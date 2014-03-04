@@ -1,0 +1,49 @@
+
+SIMULATION_MODE=1 // t-domain mode
+
+NNU=1
+ONLY_PASSED_EVENTS=1 // run AraSim until triggered events reach to NNU_PASSED
+NNU_PASSED=5
+
+//TRIG_ANALYSIS_MODE=1 // there's only pure signal
+TRIG_ANALYSIS_MODE=0 // signal+noise
+
+
+//POWERTHRESHOLD=-0.000001 // force to trigger
+POWERTHRESHOLD=-6.06 // 100Hz global trig rate for 3 out of 16 ARA stations
+
+TRIG_MODE=0 // trigger don't distinguish Vpol and Hpol
+N_TRIG=3 // global trigger = 3 or more channels pass threshold
+
+TRIG_ONLY_BH_ON=1 // only for TestBed mode, triggered by borehole channels only
+
+FILL_TREE_MODE=2 // save only triggered events
+DATA_SAVE_MODE=0 // 0 : save all informations in AraSim tree
+WRITE_ALL_EVENTS=0 // save only triggered events in AraRoot tree
+
+DETECTOR=3 // testbed mode
+
+
+// below are settings to run AraSim in TestBed which uses geometric information from AraRoot
+
+USE_MANUAL_GAINOFFSET=0
+USE_TESTBED_RFCM_ON=0
+NOISE_TEMP_MODE=1
+TRIG_THRES_MODE=1
+READGEOM=1 // reads geometry information from the sqlite file or not (0 : don't read)
+
+NOISE=1
+NOISE_EVENTS=1
+BH_ANT_SEP_DIST_ON=0
+
+                                           
+V_MIMIC_MODE=2 // t-domain tuned to match TestBed
+//ALL_ANT_V_ON=1 // use Vpol response for Hpol response with changed polarization
+
+///////////////////
+
+// below are Calpulser settings
+
+CALPULSER_ON=4 // calpulser2 middle location, V, Hpol radiate same time
+CALPUL_AMP=0.05
+

@@ -1,0 +1,61 @@
+*All the data for flux are E^2dN/dE and have the units of GeV/(cm^2*str*s)
+EXPONENT from 12 ~ 100 dat files are from Fenfang Wu in UC Irvine.
+
+Can add more models (EXPONENT >= 100 && EXPONENT < 200 is empty).
+
+In the file, first line is the number of data points,
+and from the second line, first column : energy in log, second column : flux E^2dN/dE [GeV/(cm^2*str*s)].
+
+32. essfig9.dat-----ESS's paper in Physical Review D, Volume 64, 093010 scaled(using fig4 for the ratio of nu_e/nu_mu) FIG 9 for nu_mu+nu_e
+
+33. essbaseline.dat-----ESSflux_m3_flat_lamda0.7(the black curve in the plot that David Seckel sent to me)
+
+34. ess_n0.dat-----ESS without evolution,ftp://ftp.bartol.udel.edu/seckel/ess-gzk/flux_n0_2.7.tab
+
+40. ahlers.dat------Ahlers' paper in PHYSICAL REVIEW D 72, 023001 (2005) FIG 4b
+
+50. allard.dat------Allard's paper in astro-ph/0605327 v2 22 May 2006  FIG 11 slim solid line
+
+60. ave_max.dat-----Ave's paper in astro-ph/0409316v2 6 Nov 2004 FIG 6 solid curve(upper)
+
+61. ave_min.dat-----Ave's paper in astro-ph/0409316v2 6 Nov 2004 FIG 6 dotted curve(lower)
+
+70. kkss_envo.dat-----KKSS's paper in hep-ph/0205050 v3 13 Dec 2002 FIG7 envolop
+
+80. gzk_peter.dat-----Peter's GZK flux from the ANITA proposal(upper blue line)
+
+90. waxgzk.dat-----Waxman GZK flux taken from David Seckel's ftp GZK_update.ps page 1, the green curve in the right plot
+
+100. e-2.dat-----E-2 model I used,which is the experimental limit Steve Barwick told me
+
+110. yuksel_grb.dat-----Yuksel's paper from astro-ph/0610481v2 9 Nov 2006 FIG4
+
+111. yuksel_qso.dat-----Yuksel's paper from astro-ph/0610481v2 9 Nov 2006 FIG4
+
+112. yuksel_sfh.dat-----Yuksel's paper from astro-ph/0610481v2 9 Nov 2006 FIG4
+
+
+200. Ave2005_Fe_Emax21.0.dat-----Ave's paper from Astroparticle Physics 23. (2005) 19-29, Fig.6
+
+201. Ave2005_Fe_Emax21.5.dat-----Ave's paper from Astroparticle Physics 23. (2005) 19-29, Fig.6
+
+202. Ave2005_Fe_Emax22.0.dat-----Ave's paper from Astroparticle Physics 23. (2005) 19-29, Fig.6
+
+203. Ave2005_Fe_hi_evo.dat-----Ave's paper from Astroparticle Physics 23. (2005) 19-29, Fig.5 dashed line
+
+204. Ave2005_Fe_low_evo.dat-----Ave's paper from Astroparticle Physics 23. (2005) 19-29, Fig.5 solid line
+
+210. Stanev2008_heavy.dat-----Stanev's paper from Nuclear Instruments and Methods in Physics Research A 588 (2008) 215-220, Fig.7 pentagon
+
+220. Kotera2010_Fe_only.dat-----Kotera's paper from arXiv:1009.1382v2, Fig.9 blue dashed line
+
+221. Kotera2010_Fe_rich.dat-----Kotera's paper from arXiv:1009.1382v2, Fig.9 blue dotted line
+
+222. Kotera2010_mix_max.dat-----Kotera's paper from arXiv:1009.1382v2, Fig.9 top shaded area
+
+223. Kotera2010_mix_min.dat-----Kotera's paper from arXiv:1009.1382v2, Fig.9 bottom shaded area
+
+224. Kotera2010_max.dat-----Kotera flux max from ARA paper arXiv:1105.2854v1, Fig.27 Kotera et al. '10 max
+
+
+
