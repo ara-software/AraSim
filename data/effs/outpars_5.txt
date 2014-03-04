@@ -1,0 +1,24 @@
+lower (1) 	 upper (1) 	 etc.
+0 8e-08 0 8.5e-08 0 5e-08 0 5e-08 
+The following coefficients set the upper edge of the fitted region on the signal efficiency curves.
+Upper limit = u_0 + coeff_thresh*ithresh^exp_thresh + coeff_triggerband * triggerband ^ exp_triggerband + coeff_angle * iangle ^ exp_angle
+u_0 is given by the upper bound in the first line.
+ithresh=0,1,2,3 for threshold = 3.0, 4.08, 5.0, 6.2
+triggerband=0,1,2,3
+iangle=0,1,2,3,4,5 for angle off cone = 0., 0.5, 1.0, 1.5, 2.0, 2.5 degrees
+coeff_thresh 	 exp_thresh 	 coeff_triggerband 	 exp_triggerband 	 coeff_angle 	 exp_angle 
+2.1e-08 1 0 1 3e-09 4.6
+The signal efficiencies are parameterized by 1/a1*atan(a2*(x-a3))+a4
+a1 = b1*threshold + c1 
+b1 (band 1) 	 c1 (band 1) etc.
+1.3661 0.148587 1.40657 0.173881 1.93557 0.0826298 1.80353 0.140369 
+a2 = b2*threshold + c2 
+b2 (band 1) 	 c2 (band 1) etc.
+2.31616e+07 366228 2.48497e+07 1.59837e+06 5.04084e+07 -860690 4.92951e+07 3.9314e+06 
+a3 = b3*threshold + c3 
+b3 (band 1) 	 c3 (band 1) etc.
+2.23259e-08 4.98938e-09 2.13526e-08 4.77122e-09 1.91654e-08 4.27639e-09 1.78084e-08 3.97023e-09 
+a4 = b4*threshold + c4 
+b4 (band 1) 	 c4 (band 1) etc.
+0.393652 0.0122015 0.397676 0.0130909 0.435814 0.00830555 0.437467 0.0100994 
+

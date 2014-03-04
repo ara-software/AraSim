@@ -1,0 +1,1164 @@
+This is a log file for documenting changes to AraSim.
+Enter the date, your name, and comments about the changes you have made.
+8/25/10	Connolly   Committed first version to be released to RadioSim group, tagged Release_Connolly_082510.  This version compiles and runs without errors but does not actually calculate anything.
+
+9/8/11 E. Hong  Modified few files to work compiling on ubuntu. Below are modified things
+
+EarthModel.cc : as there are no "Signal.h" file, copied signal.hh and signal.cc files from icemc and added.
+EarthModel.cc : changed #include "earthmodel.hh" to "EarthModel.h"
+EarthModel.cc : changed #include "icemodel.hh" to "IceModel.h"
+EarthModel.cc : changed #include "vector.hh" to "Vector.h"
+EarthModel.cc : changed #include "position.hh" to "Position.h"
+EarthModel.cc : added #include <cstdlib>
+
+Tools.cc : changed #include <fstream.h> to <fstream>
+
+signal.cc : changed #include "vector.hh" to "Vector.h"
+signal.cc : changed #include "position.hh" to "Position.h"
+
+Added Settings.h and Settings.cc for set variables and initialize them.
+
+AraSim.cc : added #include "Settings.h"
+AraSim.cc : modified variable settings. Now Settings class will define and read variables from file.
+AraSim.cc : print variable values to check initialize works fine and read file works fine.
+
+Added setup.txt file to set variable vales. For more detail, read setup.txt file.
+
+Makefile : added Settings.cc to CCFILE
+Makefile : changed CCFILE -> Signal.cc to signal.cc
+
+
+9/16/11 E. Hong; Modified Detector.cc, Detector.h, AraSim.cc.
+
+Detector class : removed original parts
+                 defined 3 different modes for Detector class.
+                 mode 0 : use testbed antenna infomation
+                 mode 1 : small number of stations (1 ~ 7). Array increase as pentagon shape
+                 mode 2 : pentagon shape station arrays.
+
+Above, in mode 1 and 2, each station will contain 4 strings and 4 surface antennas. The map of single station is shown in "ARADetailMap.pdf" file.
+We can change the distance between center of station and strings (R_string),
+Distance between center of station and surface antennas (R_surf),
+Maximum depth of string (z_max), distance between antennas on the string (z_btw), etc.
+
+Also, we can change the center of pentagon array (core_x, core_y),
+distance between stations (station_spacing)
+
+In mode 1 : total number of stations (number_of_stations)
+            
+In mode 2 : number of stations on the side (stations_per_side)
+
+More detail will be shown on AraSim_doc.pdf file.
+
+
+9/19/11 E. Hong; Modified AraSim.cc, added testbed_info.txt file.
+
+AraSim.cc : added one more plot in pdf file output. Added plot is for borehole antenna layout.
+testbed_info.txt : file added. This file should have added in previous version.
+AraSim_doc.pdf : fixed some typos.
+
+
+10/11/11 E. Hong; Modified Detector.cc, Detector.h, Settings.cc, Settings.h, AraSim.cc, added flux models for Spectra class.
+
+Detector class : added reading nec2 antenna property (gain). Currently V-pol (6in bicone) and H-pol (23in QSC) borehole antennas' gain are available. Read by GetGain or GetG function.
+
+Settings class : added DETECTOR parameter which decide the mode of detector layout.
+
+Spectra class : copied from icemc. Information on README_EXPONENT and fluxes/README.
+
+More detail, see AraSim_doc.pdf file.
+
+=============================================================================
+
+11/03/11 E. Hong; Two main things!.
+
+1) added PickUnbiased function in IceModel class (copy from icemc).
+    PickUnbiased function can pick any random unbiased posnu (interaction point of neutrino inside the antarctic ice) and nnu (direction of neutrino propagation).
+
+2) outputs/AraOut.root has detector class as a branch.
+    For this, class Detector (including ARA_station, Antenna_string, Antenna, Surface_antenna, Parameters classes) added to ROOT class. Method is shown in http://www.phys.ufl.edu/LIGO/wavelet/root_shared_lib.html
+    Also sub-classes of Detector (Vector and Position) are added to ROOT class with same method.
+    Parameters class in Detector -> some values (static const) changed to int or double.
+    GetGain function in Detector -> use freq_step, ang_step, freq_width, freq_init in Detector instead of same values in Parameters class (it causes returning wrong vales... and I don't understand why)
+
+
+3) some other minor changes : 
+    Ray class : added WhereDoesItLeave function from icemc ray class
+    EarthModel class : added TRandom3.h header file
+    counting class : add from icemc (need for Primaries class)
+    Settings class : add many variable from icemc Settings class (need for Primaries class)
+
+
+4) minor thing added: added Makefile.org, M.readTree and readTree.cc file.
+    after compile AraSim and run arasim (which produces outputs/AraOut.root file), we can use compile readTree.cc and test if we can read outputs/AraOut.root file correctly.
+    method I did : cp M.readTree Makefile
+                    make clean all
+                    make clean readTree
+                    ./readTree
+    way to comeback AraSim compile:
+                    cp Makefile.org Makefile
+                    make clean all
+                    make clean araSim
+                    ./araSim
+
+===============================================================================
+
+11/08/11 E. Hong; add more classed for ROOT. (IceModel, EarthModel, Interaction, Spectra, Settings)
+
+1) Primaries : added variable int pickunbiased to store IceModel::PickUnbiased return value.
+
+2) making plots codes move from AraSim.cc to readTree.cc
+
+3) some other minor changes...
+
+===============================================================================
+
+11/09/11 E. Hong; fixed ray_solver_makefile
+
+Simply removed two lines and added Makefile.arch.
+It fixed compiling bug in my (Ubuntu) machine.
+
+Also added README_ray_solver for simple instruction.
+
+===============================================================================
+
+12/21/11 E. Hong;
+
+Main changes : added fortran codes for time domain Askaryan radiation simulation (this is not complete as we still need more codes from Jaime)
+
+    use signal, secondaries files from icemc for frequency domain ray simulation.
+
+Without any changes of setup.txt and ARA_N_info.txt files, AraSim will run frequency domain simulation with 60 frequency bin (same with antenna frequency domain), only one ARA station, only 10 neutrino events.
+
+Currently AraSim will printout detailed informations about ray signal (V/m/MHz @1m for every freq bin, all antennas) so, you better make them written in log file such as
+
+./araSim > log_file
+
+AraSim doesn't save V/m/MHz information in output root file yet.
+However, it only needs to add parts to apply 1/r, ice attenuation factor and other antenna responses.
+
+
+setup.txt -> SIMULATION_MODE    0 for freq domain, 1 for time domain simulation
+
+setup.txt -> INTERACTION_MODE   0 : use PickUnbiased (randomly choose position of interaction inside all Antarctic ice)
+                                1 : use PickNear (randomly choose position of interaction near by stations)
+
+setup.txt -> POSNU_RADIUS       2000 : for PickNear, boundary radius for position of interaction defualt 2000m
+
+===============================================================================
+
+12/22/11 E. Hong;
+
+Forgot to mention that from this version, you need g77 to compile fortran codes.
+In Ubuntu, I did
+
+Edit your /etc/apt/sources.list to add:
+deb http://cz.archive.ubuntu.com/ubuntu hardy-updates main universe
+
+Then use:
+sudo apt-get update
+sudo apt-get install g77
+
+===============================================================================
+
+
+01/23/12 E. Hong;
+
+Temperary removed Fortran part. (confliction between different os systems and can't solve the problem yet)
+Added Report class which designed to contain all valuable information about interaction and signal for each antennas.
+
+Report has similar structure as Detector ( report->stations[i].strings[j].antennas[k] )
+Each antenna has number of raysolver solutions (ray_sol_cnt),
+     information about whether the antenna triggered for each raysolver solutions (trg[i])
+    view angle for each raysolver solutions ( view_ang[i] )
+    antenna receive angle for each raysolver solutions (rec_ang[i])
+    travel distance between the source and the antenna for each raysolver solutions ( Dist[i] )
+    signal V/m/MHz for each frequency bin (same freq bin with Detector antenna) for each raysolver solutions ( vmmhz[i][j] )
+
+vmmhz in Report has 1/R and ice attenuation factor in it. (maybe need revision later)
+ice attenuation factor is calculated by IceMocel -> EffectiveAttenuationLength (attenuation length depend on depth of ice)
+
+
+Also removed all TGraph, TSpline classes in Spectra class which caused readTree segmentation violation.
+Spectra class should be fixed later for better neutrino flux interpolation.
+
+Makefile modified.
+Removed Fortran code part, simplified by Paul Schellin
+
+There are also some minor changes in IceModel, AraSim.cc, Detector.
+
+Like previous version, running araSim will print out (cout) lots of information to trace bugs.
+I highly recommend to run araSim with saving the outputs in log file such as
+
+./araSim > log
+
+After compiling AraSim and run correctly, it will create output root file at /outputs/AraOut.root
+You can compile readTree.cc file and run it to make plots from AraOut.root file
+
+make -f M.readTree
+
+./readTree
+
+For example, ARA-37_station_layout.pdf will show you the layout of ARA detector (as you set by setup.txt),
+    GEdN.pdf will show you the EdNdEdAdt neutrino flux (as you set by setup.txt)
+
+===============================================================================
+
+01/23/12_2 E. Hong;
+
+Some minor changes in Report class.
+
+Variables in Report which are overlapping with Interaction class have been removed.
+Report should more focus on connection between Interaction and Detector classes.
+
+
+===============================================================================
+
+01/25/12 E. Hong;
+
+Main change : let Interaction as a vector inside Event class.
+Event class has basic information about the event.
+ ( choose the initial particle, flavor, direction, etc)
+ There will be number of Interaction vector array as much as number of interactions
+ (currently there is only 1 interaction)
+
+Interaction class will have information about that specific interaction.
+So, elast_y, posnu, emfrac, hadfrac, cone width, VmMHz1m will be determinded
+
+Report class will then read Event class (then we can access Interaction of that Event), Detector class and some other classes which needed to calculate the signal at each antennas.
+
+Some more modifications are expected after discusstion with Prof. Connolly.
+
+
+===============================================================================
+
+01/26/12 E. Hong;
+
+There was a bug in the previous version that Report keep accumulate information as event goes on.
+Added clear() function in the Antenna_r class in Report and call it when we use Connect_Interaction_Detector function.
+
+Also modified readTree.cc to work in new structure of AraOut.root file.
+
+
+===============================================================================
+
+02/01/12 E. Hong;
+
+Modified Report and IceModel classes.
+Added GetFresnel function in IceModel. It is similar with GetFresnel in icemc.cc but values calculated in GetFresnel is changed from refracted ray to reflected ray as there are only reflected rays in ARA.
+
+Also added GetParameters function in Report.
+GetParameters will calculate the viewangle, launch vector and receive vector.
+
+Minor change in Interaction class, PickNear function.
+Fixed the bug that PickNear more likely pick posnu near the center of the array.
+
+===============================================================================
+
+02/10/12 E. Hong;
+
+Fixed some bugs in IceModel->GetFresnel and Report.
+At GetFresnel function, magnification factor was calculated wrong.
+In Report, when ice attenuation factor is applied, there was extra factor 2 applied inside exponential (power <-> field)
+
+===============================================================================
+
+02/13/12 E. Hong;
+
+Fixed bug in initialzation function in signal class.
+Previously there was no initialization function for LPM in signal class.
+Now added LPM in Settings class, and read the LPM value from Settings class and set LPM in signal class.
+
+
+===============================================================================
+
+02/17/12 E. Hong;
+
+Added n_trg_slappy and n_trg_pokey variables in Report class for later use.
+Added SECONDARIES and TAUDECAY values in Settings class.
+Default values are SECONDARIES=1, TAUDECAY=1 which mean (work on secondary interactions, and include taudecay to secondary interactions)
+Secondary class now reads Settings when it constructs (read SECONDARIES and TAUDECAY from Settings and apply them).
+Now when we set SECONDARY=0 inside setup.txt file, there will be only "1" number of interactions (events->n_interactions)
+
+
+===============================================================================
+
+02/27/12 E. Hong;
+
+Bug fixed in IceModel -> GetFresnel, return value of magnification factor.
+from sqrt( tan^2 / tan^2 ) to sqrt( abs(tan) / abs(tan) ) which should have been.
+
+
+===============================================================================
+03/06/12 E. Hong;
+
+Added Rank in Report->stations.strings.antennas
+When Report->Connect_Interaction_Detector runs, it will call SetRank and set Rank values for 1st ray solve solutions.
+You can find out the Rank values when you run readTree.
+readTree will printout the Rank for all antennas at certain event number.
+
+Added SimpleLinearInterpolation function in Tools class.
+It will read arrays (which is not evenly spaced bin like digitized array) and return new array which x values are set as you want.
+
+Filter gain data file (which I got from digitizing from the plot) is added to /data/filter.csv
+As a test, AraSim will make a plot of the Filter with Tools::SimpleLinearInterpolation.
+
+Some minor changes in Detector, RaySolver, Settings class.
+
+
+===============================================================================
+
+03/14/12 E. Hong;
+
+Fixed bug in Report->SetRank()
+When there are "0" PeakV, previous SetRank did weird things. (now fixed)
+
+Add filter factor to signal, noise.
+
+Now we have flat thermal noise (when NOISE=0 in setup.txt, by default)
+Currently it looks like noise is pretty big (~mV).
+Will double check if the thermal noise makes sense or not.
+
+
+===============================================================================
+
+04/16/12 E. Hong;
+
+This one is a big release.
+
+Many things are updated.
+
+1) The most big one is "trigger" added. Now there is a global trigger function added. Still I have to fix some parts though.
+Now we can check if the global trigger passed in report->stations[i].Global_Pass.
+The "report->stations[i].Global_Pass" will return the trigger passed bin value from long noise waveforms.
+Or if the station didn't passed the global trigger, return value will be "0".
+
+Now, "WHEN" global trigger is passed, in each antennas, V_mimic and time array will have information in it.
+ex) report->stations[0].strings[1].antennas[2].V_mimic[ bin_value ]
+ex) report->stations[0].strings[1].antennas[2].time[ bin_value ]
+
+V_mimic array will have voltage information where triggered bin (for this antenna) will located at the center of the window.
+time array will have bin information and it can represent the time difference between antennas as all antennas (channels) share the bin values
+Both V_mimic and time arrays will have size of NFOUR/2 (which is 512 currently).
+
+For channels which didn't passed the trigger (but global trigger is passed), V_mimic will show the middle NFOUR/2 (currently 512) bins of the trigger window.
+
+
+2) another noticable change is that I removed most of bug checking print outs from most of channels.
+This means when you run araSim, other than event numbers and notice about global trigger is passed, nothing much information will show up.
+
+Also I added new function in Report class named "stations[].strings[].antennas[].clear_useless()".
+Literally, it will remove (do vector clear() ) useless data which did blow up the size of output AraOut.root file.
+
+
+There are many other minor changes in many classes but I can't remember...
+
+
+===============================================================================
+
+04/16/12 ver2. E. Hong;
+
+One more minor thing fixed.
+Fixed bug when constant neutrino energy case.
+When setup.txt -> EXPONENT= 10 ~ 29, neutrino energy will be constant and the value will be
+pnu = 10^(EXPONENT) eV
+
+
+===============================================================================
+
+04/27/12 E. Hong;
+
+Minor update.
+Added "DATA_SAVE_MODE" to Settings class. DATA_SAVE_MODE=0 is the default value, and this mode will save "all" information in report class (ex. spectrum before antenna, after antenna, after filter...)
+DATA_SAVE_MODE=1 will remove most of intermediate state information in report class except geometric information (things related to RaySolver) and final waveform from global trigger (V_mimic).
+As DATA_SAVE_MODE=1 is not a default mode, you have to put this setting in setup.txt file if you want.
+
+
+===============================================================================
+
+05/09/12 E. Hong;
+
+minor modification in Report class.
+Fixed launch_ang variable in Report class.
+
+===============================================================================
+
+05/10/12 E. Hong;
+
+Fixed some commented lines in AraSim.cc.
+Fixed compile error for some machines in Trigger class.
+
+===============================================================================
+
+05/11/12 E. Hong;
+
+Added error calculation function.
+It will show (cout) the effective volume and +- error value.
+
+===============================================================================
+
+05/11/12_2 E. Hong;
+
+Added bore hole antenna layout selection mode.
+In ARA_N_info.txt or ARA37_info.txt file, you can change the borehole layout with variable
+BORE_HOLE_ANTENNA_LAYOUT
+
+0 for V-H-V-H (default)
+1 for V-H-V
+2 for V-H-V-V
+3 for V-H-H-H
+
+Also, added the coincidence number of antenna trigger for global trigger.
+This can be changed in setup.txt file variable
+N_TRIG
+
+for example, N_TRIG=3 (which is the default value) will set global trigger when 3 or more antennas are trigger in TRIG_WINDOW time.
+
+===============================================================================
+
+05/14/12 E. Hong;
+
+Added RANDOM_MODE to Settings class.
+RANDOM_MODE=0 will generate same random number every time (event info will independant to run number)
+RANDOM_MODE=1 will generate totally random number (seed is guaranteed to be unique in space and time)
+
+Moved BORE_HOLE_ANTENNA_LAYOUT parameter from Detector setup files (ARA_N_info.txt and ARA-37_info.txt) to setup.txt file.
+
+Now you can run AraSim with different setup file name.
+For example,
+    ./araSim setup_test.txt
+
+above will run AraSim with setup_test.txt instead of setup.txt file.
+If no setup file input, AraSim will automatically read setup.txt file.
+
+
+Added one more output file which contains weight information.
+File will locate on /weight_output directory.
+File name will be "weight_setupfile.txt".
+File will contain total weight on the first line,
+and 10 (NBINS) weight bin values (event number) on the second line.
+
+===============================================================================
+
+05/15/12 E. Hong;
+
+Added one more option to DATA_SAVE_MODE in Settings class.
+DATA_SAVE_MODE=2 will now save only physics info (like energy, track info, global triggered or not) and remove all waveform info (including noise waveform in Trigger class which is HUGE).
+
+===============================================================================
+
+05/15/12_2 E. Hong;
+
+Modified executing multi runs part.
+Now when you can run AraSim with multi run with the script example files batchScript_test.sh and runaraSim_test.sh
+
+In super computers (cluster computer where you can run qsub), you can run multipule runs with same setup file by
+    ./batchScript_test.sh
+
+it will then show your currnet directory and ask the AraSim location.
+You can just copy and paste the directory address if it is same.
+And then it will ask the setup file name.
+If you have your own version of setup.txt file, put the name without the directory address.
+Or you can just use setup.txt file.
+After that, it will ask the number of run.
+So if you input 1000, AraSim will run 1000 runs with same setup file.
+
+If you run multiple runs there will be multiple output files.
+In /outputs/, AraOut.root file will have extra setup file name and run number.
+For example, AraOut.setup.txt.run1.root
+
+If you just run with ./araSim as before, root file will be just
+AraOut.root
+as usual.
+
+Also weight output file in /weight_output/ directory will also have setup file name and run number,
+weight_setup.txt.run1
+
+If you are just using AraSim in your personal computer (no qsub), nothing much are different.
+However, if you are running AraSim in super computers (qsub), you can use those script files (or make your own) to run multi runs conveniently.
+
+===============================================================================
+
+05/18/12 E. Hong;
+
+Bug fixed in IceModel class WhereDoesItEnter function.
+Some times (actually many times) WhereDoesItEnter do calculated weird location
+as earth entrance point.
+Now it will do some iteration to do some corrections.
+
+===============================================================================
+
+05/23/12 E. Hong;
+
+Added one more BORE_HOLE_ANTENNA mode in settings class.
+BORE_HOLE_ANTENNA=4 is now for V-H-H antenna layout.
+
+Also, in new version (version after 300?) now has some new functions to have
+AraRoot like output data in AraOut.root file.
+For that, if your machine doesn't have AraRoot installed, AraSim may not
+compile or run correctly.
+In that case, try to add new environment variables and try again.
+For example, you can add 
+
+export ARASIM_SYS=( the location where your AraSim is located )
+export LD_LIBRARY_PATH=$ARASIM_SYS/lib:$LD_LIBRARY_PATH
+
+above lines in your .bashrc file.
+It might work in most cases.
+
+===============================================================================
+
+05/30/12 E. Hong;
+
+Now from this version, we don't need to add environment variables any more.
+So, don't need any ARASIM_SYS and LD_LIBRARY_PATH for ARASIM_SYS/lib.
+Thanks to Carl.
+
+Another function I added is RAYSOL_RANGE value in Settings class.
+As currently Raysolver has some problem with calculating ray trace when
+they are far part, I added RAYSOL_RANGE to Settings class.
+Now if the geometric distance between the source and the antenna is bigger
+than RAYSOL_RANGE, AraSim will not run RaySolver.
+It means there will be no signal added  to pure noise waveform when we do
+global trigger process (assuming that more than RAYSOL_RANGE distnace,
+signal will attenuated too much to give any noticable peak)
+Default value for RAYSOL_RANGE is 3000 m.
+You can set this value in setup.txt like other values.
+
+===============================================================================
+
+06/01/12 E. Hong;
+
+Serious memory leakage fixed. Most of memory leakage in AraSim is fixed.
+There are still small amoung of leakage but should not cause problems.
+
+===============================================================================
+
+06/01/12 E. Hong;
+
+Added new function for pure signal trigger, pure noise trigger.
+In setup.txt file, TRIG_ANALYSIS_MODE will decide which trigger mode you will use.
+0 : default, signal + noise trigger.
+1 : pure signal
+2 : pure noise
+
+If you use pure signal mode, trigger class will generate NOISE_EVENT number of noise waveforms and calculate mean, rms diode response values. And after that, it will remove all data and just set all noise waveform values to 0.
+
+At pure noise mode, AraSim will not generate any ray trace so it can reduce the running time, but instead, it can take a lot of time in trigger checking depending on threshold value you set. It's because Report class will search all channel's waveforms for trigger.
+
+===============================================================================
+
+06/04/12 E. Hong;
+
+Fixed a bug related to index of refraction N independant of depth bug.
+Now if you set NOFZ=1 or don't set NOFZ in setup.txt file, index of refraction N at posnu will depend on the depth of posnu location.
+It will now change the cherenkov angle.
+
+===============================================================================
+
+06/04/12_2 E. Hong;
+
+Changed TRIG_ANALYSIS_MODE=2 (pure noise case).
+To compare TRIG_ANALYSIS_MODE=0 (signal + noise case), I set "EVERY THING" same between two modes but just set pure signal V = 0.
+It means ray trace solver will calculate if there's any raysols and if there's no raysols, AraSim will not do trigger check at all.
+If there's any raysol, global trigger check will be performed.
+And total trigger time check will be the maximum time between the earliest raysol and the latest raysol (even if we have signal V = 0).
+I think it's the fair way to compare between two modes.
+
+===============================================================================
+
+06/07/12 E. Hong;
+
+Added index of refraction at posnu and cherenkov angle at posnu in Interaction class.
+They are indexN and changle respectively.
+So if you want to read those values, try
+cout<<event->Nu_Interaction[0].indexN;
+cout<<event->Nu_Interaction[0].changle;
+
+===============================================================================
+
+06/27/12 E. Hong;
+
+Fixed few bugs.
+
+1) fixed switched NC, CC mode. Previously in Primary class it recognized NC : 1 and CC : 0 index while the array (m_fsigma) to calculate the cross setion used opposite way. 
+
+2) When we calcuate the weight (probability to survive to posnu), so far AraSim used either NC or CC cross section (depending on which interaction it
+is at posnu). Now when we calcuate the weight, AraSim uses the total cross section (NC + CC).
+
+===============================================================================
+
+09/12/12 E. Hong;
+
+Added a functionality to track back which pure noise waveform is used for each triggered events, each channels.
+In Report class antenna, "noise_ID" will show you which pure noise waveform in Trigger class is used for trigger analysis.
+For example,
+
+    report->stations[i].strings[j].antennas[k].noise_ID[0]
+
+    noise_ID is a vector array as there could be more than 1 pure noise waveform used for trigger analysis (almost all cases it will be just one value, actually if there's more than one value, current AraSim can't handle that case correctly).
+
+    If above noise_ID value is 10, that means for that event, antenna, 
+    
+    trigger->v_noise_timedomain[ 10 ][ noise waveform data, size : settings->DATA_BIN_SIZE, default 16384 ]
+
+    above pure noise waveform is used fot trigger analysis.
+    For the channels which passed the trigger (report->stations[i].strings[j].antennas[k].Trig_Pass is not 0), V_mimic waveform should used the pure noise waveform 
+
+    trigger->v_noise_timedomain[ noise_ID ][ 512 bins where Trig_Pass bin value is located at the center ]
+
+    For the channels which didn't passed the trigger (Trig_Pass is 0), V_mimiv waveform should used the pure noise waveform
+
+    trigger->v_noise_timedomain[ noise_ID ][ 512 bins where Global_Pass + (settings->TRIG_WINDOW / (2 * settings->TIMESTEP) ) is located at the center ]
+
+    The reason why I use such a wired bin values is that
+
+    1) I wanted to make the trigger passed bin located at the center of waveform
+
+    2) For channels which didn't passed the trigger, save the waveform where the center of trigger window
+
+
+===============================================================================
+
+10/10/12 E. Hong;
+
+Fixed some minor bugs.
+
+1) Make sure when AraSim select one of the pure noise waveform, there's no
+same noise waveform selected among same station.
+So in Report.cc, when noise_ID is selected, check if there's same noise_ID in
+different chs (don't check different stations) and if there's any, get a new
+noise_ID (until there's no same)
+
+2) Fixed bug related to Trig_Pass value in Report class.
+In previous version, when a station is not global triggered, chs' Trig_Pass
+values used to have strange high value.
+Now whether station is global triggered or not, Trig_Pass is either 0 (not
+triggered) or trigger passed bin number.
+
+
+===============================================================================
+
+01/30/13 E. Hong;
+
+many updates
+
+1) TestBed structure updated.
+Now with DETECTOR=3 mode, AraSim will read actual TestBed geometry information from sqlite file from AraRoot and put antennas to proper locations. To do this properly, please use READGEOM=1 also.
+
+2) TestBed Calpulser1 and 2 functionality.
+If you want to run AraSim with TestBed, calpulser on, use CALPULSER_ON=1 (calpulser1 in Hpol). There are calpulser 2 mode also
+CALPULSER_ON=2 (calpulser2 Vpol)
+CALPULSER_ON=3 (calpulser2 Hpol)
+CALPULSER_ON=4 (calpulser2 Vpol and Hpol at the same time and location is middle of those two)
+
+You can also change the signal strength of calpulsers.
+CALPUL_AMP=0.15 (reasonable value for calpulser1 Hpol evts)
+CALPUL_AMP=0.25 (reasonable value for calpulser2 evts)
+
+3) Trigger windowing changed.
+To mimic the way how TestBed write the waveform, I added V_MIMIC_MODE in setup class.
+V_MIMIC_MODE=0 (write waveforms with average borehole chs cable delays and then apply each chs cable delay. This doesn't write the waveform same as TestBed)
+
+V_MIMIC_MODE=1 (just write waveforms where global triggered bin is centered at the window. Quite different from TestBed waveforms)
+
+V_MIMIC_MODE=2 (similar to V_MIMIC_MODE=0 but I added extra delays to each chs to match TestBed data waveforms. Manually added delay is less than 100ns)
+
+4) new trigger mode
+To match with TestBed calpulser trigger (in data), I added new trigger mode which trigger only occur by borehole chs (from ch1 to 8).
+TRIG_ONLY_BH_ON=1 (trigger will only check borehole chs)
+by default, it's off.
+
+5) now Preamp, FOAM amplification is added
+Currently just one value for Preamp, FOAM gains.
+Preamp gain file : data/preamp.csv
+FOAM gain file : data/FOAM.csv
+
+6) new time array which mimics TestBed data
+Added new time_mimic vector array in report class. This will return time (ns) for each chs which mimics TestBed waveforms.
+report->stations[i].strings[j].antennas.[k].time_mimic[bin]
+report->stations[i].Global_Pass   this value will now store the global trigger occured bin (from DATA_BIN_SIZE)
+
+7) new method to match string, antenna numbers and actual TestBed ch numbers
+TestBed station number in DETECTOR=3 mode is 0.
+So you can reach TestBed station by detector->stations[0] or report->stations[0].
+Now, to match channel number (from TestBed AraRoot system) and strings, antennas numbers you can use
+detector->GetSSAfromChannel(0, chID+1, &ant, &string);
+function.
+GetSSAfromChannel will return correct antenna number and string number for chID value.
+There is a example code (readTree.cc) which making a plot with channel ordering.
+
+
+There are actually more things that have been changed...
+Hope I can make note for those later.
+
+===============================================================================
+
+02/27/13 E. Hong;
+
+many updates
+Most of things are related to installed TestBed mode (DETECTOR=3 case).
+Some other bug fixed related to ideal station cases.
+
+Bug fixed and functionalities for entire modes
+
+1) broken ideal station modes are fixed (DETECTOR=1 and 2 with READGEOM=0 case)
+
+2) new noise waveform generation mode is added.
+As previous method of generating noise waveforms (before looping over neutrino events, generate noise waveforms and use them) required a lot of memory and virtual memory, I added new method to avoid this problem.
+NOISE_WAVEFORM_GENERATE_MODE=0 will generate noise waveforms newly for each events. So you don't need to ask a lot of noise waveforms (NOISE_EVENTS) in this case. You will still need to make at least the number of total channels you have to avoid using same noise waveform for different channels. (ex. 1 station case NOISE_EVENTS=16 is enough) As this method is much more healthy for machines you are using, I set this new mode as a default mode.
+NOISE_WAVEFORM_GENERATE_MODE=1 is the old way of generating noise waveforms. It will generate noise waveforms before event loop and use those generated noise waveforms. Becareful when you use this mode as this will require lot of memory. (ex. NOISE_EVENTS=10000 will require approximately 1.3 GByte of mem)
+
+3) settings compatibility check before event loop
+In AraSim.cc, before start looping over events it will check if there's any settings compatibility problem. (if you asked impossible settings). It will print out what settings have compatibility issues and stop the loop. As there will be some unfound compatibility problem, please let me know if any one find new bug and what to add to this settings compatibility check.
+
+4) fixed V_MIMIC_MODE order
+V_MIMIC_MODE=0 (just write waveforms where global triggered bin is centered at the window. default)
+V_MIMIC_MODE=1 (write waveforms with average borehole chs cable delays and then apply each chs cable delay. This doesn't write the waveform same as TestBed)
+V_MIMIC_MODE=2 (similar to V_MIMIC_MODE=1 but I added extra delays to each chs to match TestBed data waveforms. Manually added delay is less than 100ns)
+
+
+
+New functionalities added for installed TestBed mode
+
+1) Each channels can have different system temperatures in NOISE_TEMP_MODE=1 and 2.
+
+NOISE_TEMP_MODE=1 will use different system temperatures for all 16 chs and generate noise waveforms for each channel specified.
+
+NOISE_TEMP_MODE=2 will use different system temperatures for borehole 8 chs and other 8 chs will use NOISE_TEMP value (for TestBed borehole chs analysis). Noise waveforms will generated separately for borehole chs and other channels will share different noise waveforms with NOISE_TEMP systemp temperature.
+
+2) gain offset to different channels
+As different channels have different total gain, we can apply gain offset to each channel.
+USE_CH_GAINOFFSET=0 will not apply any additional gain offset
+USE_CH_GAINOFFSET=1 will read data/preamp_ch_gain_offset.csv file and apply those values to each channels. The value is in unit of voltage.
+There's also different way to apply gain offset to entire channels manually.
+USE_MANUAL_GAINOFFSET=0 will not apply manual gain offset
+USE_MANUAL_GAINOFFSET=1 will apply MANUAL_GAINOFFSET_VALUE to entire channels. Again this MANUAL_GAINOFFSET_VALUE is in unit of voltage.
+We can't use USE_CH_GAINOFFSET and USE_MANUAL_GAINOFFSET at the same time.
+
+3) Each channels can have different threshold for triggering.
+By default, if you use different system temperature modes (NOISE_TEMP_MODE=1 or 2), channels which have different temperatures will have different pure noise diode response RMS values and therefore the threshold will be different for different channels.
+Additional to this difference, you can give an offset to the threshold to each channels.
+TRIG_THRES_MODE=0 will not give any threshold offset (default)
+TRIG_THRES_MODE=1 will read data/threshold_offset.csv file and apply those values to each channels. (ex. if the value for ch1 in csv file is 2, threshold will be rms_diode * powerthreshold * 2)
+TRIG_THRES_MODE=2 will not read data/threshold_offset.csv file but use the gain offset for each channels as threshold offset. (ex. if gain offset for ch1 is 2, threshold will be rms_diode * powerthreshold * 2^2) 
+
+
+===============================================================================
+
+
+03/01/13 E. Hong;
+
+Bug fixed.
+In previous version, with TRIG_ANALYSIS_MODE=1 (only signal, no noise mode) didn't work properly.
+It should work fine now.
+
+
+===============================================================================
+
+03/04/13 E. Hong;
+
+Added new interaction mode (PickUnbiased from icemc)
+
+In INTERACTION_MODE=0 AraSim will use entire Antarctica surface as neutrino Earth entrance location.
+In this INTERACTION_MODE=0 case, you have to also get GETCHORD_MODE=1 which will calculate the probability value (instead of weight) for neutrino to survive upto the ice interaction location and the probability to interact inside the ice.
+Also at the end, AraSim will calculate the effective area (while in INTERACTION_MODE=1, it will return effective volume) from the run.
+
+Currently INTERACTION_MODE=1 is a default value (if you don't set the value in setup.txt file, AraSim will automatically use INTERACTION_MODE=1).
+To remind you, INTERACTION_MODE=1 will use the nearby ice volume and force neutrinos to interact inside the nearby ice (cylinder-like volume).
+
+Settings class will check if there's compatibility problem in INTERACTION_MODE and GETCHORD_MODE and let you know what you should use.
+
+Also as in INTERACTION_MODE=0 neutrino direction (nnu) can be changed later, nnu have been moved from Event class to Interaction.
+So if you have been reading nnu through
+event->nnu
+
+now you have to read by
+event->Nu_Interaction[0].nnu
+
+
+===============================================================================
+
+03/04/13_2 E. Hong;
+
+Added new borehole antenna depth setting
+
+In Settings class (setup.txt file), if you use BH_ANT_SEP_DIST_ON=1 AraSim will try to use different depth for different bore hole antennas.
+By default if you don't set any value for BH_ANT_SEP_DIST_ON AraSim will use BH_ANT_SEP_DIST_ON=0 which just use constant depth difference between bore hole antennas.
+
+Now if you set BH_ANT_SEP_DIST_ON=1 in setup.txt file, AraSim will read ARA_N_info.txt or ARA37_info.txt file to find borehole depth information in it.
+z_btw01 will set the distance between borehole antenna[0] and antenna[1]
+z_btw12 will set the distance between borehole antenna[1] and antenna[2]
+z_btw23 will set the distance between borehole antenna[2] and antenna[3]
+
+if you don't set any values for z_btw01, z_btw12, ... AraSim will just use z_btw value (the constant depth difference between borehole antenna value) for all borehole antennas.
+Also if you don't set any value for z_btw, AraSim will use the default value 10m.
+
+
+===============================================================================
+
+03/05/13 E. Hong;
+
+Added new trigger mode
+
+In Settings class (setup.txt file), now you can use TRIG_MODE=1 which will make AraSim work as current installed ARA stations' trigger method.
+In TRIG_MODE=1 AraSim will do trigger separately in Vpol and Hpol. AraSim will count trigger passed channels in Vpol and Hpol separately and if any one of the channel meets the condition, the station will global trigger.
+You can also set the number of trigger for Vpol and Hpol separately by N_TRIG_V and N_TRIG_H.
+By default those two values are 3 (N_TRIG_V=3, N_TRIG_H=3, that means either Vpol or Hpol passed 3 or more).
+
+Settings class will also check if TRIG_MODE=1 is in use with DETECTOR=3 mode (installed TestBed mode) as those two modes are not compatible.
+
+By default TRIG_MODE=0 (only trigger method, Vpol and Hpol combined, see if passed channels is same or more then N_TRIG).
+
+And one more thing.
+I added new AraOut.root (AraSim output file at /outputs/AraOut.root) readout code.
+It's readGeom.cc and M.readGeom.
+After you compile and run AraSim, you can compile readGeom.cc by
+make -f M.readGeom
+
+And then you can run ./readGeom
+(this will read ./outputs/AraOut.root file. If you generated difference named output root file, you can do "./readGeom /file_location" )
+This will generate ARA-37_station_layout.pdf file. And here, you can see installed stations layout and posnu (neutrino in ice interaction location), etc.
+
+===============================================================================
+
+03/18/13 E. Hong;
+
+Modified the way to make new noise waveforms in NOISE_WAVEFORM_GENERATE_MODE=0 mode.
+Now in NOISE_WAVEFORM_GENERATE_MODE=0 mode, AraSim will make new noise waveforms with reasonable amount of bin size (after ray trace, we know what's the total time difference between 1st arrived signal and last arrived signal).
+With this modification, the run time of AraSim reduced ~15%.
+
+
+===============================================================================
+
+04/02/13 E. Hong;
+
+Added new NOISE mode. After obtaining the Rayleigh distribution fit from force triggered TestBed data, I added new NOISE mode which is NOISE=1.
+NOISE=0 uses just flat thermal noise spectrum from constant temperature and apply preamp, filter gains to them.
+NOISE=1 uses Rayleigh distribution bit value from TestBed data (distribution at different freq values) so don't use any preamp filter gain for noise waveforms.
+
+Currently NOISE=1 mode is available with 
+DETECTOR=3
+READGEOM=1
+NOISE_TEMP_MODE=1 or 2
+
+After we get new Rayleigh dist. fit from ARA1, 2, 3 stations, we will added those functionalities to those DETECTOR modes.
+
+
+===============================================================================
+
+04/24/13 E. Hong;
+
+Added total number of bins for searching trigger to Report class.
+report->stations[i].total_trig_search_bin
+
+This total_trig_search_bin value will be useful for the global trigger rate calculation.
+
+
+===============================================================================
+
+06/17/13 E. Hong;
+
+Added useRaySolver as an extra source file to get ray trace result from x, y, z coordinate.
+After you compile AraSim, you have to compile useRaySolver by
+
+make -f M.useRaySolver
+
+After thatm you have to give src, trg location (in ice flat surface at z=0 coordinate)
+for example, you can run useRaySolver with
+
+./useRaySolver 0 0 -100 100 0 -100
+
+which means
+src_x = 0
+src_y = 0
+src_z = -100
+
+trg_x = 100
+trg_y = 0
+trg_z = -100
+
+all in unit of meters
+This will return ray trace result on the screen
+
+===============================================================================
+
+06/20/13 E. Hong;
+
+Added readTree, readGeom for Ubuntu machines.
+Due to the confliction in Ubuntu machine, I added readTree, readGeom for Ubuntu.
+
+To use them, plase copy readTree.cc.ubuntu to readTree.cc and readGeom.cc.ubuntu to readGeom.cc
+And then compile by
+
+make -f M.readTree
+make -f M.readGeom
+
+
+===============================================================================
+
+
+07/10/13 E. Hong;
+
+Fixed some minor parts in Report, Trigger classes.
+Changed the maximum allowed DATA_BIN_SIZE to 32768 (double as before which can handle ~ 16 us with 0.5ns TIMESTEP)
+
+
+===============================================================================
+
+07/11/13 E. Hong;
+
+Fixed bug in case using NFOUR bigger than 1024.
+The bug occured when storing waveform in data structure (UsefulIcrrStationEvents) with bigger than 512 bin.
+
+With this version, AraSim will see if NFOUR/2 is bigger than 512 or not.
+And if NFOUR/2 is bigger than 512, only store the first 512 bins for UsefulIcrrStationEvents.
+(to keep same structure base with AraRoot)
+
+V_mimic, time_mimic arrays will just use NFOUR/2 as a size of array (not affected by 512 bin size limit)
+
+
+===============================================================================
+
+07/17/13 E. Hong;
+
+Trying modified INTERACTION_MODE=0 (Aeff direct calculation mode) code.
+Upto previous version, AraSim searched neutrino events which actually successfully chose posnu (ex. meet the ice).
+However, to avoid the bias (or to use PI as solid angle for neutrino injection), we need to count all possible events that have been tried.
+
+We will test with this version and see if the results make sense.
+
+===============================================================================
+
+10/03/13 E. Hong;
+
+Massive update
+
+
+1) Time domain Askaryan signal mode
+
+    In settings, SIMULATION_MODE=1 will let AraSim use time domain signal mode.
+    (still default is SIMULATION_MODE=0 which is AVZ parameterized model in freq domain).
+    Below are setup parameters for SIMULATION_MODE=1
+
+    SHOWER_MODE = 0 or 1 or 2 ( 0 : only use EM shower for radiated signal, 1 : only HAD shower, 2 : use EM or HAD depending on strength of signal) default : 2
+
+    SHOWER_STEP = 0.001 (how small shower profile step will be. More small step result in more precise signal but takes more computation time. by default 1 mm which is good enought for most of case)
+
+    SHOWER_PARAM_MODEL = 0 or 1 (choose shower profile parameters. 0 : fit parameter from Jaime, 1 : fit by Carl) default = 0
+
+    OFFCONE_LIMIT = 10. (to reduce computation time to calculate waveform, we set offcone limit cut. unit is in deg. default = 10 deg)
+
+    Few updates related to time domain signal.
+
+    Now antenna response files (ARA_bicone6in_output.txt and ARA_dipoletest1_output.txt) have phase information too.
+    When AraSim uses phase information for antenna, it uses negative value of the antenna phase information due to the fact that NEC2 response is always measured as a transmitter antenna while we use those values as receiver.
+
+    For electronics chain response, there's new data file (data/ARA_Electronics_TotalGain_TwoFilters.txt) which has notch filter and clean filter's combined phase response in it. Two filters' phase response is obtained by filter simulator (QucsStudio).
+
+    This new time domain mode will increase the computation time by factor of 1.5 to 2.0 compare with previous freq domain AVZ model mode.
+    Also this mode may result in reducing sensitivity of ARA detector as now signal will be dispersed and become less likely to pass the trigger.
+
+
+2) Test mode INTERACTION_MODE = 3 (use a sphere area surrounding ARA detector to get correct effective area)
+
+    The center location of sphere is same center location of ARA stations.
+    Radius of the sphere can be set by PICKNEARUNBIASED_R value in setup.
+    By default PICKNEARUNBIASED_R = 5000. (5 km) which is big enough to test single station case.
+
+    Currently this mode is not tested fully enough.
+
+
+3) minor update : saturation in electronics chain is implemented.
+    
+    V_SATURATION in setup wil set the limit voltage in degitized waveform.
+    Degitized waveform values which have outside the range +-V_SATURATION will be forced to + or - V_SATURATION value.
+    By default V_SATURATION = 1.0 which is 1.0 V or 1000 mV
+
+
+===============================================================================
+
+
+10/07/13 E. Hong;
+
+removed some vector arrays in Report class.
+
+    vector < vector <double> > Vm_wo_antfactor
+    vector < vector <double> > VHz_antfactor
+    vector < vector <double> > VHz_filter
+
+Above vector arrays are so far used to get information in the middle of applying antenna, electronics properties.
+However, as we don't need to check those steps right now, I removed those arrays to decrease size of output root file.
+
+===============================================================================
+
+10/10/2013 C.Pfendner
+
+replaced TRIG_THRES_MODE=1 mode:
+Now this mode reads in the thresholds from a CSV file: ./data/thresholds_TB.csv
+Only for station 0 in detector mode 3 (i.e. installed TestBed)
+If this condition is not met, the simulation uses the default threshold (normally -6.06)
+Thresholds read in by ReadThres_TestBed function and called via the GetThres function
+
+Added threshold input file ./data/thresholds_TB.csv
+
+===============================================================================
+
+10/22/2013 E. Hong;
+
+Added (ANOTHER) new mode in AraSim to test t-domain phase affecting trigger efficiency.
+In setup file, you can add new parameter value named
+
+PHASE_SKIP_MODE
+
+This PHASE_SKIP_MODE only work in time domain signal mode (SIMULATION_MODE=1)
+
+PHASE_SKIP_MODE=0 default value. Don't skip any phase step
+PHASE_SKIP_MODE=1 only apply phase from Askaryan radiated signal. No antenna, electronics phase (only amplitude change)
+PHASE_SKIP_MODE=2 apply phase from Askaryan radiated signal to antenna. No electronics phase
+
+===============================================================================
+
+11/05/2013 E. Hong;
+
+Fixed Calpulser functionality in AraSim at T-domain mode (SIMULATION_MODE=1).
+AraSim will read Calpulser waveform (waveform before transmitter antenna) from ./data/CalPulserWF.txt file.
+There is an example Calpulser setup file which is
+
+setup_Tdomain_TestBed_CalPulser4
+
+Calpulser mode in old F-domain simulation mode should also work.
+
+Like old Calpulser mode, currently Calpulser mode will work only with DETECTOR=3 (actual TestBed geometry mode).
+
+===============================================================================
+
+12/10/2013 C. Pfendner
+Added ability to define output directory for argc==4, at argv[3]
+added inverse exponential index of refraction model with NOFZ=2
+added conditional dependence on AraRoot for AraRoot-like output
+	checks if ARA_UTIL_INSTALL_DIR exists and links against the libraries there to make a UsefulIcrrStationEvent 
+
+===============================================================================
+
+01/08/2014 E. Hong;
+
+Added new flux model file.
+Kotera 2010 max model file (./fluxes/Kotera2010_max.dat) added and to use
+that, use EXPONENT value 224.
+New Kotera 2010 max is similar with Kotera2010_mix_max.dat but slightly
+different.
+The flux value is from ARA paper arXiv:1105.2854v1, Fig.27 Kotera et al. '10 max
+
+Also added new mode.
+In setup file, "ADDITIONAL_DEPTH_ON" and "ADDITIONAL_DEPTH" settings are
+added.
+Those are used when you want to manually add same additional depth to default
+values.
+
+For example, when you use TestBed geometry (DETECTOR=3, READGEOM=1 case) and
+want to add addtional depth to all channels except surface channels, use this
+mode.
+
+ADDITIONAL_DEPTH_ON=1 will turn on this mode (by default this value is 0 which
+is turned off)
+And when ADDITIONAL_DEPTH_ON=1 case, AraSim will read ADDITIONAL_DEPTH=xxx
+value and make all channels xxx amount deeper than before (positive xxx value
+will make antennas more deeper and negative xxx value will make antennas move
+up near the surface)
+
+Don't give ADDITIONAL_DEPTH value too big so that antennas are located in the
+middle of air or in the bed rock.
+
+===============================================================================
+
+01/13/2014 E. Hong;
+
+Added few modes to Settings class.
+
+1) TRIG_ONLY_LOW_CH_ON
+
+For ideal stations, this mode will force only lower 8 antennas can contribute
+to trigger.
+By default this value is 0 (just regular mode; all 16 channels contribute to
+trigger)
+There are combinations of settings to compare ideal ARA station and TestBed by
+using for example
+DETECTOR=1
+number_of_stations=1
+TRIG_ONLY_LOW_CH_ON=1
+NOISE_TEMP_MODE=1 // different noise for different chs
+NOISE=1 // use TB calibrated Rayleigh dist. noise
+TRIG_THRES_MODE=1 // TB calibrated trig threshold
+
+above combinations will make ideal ARA station 1 which only triggered by
+bottom 8 antennas (4 Vpol, 4 Hpol) and those 8 channels will have calibrated
+TestBed's thermal noise waveform (by Rayleigh dist.) and calibrated trigger
+threshold.
+
+2) ACCUM_TRIG_SEARCH_BINS_STATION0
+
+Above value is actually not a setting value but an output value which gives us
+how much trigger searched bins there were in the run for station 0.
+This value is needed if we want to calculate the global trigger rate with
+small output root file size (FILL_TREE_MODE=2 which only stores triggered
+events).
+
+With this value, we can calculate trigger rate with global passed number of
+events in station 0.
+
+
+============================================================================
+
+12/02/2014 Guy Nir:
+
+added some minor changes to input/output:
+
+* in AraSim.cc : now using setupfiles inside directories will not make output files very long:
+
+if you run ./AraSim setupdirectory/setup.txt 0 you will get
+
+AraOut.setup.txt.run0.root instead of AraOut.setupdirectory/setup.txt.run0.root
+
+* can now add third parameter to AraSim for output directory:
+
+./AraSim setup.txt 0 /path/to/output/dir/ 
+
+can add slash in the end or not
+
+* in Spectra.cc : added new EXPONENT values between 510 and 650 (including), so we can have non-integer energy values:
+
+the formula is E=10^X with X=(EXPONENT-400)/10 
+
+so if you want 10^18.3eV use EXPONENT=400+18.3*10=583
+
+added a bash script to make a dynamic load library "library.sh"  
+run it and get "libSim.so" which is useful for loading all the simulation files you need to link with. 
+
+added the user guide in its own directory. 
+
+modified the StandardDefinitions.mk : commented out the parts where it calls ARA_UTIL_INSTALL_DIR 
+(it messed up my installation and I think in general AraRoot conflicts with AraSim)
+
+
+============================================================================
+
+23/02/2014 Guy Nir:
+
+Triggering upgrade:
+
+* added to Settings class new mode: TRIG_SCAN_MODE
+
+-in TRIG_SCAN_MODE=0 triggering works same as before (default)
+-in TRIG_SCAN_MODE=1 triggering is faster using circular buffer (10-15% for time domain, 40-50% for freq domain)
+-in TRIG_SCAN_MODE=2 choose low POWERTHRESHOLD, for each triggered event get above what Pthresh this would trigger (e.g. event can trigger if threshold was -5.7). 
+-results for mode 2 saved in report->stations[].TDR_all and TDR_Hpol and TDR_Vpol and sorted from highest to lowest in TDR_Vpol_sorted etc. (TDR= Tunnel Diode Response). 
+
+So for one run at TRIG_SCAN_MODE=2 and POWERTHRESHOLD=-4 and TRIG_MODE=1 (trigger on Hpol and Vpol seperately) and N_TRIG_H=N_TRIG_V=3 we will get for each event the maximum number of channels and maximum POWERTHRESHOLD combination on which it would trigger (e.g. it could trigger at -6.1 in 3 channels or -5.9 at 4 channels). Don't need to run different runs for different Pthresh or N_TRIG, can make the cuts out of the outputfile. 
+
+
+============================================================================
+
+28/02/2014 Guy Nir:
+
+* changed TDR arrays to vectors to save space. The non-sorted TDR_all will have each channel's TDR value, and TDR_***_sorted will be filled depending on trigger mode: if we trigger on all channels only TDR_all_sorted will contain sorted triggering info, if we trigger on Vpol/Hpol then those will be sorted and filled.

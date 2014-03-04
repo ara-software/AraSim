@@ -1,0 +1,56 @@
+EXPONENT value (neutrino flux shape) can be modified by inputs.txt second line.
+
+From EXPONENT 10 ~ 92, more infomation can be found at icemc/fluxes/README
+
+
+EXPONENT    discription
+
+1           dN/dE ~ E^-1
+2           dN/dE ~ E^-2
+3           dN/dE ~ E^-3
+4           dN/dE ~ E^-4
+
+30          ESS baseline model (used to be EXPONENT "0")
+31          ESS-cosmological constant model (used to be EXPONENT "5")
+32          essfig9.dat (used to be EXPONENT "105")
+33          essbaseline.dat (used to be EXPONENT "106")
+34          ess_n0.dat (used to be EXPONENT "107")
+
+40          ahlers.dat (used to be EXPONENT "101")
+
+50          allard.dat (used to be EXPONENT "102")
+
+60          ave_max.dat (used to be EXPONENT "103")
+61          ave_min.dat (used to be EXPONENT "104")
+
+70          kkss_envo.dat (used to be EXPONENT "108")
+
+80          gzk_peter.dat (used to be EXPONENT "109")
+
+90          waxgzk.dat (used to be EXPONENT "110")
+
+100          e-2.dat (used to be EXPONENT "111")
+
+110          yuksel_grb.dat (used to be EXPONENT "112")
+111          yuksel_qso.dat (used to be EXPONENT "113")
+112          yuksel_sfh.dat (used to be EXPONENT "114")
+
+///////////////////
+// above 200 -> Fe / Heavy nuclear models
+//////////////////
+
+200         Ave2005_Fe_Emax21.0.dat
+201         Ave2005_Fe_Emax21.5.dat
+202         Ave2005_Fe_Emax22.0.dat
+203         Ave2005_Fe_hi_evo.dat
+204         Ave2005_Fe_low_evo.dat
+
+210         Stanev2008_heavy.dat
+
+220         Kotera2010_Fe_only.dat
+221         Kotera2010_Fe_rich.dat
+222         Kotera2010_mix_max.dat
+223         Kotera2010_mix_min.dat
+224         Kotera2010_max.dat
+
+

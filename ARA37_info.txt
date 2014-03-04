@@ -1,0 +1,10 @@
+// test file
+
+stations_per_side=4
+
+core_x=100000
+core_y=100000
+
+//z_btw01=2
+//z_btw12=15
+//z_btw23=2

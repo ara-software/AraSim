@@ -1,0 +1,12 @@
+// test file
+
+number_of_stations=1
+
+core_x=10000
+core_y=10000
+
+//z_btw01=2
+//z_btw12=15
+//z_btw23=2
+
+antenna_orientation=1

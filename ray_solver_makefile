@@ -1,0 +1,41 @@
+
+include Makefile.arch
+
+#--------------------------------------------------
+# LIBDIR = /net/user/cweaver/tools/$(OS_ARCH)
+#-------------------------------------------------- 
+
+#--------------------------------------------------
+#    below two lines commented: CXX and CXXFLAGS will set from Makefile.arch
+#-------------------------------------------------- 
+#--------------------------------------------------
+# CXX = clang++
+# CXXFLAGS = -O3 -I$(BOOST_INCDIR)
+#-------------------------------------------------- 
+
+LDFLAGS+=-lboost_program_options -L. -lAra
+LDFLAGS+=-L$(ROOTSYS)/lib -lCore -lCint -lMatrix -lPhysics -lMathCore
+
+.PHONY: all clean install
+
+all : $(ROOT_LIBRARY) ray_solver
+
+clean : 
+	rm -f ray_solver.o ray_solver
+
+ray_solver : ray_solver.o
+	$(CXX) $(CXXFLAGS) $^ $(LDFLAGS) $(ROOT_LIBRARY) -o $@
+
+
+
+
+
+ray_solver.o : $(ROOT_LIBRARY) ray_solver.cpp
+	$(CXX) -c $(CXXFLAGS) $< -o $@
+
+CLASS_HEADERS = Trigger.h Detector.h
+
+eventDict.C: $(CLASS_HEADERS)
+	@echo "Generating dictionary ..."
+	@ rm -f *Dict* 
+	rootcint $@ -c $(CLASS_HEADERS) LinkDef.h
