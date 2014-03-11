@@ -22,8 +22,8 @@ SRCSUF = ${SrcSuf}
 CXX = g++
 
 #Generic and Site Specific Flags
-CXXFLAGS     += $(INC_ARA_UTIL) $(SYSINCLUDES) 
-LDFLAGS      += -g $(LD_ARA_UTIL) -I$(BOOST_ROOT) $(ROOTLDFLAGS) -L. 
+CXXFLAGS     += $(SYSINCLUDES) $(INC_ARA_UTIL)
+LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL)
 ARA_ROOT_FLAGS = 
 
 # copy from ray_solver_makefile (removed -lAra part)
@@ -46,7 +46,7 @@ PROGRAMS = AraSim
 all : $(PROGRAMS) 
 
 AraSim : $(OBJS)
-	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $(PROGRAMS) 
+	$(LD) -L. $(OBJS) $(LDFLAGS) $(LIBS) -o $(PROGRAMS) 
 	@echo "done."
 
 #The library
