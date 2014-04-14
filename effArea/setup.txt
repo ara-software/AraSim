@@ -1,0 +1,114 @@
+//This is a test setup file.
+//The values which set in this file will be changed from default value.
+
+//  NNU=100  // number of neutrinos
+
+//ICE_MODEL=0; //Select ice model to be used.  0 = Crust 2.0 , 1 = BEDMAP.
+
+//NOFZ=1; // 1=depth dependent index of refraction,0=off
+
+//CONSTANTCRUST=0; // set crust density and thickness to constant values.
+
+//CONSTANTICETHICKNESS=0; // set ice thickness to constant value
+
+//FIXEDELEVATION=0; // fix the elevation to the thickness of ice.
+
+//MOOREBAY=0; //1=use Moore's Bay measured ice field attenuation length for the west land, otherwise use South Pole data
+  
+//EXPONENT=19.; // 10^19 eV neutrinos only
+
+//DETECTOR=2;   // Detector mode; 0 : testbed, 1 : ARA 1~7 stations, 2 : ARA hexagon layout
+
+//INTERACTION_MODE=1;   // method to choose interaction point posnu. mode 0 : PickUnbiased (randomly in Antarctic ice), mode 1 : PickNear (randomly near by detectors) mode 2: pick exact position
+INTERACTION_MODE=1
+
+//POSNU_RADIUS=2000;     // when above INTERACTION_MODE = 1, the radius of randomly selected position of interaction in meter.
+
+//WHICHPARAMETERIZATION=0;  //
+
+//SIMULATION_MODE=0;    // 0 for freq domain simulation (old method) 1 for time domain (new method). time domain currently not available
+
+//SECONDARIES=1;        // 1 for with secondary interactions, 0 for without secondary interactions
+
+//
+// Above are default values!
+//
+
+// If you want to change any of above default values, write as
+// EXPONENT=5
+// as an example.
+// order is not important.
+// Make sure the name of variable is correct.
+
+
+
+///////////////////
+
+
+EXPONENT=19
+NNU=100 // number of neutrino events
+NNU_PASSED=10 // number of neutrino events that are allowed to pass the trigger
+ONLY_PASSED_EVENTS=0 // 0 (default): AraSim throws NNU events whether or not they pass; 1: AraSim throws events until the number of events that pass the trigger is equal to NNU_PASSED (WARNING: may cause long run times if reasonable values are not chosen)
+NOISE_WAVEFORM_GENERATE_MODE=0 // generate new noise waveforms for each events
+NOISE_EVENTS=16 // number of pure noise waveforms
+TRIG_ANALYSIS_MODE=0 // 0 = signal + noise, 1 = signal only, 2 = noise only
+DETECTOR=1 // ARA stations 1 to 7
+
+TIMESTEP=5.E-10 // value for 2GHz actual station value
+TRIG_WINDOW=1.E-7 // 100ns which is actual testbed trig window
+POWERTHRESHOLD=-6.06 // 100Hz global trig rate for 3 out of 16 ARA stations
+//DATA_BIN_SIZE=8192
+
+POSNU_RADIUS=3000
+V_MIMIC_MODE=0 // 0 : global trig is located center of readout windows
+DATA_SAVE_MODE=2 // 2 : don't save any waveform informations at all
+WRITE_ALL_EVENTS=2 // don't save any waveform informations to eventTree
+BORE_HOLE_ANTENNA_LAYOUT=0
+SECONDARIES=0
+
+// below settings are available for only TestBed mode (DETECTOR=3 case)
+TRIG_ONLY_BH_ON=0
+CALPULSER_ON=0
+USE_MANUAL_GAINOFFSET=0
+USE_TESTBED_RFCM_ON=0
+NOISE_TEMP_MODE=0
+TRIG_THRES_MODE=0
+READGEOM=0 // reads geometry information from the sqlite file or not (0 : don't read)
+
+// new variables
+//INTERACTION_MODE=0 // pickunbiased mode!
+//GETCHORD_MODE=1 // use new icemc Getchord function
+//taumodes=1
+
+//BH_ANT_SEP_DIST_ON=1 // default 0 : use constant borehole antenna distance. 1 : use separate antenna distance. use z_btw01, z_btw12, ... in ARA_N_info.txt or ARA37_info.txt
+
+TRIG_MODE=0 // use vpol, hpol separated trigger mode. by default N_TRIG_V=3, N_TRIG_H=3. You can change this values
+//N_TRIG_V=4
+//N_TRIG_H=4
+
+///////////////////
+
+
+// Set options for what information to write out and how it should be written
+// DATA_SAVE_MODE 0 to save all data, 1 to remove most of data except geometric info, final global trigger data V_mimic (pure noise waveforms in trigger class will remain), 2 to remove final global trigger waveform V_mimic also (so just Physics info left)
+
+// WRITE_ALL_EVENTS 0 only write globally triggered events, 1 Write all event events including events that are not globally triggered
+// Note: NNU is the number of neutrinos that have been thrown in total, not just globally triggered events
+// When writing all events, the waveform stored in UsefulAraSimEvent->VoltsRF[] is just the untriggered, noiseless waveform of the initial signal, and it has not propagated to the antenna yet.
+// new mode, WRITE_ALL_EVENTS 2 will not save waveforms at all.
+
+
+
+// lets work on nnu theta 80 deg +- 1deg
+//NNU_THIS_THETA=1
+//NNU_THETA=1.39626
+//NNU_D_THETA=0.017453
+
+
+//CALPULSER_ON=0 // Calpulser is off
+//CALPULSER_ON=1
+//CALPUL_AMP=0.15 // calpulser1 amp
+//CALPUL_AMP=0.25 // calpulser2 amp
+//TRIG_ONLY_BH_ON=1
+
+

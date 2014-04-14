@@ -1,0 +1,14 @@
+From the conversation between Amy Connolly and Christopher Weaver,
+
+     to compile,
+
+     make -f ray_solver_makefile
+
+
+     to run,
+
+     ./ray_solver --src_x=0 --src_y=0 --src_z=-100 --trg_x=100 --trg_y=0 --trg_z=-100
+
+     which means rays between the source point (0,0,-100) and target point (100,0,-100).
+
+

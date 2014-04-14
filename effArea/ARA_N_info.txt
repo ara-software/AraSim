@@ -1,0 +1,10 @@
+// test file
+
+number_of_stations=3
+
+core_x=0
+core_y=0
+
+//z_btw01=2
+//z_btw12=15
+//z_btw23=2

@@ -1,0 +1,688 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <math.h>
+#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
+#include <time.h>
+#include "TTreeIndex.h"
+#include "TChain.h"
+#include "TH1.h"
+#include "TF1.h"
+#include "TF2.h"
+#include "TFile.h"
+#include "TRandom.h"
+#include "TRandom2.h"
+#include "TRandom3.h" 
+#include "TTree.h"
+#include "TLegend.h"
+#include "TLine.h"
+#include "TROOT.h"
+#include "TPostScript.h"
+#include "TCanvas.h"
+#include "TH2F.h"
+#include "TText.h"
+#include "TProfile.h"
+#include "TGraphErrors.h"
+#include "TStyle.h"
+#include "TMath.h"
+#include <unistd.h>
+#include "TVector3.h"
+#include "TRotation.h"
+#include "TSpline.h"
+#include "Math/Integrator.h"
+
+//#include <fftw3.h>
+
+using namespace std;
+
+#include "Tools.h"
+#include "Constants.h"
+#include "Vector.h"
+#include "Position.h"
+#include "EarthModel.h"
+#include "IceModel.h"
+#include "Efficiencies.h"
+#include "Spectra.h"
+#include "Event.h"
+#include "Trigger.h"
+#include "Detector.h"
+#include "Settings.h"
+#include "counting.hh"
+#include "Primaries.h"
+#include "Report.h"
+
+#include "Ray.h"
+
+class EarthModel; //class
+
+
+int main(int argc, char **argv) {    // this is for manual power threshold value
+
+
+
+    string readfile;
+  if (argc<2) { // no setup file input, use default
+      readfile = "outputs/AraOut.root";
+  }
+  else if (argc == 2) { // read file!!
+      readfile = string( argv[1] );
+  }
+  else { // no mode for argc > 2!
+      cout<<"too many info! just use default AraOut.root file!"<<endl;
+      readfile = "outputs/AraOut.root";
+  }
+
+
+
+
+
+
+  string setupfile = "setup.txt";
+
+  Settings *settings = new Settings();
+  //Settings *settings = 0;
+
+
+
+
+
+
+//  IceModel *icemodel=new IceModel(ICE_MODEL + NOFZ*10,CONSTANTICETHICKNESS * 1000 + CONSTANTCRUST * 100 + FIXEDELEVATION * 10 + 0,MOOREBAY);// creates Antarctica ice model
+  IceModel *icemodel=new IceModel(settings->ICE_MODEL + settings->NOFZ*10,settings->CONSTANTICETHICKNESS * 1000 + settings->CONSTANTCRUST * 100 + settings->FIXEDELEVATION * 10 + 0,settings->MOOREBAY);// creates Antarctica ice model
+  //IceModel inherits from EarthModel  
+
+  cout<<endl;
+  cout<<"Surface at (log:0, lat:0) : "<<icemodel->Surface(0., 0.)<<endl;
+  cout<<"SurfaceAboveGeoid at (log:0, lat:0) : "<<icemodel->SurfaceAboveGeoid(0., 0.)<<endl;
+  
+  //Detector *detector=new Detector(settings, icemodel); // builds antenna array, 0 for testbed
+  Detector *detector=new Detector(settings, icemodel, setupfile ); // builds antenna array, 0 for testbed
+  cout<<"end calling detector"<<endl;
+//  Detector *detector=new Detector(settings->DETECTOR); // builds antenna array, 0 for testbed
+
+  Trigger *trigger=new Trigger(detector, settings); // builds the trigger  
+//  Efficiencies *efficiencies=new Efficiencies(detector->getnRx(),outputdir); // keeps track of efficiencies at each stage of the simulation
+  cout<<"called Efficiencies"<<endl;
+  
+  Spectra *spectra=new Spectra(settings->EXPONENT); // gets library (or whatever) of neutrino spectra
+  cout<<"called Spectra"<<endl;
+
+  Ray *ray = new Ray(); // construct Ray class
+  cout<<"called Ray"<<endl;
+  
+
+    // 
+    // test PickUnbiased in IceModel.
+  Counting *count1 = new Counting();
+  cout<<"called Counting"<<endl;
+
+  Primaries *primary1 = new Primaries();
+  cout<<"called Primaries"<<endl;
+
+  int whichray = 0; // for test
+//--------------------------------------------------
+//   Interaction *interaction1=new Interaction("nu",primary1,settings,whichray,count1);
+//   cout<<"called Interaction1"<<endl;
+//-------------------------------------------------- 
+
+  Event *event = new Event();
+  cout<<"called Event"<<endl;
+
+  //Report *report = new Report(detector, settings);
+  Report *report = new Report();
+  cout<<"called Evt"<<endl;
+
+
+  TFile *AraFile;
+  AraFile=new TFile((readfile).c_str(),"READ","ara");
+
+/*
+   if (argc == 3) {
+        AraFile=new TFile((outputdir+"/AraOut."+setupfile+".run"+run_no+".root").c_str(),"RECREATE","ara");
+   }
+   else {
+        AraFile=new TFile((outputdir+"/AraOut.root").c_str(),"RECREATE","ara");
+   }
+*/
+
+  //TTree *AraTree=new TTree("AraTree","AraTree");    // for single entry
+  //TTree *AraTree2=new TTree("AraTree2","AraTree2"); //for many entries
+
+  TTree *AraTree=(TTree*)AraFile->Get("AraTree");
+  TTree *AraTree2=(TTree*)AraFile->Get("AraTree2");
+
+  cout<<"assign AraFile, AraTrees"<<endl;
+
+
+
+
+
+  AraTree->SetBranchAddress("detector",&detector);
+  cout<<"branch detector"<<endl;
+  AraTree->SetBranchAddress("icemodel",&icemodel);
+  cout<<"branch icemodel"<<endl;
+  AraTree->SetBranchAddress("trigger",&trigger);
+  cout<<"branch trigger"<<endl;
+  AraTree->SetBranchAddress("settings",&settings);
+  cout<<"branch settings"<<endl;
+  AraTree->SetBranchAddress("spectra",&spectra);
+  cout<<"branch spectra"<<endl;
+  AraTree2->SetBranchAddress("event",&event);
+  cout<<"branch Evt"<<endl;
+  AraTree2->SetBranchAddress("report",&report);
+  cout<<"branch report"<<endl;
+
+  cout<<"finish tree assign"<<endl;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//  Settings *settings = new Settings();
+
+/*
+  //  Detector *detector=new Detector(settings->DETECTOR); // builds antenna array, 0 for testbed
+  Detector *detector=0; // builds antenna array, 0 for testbed
+  Settings *settings = 0;
+  Spectra *spectra = 0;
+  IceModel *icemodel = 0;
+  Event *event = 0;
+  Report *report = 0;
+  Trigger *trigger = 0;
+*/
+
+
+
+/*
+
+  string setupfile = "setup.txt";
+
+  Settings *settings = new Settings();
+  Spectra *spectra=new Spectra(settings->EXPONENT); // gets library (or whatever) of neutrino spectra
+  IceModel *icemodel=new IceModel(settings->ICE_MODEL + settings->NOFZ*10,settings->CONSTANTICETHICKNESS * 1000 + settings->CONSTANTCRUST * 100 + settings->FIXEDELEVATION * 10 + 0,settings->MOOREBAY);// creates Antarctica ice model
+  Detector *detector=new Detector(settings, icemodel, setupfile ); // builds antenna array, 0 for testbed
+  Event *event = new Event();
+  Report *report = new Report();
+  Trigger *trigger=new Trigger(detector, settings); // builds the trigger  
+
+
+  cout<<"construct detector"<<endl;
+
+  
+  //TFile *AraFile=new TFile(( readfile ).c_str());
+  //TFile *AraFile=new TFile((readfile).c_str(),"READ","ara");
+  //TFile *AraFile = TFile::Open( (readfile).c_str() );
+
+  //TFile *AraFile=new TFile((outputdir+"/AraOut.root").c_str());
+
+
+  TFile *AraFile;
+  AraFile=new TFile((readfile).c_str(),"READ","ara");
+
+
+
+  cout<<"AraFile"<<endl;
+  TTree *AraTree=(TTree*)AraFile->Get("AraTree");
+  TTree *AraTree2=(TTree*)AraFile->Get("AraTree2");
+  cout<<"AraTree"<<endl;
+  AraTree->SetBranchAddress("detector",&detector);
+  AraTree->SetBranchAddress("settings",&settings);
+  AraTree->SetBranchAddress("spectra",&spectra);
+  AraTree->SetBranchAddress("icemodel",&icemodel);
+  AraTree->SetBranchAddress("trigger",&trigger);
+  AraTree2->SetBranchAddress("event",&event);
+  AraTree2->SetBranchAddress("report",&report);
+  cout<<"branch detector"<<endl;
+
+
+*/
+
+  
+  AraTree->GetEvent(0);
+  cout<<"getevent"<<endl;
+  cout << "I'm here.\n";
+  //cout << "GetGain(700,5,0,0) is " << detector->GetGain(700., 5., 0., 0) << "\n";
+  //cout << "GetGain(10,5,0,0) is " << detector->GetGain(10., 5., 0., 0) << "\n";
+
+  cout<<"station x is "<<detector->stations[0].GetX()<<endl;
+  cout<<"string x is "<<detector->stations[0].strings[0].GetX()<<endl;
+  cout<<"antenna x is "<<detector->stations[0].strings[0].antennas[0].GetX()<<endl;
+  cout<<"antenna Gain(700,5,0) is "<<detector->stations[0].strings[0].antennas[0].GetG(detector,700.,5.,0.)<<endl;
+
+  cout<<"params.number_of_stations : "<<detector->params.number_of_stations<<endl;
+  cout<<"params.station_spacing : "<<detector->params.station_spacing<<endl;
+
+  cout<<"\n"<<endl;
+  cout<<"Settings->NNU : "<<settings->NNU<<endl;
+  cout<<"Settings->DETECTOR : "<<settings->DETECTOR<<endl;
+  cout<<"Settings->EXPONENT : "<<settings->EXPONENT<<endl;
+
+
+cout<<"random energy from Spectra : "<<spectra->GetNuEnergy()<<endl;
+
+cout<<"Detector static const double freq_init : "<<detector->Getfreq_init()<<endl;
+
+
+cout<<"Detector -> freq_forfft[0] : "<<detector->freq_forfft[0]<<endl;
+cout<<"Detector -> freq_forfft[9] : "<<detector->freq_forfft[9]<<endl;
+cout<<"Detector -> freq_forfft[100] : "<<detector->freq_forfft[100]<<endl;
+
+cout<<"icemodel surface : "<<icemodel->Surface(0.,0.)<<endl;
+
+AraTree2->GetEvent(0);
+cout<<"nnu x : "<<event->Nu_Interaction[0].nnu.GetX()<<endl;
+AraTree2->GetEvent(1);
+cout<<"nnu x : "<<event->Nu_Interaction[0].nnu.GetX()<<endl;
+
+  int nnu_pass = 0; // number of nu events which passed PickUnbiased.
+  double posnuX[settings->NNU];
+  double posnuY[settings->NNU];
+  double posnuR[settings->NNU];
+  double posnuX_max=-icemodel->R_EARTH;
+  double posnuY_max=-icemodel->R_EARTH;
+
+  double posnuX_min=icemodel->R_EARTH;
+  double posnuY_min=icemodel->R_EARTH;
+
+
+
+
+///////////////////////////////////////////
+//  test Detector class
+///////////////////////////////////////////
+
+
+
+
+if ( settings->DETECTOR != 0 ) {
+
+
+  for (int inu=0;inu<settings->NNU;inu++) { // loop over neutrinos
+
+
+      AraTree2->GetEvent(inu);
+
+      // save X, Y of posnus which passed PickUnbiased
+      if ( event->Nu_Interaction[0].pickposnu ) {
+          posnuX[nnu_pass] = event->Nu_Interaction[0].posnu.GetX();
+          posnuY[nnu_pass] = event->Nu_Interaction[0].posnu.GetY();
+          posnuR[nnu_pass] = event->Nu_Interaction[0].posnu.R();
+
+          if (posnuX[nnu_pass] > posnuX_max) posnuX_max = posnuX[nnu_pass];
+          if (posnuX[nnu_pass] < posnuX_min) posnuX_min = posnuX[nnu_pass];
+
+          if (posnuY[nnu_pass] > posnuY_max) posnuY_max = posnuY[nnu_pass];
+          if (posnuY[nnu_pass] < posnuY_min) posnuY_min = posnuY[nnu_pass];
+
+          nnu_pass++;
+
+      }
+  }
+
+
+
+
+
+cout<<"\n\t Test ARA-37 array setting !"<<endl;
+//cout<<"total number of strings : "<<(int)detector->Detector.params.number_of_strings<<endl;
+cout<<"total number of strings : "<<(int)detector->params.number_of_strings<<endl;
+cout<<"total number of antennas : "<<(int)detector->params.number_of_antennas<<endl;
+
+
+TCanvas *c1 = new TCanvas("c1","A Simple Graph Example",200,10,4800,700);
+c1->Divide(6,1);
+
+double x[(int)detector->params.number_of_stations], y[(int)detector->params.number_of_stations];
+
+for (int i=0;i<(int)detector->params.number_of_stations;i++) {
+    x[i] = (double)detector->stations[i].GetX();
+    y[i] = (double)detector->stations[i].GetY();
+}
+
+TGraph *gr;
+gr = new TGraph((int)detector->params.number_of_stations,x,y);
+
+c1->cd(1);
+gr->SetTitle("ARA station layout");
+gr->GetHistogram()->SetMaximum(detector->params.core_y + settings->POSNU_RADIUS);
+gr->GetHistogram()->SetMinimum(detector->params.core_y - settings->POSNU_RADIUS);
+gr->GetHistogram()->SetXTitle("X (m)");
+gr->GetHistogram()->SetYTitle("Y (m)");
+gr->GetYaxis()->SetTitleOffset(1.2);
+gr->GetHistogram()->SetYTitle("Y (m)");
+gr->GetXaxis()->SetLimits(detector->params.core_x- settings->POSNU_RADIUS, detector->params.core_x+ settings->POSNU_RADIUS);
+gr->Draw("a*");
+
+
+c1->cd(2);
+
+int station_choice = 0;
+
+double string_x[4], string_y[4];
+double surface_x[4], surface_y[4];
+
+//for (int i=0;i<4;i++) {
+for (int i=0;i< detector->params.number_of_strings_station;i++) {
+    string_x[i] = (double)detector->stations[station_choice].strings[i].GetX();
+    string_y[i] = (double)detector->stations[station_choice].strings[i].GetY();
+}
+
+for (int i=0;i< detector->params.number_of_surfaces_station;i++) {
+
+    surface_x[i] = (double)detector->stations[station_choice].surfaces[i].GetX();
+    surface_y[i] = (double)detector->stations[station_choice].surfaces[i].GetY();
+}
+
+
+TGraph *gr_string;
+//gr_string = new TGraph(4,string_x,string_y);
+gr_string = new TGraph(detector->params.number_of_strings_station,string_x,string_y);
+
+gr_string->SetTitle("Strings and surface antennas layout for each station");
+//gr_string->GetHistogram()->SetMaximum(5300);
+//gr_string->GetHistogram()->SetMinimum(5100);
+//gr_string->GetXaxis()->SetLimits(-3100,-2900);
+gr_string->GetHistogram()->SetMaximum( (int)detector->stations[station_choice].GetY() + 100);
+gr_string->GetHistogram()->SetMinimum( (int)detector->stations[station_choice].GetY() - 100);
+gr_string->GetXaxis()->SetLimits( (int)detector->stations[station_choice].GetX() - 100, (int)detector->stations[station_choice].GetX() + 100 );
+gr_string->SetMarkerColor(4);
+gr_string->SetMarkerSize(2);
+gr_string->SetMarkerStyle(20);
+gr_string->GetHistogram()->SetXTitle("X (m)");
+gr_string->GetHistogram()->SetYTitle("Y (m)");
+gr_string->GetYaxis()->SetTitleOffset(1.2);
+gr_string->Draw("ap");
+
+TGraph *gr_surface;
+gr_surface = new TGraph(detector->params.number_of_surfaces_station,surface_x,surface_y);
+gr_surface->SetMarkerColor(2);
+gr_surface->SetMarkerSize(2);
+gr_surface->SetMarkerStyle(21);
+gr_surface->Draw("p");
+
+
+TLegend *Leg_string_surface = new TLegend(1., 0.95, 0.5,0.8);
+Leg_string_surface -> AddEntry(gr_string, "Strings");
+Leg_string_surface -> AddEntry(gr_surface, "Surface antennas");
+Leg_string_surface -> Draw();
+
+
+
+c1->cd(3);
+
+int string_choice = 0;
+//int station_choice = (int)detector->params.number_of_stations - 1;
+
+double antenna_x_V[4], antenna_y_V[4];   // use x as x, y as z to see the depth layout
+double antenna_x_H[4], antenna_y_H[4];   // use x as x, y as z to see the depth layout
+int V_pol_num = 0;
+int H_pol_num = 0;
+
+//for (int i=0;i<4;i++) {
+for (int i=0;i<detector->params.number_of_antennas_string;i++) {
+    //antenna_x[i] = (double)detector->stations[station_choice].strings[string_choice].GetX();
+    if (detector->stations[station_choice].strings[string_choice].antennas[i].type == 0) { // Vpol
+    antenna_x_V[V_pol_num] = (double)detector->stations[station_choice].strings[string_choice].antennas[i].GetX();
+    antenna_y_V[V_pol_num] = (double)detector->stations[station_choice].strings[string_choice].antennas[i].GetZ();
+    V_pol_num++;
+    }
+    else if (detector->stations[station_choice].strings[string_choice].antennas[i].type == 1) { // Hpol
+    antenna_x_H[H_pol_num] = (double)detector->stations[station_choice].strings[string_choice].antennas[i].GetX();
+    antenna_y_H[H_pol_num] = (double)detector->stations[station_choice].strings[string_choice].antennas[i].GetZ();
+    H_pol_num++;
+    }
+
+}
+
+cout<<"Vpolnum : "<<V_pol_num<<" Hpolnum : "<<H_pol_num<<endl;
+
+TGraph *gr_antenna;
+//gr_antenna = new TGraph(4,antenna_x,antenna_y);
+gr_antenna = new TGraph(V_pol_num,antenna_x_V,antenna_y_V);
+
+gr_antenna->SetTitle("Borehole antenna layout for each string");
+//gr_string->GetHistogram()->SetMaximum(5300);
+//gr_string->GetHistogram()->SetMinimum(5100);
+//gr_string->GetXaxis()->SetLimits(-3100,-2900);
+//gr_antenna->GetHistogram()->SetMaximum( (int)detector->stations[station_choice].strings[string_choice].GetZ() );
+gr_antenna->GetHistogram()->SetMaximum( (int)detector->stations[station_choice].strings[string_choice].antennas[detector->params.number_of_antennas_string-1].GetZ() + 20 );
+gr_antenna->GetHistogram()->SetMinimum( (int)detector->stations[station_choice].strings[string_choice].antennas[0].GetZ() - 20);
+gr_antenna->GetXaxis()->SetLimits( (int)detector->stations[station_choice].GetX() - 100, (int)detector->stations[station_choice].GetX() + 100 );
+gr_antenna->GetYaxis()->SetTitle("Z (depth, m)");
+gr_antenna->SetMarkerColor(4);
+gr_antenna->SetMarkerSize(2);
+gr_antenna->SetMarkerStyle(20);
+gr_antenna->GetHistogram()->SetXTitle("X (m)");
+gr_antenna->GetYaxis()->SetTitleOffset(1.2);
+gr_antenna->Draw("ap");
+
+
+TGraph *gr_antenna_H;
+//gr_antenna = new TGraph(4,antenna_x,antenna_y);
+gr_antenna_H = new TGraph(H_pol_num,antenna_x_H,antenna_y_H);
+gr_antenna_H->SetMarkerColor(2);
+gr_antenna_H->SetMarkerSize(2);
+gr_antenna_H->SetMarkerStyle(21);
+gr_antenna_H->Draw("p");
+
+
+TLegend *Leg_borehole = new TLegend(1., 0.95, 0.5,0.8);
+Leg_borehole -> AddEntry(gr_antenna, "Vpol","p");
+Leg_borehole -> AddEntry(gr_antenna_H, "Hpol","p");
+Leg_borehole -> Draw();
+
+
+
+c1->cd(4);
+
+
+double station_x[(int)detector->params.number_of_stations], station_z[(int)detector->params.number_of_stations];
+
+for (int i=0;i<(int)detector->params.number_of_stations;i++) {
+    station_x[i] = (double)detector->stations[i].GetX();
+    station_z[i] = (double)detector->stations[i].GetZ();
+//    station_z[i] = (double)detector->stations[0].GetZ();
+}
+
+TGraph *gr_crosssection;
+gr_crosssection = new TGraph((int)detector->params.number_of_stations,station_x,station_z);
+
+gr_crosssection->SetTitle("Station layout CrossSection");
+//--------------------------------------------------
+// gr_crosssection->GetHistogram()->SetMaximum( (int)detector->stations[0].GetZ() + 10 );
+// gr_crosssection->GetHistogram()->SetMinimum( (int)detector->stations[0].GetZ() - 10 );
+//-------------------------------------------------- 
+gr_crosssection->GetHistogram()->SetMaximum( detector->stations[detector->params.number_of_stations-1].GetZ() + 1000 );
+gr_crosssection->GetHistogram()->SetMinimum( detector->stations[detector->params.number_of_stations-1].GetZ() - 1000 );
+gr_crosssection->GetXaxis()->SetLimits(detector->params.core_x- settings->POSNU_RADIUS, detector->params.core_x+ settings->POSNU_RADIUS);
+gr_crosssection->GetHistogram()->SetXTitle("X (m)");
+gr_crosssection->GetHistogram()->SetYTitle("Z (m)");
+gr_crosssection->GetYaxis()->SetTitleOffset(1.2);
+gr_crosssection->Draw("a*");
+
+
+c1->cd(5);
+
+TGraph *gr_posnu;
+gr_posnu = new TGraph(nnu_pass,posnuX,posnuY);
+
+gr_posnu->SetTitle("posnu");
+//--------------------------------------------------
+// gr_posnu->GetHistogram()->SetMaximum( icemodel->Surface(0.,0.)*sin(30.*RADDEG) );
+// gr_posnu->GetHistogram()->SetMinimum( -icemodel->Surface(0.,0.)*sin(30.*RADDEG)  );
+//-------------------------------------------------- 
+//gr_posnu->GetHistogram()->SetMaximum( detector->params.core_y+3000. );
+//gr_posnu->GetHistogram()->SetMinimum( detector->params.core_y-3000.  );
+//gr_posnu->GetHistogram()->SetMaximum( detector->params.core_y+settings->POSNU_RADIUS );
+//gr_posnu->GetHistogram()->SetMinimum( detector->params.core_y-settings->POSNU_RADIUS  );
+gr_posnu->GetHistogram()->SetMaximum( posnuY_max );
+gr_posnu->GetHistogram()->SetMinimum( posnuY_min  );
+gr_posnu->GetHistogram()->SetXTitle("X (m)");
+gr_posnu->GetHistogram()->SetYTitle("Y (m)");
+gr_posnu->GetYaxis()->SetTitleOffset(1.2);
+gr_posnu->GetHistogram()->SetYTitle("Y (m)");
+//gr_posnu->GetXaxis()->SetLimits( detector->params.core_x-settings->POSNU_RADIUS, detector->params.core_x+settings->POSNU_RADIUS);
+gr_posnu->GetXaxis()->SetLimits( posnuX_min, posnuX_max );
+//--------------------------------------------------
+// gr_posnu->GetXaxis()->SetLimits(-icemodel->Surface(0.,0.)*sin(30.*RADDEG),icemodel->Surface(0.,0.)*sin(30.*RADDEG));
+//-------------------------------------------------- 
+gr_posnu->Draw("a*");
+
+
+c1->cd(6);
+
+double cd6_x[settings->NNU];
+double cd6_y_top[settings->NNU];
+double cd6_y_bot[settings->NNU];
+
+for(int i =0; i<settings->NNU; i++) {
+      
+    AraTree2->GetEvent(i);
+
+    cd6_x[i] = i;
+    cd6_y_top[i] = icemodel->Surface( event->Nu_Interaction[0].posnu.Lon(), event->Nu_Interaction[0].posnu.Lat() );
+    cd6_y_bot[i] = icemodel->Surface( event->Nu_Interaction[0].posnu.Lon(), event->Nu_Interaction[0].posnu.Lat() ) - icemodel->IceThickness( event->Nu_Interaction[0].posnu.Lon(), event->Nu_Interaction[0].posnu.Lat() );
+    
+    if (icemodel->Surface( event->Nu_Interaction[0].posnu.Lon(), event->Nu_Interaction[0].posnu.Lat() ) - posnuR[i] < 0) { 
+        cout<<"Surface - posnuR : "<<icemodel->Surface( event->Nu_Interaction[0].posnu.Lon(), event->Nu_Interaction[0].posnu.Lat() ) - posnuR[i]<<endl;
+        cout<<"!offsurface"<<endl;
+    }
+
+    if (posnuR[i] - ( icemodel->Surface( event->Nu_Interaction[0].posnu.Lon(), event->Nu_Interaction[0].posnu.Lat()) - icemodel->IceThickness(event->Nu_Interaction[0].posnu.Lon(), event->Nu_Interaction[0].posnu.Lat()) ) < 0)  {
+        cout<<"posnuR - Icebottom : "<<posnuR[i] - ( icemodel->Surface( event->Nu_Interaction[0].posnu.Lon(), event->Nu_Interaction[0].posnu.Lat() ) - icemodel->IceThickness(event->Nu_Interaction[0].posnu.Lon(), event->Nu_Interaction[0].posnu.Lat()) ) <<endl;
+        cout<<"!offbottomice"<<endl;
+    }
+
+}
+
+
+TGraph *gr_depth;
+gr_depth = new TGraph(settings->NNU, cd6_x, posnuR);
+
+TGraph *gr_top;
+gr_top = new TGraph(settings->NNU, cd6_x, cd6_y_top);
+
+TGraph *gr_bot;
+gr_bot = new TGraph(settings->NNU, cd6_x, cd6_y_bot);
+
+
+gr_depth->SetTitle("posnu_position");
+gr_depth->GetHistogram()->SetMaximum( cd6_y_top[0] + 1000. );
+gr_depth->GetHistogram()->SetMinimum( cd6_y_bot[0] - 1000.  );
+gr_depth->GetHistogram()->SetXTitle("posnu evt number");
+gr_depth->GetHistogram()->SetYTitle("depth (m)");
+gr_depth->GetYaxis()->SetTitleOffset(1.2);
+gr_depth->SetMarkerColor(2);
+gr_depth->SetMarkerSize(1);
+gr_depth->SetMarkerStyle(21);
+gr_depth->Draw("ap");
+
+gr_top->SetMarkerColor(3);
+gr_top->SetMarkerSize(1);
+gr_top->SetMarkerStyle(21);
+gr_top->Draw("p");
+
+gr_bot->SetMarkerColor(4);
+gr_bot->SetMarkerSize(1);
+gr_bot->SetMarkerStyle(21);
+gr_bot->Draw("p");
+
+
+TLegend *Leg_top_bot = new TLegend(1., 0.95, 0.5,0.8);
+Leg_top_bot -> AddEntry(gr_top, "Ice Surface");
+Leg_top_bot -> AddEntry(gr_depth, "posnu depth");
+Leg_top_bot -> AddEntry(gr_bot, "Bedrock");
+Leg_top_bot -> Draw();
+
+c1->Print("ARA-37_station_layout.pdf");
+
+
+
+
+}
+
+
+
+// test
+cout<<"station[0] x : "<<detector->stations[0].GetX()<<endl;
+cout<<"string[0] x : "<<detector->stations[0].strings[0].GetX()<<endl;
+cout<<"antenna[0] x : "<<detector->stations[0].strings[0].antennas[0].GetX()<<endl;
+cout<<"antenna[0] Gain(700,5,0) : "<<detector->stations[0].strings[0].antennas[0].GetG(detector,700.,5.,0.)<<endl;
+//cout<<"GetGain(700,5,0,0) : "<<detector->GetGain(700.,5.,0.,0)<<endl;
+//cout<<"GetGain(10,5,0,0) : "<<detector->GetGain(10.,5.,0.,0)<<endl;
+
+cout<<"params.number_of_stations : "<<detector->params.number_of_stations<<endl;
+cout<<"params.station_spacing : "<<detector->params.station_spacing<<endl;
+
+cout<<"Spectra energy values : "<<spectra->GetE_bin()<<endl;
+for (int i=0;i<spectra->GetE_bin();i++) {
+    cout<<"energy bin "<<i<<" : "<<spectra->energy[i]<<endl;
+}
+
+cout<<"IceModel R_EARTH : "<<icemodel->R_EARTH<<endl;
+
+/////////////////////////////////////////////
+
+
+
+double *energy = spectra->Getenergy();
+int Ebin = spectra->GetE_bin();
+
+cout<<"\n";
+for (int i=0;i<Ebin;i++) {
+    cout<<"energy["<<i<<"] : "<<energy[i]<<endl;
+}
+
+///////////////////////////////////////////////////
+
+double E = 19.0;
+cout<<"\n";
+cout<<"Flux at 19 is : "<<spectra->GetEdNdEdAdt(E)<<endl;
+
+///////////////////////////////////////////////////
+
+
+//--------------------------------------------------
+// TSpline3 *sp1;
+// sp1 = spectra->GetSEdNdEdAdt();
+//-------------------------------------------------- 
+
+///////////////////////////////////////////////////
+
+
+
+
+
+
+}

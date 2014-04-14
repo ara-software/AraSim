@@ -1,0 +1,37 @@
+//
+// testbed antenna information from Peter Gorham's spreadsheet.
+//
+// first z : bicone, second z : bowtie-slotted cyl.
+// need check if channel info is changed.
+
+number_of_strings=4
+
+//BH1
+antenna_string=0
+x=9.19
+y=-4.97
+z=-25.4, 0
+z=-20.4, 1
+
+//BH2
+antenna_string=1
+x=9.79
+y=5.46
+z=-22.4, 0
+z=-27.4, 1
+
+//BH3
+antenna_string=2
+x=0.03
+y=10.2
+z=-27.4, 0
+z=-22.4, 1
+
+//BH5
+antenna_string=3
+x=-9.53
+y=-4.68
+z=-25.2, 0
+z=-30.2, 1
+
+
