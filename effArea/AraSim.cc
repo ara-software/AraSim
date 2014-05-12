@@ -530,8 +530,8 @@ double cur_posnu_z;
        } // if pickposnu > 0
        else {
            //cout<<"pickposnu : "<<event->Nu_Interaction[0].pickposnu<<endl;
-           report->delete_all();
-           event->delete_all();
+	 //report->delete_all();
+	 //event->delete_all();
        }
 
 
