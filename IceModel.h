@@ -170,6 +170,14 @@ void GetFresnel (
         Vector &Pol // will read the polarization at the source and return polarization at the target antenna
         );
 
+  // new ARA ice attenuation measurement values (at 300 MHz)
+  //
+  double ARA_IceAtten_Depth[100]; // maximum 100 bins
+  double ARA_IceAtten_Length[100];
+  int ARA_IceAtten_bin;
+
+  double GetARAIceAttenuLength(double depth);
+
   //  void FillArraysforTree(double lon_ground[1068][869],double lat_ground[1068][869],double lon_ice[1200][1000],double lat_ice[1200][1000],double lon_water[1200][1000],double lat_water[1200][1000]);
 
   // below three members are copied from icemc icemodel.

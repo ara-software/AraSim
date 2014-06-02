@@ -36,6 +36,9 @@ outputdir="outputs"; // directory where outputs go
  YPARAM=1;  // Connolly et al. 2011 default y parametrization
  UNBIASED_SELECTION=1.; // (0) pick neutrino interaction in the ice and neutrino from any direction or (1) choose neutrino interaction point in the horizon on the balloon in the ice and neutrino direction on the cerenkov cone
 
+ SIGMA_SELECT=0; // when in SIGMAPARAM=1 case, 0 : (default) use mean value, 1 : use upper bound, 2 : use lower bound
+
+
 // end of values from icemc
 
 
@@ -51,6 +54,7 @@ outputdir="outputs"; // directory where outputs go
   CONSTANTICETHICKNESS=0; // set ice thickness to constant value
   FIXEDELEVATION=0; // fix the elevation to the thickness of ice.
   MOOREBAY=0; //1=use Moore's Bay measured ice field attenuation length for the west land, otherwise use South Pole data
+  USE_ARA_ICEATTENU=1; // use ARA measured ice attenuation value
   
   EXPONENT=19.; // 10^19 eV neutrinos only
 
@@ -171,7 +175,7 @@ outputdir="outputs"; // directory where outputs go
 
     GETCHORD_MODE = 0; // which Getchord function to use. default 0 : old Getchord function (not correct tau weight, weight don't have ice inside interaction probability in it). 1 : new Getchord from icemc. This has new tau weight calculation and ice interaction probability applied to weight factor.
 
-    taumodes = 1; // tau created in the rock
+    taumodes = 0; // no tau created in the rock
 
     BH_ANT_SEP_DIST_ON = 1; // default 0 : use constant borehole antenna distance. 1 : use separate antenna distance. use z_btw01, z_btw12, ... in ARA_N_info.txt or ARA37_info.txt
 
@@ -189,7 +193,7 @@ outputdir="outputs"; // directory where outputs go
     PICKNEARUNBIASED_R = 5000.; // radius of the sphere when we use INTERACTION_MODE=3
 
 
-    SHOWER_MODE = 2; // EM (0) or HAD (1) shower in t-domain signal. or either one which is bigger (2)  default : either one which is bigger
+    SHOWER_MODE = 2; // EM (0) or HAD (1) shower in t-domain signal. or either one which is bigger (3) or both EM and HAD (2)  default : 2, both EM and HAD showers
 
     SHOWER_STEP = 0.001; // step size in generating shower profile. default 0.001 m
 
@@ -197,7 +201,7 @@ outputdir="outputs"; // directory where outputs go
 
     OFFCONE_LIMIT = 10.; // offcone angle (deg) limit to calculate time domain signal. Increasing this value will result in drametically increase computation time
 
-    ALL_ANT_V_ON = 0; // use Vpol antenna gain for both Vpol and Hpol = 1, use Hpol gain for Hpol model = 0
+    ALL_ANT_V_ON = 1; // use Vpol antenna gain for both Vpol and Hpol = 1, use Hpol gain for Hpol model = 0
 
     PHASE_SKIP_MODE = 0; // skip applying phase in t-domain mode (SIMULATION_MODE = 1). default 0 : don't skip (apply all phase), 1 : only upto Askaryan radiation, 2 : only upto antenna
 
@@ -221,6 +225,10 @@ outputdir="outputs"; // directory where outputs go
 
     ACCUM_TRIG_SEARCH_BINS_STATION0 = 0.; // not actually setting value but gives us how much trigger searched bins there were in the run for station0
 
+    NU_NUBAR_SELECT_MODE = 0; // default : random nu_nubar based on arXiv:1108.3163, section 3, 1 = just nu, 2 = just nubar 
+
+
+    SELECT_FLAVOR = 0; // default : randomly 1:1:1 ratio, 1 : el. 2 : mu, 3 : tau
 
 }
 
@@ -487,6 +495,28 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "TRIG_ONLY_LOW_CH_ON") {
                   TRIG_ONLY_LOW_CH_ON = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }              
+              else if (label == "USE_ARA_ICEATTENU") {
+                  USE_ARA_ICEATTENU = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "SIGMA_SELECT") {
+                  SIGMA_SELECT = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }              
+              else if (label == "SIGMAPARAM") {
+                  SIGMAPARAM = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }              
+              else if (label == "SIGMA_FACTOR") {
+                  SIGMA_FACTOR = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "YPARAM") {
+                  YPARAM = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }              
+              else if (label == "NU_NUBAR_SELECT_MODE") {
+                  NU_NUBAR_SELECT_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }              
+              else if (label == "SELECT_FLAVOR") {
+                  SELECT_FLAVOR = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }              
+
 
           }
       }

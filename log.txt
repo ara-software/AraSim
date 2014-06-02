@@ -1162,3 +1162,72 @@ So for one run at TRIG_SCAN_MODE=2 and POWERTHRESHOLD=-4 and TRIG_MODE=1 (trigge
 28/02/2014 Guy Nir:
 
 * changed TDR arrays to vectors to save space. The non-sorted TDR_all will have each channel's TDR value, and TDR_***_sorted will be filled depending on trigger mode: if we trigger on all channels only TDR_all_sorted will contain sorted triggering info, if we trigger on Vpol/Hpol then those will be sorted and filled.
+
+
+============================================================================
+
+04/24/14 Eugene Hong;
+
+Added new ARA measured Ice Attenuation factor mode.
+Settings, 
+USE_ARA_ICEATTENU=1
+uses new ARA measured Ice Attenuation length (300MHz value across entire frequencies).
+Also it uses ray trace steps information to account different attenuation length as a function of depth.
+Currently by default USE_ARA_ICEATTENU=1.
+
+To go back to old method, use USE_ARA_ICEATTENU=0
+
+
+============================================================================
+
+
+04/25/14 Eugene Hong;
+
+Added new sigma (neutrino cross section) boundary values.
+When we use Connolly et al 2011 (http://arxiv.org/abs/1102.0691, Fig1, Fig2 plots and Table 3 and 4 for parameter values) cross section mode (SIGMAPARAM=1),
+We can use mean cross section (by default) with 
+Settings, 
+SIGMA_SELECT=0 
+
+and upper bound value by
+SIGMA_SELECT=1
+
+and lower bound value by
+SIGMA_SELECT=2
+
+============================================================================
+
+
+05/05/14 Eugene Hong;
+
+Fixed nu_nubar selection (used to not select nu or nubar correctly).
+Now nu or nubar is randomly selected based on arXiv:1108.3163 section 3.
+Also error for inelasticity Y calculation for nu and nubar case.
+
+============================================================================
+
+05/15/14 Eugene Hong;
+
+Various bug fixed, such as elast_y, cross section part. (nu, nubar mixed)
+secondary folder fixed (emfrac, hadfrac: em and had shower energy fraction from neutrino energy)
+
+Fix in new RF mode signal (with default SHOWER_MODE=2, now we sum both EM and HAD shower instead of using one dominant shower)
+
+Functionality added
+setup parameter
+
+nu, nubar ratio selection
+
+NU_NUBAR_SELECT_MODE: 0 (default) select nu, nubar ratio based on arXiv:1108.3163, section 3
+1 = all nu
+2 = all nubar
+
+
+SELECT_FLAVOR: 0 (default) el, mu, tau ratio = 1:1:1
+1 = only el.
+2 = only mu
+3 = tau
+
+
+============================================================================
+

@@ -1038,6 +1038,56 @@ void Tools::SimpleLinearInterpolation_OutZero_PIcut(int n1, double *x1, double *
 
 
 
+double Tools::SimpleLinearInterpolation_extend_Single(int n1, double *x1, double *y1, double x2 ) {    // reads n1 array values x1, y1 and do simple linear interpolation and return y2 value
+    //
+
+    int first=0;    // first x2 array which is bigger than x1[0]
+    int last=0;       // last x2 array which is smaller than x1[n1-1]
+
+    int cnt = 0;
+    
+
+    double slope_1;
+    double slope_2;
+
+    slope_1 = (y1[1] - y1[0]) / (x1[1] - x1[0]);
+    slope_2 = (y1[n1-1] - y1[n1-2]) / (x1[n1-1] - x1[n1-2]);
+
+    double y2;
+
+        
+    if ( x2 < x1[0] ) {  // if x2 has smaller x values 
+            
+        y2 = slope_1 * (x2 - x1[0]) + y1[0];
+    }
+    else if ( x2 > x1[n1-1] ) {
+            
+        y2 = slope_2 * (x2 - x1[n1-1]) + y1[n1-1];
+    }
+    else { // in between
+
+        cnt=-1;
+        for (int j=0; j<n1; j++) {
+            //if (x2[i] < x1[j] && cnt==-1) {
+            if (x2 <= x1[j] && cnt==-1) {
+                cnt = j;
+            }
+        }
+
+        y2 = y1[cnt-1] + (x2-x1[cnt-1])*(y1[cnt]-y1[cnt-1])/(x1[cnt]-x1[cnt-1]);
+            
+    }
+
+
+    return y2;
+
+}
+
+
+
+
+
+
 
 
 

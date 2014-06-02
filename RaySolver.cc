@@ -314,6 +314,10 @@ void RaySolver::Solve_Ray_org (Position &source, Position &target, std::vector <
 	
 	RayTrace::TraceFinder tf(refractionModel,attenuationModel);
 
+                            
+        std::vector < std::vector < std::vector <double> > > testvector;
+
+
 	int sol_cnt;
         int sol_error;
 
@@ -392,6 +396,56 @@ void RaySolver::Solve_Ray_org (Position &source, Position &target, std::vector <
                             outputs[1].push_back(it->launchAngle);
                             outputs[2].push_back(it->receiptAngle);
                             //std::cout<<"outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<"pathLen : "<<it->pathLen<<"\n";
+
+
+                            std::string pathfilename;
+                            if ( sol_no == 0 ) {
+                                pathfilename = "./pathfile_0.txt";
+                            }
+                            else if ( sol_no == 1 ) {
+                                pathfilename = "./pathfile_1.txt";
+                            }
+                            else {
+                                pathfilename = "./pathfile.txt";
+                            }
+
+                            testvector.resize(sol_no+1); // x, z
+
+                            // construct
+                            pathStore_vector<RayTrace::minimalRayPosition> pathsave_test;
+                            //pathStore_vector_2<RayTrace::minimalRayPosition> pathsave_test (testvector);
+                            //pathStore_test<RayTrace::minimalRayPosition> pathsave_test ("./pathfile.txt");
+                            //pathStore_test<RayTrace::minimalRayPosition> pathsave_test (pathfilename);
+                
+                            //tf.doTrace<RayTrace::minimalRayPosition>(src_z, it->launchAngle, RayTrace::rayTargetRecord(trg_z,sqrt((trg_x-src_x)*(trg_x-src_x)+(trg_y-src_y)*(trg_y-src_y))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+                            tf.doTrace<RayTrace::minimalRayPosition>(src.GetZ(), it->launchAngle, RayTrace::rayTargetRecord(trg.GetZ(),sqrt((trg.GetX()-src.GetX())*(trg.GetX()-src.GetX())+(trg.GetY()-src.GetY())*(trg.GetY()-src.GetY()))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+
+
+                            pathsave_test.CopyVector( testvector, sol_no );
+                            pathsave_test.DelVector();
+
+                            /*
+                            double totalpath = 0.;
+                            double dx, dz;
+
+                            //cout<<"\nRayStep : "<<(int)testvector[0].size()<<endl;
+                            for (int step=0; step<(int)testvector[sol_no][0].size(); step++ ) {
+
+                                if ( step > 0 ) {
+                                    dx = fabs(testvector[sol_no][0][step-1] - testvector[sol_no][0][step]);
+                                    dz = fabs(testvector[sol_no][1][step-1] - testvector[sol_no][1][step]);
+                                    totalpath += sqrt( (dx*dx) + (dz*dz) );
+                                }
+                            }
+                            */
+
+                            //cout<<"pathLen : "<<it->pathLen<<", pathSum : "<<totalpath<<endl;
+
+
+                            //testvector.clear();
+
+
+
                             sol_no++;
                         }
                         else if ( SrcTrgExc == 1 ) { // src, trg exchanged
@@ -401,8 +455,62 @@ void RaySolver::Solve_Ray_org (Position &source, Position &target, std::vector <
                             outputs[1].push_back(PI - it->receiptAngle);
                             outputs[2].push_back(PI - it->launchAngle);
                             //std::cout<<"outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<"pathLen : "<<it->pathLen<<"\n";
+
+
+                            std::string pathfilename;
+                            if ( sol_no == 0 ) {
+                                pathfilename = "./pathfile_0.txt";
+                            }
+                            else if ( sol_no == 1 ) {
+                                pathfilename = "./pathfile_1.txt";
+                            }
+                            else {
+                                pathfilename = "./pathfile.txt";
+                            }
+
+                            testvector.resize(sol_no+1); // x, z
+
+                            // construct
+                            pathStore_vector<RayTrace::minimalRayPosition> pathsave_test;
+                            //pathStore_vector_2<RayTrace::minimalRayPosition> pathsave_test (testvector);
+                            //pathStore_test<RayTrace::minimalRayPosition> pathsave_test ("./pathfile.txt");
+                            //pathStore_test<RayTrace::minimalRayPosition> pathsave_test (pathfilename);
+                
+                            //tf.doTrace<RayTrace::minimalRayPosition>(src_z, it->launchAngle, RayTrace::rayTargetRecord(trg_z,sqrt((trg_x-src_x)*(trg_x-src_x)+(trg_y-src_y)*(trg_y-src_y))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+                            tf.doTrace<RayTrace::minimalRayPosition>(src.GetZ(), PI - it->receiptAngle, RayTrace::rayTargetRecord(trg.GetZ(),sqrt((trg.GetX()-src.GetX())*(trg.GetX()-src.GetX())+(trg.GetY()-src.GetY())*(trg.GetY()-src.GetY()))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+
+                            pathsave_test.CopyVector( testvector, sol_no );
+                            pathsave_test.DelVector();
+
+                            /*
+                            double totalpath = 0.;
+                            double dx, dz;
+
+                            //cout<<"\nRayStep : "<<(int)testvector[0].size()<<endl;
+                            for (int step=0; step<(int)testvector[sol_no][0].size(); step++ ) {
+
+                                if ( step > 0 ) {
+                                    dx = fabs(testvector[sol_no][0][step-1] - testvector[sol_no][0][step]);
+                                    dz = fabs(testvector[sol_no][1][step-1] - testvector[sol_no][1][step]);
+                                    totalpath += sqrt( (dx*dx) + (dz*dz) );
+                                }
+                            }
+                            */
+
+                            //cout<<"pathLen : "<<it->pathLen<<", pathSum : "<<totalpath<<endl;
+
+
+
+                            //testvector.clear();
+
+
+
                             sol_no++;
                         }
+
+	
+
+
                     }
 
 		}
@@ -523,8 +631,12 @@ void RaySolver::Solve_Ray_org (double source_x, double source_y, double source_z
 
 	std::vector<RayTrace::TraceRecord> paths;
 	std::vector<RayTrace::TraceRecord> paths_exc;
-	
+
+
 	RayTrace::TraceFinder tf(refractionModel,attenuationModel);
+
+                        
+        std::vector < std::vector < std::vector <double> > > testvector;
 
 	int sol_cnt;
         int sol_error;
@@ -597,6 +709,57 @@ void RaySolver::Solve_Ray_org (double source_x, double source_y, double source_z
 			<< std::setw(10) << (it->attenuation*signal)
 			<< std::endl;
 
+
+        
+
+                        std::string pathfilename;
+                        if ( sol_no == 0 ) {
+                            pathfilename = "./pathfile_0.txt";
+                        }
+                        else if ( sol_no == 1 ) {
+                            pathfilename = "./pathfile_1.txt";
+                        }
+                        else {
+                            pathfilename = "./pathfile.txt";
+                        }
+
+                        testvector.resize(sol_no+1); // x, z
+
+                        // construct
+                        pathStore_vector<RayTrace::minimalRayPosition> pathsave_test;
+                        //pathStore_vector_2<RayTrace::minimalRayPosition> pathsave_test (testvector);
+                        //pathStore_test<RayTrace::minimalRayPosition> pathsave_test ("./pathfile.txt");
+                        //pathStore_test<RayTrace::minimalRayPosition> pathsave_test (pathfilename);
+
+
+            
+			//tf.doTrace<RayTrace::minimalRayPosition>(src_z, it->launchAngle, RayTrace::rayTargetRecord(trg_z,sqrt((trg_x-src_x)*(trg_x-src_x)+(trg_y-src_y)*(trg_y-src_y))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+			tf.doTrace<RayTrace::minimalRayPosition>(src.GetZ(), it->launchAngle, RayTrace::rayTargetRecord(trg.GetZ(),sqrt((trg.GetX()-src.GetX())*(trg.GetX()-src.GetX())+(trg.GetY()-src.GetY())*(trg.GetY()-src.GetY()))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+
+                        pathsave_test.CopyVector( testvector, sol_no );
+                        pathsave_test.DelVector();
+
+                        /*
+                        double totalpath = 0.;
+                        double dx, dz;
+
+                        //cout<<"\nRayStep : "<<(int)testvector[0].size()<<endl;
+                        for (int step=0; step<(int)testvector[sol_no][0].size(); step++ ) {
+
+                            if ( step > 0 ) {
+                                dx = fabs(testvector[sol_no][0][step-1] - testvector[sol_no][0][step]);
+                                dz = fabs(testvector[sol_no][1][step-1] - testvector[sol_no][1][step]);
+                                totalpath += sqrt( (dx*dx) + (dz*dz) );
+                            }
+                        }
+                        */
+
+                        //cout<<"pathLen : "<<it->pathLen<<", pathSum : "<<totalpath<<endl;
+
+
+                        //testvector.clear();
+
+
                         sol_no++;
                         if (sol_no == 1) { // save only first sol
                             //travel_dist = it->pathLen;
@@ -639,7 +802,8 @@ void RaySolver::Solve_Ray_org (double source_x, double source_y, double source_z
 //--------------------------------------------------
 // void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarctica, std::vector <double> &outputs) {
 //-------------------------------------------------- 
-void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarctica, std::vector < std::vector <double> > &outputs, Settings *settings1) {
+//void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarctica, std::vector < std::vector <double> > &outputs, Settings *settings1) {
+void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarctica, std::vector < std::vector <double> > &outputs, Settings *settings1, std::vector < std::vector < std::vector <double> > > &RayStep ) {
                         
     outputs.clear();
 
@@ -901,6 +1065,9 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 	
 	paths=tf.findPaths(src,trg,frequency/1.0e3,polarization, sol_cnt, sol_error, refl,requiredAccuracy);
 
+                            
+        //std::vector < std::vector < std::vector <double> > > testvector;
+
         //std::cout<<"sol cnt : "<<sol_cnt<<" sol error : "<<sol_error<<std::endl;
         // have to fix src trg exchanged case angle outputs
         //
@@ -974,6 +1141,59 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
                             outputs[3].push_back(it->reflectionAngle);
                             outputs[4].push_back( it->pathTime );   // time in s (not ns)
                             //std::cout<<"outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<"pathLen : "<<it->pathLen<<"\n";
+
+                            std::string pathfilename;
+                            if ( sol_no == 0 ) {
+                                pathfilename = "./pathfile_0.txt";
+                            }
+                            else if ( sol_no == 1 ) {
+                                pathfilename = "./pathfile_1.txt";
+                            }
+                            else {
+                                pathfilename = "./pathfile.txt";
+                            }
+
+                            //testvector.resize(sol_no+1);
+                            RayStep.resize(sol_no+1);
+
+                            // construct
+                            pathStore_vector<RayTrace::minimalRayPosition> pathsave_test;
+                            //pathStore_vector_2<RayTrace::minimalRayPosition> pathsave_test (testvector);
+                            //pathStore_test<RayTrace::minimalRayPosition> pathsave_test ("./pathfile.txt");
+                            //pathStore_test<RayTrace::minimalRayPosition> pathsave_test (pathfilename);
+                
+                            //tf.doTrace<RayTrace::minimalRayPosition>(src_z, it->launchAngle, RayTrace::rayTargetRecord(trg_z,sqrt((trg_x-src_x)*(trg_x-src_x)+(trg_y-src_y)*(trg_y-src_y))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+                            tf.doTrace<RayTrace::minimalRayPosition>(src.GetZ(), it->launchAngle, RayTrace::rayTargetRecord(trg.GetZ(),sqrt((trg.GetX()-src.GetX())*(trg.GetX()-src.GetX())+(trg.GetY()-src.GetY())*(trg.GetY()-src.GetY()))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+
+                            //pathsave_test.CopyVector( testvector, sol_no );
+                            pathsave_test.CopyVector( RayStep, sol_no );
+                            pathsave_test.DelVector();
+
+                            /*
+                            double totalpath = 0.;
+                            double dx, dz;
+
+                            //cout<<"\nRayStep : "<<(int)testvector[0].size()<<endl;
+                            //for (int step=0; step<(int)testvector[sol_no][0].size(); step++ ) {
+                            for (int step=0; step<(int)RayStep[sol_no][0].size(); step++ ) {
+
+                                if ( step > 0 ) {
+                                    //dx = fabs(testvector[sol_no][0][step-1] - testvector[sol_no][0][step]);
+                                    //dz = fabs(testvector[sol_no][1][step-1] - testvector[sol_no][1][step]);
+                                    dx = fabs(RayStep[sol_no][0][step-1] - RayStep[sol_no][0][step]);
+                                    dz = fabs(RayStep[sol_no][1][step-1] - RayStep[sol_no][1][step]);
+                                    totalpath += sqrt( (dx*dx) + (dz*dz) );
+                                }
+                            }
+                            */
+
+                            //cout<<"pathLen : "<<it->pathLen<<", pathSum : "<<totalpath<<endl;
+
+
+
+                            //testvector.clear();
+
+
                             sol_no++;
                         }
                         else if ( SrcTrgExc == 1 ) { // src, trg exchanged
@@ -985,8 +1205,67 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
                             outputs[3].push_back(it->reflectionAngle);
                             outputs[4].push_back( it->pathTime );   // time in s (not ns)
                             //std::cout<<"outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<"pathLen : "<<it->pathLen<<"\n";
+
+
+                            std::string pathfilename;
+                            if ( sol_no == 0 ) {
+                                pathfilename = "./pathfile_0.txt";
+                            }
+                            else if ( sol_no == 1 ) {
+                                pathfilename = "./pathfile_1.txt";
+                            }
+                            else {
+                                pathfilename = "./pathfile.txt";
+                            }
+
+
+                            //testvector.resize(sol_no+1);
+                            RayStep.resize(sol_no+1);
+
+                            // construct
+                            pathStore_vector<RayTrace::minimalRayPosition> pathsave_test;
+                            //pathStore_vector_2<RayTrace::minimalRayPosition> pathsave_test (testvector);
+                            //pathStore_test<RayTrace::minimalRayPosition> pathsave_test ("./pathfile.txt");
+                            //pathStore_test<RayTrace::minimalRayPosition> pathsave_test (pathfilename);
+                
+                            //tf.doTrace<RayTrace::minimalRayPosition>(src_z, it->launchAngle, RayTrace::rayTargetRecord(trg_z,sqrt((trg_x-src_x)*(trg_x-src_x)+(trg_y-src_y)*(trg_y-src_y))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+                            tf.doTrace<RayTrace::minimalRayPosition>(src.GetZ(), PI - it->receiptAngle, RayTrace::rayTargetRecord(trg.GetZ(),sqrt((trg.GetX()-src.GetX())*(trg.GetX()-src.GetX())+(trg.GetY()-src.GetY())*(trg.GetY()-src.GetY()))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+
+                            //pathsave_test.CopyVector( testvector, sol_no );
+                            pathsave_test.CopyVector( RayStep, sol_no );
+                            pathsave_test.DelVector();
+
+                            /*
+                            double totalpath = 0.;
+                            double dx, dz;
+
+                            //cout<<"\nRayStep : "<<(int)testvector[0].size()<<endl;
+                            //for (int step=0; step<(int)testvector[sol_no][0].size(); step++ ) {
+                            for (int step=0; step<(int)RayStep[sol_no][0].size(); step++ ) {
+
+                                if ( step > 0 ) {
+                                    //dx = fabs(testvector[sol_no][0][step-1] - testvector[sol_no][0][step]);
+                                    //dz = fabs(testvector[sol_no][1][step-1] - testvector[sol_no][1][step]);
+                                    dx = fabs(RayStep[sol_no][0][step-1] - RayStep[sol_no][0][step]);
+                                    dz = fabs(RayStep[sol_no][1][step-1] - RayStep[sol_no][1][step]);
+                                    totalpath += sqrt( (dx*dx) + (dz*dz) );
+                                }
+                            }
+                            */
+
+                            //cout<<"pathLen : "<<it->pathLen<<", pathSum : "<<totalpath<<endl;
+
+
+                            //testvector.clear();
+
+
                             sol_no++;
                         }
+
+
+
+
+
                     }
 
 		}

@@ -36,6 +36,8 @@ class Settings
         int CONSTANTICETHICKNESS; // set ice thickness to constant value
         int FIXEDELEVATION; // fix the elevation to the thickness of ice.
         int MOOREBAY; //1=use Moore's Bay measured ice field attenuation length for the west land, otherwise use South Pole data
+        int USE_ARA_ICEATTENU; // 0 : use old ice attenuation factor with one depth info, 1 : (default) use ARA measured ice attenuation factor with depth from ray steps
+
         double EXPONENT; // 10^19 eV neutrinos only
 
         int DETECTOR;   // choose detector layout
@@ -181,7 +183,7 @@ class Settings
         double PICKNEARUNBIASED_R; // radius of the sphere surrounding the detector for INTERACTION_MODE=3, current default value is 5000 m
 
 
-        int SHOWER_MODE; // in time domain caes (SIMULATION_MODE=1), if we just want EM shower portion, SHOWER_MODE = 0, HAD shower only = 1, if we want summed EM and HAD = 2, default 0
+        int SHOWER_MODE; // in time domain caes (SIMULATION_MODE=1), if we just want EM shower portion, SHOWER_MODE = 0, HAD shower only = 1, if we want summed EM and HAD = 2, either one which is dominant = 3 (default = 2)
 
         double SHOWER_STEP; // step size (meter) in generating shower profile, default = 0.001
 
@@ -190,7 +192,7 @@ class Settings
         double OFFCONE_LIMIT; // offcone cut angel (deg) to reduce computation time 
 
 
-        int ALL_ANT_V_ON; // default 0 : use Vpol ant gain from Vpol model, Hpol ant gain from Hpol model (where Hpol ant model is not reliable). 1 : use both Vpol, Hpol ant gain from Vpol ant model but for Hpol ant case response is in Hpol, not Vpol
+        int ALL_ANT_V_ON; // default 1 : use both Vpol, Hpol ant gain from Vpol ant model but for Hpol ant case response is in Hpol, not Vpol, 0 : use Vpol ant gain from Vpol model, Hpol ant gain from Hpol model (where Hpol ant model is not reliable).
 
     
         int PHASE_SKIP_MODE; // skip applying phase in t-domain mode (SIMULATION_MODE = 1). default 0 : don't skip (apply all phase), 1 : only upto Askaryan radiation, 2 : only upto antenna
@@ -218,6 +220,13 @@ class Settings
         double ACCUM_TRIG_SEARCH_BINS_STATION0; // not actually setting value but gives us how much trigger searched bins there were in the run
 
 
+    
+        int NU_NUBAR_SELECT_MODE; // default : 0 = random nu_nubar based on arXiv:1108.3163, section 3, 1 = just nu, 2 = just nubar 
+
+
+        int SELECT_FLAVOR; // default : 0 = random 1:1:1, 1: e, 2: mu, 3: tau
+
+
 
 
     // below : values from icemc
@@ -230,6 +239,9 @@ class Settings
     double SIGMA_FACTOR; // factor to multiply cross section by for error analysis
     int SIGMAPARAM; // 0=Reno, 1=Connolly et al. 2011 for cross section parametrization
     int YPARAM; // 0=Reno, 1=Connolly et al. 2011 for cross section parametrization
+
+    int SIGMA_SELECT; // when in SIGMAPARAM=1 case, 0 : (default) use mean value, 1 : use upper bound, 2 : use lower bound
+
     int SIGNAL_FLUCT;  // 1=add noise fluctuation to signal or 0=do not
     int TRIGGERSCHEME;  // frequency domain voltage, frequency domain energy, time domain diode integration
     int ZEROSIGNAL;  // zero the signal to see how many of our hits are noise hits

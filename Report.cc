@@ -413,7 +413,9 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                        //if (event->Nu_Interaction[0].pickposnu && event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) <= settings1->RAYSOL_RANGE && debugmode == 0 ) {    // if posnu is selected inside the antarctic ic:"<<viewangle<<" th_em:"<<d_theta_em[l]<<" th_had:"<<d_theta_had[l]<<" emfrac:"<<emfrac<<" hadfrac:"<<hadfrac<<" vmmhz1m:"<<vmmhz1m[l]<<endl;e
 
                            
-                           raysolver->Solve_Ray(event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], icemodel, ray_output, settings1);   // solve ray between source and antenna
+                           //raysolver->Solve_Ray(event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], icemodel, ray_output, settings1);   // solve ray between source and antenna
+                           RayStep.clear(); // remove previous values
+                           raysolver->Solve_Ray(event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], icemodel, ray_output, settings1, RayStep);   // solve ray between source and antenna
                            
                            ray_sol_cnt = 0;
                            
@@ -425,6 +427,30 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 
                                    stations[i].strings[j].antennas[k].arrival_time.push_back(ray_output[4][ray_sol_cnt]);
+
+
+                                   // get ice attenuation factor
+                                   //
+                                   double IceAttenFactor = 1.; 
+                                   if ( settings1->USE_ARA_ICEATTENU==1 ) {// use new ARA measured ice attenuation values
+
+                                       double dx, dz, dl;
+                                       for (int steps=1; steps<(int)RayStep[ray_sol_cnt][0].size(); steps++) {
+
+                                           dx = RayStep[ray_sol_cnt][0][steps-1] - RayStep[ray_sol_cnt][0][steps];
+                                           dz = RayStep[ray_sol_cnt][1][steps-1] - RayStep[ray_sol_cnt][1][steps];
+                                           dl = sqrt( (dx*dx) + (dz*dz) );
+
+                                           // use new ice model
+                                           IceAttenFactor *= exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps]) );
+                                       }
+                                       //cout<<"new iceattenfactor : "<<IceAttenFactor<<", old way : "<<exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0))<<endl;
+                                   }
+                                   else if ( settings1->USE_ARA_ICEATTENU==0 ) {// use old method
+                                          
+                                       IceAttenFactor = exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0));
+                                   }
+
 
 
                                    if ( debugmode==0 ) {
@@ -569,7 +595,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 
                                           // multiply all factors for traveling ice
-                                          vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0)) * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                                          //vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0)) * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                                          vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
                                           //cout<<"AttenLength : "<<icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0)<<endl;
 
 
@@ -722,7 +749,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                // let's make NFOUR/2 bin of time domain pure signal part for now
                                                // later once we understand how to apply antenna phase, total electronics with phase, apply those
 
-                                               double atten_factor = 1. / ray_output[0][ray_sol_cnt] * exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0)) * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                                               //double atten_factor = 1. / ray_output[0][ray_sol_cnt] * exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0)) * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                                               double atten_factor = 1. / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
 
 
                                                // signal before the antenna (get signal at 1m and apply atten factor)

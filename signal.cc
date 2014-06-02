@@ -841,6 +841,506 @@ double Signal::Greisen(double x_in, double *par) {
 
 
 
+
+// depending on the shower_mode, make Vm array for em shower/had shower or both
+void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins ) {
+
+
+
+    double sin_view = sin(viewangle);
+    double cos_view = cos(viewangle);
+    double sin_changle = sin(changle_ice);
+
+    double offcone_factor = 1.-nice*cos_view;
+
+
+    //double c_ns = 2.998e-1; // speed of light in m/ns
+    double c_ns = CLIGHT *1.e-9; // speed of light in m/ns 
+
+    double Const;
+
+    double Integrate = 0.;
+
+    double V_s;
+    //double param_RA[6];
+    double param_RA[8];
+
+    int shower_bin;
+
+    double E_shower;
+
+
+
+    // reset Earray and Tarray
+    for (int tbin=0; tbin<outbin; tbin++) {
+
+        Tarray[tbin] = 0.;
+        Earray[tbin] = 0.;
+    }
+
+
+    // if we drive Askaryan signal from only one shower
+    //if ( settings1->SHOWER_MODE == 0 || settings1->SHOWER_MODE == 1 ) { // only EM or only HAD
+    if ( settings1->SHOWER_MODE == 0 || settings1->SHOWER_MODE == 1 || settings1->SHOWER_MODE == 3 ) { // only EM or only HAD
+
+
+        // if EM shower only (always)
+        if ( settings1->SHOWER_MODE == 0 ) {
+        //if ( event->Nu_Interaction[0].primary_shower == 0 ) {
+
+            V_s = -4.5e-14;
+            param_RA[0] = 0.057;
+            param_RA[1] = 2.87;
+            param_RA[2] = -3.;
+
+            param_RA[3] = -0.03;
+            param_RA[4] = -3.05;
+            param_RA[5] = -3.5;
+
+            E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
+
+            //cout<<"E_shower, em : "<<E_shower<<endl;
+
+            Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
+
+            shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
+
+            // do integration
+            //
+
+        }
+
+        // if HAD shower only (always)
+        else if ( settings1->SHOWER_MODE == 1 ) {
+        //else if ( event->Nu_Interaction[0].primary_shower == 1 ) {
+
+            V_s = -3.2e-14;
+            param_RA[0] = 0.043;
+            param_RA[1] = 2.92;
+            param_RA[2] = -3.21;
+
+            param_RA[3] = -0.065;
+            param_RA[4] = -3.00;
+            param_RA[5] = -2.65;
+
+            //E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
+            E_shower = event->pnu*event->Nu_Interaction[0].hadfrac;
+
+            //cout<<"E_shower, had : "<<E_shower<<endl;
+
+            Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
+
+            shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
+
+            // do integration
+            //
+
+        }
+
+
+        // EM or HAD shower only depending on the energy of the shower
+        else if ( settings1->SHOWER_MODE == 3 ) {
+        //if ( event->Nu_Interaction[0].primary_shower == 0 ) {
+
+
+            // if EM shower dominant
+            if ( event->Nu_Interaction[0].primary_shower == 0 ) {
+
+                V_s = -4.5e-14;
+                param_RA[0] = 0.057;
+                param_RA[1] = 2.87;
+                param_RA[2] = -3.;
+
+                param_RA[3] = -0.03;
+                param_RA[4] = -3.05;
+                param_RA[5] = -3.5;
+
+                E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
+
+                //cout<<"E_shower, em : "<<E_shower<<endl;
+
+                Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
+
+                shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
+
+            }
+
+            // if HAD shower dominant
+            else if ( event->Nu_Interaction[0].primary_shower == 1 ) {
+
+                V_s = -3.2e-14;
+                param_RA[0] = 0.043;
+                param_RA[1] = 2.92;
+                param_RA[2] = -3.21;
+
+                param_RA[3] = -0.065;
+                param_RA[4] = -3.00;
+                param_RA[5] = -2.65;
+
+                //E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
+                E_shower = event->pnu*event->Nu_Interaction[0].hadfrac;
+
+                //cout<<"E_shower, had : "<<E_shower<<endl;
+
+                Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
+
+                shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
+
+            }
+
+        } // if shower_mode = 3
+
+
+
+        //cout<<"Const : "<<Const<<" viewangle : "<<viewangle*DEGRAD<<" E_shower : "<<E_shower<<endl;
+
+
+        // ok, let's just calculate near signal time bins
+        //
+        double shower_dt = (settings1->SHOWER_STEP * shower_bin) / c_ns; // shower time length in ns
+
+        double test_signal_window = fabs(offcone_factor) * shower_dt * 1.2 + 2.; // additional 2 ns for changle_ice case, 20% additional time
+
+        // we also have to calculate when the window should start
+        double test_signal_Tinit = offcone_factor * shower_dt/2. - test_signal_window/2.;
+
+        // now let's try with constant number of time bins
+        //int test_T_bin = 50; -> now it's outbin
+
+        // then we can decide the time step of the signal waveform
+        double test_dT = test_signal_window / (double)outbin;
+
+
+
+
+        // we need to shift random amount of time in Tinit
+        //test_signal_Tinit += gRandom->Rndm() * test_dT;
+
+
+
+        // calculate new integrate step in z (meters) depending on offcone angle set 10deg off is the maximum case and use default step in that case
+        double test_shower_step;
+        if ( offcone_factor == 0 ) test_shower_step = 1.;
+        else test_shower_step = 5.e-4 / fabs( offcone_factor );
+
+        if ( test_shower_step > 1.) test_shower_step = 1.; // maximum value is 1m step
+        //int skip_bins = (int)( test_shower_step / settings1->SHOWER_STEP );
+        skip_bins = (int)( test_shower_step / settings1->SHOWER_STEP );
+
+        // test
+        if ( skip_bins < 1 ) skip_bins = 1;
+
+        test_shower_step = skip_bins * settings1->SHOWER_STEP;
+
+        //int new_shower_bin = (int)( (settings1->SHOWER_STEP * shower_bin) / test_shower_step); // new number of bins for shower profile
+        int new_shower_bin = (int)( shower_bin / skip_bins ); // new number of bins for shower profile
+
+        int mid_old_bin;
+
+
+
+
+
+        double Tterm;
+
+        // do integration
+        //
+        for (int tbin=0; tbin<outbin; tbin++) {
+
+            Tarray[tbin] = test_signal_Tinit + (double)tbin*test_dT; // in ns
+            //cout<<" Tarray["<<tbin<<"] : "<<Tarray[tbin];
+
+            Integrate = 0.;
+
+
+            //for (int bin=0; bin<shower_bin-1; bin++) {
+            for (int bin=0; bin<new_shower_bin-2; bin++) {
+
+                mid_old_bin = bin*skip_bins;
+
+                //Tterm = Tarray[tbin] - (0.5+(double)bin)*settings1->SHOWER_STEP * ( (1.-nice*cos(angle))/c_ns );
+                //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[bin] * ( (1.-nice*cos(viewangle))/c_ns );
+                Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
+
+                //if ( event->Nu_Interaction[0].shower_Q_profile[bin]<=0) {
+                if ( event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]<=0) {
+                    Integrate += 0.;
+                }
+                else {
+
+                    //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[bin]) * Param_RE_Tterm(Tterm, param_RA);
+                    //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
+                    Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
+                }
+
+            }
+
+            //Earray[tbin] = Const * Integrate * atten_factor;
+            //Earray[tbin] = Const * Integrate;
+            Earray[tbin] = Const * Integrate * skip_bins * atten_factor;
+            //cout<<" Earray["<<tbin<<"] : "<<Earray[tbin];
+
+        }
+
+    } // if shower_mode == 0 or 1 or 3 (only EM or HAD)
+
+
+    else if ( settings1->SHOWER_MODE == 2 ) { 
+
+        int EM_shower_on = 0; // is there EM shower?
+
+        // 1) for EM shower part
+        //
+        if ( event->Nu_Interaction[0].EM_LQ > 0 ) {
+
+            EM_shower_on = 1;
+
+            V_s = -4.5e-14;
+            param_RA[0] = 0.057;
+            param_RA[1] = 2.87;
+            param_RA[2] = -3.;
+
+            param_RA[3] = -0.03;
+            param_RA[4] = -3.05;
+            param_RA[5] = -3.5;
+
+            E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
+
+            //cout<<"E_shower, em : "<<E_shower<<endl;
+
+            //Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
+            Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].EM_LQ * (V_s) * E_shower / 1.e12;
+
+            //shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
+            shower_bin = event->Nu_Interaction[0].EM_shower_Q_profile.size();
+
+
+            // ok, let's just calculate near signal time bins
+            //
+            double shower_dt = (settings1->SHOWER_STEP * shower_bin) / c_ns; // shower time length in ns
+
+            double test_signal_window = fabs(offcone_factor) * shower_dt * 1.2 + 2.; // additional 2 ns for changle_ice case, 20% additional time
+
+            // we also have to calculate when the window should start
+            double test_signal_Tinit = offcone_factor * shower_dt/2. - test_signal_window/2.;
+
+            // now let's try with constant number of time bins
+            //int test_T_bin = 50; -> now it's outbin
+
+            // then we can decide the time step of the signal waveform
+            double test_dT = test_signal_window / (double)outbin;
+
+            // we need to shift random amount of time in Tinit
+            //test_signal_Tinit += gRandom->Rndm() * test_dT;
+
+            // calculate new integrate step in z (meters) depending on offcone angle set 10deg off is the maximum case and use default step in that case
+            double test_shower_step;
+            if ( offcone_factor == 0 ) test_shower_step = 1.;
+            else test_shower_step = 5.e-4 / fabs( offcone_factor );
+
+            if ( test_shower_step > 1.) test_shower_step = 1.; // maximum value is 1m step
+            //int skip_bins = (int)( test_shower_step / settings1->SHOWER_STEP );
+            skip_bins = (int)( test_shower_step / settings1->SHOWER_STEP );
+
+            // test
+            if ( skip_bins < 1 ) skip_bins = 1;
+
+            test_shower_step = skip_bins * settings1->SHOWER_STEP;
+
+            //int new_shower_bin = (int)( (settings1->SHOWER_STEP * shower_bin) / test_shower_step); // new number of bins for shower profile
+            int new_shower_bin = (int)( shower_bin / skip_bins ); // new number of bins for shower profile
+
+            int mid_old_bin;
+
+
+
+
+
+            double Tterm;
+
+            // do integration
+            //
+            for (int tbin=0; tbin<outbin; tbin++) {
+
+                Tarray[tbin] = test_signal_Tinit + (double)tbin*test_dT; // in ns
+                //cout<<" Tarray["<<tbin<<"] : "<<Tarray[tbin];
+
+                Integrate = 0.;
+
+
+                //for (int bin=0; bin<shower_bin-1; bin++) {
+                for (int bin=0; bin<new_shower_bin-2; bin++) {
+
+                    mid_old_bin = bin*skip_bins;
+
+                    //Tterm = Tarray[tbin] - (0.5+(double)bin)*settings1->SHOWER_STEP * ( (1.-nice*cos(angle))/c_ns );
+                    //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[bin] * ( (1.-nice*cos(viewangle))/c_ns );
+                    //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
+                    Tterm = Tarray[tbin] - event->Nu_Interaction[0].EM_shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
+
+                    //if ( event->Nu_Interaction[0].shower_Q_profile[bin]<=0) {
+                    //if ( event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]<=0) {
+                    if ( event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]<=0) {
+                        Integrate += 0.;
+                    }
+                    else {
+
+                        //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[bin]) * Param_RE_Tterm(Tterm, param_RA);
+                        //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
+                        //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
+                        Integrate += -1.*(event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
+                    }
+
+                }
+
+                //Earray[tbin] = Const * Integrate * atten_factor;
+                //Earray[tbin] = Const * Integrate;
+                Earray[tbin] = Const * Integrate * skip_bins * atten_factor;
+                //cout<<" Earray["<<tbin<<"] : "<<Earray[tbin];
+
+            }
+
+
+        } // if EM_LQ > 0
+
+
+        // 2) for HAD shower part
+        //
+        if ( event->Nu_Interaction[0].HAD_LQ > 0 ) {
+
+            V_s = -3.2e-14;
+            param_RA[0] = 0.043;
+            param_RA[1] = 2.92;
+            param_RA[2] = -3.21;
+
+            param_RA[3] = -0.065;
+            param_RA[4] = -3.00;
+            param_RA[5] = -2.65;
+
+            //E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
+            E_shower = event->pnu*event->Nu_Interaction[0].hadfrac;
+
+            //cout<<"E_shower, had : "<<E_shower<<endl;
+
+            //Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
+            Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].HAD_LQ * (V_s) * E_shower / 1.e12;
+
+            //shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
+            shower_bin = event->Nu_Interaction[0].HAD_shower_Q_profile.size();
+
+
+
+            // ok, let's just calculate near signal time bins
+            //
+            double shower_dt = (settings1->SHOWER_STEP * shower_bin) / c_ns; // shower time length in ns
+
+            double test_signal_window = fabs(offcone_factor) * shower_dt * 1.2 + 2.; // additional 2 ns for changle_ice case, 20% additional time
+
+            // we also have to calculate when the window should start
+            double test_signal_Tinit = offcone_factor * shower_dt/2. - test_signal_window/2.;
+
+            // now let's try with constant number of time bins
+            //int test_T_bin = 50; -> now it's outbin
+
+            // then we can decide the time step of the signal waveform
+            double test_dT = test_signal_window / (double)outbin;
+
+            // we need to shift random amount of time in Tinit
+            //test_signal_Tinit += gRandom->Rndm() * test_dT;
+
+            // calculate new integrate step in z (meters) depending on offcone angle set 10deg off is the maximum case and use default step in that case
+            double test_shower_step;
+            if ( offcone_factor == 0 ) test_shower_step = 1.;
+            else test_shower_step = 5.e-4 / fabs( offcone_factor );
+
+            if ( test_shower_step > 1.) test_shower_step = 1.; // maximum value is 1m step
+            //int skip_bins = (int)( test_shower_step / settings1->SHOWER_STEP );
+            skip_bins = (int)( test_shower_step / settings1->SHOWER_STEP );
+
+            // test
+            if ( skip_bins < 1 ) skip_bins = 1;
+
+            test_shower_step = skip_bins * settings1->SHOWER_STEP;
+
+            //int new_shower_bin = (int)( (settings1->SHOWER_STEP * shower_bin) / test_shower_step); // new number of bins for shower profile
+            int new_shower_bin = (int)( shower_bin / skip_bins ); // new number of bins for shower profile
+
+            int mid_old_bin;
+
+
+
+
+
+            double Tterm;
+
+            // do integration
+            //
+            for (int tbin=0; tbin<outbin; tbin++) {
+
+            
+                if ( EM_shower_on == 0 ) { // if there was no EM shower
+                
+                    Tarray[tbin] = test_signal_Tinit + (double)tbin*test_dT; // in ns
+                }
+                /*
+                if ( Tarray[tbin] != test_signal_Tinit + (double)tbin*test_dT ) {
+                    cout<<"Tarray["<<tbin<<"] got different!"<<endl;
+                }
+                */
+
+
+                //cout<<" Tarray["<<tbin<<"] : "<<Tarray[tbin];
+
+                Integrate = 0.;
+
+
+                //for (int bin=0; bin<shower_bin-1; bin++) {
+                for (int bin=0; bin<new_shower_bin-2; bin++) {
+
+                    mid_old_bin = bin*skip_bins;
+
+                    //Tterm = Tarray[tbin] - (0.5+(double)bin)*settings1->SHOWER_STEP * ( (1.-nice*cos(angle))/c_ns );
+                    //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[bin] * ( (1.-nice*cos(viewangle))/c_ns );
+                    //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
+                    Tterm = Tarray[tbin] - event->Nu_Interaction[0].HAD_shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
+
+                    //if ( event->Nu_Interaction[0].shower_Q_profile[bin]<=0) {
+                    //if ( event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]<=0) {
+                    if ( event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]<=0) {
+                        Integrate += 0.;
+                    }
+                    else {
+
+                        //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[bin]) * Param_RE_Tterm(Tterm, param_RA);
+                        //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
+                        //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
+                        Integrate += -1.*(event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
+                    }
+
+                }
+
+                //Earray[tbin] = Const * Integrate * atten_factor;
+                //Earray[tbin] = Const * Integrate;
+                //Earray[tbin] = Const * Integrate * skip_bins * atten_factor;
+                Earray[tbin] += Const * Integrate * skip_bins * atten_factor; // add Had shower part on top of EM shower part
+                //cout<<" Earray["<<tbin<<"] : "<<Earray[tbin];
+
+            }
+
+
+        } // if HAD_LQ > 0
+
+
+    } // if using both EM and HAD showers
+
+
+
+}
+
+
+
+// old code (for the reference)
+/*
 //void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray ) {
 void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins ) {
 
@@ -908,7 +1408,8 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
         param_RA[4] = -3.00;
         param_RA[5] = -2.65;
 
-        E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
+        //E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
+        E_shower = event->pnu*event->Nu_Interaction[0].hadfrac;
 
         Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
 
@@ -1011,32 +1512,8 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
     }
 
 
-
-        /*
-   TCanvas *cEout = new TCanvas("cEout","",800,600);
-   TGraph *gEout = new TGraph (outbin, Tarray, Earray);
-   cEout->cd();
-   gEout->Draw("al");
-   cEout->Print("Eout.pdf");
-   delete cEout;
-   delete gEout;
-   */
-
-
-
-
-        /*
-    }// if near cone
-    else {
-    for (int tbin=0; tbin<outbin; tbin++) {
-        Tarray[tbin] = (double)tbin;
-        Earray[tbin] = 0.;
-    }
-    }
-    */
-
-
 }
+*/
 
 
 

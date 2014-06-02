@@ -193,6 +193,8 @@ class Report {
 	   
            int saveTriggeredEvent(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int last_trig_bin);
 
+           vector < vector < vector <double> > > RayStep;
+
 
     public:
            /*

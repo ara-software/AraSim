@@ -38,6 +38,9 @@ class Event {
       int nuflavorint;  // 1 : nue,  2 : numu,  3 : nutau
       int n_interactions;    // number of interaction inside the ice
       int IsCalpulser;
+
+      int nu_nubar; // 0 : nu, 1 : nu_bar
+
       
     void Initialize ();
 

@@ -47,7 +47,11 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         output.SetZ(TMath::Cos(hereTheta*3.1415926535/180.));
         nnu = output;
 */
-        nuflavor = primary1->GetNuFlavor();
+        //nuflavor = primary1->GetNuFlavor();
+        nuflavor = primary1->GetNuFlavor(settings1);
+
+        nu_nubar = primary1->GetNuNuBar(nuflavor);
+
 
         /*
         if (settings1->NNU_THIS_THETA==1) {    // set specific theta angle for nnu
@@ -68,7 +72,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         Interaction *Nu_temp;
         //Report *report_tmp;
 
-        Nu_temp = new Interaction (pnu, nuflavor, n_interactions, icemodel, detector, settings1, primary1, signal, sec1 );
+        Nu_temp = new Interaction (pnu, nuflavor, nu_nubar, n_interactions, icemodel, detector, settings1, primary1, signal, sec1 );
         //report_tmp = new Report(detector ,settings1);
         
         Nu_Interaction.push_back(*Nu_temp);  // for the first interaction

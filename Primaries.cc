@@ -105,22 +105,105 @@ Primaries::Primaries(){//constructor
   c3[1][1]=1.569;
   c4[1][1]=-17.72;
   
+
+  ////////////////////////////
+  // upper bound
+  //[nu][neutral current]
+  c0_upper[0][0]= -1.456;
+  c1_upper[0][0]= 32.23;
+  c2_upper[0][0]= -32.32; 
+  c3_upper[0][0]= 5.881;
+  c4_upper[0][0]= -49.41;
+  
+  //[nu][charged current]
+  c0_upper[0][1]= -1.456;
+  c1_upper[0][1]= 33.47;
+  c2_upper[0][1]= -33.02; 
+  c3_upper[0][1]= 6.026;
+  c4_upper[0][1]= -49.41;
+  
+  //[nubar][neutral current]	
+  c0_upper[1][0]= -2.945;
+  c1_upper[1][0]= 143.2;
+  c2_upper[1][0]= -76.70; 
+  c3_upper[1][0]= 11.75;
+  c4_upper[1][0]= -142.8;
+  
+  //[nubar][charged current]
+  c0_upper[1][1]= -2.945;
+  c1_upper[1][1]= 144.5;
+  c2_upper[1][1]= -77.44; 
+  c3_upper[1][1]= 11.90;
+  c4_upper[1][1]= -142.8;
+
+
+  ////////////////////////////
+  // lower bound
+  //[nu][neutral current]
+  c0_lower[0][0]= -15.35;
+  c1_lower[0][0]= 16.16;
+  c2_lower[0][0]= 37.71;
+  c3_lower[0][0]= -8.801;
+  c4_lower[0][0]= -253.1;
+  
+  //[nu][charged current]
+  c0_lower[0][1]= -15.35;
+  c1_lower[0][1]= 13.86;
+  c2_lower[0][1]= 39.84; 
+  c3_lower[0][1]= -9.205;
+  c4_lower[0][1]= -253.1;
+  
+  //[nubar][neutral current]	
+  c0_lower[1][0]= -13.08;
+  c1_lower[1][0]= 15.17;
+  c2_lower[1][0]= 31.19; 
+  c3_lower[1][0]= -7.757;
+  c4_lower[1][0]= -216.1;
+  
+  //[nubar][charged current]
+  c0_lower[1][1]= -13.08;
+  c1_lower[1][1]= 12.48;
+  c2_lower[1][1]= 33.52; 
+  c3_lower[1][1]= -8.191;
+  c4_lower[1][1]= -216.1;
+  //
+  //
+
+
+
+
   char ch[50];
   string stmp;
   string sbase="fsigma";
+  string bound_upper="upper";
+  string bound_lower="lower";
   for(int i=0; i<=1;i++){ // nu, nubar
     for(int j=0; j<=1; j++){ // nc, cc
       sprintf(ch,"%d%d",i,j);
       stmp=ch;	
-      m_fsigma[i][j]=new TF1((sbase+stmp).c_str(),"pow(10, [1]+[2]*log(x-[0])+[3]*pow(log(x-[0]),2)+[4]/log(x-[0]))", 4., 21.);//check bounds. they're in log10 GeV.
+      //m_fsigma[i][j]=new TF1((sbase+stmp).c_str(),"pow(10, [1]+[2]*log(x-[0])+[3]*pow(log(x-[0]),2)+[4]/log(x-[0]))", 4., 21.);//check bounds. they're in log10 GeV.
+      m_fsigma[i][j]=new TF1((sbase+stmp).c_str(),"pow(10, [1]+[2]*log(x-[0])+[3]*pow(log(x-[0]),2)+[4]/log(x-[0]))", 4., 12.);//check bounds. they're in log10 GeV.
       //x=log10(pnu/GeV).
       m_fsigma[i][j]->SetParameters(c0[i][j], c1[i][j], c2[i][j], c3[i][j], c4[i][j]);
+
+      m_fsigma_upper[i][j]=new TF1((sbase+stmp+bound_upper).c_str(),"pow(10, [1]+[2]*log(x-[0])+[3]*pow(log(x-[0]),2)+[4]/log(x-[0]))", 4., 12.);//check bounds. they're in log10 GeV.
+      //x=log10(pnu/GeV).
+      m_fsigma_upper[i][j]->SetParameters(c0_upper[i][j], c1_upper[i][j], c2_upper[i][j], c3_upper[i][j], c4_upper[i][j]);
+
+      m_fsigma_lower[i][j]=new TF1((sbase+stmp+bound_lower).c_str(),"pow(10, [1]+[2]*log(x-[0])+[3]*pow(log(x-[0]),2)+[4]/log(x-[0]))", 4., 12.);//check bounds. they're in log10 GeV.
+      //x=log10(pnu/GeV).
+      m_fsigma_lower[i][j]->SetParameters(c0_lower[i][j], c1_lower[i][j], c2_lower[i][j], c3_lower[i][j], c4_lower[i][j]);
+
       //"fsigma00"->[nu][neutral current]
       //"fsigma01"->[nu][charged current]
       //"fsigma10"->[nubar][neutral current]
       //"fsigma11"->[nubar][charged current]
     }		
   }
+
+
+
+
   m_csigma=new TCanvas("m_csigma","m_csigma title",1000, 700);
   m_hsigma=new TH2D("hsigma","title hsigma", 600, 7., 12., 600, -40., -30.);
   
@@ -143,22 +226,26 @@ Primaries::Primaries(){//constructor
   A_low[3]=0.456;
   //high y////////////////////////////
   //[0=nu, 1=nubar][0=neutral current, 1=charged current]
-  //[nu_bar][currentint];
+  //
+  //[nu][NC]
   A0_high[0][0]=-0.005;
   A1_high[0][0]=0.23;
   A2_high[0][0]=3.0;
   A3_high[0][0]=1.7;
   
+  //[nu][CC]
   A0_high[0][1]=-0.008;
   A1_high[0][1]=0.26;
   A2_high[0][1]=3.0;
   A3_high[0][1]=1.7;
   
+  //[nu_bar][NC]
   A0_high[1][0]=-0.005;
   A1_high[1][0]=0.23;
   A2_high[1][0]=3.0;
   A3_high[1][0]=1.7;
   
+  //[nu_bar][CC]
   A0_high[1][1]=-0.0026;
   A1_high[1][1]=0.085;
   A2_high[1][1]=4.1;
@@ -177,7 +264,8 @@ Primaries::Primaries(){//constructor
   // 0=Reno
   // 1=Connolly et al. 2011
   mine[0]=1.2E15;
-  mine[1]=1.E4;// minimum energy for cross section parametrizations
+  //mine[1]=1.E4;// minimum energy for cross section parametrizations
+  mine[1]=1.E13;// minimum energy for cross section parametrizations
   maxe[0]=1.E21;
   maxe[1]=1.E21; // use the same upper limit for reno as for connolly et al.
 
@@ -199,6 +287,9 @@ Primaries::~Primaries(){//default deconstructor
   for(int i=0; i<=1;i++){ // nu, nubar
     for(int j=0; j<=1; j++){ // nc, cc
       delete m_fsigma[i][j];
+
+      delete m_fsigma_upper[i][j];
+      delete m_fsigma_lower[i][j];
     }
   }
     delete m_csigma;
@@ -206,6 +297,10 @@ Primaries::~Primaries(){//default deconstructor
 
 }//deconstructor
 
+
+
+// old GetSigma function from icemc
+// leave as a reference
 int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *settings1,int nu_nubar,int currentint){
   // calculate cross section
   if (pnu<mine[settings1->SIGMAPARAM] || pnu>maxe[settings1->SIGMAPARAM]) {
@@ -214,8 +309,10 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
   } //if
   else {
    
-    nu_nubar=1;//default.
+    //nu_nubar=1;//default.
     //nu=0, nubar=1
+
+
     if(nu_nubar!=0 && nu_nubar!=1){   
       cout<<"nu_nubar is not defined correctly!\n";
       return 0;
@@ -248,6 +345,7 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
 
 
 
+
 int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *settings1,int nu_nubar,int currentint, double &len_int_kgm2_total){
     double sigma_total;
   // calculate cross section
@@ -257,8 +355,10 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
   } //if
   else {
    
-    nu_nubar=1;//default.
+    //nu_nubar=1;//default.
     //nu=0, nubar=1
+
+
     if(nu_nubar!=0 && nu_nubar!=1){   
       cout<<"nu_nubar is not defined correctly!\n";
       return 0;
@@ -280,8 +380,30 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
     else if (settings1->SIGMAPARAM==1) {//Connolly et al.
       double pnuGeV=pnu/1.E9;//Convert eV to GeV.
       double epsilon=log10(pnuGeV);
-      sigma=settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][currentint]->Eval(epsilon))/1.E4;//convert cm to meters. multiply by (1m^2/10^4 cm^2).
-      sigma_total = (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][0]->Eval(epsilon))/1.E4) + (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][1]->Eval(epsilon))/1.E4);
+
+
+      if ( settings1->SIGMA_SELECT == 0 ) {// use mean value
+
+          sigma=settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][currentint]->Eval(epsilon))/1.E4;//convert cm to meters. multiply by (1m^2/10^4 cm^2).
+          sigma_total = (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][0]->Eval(epsilon))/1.E4) + (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][1]->Eval(epsilon))/1.E4);
+      }
+      else if ( settings1->SIGMA_SELECT == 1 ) {// use upper bound
+
+          sigma=settings1->SIGMA_FACTOR*(m_fsigma_upper[nu_nubar][currentint]->Eval(epsilon))/1.E4;//convert cm to meters. multiply by (1m^2/10^4 cm^2).
+          sigma_total = (settings1->SIGMA_FACTOR*(m_fsigma_upper[nu_nubar][0]->Eval(epsilon))/1.E4) + (settings1->SIGMA_FACTOR*(m_fsigma_upper[nu_nubar][1]->Eval(epsilon))/1.E4);
+      }
+      else if ( settings1->SIGMA_SELECT == 2 ) {// use lower bound
+
+          sigma=settings1->SIGMA_FACTOR*(m_fsigma_lower[nu_nubar][currentint]->Eval(epsilon))/1.E4;//convert cm to meters. multiply by (1m^2/10^4 cm^2).
+          sigma_total = (settings1->SIGMA_FACTOR*(m_fsigma_lower[nu_nubar][0]->Eval(epsilon))/1.E4) + (settings1->SIGMA_FACTOR*(m_fsigma_lower[nu_nubar][1]->Eval(epsilon))/1.E4);
+      }
+      else {// if other values are chosen, just use mean value
+
+          sigma=settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][currentint]->Eval(epsilon))/1.E4;//convert cm to meters. multiply by (1m^2/10^4 cm^2).
+          sigma_total = (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][0]->Eval(epsilon))/1.E4) + (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][1]->Eval(epsilon))/1.E4);
+      }
+
+
       
       if(m_hsigma->GetEntries()<2000){
 	m_hsigma->Fill(epsilon, log10(sigma));
@@ -391,9 +513,11 @@ double Primaries::Gety(Settings *settings1,double pnu,int nu_nubar,int currentin
   }//old Gety
 
   else if (settings1->YPARAM==1) { //use prescription in Connolly et al.2011
-  	nu_nubar=0;
+  	//nu_nubar=0;
 	double pnuGeV=pnu/1.E9;
-	double elast_y=m_myY->pickY(nu_nubar,currentint,pnuGeV);
+        double epsilon=log10(pnuGeV);
+	//double elast_y=m_myY->pickY(nu_nubar,currentint,pnuGeV);
+	double elast_y=m_myY->pickY(nu_nubar,currentint,epsilon);
 	return elast_y;   
   }//current Gety
 
@@ -413,11 +537,12 @@ double Primaries::Getyweight(double pnu, double y, int nu_nubar, int currentint)
 
 	C2_low=b0+b1*epsilon;//Eq(17)
 	C1_low=A_low[0]+A_low[1]*(-exp(-(epsilon-A_low[2])/A_low[3]));//Eq(16)
-	nu_nubar=0;
-	C1_high=A0_high[nu_nubar][currentint]+A1_high[nu_nubar][currentint]*(-exp(-(epsilon-A2_high[nu_nubar][currentint])/A3_high[nu_nubar][currentint]));
+	int nu_nubar_tmp=0;
+	C1_high=A0_high[nu_nubar_tmp][currentint]+A1_high[nu_nubar_tmp][currentint]*(-exp(-(epsilon-A2_high[nu_nubar_tmp][currentint])/A3_high[nu_nubar_tmp][currentint]));
 
-	nu_nubar=1;
-	C1_highbar=A0_high[nu_nubar][currentint]+A1_high[nu_nubar][currentint]*(-exp(-(epsilon-A2_high[nu_nubar][currentint])/A3_high[nu_nubar][currentint]));//Eq(16)
+	nu_nubar_tmp=1;
+	C1_highbar=A0_high[nu_nubar_tmp][currentint]+A1_high[nu_nubar_tmp][currentint]*(-exp(-(epsilon-A2_high[nu_nubar_tmp][currentint])/A3_high[nu_nubar_tmp][currentint]));//Eq(16)
+
 	if(nu_nubar==0) {
 		U=1-1/C2_low;
 		W=fabs( (ymax_high-C1_high)/(ymin_high-C1_high));
@@ -499,6 +624,80 @@ string Primaries::GetNuFlavor() {
     cout << "unable to pick nu flavor\n";
   return nuflavor;
 } //GetNuFlavor
+
+
+
+
+string Primaries::GetNuFlavor(Settings *settings1) {
+    // pick a neutrino type, flavor ratio 1:1:1
+  
+  string nuflavor;
+
+  double rnd=gRandom->Rndm();
+
+  if ( settings1->SELECT_FLAVOR == 1 ) {
+      nuflavor="nue";
+  }
+  else if ( settings1->SELECT_FLAVOR == 2 ) {
+      nuflavor="numu";
+  }
+  else if ( settings1->SELECT_FLAVOR == 3 ) {
+      nuflavor="nutau";
+  }
+
+  else { // not specifically select the flavor
+
+      if (rnd<=(1./3.)) {  
+        nuflavor="nue";
+      } //if
+      else if(rnd<=(2./3.)) { 
+        nuflavor="numu";
+      } //else if
+      else if(rnd<=(1.)) { 
+        nuflavor="nutau";
+      } //else if
+      else
+        cout << "unable to pick nu flavor\n";
+  }
+
+  return nuflavor;
+} //GetNuFlavor
+
+
+
+
+
+
+
+int  Primaries::GetNuNuBar( string nuflavor ) {
+     // depending on nu flavor, choose nu or nubar
+     //
+     // based on arXiv:1108.3163, section 3
+      
+    double rnd = gRandom->Rndm();
+
+    int nu_nubar_out = 0; // start with nu
+	
+    if (nuflavor=="nue") {
+
+        if ( rnd <= 0.78 )
+            nu_nubar_out = 0;
+        else 
+            nu_nubar_out = 1;
+    }
+    else { // for both numu and nutau
+            
+        if ( rnd <= 0.61 )
+            nu_nubar_out = 0;
+        else 
+            nu_nubar_out = 1;
+    }
+
+    return nu_nubar_out;
+}
+
+
+
 
 
 
@@ -610,7 +809,7 @@ Interaction::Interaction(string inttype,Primaries *primary1,Settings *settings1,
 
 */
 
-Interaction::Interaction (double pnu, string nuflavor, int &n_interactions, IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 ) {
+Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_interactions, IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 ) {
 
     Initialize ();
 
@@ -828,8 +1027,13 @@ Interaction::Interaction (double pnu, string nuflavor, int &n_interactions, IceM
            // only EM shower
            if ( settings1->SHOWER_MODE == 0 ) {
   
-               //signal->GetShowerProfile( pnu*emfrac, 0, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, EM_shower_depth_m, EM_shower_Q_profile, EM_LQ );
-               signal->GetShowerProfile( pnu*emfrac, 0, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, shower_depth_m, shower_Q_profile, LQ );
+               if ( emfrac > 1.e-10 ) {
+
+                   //signal->GetShowerProfile( pnu*emfrac, 0, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, EM_shower_depth_m, EM_shower_Q_profile, EM_LQ );
+                   signal->GetShowerProfile( pnu*emfrac, 0, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, shower_depth_m, shower_Q_profile, LQ );
+               }
+               else LQ = 0;
+
                primary_shower = 0;
                //cout<<"LQ : "<<LQ<<endl;
            }
@@ -837,24 +1041,86 @@ Interaction::Interaction (double pnu, string nuflavor, int &n_interactions, IceM
            // only HAD shower
            else if ( settings1->SHOWER_MODE == 1 ) {
 
-               //signal->GetShowerProfile( pnu*hadfrac, 1, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, HAD_shower_depth_m, HAD_shower_Q_profile, HAD_LQ );
-               signal->GetShowerProfile( pnu*hadfrac, 1, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, shower_depth_m, shower_Q_profile, LQ );
+               if ( hadfrac > 1.e-10 ) {
+                   //signal->GetShowerProfile( pnu*hadfrac, 1, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, HAD_shower_depth_m, HAD_shower_Q_profile, HAD_LQ );
+                   signal->GetShowerProfile( pnu*hadfrac, 1, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, shower_depth_m, shower_Q_profile, LQ );
+               }
+               else LQ = 0;
+
+
                primary_shower = 1;
                //cout<<"LQ : "<<LQ<<endl;
            }
 
-           // use EM or HAD depending on shower energy
+           // use both EM and HAD 
            else if ( settings1->SHOWER_MODE == 2 ) {
 
+               if ( emfrac > 1.e-10 ) {
 
-               if ( pnu*emfrac > pnu*hadfrac ) {
-                   signal->GetShowerProfile( pnu*emfrac, 0, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, shower_depth_m, shower_Q_profile, LQ );
-                   primary_shower = 0;
+                   signal->GetShowerProfile( pnu*emfrac, 0, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, EM_shower_depth_m, EM_shower_Q_profile, EM_LQ );
+               }
+               else EM_LQ = 0;
+
+               if ( hadfrac > 1.e-10 ) {
+           
+                   signal->GetShowerProfile( pnu*hadfrac, 1, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, HAD_shower_depth_m, HAD_shower_Q_profile, HAD_LQ );
+               }
+               else HAD_LQ = 0;
+
+
+
+               if ( EM_LQ!=EM_LQ ) {// if nan
+                   EM_LQ = 0.;
+               }
+               if ( HAD_LQ!=HAD_LQ ) {// if nan
+                   HAD_LQ = 0.;
                }
 
-               else {
-                   signal->GetShowerProfile( pnu*hadfrac, 1, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, shower_depth_m, shower_Q_profile, LQ );
-                   primary_shower = 1;
+           
+               // get total LQ
+               LQ = EM_LQ + HAD_LQ;
+
+               /*
+               cout<<"EM_LQ : "<<EM_LQ<<endl;
+               cout<<"HAD_LQ : "<<HAD_LQ<<endl;
+               cout<<"LQ : "<<LQ<<endl;
+               */
+
+
+               //
+               // make shower profiles same length
+               if ( EM_LQ > 0 && HAD_LQ > 0 ) { // if both EM and HAD shower exist
+
+
+                   double d_depth_EM = EM_shower_depth_m[1] - EM_shower_depth_m[0];
+                   double d_depth_HAD = HAD_shower_depth_m[1] - HAD_shower_depth_m[0];
+
+                   int lastbin;
+
+                   while ( (int)EM_shower_Q_profile.size() != (int)HAD_shower_Q_profile.size() ) {
+
+                       if ( (int)EM_shower_Q_profile.size() > (int)HAD_shower_Q_profile.size() ) {
+
+                           lastbin = HAD_shower_Q_profile.size();
+
+                           HAD_shower_Q_profile.push_back( 0 );
+
+                           HAD_shower_depth_m.push_back( HAD_shower_depth_m[lastbin-1] + d_depth_HAD );
+
+                       }
+
+                       else if ( (int)EM_shower_Q_profile.size() < (int)HAD_shower_Q_profile.size() ) {
+
+                           lastbin = EM_shower_Q_profile.size();
+
+                           EM_shower_Q_profile.push_back( 0 );
+
+                           EM_shower_depth_m.push_back( EM_shower_depth_m[lastbin-1] + d_depth_EM );
+
+                       }
+
+                   }
+
                }
 
                //cout<<"LQ : "<<LQ<<endl;
@@ -862,10 +1128,39 @@ Interaction::Interaction (double pnu, string nuflavor, int &n_interactions, IceM
                //signal->GetShowerProfile( pnu*emfrac, 0, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, EM_shower_depth_m, EM_shower_Q_profile, EM_LQ );
                //signal->GetShowerProfile( pnu*hadfrac, 1, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, HAD_shower_depth_m, HAD_shower_Q_profile, HAD_LQ );
                //cout<<"EM_LQ : "<<EM_LQ<<", HAD_LQ : "<<HAD_LQ<<endl;
-           }
+               //
+           
+
+           } // shower_mode = 2
 
 
-       }
+
+           // only one dominant shower (either EM or HAD)
+           else if ( settings1->SHOWER_MODE == 3 ) {
+
+
+               // find the dominant shower among EM and HAD
+               if ( emfrac > hadfrac ) {
+
+                   signal->GetShowerProfile( pnu*emfrac, 0, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, shower_depth_m, shower_Q_profile, LQ );
+
+                   primary_shower = 0;
+
+               }
+               else {
+
+                   signal->GetShowerProfile( pnu*hadfrac, 1, settings1->SHOWER_STEP, settings1->SHOWER_PARAM_MODEL, shower_depth_m, shower_Q_profile, LQ );
+               
+                   primary_shower = 1;
+               }
+
+
+           } // shower_mode = 3
+
+
+
+
+       } // tdomain mode
 
 
 
@@ -2595,6 +2890,7 @@ Y::Y() { // Constructor
     }
   }
 
+  /*
 // parameter A_0 in Table V for the high y region
   fC1_high[0][0]->FixParameter(0,-0.0026);//nubar, CC
   fC1_high[1][0]->FixParameter(0,-0.008); //nu,    CC
@@ -2613,10 +2909,29 @@ Y::Y() { // Constructor
   fC1_high[1][0]->FixParameter(2,3.0); // nu, CC   
   fC1_high[0][1]->FixParameter(2,3.0); // nubar, NC
   fC1_high[1][1]->FixParameter(2,3.0); // nu, NC
+  */
+// parameter A_0 in Table V for the high y region (fixed order)
+  fC1_high[0][0]->FixParameter(0,-0.005); //nu,    NC
+  fC1_high[1][0]->FixParameter(0,-0.005); //nubar, NC
+  fC1_high[0][1]->FixParameter(0,-0.008); //nu,    CC
+  fC1_high[1][1]->FixParameter(0,-0.0026);//nubar, CC
+
+  // parameter A_1 in Table V for the high y region
+  fC1_high[0][0]->FixParameter(1,0.23); // nu, NC
+  fC1_high[1][0]->FixParameter(1,0.23); // nubar, NC
+  fC1_high[0][1]->FixParameter(1,0.26); // nu, CC
+  fC1_high[1][1]->FixParameter(1,0.085); // nubar, CC
+
+
+  // parameter A_2 in Table V for the high y region
+  fC1_high[0][0]->FixParameter(2,3.0); // nu, NC
+  fC1_high[1][0]->FixParameter(2,3.0); // nubar, NC
+  fC1_high[0][1]->FixParameter(2,3.0); // nu, CC   
+  fC1_high[1][1]->FixParameter(2,4.1); // nubar, CC
 
   // parameter A_3 in Table V for the high y region.  This parameter is the same for all four interaction types
   for (int i=0;i<2;i++) { // nu, nubar
-    for (int j=0;j<2;j++) { // CC, NC
+    for (int j=0;j<2;j++) { // NC, CC
       fC1_high[i][j]->FixParameter(3,1.7);
     }
   }

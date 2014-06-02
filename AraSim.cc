@@ -754,7 +754,8 @@ double cur_posnu_z;
        IceVolume = PI * (settings1->POSNU_RADIUS) * (settings1->POSNU_RADIUS) * icemodel->IceThickness( detector->stations[0] );
        cout<<"IceVolume : "<<IceVolume<<endl;
 
-       double Veff_test;
+       double Veff_test_we; // effective volume water equivalent
+       double Veff_test; // effective volume ice
 
        // error bar for weight
        double error_plus = 0;
@@ -769,13 +770,15 @@ double cur_posnu_z;
        error_minus = IceVolume * 4. * PI * signal->RHOICE / signal->RHOH20 * error_minus / (double)(settings1->NNU);
        */
 
-       Veff_test = IceVolume * 4. * PI * signal->RHOICE / signal->RHOH20 * Total_Weight / (double)(settings1->NNU);
+       Veff_test_we = IceVolume * 4. * PI * signal->RHOICE / signal->RHOH20 * Total_Weight / (double)(settings1->NNU);
+       Veff_test = IceVolume * 4. * PI * Total_Weight / (double)(settings1->NNU);
        error_plus = IceVolume * 4. * PI * signal->RHOICE / signal->RHOH20 * error_plus / (double)(settings1->NNU);
        error_minus = IceVolume * 4. * PI * signal->RHOICE / signal->RHOH20 * error_minus / (double)(settings1->NNU);
 
 
-       cout<<"test Veff : "<<Veff_test<<" m3sr, "<<Veff_test*1.E-9<<" km3sr"<<endl;
-       cout<<"And Veff error plus : "<<error_plus*1.E-9<<" and error minus : "<<error_minus*1.E-9<<endl;
+       cout<<"test Veff(ice) : "<<Veff_test<<" m3sr, "<<Veff_test*1.E-9<<" km3sr"<<endl;
+       cout<<"test Veff(water eq.) : "<<Veff_test_we<<" m3sr, "<<Veff_test_we*1.E-9<<" km3sr"<<endl;
+       cout<<"And Veff(water eq.) error plus : "<<error_plus*1.E-9<<" and error minus : "<<error_minus*1.E-9<<endl;
    }
 
 

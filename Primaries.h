@@ -104,11 +104,27 @@ public:
 	TF1* m_fy[2][2];
 	TF1* m_fsigma[2][2];
 
+	TF1* m_fsigma_upper[2][2];
+	TF1* m_fsigma_lower[2][2];
+
 	double c0[2][2];
 	double c1[2][2];
 	double c2[2][2];
 	double c3[2][2];
 	double c4[2][2];
+
+	double c0_upper[2][2];
+	double c1_upper[2][2];
+	double c2_upper[2][2];
+	double c3_upper[2][2];
+	double c4_upper[2][2];
+
+	double c0_lower[2][2];
+	double c1_lower[2][2];
+	double c2_lower[2][2];
+	double c3_lower[2][2];
+	double c4_lower[2][2];
+
 
 	static const int NSIGMAS=2;// number of possible cross section models
 	// 0=Gandhi et al.
@@ -138,6 +154,11 @@ public:
 	double Getyweight(double pnu,double y,int nu_nubar,int currentint);
 	string GetCurrent();
 	string GetNuFlavor();
+	string GetNuFlavor(Settings *settings1);
+
+        int GetNuNuBar( string nuflavor );
+
+
     int IsCalpulser;
 
         ClassDef(Primaries,1);
@@ -182,7 +203,7 @@ class Interaction  {
 
  // variables for GetSignal
  //
- int nu_nubar;
+ //int nu_nubar; // moved to Event class
  string taudecay;
  //int n_interactions;  // moved to Event class
  double emfrac, hadfrac;
@@ -223,7 +244,7 @@ class Interaction  {
  Interaction(); // default constructor
  //Interaction(string inttype,Primaries *primary1,Settings *settings1,int whichray,Counting *count1);
 
- Interaction (double pnu, string nuflavor, int &n_interactions, IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 ); // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc
+ Interaction (double pnu, string nuflavor, int nu_nubar, int &n_interactions, IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 ); // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc
 
  ~Interaction();
 

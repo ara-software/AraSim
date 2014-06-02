@@ -12,6 +12,7 @@
 //#include "vector.hh"
 //#include "ray.hh"
 
+#include "Tools.h"
 
 #include <iostream>
 #include <fstream>
@@ -175,7 +176,97 @@ void IceModel::setUpIceModel(int model) {
     }
   westlanddown.close();
 
- }
+
+  // new ARA ice attenuation measurement values (at 300 MHz)
+  //
+  /*
+  ifstream file( "data/ARA_IceAttenL.txt" );
+
+  string line;
+  string line2;
+
+  int N=-1;
+
+  int skipline = 1;
+  int first_time = 1;
+
+
+if ( file.is_open() ) {
+    while (file.good() ) {
+        
+        if ( first_time == 1 ) {
+            for (int sl=0; sl<skipline; sl++) {
+                getline (file, line);
+            }
+            first_time = 0;
+        }
+                
+
+        getline (file, line);
+
+        N++;
+
+
+        //ARA_IceAtten_Depth[N] = atof( line.substr(0, line.find_first_of(",")).c_str() );
+        cout<< line.substr(0, line.find_first_of(",")).c_str()<<endl;
+
+        cout<<"ARA_IceAtten Depth"<<N<<" : "<<ARA_IceAtten_Depth[N]<<"\t";
+
+        line2 = line.substr( line.find_first_of(",")+1);
+
+        ARA_IceAtten_Length[N] = atof( line2.substr(0).c_str() );
+
+        cout<<"ARA_IceAtten L"<<N<<" : "<<ARA_IceAtten_Length[N]<<"\n";
+
+    }
+    file.close();
+}
+
+    ARA_IceAtten_bin = N;
+    cout<<"ARA_IceAtten total N : "<<ARA_IceAtten_bin<<"\n";
+
+    // done reading ARA ice attenuation info
+    */
+
+  //
+  double ARA_IceAtten_Depth_tmp[53] = { 72.7412,   76.5697,    80.3982,    91.8836,    95.7121,    107.198,    118.683,    133.997,    153.139,    179.939,    206.738,    245.023,    298.622,    356.049,    405.819,    470.904,    516.845,    566.616,    616.386,    669.985,    727.412,    784.839,    838.438,    899.694,    949.464,    1003.06,    1060.49,    1121.75,    1179.17,    1236.6,    1297.86,    1347.63,    1405.05,    1466.31,    1516.08,    1565.85,    1611.79,    1657.73,    1699.85,    1745.79,    1791.73,    1833.84,    1883.61,    1929.56,    1990.81,    2052.07,    2109.49,    2170.75,    2232.01,    2304.75,    2362.17,    2431.09,    2496.17 };
+
+  double ARA_IceAtten_Length_tmp[53] = { 1994.67,   1952,    1896,    1842.67,    1797.33,    1733.33,    1680,    1632,    1586.67,    1552,    1522.67,    1501.33,    1474.67,    1458.67,    1437.33,    1416,    1392,    1365.33,    1344,    1312,    1274.67,    1242.67,    1205.33,    1168,    1128,    1090.67,    1048,    1008,    965.333,    920,    874.667,    834.667,    797.333,    752,    714.667,    677.333,    648,    616,    589.333,    557.333,    530.667,    506.667,    477.333,    453.333,    418.667,    389.333,    362.667,    333.333,    309.333,    285.333,    264,    242.667,    221.333 };
+
+  ARA_IceAtten_bin = 53;
+  for (int bin=0; bin<ARA_IceAtten_bin; bin++) {
+
+      ARA_IceAtten_Depth[bin] = ARA_IceAtten_Depth_tmp[bin];
+      ARA_IceAtten_Length[bin] = ARA_IceAtten_Length_tmp[bin];
+  }
+
+
+ 
+}
+
+
+
+// read depth in positive value and return attenuation length (m) at the depth
+double IceModel::GetARAIceAttenuLength(double depth) {
+
+    double AttenL;
+
+    // check if depth is positive value
+    if ( depth < 0. ) {// whether above the ice or wrong value!
+
+        cerr<<"depth negative! "<<depth<<endl;
+    }
+    else {
+
+        AttenL = Tools::SimpleLinearInterpolation_extend_Single(ARA_IceAtten_bin, ARA_IceAtten_Depth, ARA_IceAtten_Length, depth );
+    }
+
+    return AttenL;
+
+}
+
+
+
 
 int IceModel::Getice_model() {
     return ice_model;
