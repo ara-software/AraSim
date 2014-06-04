@@ -173,7 +173,8 @@ outputdir="outputs"; // directory where outputs go
 
     USE_CH_GAINOFFSET = 0; // if use gain offset for different channels. (default 0 : not using gain offset). mode 1 is only availbale for installed TestBed so far.
 
-    GETCHORD_MODE = 0; // which Getchord function to use. default 0 : old Getchord function (not correct tau weight, weight don't have ice inside interaction probability in it). 1 : new Getchord from icemc. This has new tau weight calculation and ice interaction probability applied to weight factor.
+    // removed GETCHORD_MODE. This parameter is merged into INTERACTION_MODE
+    //GETCHORD_MODE = 0; // which Getchord function to use. default 0 : old Getchord function (not correct tau weight, weight don't have ice inside interaction probability in it). 1 : new Getchord from icemc. This has new tau weight calculation and ice interaction probability applied to weight factor.
 
     taumodes = 0; // no tau created in the rock
 
@@ -428,9 +429,9 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "USE_CH_GAINOFFSET") {
                   USE_CH_GAINOFFSET = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-              else if (label == "GETCHORD_MODE") {
-                  GETCHORD_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-              }
+              //else if (label == "GETCHORD_MODE") {
+                  //GETCHORD_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              //}
               else if (label == "taumodes") {
                   taumodes = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -577,6 +578,7 @@ int Settings::CheckCompatibilities(Detector *detector) {
         }
     }
 
+    /*
     // if INTERACTION_MODE is 0 (sphere area and obtain Aeff), make sure using GETCHORD_MODE=1
     if (INTERACTION_MODE==0) { // picknear_sphere mode
         if (GETCHORD_MODE==0) { // but use old getchord mode (not working!)
@@ -590,6 +592,7 @@ int Settings::CheckCompatibilities(Detector *detector) {
             num_err++;
         }
     }
+    */
 
     // if BH_ANT_SEP_DIST_ON=1, we can't use READGEOM=1 (actual installed geom)
     if (BH_ANT_SEP_DIST_ON==1 && READGEOM==1) {

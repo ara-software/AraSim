@@ -37,7 +37,6 @@ READGEOM=0 // reads geometry information from the sqlite file or not (0 : don't 
 
 // new variables
 //INTERACTION_MODE=0 // pickunbiased mode!
-//GETCHORD_MODE=1 // use new icemc Getchord function
 //taumodes=1
 
 //BH_ANT_SEP_DIST_ON=0 // default 0 : use constant borehole antenna distance. 1 : use separate antenna distance. use z_btw01, z_btw12, ... in ARA_N_info.txt or ARA37_info.txt

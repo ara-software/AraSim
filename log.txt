@@ -1239,7 +1239,10 @@ Until this new mode is confirmed to work as we expected, I'll leave the default 
 In case you want to use Keiichi's Aeff code, use below two parameter values in your setup file
 
 INTERACTION_MODE=0 // use spherical area to get Aeff
-GETCHORD_MODE=1  // when we get chord, we also calculate the probability to interact inside the sphere
+
+There used to be GETCHORD_MODE parameter value which decide which Getchord function to use.
+However, (at least for now) as INTERACTION_MODE decide which Getchord functin to use, GETCHORD_MODE parameter is removed from Setting class.
+So Veff/Aeff will be simply decided by INTERACTION_MODE=1 or 0.
 
 ============================================================================
 
