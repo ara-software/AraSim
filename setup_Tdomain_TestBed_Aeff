@@ -1,4 +1,10 @@
 
+  
+INTERACTION_MODE=0 // use sphere mode
+    
+GETCHORD_MODE=1 
+
+
 SIMULATION_MODE=1 // t-domain mode (test)
 
 NNU=1

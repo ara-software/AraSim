@@ -1231,3 +1231,15 @@ SELECT_FLAVOR: 0 (default) el, mu, tau ratio = 1:1:1
 
 ============================================================================
 
+06/03/14 Eugene Hong;
+
+Merged Keiichi's Aeff code.
+Until this new mode is confirmed to work as we expected, I'll leave the default Veff/Aeff mode to previous Veff mode (uses cylinderical volume, INTERACTION_MODE=1 & GETCHORD_MODE=0).
+
+In case you want to use Keiichi's Aeff code, use below two parameter values in your setup file
+
+INTERACTION_MODE=0 // use spherical area to get Aeff
+GETCHORD_MODE=1  // when we get chord, we also calculate the probability to interact inside the sphere
+
+============================================================================
+

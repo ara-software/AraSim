@@ -1142,6 +1142,8 @@ int EarthModel::Getchord(Primaries *primary1, Settings *settings1,IceModel *anta
 				       crust_entered, mantle_entered, core_entered, myxarray, myEarray, myyweightarray, 
 				       mytausurvarray,tauchord,avgdensityarray,densityarray,inu,weight1_tmp,probability_tmp);
       */
+      weight1_tmp=0.; // initialization necessary (added by K.M. 2013.10.31)
+
       sec1->GetTauWeight(primary1, settings1,antarctica1,pnu, nu_nubar,currentint,Etau_final,posnu, earth_in,
 				       crust_entered, mantle_entered, core_entered, 
 				       weight1_tmp,probability_tmp);
@@ -1426,6 +1428,387 @@ int EarthModel::Getchord(Primaries *primary1, Settings *settings1,IceModel *anta
     
     return 1;
 } //end Getchord
+
+
+
+
+
+
+
+
+// new Getchord from icemc (modified version)
+// new tau weight calculation, probability to interact inside the ice
+// additional L0 input to account the probability to interact inside the sphere (INTERACTION_MODE=0)
+int EarthModel::Getchord(Primaries *primary1, Settings *settings1,IceModel *antarctica1, Secondaries *sec1,
+			 double len_int_kgm2,
+			 const Position &earth_in, // place where neutrino entered the earth
+			 const Position &r_enterice,
+			 const Position &nuexitice,
+			 
+			 const Position &posnu, // position of the interaction
+			 int inu,
+			 double& chord, // chord length
+			 double& probability_tmp, // weight
+			 double& weight1_tmp,
+			 double& nearthlayers, // core, mantle, crust
+			 double myair,
+			 double& total_kgm2, // length in kg m^2
+			 int& crust_entered, // 1 or 0
+			 int& mantle_entered, // 1 or 0
+			 int& core_entered, 
+                         string thisnuflavor,double pnu, double Etau_final,
+			 int nu_nubar, int currentint,int taumodes1, double L0
+			 )  {
+    
+    Vector chord3;
+    Vector nchord;
+    double x=0;
+    double lat,lon;
+    int ilon,ilat;
+    
+    
+    total_kgm2 = 0; //Initialize column density
+    nearthlayers=0; // this counts the number of earth layers the neutrino traverses.
+    // Want to find probability that the neutrino survives its trip
+    // through the earth.
+    
+    //Find the chord, its length and its unit vector.
+    chord3 = posnu - earth_in;
+    chord=chord3.Mag();
+    nchord = chord3 / chord;
+    
+    if (chord<=1) {
+	cout << "short chord " << chord << "\n";
+	return 0;
+    }
+    if (chord>2.*R_EARTH+1000) {
+	cout << "bad chord" << " " << chord << ".  Event is " << inu << "\n";
+    }
+    
+    Position where=earth_in;
+    //cout <<"where(1) is "<<where;
+    // the sin of the angle between the neutrino path and the 
+    // radial vector to its earth entrance point determines
+    // if it will get to the next layer down.
+    double costh=(where*nchord)/where.Mag();
+    double sinth=sqrt(1-costh*costh);
+    double distance=0;
+    double halfchord=0;
+    double taumodes = settings1->taumodes;
+
+
+    if (getchord_method<1 || getchord_method>3)
+	cout << "Bogus method!\n";
+    if (thisnuflavor =="nutau" && taumodes1==1 ){
+      // cout <<"nuflavor is nutau, \n";
+      /*
+      sec1->GetTauWeight(primary1, settings1,antarctica1,pnu, nu_nubar,currentint,Etau_final,posnu, earth_in,
+				       crust_entered, mantle_entered, core_entered, myxarray, myEarray, myyweightarray, 
+				       mytausurvarray,tauchord,avgdensityarray,densityarray,inu,weight1_tmp,probability_tmp);
+      */
+      weight1_tmp=0.; // initialization necessary (added by K.M. 2013.10.31)
+
+      //cout <<"weight1_tmp(tau before) is "<<weight1_tmp<<".\n";
+      sec1->GetTauWeight(primary1, settings1,antarctica1,pnu, nu_nubar,currentint,Etau_final,posnu, earth_in,
+				       crust_entered, mantle_entered, core_entered, 
+				       weight1_tmp,probability_tmp);
+
+      weight1_tmp *=2; //only going to get half the normal number, so multiply by 2 to compensate.
+      //tauweight = weight1_tmp;
+      //cout <<"weight1_tmp(tau after) is "<<weight1_tmp<<".\n";
+      return 1;
+    }//thisnuflavor
+    //cout <<"nuflavor is not nutau. \n";
+    // we are really focusing on method 2 - method 1 has not been maintenanced in a long time!!
+    // use at your own risk.
+    if (getchord_method==1) {
+	double L=0;
+	weight1_tmp=0;
+	
+	if (sinth>sqrt(radii[1]/radii[2])) {
+	    nearthlayers++;
+	    
+	    // these only skim the first layer.
+	    L=len_int_kgm2/densities[2];
+	    
+	    weight1_tmp=exp(-posnu.Distance(where)/L);
+	}
+	else {
+	    nearthlayers++;
+	    
+	    // these get to the second layer down.
+	    L=len_int_kgm2/densities[2];
+	    // compute distance before it gets to the next layer.
+	    halfchord=sqrt(radii[1]-radii[2]*sinth*sinth);
+	    distance=sqrt(radii[2])*costh-halfchord;
+	    
+	    weight1_tmp=exp(-distance/L);
+	    
+	    // get position where it enters the second layer.
+	    where = earth_in + distance*nchord;
+	    
+	    // determine if it enters the core or not.
+	    costh=(where*nchord)/where.Mag();
+	    sinth=sqrt(1-costh*costh);
+	    
+	    if (sinth>sqrt(radii[0]/radii[1])) {
+		
+		
+		halfchord=sqrt(radii[1])*costh;
+		nearthlayers++;
+		
+		// these do not enter the core.
+		L=len_int_kgm2/densities[1];
+		
+		
+		weight1_tmp *= exp(-2*halfchord/L); 
+		
+		L=len_int_kgm2/densities[2];
+		// this is where it exits the second layer and enters the crust again.
+		where = where + 2*halfchord*nchord;
+		weight1_tmp*=exp(-where.Distance(posnu)/L);
+	    }
+	    else {
+		nearthlayers++;
+		// these enter the core.
+		L=len_int_kgm2/densities[1];
+		
+		// compute distance before entering the core.
+		halfchord=sqrt(radii[0]-radii[1]*sinth*sinth);
+		distance=sqrt(radii[1])*costh-halfchord;
+		weight1_tmp*=exp(-distance/L);
+		
+		// go through the core.
+		L=len_int_kgm2/densities[0];
+		weight1_tmp*=exp(-2*halfchord/L);
+		
+		// go through 2nd layer again.
+		L=len_int_kgm2/densities[1];
+		weight1_tmp*=exp(-distance/L);
+		
+		// through the crust and end up at posnu.
+		L=len_int_kgm2/densities[2];
+		
+		where = where + (2*distance+2*halfchord)*nchord;
+		weight1_tmp*=exp(-where.Distance(posnu)/L);
+	    } //else
+	} //else
+    } //if getchord_method==1
+    if (getchord_method==2) {
+	
+	x=0; // x is the distance you move as you step through the earth.
+	
+	lon = where.Lon();
+	lat = where.Lat();
+	ilon = (int)(lon/2);
+	ilat = (int)(lat/2);
+	
+	double surface_elevation = this->SurfaceAboveGeoid(lon,lat); // altitude of surface relative to geoid at earth entrance point
+	
+	double local_icethickness = this->IceThickness(lon,lat);
+	double local_waterdepth = WaterDepth(lon,lat);
+	double altitude=0;
+	weight1_tmp=1;
+	probability_tmp=1;
+	double step=Tools::dMin(len_int_kgm2/densities[1]/10,500.); //how big is the step size
+	// either 1/10 of an interaction length in the mantle or 500 m, whichever is smaller.
+	// 500 m is approximately the feature size in Crust 2.0.
+	//------------------added on Dec 8------------------------
+	weight1_tmp*=exp(-myair/len_int_kgm2);//add atmosphere attenuation // fenfang's atten. due to atmosphere
+	//------------------added on Dec 8------------------------
+	total_kgm2+=myair;
+	
+	
+	
+	double L_ice=len_int_kgm2/Signal::RHOICE;
+	
+	if (settings1->UNBIASED_SELECTION){
+
+	  if(settings1->INTERACTION_MODE!=0){
+	    probability_tmp*=1.-exp(-1.*(r_enterice.Distance(nuexitice)/L_ice)); // probability it interacts in ice along its path  
+	  }
+          else{  // if INTERACTION_MODE==0 (using sphere area)
+	    probability_tmp*=1.-exp(-1.*(L0/L_ice)); // probability it interacts in ice along its path
+
+	    //cout << "Yeah!!!" << endl;
+	    //cout << L0 << " " << r_enterice.Distance(nuexitice) 
+		 //<< " " << L_ice << endl;
+	  }
+	}
+	
+	double L=0;
+	
+	double ddensity=Signal::RHOAIR;
+	nearthlayers=1;
+	
+	if (where*nchord>0.)  { // look at direction of neutrino where it enters the earth.
+	    cout << "This one's trouble.  Neutrino exit point looks more like an entrance point.  Event is " << inu << "\n";
+	    cout << "where is " << where[0] << " " << where[1] << " " << where[2] << "\n";
+	    cout << "nchord is " << nchord[0] << " " << nchord[1] << " " << nchord[2] << "\n";
+	    cout << "dot product is " << where*nchord/sqrt(where*where) << "\n";
+	    cout << "posnu is " << posnu[0] << " " << posnu[1] << " " << posnu[2] << "\n";
+	    cout << "Length of chord is : "<<chord<<endl;
+	} //end if
+	
+	altitude=where.Mag()-Geoid(lat); // what is the altitude of the entrance point
+	
+	if(altitude>surface_elevation+0.1) // if it is above the surface, it's messed up
+	    cout << "neutrino entrance point is above the surface.  Event is " << inu << "\n";
+	//cout <<"altitude is "<<altitude<<"\n";
+	
+	while(altitude>MIN_ALTITUDE_CRUST && x<posnu.Distance(earth_in)) { // starting at earth entrance point, step toward interaction position until you've reached the interaction or you are below the crust.
+	    //    while(altitude>MIN_ALTITUDE_CRUST && x<dDistance(enterice,earth_in)) {
+	  double abovesurface =0;
+	  ddensity = this->GetDensity(altitude,where,posnu,crust_entered,mantle_entered,core_entered);
+	  //  if (abovesurface==1)
+	  //  cout <<"altitude is "<<altitude<<"\n";
+	    // sometimes altitude will not satisfy any of these because it is above the surface.
+	    // the neutrino is skimming the surface and will fly through the air for a while.
+	    
+	    L=len_int_kgm2/ddensity; // get the interaction length for that density
+	    weight1_tmp*=exp(-step/L);  // adjust the weight accordingly
+	    
+	    
+	    total_kgm2+=ddensity*step; //increase column density accordingly
+	    if (exp(-step/L) > 1)
+		cout<<"Oops! len_int_kgm2, ddensity, factor : "<<len_int_kgm2<<" , "<<ddensity<<" , "<<exp(-step/L)<<endl;
+	    x+=step; // distance you have stepped through the earth so far.
+	    
+	    where += step*nchord;// find where you are now along the neutrino's path 
+	    
+	    lon = where.Lon();
+	    lat = where.Lat();
+	    ilon = (int)(lon/2);
+	    ilat = (int)(lat/2);
+	    altitude=where.Mag()-Geoid(lat); //what is the altitude
+	    surface_elevation = this->SurfaceAboveGeoid(lon,lat); // altitude of surface relative to geoid at earth entrance point
+	    local_icethickness = this->IceThickness(lon,lat);
+	    local_waterdepth = WaterDepth(lon,lat);
+	    
+	} //end while
+	
+	if (x>posnu.Distance(earth_in) && weightabsorption) { // if you left the loop because you have already stepped the whole distance from the entrance point to the neutrino interaction position
+	  if (taumodes1==1 && thisnuflavor =="nutau")
+	    weight1_tmp *=2; //factor of two for only having half the regular neutrinos.
+	    probability_tmp*=weight1_tmp;
+	    return 1;
+	}
+	// if you left the loop because you're not in the crust anymore
+	if (altitude<=MIN_ALTITUDE_CRUST) {
+	    
+	    mantle_entered=1; //Switch that lets us know we're into the mantle
+	    
+	    // determine if it enters the core or not.
+	    sinth=sin(where.Angle(nchord));
+	    costh=sqrt(1-sinth*sinth);
+	    
+	    if (sinth>sqrt(radii[0]/radii[1])) { // it does not enter the core, just the mantle
+		
+		nearthlayers++;  // count the mantle as a layer traversed.
+		
+		L=len_int_kgm2/densities[1]; // interaction length in the mantle
+		halfchord=sqrt(radii[1])*costh; // 1/2 chord the neutrino goes through in the mantle
+		
+		weight1_tmp *= exp(-2*halfchord/L); // adjust the weight for path through mantle
+		total_kgm2+= 2*halfchord*densities[1];  //add column density for path through mantle 
+		where += (2*halfchord)*nchord; // neutrino's new position once it reaches the crust again
+		
+	    } //end if (not entering core)
+	    // these enter the core
+	    else {
+		core_entered=1; //Switch that lets us know we've entered the core
+		
+		nearthlayers+=2; // count the mantle and core as a layer traversed.
+		
+		L=len_int_kgm2/densities[1]; // interaction length in mantle
+		
+		// compute distance before entering the core.
+		halfchord=sqrt(radii[0]-radii[1]*sinth*sinth); // find distance it travels in the mantle
+		distance=sqrt(radii[1])*costh-halfchord;
+		weight1_tmp*=exp(-distance/L); // adjust the weight
+		total_kgm2 += 2*distance*densities[1]; //Add column density for trip through mantle
+		// go through the core.
+		L=len_int_kgm2/densities[0]; // interaction length in core
+		weight1_tmp*=exp(-2*halfchord/L); // adjust the weight
+		total_kgm2 += 2*halfchord*densities[0]; //Add column density for trip through core
+		// go through 2nd layer again.
+		L=len_int_kgm2/densities[1];
+		weight1_tmp*=exp(-distance/L);
+		if (exp(-distance/L) > 1)
+		    cout<<"Oops2! len_int_kgm2, ddensity, distance, factor : "<<len_int_kgm2<<" , "<<ddensity<<" , "<<distance<<" , "<<exp(-distance/L)<<endl;
+		where += (2*distance+2*halfchord)*nchord;  // neutrino's new position once it reaches the crust again
+		
+	    } //end else(enter core)
+	} //end if(left crust)
+	
+	lon = where.Lon();
+	lat = where.Lat();
+	ilon = (int)(lon/2);
+	ilat = (int)(lat/2);
+	altitude=where.Mag()-Geoid(lat); //what is the altitude
+	surface_elevation = this->SurfaceAboveGeoid(lon,lat); // altitude of surface relative to geoid at earth entrance point
+	local_icethickness = this->IceThickness(lon,lat);
+	local_waterdepth = WaterDepth(lon,lat);
+	
+	double distance_remaining=where.Distance(posnu); // how much farther you need to travel before you reach the neutrino interaction point
+	
+	x=0; // this keeps track of how far you've stepped along the neutrino path, starting at the crust entrance.
+	while(x<=distance_remaining) { // keep going until you have reached the interaction position
+	    
+	  ddensity=this->GetDensity(altitude,where,posnu,crust_entered,mantle_entered,core_entered);
+	  
+	    L=len_int_kgm2/ddensity; // get the interaction length for that density
+	    weight1_tmp*=exp(-step/L);  // adjust the weight accordingly
+	    total_kgm2 += step*ddensity;
+	    
+	    if (exp(-step/L) > 1)
+		cout<<"Oops3! len_int_kgm2, ddensity, step, factor : "<<len_int_kgm2<<" , "<<ddensity<<" , "<<step<<" , "<<exp(-step/L)<<endl;
+	    x+=step; // increment how far you've stepped through crust
+	    
+	    
+	    // possible for a neutrino to go through the air but not likely because they aren't the most extreme skimmers (they went through the mantle)
+	    where += step*nchord; // where you are now along neutrino's path
+	    
+	    lon = where.Lon();
+	    lat = where.Lat();
+	    ilon = (int)(lon/2);
+	    ilat = (int)(lat/2);
+	    altitude=where.Mag()-Geoid(lat); //what is the altitude
+	    surface_elevation = this->SurfaceAboveGeoid(lon,lat); // altitude of surface relative to geoid at earth entrance point
+	    local_icethickness = this->IceThickness(lon,lat);
+	    local_waterdepth = WaterDepth(lon,lat);
+	} //while
+	
+    } //if (getchord_method == 2)
+    if (taumodes==1&& thisnuflavor =="nutau")
+      weight1_tmp *=2; //compensation factor
+    probability_tmp*=weight1_tmp;
+    //cout <<"probability_tmp(non-tau) is "<<probability_tmp<<".\n";
+    
+    if (weightabsorption==0) {
+	if (gRandom->Rndm()>weight1_tmp) { 
+	    
+	    weight1_tmp=0.;
+	    return 0;
+	}
+	else {
+	    
+	    weight1_tmp=1.;
+	    return 1;
+	}
+    }
+    else 
+	return 1;
+    
+    cout << "made it this far.\n";
+    
+    return 1;
+} //end Getchord
+
+
+
+
+
 
 
 

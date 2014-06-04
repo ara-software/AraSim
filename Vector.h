@@ -128,6 +128,12 @@ public:
   Vector Unit() const;
   //Returns a unit vector in the same direction as this vector.
 
+
+  void RotateUz(const Vector &NewUzVector);
+  // Change original z-axis to match the new vector                                      
+  // Note the new vector must be normalized                                              
+
+
   //Accessor functions
   double GetX() const;
   double GetY() const;

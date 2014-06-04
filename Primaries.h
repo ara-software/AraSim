@@ -284,10 +284,17 @@ class Interaction  {
   int WhereDoesItExitIceForward ( const Position &posnu, const Vector &nnu, double stepsize, Position &r_enterice_output, IceModel *antarctica);
   void FlattoEarth ( IceModel *antarctica, double X, double Y, double D);
   void FlattoEarth_Near_Surface ( IceModel *antarctica, double X, double Y, double D, double max_depth);
-  void PickNear(IceModel *antarctica, Detector *detector, Settings *settings1);
-    void PickExact(IceModel *antarctica, Detector *detector, Settings *settings1, double R, double Theta, double Phi);
+  void FlattoEarth_Spherical ( IceModel *antarctica, double X, double Y, double Z);
 
-    int PickNearUnbiased (IceModel *antarctica, Detector *detector, Settings *settings1);
+  void PickNear_Cylinder (IceModel *antarctica, Detector *detector, Settings *settings1);
+  double PickNear_Sphere (IceModel *antarctica, Detector *detector, Settings *settings1);
+
+  void PickExact(IceModel *antarctica, Detector *detector, Settings *settings1, double R, double Theta, double Phi);
+
+  bool Does_Interact(double x, double y, double z,
+		     double theta, double phi, double r,
+		     double &newx, double &newy, double &newz, double& l);
+
 
 
     // end move from IceModel

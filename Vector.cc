@@ -289,6 +289,33 @@ void Vector::UpdateXYZ() {
 } // Zero
 
 
+ void Vector::RotateUz(const Vector &NewUzVector) {
+   // Change original z-axis to match the new vector
+   // Note the new vector must be normalized
+   // stolen from TVector3
+
+   double u1 = NewUzVector.GetX();
+   double u2 = NewUzVector.GetY();
+   double u3 = NewUzVector.GetZ();
+   double up = u1*u1 + u2*u2;
+   
+   if(up){
+     up = sqrt(up);
+     double px = x;
+     double py = y;
+     double pz = z;
+     x = (u1*u3*px - u2*py + u1*up*pz)/up;
+     y = (u2*u3*px + u1*py + u2*up*pz)/up;
+     z = (u3*u3*px -    px + u3*up*pz)/up;
+   }else if(u3 < 0.){ // phi = 0 theta = pi
+     x = -x;
+     z = -z;
+   }
+   else{};
+} // RotateUz
+
+
+
  double Vector::operator [](int i) const {
   //code taken from ROOT's TVector3 class
   switch(i) {

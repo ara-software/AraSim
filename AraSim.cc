@@ -733,9 +733,6 @@ double cur_posnu_z;
    else if (settings1->INTERACTION_MODE==0) {
        weight_file << "Total_Probability="<<Total_Probability<<endl;
    }
-   else if (settings1->INTERACTION_MODE==3) {
-       weight_file << "Total_Probability="<<Total_Probability<<endl;
-   }
 
    cout<<"weight bin values : ";
    for (int i=0; i<count1->NBINS-1; i++) {
@@ -748,10 +745,11 @@ double cur_posnu_z;
    cout<<"\n\n";
 
 
-   // if using picknear method
+   // if using picknear_cylinder method
    if (settings1->INTERACTION_MODE==1) {
        double IceVolume;
        IceVolume = PI * (settings1->POSNU_RADIUS) * (settings1->POSNU_RADIUS) * icemodel->IceThickness( detector->stations[0] );
+       cout << "Radius: " << settings1->POSNU_RADIUS << " [m]" << endl;
        cout<<"IceVolume : "<<IceVolume<<endl;
 
        double Veff_test_we; // effective volume water equivalent
@@ -782,72 +780,40 @@ double cur_posnu_z;
    }
 
 
-   // if using pickunbiased method
+   // if using picknear_sphere method
    //
    else if (settings1->INTERACTION_MODE==0) {
-       double IceSurf;
-       IceSurf = 2. * PI * icemodel->R_EARTH * icemodel->R_EARTH * (1. - cos(icemodel->GetCOASTLINE()*RADDEG) );
-       cout<<"total IceSurf : "<<IceSurf<<" m2"<<endl;
 
-       double Aeff_test;
+       double IceArea;
+       IceArea = PI * (settings1->POSNU_RADIUS) * (settings1->POSNU_RADIUS);
+       cout << endl;
+       cout<<"IceArea : "<< IceArea <<endl;
+
+       double Aeff;
+       Aeff = IceArea * Total_Probability / (double)(settings1->NNU);
+       cout << "Aeff : " << Aeff << " [m^2]" << endl;
+
 
        // error bar for weight
        double error_plus = 0;
        double error_minus = 0;
        Counting::findErrorOnSumWeights( count1->eventsfound_binned, error_plus, error_minus );
 
-       /*
-       Aeff_test = IceSurf * PI * Total_Probability / (double)(settings1->NNU);
-
        // account all factors to error
-       error_plus = IceSurf * PI * error_plus / (double)(settings1->NNU);
-       error_minus = IceSurf * PI * error_minus / (double)(settings1->NNU);
-       */
+       error_plus = IceArea * error_plus / (double)(settings1->NNU);
+       error_minus = IceArea * error_minus / (double)(settings1->NNU);
 
-       Aeff_test = IceSurf * PI * Total_Probability / (double)(settings1->NNU);
-
-       // account all factors to error
-       error_plus = IceSurf * PI * error_plus / (double)(settings1->NNU);
-       error_minus = IceSurf * PI * error_minus / (double)(settings1->NNU);
+       cout<<"And Aeff error plus : "<<error_plus<<" and error minus : "<<error_minus<<" [m^2]"<<endl;
 
 
-       cout<<"test Aeff : "<<Aeff_test<<" m2sr, "<<Aeff_test*1.E-6<<" km2sr"<<endl;
-       cout<<"And Aeff error plus : "<<error_plus*1.E-6<<" and error minus : "<<error_minus*1.E-6<<endl;
+       // Aeff*sr
+       cout<<"and Aeff*sr values are"<<endl;
+       cout << "Aeff*sr : " << Aeff * 4.* PI << " [m^2sr]" <<", "<< Aeff * 4.* PI *1.e-6<<" [km^2sr]"<< endl;
+
+
+
    }
 
-
-   // if using picknearunbiased method
-   //
-   else if (settings1->INTERACTION_MODE==3) {
-       double SphereSurf;
-       SphereSurf = 4. * PI * settings1->PICKNEARUNBIASED_R * settings1->PICKNEARUNBIASED_R;
-       cout<<"total SphereSurf : "<<SphereSurf<<" m2"<<endl;
-
-       double Aeff_test;
-
-       // error bar for weight
-       double error_plus = 0;
-       double error_minus = 0;
-       Counting::findErrorOnSumWeights( count1->eventsfound_binned, error_plus, error_minus );
-
-       /*
-       Aeff_test = IceSurf * PI * Total_Probability / (double)(settings1->NNU);
-
-       // account all factors to error
-       error_plus = IceSurf * PI * error_plus / (double)(settings1->NNU);
-       error_minus = IceSurf * PI * error_minus / (double)(settings1->NNU);
-       */
-
-       Aeff_test = SphereSurf * PI * Total_Probability / (double)(settings1->NNU);
-
-       // account all factors to error
-       error_plus = SphereSurf * PI * error_plus / (double)(settings1->NNU);
-       error_minus = SphereSurf * PI * error_minus / (double)(settings1->NNU);
-
-
-       cout<<"test Aeff : "<<Aeff_test<<" m2sr, "<<Aeff_test*1.E-6<<" km2sr"<<endl;
-       cout<<"And Aeff error plus : "<<error_plus*1.E-6<<" and error minus : "<<error_minus*1.E-6<<endl;
-   }
 
 
 

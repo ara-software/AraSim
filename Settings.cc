@@ -60,7 +60,7 @@ outputdir="outputs"; // directory where outputs go
 
   DETECTOR=1;   //ARA layout with small number of stations
 
-  INTERACTION_MODE=1;   //PickNear mode
+  INTERACTION_MODE=1;   //PickNear mode (0: Aeff mode using sphere surface around station, 1: Veff mode using cylinder volume around station)
 
   POSNU_RADIUS=3000;    //radius for PickNear method
 
@@ -190,7 +190,6 @@ outputdir="outputs"; // directory where outputs go
     ONLY_PASSED_EVENTS = 0;
     NNU_PASSED = 0;
 
-    PICKNEARUNBIASED_R = 5000.; // radius of the sphere when we use INTERACTION_MODE=3
 
 
     SHOWER_MODE = 2; // EM (0) or HAD (1) shower in t-domain signal. or either one which is bigger (3) or both EM and HAD (2)  default : 2, both EM and HAD showers
@@ -578,14 +577,14 @@ int Settings::CheckCompatibilities(Detector *detector) {
         }
     }
 
-    // if INTERACTION_MODE is PickUnbiased (entire Antarctica surface), make sure using GETCHORD_MODE=1
-    if (INTERACTION_MODE==0) { // pickunbiased mode
+    // if INTERACTION_MODE is 0 (sphere area and obtain Aeff), make sure using GETCHORD_MODE=1
+    if (INTERACTION_MODE==0) { // picknear_sphere mode
         if (GETCHORD_MODE==0) { // but use old getchord mode (not working!)
             cerr<<"In INTERACTION_MODE=0, you have to use GETCHORD_MODE=1"<<endl; 
             num_err++;
         }
     }
-    else if (INTERACTION_MODE==1) { // picknear mode
+    else if (INTERACTION_MODE==1) { // picknear_cylinder mode
         if (GETCHORD_MODE==1) { // but use new getchord mode (not working!)
             cerr<<"In INTERACTION_MODE=1, you have to use GETCHORD_MODE=0"<<endl; 
             num_err++;

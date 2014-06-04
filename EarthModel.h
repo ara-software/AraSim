@@ -195,6 +195,28 @@ public:
 			 );
 
 
+  int Getchord(Primaries *primary1, Settings *settings1,IceModel *antarctica1, Secondaries *sec1,
+			 double len_int_kgm2,
+			 const Position &earth_in, // place where neutrino entered the earth
+			 const Position &r_enterice,
+			 const Position &nuexitice,
+			 
+			 const Position &posnu, // position of the interaction
+			 int inu,
+			 double& chord, // chord length
+			 double& probability_tmp, // weight
+			 double& weight1_tmp,
+			 double& nearthlayers, // core, mantle, crust
+			 double myair,
+			 double& total_kgm2, // length in kg m^2
+			 int& crust_entered, // 1 or 0
+			 int& mantle_entered, // 1 or 0
+			 int& core_entered, 
+                         string thisnuflavor,double pnu, double Etau_final,
+                         int nu_nubar, int currentint,int taumodes1, double lpath
+			 );
+
+
 
 
   double GetDensity(double altitude, const Position earth_in, const Position posnu,
