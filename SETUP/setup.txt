@@ -5,7 +5,7 @@
 
 // neutrino energies (user guide: see section 3.1 page 6) //
  
-EXPONENT=19 // (DEFAULT=19) the energy spectrum of the neutrinos. 
+EXPONENT=2 // (DEFAULT=19) the energy spectrum of the neutrinos. 
  
 
 // number of neutrinos (user guide: see section 3.2 page 7) //
@@ -96,6 +96,9 @@ USE_TESTBED_RFCM_ON=0 // (DEFAULT=0) 0: don’t apply specific amplification off
  
 RFCM_OFFSET=80 // (DEFAULT=80) when USE_TESTBED_RFCM_ON =0 use this value to cancel the amplification gain of electronic components. 
  
+TRIG_SCAN_MODE=0;// 0 (default): old triggering scheme. 1: new (slightly faster) scheme. 2: record best diode response for each waveform (for threshold scans). 
+
+
 
 // ice and earth (user guide: see section 3.8 page 14) //
  
@@ -140,7 +143,7 @@ BORE_HOLE_ANTENNA_LAYOUT=0 // (DEFAULT=0) order of antennas on the string. 0: HV
   
 z_max=200 // (DEFAULT=200) lowest antenna position on the string. in meters depth 
  
-BH_ANT_SEP_DIST_ON=0 // (DEFAULT=0) 0: all distances are the same (choose z_btw ). 1: choose each distance youself (use z_btwAB ). 
+BH_ANT_SEP_DIST_ON=1 // (DEFAULT=0) 0: all distances are the same (choose z_btw ). 1: choose each distance youself (use z_btwAB ). 
  
 z_btw=10 // (DEFAULT=10) single distance for all BH antennas, used when BH_ANT_SEP_DIST_ ON = 0 
  

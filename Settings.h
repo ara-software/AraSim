@@ -220,6 +220,9 @@ class Settings
         double ACCUM_TRIG_SEARCH_BINS_STATION0; // not actually setting value but gives us how much trigger searched bins there were in the run
 
 
+	int OUTPUT_TDR_GRAPH;// saves a few example graphs of the tunnel diode response for a triggered event
+	
+	
     
         int NU_NUBAR_SELECT_MODE; // default : 0 = random nu_nubar based on arXiv:1108.3163, section 3, 1 = just nu, 2 = just nubar 
 

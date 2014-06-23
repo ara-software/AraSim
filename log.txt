@@ -1246,3 +1246,16 @@ So Veff/Aeff will be simply decided by INTERACTION_MODE=1 or 0.
 
 ============================================================================
 
+06/23/14 Guy Nir:
+
+Added SingleChannelTriggers to Antenna_r in Report class. Saves the total number of triggers in each channel. 
+Added SCT_threshold_pass Antenna_r in Report class. A vector of the Pthresh values for each single channel trigger. 
+Added TRIG_SCAN_MODE=3 to settings, that tells AraSim to fill SCT_threshold_pass with values. 
+
+Added OUTPUT_TDR_GRAPH to settings, which tells AraSim to save some tunnel diode output waveforms, for debugging. 
+
+Added TGraph *getWaveform(...) function to Report class, to get the waveforms from V_mimic and time_mimic vectors. 
+
+
+
+

@@ -117,33 +117,17 @@ void Report::Initialize(Detector *detector, Settings *settings1) {
 	    
 	  }// for j
 	  
-// 	  cout<<"numChan= "<<numChan<<" numChanVpol= "<<numChanVpol<<" numChanHpol= "<<numChanHpol<<endl;
-	  
 	  stations[i].TDR_all.clear();
 	  for(int ch=0;ch<numChan; ch++ ) stations[i].TDR_all.push_back(0);
 	  stations[i].TDR_all_sorted.clear();
 	  if(settings1->TRIG_MODE==0) for(int ch=0;ch<numChan; ch++ ) stations[i].TDR_all_sorted.push_back(0);
 
-// 	  stations[i].TDR_Vpol.clear();
-// 	  for(int ch=0;ch<numChan; ch++) stations[i].TDR_Vpol.push_back(0);
 	  stations[i].TDR_Vpol_sorted.clear();
 	  if(settings1->TRIG_MODE==1) for(int ch=0;ch<numChanVpol; ch++) stations[i].TDR_Vpol_sorted.push_back(0);
 
-// 	  stations[i].TDR_Hpol.clear();
-// 	  for(int ch=0;ch<numChan; ch++ ) stations[i].TDR_Hpol.push_back(0);
 	  stations[i].TDR_Hpol_sorted.clear();
 	  if(settings1->TRIG_MODE==1) for(int ch=0;ch<numChanHpol; ch++ ) stations[i].TDR_Hpol_sorted.push_back(0);
 
-
-	  
-// 	  for(int ch=0;ch<REPORT_NCHAN; ch++){
-	   
-// 	    stations[i].TDR_all[ch]=0;
-// 	    stations[i].TDR_all_sorted[ch]=0;
-// 	    stations[i].TDR_Vpol[ch]=0; stations[i].TDR_Vpol_sorted[ch]=0; 
-// 	    stations[i].TDR_Hpol[ch]=0; stations[i].TDR_Hpol_sorted[ch]=0; 
-	    
-// 	  }
 	  
 	}// if TRIG_SCAN_MODE 
 	
@@ -204,7 +188,10 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     Vm_zoom_T.clear();
 
     SignalBin.clear();
-    SignalExt.clear();
+    SignalExt.clear(); 
+    
+    SCT_threshold_pass.clear();
+    
 }
 
 
@@ -214,6 +201,7 @@ void Antenna_r::clear_useless(Settings *settings1) {   // to reduce the size of 
 
     if (settings1->DATA_SAVE_MODE == 1) {
     Heff.clear();
+    
     //VHz_antfactor.clear();
     //VHz_filter.clear();
     Vfft.clear();
@@ -2554,6 +2542,12 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
     
     Pthresh_value[trig_j]=0;
     buffer[trig_j]=new CircularBuffer( trig_window_bin, powerthreshold, scan_mode);
+        
+    int string_i = detector->getStringfromArbAntID( i, trig_j);
+    int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+    
+    stations[i].strings[string_i].antennas[antenna_i].SingleChannelTriggers=0;
+    stations[i].strings[string_i].antennas[antenna_i].TotalBinsScannedPerChannel=0;
     
 //     int string_i = detector->getStringfromArbAntID( i, trig_j);
 //     int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
@@ -2580,8 +2574,10 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 
   int global_pass_bit=0;
   int check_TDR_configuration=0; // check if we need to reorder our TDR arrays
-      
-
+  int SCTR_cluster_bit[numChan];   
+  
+  for(int trig_j=0;trig_j<numChan;trig_j++) SCTR_cluster_bit[trig_j]=0;
+  
   for(int trig_i = trig_search_init; trig_i < max_total_bin; trig_i++) { // scan the different window positions
 
     // for trigger check:
@@ -2614,8 +2610,40 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	  else Pthresh_value[trig_j]=trigger->Full_window[trig_j][trig_i]/(trigger->rmsdiode_ch[8] * detector->GetThresOffset( i, channel_num-1,settings1) );
 	  
 	}
-							    
-//     cout<<"Full_window= "<<trigger->Full_window[trig_j][trig_i]<<endl;
+	// this is to count how many local trigger clusters there are 
+      if(Pthresh_value[trig_j]<powerthreshold){
+	
+	if(SCTR_cluster_bit[trig_j]==0) stations[i].strings[string_i].antennas[antenna_i].SingleChannelTriggers++;
+		
+	// records all the different Pthresh values that caused local trigger.
+        if(settings1->TRIG_SCAN_MODE>2){ 
+	  
+	  if(SCTR_cluster_bit[trig_j]==0){// if first trigger in cluster
+	    
+	    stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.push_back(Pthresh_value[trig_j]);
+	    
+	    
+	  }
+	  else{// choose the highest trigger value (most negative) in cluster
+	   
+	    if(Pthresh_value[trig_j]<stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back()) stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back()=Pthresh_value[trig_j];
+	    
+	  }
+	  
+	}// trig scan mode > 2
+	
+	SCTR_cluster_bit[trig_j]=1;
+	
+      }// if local trigger
+      else SCTR_cluster_bit[trig_j]=0;// if no local trigger, set zero to start a new cluster at next local trigger
+      
+      // and how many bins scanned
+      stations[i].strings[string_i].antennas[antenna_i].TotalBinsScannedPerChannel++;
+      
+
+
+      
+      						    
       // fill the buffers (if any changes occur mark check_TDR_configuration as non-zero)
       if(trig_i<trig_search_init+trig_window_bin) check_TDR_configuration+=buffer[trig_j]->fill(Pthresh_value[trig_j]);
       else check_TDR_configuration+=buffer[trig_j]->add(Pthresh_value[trig_j]);
@@ -2874,16 +2902,6 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
   
 }
 
-
-
-// int Report::triggerCheckLoopScan(){
-//   
-// }
-// 
-// int Report::triggerCheckLoopScanNumbers(){
-//   
-// }
-
 int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int last_trig_bin){
  
   int i=stationID;
@@ -3009,6 +3027,41 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
     
   }// for trig_j
   
+  
+   if(settings1->OUTPUT_TDR_GRAPH>0){
+     
+     settings1->OUTPUT_TDR_GRAPH--;
+     
+     TGraph **gr=new TGraph*[numChan];
+     
+     for(int trig_j=0;trig_j<numChan;trig_j++){
+      
+       int string_i = detector->getStringfromArbAntID( i, trig_j);
+       int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+       int channel_num = detector->GetChannelfromStringAntenna ( i, string_i, antenna_i, settings1 );
+       double thresh_value=0;
+       
+      // assign Pthresh a value 
+      if(settings1->NOISE_TEMP_MODE==0) thresh_value=detector->GetThres(i, channel_num-1, settings1) * trigger->rmsdiode * detector->GetThresOffset( i, channel_num-1,settings1);
+      if(settings1->NOISE_TEMP_MODE==1) thresh_value=detector->GetThres(i, channel_num-1, settings1) * trigger->rmsdiode_ch[channel_num-1] * detector->GetThresOffset( i, channel_num-1,settings1);
+      if(settings1->NOISE_TEMP_MODE==2){
+	  
+	  if(channel_num-1 < 8) thresh_value=detector->GetThres(i, channel_num-1, settings1) * trigger->rmsdiode_ch[channel_num-1] * detector->GetThresOffset( i, channel_num-1,settings1);
+	  else thresh_value=detector->GetThres(i, channel_num-1, settings1) * trigger->rmsdiode_ch[8] * detector->GetThresOffset( i, channel_num-1,settings1);
+	  
+	}
+       
+       gr[trig_j]=new TGraph();
+       for(int trig_i=0;trig_i<settings1->DATA_BIN_SIZE/2;trig_i++) gr[trig_j]->SetPoint(trig_i, (trig_search_init+trig_i), trigger->Full_window[trig_j][trig_i]);
+       gr[trig_j]->SetNameTitle(Form("TDR_waveform%dC%02d",  settings1->OUTPUT_TDR_GRAPH, trig_j), Form("Tunnel diode response waveform %d, channel %02d, trig_pass= %d, P_{th}= %le; time bins; power after convolution with tunnel diode", settings1->OUTPUT_TDR_GRAPH, trig_j, stations[i].strings[string_i].antennas[antenna_i].Trig_Pass, thresh_value));
+       gr[trig_j]->Write();
+       delete gr[trig_j];
+     }
+     
+     delete [] gr;
+     
+	
+   }
   
   return 1;
   
@@ -4475,3 +4528,25 @@ int Report::GetChannelNum8_LowAnt(int string_num, int antenna_num) {
                         
 
 
+                        
+
+TGraph *Report::getWaveform(Detector *detector, int ch, int station_i, int event_num, int run_num){
+ 
+  int string_i = detector->getStringfromArbAntID( station_i, ch);
+  int antenna_i = detector->getAntennafromArbAntID( station_i, ch);
+  
+  TGraph *gr=new TGraph();
+  
+  int N=stations[station_i].strings[string_i].antennas[antenna_i].V_mimic.size();
+  
+  for(int i=0;i<N;i++){
+   
+    gr->SetPoint(i,stations[station_i].strings[string_i].antennas[antenna_i].time_mimic[i], stations[station_i].strings[string_i].antennas[antenna_i].V_mimic[i]);
+    
+  }// for i
+  
+  gr->SetNameTitle(Form("WF%dS%02dC%02d", event_num, station_i, ch), Form("Simulated waveform %d, station %d, channel %d;time (ns); voltage (mV)", event_num, station_i, ch));
+  
+  return gr;
+  
+}

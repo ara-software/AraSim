@@ -230,6 +230,8 @@ outputdir="outputs"; // directory where outputs go
 
     SELECT_FLAVOR = 0; // default : randomly 1:1:1 ratio, 1 : el. 2 : mu, 3 : tau
 
+    OUTPUT_TDR_GRAPH = 0;// saves a few example graphs of the tunnel diode response for a triggered event
+
 }
 
 void Settings::ReadFile(string setupfile) {
@@ -515,7 +517,10 @@ void Settings::ReadFile(string setupfile) {
               }              
               else if (label == "SELECT_FLAVOR") {
                   SELECT_FLAVOR = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-              }              
+              }
+              else if (label == "OUTPUT_TDR_GRAPH") {
+                  OUTPUT_TDR_GRAPH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }       
 
 
           }

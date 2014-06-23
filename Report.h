@@ -7,6 +7,7 @@
 #define REPORT_H
 
 #include <vector>
+#include "TGraph.h"
 
 #ifndef __CINT__
 //Include output format to enable reading by analysis software AraRoot
@@ -117,7 +118,11 @@ class Antenna_r {
 
         int Likely_Sol; // comparing Trig_Pass and SignalBin value, this value returns which ray trace solution has been triggered (not perfect but most likely)
 
-
+        int SingleChannelTriggers; // how many bins passed the threshold in this channel (should be equal to size of SCT_threshold_pass).
+        vector <double> SCT_threshold_pass; // for each bin that passed, what was the threshold value at which it passed (for TRIG_SCAN_MODE only). 
+	
+	long TotalBinsScannedPerChannel;
+	
         vector <int> TooMuch_Tdelay;    // 0 is PeakV is located inside the DATA_BIN_SIZE array,  1 is when PeakV is located outside the DATA_BIN_SIZE so that we can't correctly check if it is triggered or not
 
         
@@ -313,7 +318,7 @@ class Report {
         int GetChannelNum8_LowAnt(int string_num, int antenna_num); // just return ch numbers 1-8 for antenna 0-1 (bottom antennas) and higher ch numbers for antenna 2-3 (top antennas) this is used for only TRIG_ONLY_LOW_CH_ON=1 mode with 
 
 
-
+	TGraph *getWaveform(Detector *detector, int ch, int station_i=0, int event_num=0, int run_num=0);
 
         vector <double> Vfft_noise_after;   // noise Vfft after get_random_rician
         vector <double> Vfft_noise_before;   // noise Vfft before get_random_rician
