@@ -1793,17 +1793,14 @@ double Interaction::PickNear_Sphere (IceModel *antarctica, Detector *detector, S
                                   nnu.Theta(), nnu.Phi(), range,
                                   newx, newy, newz, L0);
     if(!interacted){
-    pickposnu = 0;
-    return 0.;
+      pickposnu = 0;
+      return 0.;
     }
 
     newx += detector->params.core_x;
     newy += detector->params.core_y;
 
     FlattoEarth_Spherical(antarctica, newx, newy, newz);  //change to Earth shape and set depth (always in the ice)
-
-
-
 
 
     pickposnu = 1;  // all PickNear sucess for pickposnu
@@ -2857,10 +2854,11 @@ bool Interaction::Does_Interact(double x, double y, double z,
 
   //fprintf(stderr, "ratio: %f, newratio: %f\n", ratio, rndratio);
 
-  double x1, x2, y1, y2;
+  double x1 = x + a*t1;
+  double y1 = y + b*t1; 
+  double x2 = x + a*t2;
+  double y2 = y + b*t2;
   if(z1 > z2){
-    x2 = x + a*t2;
-    y2 = y + b*t2;
     if(cos(theta)>0.){
       newx = x2 + a*newt;
       newy = y2 + b*newt;
@@ -2871,8 +2869,6 @@ bool Interaction::Does_Interact(double x, double y, double z,
       newz = z2 - c*newt;
     }
   }else{
-    x1 = x + a*t1;
-    y1 = y + b*t1;
     if(cos(theta)>0.){
       newx = x1 + a*newt;
       newy = y1 + b*newt;
