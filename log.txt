@@ -1256,6 +1256,9 @@ Added OUTPUT_TDR_GRAPH to settings, which tells AraSim to save some tunnel diode
 
 Added TGraph *getWaveform(...) function to Report class, to get the waveforms from V_mimic and time_mimic vectors. 
 
+============================================================================
 
-
+07/03/14 Keiichi Mase:
+I fixed a bug in the effective area calculation, which was found by Eugene.
+I am still working to confirm the effective area mode is working properly.
 
