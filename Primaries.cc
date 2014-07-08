@@ -769,6 +769,20 @@ void Interaction::Initialize() {
     taudecay = "test_taudecay";
 }
 
+void Interaction::clear_useless(Settings *settings1){
+ 
+  if(settings1->DATA_SAVE_MODE>0){
+    
+    shower_depth_m.clear();
+    shower_Q_profile.clear();
+    EM_shower_depth_m.clear();
+    EM_shower_Q_profile.clear();
+    HAD_shower_depth_m.clear();
+    HAD_shower_Q_profile.clear();
+  
+  }
+  
+}
 
 // remove ANITA option for ARASIM
 //

@@ -141,6 +141,7 @@ void Report::Initialize(Detector *detector, Settings *settings1) {
 
 
 void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need to be added here!
+    
     view_ang.clear();
     launch_ang.clear();
     rec_ang.clear();
@@ -234,6 +235,8 @@ void Antenna_r::clear_useless(Settings *settings1) {   // to reduce the size of 
 
     }
     else if (settings1->DATA_SAVE_MODE == 2) {
+      
+    
     Heff.clear();
     //VHz_antfactor.clear();
     //VHz_filter.clear();
@@ -270,9 +273,8 @@ void Antenna_r::clear_useless(Settings *settings1) {   // to reduce the size of 
     //Vm_wo_antfactor.clear();
     Vm_zoom.clear();
     Vm_zoom_T.clear();
-
+    
     }
-
 
 
 }
@@ -298,6 +300,7 @@ void Report::clear_useless(Settings *settings1) {   // to reduce the size of out
         //
     
         V_total_forconvlv.clear();
+	RayStep.clear();
 
     }
 

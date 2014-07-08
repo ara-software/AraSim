@@ -6,20 +6,14 @@
 
 \usepackage{tikz}
 \usetikzlibrary{shapes, arrows, shadows}
-%\usepackage{parskip}
 
-\usepackage{amssymb}
 \usepackage{graphicx}
 
-\usepackage{amsmath}
-\usepackage{amsthm}
-\usepackage{amsfonts}
-%\usepackage[retainorgcmds]{IEEEtrantools}
+\usepackage{amsmath, amsthm, amssymb,amsfonts}
 \usepackage{mathrsfs}
 \usepackage{float}
-% \floatstyle{boxed} 
 \restylefloat{figure}
-%\usepackage{pdfpages}
+\usepackage{pdfpages}
 
 \usepackage{xspace}
 
@@ -27,17 +21,17 @@
 
 \usepackage{xstring}
 
-%\setlength{\parindent}{1cm}
-
 \usepackage{url}
 
-\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
-\newcommand{\pdc}[3]{\left(\pd{#1}{#2}\right)_{#3}}
-\newcommand{\Dt}{\frac{d}{dt}}
-\renewcommand{\H}{\mathcal{H}}
-\renewcommand{\inf}{\infty}
-\newcommand{\intinf}{\int_{-\inf}^{\inf}}
+% some useful math macros (not necessarily needed for this document)
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}} % partial derivative
+\newcommand{\pdc}[3]{\left(\pd{#1}{#2}\right)_{#3}}  % partial derivative keeping #3 constant
+\newcommand{\Dt}{\frac{d}{dt}} % time derivative
+\renewcommand{\H}{\mathcal{H}} % Hamiltonian H
+\renewcommand{\inf}{\infty}    % infinity
+\newcommand{\intinf}{\int_{-\inf}^{\inf}} % integral from -inf  ro inf
 
+% common greek letters
 \newcommand{\sig}{\sigma}
 \renewcommand{\b}{\beta}
 \newcommand{\la}{\lambda}
@@ -47,67 +41,61 @@
 \newcommand{\Del}{\Delta}
 \newcommand{\om}{\omega}
 \renewcommand{\O}{\Omega}
-\newcommand{\then}{\quad\Rightarrow\quad}
-\newcommand{\with}{\quad\text{with}\quad}
-\newcommand{\an}{\quad \text{and} \quad}
-\newcommand{\I}{\mathbb{I}}
 \newcommand{\ep}{\varepsilon}
-\newcommand{\ih}{i\hbar}
-\newcommand{\D}{\mathcal{D}}
-\newcommand{\De}{\Delta \ep}
-\newcommand{\BS}{\vspace{1cm}\begin{flushright} $\blacksquare$ \end{flushright}\vspace{1 cm}}
-\newcommand{\ans}{\vspace{1cm} \textit{Answer:} \vspace{1cm}}
-\newcommand{\hhm}{\frac{\hbar^2}{2m}}
+\newcommand{\f}{\varphi}
+\newcommand{\al}{\alpha}
 
+% useful for equations
+\newcommand{\then}{\quad\Rightarrow\quad} % padded double arrow
+\newcommand{\with}{\quad\text{with}\quad} 
+\newcommand{\an}{\quad \text{and} \quad}  
+\newcommand{\comma}{\quad , \quad}
+
+% useful stuff for quantum mechanics
 \newcommand{\ket}[1]{|\ #1 \rangle}
 \newcommand{\bra}[1]{\langle #1 \ |}
 \newcommand{\bracket}[2]{\langle #1 \ | \ #2 \rangle}
 \newcommand{\resq}[1]{\tfrac {1} {\sqrt{#1}}}
 \renewcommand{\dag}{ ^\dagger}
 \newcommand{\levic}[1]{\varepsilon_{#1}}
-\newcommand{\comm}[2]{\left[#1\ ,\ #2\right]}
-\newcommand{\comma}{\quad , \quad}
-\newcommand{\ave}[1]{\langle #1 \rangle}
-\newcommand{\intdr}{\int d^3 r}
-\newcommand{\f}{\varphi}
-\newcommand{\al}{\alpha}
+\newcommand{\comm}[2]{\left[#1\ ,\ #2\right]} % commutator
+\newcommand{\mat}[1]{\left(\begin{matrix} #1 \end{matrix}\right)}
 \newcommand{\shro}{Shr\"odinger\xspace}
 
+% useful stuff for statistical mechanics 
+\newcommand{\ave}[1]{\langle #1 \rangle}
+\newcommand{\intdr}{\int d^3 r}
 \renewcommand{\deg}{^\circ}
 
 
-\newcommand{\eq}[2][ ]{\begin{equation}\label{#1}{#2}\end{equation}}
-
-%\newcommand{\eqn}[2][ ]{\begin{IEEEeqnarray*}{rCl} {#2} \IEEEyesnumber\label{#1} \end{IEEEeqnarray*}}
-
-\newcommand{\eqn}[2][]{\begin{align} {#2} \label{#1}\end{align}}
-
-\newcommand{\mat}[1]{\left(\begin{matrix} #1 \end{matrix}\right)}
-
-
-
-\newcommand{\eqr}[1]{\begin{equation*} #1 \end{equation*}}
 \newcommand{\room}{\vspace{0.3cm}}
 
-%\newcommand{\fdt}{\Large\textt{\makebox{\raisebox{+0.1ex}{F}}\makebox[5pt]{\raisebox{-0.2ex}{d}}\makebox[+12pt]{\raisebox{+0.1ex}{T}}}\normalsize}
-
 \newcommand{\pic}[2][1]{\begin{center}\includegraphics[width=#1\textwidth]{#2} \end{center}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
+% project specific macros:
 
 \newcommand{\arasim}{AraSim\xspace}
 %\newcommand{\arasim}{\makebox[.7em]{\raisebox{0.3ex}{A}}\makebox[0.9ex]{\raisebox{-0.2ex}r}\makebox{\raisebox{0.4ex}{a}}\makebox[0.9ex]{\raisebox{0.5ex}{S}}\makebox[0.8ex]{\raisebox{-0.2ex}{i}} \makebox[0.1ex]{\raisebox{0.3ex}{m}}\xspace\xspace\xspace}
 
+% this formats the ARASIM parameters. Don't use '_' it will render them automatically
+\newcommand{\p}[1]{\texttt{\StrSubstitute{#1}{ }{\char`_\hspace{0.5pt}}} \xspace} 
 
-\newcommand{\p}[1]{\texttt{\StrSubstitute{#1}{ }{\char`_\hspace{0.5pt}}} \xspace} %used to write parameter names as code
+% this is used to first define a parameter. same as \p but with reference and spade-suit bullet. Don't use '_' it will render them automatically
+\newcommand{\pr}[1]{\vspace{5pt}{\color{blue}$\spadesuit$} \label{#1}\texttt{ \StrSubstitute{#1}{ }{\char`_\hspace{0.5pt}}}} 
 
-\newcommand{\pr}[1]{\vspace{5pt}{\color{blue}$\spadesuit$} \label{#1}\texttt{ \StrSubstitute{#1}{ }{\char`_\hspace{0.5pt}}}} % same as \p but with reference and spade suit bullet.
+%  a reference to a parameter. This is used to print out a short description plus page ref to the guide
+\renewcommand{\r}[3][0]{\#\texttt{\StrSubstitute{#2}{ }{\char`_\hspace{0.5pt}}}=#1 // (DEFAULT=#1) #3 \# }
 
-\renewcommand{\r}[3][0]{\#\texttt{\StrSubstitute{#2}{ }{\char`_\hspace{0.5pt}}}=#1 // (DEFAULT=#1) #3 \# } % a reference to a parameter. 
+% unused reference to parameters which don't need a reference
+\newcommand{\rs}[3][0]{}
 
-\newcommand{\rs}[3][0]{} % unused reference to parameters which are unused and don't need a reference
+% reference section:
+\newcommand{\rsection}[1]{\subsection*{\#\#//  #1 (\textbf{user guide}: see section \ref{#1} page \pageref{#1}) //\#}} 
 
-\newcommand{\rsection}[1]{\subsection*{\#\#//  #1 (\textbf{user guide}: see section \ref{#1} page \pageref{#1}) //\#}} %reference section
-
-\newcommand{\tb}[1]{{\color{red}\textbf{#1}}} % the emphasis for testbed only! lines
+% the emphasis for testbed only! lines
+\newcommand{\tb}[1]{{\color{red}\textbf{#1}}} 
 
 
 % \renewcommand{\labelitemi}{$\clubsuit$}
@@ -159,7 +147,7 @@ for writing this software
 
 \today
 
-svn: revision 446
+svn: revision 467
 
 \end{centering}
 
@@ -216,6 +204,8 @@ Along with this .pdf document is a settings file `setup.txt' which contains the 
  \item ROOT: you should already be running root (and, if necessary, have \verb|ROOTSYS| set in your environmental variables). 
 
  \item Boost: a bunch of libraries for doing things faster in c++: 
+ 
+ \item AraRoot: for the data structures and geometry used in ARA analysis. 
  
  \begin{enumerate} 
   
@@ -606,6 +596,7 @@ The second option is \p{ONLY PASSED EVENTS}= 1, where we specify how many $\nu$'
 
 \pr{NNU PASSED}=0. When using this mode (\p{ONLY PASSED EVENTS}=1), \arasim will ignore the \p{NNU} field and look instead at \p{NNU PASSED}. This field determines how many neutrinos will globally trigger. 
 
+\pr{OUTPUT TDR GRAPH}=0. Saves this number of tunnel diode response (TDR) waveforms for debugging. 
 
 \begin{figure}[H]
 
@@ -767,17 +758,21 @@ If you really want to work in the old methods choose \p{NOISE WAVEFORM GENERATE 
 
 \begin{itemize}
 
- \item \textbf{Pick unbiased} (mode 0): chooses a random location in the antarctic ice sheet. May lead to many neutrinos being outside the range of the detector. 
+%  \item \textbf{Pick unbiased} (mode 0): chooses a random location in the antarctic ice sheet. May lead to many neutrinos being outside the range of the detector. 
  
- \room
+ \item \textbf{Aeff mode (spherical volume)} (mode 0): choose neutrino location in sphere around detector, but only inside ice. Makes an unbiased sample of events so we can get the effective area directly. This automatically chooses the new \p{GET CHORD} mode. Make sure you set \p{POSNU RADIUS} to 5km (or more) for this mode. 
  
- \item \textbf{Pick near} (mode 1, default): Chooses $\nu$ interaction position close by to the detector, within a cylinder of radius R. 
+ This mode has the advantage that it already takes into account the survival probability of neutrinos passing through the earth. 
  
- \underline{In pick near mode only}:
- 
+  
  \pr{POSNU RADIUS}=3000, in meters. Determines the radius around the detector in which the neutrinos are generated.
  
-  Make sure you choose a reasonable radius for the position of the neutrino interaction. If you choose a large detector, for example ARA37, make sure you increase the size of \p{POSNU RADIUS} to include the detector and the area around it (for ARA37 consider using $\sim$13000)
+   Make sure you choose a reasonable radius for the position of the neutrino interaction. If you choose a large detector, for example ARA37, make sure you increase the size of \p{POSNU RADIUS} to include the detector and the area around it (for ARA37 consider using $\sim$13000)
+
+ \room
+ 
+ \item \textbf{Veff mode (cylindrical volume)} (mode 1, default): Chooses $\nu$ interaction position close by to the detector, within a cylinder of radius R. In this mode we get the effective volume. This uses the old \p{GET CHORD} function. 
+
  
  \pr{PICK POSNU DEPTH}=0 (default) takes all the ice down to the bedrock (according to the earth model used). mode 1 allows the user to choose a maximum depth for the position of the neutrinos. 
  
@@ -796,13 +791,17 @@ If you really want to work in the old methods choose \p{NOISE WAVEFORM GENERATE 
 
    relative to the station center. This mode is useful for testing reconstruction at a specific location, or for making sure all events have a ray trace solution (see subsection \ref{ray solving}).
    
-   \item \textbf{Pick near-unbiased} (mode 3): choose position of $\nu$'s in a sphere around center of ARA stations. 
+%    \item \textbf{Pick near-unbiased} (mode 3): choose position of $\nu$'s in a sphere around center of ARA stations. 
    
-   \underline{in pick near-unbiased mode only}:
+%    \underline{in pick near-unbiased mode only}:
    
-   \pr{PICKNEARUNBIASED R}=5000 the radius around detector when using above mode 3. This is far enough to contain all relevant events when using single station. Like \p{POSNU RADIUS}, make sure you choose a larger size when using multiple stations. 
-   
+%    \pr{PICKNEARUNBIASED R}=5000 the radius around detector when using above mode 3. This is far enough to contain all relevant events when using single station. Like \p{POSNU RADIUS}, make sure you choose a larger size when using multiple stations. 
+
+
+
 \end{itemize}
+
+
 
 The direction of the incoming neutrino can be predetermined using
 
@@ -814,9 +813,9 @@ The direction of the incoming neutrino can be predetermined using
 
 \room
 
-\pr{SECONDARIES}=0 (default): does not allow any more interactions after the first. mode 1: allow secondary interactions (for future release only - do not use).
+\pr{SECONDARIES}=1. mode 0: does not allow any more interactions after the first. mode 1 (default): allow secondary interactions.
 
-\pr{TAUDECAY}=0 (default) do not allow secondary $\tau$ particle decays. mode 1: let $\tau$ particles that are generated from $\nu_\tau$ to also have a secondary decay in the ice. Only works when \p{SECONDARIES} is set to 1 (future release). 
+\pr{TAUDECAY}=1. mode 0: do not allow secondary $\tau$ particle decays. mode 1 (default): let $\tau$ particles that are generated from $\nu_\tau$ to also have a secondary decay in the ice. Only works when \p{SECONDARIES} is set to 1. 
 
 
 
@@ -1003,7 +1002,8 @@ This means that a number of waveforms (exact number is determined by the paramet
   
 \end{itemize}
 
-\pr{TRIG SCAN MODE}=0 (default): use old triggering algorithm. mode 1: use new, slightly faster code. mode 2: scan all threshold values and save the results in `Report' class. This mode takes a little more time, but gives information for each event that triggers what would be the best \p{POWERTHRESHOLD} it would have triggered on, and how many channels required for it. For example, an event passed the threshold in 3 channels (at \p{POWERTHRESHOLD}=-6.15) but had large amplitude and could have triggered \p{POWERTHRESHOLD}=-6.5 in four channels. Useful for scanning low values of \p{POWERTHRESHOLD}. Information is stored in \verb| TDR_all_sorted | or \verb| TDR_Vpol_sorted | and \verb| TDR_Hpol_sorted | when triggering on Vpol/Hpol seperately. One can then use this information to make powerthreshold cut vs.~number of triggers. 
+\pr{TRIG SCAN MODE}=0 (default): use old triggering algorithm. mode 1: use new, slightly faster code. mode 2: scan all threshold values and save the results in `Report' class. This mode takes a little more time, but gives information for each event that triggers what would be the best \p{POWERTHRESHOLD} it would have triggered on, and how many channels required for it. For example, an event passed the threshold in 3 channels (at \p{POWERTHRESHOLD}=-6.15) but had large amplitude and could have triggered \p{POWERTHRESHOLD}=-6.5 in four channels. Useful for scanning low values of \p{POWERTHRESHOLD}. Information is stored in \verb| TDR_all_sorted | or \verb| TDR_Vpol_sorted | and \verb| TDR_Hpol_sorted | when triggering on Vpol/Hpol seperately. One can then use this information to make powerthreshold cut vs.~number of triggers. mode 3: save the single channel triggers and each powerthreshold value at which the occured. this is saved to \verb| SCT_threshold_pass | in \verb| antenna_r |. Used to get the single 
+channel trigger rate vs powerthreshold. 
 
 
 \pr{TRIG ONLY BH ON}=0 (default) trigger is checked for all channels. mode 1 use only borehole antennas for triggering. Use in \tb{testbed mode only}!  
@@ -1308,17 +1308,15 @@ We can also determine the way the radio waves move through the antarctic ice usi
  
  \pr{z max}=200, in meters. This sets the depth of the lowest antenna on a string.Positive numbers are used to denote depth. 
  
- \pr{BH ANT SEP DIST ON}=0 (default) the distances between antennas on a string are all the same:
+ \pr{BH ANT SEP DIST ON}=0 the distances between antennas on a string are all the same. mode 1 (default) we get to choose different distances on the string. 
  
  \pr{z btw}=10 (in meters) is the distance between antennas in mode 0.
  
- In mode 1 we get to choose different distances on the string. 
+ \pr{z btw01}=2 (in meters) is the distance between first (lowest) antenna and second in mode 1. 
  
- \pr{z btw01}=2 (in meters) is the distance between the first (lowest) antenna and the second. 
+ \pr{z btw12}=15 (in meters) between second and third antenna in mode 1. 
  
- \pr{z btw12}=15 (in meters) between the second and third antenna. 
- 
- \pr{z btw23}=2 (in meters) between the third and fourth (last, if it exists) antenna. 
+ \pr{z btw23}=2 (in meters) between third and fourth (last, if it exists) antenna in mode 1. 
 
  \begin{itemize}
  
@@ -1725,7 +1723,7 @@ working progress
 
 \r[10]{NNU PASSED}{when using \p{ONLY PASSED EVENTS} this determines how many events will pass the trigger.}
 
-
+\r{OUTPUT TDR GRAPH}{saves this number of tunnel diode response waeforms.}
 
 
 \rsection{generating noise}
@@ -1762,9 +1760,9 @@ working progress
 
 \r{NNU D THETA}{the range around \p{NNU THETA} (up and down).}
 
-\r{SECONDARIES}{0: no secondary interactions. 1: future release.}
+\r[1]{SECONDARIES}{0: no secondary interactions. 1: allow secondary interactions.}
 
-\r{TAUDECAY}{0: do not allow secondary tau decay. 1: allow secondary decay of tau's, only works when \p{SECONDARIES}=1 in future release.}
+\r[1]{TAUDECAY}{0: do not allow secondary tau decay. 1: allow secondary decay of tau's, only works when \p{SECONDARIES}=1.}
 
 
 
@@ -1794,7 +1792,7 @@ working progress
 
 \r[3]{N TRIG H}{number of Hpol required for a global trigger (if \p{TRIG MODE}=1).}
 
-\r[0]{TRIG SCAN MODE}{triggering algorithm. 0: old code. 1: new, faster code. 2: scan all powerthreshold values.}
+\r[0]{TRIG SCAN MODE}{triggering algorithm. 0: old code. 1: new, faster code. 2: scan all powerthreshold values. 3: save single channel trigger powerthreshold values, too. }
 
 
 \r{TRIG ONLY BH ON}{0: check trigger on all channels. 1: check only borehole antennas.}
@@ -1857,7 +1855,7 @@ working progress
 
 \r[200]{z max}{lowest antenna position on the string. in meters depth}
 
-\r{BH ANT SEP DIST ON}{0: all distances are the same (choose \p{z btw}). 1: choose each distance youself (use \p{z btwAB}).}
+\r[1]{BH ANT SEP DIST ON}{0: all distances are the same (choose \p{z btw}). 1: choose each distance youself (use \p{z btwAB}).}
 
 \r[10]{z btw}{single distance for all BH antennas, used when \p{BH ANT SEP DIST ON}= 0}
 

@@ -1262,3 +1262,11 @@ Added TGraph *getWaveform(...) function to Report class, to get the waveforms fr
 I fixed a bug in the effective area calculation, which was found by Eugene.
 I am still working to confirm the effective area mode is working properly.
 
+============================================================================
+
+07/08/14 Guy Nir:
+
+Added Interaction::clear_useless() method to clear the shower profile vectors. 
+These vectors took a very large volume in the output files, especially when saving all events.
+This only applies in DATA_SAVE_MODE>0. 
+

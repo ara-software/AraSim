@@ -487,7 +487,7 @@ double cur_posnu_z;
 #endif
                
            report->ClearUselessfromConnect(detector, settings1, trigger);
-
+	   for(int i=0;i<event->Nu_Interaction.size(); i++) event->Nu_Interaction[i].clear_useless(settings1);
 
            // test if posnu is exactly same in calpulser mode
            if (settings1->CALPULSER_ON == 1) {
@@ -679,7 +679,10 @@ double cur_posnu_z;
        }
        */
 
-
+// if(inu==nuLimit){
+//   cout<<endl<<"sizeof: Report= "<<sizeof(*report)<<"  station= "<<sizeof(report->stations[0])<<"  antenna= "<<sizeof(report->stations[0].strings[0].antennas[0])<<endl;
+//   cout<<"sizeof: Event= "<<sizeof(*event)<<" Interaction= "<<sizeof(event->Nu_Interaction[0])<<"  TOTAL SIZE= "<<sizeof(*report)+sizeof(*event)+sizeof(report->stations[0])+16*sizeof(report->stations[0].strings[0].antennas[0])+sizeof(event->Nu_Interaction[0])<<endl;
+// }
 
  delete event;
  delete report;
@@ -886,7 +889,7 @@ double cur_posnu_z;
 
  cout<<"outputdir= "<<outputdir<<endl;
 
-
+  
  
  return 0;
   

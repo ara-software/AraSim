@@ -312,7 +312,7 @@ class Interaction  {
   Position r_in; // position where neutrino enters the earth
   Position r_enterice; // position where neutrino enters the ice
   Position nuexit; // place where neutrino would have left the earth
-Position nuexitice; // place where neutrino would have left the ice
+  Position nuexitice; // place where neutrino would have left the ice
   double chord;  // chord in m from earth entrance to rock-ice boundary
   double logchord; // log_10 of chord length earth entrance to where it enters ice
   double weight_bestcase; // what weight1 would be if whole earth had density of crust - for quick and dirty calculation of best case scenario
@@ -388,6 +388,7 @@ static const double banana_signal_fluct;//Turn off noise for banana plots (setti
 
   int primary_shower; // 0 or EM, 1 for HAD. set by emfrac, hadfrac
 
+  void clear_useless(Settings *settings1);
   
   /*
 

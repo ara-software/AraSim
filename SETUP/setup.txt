@@ -96,10 +96,6 @@ USE_TESTBED_RFCM_ON=0 // (DEFAULT=0) 0: don’t apply specific amplification off
  
 RFCM_OFFSET=80 // (DEFAULT=80) when USE_TESTBED_RFCM_ON =0 use this value to cancel the amplification gain of electronic components. 
  
-TRIG_SCAN_MODE=0;// 0 (default): old triggering scheme. 1: new (slightly faster) scheme. 2: record best diode response for each waveform (for threshold scans). 
-
-
-
 // ice and earth (user guide: see section 3.8 page 14) //
  
 CONSTANTCRUST=0 // (DEFAULT=0) This is a left over parameter, do not change these settings. 
@@ -116,7 +112,7 @@ ICE_MODEL=0 // (DEFAULT=0) 0: Crust 2.0 or 1: bedmap (old ice model).
  
 NOFZ=1 // (DEFAULT=1) 0: constant index of refraction (not recommended). 1: n changes with depth (default). 
  
-GETCHORD_MODE=0 // (DEFAULT=0) which code to use for weights of nu’s passing the earth / atmosphere. 0: old code. 1: new untested code. 
+//GETCHORD_MODE=0 // (DEFAULT=0) which code to use for weights of nu’s passing the earth / atmosphere. 0: old code. 1: new untested code. 
  
 taumodes=0 // (DEFAULT=0) 0: no tau modes. 1: allow tau nu’s interaction in bedrock to create tau’s. works only when GETCHORD_MODE =1. 
  
@@ -143,7 +139,7 @@ BORE_HOLE_ANTENNA_LAYOUT=0 // (DEFAULT=0) order of antennas on the string. 0: HV
   
 z_max=200 // (DEFAULT=200) lowest antenna position on the string. in meters depth 
  
-BH_ANT_SEP_DIST_ON=1 // (DEFAULT=0) 0: all distances are the same (choose z_btw ). 1: choose each distance youself (use z_btwAB ). 
+BH_ANT_SEP_DIST_ON=1 // (DEFAULT=1) 0: all distances are the same (choose z_btw ). 1: choose each distance youself (use z_btwAB ). 
  
 z_btw=10 // (DEFAULT=10) single distance for all BH antennas, used when BH_ANT_SEP_DIST_ ON = 0 
  

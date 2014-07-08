@@ -178,7 +178,7 @@ outputdir="outputs"; // directory where outputs go
 
     taumodes = 0; // no tau created in the rock
 
-    BH_ANT_SEP_DIST_ON = 1; // default 0 : use constant borehole antenna distance. 1 : use separate antenna distance. use z_btw01, z_btw12, ... in ARA_N_info.txt or ARA37_info.txt
+    BH_ANT_SEP_DIST_ON = 1; // 0 : use constant borehole antenna distance. default 1 : use separate antenna distance. use z_btw01, z_btw12, ... in ARA_N_info.txt or ARA37_info.txt
 
     TRIG_MODE = 1; // default 1 : if any antennas got passed N_TRIG or more, global trig. 1 : either Vpol or Hpol antennas got passed N_TRIG_V or N_TRIG_H respectively, global trig.
 
