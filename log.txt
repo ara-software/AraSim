@@ -1270,3 +1270,9 @@ Added Interaction::clear_useless() method to clear the shower profile vectors.
 These vectors took a very large volume in the output files, especially when saving all events.
 This only applies in DATA_SAVE_MODE>0. 
 
+============================================================================
+
+07/14/14 Eugene Hong;
+
+Fixed oldRF mode Hpol antenna response nan problem (at a specific angle, frequency linear gain value become negative).
+
