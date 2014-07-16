@@ -1276,3 +1276,17 @@ This only applies in DATA_SAVE_MODE>0.
 
 Fixed oldRF mode Hpol antenna response nan problem (at a specific angle, frequency linear gain value become negative).
 
+============================================================================
+
+07/16/14 Eugene Hong;
+
+Additional bug fixes (more details in my presentation
+http://ara.physics.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=1074
+-> second stage debugging -> oldRF mode normalization part
+
+Now, as a default AraSim will generate new normalization factor applied mode (AVZ_NORM_FACTOR_MODE=1).
+If you want to get old (wrong) normalization mode again, put
+AVZ_NORM_FACTOR_MODE=0
+in your setup file
+
+

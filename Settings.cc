@@ -232,6 +232,10 @@ outputdir="outputs"; // directory where outputs go
 
     OUTPUT_TDR_GRAPH = 0;// saves a few example graphs of the tunnel diode response for a triggered event
 
+
+    AVZ_NORM_FACTOR_MODE = 1; // default : 1 : don't apply sqrt(2) (actually applied but cancel that) as realft assume Hn as double-sided spectrum (invFFT normalization factor 2/N) and also remove dF binning factor in MakeArraysforFFT function, 0 : use normalization factors like in old version
+
+
 }
 
 void Settings::ReadFile(string setupfile) {
@@ -521,6 +525,9 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "OUTPUT_TDR_GRAPH") {
                   OUTPUT_TDR_GRAPH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }       
+              else if (label == "AVZ_NORM_FACTOR_MODE") {
+                  AVZ_NORM_FACTOR_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }              
 
 
           }

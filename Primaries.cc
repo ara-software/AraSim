@@ -1027,8 +1027,15 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
 
 
                    if (primary1->IsCalpulser == 0){
-                   vmmhz1m[i] = signal->GetVmMHz1m( pnu, detector->GetFreq(i) );   // get VmMHz at 1m at cherenkov angle at GetFreq(i)
-                   //cout<<"GetVmMHZ1m : "<<vmmhz1m[i]<<endl;
+
+                       if (settings1->AVZ_NORM_FACTOR_MODE == 0) { // use previous normalization factor ( with sqrt(2) )
+                           vmmhz1m[i] = signal->GetVmMHz1m( pnu, detector->GetFreq(i) );   // get VmMHz at 1m at cherenkov angle at GetFreq(i)
+                       }
+                    
+                       else if (settings1->AVZ_NORM_FACTOR_MODE == 1) { // use new normalization factor ( without sqrt(2) )
+                           vmmhz1m[i] = signal->GetVmMHz1m( pnu, detector->GetFreq(i) ) / sqrt(2.);   // get VmMHz at 1m at cherenkov angle at GetFreq(i), cancel sqrt(2) factor
+                       }
+
                    } else {
                        if (i <56){
                        vmmhz1m[i] = signal->GetVmMHz1mCalPulser( i );

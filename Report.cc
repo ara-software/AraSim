@@ -4088,93 +4088,162 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
 //    int TIMESTEP = detector->stations[StationIndex].TIMESTEP;
     Tools::Zero(vsignal_forfft,NFOUR/2);
     
-    double previous_value_e_even=0.;
-    double previous_value_e_odd=0.;
-    int count_nonzero=0;
-    int iprevious=0;
-    int ifirstnonzero=-1;
-    int ilastnonzero=2000;
-    //for (int i=0;i<NFREQ;i++) {
-    for (int i=0;i<detector->GetFreqBin();i++) {
-	
-	// freq_forfft has NFOUR/2 elements because it is meant to cover real and imaginary values
-	// but there are only NFOUR/4 different values
-	// it's the index among the NFOUR/4 that we're interested in
-	int ifour=Tools::Getifreq(detector->GetFreq(i),detector->freq_forfft[0],detector->freq_forfft[NFOUR/2-1],NFOUR/4);
-	
-	if (ifour!=-1 && 2*ifour+1<NFOUR/2) {
-	    count_nonzero++;
-	    if (ifirstnonzero==-1)
-		ifirstnonzero=ifour;
-	    
-	    vsignal_forfft[2*ifour]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // inverse fft normalization factor (2/(N/2)), 1/dt for change integration fft form to discrete numerical fft
-	    
-	    //      cout << "ifour, vsignal is " << ifour << " " << vsignal_e_forfft[2*ifour] << "\n";
-	    
-	    vsignal_forfft[2*ifour+1]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // phase is 90 deg.
-	    // the 2/(nfour/2) needs to be included since were using Tools::realft with the -1 setting
-	    
-	    // how about we interpolate instead of doing a box average
-	    
-	    for (int j=iprevious+1;j<ifour;j++) {
-		vsignal_forfft[2*j]=previous_value_e_even+(vsignal_forfft[2*ifour]-previous_value_e_even)*(double)(j-iprevious)/(double)(ifour-iprevious);
-		//	cout << "j, vsignal is " << j << " " << vsignal_e_forfft[2*j] << "\n";
-		
-		vsignal_forfft[2*j+1]=previous_value_e_odd+(vsignal_forfft[2*ifour+1]-previous_value_e_odd)*(double)(j-iprevious)/(double)(ifour-iprevious);
-	    }
-	    
-	    ilastnonzero=ifour;
-	    iprevious=ifour;
-	    previous_value_e_even=vsignal_forfft[2*ifour];
-	    previous_value_e_odd=vsignal_forfft[2*ifour+1];
-	}
-	
-    } // end loop over nfreq
+
+
+    if (settings1->AVZ_NORM_FACTOR_MODE == 0) { // use previous normalization factors
+
+
+        double previous_value_e_even=0.;
+        double previous_value_e_odd=0.;
+        int count_nonzero=0;
+        int iprevious=0;
+        int ifirstnonzero=-1;
+        int ilastnonzero=2000;
+        //for (int i=0;i<NFREQ;i++) {
+        for (int i=0;i<detector->GetFreqBin();i++) {
+            
+            // freq_forfft has NFOUR/2 elements because it is meant to cover real and imaginary values
+            // but there are only NFOUR/4 different values
+            // it's the index among the NFOUR/4 that we're interested in
+            int ifour=Tools::Getifreq(detector->GetFreq(i),detector->freq_forfft[0],detector->freq_forfft[NFOUR/2-1],NFOUR/4);
+            
+            if (ifour!=-1 && 2*ifour+1<NFOUR/2) {
+                count_nonzero++;
+                if (ifirstnonzero==-1)
+                    ifirstnonzero=ifour;
+                
+                vsignal_forfft[2*ifour]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // inverse fft normalization factor (2/(N/2)), 1/dt for change integration fft form to discrete numerical fft
+                
+                //      cout << "ifour, vsignal is " << ifour << " " << vsignal_e_forfft[2*ifour] << "\n";
+                
+                vsignal_forfft[2*ifour+1]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // phase is 90 deg.
+                // the 2/(nfour/2) needs to be included since were using Tools::realft with the -1 setting
+                
+                // how about we interpolate instead of doing a box average
+                
+                for (int j=iprevious+1;j<ifour;j++) {
+                    vsignal_forfft[2*j]=previous_value_e_even+(vsignal_forfft[2*ifour]-previous_value_e_even)*(double)(j-iprevious)/(double)(ifour-iprevious);
+                    //	cout << "j, vsignal is " << j << " " << vsignal_e_forfft[2*j] << "\n";
+                    
+                    vsignal_forfft[2*j+1]=previous_value_e_odd+(vsignal_forfft[2*ifour+1]-previous_value_e_odd)*(double)(j-iprevious)/(double)(ifour-iprevious);
+                }
+                
+                ilastnonzero=ifour;
+                iprevious=ifour;
+                previous_value_e_even=vsignal_forfft[2*ifour];
+                previous_value_e_odd=vsignal_forfft[2*ifour+1];
+            }
+            
+        } // end loop over nfreq
+        
+
+
+        // don't applying any extra factor for the change in array (change of bin size)
+        // as change in the bin size doesn't matter for the total energy
+        // total energy is just same as integral over frequency range and this frequency range will not change
+        //
+          //cout << "ifirstnonzero, ilastnonzero are " << ifirstnonzero << " " << ilastnonzero << "\n";
+          //cout << "non zero count is " << count_nonzero << "\n";
+          //cout << "ratio is " << (double)count_nonzero/(double)(ilastnonzero-ifirstnonzero) << "\n";
+        for (int j=0;j<NFOUR/4;j++) {
+            vsignal_forfft[2*j]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
+            vsignal_forfft[2*j+1]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
+        }
+
+
+
+        
+        //  Tools::InterpolateComplex(vsignal_e_forfft,NFOUR/4);
+        //Tools::InterpolateComplex(vsignal_h_forfft,NFOUR/4);
+        for (int ifour=0;ifour<NFOUR/4;ifour++) {
+
+
+
+            vsignal_forfft[2*ifour]*=cos(settings1->PHASE*PI/180.);
+            vsignal_forfft[2*ifour+1]*=sin(settings1->PHASE*PI/180.);
+            
+            //--------------------------------------------------
+            // if (!PULSER) {
+            //     
+            //     vsignal_forfft[2*ifour]*=cos(phase*PI/180.);
+            //     vsignal_forfft[2*ifour+1]*=sin(phase*PI/180.);
+            //     
+            //     
+            // }
+            // else {
+            //     vsignal_forfft[2*ifour]*=cos(v_phases[ifour]*PI/180.);
+            //     vsignal_forfft[2*ifour+1]*=sin(v_phases[ifour]*PI/180.);
+            //     
+            // }	  	  	  
+            //-------------------------------------------------- 
+            
+            
+        }
+    }
+    else if (settings1->AVZ_NORM_FACTOR_MODE == 1) { // use new (fixed) normalization factors
     
-
-
-    // don't applying any extra factor for the change in array (change of bin size)
-    // as change in the bin size doesn't matter for the total energy
-    // total energy is just same as integral over frequency range and this frequency range will not change
-    //
-      //cout << "ifirstnonzero, ilastnonzero are " << ifirstnonzero << " " << ilastnonzero << "\n";
-      //cout << "non zero count is " << count_nonzero << "\n";
-      //cout << "ratio is " << (double)count_nonzero/(double)(ilastnonzero-ifirstnonzero) << "\n";
-    for (int j=0;j<NFOUR/4;j++) {
-	vsignal_forfft[2*j]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
-	vsignal_forfft[2*j+1]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
+        double dF = 1. / ((double)(NFOUR/2) * TIMESTEP); // in Hz
+        //cout<<"dF1 : "<<dF<<endl;
+            
+        double dF_org = detector->GetFreq(1) - detector->GetFreq(0); // in Hz
+            
+        //double dF_factor = sqrt( dF_org / dF );
+         double dF_factor = 1.;
+         //double dF_factor = sqrt( dF / dF_org );
+            
+         int Norg = detector->GetFreqBin();
+                                    
+         double FreqOrg[Norg+1];
+         double VmMHzOrg[Norg+1];
+                                            
+         double FreqNFOUR[NFOUR/4+1]; // one more bin
+         double VmMHzNFOUR[NFOUR/4+1]; // one more bin
+         
+         for (int i=0;i<Norg+1;i++) {
+                                                        
+             if ( i==0 ) {
+                                                                       
+                 VmMHzOrg[i] = 0.;
+                 FreqOrg[i] = 0.;
+             }
+             else {
+                                                                                                              
+                 VmMHzOrg[i] = vsignal_array[i-1];
+                 FreqOrg[i] = detector->GetFreq(i-1);
+             }
+                                                                                                                                      
+         }
+                                                                                                                                          
+         for (int ifour=0;ifour<NFOUR/4+1;ifour++) {
+                                                                                                                                                   
+             FreqNFOUR[ifour] = dF * (double)ifour;
+             VmMHzNFOUR[ifour] = 0.;
+                                                                                                                                                                
+         }
+         
+           
+         //Tools::SimpleLinearInterpolation_OutZero( Norg, FreqOrg, vsignal_array, NFOUR/4+1, FreqNFOUR, VmMHzNFOUR );
+         Tools::SimpleLinearInterpolation_OutZero( Norg+1, FreqOrg, VmMHzOrg, NFOUR/4+1, FreqNFOUR, VmMHzNFOUR );
+          
+           
+         for (int ifour=1;ifour<NFOUR/4;ifour++) {
+           
+             // same amplitude, 2/(NFOUR/2) for inverse FFT normalization factor
+             vsignal_forfft[2*ifour] = VmMHzNFOUR[ifour] * 2/((double)NFOUR/2) * dF_factor / TIMESTEP; // change to V/Hz, apply norm factor, change to Hn
+             vsignal_forfft[2*ifour+1] = VmMHzNFOUR[ifour] * 2/((double)NFOUR/2) * dF_factor / TIMESTEP;
+          
+             // apply phase
+             vsignal_forfft[2*ifour]*=cos(settings1->PHASE*PI/180.);
+             vsignal_forfft[2*ifour+1]*=sin(settings1->PHASE*PI/180.);
+         }
+           
+         // first and last freq bin read values to 0, 1 bin
+         vsignal_forfft[0] = VmMHzNFOUR[0] * 2/((double)NFOUR/2) * dF_factor / TIMESTEP;
+         vsignal_forfft[1] = VmMHzNFOUR[NFOUR/4] * 2/((double)NFOUR/2) * dF_factor / TIMESTEP;
     }
 
 
 
-    
-    //  Tools::InterpolateComplex(vsignal_e_forfft,NFOUR/4);
-    //Tools::InterpolateComplex(vsignal_h_forfft,NFOUR/4);
-    for (int ifour=0;ifour<NFOUR/4;ifour++) {
-
-
-
-	vsignal_forfft[2*ifour]*=cos(settings1->PHASE*PI/180.);
-	vsignal_forfft[2*ifour+1]*=sin(settings1->PHASE*PI/180.);
-	
-	//--------------------------------------------------
-	// if (!PULSER) {
-	//     
-	//     vsignal_forfft[2*ifour]*=cos(phase*PI/180.);
-	//     vsignal_forfft[2*ifour+1]*=sin(phase*PI/180.);
-	//     
-	//     
-	// }
-	// else {
-	//     vsignal_forfft[2*ifour]*=cos(v_phases[ifour]*PI/180.);
-	//     vsignal_forfft[2*ifour+1]*=sin(v_phases[ifour]*PI/180.);
-	//     
-	// }	  	  	  
-	//-------------------------------------------------- 
-	
-	
-    }
-    
     
 }
 
@@ -4192,95 +4261,162 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
 //    int NFOUR = detector->stations[StationIndex].NFOUR;
 //    int TIMESTEP = detector->stations[StationIndex].TIMESTEP;
     Tools::Zero(vsignal_forfft,NFOUR/2);
-    
-    double previous_value_e_even=0.;
-    double previous_value_e_odd=0.;
-    int count_nonzero=0;
-    int iprevious=0;
-    int ifirstnonzero=-1;
-    int ilastnonzero=2000;
-    //for (int i=0;i<NFREQ;i++) {
-    for (int i=0;i<detector->GetFreqBin();i++) {
-	
-	// freq_forfft has NFOUR/2 elements because it is meant to cover real and imaginary values
-	// but there are only NFOUR/4 different values
-	// it's the index among the NFOUR/4 that we're interested in
-	int ifour=Tools::Getifreq(detector->GetFreq(i),detector->freq_forfft[0],detector->freq_forfft[NFOUR/2-1],NFOUR/4);
-	
-	if (ifour!=-1 && 2*ifour+1<NFOUR/2) {
-	    count_nonzero++;
-	    if (ifirstnonzero==-1)
-		ifirstnonzero=ifour;
-	    
-	    vsignal_forfft[2*ifour]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // inverse fft normalization factor (2/(N/2)), 1/dt for change integration fft form to discrete numerical fft
-	    
-	    //      cout << "ifour, vsignal is " << ifour << " " << vsignal_e_forfft[2*ifour] << "\n";
-	    
-	    vsignal_forfft[2*ifour+1]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // phase is 90 deg.
-	    // the 2/(nfour/2) needs to be included since were using Tools::realft with the -1 setting
-	    
-	    // how about we interpolate instead of doing a box average
-	    
-	    for (int j=iprevious+1;j<ifour;j++) {
-		vsignal_forfft[2*j]=previous_value_e_even+(vsignal_forfft[2*ifour]-previous_value_e_even)*(double)(j-iprevious)/(double)(ifour-iprevious);
-		//	cout << "j, vsignal is " << j << " " << vsignal_e_forfft[2*j] << "\n";
-		
-		vsignal_forfft[2*j+1]=previous_value_e_odd+(vsignal_forfft[2*ifour+1]-previous_value_e_odd)*(double)(j-iprevious)/(double)(ifour-iprevious);
-	    }
-	    
-	    ilastnonzero=ifour;
-	    iprevious=ifour;
-	    previous_value_e_even=vsignal_forfft[2*ifour];
-	    previous_value_e_odd=vsignal_forfft[2*ifour+1];
-	}
-	
-    } // end loop over nfreq
-    
 
 
-    // don't applying any extra factor for the change in array (change of bin size)
-    // as change in the bin size doesn't matter for the total energy
-    // total energy is just same as integral over frequency range and this frequency range will not change
-    //
-      //cout << "ifirstnonzero, ilastnonzero are " << ifirstnonzero << " " << ilastnonzero << "\n";
-      //cout << "non zero count is " << count_nonzero << "\n";
-      //cout << "ratio is " << (double)count_nonzero/(double)(ilastnonzero-ifirstnonzero) << "\n";
-    for (int j=0;j<NFOUR/4;j++) {
-	vsignal_forfft[2*j]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
-	vsignal_forfft[2*j+1]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
+    if (settings1->AVZ_NORM_FACTOR_MODE == 0) { // use previous normalization factors
+
+    
+        double previous_value_e_even=0.;
+        double previous_value_e_odd=0.;
+        int count_nonzero=0;
+        int iprevious=0;
+        int ifirstnonzero=-1;
+        int ilastnonzero=2000;
+        //for (int i=0;i<NFREQ;i++) {
+        for (int i=0;i<detector->GetFreqBin();i++) {
+            
+            // freq_forfft has NFOUR/2 elements because it is meant to cover real and imaginary values
+            // but there are only NFOUR/4 different values
+            // it's the index among the NFOUR/4 that we're interested in
+            int ifour=Tools::Getifreq(detector->GetFreq(i),detector->freq_forfft[0],detector->freq_forfft[NFOUR/2-1],NFOUR/4);
+            
+            if (ifour!=-1 && 2*ifour+1<NFOUR/2) {
+                count_nonzero++;
+                if (ifirstnonzero==-1)
+                    ifirstnonzero=ifour;
+                
+                vsignal_forfft[2*ifour]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // inverse fft normalization factor (2/(N/2)), 1/dt for change integration fft form to discrete numerical fft
+                
+                //      cout << "ifour, vsignal is " << ifour << " " << vsignal_e_forfft[2*ifour] << "\n";
+                
+                vsignal_forfft[2*ifour+1]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // phase is 90 deg.
+                // the 2/(nfour/2) needs to be included since were using Tools::realft with the -1 setting
+                
+                // how about we interpolate instead of doing a box average
+                
+                for (int j=iprevious+1;j<ifour;j++) {
+                    vsignal_forfft[2*j]=previous_value_e_even+(vsignal_forfft[2*ifour]-previous_value_e_even)*(double)(j-iprevious)/(double)(ifour-iprevious);
+                    //	cout << "j, vsignal is " << j << " " << vsignal_e_forfft[2*j] << "\n";
+                    
+                    vsignal_forfft[2*j+1]=previous_value_e_odd+(vsignal_forfft[2*ifour+1]-previous_value_e_odd)*(double)(j-iprevious)/(double)(ifour-iprevious);
+                }
+                
+                ilastnonzero=ifour;
+                iprevious=ifour;
+                previous_value_e_even=vsignal_forfft[2*ifour];
+                previous_value_e_odd=vsignal_forfft[2*ifour+1];
+            }
+            
+        } // end loop over nfreq
+        
+
+
+        // don't applying any extra factor for the change in array (change of bin size)
+        // as change in the bin size doesn't matter for the total energy
+        // total energy is just same as integral over frequency range and this frequency range will not change
+        //
+          //cout << "ifirstnonzero, ilastnonzero are " << ifirstnonzero << " " << ilastnonzero << "\n";
+          //cout << "non zero count is " << count_nonzero << "\n";
+          //cout << "ratio is " << (double)count_nonzero/(double)(ilastnonzero-ifirstnonzero) << "\n";
+        for (int j=0;j<NFOUR/4;j++) {
+            vsignal_forfft[2*j]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
+            vsignal_forfft[2*j+1]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
+        }
+
+
+
+        
+        //  Tools::InterpolateComplex(vsignal_e_forfft,NFOUR/4);
+        //Tools::InterpolateComplex(vsignal_h_forfft,NFOUR/4);
+        for (int ifour=0;ifour<NFOUR/4;ifour++) {
+
+
+
+            vsignal_forfft[2*ifour]*=cos(settings1->PHASE*PI/180.);
+            vsignal_forfft[2*ifour+1]*=sin(settings1->PHASE*PI/180.);
+            
+            //--------------------------------------------------
+            // if (!PULSER) {
+            //     
+            //     vsignal_forfft[2*ifour]*=cos(phase*PI/180.);
+            //     vsignal_forfft[2*ifour+1]*=sin(phase*PI/180.);
+            //     
+            //     
+            // }
+            // else {
+            //     vsignal_forfft[2*ifour]*=cos(v_phases[ifour]*PI/180.);
+            //     vsignal_forfft[2*ifour+1]*=sin(v_phases[ifour]*PI/180.);
+            //     
+            // }	  	  	  
+            //-------------------------------------------------- 
+            
+            
+        }
+    }
+    else if (settings1->AVZ_NORM_FACTOR_MODE == 1) { // use new (fixed) normalization factors
+    
+        double dF = 1. / ((double)(NFOUR/2) * TIMESTEP); // in Hz
+        //cout<<"dF1 : "<<dF<<endl;
+            
+        double dF_org = detector->GetFreq(1) - detector->GetFreq(0); // in Hz
+            
+        //double dF_factor = sqrt( dF_org / dF );
+         double dF_factor = 1.;
+         //double dF_factor = sqrt( dF / dF_org );
+            
+         int Norg = detector->GetFreqBin();
+                                    
+         double FreqOrg[Norg+1];
+         double VmMHzOrg[Norg+1];
+                                            
+         double FreqNFOUR[NFOUR/4+1]; // one more bin
+         double VmMHzNFOUR[NFOUR/4+1]; // one more bin
+         
+         for (int i=0;i<Norg+1;i++) {
+                                                        
+             if ( i==0 ) {
+                                                                       
+                 VmMHzOrg[i] = 0.;
+                 FreqOrg[i] = 0.;
+             }
+             else {
+                                                                                                              
+                 VmMHzOrg[i] = vsignal_array[i-1];
+                 FreqOrg[i] = detector->GetFreq(i-1);
+             }
+                                                                                                                                      
+         }
+                                                                                                                                          
+         for (int ifour=0;ifour<NFOUR/4+1;ifour++) {
+                                                                                                                                                   
+             FreqNFOUR[ifour] = dF * (double)ifour;
+             VmMHzNFOUR[ifour] = 0.;
+                                                                                                                                                                
+         }
+         
+           
+         //Tools::SimpleLinearInterpolation_OutZero( Norg, FreqOrg, vsignal_array, NFOUR/4+1, FreqNFOUR, VmMHzNFOUR );
+         Tools::SimpleLinearInterpolation_OutZero( Norg+1, FreqOrg, VmMHzOrg, NFOUR/4+1, FreqNFOUR, VmMHzNFOUR );
+          
+           
+         for (int ifour=1;ifour<NFOUR/4;ifour++) {
+           
+             // same amplitude, 2/(NFOUR/2) for inverse FFT normalization factor
+             vsignal_forfft[2*ifour] = VmMHzNFOUR[ifour] * 2/((double)NFOUR/2) * dF_factor / TIMESTEP; // change to V/Hz, apply norm factor, change to Hn
+             vsignal_forfft[2*ifour+1] = VmMHzNFOUR[ifour] * 2/((double)NFOUR/2) * dF_factor / TIMESTEP;
+          
+             // apply phase
+             vsignal_forfft[2*ifour]*=cos(settings1->PHASE*PI/180.);
+             vsignal_forfft[2*ifour+1]*=sin(settings1->PHASE*PI/180.);
+         }
+           
+         // first and last freq bin read values to 0, 1 bin
+         vsignal_forfft[0] = VmMHzNFOUR[0] * 2/((double)NFOUR/2) * dF_factor / TIMESTEP;
+         vsignal_forfft[1] = VmMHzNFOUR[NFOUR/4] * 2/((double)NFOUR/2) * dF_factor / TIMESTEP;
     }
 
 
 
-    
-    //  Tools::InterpolateComplex(vsignal_e_forfft,NFOUR/4);
-    //Tools::InterpolateComplex(vsignal_h_forfft,NFOUR/4);
-    for (int ifour=0;ifour<NFOUR/4;ifour++) {
-
-
-
-	vsignal_forfft[2*ifour]*=cos(settings1->PHASE*PI/180.);
-	vsignal_forfft[2*ifour+1]*=sin(settings1->PHASE*PI/180.);
-	
-	//--------------------------------------------------
-	// if (!PULSER) {
-	//     
-	//     vsignal_forfft[2*ifour]*=cos(phase*PI/180.);
-	//     vsignal_forfft[2*ifour+1]*=sin(phase*PI/180.);
-	//     
-	//     
-	// }
-	// else {
-	//     vsignal_forfft[2*ifour]*=cos(v_phases[ifour]*PI/180.);
-	//     vsignal_forfft[2*ifour+1]*=sin(v_phases[ifour]*PI/180.);
-	//     
-	// }	  	  	  
-	//-------------------------------------------------- 
-	
-	
-    }
-    
-    
 }
 
 

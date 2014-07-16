@@ -230,6 +230,8 @@ class Settings
         int SELECT_FLAVOR; // default : 0 = random 1:1:1, 1: e, 2: mu, 3: tau
 
 
+        int AVZ_NORM_FACTOR_MODE; // default : 1 : don't apply sqrt(2) (actually applied but cancel that) as realft assume Hn as double-sided spectrum (invFFT normalization factor 2/N) and also remove dF binning factor in MakeArraysforFFT function, 0 : use normalization factors like in old version
+
 
 
     // below : values from icemc
