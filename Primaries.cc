@@ -1794,15 +1794,15 @@ double Interaction::PickNear_Sphere (IceModel *antarctica, Detector *detector, S
     double X, Y, Z;    // X,Y wrt detector core
     //calculate posnu's X, Y wrt detector core
     if (detector->Get_mode() == 1 || detector->Get_mode() == 2 || detector->Get_mode() == 3) {   // detector mode is for ARA stations;
-    X = detector->params.core_x + transX;
-    Y = detector->params.core_y + transY;
-    Z = transZ;
+      X = detector->params.core_x + transX;
+      Y = detector->params.core_y + transY;
+      Z = transZ;
     }
     //calculate posnu's X, Y wrt to (0,0)
     else {  // for mode = 0 (testbed)
-    X = transX;
-    Y = transY;
-    Z = transZ;
+      X = transX;
+      Y = transY;
+      Z = transZ;
     }
     //fprintf(stdout, "X: %f, Y: %f, Z: %f\n", 
     //X - detector->params.core_x, Y - detector->params.core_y, Z);
@@ -1823,6 +1823,12 @@ double Interaction::PickNear_Sphere (IceModel *antarctica, Detector *detector, S
 
     FlattoEarth_Spherical(antarctica, newx, newy, newz);  //change to Earth shape and set depth (always in the ice)
 
+    if(posnu.Mag()-antarctica->Surface(posnu)+antarctica->IceThickness(posnu)<0){
+      toolow=1;
+      //cout << "inu, toolow is " << inu << " " << interaction1->toolow << "\n";
+      pickposnu = 0;
+      return 0.;
+    }
 
     pickposnu = 1;  // all PickNear sucess for pickposnu
 
