@@ -8,6 +8,7 @@
 #pragma link C++ class Detector+;
 #pragma link C++ class Parameters+;
 #pragma link C++ class InstalledStation+;
+#pragma link C++ class IdealStation+;
 #pragma link C++ class Trigger+;
 
 #pragma link C++ class ARA_station+;
@@ -33,28 +34,28 @@
 #pragma link C++ class Interaction+;
 
 #ifdef ARA_UTIL_EXISTS
-#pragma link C++ class AtriEventHkData+;
-#pragma link C++ class AtriSensorHkData+;
-#pragma link C++ class RawAraStationEvent+;
-#pragma link C++ class RawIcrrStationHeader+;
-#pragma link C++ class RawIcrrStationEvent+;
-#pragma link C++ class RawAtriSimpleStationEvent+;
-#pragma link C++ class AraRawIcrrRFChannel+;
-#pragma link C++ class IcrrHkData+;
-#pragma link C++ class FullIcrrHkEvent+;
-#pragma link C++ class IcrrTriggerMonitor+;
-#pragma link C++ class UsefulAraStationEvent+;
-#pragma link C++ class UsefulIcrrStationEvent+;
-#pragma link C++ class UsefulAtriStationEvent+;
-#pragma link C++ class AraAntennaInfo+;
-#pragma link C++ class AraStationInfo+;
-#pragma link C++ class AraGeomTool+;
-#pragma link C++ class AraEventCalibrator+;
-#pragma link C++ class RawAtriStationBlock+;
-#pragma link C++ class RawAtriStationEvent+;
-#pragma link C++ class RawAraGenericHeader+;
-
-#pragma link C++ typedef AraDataStructureType_t;
+// #pragma link C++ class AtriEventHkData+;
+// #pragma link C++ class AtriSensorHkData+;
+// #pragma link C++ class RawAraStationEvent+;
+// #pragma link C++ class RawIcrrStationHeader+;
+// #pragma link C++ class RawIcrrStationEvent+;
+// #pragma link C++ class RawAtriSimpleStationEvent+;
+// #pragma link C++ class AraRawIcrrRFChannel+;
+// #pragma link C++ class IcrrHkData+;
+// #pragma link C++ class FullIcrrHkEvent+;
+// #pragma link C++ class IcrrTriggerMonitor+;
+// #pragma link C++ class UsefulAraStationEvent+;
+// #pragma link C++ class UsefulIcrrStationEvent+;
+// #pragma link C++ class UsefulAtriStationEvent+;
+// #pragma link C++ class AraAntennaInfo+;
+// #pragma link C++ class AraStationInfo+;
+// #pragma link C++ class AraGeomTool+;
+// #pragma link C++ class AraEventCalibrator+;
+// #pragma link C++ class RawAtriStationBlock+;
+// #pragma link C++ class RawAtriStationEvent+;
+// #pragma link C++ class RawAraGenericHeader+;
+// 
+// #pragma link C++ typedef AraDataStructureType_t;
 
 
 #pragma link C++ namespace     AraCalType;

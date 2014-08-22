@@ -191,6 +191,27 @@ class InstalledStation {
 
 
 //class Detector : public TObject {
+      
+class IdealStation{
+      
+    public:
+      
+        int nSurfaces;
+        int nStrings;
+        vector < int > surfaceChannels;
+        vector < vector < int > > VHChannel;
+        int nChannels;
+        int nChannelsVH;
+        vector < vector < int > > VHID;
+        vector < int > surfaceID;
+        vector < int > IDSurface;
+        vector < int > IDAntenna;
+        vector < int > IDString;
+        
+	ClassDef(IdealStation, 1);
+	
+};
+  
 class Detector {
     private:
         static const int freq_step_max = 60;
@@ -416,20 +437,23 @@ class Detector {
     
     vector < InstalledStation > InstalledStations;
     
-    struct IdealStation{
-        int nSurfaces;
-        int nStrings;
-        vector < int > surfaceChannels;
-        vector < vector < int > > VHChannel;
-        int nChannels;
-        int nChannelsVH;
-        vector < vector < int > > VHID;
-        vector < int > surfaceID;
-        vector < int > IDSurface;
-        vector < int > IDAntenna;
-        vector < int > IDString;
-        
-    };
+//     class IdealStation{
+//       
+//     public:
+//       
+//         int nSurfaces;
+//         int nStrings;
+//         vector < int > surfaceChannels;
+//         vector < vector < int > > VHChannel;
+//         int nChannels;
+//         int nChannelsVH;
+//         vector < vector < int > > VHID;
+//         vector < int > surfaceID;
+//         vector < int > IDSurface;
+//         vector < int > IDAntenna;
+//         vector < int > IDString;
+//         
+//     };
     
     vector < IdealStation > IdealStations;
     
@@ -447,6 +471,8 @@ class Detector {
     vector <double> CalPulserWF_V;
 
 
+    void printGeometry(int station_i=0);
+    
     
         ~Detector();    //destructor
 

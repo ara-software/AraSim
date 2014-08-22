@@ -5,6 +5,7 @@
 #include "Settings.h"
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <math.h>
@@ -5001,6 +5002,26 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
             ant_ID = ant_ID - stations[stationID].strings[i].antennas.size();
         }
     }
+}
+
+void Detector::printGeometry(int station_i){
+ 
+  cout<<"  ch   |      X      |      Y      |      Z      |"<<endl;
+  cout<<"-------+-------------+-------------+-------------+"<<endl;
+      
+  for(int ch=0;ch<stations[station_i].number_of_antennas; ch++){
+   
+    int string_i = getStringfromArbAntID( station_i, ch);
+    int antenna_i = getAntennafromArbAntID( station_i, ch);
+    
+    double x=stations[station_i].strings[string_i].antennas[antenna_i].GetX()-stations[station_i].GetX();
+    double y=stations[station_i].strings[string_i].antennas[antenna_i].GetY()-stations[station_i].GetY();
+    double z=stations[station_i].strings[string_i].antennas[antenna_i].GetZ()-stations[station_i].GetZ();
+    
+    cout<<"  "<<setw(3)<<ch<<"  |"<<setw(11)<<x<<"  |"<<setw(11)<<y<<"  |"<<setw(11)<<z<<"  |"<<endl;
+    
+  }
+  
 }
 
 Detector::~Detector() {

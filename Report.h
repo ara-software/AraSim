@@ -320,6 +320,15 @@ class Report {
 
 	TGraph *getWaveform(Detector *detector, int ch, int station_i=0, int event_num=0, int run_num=0);
 
+	vector<TGraph*> getWaveformVector(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
+	vector<TGraph*> getWaveformVectorVpol(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
+	vector<TGraph*> getWaveformVectorHpol(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
+	
+	vector<double> getHitTimesVector(Detector *detector, int station_i=0, int polarization=-1);// -1 for all pol, 0 for Vpol, 1: for Hpol
+	vector<double> getHitTimesVectorVpol(Detector *detector, int station_i=0);
+	vector<double> getHitTimesVectorHpol(Detector *detector, int station_i=0);
+
+	
         vector <double> Vfft_noise_after;   // noise Vfft after get_random_rician
         vector <double> Vfft_noise_before;   // noise Vfft before get_random_rician
         //vector <double> V_noise_timedomain;   // noise V timedomain after get_random_rician and inverse fft

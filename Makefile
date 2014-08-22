@@ -23,7 +23,7 @@ CXX = g++
 
 #Generic and Site Specific Flags
 CXXFLAGS     += $(SYSINCLUDES) $(INC_ARA_UTIL)
-LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL)
+LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl,--no-as-needed
 ARA_ROOT_FLAGS = 
 
 # copy from ray_solver_makefile (removed -lAra part)
@@ -77,7 +77,7 @@ endif
 	@echo "<**Compiling**> "$<
 	$(CXX) $(CXXFLAGS) $ -c $< -o  $@
 
-%.$(OBJSUF) : %.cc
+%.$(OBJSUF) : %.cc %.h
 	@echo "<**Compiling**> "$<
 	$(CXX) $(CXXFLAGS) $ -c $< -o  $@
 

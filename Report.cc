@@ -4689,3 +4689,136 @@ TGraph *Report::getWaveform(Detector *detector, int ch, int station_i, int event
   return gr;
   
 }
+
+
+vector<TGraph*> Report::getWaveformVector(Detector *detector, int station_i, int event_num, int run_num){
+
+  vector<TGraph*> waveforms;
+  
+  for(int ch=0;ch<detector->stations[station_i].number_of_antennas; ch++){
+      
+    int string_i = detector->getStringfromArbAntID( station_i, ch);
+    int antenna_i = detector->getAntennafromArbAntID( station_i, ch);
+    
+    TGraph *gr=new TGraph();
+      
+    int N=stations[station_i].strings[string_i].antennas[antenna_i].V_mimic.size();
+    
+    for(int i=0;i<N;i++){
+   
+      gr->SetPoint(i,stations[station_i].strings[string_i].antennas[antenna_i].time_mimic[i], stations[station_i].strings[string_i].antennas[antenna_i].V_mimic[i]);
+    
+    }// for i
+  
+    gr->SetNameTitle(Form("WF%dS%02dC%02d", event_num, station_i, ch), Form("Simulated waveform %d, station %d, channel %d;time (ns); voltage (mV)", event_num, station_i, ch));
+    
+    waveforms.push_back(gr);
+    
+  }// for ch
+  
+  return waveforms;
+  
+}
+
+vector<TGraph*> Report::getWaveformVectorVpol(Detector *detector, int station_i, int event_num, int run_num){
+ 
+  vector<TGraph*> waveforms;
+  
+  for(int ch=0;ch<detector->stations[station_i].number_of_antennas; ch++){
+      
+    int string_i = detector->getStringfromArbAntID( station_i, ch);
+    int antenna_i = detector->getAntennafromArbAntID( station_i, ch);
+    
+    if(detector->stations[station_i].strings[string_i].antennas[antenna_i].type!=0) continue; // jump to next channel if this isn't Vpol
+    
+    TGraph *gr=new TGraph();
+      
+    int N=stations[station_i].strings[string_i].antennas[antenna_i].V_mimic.size();
+    
+    for(int i=0;i<N;i++){
+   
+      gr->SetPoint(i,stations[station_i].strings[string_i].antennas[antenna_i].time_mimic[i], stations[station_i].strings[string_i].antennas[antenna_i].V_mimic[i]);
+    
+    }// for i
+  
+    gr->SetNameTitle(Form("WF%dS%02dC%02d", event_num, station_i, ch), Form("Simulated waveform %d, station %d, channel %d;time (ns); voltage (mV)", event_num, station_i, ch));
+    
+    waveforms.push_back(gr);
+    
+  }// for ch
+  
+  return waveforms;
+  
+}
+
+vector<TGraph*> Report::getWaveformVectorHpol(Detector *detector, int station_i, int event_num, int run_num){
+ 
+  vector<TGraph*> waveforms;
+  
+  for(int ch=0;ch<detector->stations[station_i].number_of_antennas; ch++){
+      
+    int string_i = detector->getStringfromArbAntID( station_i, ch);
+    int antenna_i = detector->getAntennafromArbAntID( station_i, ch);
+    
+    if(detector->stations[station_i].strings[string_i].antennas[antenna_i].type!=1) continue; // jump to next channel if this isn't Hpol
+    
+    TGraph *gr=new TGraph();
+      
+    int N=stations[station_i].strings[string_i].antennas[antenna_i].V_mimic.size();
+    
+    for(int i=0;i<N;i++){
+   
+      gr->SetPoint(i,stations[station_i].strings[string_i].antennas[antenna_i].time_mimic[i], stations[station_i].strings[string_i].antennas[antenna_i].V_mimic[i]);
+    
+    }// for i
+  
+    gr->SetNameTitle(Form("WF%dS%02dC%02d", event_num, station_i, ch), Form("Simulated waveform %d, station %d, channel %d;time (ns); voltage (mV)", event_num, station_i, ch));
+    
+    waveforms.push_back(gr);
+    
+  }// for ch
+  
+  return waveforms;
+  
+}
+
+
+vector<double> Report::getHitTimesVector(Detector *detector, int station_i, int polarization){
+
+  vector<double> times;
+    
+  for(int ch=0;ch<detector->stations[station_i].number_of_antennas;ch++){
+    
+    int string_i = detector->getStringfromArbAntID( station_i, ch);
+    int antenna_i = detector->getAntennafromArbAntID( station_i, ch);
+    
+    if(polarization>=0 && detector->stations[station_i].strings[string_i].antennas[antenna_i].type!=polarization) continue; // jump to next channel if this isn't Hpol/Vpol
+
+    
+    if(stations[station_i].strings[string_i].antennas[antenna_i].arrival_time.size()){
+   
+      times.push_back(1e9*stations[station_i].strings[string_i].antennas[antenna_i].arrival_time[0]);// get the direct beam arrival time
+    
+    }
+  
+    else times.push_back(-1000); // if there's no ray-trace solution just put something in.
+  
+  }
+  
+  return times;
+  
+}
+
+vector<double> Report::getHitTimesVectorVpol(Detector *detector, int station_i){
+
+  return getHitTimesVector(detector, station_i, 0);
+  
+}
+
+vector<double> Report::getHitTimesVectorHpol(Detector *detector, int station_i){
+   
+  return getHitTimesVector(detector, station_i, 1);
+  
+}
+
+

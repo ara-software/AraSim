@@ -1290,3 +1290,8 @@ AVZ_NORM_FACTOR_MODE=0
 in your setup file
 
 
+08/22/14 Guy Nir:
+
+Added utilities to get the waveforms and hit times in vectors from Report class.
+Added a printGeometry method to Detector class.
+
