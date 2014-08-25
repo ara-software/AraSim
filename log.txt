@@ -1289,9 +1289,22 @@ If you want to get old (wrong) normalization mode again, put
 AVZ_NORM_FACTOR_MODE=0
 in your setup file
 
+============================================================================
 
 08/22/14 Guy Nir:
 
 Added utilities to get the waveforms and hit times in vectors from Report class.
 Added a printGeometry method to Detector class.
+
+============================================================================
+
+08/25/14 Eugene Hong;
+
+Fixed RayTracing code.
+In previous RayTracing, in specific conditions ray solution was not properly calculated (miss distance which is the distance between final result and target location was far different from required accuracy value).
+In RayTrace, I added a condition check term which see if ray solution is in required accuracy (default 0.2m, if physical distance between target and source is more than 200m, change the value to physical distance / 1000).
+If the condition is not met, throw away the ray solution.
+Further investigation is recommended to fix bugs buried in ray tracing code.
+
+============================================================================
 

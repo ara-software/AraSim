@@ -217,7 +217,8 @@ namespace RayTrace{
 
 	//========== TraceFinder ==========//
 
-	const double TraceFinder::maximum_ice_depth = -2850.0;
+	//const double TraceFinder::maximum_ice_depth = -2850.0;
+	const double TraceFinder::maximum_ice_depth = -3500.0; // changed for testing max ice depth
 	
 	///\brief Computes the derivatives of the position coordinates with respect to path length
 	///
@@ -722,6 +723,7 @@ namespace RayTrace{
 		lastMiss=-1.0e3*miss_eps;
 		
 		while((c-a)>angle_eps && fabs(trace.miss-lastMiss)>miss_eps){
+                    // changed
 			//std::cout << "\tAngular range=" << (c-a) << ", miss change=" << fabs(trace.miss-lastMiss) << std::endl;
 			lastMiss=trace.miss;
 			//std::cout << " Angular range is now [" << a << ',' << c << "]\n";
@@ -805,6 +807,7 @@ namespace RayTrace{
 		return(traceRootImpl(emit_depth, target, rising, allowedReflections, requiredAccuracy, a, aTrace, c, cTrace, angle, sol_error ));
 	}
 	
+        /*
 	std::pair<double,double> TraceFinder::refineRoot(double emit_depth, const rayTargetRecord& target, const TraceRecord& seed, bool rising, unsigned short allowedReflections, double requiredAccuracy, int &sol_error ) const{
 
             // test sol_error
@@ -831,14 +834,24 @@ namespace RayTrace{
 				a=pi;
 			//std::cout << "\ttesting theta=" << a << std::endl;
 			aTrace=doTrace<minimalRayPosition>(emit_depth,a,target,allowedReflections,0.0,0.0, sol_error );
-			//std::cout << "\t (miss=" << aTrace.miss << ")" << std::endl;
-			if(std::abs(aTrace.miss) < requiredAccuracy)
+                        // changed
+			std::cout << "\t (miss=" << aTrace.miss << ")" << std::endl;
+			if(std::abs(aTrace.miss) < requiredAccuracy) {
+                                // changed
+                                std::cout << "miss<requiredAccuracy" << std::endl;
 				return(std::make_pair(a,aTrace.miss));
+                        }
 				//return(doTrace<fullRayPosition>(emit_depth,a,target,allowedReflections,0.0,0.0));
-			if((aTrace.miss*seed.miss)<0.0)
+			if((aTrace.miss*seed.miss)<0.0) {
+                                // changed
+                                std::cout << "trace.miss * seed.miss < 0, break" << std::endl;
 				break;
+                        }
 		}
 		if(i==maxTests){
+                        // changed
+                        std::cout << "refineRoot, reached maxTests" << std::endl;
+
 			//std::cerr << "Last attempt at bracketing was: [" << seed.launchAngle << "->" << seed.miss << ',' << a << "->" << aTrace.miss << ']' << std::endl;
 			//std::cerr << "\trising edge = " << std::boolalpha << rising << std::endl;
 			throw std::runtime_error("TraceFinder::refineRoot: exceeded maximum allowed number of steps for bracketing.");
@@ -858,6 +871,307 @@ namespace RayTrace{
 		double angle=0.5*(a+c);
 		return(traceRootImpl(emit_depth, target, rising, allowedReflections, requiredAccuracy, a, aTrace, c, cTrace, angle, sol_error ));
 	}
+        */
+
+
+
+        /*
+        // changed
+        // test obtaining min value case
+	std::pair<double,double> TraceFinder::refineRoot(double emit_depth, const rayTargetRecord& target, const TraceRecord& seed, bool rising, unsigned short allowedReflections, double requiredAccuracy, int &sol_error ) const{
+
+            // test sol_error
+            //int sol_error;
+
+            double min_angle, min_angle_plus, min_angle_minus;
+            double min_miss = 1e10; // start with big value
+
+
+		//bracket the root
+		//std::cout << "Attempting to refine root near theta=" << seed.launchAngle << std::endl;
+		double a, c;
+		TraceRecord aTrace, cTrace;
+		double testDisp=.001; //TODO: this is a problem since there could be a second root arbitrarily close to the one we seek
+		//If we start with testDisp larger than the distance betwee these roots we can bracket them both and incorrectly conclude that we've bracketed nothing
+		const unsigned int maxTests=(unsigned int)std::ceil(0.5*(sqrt(1.0+(8*pi/testDisp))-1.0));
+		if((seed.miss>0.0)==rising)
+			testDisp*=-1;
+		unsigned int i;
+		a=seed.launchAngle;
+		for(i=0; i<maxTests; i++){
+			a+=testDisp;
+			testDisp*=2.0;
+			if(a<0.0)
+				a=0.0;
+			else if(a>pi)
+				a=pi;
+			//std::cout << "\ttesting theta=" << a << std::endl;
+			aTrace=doTrace<minimalRayPosition>(emit_depth,a,target,allowedReflections,0.0,0.0, sol_error );
+
+                        if ( min_miss > std::abs(aTrace.miss) ) {
+                            min_miss = std::abs(aTrace.miss);
+                            min_angle = a;
+		
+                            if((seed.miss>0.0)==rising) {
+                                min_angle_plus = a - testDisp;
+                                min_angle_minus = a + testDisp;
+                            }
+                            else {
+                                min_angle_plus = a + testDisp;
+                                min_angle_minus = a - testDisp;
+                            }
+                        }
+
+                        // changed
+			std::cout << "\t (miss=" << aTrace.miss << ") at angle: "<<a<< std::endl;
+			if(std::abs(aTrace.miss) < requiredAccuracy) {
+                                // changed
+                                std::cout << "miss<requiredAccuracy" << std::endl;
+				return(std::make_pair(a,aTrace.miss));
+                        }
+				//return(doTrace<fullRayPosition>(emit_depth,a,target,allowedReflections,0.0,0.0));
+			if((aTrace.miss*seed.miss)<0.0) {
+                                // changed
+                                std::cout << "trace.miss * seed.miss < 0, break" << std::endl;
+				break;
+                        }
+		}
+		if(i==maxTests){
+                        // changed
+                        std::cout << "refineRoot, reached maxTests" << std::endl;
+
+			//std::cerr << "Last attempt at bracketing was: [" << seed.launchAngle << "->" << seed.miss << ',' << a << "->" << aTrace.miss << ']' << std::endl;
+			//std::cerr << "\trising edge = " << std::boolalpha << rising << std::endl;
+			throw std::runtime_error("TraceFinder::refineRoot: exceeded maximum allowed number of steps for bracketing.");
+		}
+		if((seed.miss>0.0)==rising){
+			c=seed.launchAngle;
+			cTrace=seed;
+		}
+		else{
+			c=a;
+			cTrace=aTrace;
+			a=seed.launchAngle;
+			aTrace=seed;
+		}
+		
+                // changed
+                std::cout<<"min miss : "<<min_miss<<" at angle : "<<min_angle<<", test w/ min angle : "<<min_angle_minus<<" max angle : "<<min_angle_plus<<std::endl;
+
+		//std::cout << "Endpoint miss distances are " << aTrace.miss << " and " << cTrace.miss << std::endl;
+		double angle=0.5*(a+c);
+                // changed
+		//return(traceRootImpl(emit_depth, target, rising, allowedReflections, requiredAccuracy, a, aTrace, c, cTrace, angle, sol_error ));
+		return(evenmore_refineRoot(emit_depth, target, seed, min_angle_minus, min_angle_plus, rising, allowedReflections, requiredAccuracy, sol_error ));
+	}
+        */
+
+        // changed
+        // test obtaining min value case more carefully
+	std::pair<double,double> TraceFinder::evenmore_refineRoot(double emit_depth, const rayTargetRecord& target, const TraceRecord& seed, double angle_min, double angle_max, bool rising, unsigned short allowedReflections, double requiredAccuracy, int &sol_error ) const{
+
+            // test sol_error
+            //int sol_error;
+
+            double min_angle;
+            double min_miss = 1e10; // start with big value
+
+
+		//bracket the root
+		//std::cout << "Attempting to refine root near theta=" << seed.launchAngle << std::endl;
+		double a, c;
+		TraceRecord aTrace, cTrace;
+		//double testDisp=.001; //TODO: this is a problem since there could be a second root arbitrarily close to the one we seek
+		double testDisp=.00001; //TODO: this is a problem since there could be a second root arbitrarily close to the one we seek
+		//If we start with testDisp larger than the distance betwee these roots we can bracket them both and incorrectly conclude that we've bracketed nothing
+		//const unsigned int maxTests=(unsigned int)std::ceil(0.5*(sqrt(1.0+(8*pi/testDisp))-1.0));
+		const unsigned int maxTests=(unsigned int)((angle_max - angle_min)/testDisp);
+
+		//if((seed.miss>0.0)==rising)
+			//testDisp*=-1;
+		unsigned int i;
+		//a=seed.launchAngle;
+		a=angle_min;
+		for(i=0; i<maxTests; i++){
+			a+=testDisp;
+			testDisp*=2.0;
+			if(a<0.0)
+				a=0.0;
+			else if(a>pi)
+				a=pi;
+			//std::cout << "\ttesting theta=" << a << std::endl;
+			aTrace=doTrace<minimalRayPosition>(emit_depth,a,target,allowedReflections,0.0,0.0, sol_error );
+
+                        if ( min_miss > std::abs(aTrace.miss) ) {
+                            min_miss = std::abs(aTrace.miss);
+                            min_angle = a;
+                        }
+
+                        // changed
+			//std::cout << "\t second (miss=" << aTrace.miss << ") at angle: "<<a<< std::endl;
+			if(std::abs(aTrace.miss) < requiredAccuracy) {
+                                // changed
+                                //std::cout << "miss<requiredAccuracy" << std::endl;
+				return(std::make_pair(a,aTrace.miss));
+                        }
+				//return(doTrace<fullRayPosition>(emit_depth,a,target,allowedReflections,0.0,0.0));
+			if((aTrace.miss*seed.miss)<0.0) {
+                                // changed
+                                //std::cout << "second trace.miss * seed.miss < 0, break" << std::endl;
+				break;
+                        }
+		}
+
+
+
+
+
+		if(i==maxTests){
+                        // changed
+                        //std::cout << "refineRoot, reached maxTests" << std::endl;
+
+			//std::cerr << "Last attempt at bracketing was: [" << seed.launchAngle << "->" << seed.miss << ',' << a << "->" << aTrace.miss << ']' << std::endl;
+			//std::cerr << "\trising edge = " << std::boolalpha << rising << std::endl;
+			throw std::runtime_error("TraceFinder::refineRoot: exceeded maximum allowed number of steps for bracketing.");
+		}
+		if((seed.miss>0.0)==rising){
+			c=seed.launchAngle;
+			cTrace=seed;
+		}
+		else{
+			c=a;
+			cTrace=aTrace;
+			a=seed.launchAngle;
+			aTrace=seed;
+		}
+		
+                // changed
+                //std::cout<<"min miss : "<<min_miss<<" at angle : "<<min_angle<<std::endl;
+
+		//std::cout << "Endpoint miss distances are " << aTrace.miss << " and " << cTrace.miss << std::endl;
+		double angle=0.5*(a+c);
+                // changed
+		return(traceRootImpl(emit_depth, target, rising, allowedReflections, requiredAccuracy, a, aTrace, c, cTrace, angle, sol_error ));
+	}
+
+
+        // changed
+        // test obtaining min value case
+        // loosen required accuracy and see if they pass
+	std::pair<double,double> TraceFinder::refineRoot(double emit_depth, const rayTargetRecord& target, const TraceRecord& seed, bool rising, unsigned short allowedReflections, double requiredAccuracy, int &sol_error ) const{
+
+            // test sol_error
+            //int sol_error;
+
+            double min_angle, min_angle_plus, min_angle_minus;
+            double min_miss = 1e10; // start with big value
+
+
+		//bracket the root
+		//std::cout << "Attempting to refine root near theta=" << seed.launchAngle << std::endl;
+		double a, c;
+		TraceRecord aTrace, cTrace, minmissTrace;
+		double testDisp=.001; //TODO: this is a problem since there could be a second root arbitrarily close to the one we seek
+		//If we start with testDisp larger than the distance betwee these roots we can bracket them both and incorrectly conclude that we've bracketed nothing
+		const unsigned int maxTests=(unsigned int)std::ceil(0.5*(sqrt(1.0+(8*pi/testDisp))-1.0));
+		if((seed.miss>0.0)==rising)
+			testDisp*=-1;
+		unsigned int i;
+		a=seed.launchAngle;
+		for(i=0; i<maxTests; i++){
+			a+=testDisp;
+			testDisp*=2.0;
+			if(a<0.0)
+				a=0.0;
+			else if(a>pi)
+				a=pi;
+			//std::cout << "\ttesting theta=" << a << std::endl;
+			aTrace=doTrace<minimalRayPosition>(emit_depth,a,target,allowedReflections,0.0,0.0, sol_error );
+
+                        if ( min_miss > std::abs(aTrace.miss) ) {
+                            min_miss = std::abs(aTrace.miss);
+                            min_angle = a;
+                            minmissTrace = aTrace;
+		
+                            if((seed.miss>0.0)==rising) {
+                                min_angle_plus = a - testDisp;
+                                min_angle_minus = a + testDisp;
+                            }
+                            else {
+                                min_angle_plus = a + testDisp;
+                                min_angle_minus = a - testDisp;
+                            }
+                        }
+
+                        // changed
+			//std::cout << "\t (miss=" << aTrace.miss << ") at angle: "<<a<< std::endl;
+			if(std::abs(aTrace.miss) < requiredAccuracy) {
+                                // changed
+                                //std::cout << "miss<requiredAccuracy" << std::endl;
+				return(std::make_pair(a,aTrace.miss));
+                        }
+				//return(doTrace<fullRayPosition>(emit_depth,a,target,allowedReflections,0.0,0.0));
+			if((aTrace.miss*seed.miss)<0.0) {
+                                // changed
+                                //std::cout << "trace.miss * seed.miss < 0, break" << std::endl;
+				break;
+                        }
+		}
+		if(i==maxTests){
+                        // changed
+                        //std::cout << "refineRoot, reached maxTests" << std::endl;
+
+			//std::cerr << "Last attempt at bracketing was: [" << seed.launchAngle << "->" << seed.miss << ',' << a << "->" << aTrace.miss << ']' << std::endl;
+			//std::cerr << "\trising edge = " << std::boolalpha << rising << std::endl;
+			throw std::runtime_error("TraceFinder::refineRoot: exceeded maximum allowed number of steps for bracketing.");
+		}
+		if((seed.miss>0.0)==rising){
+			c=seed.launchAngle;
+			cTrace=seed;
+		}
+		else{
+			c=a;
+			cTrace=aTrace;
+			a=seed.launchAngle;
+			aTrace=seed;
+		}
+		
+                // changed
+                //std::cout<<"min miss : "<<min_miss<<" at angle : "<<min_angle<<", test w/ min angle : "<<min_angle_minus<<" max angle : "<<min_angle_plus<<std::endl;
+
+
+                /*
+                // changed
+                // test loosen required accuray 
+                double loosen_cut = 5.; // const value for now
+                if ( min_miss < loosen_cut ) {
+
+                    std::cout<<"min miss : "<<min_miss<<" at angle : "<<min_angle<<", passed loosen cut "<<loosen_cut<<std::endl;
+                    return(std::make_pair(min_angle,min_miss));
+                }
+                */
+
+
+
+		//std::cout << "Endpoint miss distances are " << aTrace.miss << " and " << cTrace.miss << std::endl;
+		double angle=0.5*(a+c);
+                // changed
+		//return(traceRootImpl(emit_depth, target, rising, allowedReflections, requiredAccuracy, a, aTrace, c, cTrace, angle, sol_error ));
+		return(evenmore_refineRoot(emit_depth, target, seed, min_angle_minus, min_angle_plus, rising, allowedReflections, requiredAccuracy, sol_error ));
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
 	
 	bool shorterPath(const TraceRecord& a, const TraceRecord& b){
 		return(a.pathLen < b.pathLen);
@@ -922,6 +1236,8 @@ namespace RayTrace{
                 sol_error = 0;
                 
 
+                // changed
+                //std::cout<<"begin findPaths"<<std::endl;
                 /*
                 std::cout<<"findPaths mode : "<<mode<<std::endl;
                 if (mode == 1) {    // mode 1 for src, trg exchanged
@@ -954,7 +1270,10 @@ namespace RayTrace{
 		
 		//special case for pesky near-vertical rays
 		if(dist<=requiredAccuracy){
-			//std::cout << "Computing direct ray (vertical)" << std::endl;
+			
+                    // changed
+                    //std::cout << "Computing direct ray (vertical)" << std::endl;
+
 			if(replayBuffer==NULL)
                                 {
 				results.push_back(doVerticalTrace<fullRayPosition>(sourcePos.GetZ(), (sourcePos.GetZ()<targetPos.GetZ()?0.0:pi), target, NoReflection, frequency, polarization));
@@ -1007,7 +1326,10 @@ namespace RayTrace{
 
                 // if either src or trg not in the ice
 		if(!fullyContained){
-			//std::cout << "Ray not fully contained" << std::endl;
+			
+                    // changed
+                    //std::cout << "Ray not fully contained" << std::endl;
+
 			if(replayBuffer==NULL)
                                 {
 				results.push_back(findUncontainedFast(sourcePos, targetPos, frequency, polarization, requiredAccuracy, sol_error ));
@@ -1024,54 +1346,113 @@ namespace RayTrace{
 		} // if either src or trg not in the ice
 
 
+                // changed 
+                // both cout
 		//std::cout << "Looking for estimate" << std::endl;
 		indexOfRefractionModel::RayEstimate est=rModel->estimateRayAngle(sourcePos.GetZ(), targetPos.GetZ(), dist); //TODO: put this back!!!
 		//std::cout << "Estimate result : " << est.status << " refractionmodel solution : "<< indexOfRefractionModel::SOLUTION << std::endl;
 
 
 		if(est.status==indexOfRefractionModel::SOLUTION){ //got a solution estimate
-			//std::cout << "Got fast solution" << std::endl;
+			
+                    // changed
+                    //std::cout << "Got fast solution, est.angle: " << est.angle << std::endl;
+
 			//std::cout << "\t(theta=" << est.angle << ')' << std::endl;
 			if(replayBuffer==NULL)
                                 {
                                 //std::cout << "replayBuffer==NULL" <<std::endl;
 				results.push_back(doTrace<fullRayPosition>(sourcePos.GetZ(), est.angle, target, NoReflection, frequency, polarization, sol_error )); //this is supposed to be a direct ray, so no reflections should be needed
-                                //std::cout << "done 1st doTrace" << std::endl;
+                                        
+                                // changed always (if)?
+                                //std::cout << "done 1st doTrace (if)\n" << std::endl;
+                                //std::cout << "results pathLen: "<<results.front().pathLen<<" miss: "<<results.front().miss<<"\n" << std::endl;
                                 sol_cnt++;
                                 //std::cout<<"\n\tSOL_CNT ADDED! 9\n"<<std::endl;
                                 }
 			else{
                                 //std::cout << "replayBuffer!=NULL" <<std::endl;
 				results.push_back(doTrace<positionRecordingWrapper<fullRayPosition> >(sourcePos.GetZ(), est.angle, target, NoReflection, frequency, polarization, sol_error, recorder.get())); //this is supposed to be a direct ray, so no reflections should be needed
-                                //std::cout << "done 1st doTrace" << std::endl;
+
+                                // changed
+                                //std::cout << "done 1st doTrace (else)\n" << std::endl;
 				replayBuffer->push_back(recorder->getData());
 				recorder->clearData();
                                 sol_cnt++;
                                 //std::cout<<"\n\tSOL_CNT ADDED! 10\n"<<std::endl;
 			}
 			if(std::abs(results.front().miss) > requiredAccuracy){
-				//std::cout << "Fast Solution not close enough (" << results.front().miss << "); refining" << std::endl;
+                            // changed
+                            //std::cout << "Fast Solution not close enough (" << results.front().miss << "), pathLen: "<<results.front().pathLen<<"; refining" << std::endl;
+
 				est.angle=refineRoot(sourcePos.GetZ(), target, results.front(), false, NoReflection, requiredAccuracy, sol_error ).first;
+                            // changed
+                            //std::cout << "done refining" << std::endl;
+
 				if(replayBuffer==NULL)
                                         {
                                         //std::cout << "Begin 2nd doTrace" << std::endl;
 					results.front()=doTrace<fullRayPosition>(sourcePos.GetZ(), est.angle, target, NoReflection, frequency, polarization, sol_error );
-                                        //std::cout << "done 2nd doTrace" << std::endl;
-                                        sol_cnt++;
+                                
+                                        // changed
+                                        //std::cout << "done 2nd doTrace (if)\n" << std::endl;
+                                        //std::cout << "results pathLen: "<<results.front().pathLen<<" miss: "<<results.front().miss<<"\n" << std::endl;
+
+                                        // changed
+                                        // if still don't satisfy accuracy, remove
+                                        if ( std::abs(results.front().miss) > requiredAccuracy ) {
+                                            //std::cout << "missed too much, pop back!" << std::endl;
+                                            results.pop_back();
+                                            sol_cnt--;
+                                        }
+                                        else if ( std::isnan(results.front().miss) ) {
+                                            //std::cout << "nan info! pop back!" << std::endl;
+                                            results.pop_back();
+                                            sol_cnt--;
+                                        }
+                                        //else
+                                            //sol_cnt++; // sol_cnt already done
+
                                         //std::cout<<"\n\tSOL_CNT ADDED! 11\n"<<std::endl;
                                         }
 				else{
                                         //std::cout << "Begin 2nd doTrace" << std::endl;
 					results.front()=doTrace<positionRecordingWrapper<fullRayPosition> >(sourcePos.GetZ(), est.angle, target, NoReflection, frequency, polarization, sol_error, recorder.get());
-                                        //std::cout << "done 2nd doTrace" << std::endl;
-					replayBuffer->front()=recorder->getData();
-					recorder->clearData();
-                                        sol_cnt++;
+                                        
+                                        // changed
+                                        //std::cout << "done 2nd doTrace (else)\n" << std::endl;
+                                        //sol_cnt++;
+
+                                        // changed
+                                        // if still don't satisfy accuracy, remove
+                                        if ( std::abs(results.front().miss) > requiredAccuracy ) {
+                                            //std::cout << "missed too much, pop back!" << std::endl;
+                                            results.pop_back();
+                                            recorder->clearData();
+                                            replayBuffer->pop_back();
+                                            sol_cnt--;
+                                        }
+                                        else if ( std::isnan(results.front().miss) ) {
+                                            //std::cout << "nan info! pop back!" << std::endl;
+                                            results.pop_back();
+                                            recorder->clearData();
+                                            replayBuffer->pop_back();
+                                            sol_cnt--;
+                                        }
+                                        else {
+                                            replayBuffer->front()=recorder->getData();
+                                            recorder->clearData();
+                                            //sol_cnt++; // sol_cnt already done
+                                        }
                                         //std::cout<<"\n\tSOL_CNT ADDED!  12\n"<<std::endl;
 				}
 			}
-			if(allowedReflections & SurfaceReflection){
-				//std::cout << "Looking for surface reflected solution" << std::endl;
+			//if(allowedReflections & SurfaceReflection){
+			if((allowedReflections & SurfaceReflection) && (sol_cnt>0) ){ // try reflect solution if there was 1st solution existing
+				
+                            // changed
+                            //std::cout << "Looking for surface reflected solution, prev est.angle: " << est.angle << std::endl;
+
 				//double angle=traceRoot(sourcePos.GetZ(),target,0.0,est.angle-1e-1,true,SurfaceReflection,requiredAccuracy);
 				
 				//Here, we want to find another root, potentially near the direct solution, but distinct from it. 
@@ -1102,23 +1483,66 @@ namespace RayTrace{
                                         //
                                         //std::cout << "Begin 3rd doTrace (replayBuffer==NULL)" << std::endl;
 					results.push_back(doTrace<fullRayPosition>(sourcePos.GetZ(),root.first,target,allowedReflections,frequency,polarization, sol_error ));
-                                        //std::cout << "Done 3rd doTrace" << std::endl;
-                                        sol_cnt++;
+                                        // changed
+                                        //std::cout << "Done 3rd doTrace (if)\n" << std::endl;
+                                        //std::cout << "results pathLen: "<<results[1].pathLen<<" miss: "<<results[1].miss<<"\n" << std::endl;
+                                        //sol_cnt++;
+
+                                        // changed
+                                        // if still don't satisfy accuracy, remove
+                                        if ( std::abs(results[1].miss) > requiredAccuracy ) {
+                                            //std::cout << "missed too much, pop back!" << std::endl;
+                                            results.pop_back();
+                                        }
+                                        else if ( std::isnan(results[1].miss) ) {
+                                            //std::cout << "nan info! pop back!" << std::endl;
+                                            results.pop_back();
+                                        }
+                                        else
+                                            sol_cnt++;
+
                                         //std::cout<<"\n\tSOL_CNT ADDED! 13\n"<<std::endl;
                                         }
 				else{
                                         //std::cout << "Begin 3rd doTrace (replayBuffer!=NULL)" << std::endl;
 					results.push_back(doTrace<positionRecordingWrapper<fullRayPosition> >(sourcePos.GetZ(),root.first,target,allowedReflections,frequency,polarization,sol_error, recorder.get()));
-                                        //std::cout << "Done 3rd doTrace" << std::endl;
-					replayBuffer->push_back(recorder->getData());
-					recorder->clearData();
-                                        sol_cnt++;
+                                        // changed
+                                        //std::cout << "Done 3rd doTrace (else)\n" << std::endl;
+					//replayBuffer->push_back(recorder->getData());
+					//recorder->clearData();
+                                        //sol_cnt++;
+
+                                        // changed
+                                        // if still don't satisfy accuracy, remove
+                                        if ( std::abs(results[1].miss) > requiredAccuracy ) {
+                                            //std::cout << "missed too much, pop back!" << std::endl;
+                                            results.pop_back();
+                                            recorder->clearData();
+                                            replayBuffer->pop_back();
+                                        }
+                                        else if ( std::isnan(results[1].miss) ) {
+                                            //std::cout << "nan info! pop back!" << std::endl;
+                                            results.pop_back();
+                                            recorder->clearData();
+                                            replayBuffer->pop_back();
+                                        }
+                                        else {
+                                            replayBuffer->front()=recorder->getData();
+                                            recorder->clearData();
+                                            sol_cnt++;
+                                        }
+
                                         //std::cout<<"\n\tSOL_CNT ADDED! 14\n"<<std::endl;
 				}
 			} // if allowedreflections & SurfaceReflection
                         
+                        // changed
+                        // bedrock reflect part not modified yet!
 			if(allowedReflections & BedrockReflection){
-				//std::cout << "Looking for bedrock reflected solution" << std::endl;
+				
+                            // changed
+                            //std::cout << "Looking for bedrock reflected solution" << std::endl;
+
 				//double angle=traceRoot(sourcePos.GetZ(),target,est.angle+1e-4,pi,true,BedrockReflection,requiredAccuracy).first;
 				
 				//this is the same logic as for the surface reflected case, but the seacrh is in the domain [est.angle,pi]
@@ -1154,7 +1578,11 @@ namespace RayTrace{
 		} //got a solution estimate
 
 		else{ //did not get a solution estimate
-			//std::cout << "Didn't get fast solution" << std::endl;
+			
+                    
+                    // changed
+                    //std::cout << "Didn't get fast solution" << std::endl;
+
 			double a=0.0,b=pi; //the endpoints of a range bracketing a root
 			std::pair<bool, double> minRes, maxRes, altMinRes;
 			switch(est.status){
