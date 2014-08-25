@@ -1308,3 +1308,19 @@ Further investigation is recommended to fix bugs buried in ray tracing code.
 
 ============================================================================
 
+08/25/14 2 Eugene Hong;
+
+Added one saturation study example code.
+getSatStudy.cc
+M.getSatStudy
+
+after compiling AraSim, compile getSatStudy with
+make -f M.getSatStudy
+
+Then read specific AraSim output root file with getSatStudy.
+It will generate posnu distribution and other useful plots that are related to saturation effect from output root file.
+Make sure you make outputs/plots/SatStudy
+folder to store the plots.
+
+============================================================================
+
