@@ -57,10 +57,10 @@ public:
 
   static const int NCOSTHETA=180;
   static const int NPHI=180;
-  static const double COSTHETAMAX=1.;
-  static const double COSTHETAMIN=0.;
-  static const double PHIMAX=2*3.14159;
-  static const double PHIMIN=0.;
+  static constexpr double COSTHETAMAX=1.;
+  static constexpr double COSTHETAMIN=0.;
+  static constexpr double PHIMAX=2*3.14159;
+  static constexpr double PHIMIN=0.;
  double weights_rin[NCOSTHETA][NPHI];
 
   void findCosthetaPhiBins(Position r_in,int &icostheta,int &iphi);
@@ -70,9 +70,9 @@ public:
   // added for increment weight from icemc
   static const int NBINS=10; // keep track of the number of events found, binned
   // by weights
-  static const double MIN_LOGWEIGHT=-3;
+  static constexpr double MIN_LOGWEIGHT=-3;
   //static const double MAX_LOGWEIGHT=-1;
-  static const double MAX_LOGWEIGHT=0;
+  static constexpr double MAX_LOGWEIGHT=0;
 
   double eventsfound_binned[NBINS]; 
   double eventsfound_binned_e[NBINS];

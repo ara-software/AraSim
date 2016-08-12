@@ -14,7 +14,7 @@
 #include <iostream>
 #include <fstream>
 
-//using namespace std;
+using namespace std;
 using std::string;
 using std::vector;
 

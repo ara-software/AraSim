@@ -66,7 +66,7 @@ outputdir="outputs"; // directory where outputs go
 
   WHICHPARAMETERIZATION=0;  //
 
-  SIMULATION_MODE=0;    // default freq domain simulation
+  SIMULATION_MODE=1;    // default freq domain simulation
 
   EVENT_TYPE=0;         // default neutrino only events
 
