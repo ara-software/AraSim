@@ -57,8 +57,8 @@ public:
 
   static const int NCOSTHETA=180;
   static const int NPHI=180;
-  static constexpr double COSTHETAMAX=1.;
-  static constexpr double COSTHETAMIN=0.;
+  static constexpr double COSTHETAMAX=1.0;
+  static constexpr double COSTHETAMIN=0.0;
   static constexpr double PHIMAX=2*3.14159;
   static constexpr double PHIMIN=0.;
  double weights_rin[NCOSTHETA][NPHI];

@@ -1324,3 +1324,11 @@ folder to store the plots.
 
 ============================================================================
 
+08/12/16 C Pfendner;
+
+updated static const double variables to static constexpr in
+counting.hh
+removed useless/problematic option in makefile
+added namespace definition in Tools.h
+
+============================================================================
