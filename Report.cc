@@ -18,6 +18,7 @@
 #include "TRandom3.h"
 #include "Constants.h"
 
+#include <cstdlib>
 
 ClassImp(Report);
 ClassImp(Antenna_r);
@@ -313,6 +314,8 @@ void Report::clear_useless(Settings *settings1) {   // to reduce the size of out
 //void Report::Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, UsefulIcrrStationEvent *theUsefulEvent, int evt) {
 void Report::Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt) {
 
+  //  cout << "TEST1" << endl;
+
     int ray_sol_cnt;
     double viewangle;
     Position launch_vector; // direction of ray at the source
@@ -370,63 +373,65 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
     //else if ( settings1->DEBUG_MODE_ON == 1 && evt >= settings1->DEBUG_SKIP_EVT ) cout<<"After DEBUG_SKIP_EVT"<<endl;
     else if ( settings1->DEBUG_MODE_ON == 1 && evt >= settings1->DEBUG_SKIP_EVT ) cout<<evt<<" "<<endl;
     // skip most of computation intensive processes if debugmode == 1
-
-
     
     
     int N_pass; // number of trigger passed channels (antennas)
     int N_pass_V; // number of trigger passed channels (Vpol antennas)
     int N_pass_H; // number of trigger passed channels (Hpol antennas)
 
-           for (int i = 0; i< detector->params.number_of_stations; i++) {
-               
-               min_arrival_time_tmp = 10.;      // first min_arrival_time is unreasonably big value
-               max_arrival_time_tmp = 0.;      // first max_arrival_time is unreasonably small value
-               max_PeakV_tmp = 0.;  // first max_PeakV_tmp is 0.
+    for (int i = 0; i< detector->params.number_of_stations; i++) {
+      
+      min_arrival_time_tmp = 10.;      // first min_arrival_time is unreasonably big value
+      max_arrival_time_tmp = 0.;      // first max_arrival_time is unreasonably small value
+      max_PeakV_tmp = 0.;  // first max_PeakV_tmp is 0.
+      
+      stations[i].Total_ray_sol=0; // initial Total_ray_sol value
+      
+      
+      
+      for (int j=0; j< detector->stations[i].strings.size(); j++) {
+	
+	for (int k=0; k< detector->stations[i].strings[j].antennas.size(); k++) {
+	  //	  cout << i << " : " << j << " : " << k << endl;
+	  
+	  stations[i].strings[j].antennas[k].clear();  // clear data in antenna which stored in previous event
+	  
+	  // run ray solver, see if solution exist
+	  // if not, skip (set something like Sol_No = 0;
+	  // if solution exist, calculate view angle and calculate TaperVmMHz
+	  
+	  // added one more condition to run raysolver ( direct distance is less than 3km )
+	  //
 
-               stations[i].Total_ray_sol=0; // initial Total_ray_sol value
-
-               
-               
-               for (int j=0; j< detector->stations[i].strings.size(); j++) {
-
-                   for (int k=0; k< detector->stations[i].strings[j].antennas.size(); k++) {
-
-                       stations[i].strings[j].antennas[k].clear();  // clear data in antenna which stored in previous event
-
-                       // run ray solver, see if solution exist
-                       // if not, skip (set something like Sol_No = 0;
-                       // if solution exist, calculate view angle and calculate TaperVmMHz
-
-                       // added one more condition to run raysolver ( direct distance is less than 3km )
-                       //
-                       if (event->Nu_Interaction[0].pickposnu && event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) <= settings1->RAYSOL_RANGE ) {    // if posnu is selected inside the antarctic ic:"<<viewangle<<" th_em:"<<d_theta_em[l]<<" th_had:"<<d_theta_had[l]<<" emfrac:"<<emfrac<<" hadfrac:"<<hadfrac<<" vmmhz1m:"<<vmmhz1m[l]<<endl;e
-                       //if (event->Nu_Interaction[0].pickposnu && event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) <= settings1->RAYSOL_RANGE && debugmode == 0 ) {    // if posnu is selected inside the antarctic ic:"<<viewangle<<" th_em:"<<d_theta_em[l]<<" th_had:"<<d_theta_had[l]<<" emfrac:"<<emfrac<<" hadfrac:"<<hadfrac<<" vmmhz1m:"<<vmmhz1m[l]<<endl;e
-
-                           
-                           //raysolver->Solve_Ray(event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], icemodel, ray_output, settings1);   // solve ray between source and antenna
-                           RayStep.clear(); // remove previous values
-                           raysolver->Solve_Ray(event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], icemodel, ray_output, settings1, RayStep);   // solve ray between source and antenna
-                           
-                           ray_sol_cnt = 0;
-                           
-                           if (raysolver->solution_toggle) {  // if there are solution from raysolver
-                           //if (raysolver->solution_toggle && debugmode==0 ) {  // if there are solution from raysolver
-                               
-
-                               while ( ray_sol_cnt < ray_output[0].size() ) {   // for number of soultions (could be 1 or 2)
-
-
-                                   stations[i].strings[j].antennas[k].arrival_time.push_back(ray_output[4][ray_sol_cnt]);
-
-
-                                   // get ice attenuation factor
-                                   //
+	  //	  cout << event->Nu_Interaction[0].posnu.GetX() << " : " << event->Nu_Interaction[0].posnu.GetY() << " : " << event->Nu_Interaction[0].posnu.GetZ() << endl;
+	  //	  cout << event->Nu_Interaction[0].pickposnu << " : " << event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) << " : " << settings1->RAYSOL_RANGE << endl; 
+	  if (event->Nu_Interaction[0].pickposnu && event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) <= settings1->RAYSOL_RANGE ) {    // if posnu is selected inside the antarctic ic:"<<viewangle<<" th_em:"<<d_theta_em[l]<<" th_had:"<<d_theta_had[l]<<" emfrac:"<<emfrac<<" hadfrac:"<<hadfrac<<" vmmhz1m:"<<vmmhz1m[l]<<endl;e
+	    //if (event->Nu_Interaction[0].pickposnu && event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) <= settings1->RAYSOL_RANGE && debugmode == 0 ) {    // if posnu is selected inside the antarctic ic:"<<viewangle<<" th_em:"<<d_theta_em[l]<<" th_had:"<<d_theta_had[l]<<" emfrac:"<<emfrac<<" hadfrac:"<<hadfrac<<" vmmhz1m:"<<vmmhz1m[l]<<endl;e
+	    //cout << i << " : " << j << " : " << k << endl;
+            
+	    //raysolver->Solve_Ray(event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], icemodel, ray_output, settings1);   // solve ray between source and antenna
+	    RayStep.clear(); // remove previous values
+	    raysolver->Solve_Ray(event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], icemodel, ray_output, settings1, RayStep);   // solve ray between source and antenna
+            
+	    ray_sol_cnt = 0;
+            
+	    if (raysolver->solution_toggle) {  // if there are solution from raysolver
+	      //if (raysolver->solution_toggle && debugmode==0 ) {  // if there are solution from raysolver
+              
+	      
+	      while ( ray_sol_cnt < ray_output[0].size() ) {   // for number of soultions (could be 1 or 2)
+		
+		
+		stations[i].strings[j].antennas[k].arrival_time.push_back(ray_output[4][ray_sol_cnt]);
+		
+		
+		// get ice attenuation factor
+		//
                                    double IceAttenFactor = 1.; 
                                    if ( settings1->USE_ARA_ICEATTENU==1 ) {// use new ARA measured ice attenuation values
-
-                                       double dx, dz, dl;
-                                       for (int steps=1; steps<(int)RayStep[ray_sol_cnt][0].size(); steps++) {
+				     
+				     double dx, dz, dl;
+				     for (int steps=1; steps<(int)RayStep[ray_sol_cnt][0].size(); steps++) {
 
                                            dx = RayStep[ray_sol_cnt][0][steps-1] - RayStep[ray_sol_cnt][0][steps];
                                            dz = RayStep[ray_sol_cnt][1][steps-1] - RayStep[ray_sol_cnt][1][steps];
@@ -3073,13 +3078,20 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
 }// saveTriggeredEvent
 
 #ifdef ARA_UTIL_EXISTS
-void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, UsefulIcrrStationEvent *theUsefulEvent) {
+void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulIcrrStationEvent *theUsefulEvent) {
     if (stationID < detector->params.number_of_stations){
         int i = stationID;
         cout << stationID << endl;
-        for (int ch_loop=0; ch_loop<ch_ID; ch_loop++) {
-            int string_i = detector->getStringfromArbAntID( i, ch_loop);
-            int antenna_i = detector->getAntennafromArbAntID( i, ch_loop);
+	int ch_limit;
+	if (stationID == 0){
+	  ch_limit = 14;
+	} else {
+	  ch_limit = 16;
+	}
+
+        for (int ch_loop=0; ch_loop<ch_limit; ch_loop++) {
+            int string_i = detector->getStringfromArbAntID( stationIndex, ch_loop);
+            int antenna_i = detector->getAntennafromArbAntID( stationIndex, ch_loop);
             int AraRootChannel = 0;
             AraRootChannel = detector->GetChannelfromStringAntenna (i, string_i, antenna_i, settings1);
             
@@ -3089,7 +3101,7 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
             
             //for (int mimicbin=0; mimicbin<settings1->NFOUR/2; mimicbin++) {
             for (int mimicbin=0; mimicbin<UsefulEventBin; mimicbin++) {
-                if (stations[i].Global_Pass > 0){
+                if (stations[stationIndex].Global_Pass > 0){
                     theUsefulEvent->fVoltsRF[AraRootChannel-1][mimicbin] = stations[i].strings[string_i].antennas[antenna_i].V_mimic[mimicbin];
                     theUsefulEvent->fTimesRF[AraRootChannel-1][mimicbin] = stations[i].strings[string_i].antennas[antenna_i].time_mimic[mimicbin];
                 }
@@ -3104,6 +3116,83 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
     }
 }
 #endif
+
+#ifdef ARA_UTIL_EXISTS
+void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulAtriStationEvent *theUsefulEvent) {
+  //    if (stationID < detector->params.number_of_stations){
+
+        int i = stationID;
+	cout << stationID << endl;
+	theUsefulEvent->fNumChannels = 32;
+	theUsefulEvent->stationId = stationID;
+
+	int ch_limit;
+	if (stationID == 0){
+	  ch_limit = 14;
+	} else {
+	  ch_limit = 16;
+	}
+
+	int maxElecChans = 32;
+	
+	for (int ch_loop=0; ch_loop < ch_limit; ch_loop++) {
+	  //	  int elecChan = AraGeom->getElecChanFromRFChan(ch_loop, stationID);
+	  int elecChan = AraGeomTool::Instance()->getElecChanFromRFChan(ch_loop, stationID);
+	  int string_i = 0;
+	  int antenna_i = 0;
+	  detector->GetSSAfromChannel(stationID, ch_loop, &antenna_i, &string_i, settings1);
+
+	  cout << ch_loop << " : " << elecChan << " : " << string_i << " : " << antenna_i << endl;
+
+	  //	  int string_i = detector->getStringfromArbAntID( stationIndex, ch_loop);
+	  //	  int antenna_i = detector->getAntennafromArbAntID( stationIndex, ch_loop);
+	  int AraRootChannel = 0;
+	  AraRootChannel = detector->GetChannelfromStringAntenna (stationID, string_i, antenna_i, settings1);
+	  
+	  int UsefulEventBin;
+	  if ( settings1->NFOUR/2 < EFFECTIVE_LAB3_SAMPLES*2) UsefulEventBin = settings1->NFOUR/2;
+	  else UsefulEventBin = EFFECTIVE_LAB3_SAMPLES*2;
+
+	  vector < double > volts;
+	  volts.resize(UsefulEventBin);
+	  vector < double > times;
+	  times.resize(UsefulEventBin);
+
+
+
+            
+	  //	  theUsefulEvent->fVolts[AraRootChannel-1].resize(UsefulEventBin);
+	  //	  theUsefulEvent->fTimes[AraRootChannel-1].resize(UsefulEventBin);
+	  //	  cout << string_i << " : " << antenna_i << endl;
+	  
+	  //for (int mimicbin=0; mimicbin<settings1->NFOUR/2; mimicbin++) {
+	  for (int mimicbin=0; mimicbin<UsefulEventBin; mimicbin++) {
+	    if (stations[stationIndex].Global_Pass > 0){
+	      //	      cout << "Test 1" << endl;
+	      volts[mimicbin] = stations[stationIndex].strings[string_i].antennas[antenna_i].V_mimic[mimicbin];
+	      times[mimicbin] = stations[stationIndex].strings[string_i].antennas[antenna_i].time_mimic[mimicbin];
+	      
+	    }
+	    else {
+	      volts[mimicbin] = 0.;
+	      times[mimicbin] = 0.;
+	    }
+	  }
+	  theUsefulEvent->fVolts.insert( std::pair < int, std::vector < double > > (elecChan, volts ));
+	  theUsefulEvent->fTimes.insert( std::pair < int, std::vector < double > > (elecChan, times ));
+
+	  //	  cout << elecChan << " : " << theUsefulEvent->fTimes[elecChan][1] <<  " : " << stations[stationIndex].strings[string_i].antennas[antenna_i].time_mimic[1] << endl;
+	  //	  cout << elecChan << " : " << theUsefulEvent->fVolts[elecChan][1] <<  " : " << stations[stationIndex].strings[string_i].antennas[antenna_i].V_mimic[1] << endl;
+
+
+	  volts.clear();
+	  times.clear();
+
+        }
+	//  }
+}
+#endif
+
 
 void Report::ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger){
     

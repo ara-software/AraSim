@@ -7,8 +7,8 @@
 include Makefile.arch
 
 #If you have things in non standard paths (eg. libRootFftwWrapper) append the appropriate -I or -L lines below
-SYSINCLUDES	= 
-SYSLIBS         = 
+SYSINCLUDES	= ${PLATFORM_DIR}/include
+SYSLIBS         = ${PLATFORM_DIR}/lib
 
 DLLSUF = ${DllSuf}
 OBJSUF = ${ObjSuf}

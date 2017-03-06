@@ -906,7 +906,7 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
 
     } else if (settings1->INTERACTION_MODE == 2){       
 //        PickExact(antarctica, detector, settings1, 400, 0, 0); 
-          PickExact(antarctica, detector, settings1, 1000, -PI/4., -PI/3.);
+          PickExact(antarctica, detector, settings1, 1000, -PI/4., 0.);
     }
 
 
@@ -1642,7 +1642,7 @@ void Interaction::PickNear_Cylinder (IceModel *antarctica, Detector *detector, S
     double X, Y, D;    // X,Y wrt detector core, and it's distance D
     
     //calculate posnu's X, Y wrt detector core
-    if (detector->Get_mode() == 1 || detector->Get_mode() == 2 || detector->Get_mode() == 3) {   // detector mode is for ARA stations;
+    if (detector->Get_mode() == 1 || detector->Get_mode() == 2 || detector->Get_mode() == 3 || detector->Get_mode() == 4) {   // detector mode is for ARA stations;
         X = detector->params.core_x + thisR*cos(thisPhi);
         Y = detector->params.core_y + thisR*sin(thisPhi);
         D = pow(X*X + Y*Y, 0.5);
@@ -1954,7 +1954,7 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
     
 
     //calculate posnu's X, Y wrt detector core
-    if (detector->Get_mode() == 1 || detector->Get_mode() == 2 ||detector->Get_mode() == 3) {   // detector mode is for ARA stations;
+    if (detector->Get_mode() == 1 || detector->Get_mode() == 2 ||detector->Get_mode() == 3 ||detector->Get_mode() == 4) {   // detector mode is for ARA stations;
 //        X = detector->params.core_x + thisR*cos(thisPhi)*cos(thisTheta);
 //        Y = detector->params.core_y + thisR*sin(thisPhi)*cos(thisTheta);
         X = avgX + thisR*cos(thisPhi)*cos(thisTheta);
@@ -1971,14 +1971,14 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
 
 //    double centerZ = (detector->stations[0].strings[0].antennas[1].GetZ()+ detector->stations[0].strings[0].antennas[2].GetZ())/2.;
     Z = avgZ + thisR*sin(thisTheta);
-//    std::cout << "CenterPosition:X:Y:Z:: "  << avgX << " : " << avgY << " : " << avgZ <<  std::endl;
+    //    std::cout << "CenterPosition:X:Y:Z:: "  << avgX << " : " << avgY << " : " << avgZ <<  std::endl;
 
     //std::cout << "Central position: " << centerZ << " : " << Z << " : " << X << " : " << Y << std::endl;
 
     
     posnu.SetXYZ(X,Y,Z);
-//    std::cout << "Posnu:X:Y:Z:: "  << posnu.GetX() << " : " << posnu.GetY() << " : " << posnu.GetZ() <<  std::endl;
-
+    //    std::cout << "Posnu:X:Y:Z:: "  << posnu.GetX() << " : " << posnu.GetY() << " : " << posnu.GetZ() <<  std::endl;
+    //    std::cout << "Icesurface:: " << antarctica->Surface(posnu.Lon(), posnu.Lat()) << std::endl;
     //Interaction::FlattoEarth(antarctica, X, Y, D);  //change to Earth shape and set depth (always in the ice)
     //FlattoEarth(antarctica, X, Y, D);  //change to Earth shape and set depth (always in the ice)
     

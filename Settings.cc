@@ -5,6 +5,12 @@
 #include "Settings.h"
 #include "Detector.h"
 
+bool AraUtilExists = false;
+
+#ifdef ARA_UTIL_EXISTS
+#include "AraRootVersion.h"
+#endif
+
 ClassImp(Settings);
 
 using namespace std;
@@ -41,7 +47,19 @@ outputdir="outputs"; // directory where outputs go
 
 // end of values from icemc
 
+ ARASIM_VERSION_MAJOR = ARA_SIM_MAJOR;
+ ARASIM_VERSION_MINOR = ARA_SIM_MINOR;
+ ARASIM_VERSION_SUBMINOR = ARA_SIM_SUBMINOR;
+ ARASIM_VERSION = (double)ARASIM_VERSION_MAJOR + (double)ARASIM_VERSION_MINOR * 0.001 + (double)ARASIM_VERSION_SUBMINOR * 0.000001;
+ 
+ ARAROOT_VERSION = 0.;
 
+ ARAUTIL_EXISTS = false;
+#ifdef ARA_UTIL_EXISTS
+ ARAUTIL_EXISTS = true;
+ ARAROOT_VERSION = (double)ARA_ROOT_MAJOR + (double)ARA_ROOT_MINOR * 0.01;
+#endif
+ 
 
   NNU=100;
 
@@ -66,7 +84,7 @@ outputdir="outputs"; // directory where outputs go
 
   WHICHPARAMETERIZATION=0;  //
 
-  SIMULATION_MODE=0;    // default freq domain simulation
+  SIMULATION_MODE=1;    // default freq domain simulation
 
   EVENT_TYPE=0;         // default neutrino only events
 
@@ -145,7 +163,7 @@ outputdir="outputs"; // directory where outputs go
     
     USE_INSTALLED_TRIGGER_SETTINGS = 0; // default : 0 - use idealized settings for the trigger
     
-    NUM_INSTALLED_STATIONS = 2;
+    NUM_INSTALLED_STATIONS = 4;
 
     CALPUL_OFFCONE_ANGLE = 35.;
 
@@ -235,6 +253,7 @@ outputdir="outputs"; // directory where outputs go
 
     AVZ_NORM_FACTOR_MODE = 1; // default : 1 : don't apply sqrt(2) (actually applied but cancel that) as realft assume Hn as double-sided spectrum (invFFT normalization factor 2/N) and also remove dF binning factor in MakeArraysforFFT function, 0 : use normalization factors like in old version
 
+    number_of_stations = 1;
 
 }
 
@@ -277,6 +296,9 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "DETECTOR") {
                   DETECTOR = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "DETECTOR_STATION") {
+                  DETECTOR_STATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "INTERACTION_MODE") {
                   INTERACTION_MODE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
@@ -528,6 +550,9 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "AVZ_NORM_FACTOR_MODE") {
                   AVZ_NORM_FACTOR_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }              
+	      else if (label == "number_of_stations") {
+		number_of_stations = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
 
 
           }
@@ -705,12 +730,33 @@ int Settings::CheckCompatibilities(Detector *detector) {
     }
 
 
-
-
     // This is for only ideal stations
     if (TRIG_ONLY_LOW_CH_ON==1 && DETECTOR==3) {
         cerr<<"TRIG_ONLY_LOW_CH_ON=1 doesn't work with DETECTOR=3!"<<endl;
         num_err++;
+    }
+
+
+    // This is for installed stations
+    if (DETECTOR == 4 ) {
+      if (ARAUTIL_EXISTS == false){
+	cerr << "DETECTOR=4 only works with an installation of AraRoot" << endl;
+	num_err++;
+      } else {
+	
+	cerr << "DETECTOR is set to 4" << endl; 
+	cerr << "Setting READGEOM to 1" << endl;
+	READGEOM=1;
+
+	cerr << "Setting number_of_stations to 1" << endl;
+	number_of_stations = 1;
+
+	if (DETECTOR_STATION <0 || DETECTOR_STATION >= NUM_INSTALLED_STATIONS){
+	  cerr << "DETECTOR_STATION is not set to a valid station number" << endl;
+	  num_err++;
+	}
+		
+      }
     }
 
 

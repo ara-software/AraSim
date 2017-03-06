@@ -13,11 +13,15 @@
 //Include output format to enable reading by analysis software AraRoot
 #ifdef ARA_UTIL_EXISTS
 #include "UsefulIcrrStationEvent.h"
+#include "UsefulAtriStationEvent.h"
+#include "AraGeomTool.h"
 #endif
 #endif
 
 #ifdef ARA_UTIL_EXISTS
 class UsefulIcrrStationEvent;
+class UsefulAtriStationEvent;
+class AraGeomTool;
 #endif
 
 class Detector;
@@ -232,7 +236,8 @@ class Report {
     
 #ifdef ARA_UTIL_EXISTS
 
-    void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, UsefulIcrrStationEvent *theUsefulEvent);
+    void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulIcrrStationEvent *theUsefulEvent);
+    void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulAtriStationEvent *theUsefulEvent);
 #endif
     
     void ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger);

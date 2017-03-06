@@ -414,11 +414,12 @@ class Detector {
     
 #ifdef ARA_UTIL_EXISTS
     void UseAntennaInfo (int stationNum, Settings *settings1);
+    void ImportStationInfo (Settings *settings1, int StationIndex, int StationID);
 #endif
 
 // more general used function
-    void GetSSAfromChannel ( int stationNum, int channelNum, int * antennaNum, int * stringNum, Settings *settings1);
-    int GetChannelfromStringAntenna ( int stationNum, int stringnum, int antennanum, Settings *settings1);
+    void GetSSAfromChannel ( int stationID, int channelNum, int * antennaNum, int * stringNum, Settings *settings1);
+    int GetChannelfromStringAntenna ( int stationID, int stringnum, int antennanum, Settings *settings1);
    
     
     /*
@@ -460,6 +461,7 @@ class Detector {
 
     void SetupInstalledStations();
     void PrepareVectorsInstalled();
+    void PrepareVectorsInstalled(int importedStation);
 
     void SetupIdealStations();
 

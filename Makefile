@@ -10,8 +10,8 @@ ifeq ($(strip $(BOOST_ROOT)),)
 	BOOST_ROOT = /usr/local/include
 endif
 
-SYSINCLUDES	= -I/usr/include -I$(BOOST_ROOT)
-SYSLIBS         = -L/usr/lib 
+SYSINCLUDES	= -I/usr/include -I$(BOOST_ROOT) -I$(PLATFORM_DIR)/include
+SYSLIBS         = -L/usr/lib -L$(PLATFORM_DIR)/lib
 
 DLLSUF = ${DllSuf}
 OBJSUF = ${ObjSuf}
@@ -31,8 +31,7 @@ ARA_ROOT_FLAGS =
 # added for Fortran to C++
 
 
-LIBS	= $(ROOTLIBS) -lMinuit $(SYSLIBS) 
-#-lsqlite3
+LIBS	= $(ROOTLIBS) -lMinuit $(SYSLIBS) -lsqlite3
 GLIBS	= $(ROOTGLIBS) $(SYSLIBS)
 
 # ROOT_LIBRARY = libAra.${DLLSUF}

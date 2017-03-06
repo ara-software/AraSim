@@ -3,7 +3,7 @@
 
 #include <string>
 #include "TObject.h"
-
+#include "AraSimVersion.h"
 
 class Detector;
 
@@ -24,7 +24,13 @@ class Settings
 
         int CheckCompatibilities(Detector *detector);// check if settings are not compatible to each other
 
+	int ARASIM_VERSION_MAJOR;
+        int ARASIM_VERSION_MINOR;
+        int ARASIM_VERSION_SUBMINOR;
+        double ARASIM_VERSION;
 
+        double ARAROOT_VERSION;
+	bool ARAUTIL_EXISTS;
         int NNU;
 
   // NEED TO FIGURE OUT A GOOD WAY TO READ THIS IN AND STORE THEM.
@@ -41,6 +47,11 @@ class Settings
         double EXPONENT; // 10^19 eV neutrinos only
 
         int DETECTOR;   // choose detector layout
+
+	int DETECTOR_STATION; // for DETECTOR=4, indicates the single station to be simulated
+	                      // 0 = testbed, 1 = A1, 2 = A2, 3 = A3
+
+	int number_of_stations; // the number of stations to be used in the simulation
 
         int INTERACTION_MODE;   // method to choose interaction point posnu. 0 : PickUnbiased, 1 : PickNear
 
@@ -214,7 +225,6 @@ class Settings
 
         
         int TRIG_ONLY_LOW_CH_ON;    // if trigger will occur with all chs (0, default) or only lower 8 chs (1)
-
 
     
         double ACCUM_TRIG_SEARCH_BINS_STATION0; // not actually setting value but gives us how much trigger searched bins there were in the run

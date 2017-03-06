@@ -63,11 +63,7 @@ IceModel::IceModel() {
 
 IceModel::IceModel(int model,int earth_model,int moorebay) : EarthModel(earth_model),mooreBayFlag(moorebay) {
 
-  
   setUpIceModel(model);
-
- 
-
 
  }
 
@@ -121,7 +117,7 @@ void IceModel::setUpIceModel(int model) {
       i++;
     }
   shelfup.close();
-   
+
   ifstream westlandup("data/westland_attenlength_up.txt");
   if(westlandup.fail())
     {cerr << "Failed to open westland_attenlength_up.txt";
@@ -149,7 +145,7 @@ void IceModel::setUpIceModel(int model) {
     }
   sheetdown.close();
 
-  
+
   ifstream shelfdown("data/iceshelf_attenlength_down.txt");
   if(shelfdown.fail())
     {
