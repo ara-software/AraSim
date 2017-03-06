@@ -96,6 +96,8 @@ class Settings
         int N_TRIG;         // number of coincidence channels triggered in TRIG_WINDOW default : 3
 
         int RANDOM_MODE;    // 0 : same random number generate, 1 : TRandom3(0) used. purely randomly generated (seed is guaranteed to be unique in space and time)
+    
+        int SEED; // default: 1, only applies if RANDOM_MODE=0, provides base seed value and run number taken from arguments is added to this value in order to submit multiple repeatable runs instead of only one single long repeatable run
 
         int BORE_HOLE_ANTENNA_LAYOUT;   // 0 = (V-H-V-H), 1 = (V-H-V), 2 = (V-H-V-V), 3 = (V-H-H-H), 4 = (V-H-H) default : 0
     

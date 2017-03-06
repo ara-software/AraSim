@@ -116,6 +116,8 @@ outputdir="outputs"; // directory where outputs go
 
   RANDOM_MODE=1;            // default : 1 (seed is unique in time/space)
 
+  SEED=1; // default: 1, only applies if RANDOM_MODE=0, provides base seed value and run number taken from arguments is added to this value in order to submit multiple repeatable runs instead of only one single long repeatable run
+    
   BORE_HOLE_ANTENNA_LAYOUT=0;   // default : 0 (VHVH)
 
   WRITE_ALL_EVENTS=0; //default : 0 (writes only globally triggered events)
@@ -236,6 +238,7 @@ outputdir="outputs"; // directory where outputs go
     AVZ_NORM_FACTOR_MODE = 1; // default : 1 : don't apply sqrt(2) (actually applied but cancel that) as realft assume Hn as double-sided spectrum (invFFT normalization factor 2/N) and also remove dF binning factor in MakeArraysforFFT function, 0 : use normalization factors like in old version
 
 
+
 }
 
 void Settings::ReadFile(string setupfile) {
@@ -352,6 +355,9 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "RANDOM_MODE") {
                   RANDOM_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "SEED") {
+                  SEED = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "BORE_HOLE_ANTENNA_LAYOUT") {
                   BORE_HOLE_ANTENNA_LAYOUT = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
