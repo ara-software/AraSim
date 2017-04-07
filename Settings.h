@@ -242,6 +242,20 @@ class Settings
 
         int AVZ_NORM_FACTOR_MODE; // default : 1 : don't apply sqrt(2) (actually applied but cancel that) as realft assume Hn as double-sided spectrum (invFFT normalization factor 2/N) and also remove dF binning factor in MakeArraysforFFT function, 0 : use normalization factors like in old version
 
+	int RAY_TRACE_ICE_MODEL_PARAMS; // which parameter set is used for the exponential ice model (defined in RayTrace_IceModel.cc) 
+	//0 : default, South Pole model (fitted from RICE data
+	//1 : South Pole model fitted from RICE #2
+	//2 : South Pole (Eisen (2003))
+	//3 : South Pole (Gow)
+	//10 : Moore's Bay Model 1
+	//11 : Moore's Bay Model 2
+	//20 : Byrd (Ebimuna (1983))
+	//30 : Mizuho (Ebimuna (1983))
+
+	int WAVEFORM_LENGTH; // the number of samples in the waveform length for V_mimic and UsefulAtriStationEvent, default: 64/2*20 = 640
+
+	int WAVEFORM_CENTER; // the relative location of the center of the write-out window with respect to the last triggered bin (which is laced at the center of the window by default), this effectively provides a global delay in the write-out window across all channels: positive values shift the write-out window to later times in the waveform, negative values shift the window to earlier times, default: 0
+
 
 
     // below : values from icemc
@@ -352,6 +366,7 @@ int MAXRAY;
 
 int horizontal_banana_points;
   int vertical_banana_points;
+
 
 
 

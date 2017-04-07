@@ -96,7 +96,7 @@ outputdir="outputs"; // directory where outputs go
 
   TAUDECAY=1;           //default : let taudecay as secondary interactions
 
-  TIMESTEP=(0.5)*1.E-9;  // default, in sec
+  TIMESTEP=(0.625)*1.E-9;  // default, in sec (old default: 0.5E-9, new default 0.625E-9
 
   PHASE=90.;            // default : 90 deg phase (it means all imaginary values)
 
@@ -108,7 +108,7 @@ outputdir="outputs"; // directory where outputs go
 
   TRIG_SCAN_MODE=0;	// default 0 (old mode) 1: new mode (faster) 2: scan all Pthresh values 3: scan also all N out of 8 
   
-  POWERTHRESHOLD=-6.15; // default : -6.15
+  POWERTHRESHOLD=-6.06; // old default : -6.15, new default: -6.06
 
   MAXT_DIODE=70.E-9;    // default : 70 ns
 
@@ -124,7 +124,7 @@ outputdir="outputs"; // directory where outputs go
 
   TRIG_TIMEOUT=1.E-6;       // default : 1us
 
-  TRIG_WINDOW=1.1E-7;       // default : 110 ns
+  TRIG_WINDOW=1.7E-7;       // old default : 110 ns, new default: 170 ns
 
   NOISE_EVENTS=16;        // default : 16 events
 
@@ -254,6 +254,12 @@ outputdir="outputs"; // directory where outputs go
     AVZ_NORM_FACTOR_MODE = 1; // default : 1 : don't apply sqrt(2) (actually applied but cancel that) as realft assume Hn as double-sided spectrum (invFFT normalization factor 2/N) and also remove dF binning factor in MakeArraysforFFT function, 0 : use normalization factors like in old version
 
     number_of_stations = 1;
+
+    RAY_TRACE_ICE_MODEL_PARAMS=0; // Default: South Pole values fitted from RICE data
+
+    WAVEFORM_LENGTH = 64/2*20; // Default: 64 digitization samples per block / 2 samples per waveform value * 20 blocks (value used for 2013-2016)
+    
+    WAVEFORM_CENTER = 0; // Default: 0, no offset in waveform centering
 
 }
 
@@ -553,6 +559,16 @@ void Settings::ReadFile(string setupfile) {
 	      else if (label == "number_of_stations") {
 		number_of_stations = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
 	      }
+	      else if (label == "RAY_TRACE_ICE_MODEL_PARAMS") {
+		RAY_TRACE_ICE_MODEL_PARAMS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+	      else if (label == "WAVEFORM_LENGTH") {
+		WAVEFORM_LENGTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+	      else if (label == "WAVEFORM_CENTER") {
+		WAVEFORM_CENTER = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+
 
 
           }

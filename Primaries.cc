@@ -979,13 +979,17 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
 
     // below this will be only done when we have chosen the usable posnu
     if ( pickposnu == 1 ) {
-
-
+      
+        if (settings1->INTERACTION_MODE==2) {
+            antarctica->Getchord(len_int_kgm2_total, r_in, posnu, 0, chord, weight, nearthlayers, myair, total_kgm2, crust_entered, mantle_entered, core_entered );
+        }
+      
 
         //if (settings1->GETCHORD_MODE==0) {
         if (settings1->INTERACTION_MODE==1) {
             antarctica->Getchord(len_int_kgm2_total, r_in, posnu, 0, chord, weight, nearthlayers, myair, total_kgm2, crust_entered, mantle_entered, core_entered );
         }
+
         //else if (settings1->GETCHORD_MODE==1 && settings1->INTERACTION_MODE==0) {
         else if (settings1->INTERACTION_MODE==0) {
           antarctica->Getchord(primary1, settings1, antarctica, sec1, len_int_kgm2_total, r_in, r_enterice, nuexitice, posnu, 0, chord, probability, weight, nearthlayers, myair, total_kgm2, crust_entered, mantle_entered, core_entered, nuflavor, pnu, ptauf, nu_nubar, currentint, taumodes1 , L0);

@@ -532,7 +532,7 @@ double cur_posnu_z;
 	   }
 
 	   weight = event->Nu_Interaction[0].weight;
-	   
+	   //	   cout << "weight: " << weight <<endl;	   
 #endif
                
            report->ClearUselessfromConnect(detector, settings1, trigger);
@@ -575,7 +575,7 @@ double cur_posnu_z;
                if (max_dt < report->stations[i].max_arrival_time - report->stations[i].min_arrival_time) max_dt = report->stations[i].max_arrival_time - report->stations[i].min_arrival_time;
                // check the total global trigger passed
                if (report->stations[i].Global_Pass) {
-
+		 
                    cout<<"\nGlobal_Pass : "<<report->stations[i].Global_Pass<<" evt : "<<inu<<" added weight : "<<event->Nu_Interaction[0].weight<<endl;
                    
                    if ( check_station_DC == 0) { // count trigger pass only once per event

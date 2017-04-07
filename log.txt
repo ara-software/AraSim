@@ -1295,3 +1295,15 @@ in your setup file
 Added utilities to get the waveforms and hit times in vectors from Report class.
 Added a printGeometry method to Detector class.
 
+04/07/2017 Carl Pfendner:
+
+Added option to import geometry from AraRoot for stations 2, 3 - use
+DETECTOR=4, DETECTOR_STATION=2,3,etc
+Added alternative ray tracing models - use RAY_TRACE_ICE_MODEL_PARAMS
+Fixed weight calculation for INTERACTION_MODE=2
+Added ability to set waveform length for output (AraSim and
+AraRoot-like together) and to choose the center of the waveform
+relative to the last triggered bin - use WAVEFORM_LENGTH (in samples)
+and WAVEFORM_CENTER (in samples offset)
+
+
