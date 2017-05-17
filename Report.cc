@@ -1462,9 +1462,9 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                    if ( settings1->NOISE==1 && settings1->DETECTOR==3) {
                        detector->ReadRayleigh_New(settings1);
                    }
-                   if ( settings1->NOISE==1 && settings1->DETECTOR==4) {
-                       detector->ReadRayleigh_Station(settings1);
-                   }
+//                   if ( settings1->NOISE==1 && settings1->DETECTOR==4) {
+//                       detector->ReadRayleigh_Station(settings1);
+//                   }
                    
                    
                    // reset Trigger class noise temp values
