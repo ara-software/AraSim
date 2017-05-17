@@ -823,6 +823,132 @@ Interaction::Interaction(string inttype,Primaries *primary1,Settings *settings1,
 
 */
 
+//Arbitrary event Interaction class
+Interaction::Interaction(IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 ) {
+
+  Initialize ();
+
+  double L0 = 0.;
+  
+  if (settings1->CALPULSER_ON == 1)  // calpulser1 Hpol
+    //    {
+    //        PickExact(antarctica, detector, settings1, 50.27, 36.35*PI/180., 64.76*PI/180.); 
+    //        primary1->IsCalpulser = 1;
+    //    }
+    {
+      PickExact(antarctica, detector, settings1, 29.5, 2.81*PI/180., -93.6*PI/180.);
+      primary1->IsCalpulser = 1;
+    }
+  else if(settings1->CALPULSER_ON == 2)  // calpulser2 Vpol
+    {
+      //PickExact(antarctica, detector, settings1, 47.18, 30.15*PI/180., -36.56*PI/180.); 
+      PickExact(antarctica, detector, settings1, 47.18, -20.*PI/180., 34.*PI/180.); // calpulser 2 Vpol location
+      primary1->IsCalpulser = 2;
+    } 
+  else if(settings1->CALPULSER_ON == 3)   // calpulser2 Hpol
+    {
+      //PickExact(antarctica, detector, settings1, 47.18, 30.15*PI/180., -36.56*PI/180.); 
+      PickExact(antarctica, detector, settings1, 47.18, -28.*PI/180., 34.*PI/180.); // calpulser 2 Hpol location
+      primary1->IsCalpulser = 3;
+    } 
+  else if(settings1->CALPULSER_ON == 4)   // calpulser2 middle of Vpol & Hpol
+    {
+      //PickExact(antarctica, detector, settings1, 47.18, 30.15*PI/180., -36.56*PI/180.); 
+      PickExact(antarctica, detector, settings1, 47.18, -24.*PI/180., 34.*PI/180.); // calpulser 2 Hpol location
+      primary1->IsCalpulser = 4;
+    } 
+  else if (settings1->CALPULSER_ON == 5)
+    {
+      // insert code to switch between the two calpulsers here
+    }
+  else if (settings1->CALPULSER_ON == 0){
+    primary1->IsCalpulser = 0;
+    
+    if (settings1->INTERACTION_MODE == 0) {    // for pickunbiased. posnu will be selected the sphere around the stations
+      //Interaction::PickUnbiased( antarctica );
+      
+      //pickposnu = 0;
+      /*
+      //  try PickUnbiased until it founds usable posnu
+      while (pickposnu==0) {
+      PickUnbiased( antarctica );
+      }
+      */
+      //  try PickUnbiased just once, no matter pickposnu == 0 or 1
+      //PickUnbiased( antarctica ); // PickUnbiased no more used
+      
+      L0 = PickNear_Sphere (antarctica, detector, settings1);
+      
+    }
+    else if (settings1->INTERACTION_MODE == 1) {   // for picknear. posnu will be only near by ARA core with cylinderical volume
+      
+      //Interaction::PickNear (antarctica, detector, settings1);
+      PickNear_Cylinder (antarctica, detector, settings1);
+      
+    } else if (settings1->INTERACTION_MODE == 2){       
+      //        PickExact(antarctica, detector, settings1, 400, 0, 0); 
+      PickExact(antarctica, detector, settings1, settings1->POSNU_R, settings1->POSNU_THETA, settings1->POSNU_PHI);
+    }
+    
+    
+  }
+  //cout<<" Finished Pick posnu, r_in, r_enterice, nuexitice!!"<<endl;
+  
+  
+  // now set N at posnu
+  signal->SetNDepth( antarctica->GetN( posnu ) );
+  indexN = signal->N_DEPTH;
+  changle = signal->changle;
+  
+  
+  
+  //sigma_err = primary1->GetSigma( pnu, sigma, len_int_kgm2, settings1, nu_nubar, currentint);
+  //sigma_err = primary1->GetSigma( pnu, sigma, len_int_kgm2, settings1, nu_nubar, currentint, len_int_kgm2_total );
+  //--------------------------------------------------
+  //     cout<<"len_int_kgm2 from GetSigma : "<<len_int_kgm2<<endl;
+  //     cout<<"sigma from GetSigma : "<<sigma<<endl;
+  //     cout<<" Finished SetSigma!!"<<endl;
+  //-------------------------------------------------- 
+  
+  double tmp; // for useless information
+  
+  
+  
+  if (settings1->SIMULATION_MODE == 0) { // freq domain simulation (old mode)
+    
+    // set vmmhz1m (which is generally used for all detector antennas)
+    // vmmhz1m is calculated at 1m, cherenkov angle
+    //
+    
+    
+    for (int i=0; i<detector->GetFreqBin(); i++) {   // for detector freq bin numbers
+      
+      
+      d_theta_em.push_back(0); // prepare d_theta_em and d_theta_had for GetSpread
+      d_theta_had.push_back(0);
+      vmmhz1m.push_back(0);
+      vmmhz1m_em.push_back(0);
+      
+      if (primary1->IsCalpulser != 0){
+	if (i <56){
+	  vmmhz1m[i] = signal->GetVmMHz1mCalPulser( i );
+	} else {
+	  vmmhz1m[i] =   signal->GetVmMHz1mCalPulser( 55 );
+	}
+	
+      } else{
+	
+      }
+      
+      
+      
+    }    // end detector freq bin numbers loop
+    
+  }// if SIMULATION_MODE = 0 (freq domain old method)
+  
+}
+
+// Neutrino event Interaction class
 Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_interactions, IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 ) {
 
     Initialize ();
@@ -906,7 +1032,8 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
 
     } else if (settings1->INTERACTION_MODE == 2){       
 //        PickExact(antarctica, detector, settings1, 400, 0, 0); 
-          PickExact(antarctica, detector, settings1, 1000, -PI/4., 0.);
+//          PickExact(antarctica, detector, settings1, 1000, +PI/4., 0.);
+	  PickExact(antarctica, detector, settings1, settings1->POSNU_R, settings1->POSNU_THETA, settings1->POSNU_PHI);
     }
 
 

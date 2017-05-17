@@ -506,8 +506,10 @@ double cur_posnu_z;
            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent);
            report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown);
            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent, Events_Thrown);
+
                       
 #ifdef ARA_UTIL_EXISTS
+	   if (settings1->WRITE_ALL_EVENTS !=2){
 	   int stationID;
 	   int stationIndex;
 	   if (settings1->DETECTOR == 4){
@@ -532,6 +534,7 @@ double cur_posnu_z;
 	   }
 
 	   weight = event->Nu_Interaction[0].weight;
+	   }
 	   //	   cout << "weight: " << weight <<endl;	   
 #endif
                
@@ -562,6 +565,7 @@ double cur_posnu_z;
 
            for (int i=0; i<detector->params.number_of_stations; i++) {
 #ifdef ARA_UTIL_EXISTS
+	     if (settings1->WRITE_ALL_EVENTS != 2){
                if (settings1->DETECTOR == 3 && i == 0)
 		 { theIcrrEvent->numRFChans = 14; }
 	       else if (settings1->DETECTOR == 4 && settings1->DETECTOR_STATION == 0)
@@ -570,6 +574,7 @@ double cur_posnu_z;
 		 theAtriEvent->fNumChannels = 20; 
 		 theIcrrEvent->numRFChans = 16; 
 	       }
+	     }
 #endif
                
                if (max_dt < report->stations[i].max_arrival_time - report->stations[i].min_arrival_time) max_dt = report->stations[i].max_arrival_time - report->stations[i].min_arrival_time;

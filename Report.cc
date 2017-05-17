@@ -2155,6 +2155,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                        //stations[i].Global_Pass = trig_i;
                        stations[i].Global_Pass = last_trig_bin; // where actually global trigger occured
 
+
                        //trig_i = settings1->DATA_BIN_SIZE;    // also if we know this station is trigged, don't need to check rest of time window
                        trig_i = max_total_bin;    // also if we know this station is trigged, don't need to check rest of time window
                        for (int ch_loop=0; ch_loop<ch_ID; ch_loop++) {
@@ -2296,6 +2297,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                // done V_mimic for non-triggered chs ( done fixed V_mimic )
                            }
+
                            double arrivtime = stations[i].strings[string_i].antennas[antenna_i].arrival_time[0];
                            double X = detector->stations[i].strings[string_i].antennas[antenna_i].GetX();
                            double Y = detector->stations[i].strings[string_i].antennas[antenna_i].GetY();
@@ -2395,6 +2397,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                // clear useless done
 */
         } // for stations
+
+
 
         // also clear all vector info to reduce output root file size
         clear_useless(settings1);   // to reduce the size of output AraOut.root, remove some information
@@ -2675,7 +2679,10 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 
     // check if global trigger...
     
-    if( (settings1->TRIG_MODE==0&&( N_pass >= settings1->N_TRIG )) || (settings1->TRIG_MODE==1&&( N_pass_V >= settings1->N_TRIG_V || N_pass_H >= settings1->N_TRIG_H ))){ // if there's a trigger !
+    if( (settings1->TRIG_MODE==0&&( N_pass >= settings1->N_TRIG )) || 
+	(settings1->TRIG_MODE==1&&( N_pass_V >= settings1->N_TRIG_V || N_pass_H >= settings1->N_TRIG_H )) 
+	//|| (settings1->TRIG_MODE==2&&( N_pass_0 >= settings1->N_TRIG_0 || N_pass_1 >= settings1->N_TRIG_1 ))
+	){ // if there's a trigger !
       
 
       global_pass_bit=1;  
@@ -2820,7 +2827,72 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 // 	    
 // 	  }
       }// if trig_mode==1
-    
+
+      /*          
+      if(settings1->TRIG_MODE==2){ // for N out of arbitrary sets of antennas
+
+	// for Set 0 only:
+	if(N_pass_0>=settings1->N_TRIG_0) for(int ii=0;ii<N_pass_0; ii++){// find the N_pass best channel's TDR and store them.
+
+	  double best_thresh=0;
+	  int best_chan=0;
+	  
+	  for(int trig_j=0;trig_j<numChan;trig_j++){
+	    
+	    int string_i = detector->getStringfromArbAntID( i, trig_j);
+	    int antenna_i = detector->getAntennafromArbAntID( i, trig_j);	 
+
+	    if((antenna_i == 0 || antenna_i == 2 ) && buffer[trig_j]->temp_value<best_thresh){ 
+	      
+	      best_thresh=buffer[trig_j]->temp_value; 
+	      best_chan=trig_j;
+	      
+	    }// if best
+	  }// for trig_j
+	  buffer[best_chan]->temp_value=0;
+	  
+	  TDR_Vpol_sorted_temp[ii]=best_thresh;
+	  
+	}// for ii
+	  
+	  // debug output:
+// 	  if(TDR_Vpol_sorted_temp[0]>TDR_Vpol_sorted_temp[1]||TDR_Vpol_sorted_temp[1]>TDR_Vpol_sorted_temp[2]){
+// 	   
+// 	    cout<<"\n";
+// 	    for(int p=0;p<80;p++) cout<<"*";
+// 	    cout<<"\n  ordering problem, Vpol: "<<TDR_Vpol_sorted_temp[0]<<" "<<TDR_Vpol_sorted_temp[1]<<" "<<TDR_Vpol_sorted_temp[2]<<"\n";
+// 	    for(int p=0;p<80;p++) cout<<"*";
+// 	    cout<<"\n";
+// 	    
+// 	  }
+	// for Hpol only
+	if(N_pass_1>=settings1->N_TRIG_1) for(int ii=0;ii<N_pass_1; ii++){// find the N_pass best channel's TDR and store them.
+
+	  double best_thresh=0;
+	  int best_chan=0;
+	  
+	  for(int trig_j=0;trig_j<numChan;trig_j++){ 
+	    
+	    int string_i = detector->getStringfromArbAntID( i, trig_j);
+	    int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+	 
+	    if((antenna_i==1 || antenna_i == 3) && buffer[trig_j]->temp_value<best_thresh){ 
+	      
+	      best_thresh=buffer[trig_j]->temp_value; 
+	      best_chan=trig_j;
+	      
+	    }// if best
+	  }// for trig_j
+	
+	  buffer[best_chan]->temp_value=0;
+	  
+	  TDR_Hpol_sorted_temp[ii]=best_thresh;
+	  
+
+	  	  
+	}// for ii
+*/
+
     
     // check if temp TDR arrays improved, if so update TDR arrays:
     if(settings1->TRIG_MODE==0){
@@ -2835,6 +2907,17 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       
       // for this mode, can get TDR_all_sorted from these two arrays:
     }
+
+    /*
+    if(settings1->TRIG_MODE==2){
+     
+      if(N_pass_0>=settings1->N_TRIG_0) for(int ii=0;ii<N_pass_0;ii++) if(TDR_Vpol_sorted_temp[ii]<stations[i].TDR_Vpol_sorted[ii]) stations[i].TDR_Vpol_sorted[ii]=TDR_Vpol_sorted_temp[ii];
+      if(N_pass_1>=settings1->N_TRIG_1) for(int ii=0;ii<N_pass_1;ii++) if(TDR_Hpol_sorted_temp[ii]<stations[i].TDR_Hpol_sorted[ii]) stations[i].TDR_Hpol_sorted[ii]=TDR_Hpol_sorted_temp[ii];
+      
+      // for this mode, can get TDR_all_sorted from these two arrays:
+    }
+    */
+
     
     }// if trigger and buffer changed
     

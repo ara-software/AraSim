@@ -35,7 +35,6 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
     Choose_Evt_Type (settings1);
 
     if (Event_type == 0) { // if only neutrino events exist
-
         
         pnu = spectra1->GetNuEnergy();
 //        cout << pnu << endl;
@@ -89,16 +88,60 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
             Nu_Interaction.push_back( Nu_tmp );
         }
 */
+        
+    } 
 
+    if (Event_type == 10) { // if only neutrino events exist
+        
+      pnu = 0;
+//        cout << pnu << endl;
+/*
+        double hereTheta = 10.;
+        Vector output;
+        output.SetX(-1.*TMath::Sin(hereTheta*3.1415926535/180.));
+        output.SetY(0.);
+        output.SetZ(TMath::Cos(hereTheta*3.1415926535/180.));
+        nnu = output;
+*/
+        //nuflavor = primary1->GetNuFlavor();
+      nuflavor = "";
+      nuflavorint = 0;
+      nu_nubar = 0;
+
+
+        /*
+        if (settings1->NNU_THIS_THETA==1) {    // set specific theta angle for nnu
+            nnu = primary1->GetThatDirection(settings1->NNU_THETA, settings1->NNU_D_THETA);
+        }
+        else { // nnu angle random
+            nnu = primary1->GetAnyDirection();
+        }
+        */
+        
+        Interaction *Nu_temp;
+        //Report *report_tmp;
+
+        Nu_temp = new Interaction (pnu, nuflavor, nu_nubar, n_interactions, icemodel, detector, settings1, primary1, signal, sec1 );
+        //report_tmp = new Report(detector ,settings1);
+        
+        Nu_Interaction.push_back(*Nu_temp);  // for the first interaction
+        //test_report.push_back(*report_tmp);
+
+        delete Nu_temp;
+
+        // for multiple interactions...
+/*
+        while (interaction_count < n_interactions) {    // not sure if this will work???
+
+            Nu_tmp = new Interaction (...., n_interactions );
+
+            Nu_Interaction.push_back( Nu_tmp );
+        }
+*/
         
     } 
 
     IsCalpulser = primary1->IsCalpulser;
-
-
-
-
-
 
 }
 
@@ -116,13 +159,16 @@ void Event::delete_all() {
 void Event::Choose_Evt_Type (Settings *settings1) {
 
     if (settings1->EVENT_TYPE==0) {
-        //cout<<"Only Neutrino Evnets!"<<endl;
+        //cout<<"Only Neutrino Events!"<<endl;
         Event_type = 0;
     }
+    else if (settings1->EVENT_TYPE == 10){
+      Event_type = 10;
+    }
     else {
-        cout<<"Currently, only neutrino events possible!"<<endl;
-        cout<<"Change Evt_type from "<<settings1->EVENT_TYPE<<" to 0"<<endl;
-        Event_type = 0;
+      cout<<"Currently, only neutrino (EVET_TYPE=0) and arbitrary (EVENT_TYPE=10) events possible!"<<endl;
+      cout<<"Change Evt_type from "<<settings1->EVENT_TYPE<<" to 0"<<endl;
+      Event_type = 0;
     }
 
 }

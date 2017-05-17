@@ -47,4 +47,5 @@ TRIG_MODE=0 // use vpol, hpol separated trigger mode. by default N_TRIG_V=3, N_T
 
 ///////////////////
 
-
+//INTERACTION_MODE=2
+//POSNU_THETA=.8
