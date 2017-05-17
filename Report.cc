@@ -1459,10 +1459,14 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                    if ( settings1->USE_TESTBED_RFCM_ON==1) {
                        detector->ReadRFCM_New(settings1);
                    }
-                   if ( settings1->NOISE==1) {
+                   if ( settings1->NOISE==1 && settings1->DETECTOR==3) {
                        detector->ReadRayleigh_New(settings1);
                    }
-
+                   if ( settings1->NOISE==1 && settings1->DETECTOR==4) {
+                       detector->ReadRayleigh_Station(settings1);
+                   }
+                   
+                   
                    // reset Trigger class noise temp values
                    trigger->Reset_V_noise_freqbin(settings1, detector);
 
@@ -2227,7 +2231,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                    if (V_mimic_mode == 0) { // Global passed bin is the center of the window
                                        stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( ( trigger->Full_window_V[ch_loop][ last_trig_bin + waveformCenter - waveformLength/2 + mimicbin ] )*1.e3 );// save in mV
                                        stations[i].strings[string_i].antennas[antenna_i].time.push_back( last_trig_bin + waveformCenter - waveformLength/2 + mimicbin );
-                                       stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( ( waveformCenter + waveformLength/2 + mimicbin) * settings1->TIMESTEP*1.e9  );// save in ns
+                                       stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( ( waveformCenter - waveformLength/2 + mimicbin) * settings1->TIMESTEP*1.e9  );// save in ns
                                    }
                                    else if (V_mimic_mode == 1) { // Global passed bin is the center of the window + delay to each chs from araGeom
                                        stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( ( trigger->Full_window_V[ch_loop][ last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength/2 + mimicbin ] )*1.e3 );// save in mV

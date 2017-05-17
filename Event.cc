@@ -163,6 +163,8 @@ void Event::Choose_Evt_Type (Settings *settings1) {
         Event_type = 0;
     }
     else if (settings1->EVENT_TYPE == 10){
+      //            cout<<"Currently, only neutrino events possible!"<<endl;
+      //            cout<<"Change Evt_type from "<<settings1->EVENT_TYPE<<" to 0"<<endl;
       Event_type = 10;
     }
     else {
@@ -171,6 +173,9 @@ void Event::Choose_Evt_Type (Settings *settings1) {
       Event_type = 0;
     }
 
+    
+    
+    
 }
 
 

@@ -11,7 +11,7 @@ ifeq ($(strip $(BOOST_ROOT)),)
 endif
 
 SYSINCLUDES	= -I/usr/include -I$(BOOST_ROOT) -I$(PLATFORM_DIR)/include
-SYSLIBS         = -L/usr/lib -L$(PLATFORM_DIR)/lib
+SYSLIBS         = -L/usr/lib -L$(PLATFORM_DIR)/lib -L/usr/local/lib
 
 DLLSUF = ${DllSuf}
 OBJSUF = ${ObjSuf}
@@ -45,7 +45,7 @@ PROGRAMS = AraSim
 all : $(PROGRAMS) 
 
 AraSim : $(OBJS)
-	$(LD) -L. $(OBJS) $(LDFLAGS) $(LIBS) -o $(PROGRAMS) 
+	$(LD) -v -L. $(OBJS) $(LDFLAGS) $(LIBS) -o $(PROGRAMS) 
 	@echo "done."
 
 #The library

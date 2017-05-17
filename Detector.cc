@@ -2000,10 +2000,53 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
 	      // read system temperature for chs file!!
 	      if (settings1->NOISE_TEMP_MODE!=0) {
-		ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
+            ("./data/system_temperature.csv", settings1);// only TestBed for now
 	      }
 	    }
 
+        if (settings1->DETECTOR_STATION == 2){
+            if ( settings1->NOISE==1) {
+                // read Rayleigh fit for freq range, bh channels
+                //ReadRayleighFit_TestBed("data/RayleighFit_TB.csv", settings1, settings1->RAYLEIGH_CH); // read and save RFCM gain
+                ReadRayleighFit_TestBed("data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
+            }
+            
+            /*
+            // read gain offset for chs file!!
+            ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1);// only TestBed for now
+            // read threshold offset for chs file!!
+            ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1);// only TestBed for now
+            // read threshold values for chs file
+            ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
+            // read system temperature for chs file!!
+            
+            if (settings1->NOISE_TEMP_MODE!=0) {
+                ("./data/system_temperature.csv", settings1);// only TestBed for now
+            }
+             */
+        }
+        
+        if (settings1->DETECTOR_STATION == 3){
+            if ( settings1->NOISE==1) {
+                // read Rayleigh fit for freq range, bh channels
+                //ReadRayleighFit_TestBed("data/RayleighFit_TB.csv", settings1, settings1->RAYLEIGH_CH); // read and save RFCM gain
+                ReadRayleighFit_TestBed("data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
+            }
+            /*
+            // read gain offset for chs file!!
+            ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1);// only TestBed for now
+            // read threshold offset for chs file!!
+            ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1);// only TestBed for now
+            // read threshold values for chs file
+            ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
+            // read system temperature for chs file!!
+            if (settings1->NOISE_TEMP_MODE!=0) {
+                ("./data/system_temperature.csv", settings1);// only TestBed for now
+            }
+             */
+        }
+        
+        
             // read total elec. chain response file!!
 	    cout<<"start read elect chain"<<endl;
             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
@@ -4460,6 +4503,152 @@ inline void Detector::ReadRayleighFit_TestBed(string filename, Settings *setting
     
 }
 
+
+inline void Detector::ReadRayleighFit(string filename, Settings *settings1) {    // will read Rayleigh fit result from the file
+    
+    ifstream Rayleigh_file( filename.c_str() );
+    
+    string line;
+    
+    //int N=-1;
+    int init = 1;
+    int ch_loop = 0;
+    
+    vector <double> xfreq_tmp;
+    vector <vector <double> > fit_tmp; // 2d array for ch
+    
+    fit_tmp.resize(16); // start with max number of chs
+    int ch_no=0; // this is actual number of chs from file (will be obtained)
+    int total_line = 0;
+    
+    int ch_tmp;
+    double fit_tmp_tmp;
+    double freq_tmp_tmp;
+    
+    //cout<<"Reading RayleighFit file!"<<endl;
+    
+    if ( Rayleigh_file.is_open() ) {
+        while (Rayleigh_file.good() ) {
+            
+            if (init == 1) { // ok, skip first line
+                getline (Rayleigh_file, line);
+                init++;
+            }
+            else { // from second line, read
+                
+                
+                //getline (Rayleigh_file, line);
+                getline (Rayleigh_file, line, ',');
+                
+                //xfreq_tmp.push_back( atof( line.substr(0, line.find_first_of(",")).c_str() ) ); // freq in MHz
+                //line_no1 = line.find_first_of(",");
+                //freq_tmp_tmp = atof( line.substr(0, line.find_first_of(",")).c_str() ); // freq in MHz
+                freq_tmp_tmp = atof( line.c_str() ); // freq in MHz
+                
+                getline (Rayleigh_file, line, ',');
+                
+                //chan_tmp.push_back( atof( line.substr(line.find_first_of(",") + 1).c_str() ) ); // channel number
+                //ch_tmp = atof( line.substr(line.find_first_of(",") + 1).c_str() ); // channel number (skip)
+                ch_tmp = atof( line.c_str() ); // channel number (skip)
+                
+                getline (Rayleigh_file, line, ',');
+                
+                //fit_tmp[ch_tmp].push_back( atof( line.substr( line.find_first_of("=") + 1, line.find_first_of(",") ).c_str() ) ); // fit result
+                fit_tmp_tmp = atof( line.c_str() ); // fit result
+                fit_tmp[ch_tmp].push_back( fit_tmp_tmp ); // fit result
+                
+                if (ch_tmp == 0) xfreq_tmp.push_back( freq_tmp_tmp );
+                
+                getline (Rayleigh_file, line, '\n');
+                
+                
+                
+                /*
+                 getline (Rayleigh_file, line);
+                 //xfreq_tmp.push_back( atof( line.substr(0, line.find_first_of(",")).c_str() ) ); // freq in MHz
+                 freq_tmp_tmp = atof( line.substr(0, line.find_first_of(",")).c_str() ); // freq in MHz
+                 
+                 //chan_tmp.push_back( atof( line.substr(line.find_first_of(",") + 1).c_str() ) ); // channel number
+                 ch_tmp = atof( line.substr(line.find_first_of(",") + 1).c_str() ); // channel number (skip)
+                 
+                 //fit_tmp[ch_tmp].push_back( atof( line.substr(line.find_first_of(",") + 1).c_str() ) ); // fit result
+                 fit_tmp_tmp = atof( line.substr( line.find_first_of("=") + 1, line.find_first_of(",") ).c_str() ); // fit result
+                 fit_tmp[ch_tmp].push_back( fit_tmp_tmp ); // fit result
+                 
+                 if (ch_tmp == 0) xfreq_tmp.push_back( freq_tmp_tmp );
+                 */
+                
+                total_line++;
+                
+                //cout<<freq_tmp_tmp<<"\t"<<ch_tmp<<"\t"<<fit_tmp_tmp<<endl;
+            }
+            
+        }
+        Rayleigh_file.close();
+    }
+    
+    else cout<<"Rayleigh file can not opened!!"<<endl;
+    
+    //int N = (int)xfreq_tmp.size();
+    int N = (int)xfreq_tmp.size() - 1;
+    total_line = total_line - 1;
+    //cout<<"freq bin : "<<N<<endl;
+    //cout<<"Total data lines : "<<total_line<<endl;
+    ch_no = total_line / N;
+    
+    //cout<<"number of ch from RayleighFit file : "<<ch_no<<endl;
+    
+    fit_tmp.resize(ch_no); // now resize (no data part will be removed)
+    
+    RayleighFit_ch = ch_no;
+    
+    
+    double xfreq[N];  // need array for Tools::SimpleLinearInterpolation
+    double Rayleigh[N];
+    
+    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+    double Rayleigh_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    double df_fft;
+    
+    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
+    
+    // now below are values that shared in all channels
+    for (int i=0;i<N;i++) { // copy values
+        xfreq[i] = xfreq_tmp[i];
+        
+        /*
+         for (int ch=0; ch<ch_no; ch++) {
+         ygain[i] = ygain_tmp[i];
+         }
+         */
+    }
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
+    // set vector array size to number of chs
+    Rayleigh_TB_databin_ch.resize(ch_no);
+    
+    
+    // now loop over channels and do interpolation
+    for (int ch=0; ch<ch_no; ch++) {
+        
+        // copy fit values
+        for (int i=0;i<N;i++) {
+            Rayleigh[i] = fit_tmp[ch][i];
+        }
+        
+        
+        // Tools::SimpleLinearInterpolation will return Rayleigh array (in dB)
+        Tools::SimpleLinearInterpolation( N, xfreq, Rayleigh, freq_step, Freq, Rayleigh_TB_ch[ch] );
+        
+        Tools::SimpleLinearInterpolation( N, xfreq, Rayleigh, settings1->DATA_BIN_SIZE/2, xfreq_databin, Rayleigh_databin );
+        
+        
+        for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
+            Rayleigh_databin_ch[ch].push_back( Rayleigh_databin[i] );
+        }
+    }
+}
 
 
 
