@@ -718,8 +718,8 @@ Position IceModel::WhereDoesItEnter(const Position &posnu,const Vector &nnu) con
     else if (delta<=-0.001) {
 	
 	//cout << "Error in interaction position.  whichray is " << whichray << "\n";
-	cout << "lon, lat from WhereDoesItEnter is " << " " << lon << " " << lat << "\n";
-	cout << "geoid, surface, p, surface-p are " << Geoid(lat) << " " << Surface(lon,lat) << ", " << p << " , "<<(Surface(lon,lat)-p)<<"\n";
+      //	cout << "lon, lat from WhereDoesItEnter is " << " " << lon << " " << lat << "\n";
+      //	cout << "geoid, surface, p, surface-p are " << Geoid(lat) << " " << Surface(lon,lat) << ", " << p << " , "<<(Surface(lon,lat)-p)<<"\n";
 	
     } //else if: error: interaction takes place above the surface
     
@@ -864,8 +864,8 @@ Position IceModel::WhereDoesItLeave(const Position &posnu,const Vector &nnu) con
     else if (delta<=-0.001) {
 	
 	//cout << "Error in interaction position.  whichray is " << whichray << "\n";
-	cout << "lon, lat from WhereDoesItLeave is " << " " << lon << " " << lat << "\n";
-	cout << "geoid, surface, p, surface-p are " << Geoid(lat) << " " << Surface(lon,lat) << " " << p << " , "<<(Surface(lon,lat)-p)<<"\n";
+      //	cout << "lon, lat from WhereDoesItLeave is " << " " << lon << " " << lat << "\n";
+      //	cout << "geoid, surface, p, surface-p are " << Geoid(lat) << " " << Surface(lon,lat) << " " << p << " , "<<(Surface(lon,lat)-p)<<"\n";
 	
     } //else if: error: interaction takes place above the surface
     

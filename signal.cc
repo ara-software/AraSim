@@ -192,6 +192,8 @@ Signal::~Signal() {
 
      ReadCalPulserSpectrum();
 
+     std::string arbitraryWaveform = "arbitrary_waveform.txt";
+     ReadArbitraryWaveform(arbitraryWaveform);
      
   SetParameterization(settings1->WHICHPARAMETERIZATION);
 
@@ -271,6 +273,26 @@ Signal::~Signal() {
         std::cerr << "No calpulser spectrum file!" << std::endl;
     }
 }
+
+
+ void Signal::ReadArbitraryWaveform(string target){
+   double e_field;
+   double time_tmp;
+
+   ifstream infile(target.c_str());
+   if (infile){
+     while (1){
+       infile >> time_tmp >> e_field;
+       if (!infile.good()) break;
+       cout << time_tmp << " : " << e_field <<endl;
+       ArbitraryWaveform_T.push_back(time_tmp);
+       ArbitraryWaveform_V.push_back(e_field);
+     }
+    } else {
+        std::cerr << "No arbitrary waveform file!" << std::endl;
+    }
+}
+
 
 
 

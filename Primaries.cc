@@ -1336,6 +1336,89 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
 
 }
 
+// Arbitrary event Interaction class
+Interaction::Interaction (Settings *settings1, Detector *detector, IceModel *antarctica, Primaries *primary1, Signal *signal) {
+
+
+    Initialize ();
+
+
+    if (settings1->EVENT_TYPE == 10){
+      weight=1.;
+    }
+
+
+    double L0 = 0.;
+
+    if (settings1->CALPULSER_ON == 1)  // calpulser1 Hpol
+//    {
+//        PickExact(antarctica, detector, settings1, 50.27, 36.35*PI/180., 64.76*PI/180.); 
+//        primary1->IsCalpulser = 1;
+//    }
+    {
+        PickExact(antarctica, detector, settings1, 29.5, 2.81*PI/180., -93.6*PI/180.);
+        primary1->IsCalpulser = 1;
+    }
+    else if(settings1->CALPULSER_ON == 2)  // calpulser2 Vpol
+    {
+        //PickExact(antarctica, detector, settings1, 47.18, 30.15*PI/180., -36.56*PI/180.); 
+        PickExact(antarctica, detector, settings1, 47.18, -20.*PI/180., 34.*PI/180.); // calpulser 2 Vpol location
+        primary1->IsCalpulser = 2;
+    } 
+    else if(settings1->CALPULSER_ON == 3)   // calpulser2 Hpol
+    {
+        //PickExact(antarctica, detector, settings1, 47.18, 30.15*PI/180., -36.56*PI/180.); 
+        PickExact(antarctica, detector, settings1, 47.18, -28.*PI/180., 34.*PI/180.); // calpulser 2 Hpol location
+        primary1->IsCalpulser = 3;
+    } 
+    else if(settings1->CALPULSER_ON == 4)   // calpulser2 middle of Vpol & Hpol
+    {
+        //PickExact(antarctica, detector, settings1, 47.18, 30.15*PI/180., -36.56*PI/180.); 
+        PickExact(antarctica, detector, settings1, 47.18, -24.*PI/180., 34.*PI/180.); // calpulser 2 Hpol location
+        primary1->IsCalpulser = 4;
+    } 
+    else if (settings1->CALPULSER_ON == 5)
+    {
+        // insert code to switch between the two calpulsers here
+    }
+    else if (settings1->CALPULSER_ON == 0){
+        primary1->IsCalpulser = 0;
+
+	if (settings1->INTERACTION_MODE == 0) {    // for pickunbiased. posnu will be selected the sphere around the stations
+        //Interaction::PickUnbiased( antarctica );
+        
+        //pickposnu = 0;
+        /*
+        //  try PickUnbiased until it founds usable posnu
+        while (pickposnu==0) {
+            PickUnbiased( antarctica );
+        }
+        */
+        //  try PickUnbiased just once, no matter pickposnu == 0 or 1
+        //PickUnbiased( antarctica ); // PickUnbiased no more used
+
+	  L0 = PickNear_Sphere (antarctica, detector, settings1);
+	  
+	}
+	else if (settings1->INTERACTION_MODE == 1) {   // for picknear. posnu will be only near by ARA core with cylinderical volume
+	  
+	  //Interaction::PickNear (antarctica, detector, settings1);
+	  PickNear_Cylinder (antarctica, detector, settings1);
+	  
+	} else if (settings1->INTERACTION_MODE == 2){       
+	  //        PickExact(antarctica, detector, settings1, 400, 0, 0); 
+	  //          PickExact(antarctica, detector, settings1, 1000, +PI/4., 0.);
+	  PickExact(antarctica, detector, settings1, settings1->POSNU_R, settings1->POSNU_THETA, settings1->POSNU_PHI);
+	}
+	
+	
+    }
+    
+    double tmp; // for useless information
+    
+}
+
+
 
 // GetSignal should move to Report class
 /*

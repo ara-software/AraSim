@@ -250,6 +250,8 @@ class Interaction  {
 
 Interaction (IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 ); // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc
 
+ Interaction (Settings *settings1, Detector *detector, IceModel *antarctica, Primaries *primary1, Signal *signal); // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc
+
  ~Interaction();
 
  //

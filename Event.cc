@@ -91,8 +91,9 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         
     } 
 
-    if (Event_type == 10) { // if only neutrino events exist
+    if (Event_type == 10) { // if only arbitrary events exist
         
+  
       pnu = 0;
 //        cout << pnu << endl;
 /*
@@ -121,7 +122,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         Interaction *Nu_temp;
         //Report *report_tmp;
 
-        Nu_temp = new Interaction (pnu, nuflavor, nu_nubar, n_interactions, icemodel, detector, settings1, primary1, signal, sec1 );
+        Nu_temp = new Interaction (settings1, detector, icemodel, primary1, signal );
         //report_tmp = new Report(detector ,settings1);
         
         Nu_Interaction.push_back(*Nu_temp);  // for the first interaction
