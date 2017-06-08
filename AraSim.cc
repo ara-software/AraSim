@@ -521,8 +521,8 @@ double cur_posnu_z;
            }
 
 	   if (report->stations[stationIndex].Global_Pass) {
-	     report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theIcrrEvent);
-	     //report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theAtriEvent);
+	     //report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theIcrrEvent);
+	     report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theAtriEvent);
 	     /*
 	     for (int i_chan = 0; i_chan< 16; i_chan++){
 	       int elecChan = AraGeomTool::Instance()->getElecChanFromRFChan(i_chan, stationID);

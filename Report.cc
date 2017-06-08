@@ -3447,7 +3447,9 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 	cout << stationID << endl;
 	theUsefulEvent->fNumChannels = 32;
 	theUsefulEvent->stationId = stationID;
-
+	
+	//	cout << endl << stationID << endl;
+	
 	int ch_limit;
 	if (stationID == 0){
 	  ch_limit = 14;

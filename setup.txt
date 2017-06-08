@@ -50,6 +50,15 @@ TRIG_MODE=0 // use vpol, hpol separated trigger mode. by default N_TRIG_V=3, N_T
 // Settings for Arbitrary event generation
 //EVENT_TYPE=10 // arbitrary event type
 //INTERACTION_MODE=2 // pick exact location using settings below
-//POSNU_THETA=1.5 // interaction location elevation angle in radians
+//POSNU_THETA=1.7 // interaction location elevation angle in radians
 //POSNU_PHI=0 // interaction location azimuthal angle in radians
 //POSNU_R=1000 // interaction location radius in meters
+
+//DATA_SAVE_MODE=2
+//DETECTOR=4
+//DETECTOR_STATION=2
+//number_of_stations=1
+//core_x=10000
+//core_y=10000
+
+//WRITE_ALL_EVENTS=0
