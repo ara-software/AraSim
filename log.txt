@@ -1306,4 +1306,11 @@ AraRoot-like together) and to choose the center of the waveform
 relative to the last triggered bin - use WAVEFORM_LENGTH (in samples)
 and WAVEFORM_CENTER (in samples offset)
 
+06/07/2017 Carl Pfendner:
+
+Added arbitrary event waveform input mode - even_type=10
+Takes arbitrary_waveform.txt and uses that as the input E-field waveform that
+reaches the antenna
+Also fixed the UsefulStationEvent output to UsefulAtriStationEvent
+class type
 
