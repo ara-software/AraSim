@@ -1289,11 +1289,14 @@ If you want to get old (wrong) normalization mode again, put
 AVZ_NORM_FACTOR_MODE=0
 in your setup file
 
+============================================================================
 
 08/22/14 Guy Nir:
 
 Added utilities to get the waveforms and hit times in vectors from Report class.
 Added a printGeometry method to Detector class.
+
+============================================================================
 
 04/07/2017 Carl Pfendner:
 
@@ -1306,6 +1309,8 @@ AraRoot-like together) and to choose the center of the waveform
 relative to the last triggered bin - use WAVEFORM_LENGTH (in samples)
 and WAVEFORM_CENTER (in samples offset)
 
+============================================================================
+
 06/07/2017 Carl Pfendner:
 
 Added arbitrary event waveform input mode - even_type=10
@@ -1314,3 +1319,12 @@ reaches the antenna
 Also fixed the UsefulStationEvent output to UsefulAtriStationEvent
 class type
 
+============================================================================
+
+06/21/2017 Carl Pfendner:
+
+Added mode to throw events in a cylinder above the ice - INTERACTION_MODE=4
+Primarily used with the arbitrary event generator
+Use PICK_ABOVE_HEIGHT to set the height of the generation cylinder.
+
+============================================================================
