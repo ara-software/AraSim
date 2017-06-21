@@ -1241,7 +1241,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					     //stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( volts_forfft[n] );
 					     //stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( V_forfft[n] * 2./(double)(settings1->NFOUR/2) ); // 2/N for inverse FFT normalization factor
 					     //stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( volts_forint[n] * 2./(double)(settings1->NFOUR/2) ); // 2/N for inverse FFT normalization factor
-					     stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( volts_forint[n] * 2./(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]) ); // 2/N for inverse FFT normalization factor
+					     stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( settings1->ARBITRARY_EVENT_ATTENUATION * volts_forint[n] * 2./(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]) ); // 2/N for inverse FFT normalization factor
 					   }
 					   else if (settings1->TRIG_ANALYSIS_MODE == 2) { // pure noise mode (set signal to 0)
 					     stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( 0. );
@@ -2392,15 +2392,18 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                        //trig_i = settings1->DATA_BIN_SIZE;    // also if we know this station is trigged, don't need to check rest of time window
                        trig_i = max_total_bin;    // also if we know this station is trigged, don't need to check rest of time window
                        for (int ch_loop=0; ch_loop<ch_ID; ch_loop++) {
-                           int string_i = detector->getStringfromArbAntID( i, ch_loop);
-                           int antenna_i = detector->getAntennafromArbAntID( i, ch_loop);
+			 //cout << ch_loop << "/" << ch_ID << endl;
+			 int string_i = detector->getStringfromArbAntID( i, ch_loop);
+			 int antenna_i = detector->getAntennafromArbAntID( i, ch_loop);
+			 //			 cout << "string:antenna: " << string_i << " : " << antenna_i << endl;
+			   stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = -1; // no likely init
                            if (ch_loop == Passed_chs[check_ch] && check_ch<N_pass ) {    // added one more condition (check_ch<N_Pass) for bug in vector Passed_chs.clear()???
 
 
 
                                // store which ray sol is triggered based on trig time
                                //
-                               stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = -1; // no likely init
+
                                int mindBin = 1.e9; // init big value
                                int dBin = 0;
 
@@ -2604,7 +2607,6 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                        
            } // if it's not debugmode
 
-               
 
 
                    // delete noise waveforms 

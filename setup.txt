@@ -54,6 +54,9 @@ TRIG_MODE=0 // use vpol, hpol separated trigger mode. by default N_TRIG_V=3, N_T
 //POSNU_PHI=0 // interaction location azimuthal angle in radians
 //POSNU_R=1000 // interaction location radius in meters
 
+//INTERACTION_MODE=4 // pick interaction location within cylindrical volume above the ice
+//PICK_ABOVE_HEIGHT=3000.
+
 //DATA_SAVE_MODE=2
 //DETECTOR=4
 //DETECTOR_STATION=2

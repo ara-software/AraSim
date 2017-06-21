@@ -265,6 +265,8 @@ outputdir="outputs"; // directory where outputs go
     POSNU_THETA=-3.1415926535/4.;
     POSNU_PHI=0.;
 
+    ARBITRARY_EVENT_ATTENUATION = 1.0;
+    PICK_ABOVE_HEIGHT = 3000;
 
 }
 
@@ -581,6 +583,12 @@ void Settings::ReadFile(string setupfile) {
 	      }
 	      else if (label == "POSNU_PHI") {
 		POSNU_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+	      else if (label == "ARBITRARY_EVENT_ATTENUATION") {
+		ARBITRARY_EVENT_ATTENUATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+	      else if (label == "PICK_ABOVE_HEIGHT") {
+		PICK_ABOVE_HEIGHT = atof( line.substr(line.find_first_of("=") + 1).c_str() );
 	      }
 
 

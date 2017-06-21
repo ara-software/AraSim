@@ -596,9 +596,13 @@ double cur_posnu_z;
                        else if (settings1->INTERACTION_MODE==0) {
                            count1->incrementEventsFound( event->Nu_Interaction[0].probability, event );
                        }
-                       else if (settings1->INTERACTION_MODE==3) {
-                           count1->incrementEventsFound( event->Nu_Interaction[0].probability, event );
-                       }
+		       else if (settings1->INTERACTION_MODE==3) {
+			 count1->incrementEventsFound( event->Nu_Interaction[0].probability, event );
+		       }
+		       else if (settings1->INTERACTION_MODE==4) {
+			 count1->incrementEventsFound( event->Nu_Interaction[0].weight, event );
+		       }
+
                        
                        
                    }

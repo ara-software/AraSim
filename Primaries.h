@@ -289,6 +289,7 @@ Interaction (IceModel *antarctica, Detector *detector, Settings *settings1, Prim
   int WhereDoesItExitIce ( const Position &posnu, const Vector &nnu, double stepsize, Position &r_enterice_output, IceModel *antarctica);
   int WhereDoesItExitIceForward ( const Position &posnu, const Vector &nnu, double stepsize, Position &r_enterice_output, IceModel *antarctica);
   void FlattoEarth ( IceModel *antarctica, double X, double Y, double D);
+  void FlattoEarth_AboveIce ( IceModel *antarctica, double X, double Y, double D, double height);
   void FlattoEarth_Near_Surface ( IceModel *antarctica, double X, double Y, double D, double max_depth);
   void FlattoEarth_Spherical ( IceModel *antarctica, double X, double Y, double Z);
 
@@ -296,6 +297,7 @@ Interaction (IceModel *antarctica, Detector *detector, Settings *settings1, Prim
   double PickNear_Sphere (IceModel *antarctica, Detector *detector, Settings *settings1);
 
   void PickExact(IceModel *antarctica, Detector *detector, Settings *settings1, double R, double Theta, double Phi);
+  void PickNear_Cylinder_AboveIce (IceModel *antarctica, Detector *detector, Settings *settings1);
 
   bool Does_Interact(double x, double y, double z,
 		     double theta, double phi, double r,

@@ -91,7 +91,7 @@ void Counting::findErrorOnSumWeights(double *eventsfound_binned,double &error_pl
 void Counting::incrementEventsFound(double weight, Event *event) {
 
   int index_weights=findWeightBin(log10(weight));
-
+  cout <<weight << " : " << index_weights << endl;
 
   // count number of events that pass, binned in weight
   if (index_weights<Counting::NBINS)
