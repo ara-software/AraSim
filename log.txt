@@ -1343,3 +1343,8 @@ Fixed a bug in the data-like output that wrote out the times differently for tri
 
 ============================================================================
 
+07/26/2017 Carl Pfendner:
+
+Added a control check for incompatible settings between DATA_LIKE_OUTPUT and DETECTOR_STATION settings
+
+============================================================================
