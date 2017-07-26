@@ -136,8 +136,8 @@ outputdir="outputs"; // directory where outputs go
 
   BORE_HOLE_ANTENNA_LAYOUT=0;   // default : 0 (VHVH)
 
-  WRITE_ALL_EVENTS=0; //default : 0 (writes only globally triggered events)
-
+  DATA_LIKE_OUTPUT=1; //default : 0 (doesn't write out data-like events)
+    
   RAYSOL_RANGE=5000; // default : 5000 m
 
   PICK_POSNU_DEPTH=0;     //default : 0 pick posnu depth from 0 to ice depth
@@ -419,8 +419,8 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "NNU_D_THETA") {
                   NNU_D_THETA = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-              else if (label == "WRITE_ALL_EVENTS") {
-                  WRITE_ALL_EVENTS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              else if (label == "DATA_LIKE_OUTPUT") {
+                  DATA_LIKE_OUTPUT = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "V_MIMIC_MODE") {
                   V_MIMIC_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
@@ -774,6 +774,13 @@ int Settings::CheckCompatibilities(Detector *detector) {
         num_err++;
     }
 
+    // This is for only ideal stations
+    if (DATA_LIKE_OUTPUT != 0 && (DETECTOR==0 || DETECTOR==1 || DETECTOR==2)) {
+        cerr<<"DATA_LIKE_OUTPUT=1,2 doesn't work with DETECTOR=0,1,2"<<endl;
+        cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format; without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
+        num_err++;
+    }
+    
 
     // This is for installed stations
     if (DETECTOR == 4 ) {

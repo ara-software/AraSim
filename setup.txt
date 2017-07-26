@@ -13,6 +13,9 @@ NOISE_EVENTS=16 // number of pure noise waveforms
 TRIG_ANALYSIS_MODE=0 // 0 = signal + noise, 1 = signal only, 2 = noise only
 DETECTOR=1 // ARA stations 1 to 7
 NOFZ=1
+core_x=10000
+core_y=10000
+
 
 TIMESTEP=5.E-10 // value for 2GHz actual station value
 TRIG_WINDOW=1.E-7 // 100ns which is actual testbed trig window
@@ -22,7 +25,7 @@ POWERTHRESHOLD=-6.06 // 100Hz global trig rate for 3 out of 16 ARA stations
 POSNU_RADIUS=3000
 V_MIMIC_MODE=0 // 0 : global trig is located center of readout windows
 DATA_SAVE_MODE=0 // 2 : don't save any waveform informations at all
-WRITE_ALL_EVENTS=0 // don't save any waveform informations to eventTree
+DATA_LIKE_OUTPUT=0 // 0 : don't save any waveform information to eventTree
 BORE_HOLE_ANTENNA_LAYOUT=0
 SECONDARIES=0
 
@@ -61,7 +64,5 @@ TRIG_MODE=0 // use vpol, hpol separated trigger mode. by default N_TRIG_V=3, N_T
 //DETECTOR=4
 //DETECTOR_STATION=2
 //number_of_stations=1
-//core_x=10000
-//core_y=10000
 
-//WRITE_ALL_EVENTS=0
+//DATA_LIKE_OUTPUT=1

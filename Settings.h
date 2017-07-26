@@ -110,10 +110,11 @@ class Settings
 
         int BORE_HOLE_ANTENNA_LAYOUT;   // 0 = (V-H-V-H), 1 = (V-H-V), 2 = (V-H-V-V), 3 = (V-H-H-H), 4 = (V-H-H) default : 0
     
-        int WRITE_ALL_EVENTS; // 0 only write globally triggered events, 1 Write all event events including events that are not globally triggered
+        int DATA_LIKE_OUTPUT; // 0 - don't write any information to the data-like output tree
+                              // 1 - only write globally triggered events,
+                              // 2 - Write all event events including events that are not globally triggered
         // Note: NNU is the number of neutrinos that have been thrown in total, not just globally triggered events
         // When writing all events, the waveform stored in UsefulAraSimEvent->VoltsRF[] is just the untriggered, noiseless waveform of the initial signal, and it has not propagated to the antenna yet.
-        // Hong added : 2 don't write any info to UsefulAraSimEvent (to reduce output root file)
 
         double RAYSOL_RANGE;    // direct distance limit to do raysolver. If distance between posnu and antenna is bigger than RAYSOL_RANGE, AraSim will not try RaySol for that event. Default : 3000 m
 

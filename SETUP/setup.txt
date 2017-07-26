@@ -159,7 +159,7 @@ CALPUL_AMP=0.15 // (DEFAULT=0.15) amplitude modifier for the calpulser, to match
  
 DATA_SAVE_MODE=0 // (DEFAULT=0) 0: save waveforms and primitive spectra to AraTree2 (include spectra at different stages of simulation). 1: save only waveforms after trigger. 2: save just physics data per event. 
  
-WRITE_ALL_EVENTS=0 // (DEFAULT=0) 0: save only triggered events to eventTree (realistic case). 1: fill eventTree with all events (untriggered give zero wf graphs) 2: write nothing (leave eventTree empty) 
+DATA_LIKE_OUTPUT=0 // (DEFAULT=0) 0: write nothing (leave eventTree empty) 1: save only triggered events to eventTree (realistic case). 2: fill eventTree with all events (untriggered give zero wf graphs) 
  
 FILL_TREE_MODE=0 // (DEFAULT=0) 0: save all events to AraTree2 (triggered or not) 1: don’t save events outside of ice (in pick unbiased mode) 2: save just triggered events. 
  

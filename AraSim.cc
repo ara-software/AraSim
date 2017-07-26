@@ -509,7 +509,7 @@ double cur_posnu_z;
 
                       
 #ifdef ARA_UTIL_EXISTS
-	   if (settings1->WRITE_ALL_EVENTS !=2){
+	   if (settings1->DATA_LIKE_OUTPUT !=0){
 	   int stationID;
 	   int stationIndex;
 	   if (settings1->DETECTOR == 4){
@@ -565,7 +565,7 @@ double cur_posnu_z;
 
            for (int i=0; i<detector->params.number_of_stations; i++) {
 #ifdef ARA_UTIL_EXISTS
-	     if (settings1->WRITE_ALL_EVENTS != 2){
+	     if (settings1->DATA_LIKE_OUTPUT != 0){
                if (settings1->DETECTOR == 3 && i == 0)
 		 { theIcrrEvent->numRFChans = 14; }
 	       else if (settings1->DETECTOR == 4 && settings1->DETECTOR_STATION == 0)
@@ -622,12 +622,12 @@ double cur_posnu_z;
        AraTree2->Fill();   //fill interaction every events
 
        // for 1, save all events whether passed trigger or not
-       if (settings1->WRITE_ALL_EVENTS==1) {
+       if (settings1->DATA_LIKE_OUTPUT==2) {
            //theEvent = &report->theUsefulEvent;
            eventTree->Fill();
        }
        // for 0, save events which passed trigger
-       else if (settings1->WRITE_ALL_EVENTS==0) {
+       else if (settings1->DATA_LIKE_OUTPUT==1) {
            //if ( Global_Pass_Flag == 1 ) {
            if ( check_station_DC > 0 ) {
                //theEvent = &report->theUsefulEvent;
@@ -661,12 +661,12 @@ double cur_posnu_z;
 
 
            // for 1, save all events whether passed trigger or not
-           if (settings1->WRITE_ALL_EVENTS==1) {
+           if (settings1->DATA_LIKE_OUTPUT==2) {
                //theEvent = &report->theUsefulEvent;
                eventTree->Fill();
            }
            // for 0, save events which passed trigger
-           else if (settings1->WRITE_ALL_EVENTS==0) {
+           else if (settings1->DATA_LIKE_OUTPUT==1) {
                if ( check_station_DC > 0 ) {
                    //theEvent = &report->theUsefulEvent;
                    eventTree->Fill();
@@ -682,12 +682,12 @@ double cur_posnu_z;
 
 
                // for 1, save all events whether passed trigger or not
-               if (settings1->WRITE_ALL_EVENTS==1) {
+               if (settings1->DATA_LIKE_OUTPUT==2) {
                    //theEvent = &report->theUsefulEvent;
                    eventTree->Fill();
                }
                // for 0, save events which passed trigger
-               else if (settings1->WRITE_ALL_EVENTS==0) {
+               else if (settings1->DATA_LIKE_OUTPUT==1) {
                    if ( check_station_DC > 0 ) {
                        //theEvent = &report->theUsefulEvent;
                        eventTree->Fill();
@@ -703,12 +703,12 @@ double cur_posnu_z;
 #ifdef ARA_UTIL_EXISTS
 
                // for 1, save all events whether passed trigger or not
-               if (settings1->WRITE_ALL_EVENTS==1) {
+               if (settings1->DATA_LIKE_OUTPUT==2) {
                    //theEvent = &report->theUsefulEvent;
                    eventTree->Fill();
                }
                // for 0, save events which passed trigger
-               else if (settings1->WRITE_ALL_EVENTS==0) {
+               else if (settings1->DATA_LIKE_OUTPUT==1) {
                    if ( check_station_DC > 0 ) {
                        //theEvent = &report->theUsefulEvent;
                        eventTree->Fill();
