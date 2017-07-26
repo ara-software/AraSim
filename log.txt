@@ -1337,3 +1337,9 @@ Added a control check for incompatible settings between DATA_LIKE_OUTPUT and DET
 
 ============================================================================
 
+07/26/2017 Carl Pfendner:
+
+Fixed a bug in the data-like output that wrote out the times differently for triggered channels and non-triggered channels
+
+============================================================================
+

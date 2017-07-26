@@ -2480,7 +2480,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                // set global_trig_bin values
                                if (V_mimic_mode == 0) { // Global passed bin is the center of the window
-                                   stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = waveformLength/2 - waveformCenter ;
+				 stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (waveformLength/2 - waveformCenter) ;
                                }
                                else if (V_mimic_mode == 1) { // Global passed bin is the center of the window + delay to each chs from araGeom
                                    stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) - waveformCenter + waveformLength/2;
@@ -2502,7 +2502,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                    if (V_mimic_mode == 0) { // Global passed bin is the center of the window
                                        stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( ( trigger->Full_window_V[ch_loop][ last_trig_bin + waveformCenter - waveformLength/2 + mimicbin ] )*1.e3 );// save in mV
                                        stations[i].strings[string_i].antennas[antenna_i].time.push_back( last_trig_bin + waveformCenter - waveformLength/2 + mimicbin );
-                                       stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( ( waveformCenter + waveformLength/2 + mimicbin) * settings1->TIMESTEP*1.e9 );// save in ns
+                                       stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( ( waveformCenter - waveformLength/2 + mimicbin) * settings1->TIMESTEP*1.e9 );// save in ns
                                    }
                                    else if (V_mimic_mode == 1) { // Global passed bin is the center of the window + delay to each chs from araGeom
                                        stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( ( trigger->Full_window_V[ch_loop][ last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength/2 + mimicbin ] )*1.e3 );// save in mV
@@ -3496,6 +3496,7 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 	      //	      cout << "Test 1" << endl;
 	      volts[mimicbin] = stations[stationIndex].strings[string_i].antennas[antenna_i].V_mimic[mimicbin];
 	      times[mimicbin] = stations[stationIndex].strings[string_i].antennas[antenna_i].time_mimic[mimicbin];
+	      
 	      
 	    }
 	    else {
