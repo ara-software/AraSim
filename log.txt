@@ -1328,3 +1328,12 @@ Primarily used with the arbitrary event generator
 Use PICK_ABOVE_HEIGHT to set the height of the generation cylinder.
 
 ============================================================================
+
+07/26/2017 Carl Pfendner:
+
+Changed setting variable WRITE_ALL_EVENTS to DATA_LIKE_OUTPUT
+See Settings.h for usage (0: no data-like output, 1: triggered events)
+Added a control check for incompatible settings between DATA_LIKE_OUTPUT and DETECTOR settings
+
+============================================================================
+
