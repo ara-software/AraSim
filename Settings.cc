@@ -780,7 +780,7 @@ int Settings::CheckCompatibilities(Detector *detector) {
         num_err++;
     }
 
-    if (DATA_LIKE_OUTPUT != 0 && (DETECTOR_STATION>3) {
+    if (DATA_LIKE_OUTPUT != 0 && (DETECTOR_STATION>3)) {
         cerr<<"DATA_LIKE_OUTPUT=1,2 doesn't work with DETECTOR_STATION>3"<<endl;
         cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format; without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
         num_err++;
