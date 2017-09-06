@@ -1664,18 +1664,20 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                    // redefine DATA_BIN_SIZE
                    int DATA_BIN_SIZE_tmp;
+//                   long DATA_BIN_SIZE_tmp;
                    //for (int DBS=10; DBS<15; DBS++) {
                    for (int DBS=10; DBS<16; DBS++) {
-                   //for (int DBS=10; DBS<17; DBS++) {
+//                   for (int DBS=10; DBS<17; DBS++) {
                        DATA_BIN_SIZE_tmp = (int)pow(2., (double)DBS);
                        //if (DATA_BIN_SIZE_tmp > max_total_bin) DBS = 15; // come out
                        if (DATA_BIN_SIZE_tmp > max_total_bin) DBS = 16; // come out
-                       //if (DATA_BIN_SIZE_tmp > max_total_bin) DBS = 17; // come out
+//                       if (DATA_BIN_SIZE_tmp > max_total_bin) DBS = 17; // come out
+//                       if (DATA_BIN_SIZE_tmp > max_total_bin) DATA_BIN_SIZE_tmp = (long)pow(2., 17.0);
                        //if (DATA_BIN_SIZE_tmp > max_total_bin+settings1->NFOUR/2) DBS = 15; // come out
                    }
                    settings1->DATA_BIN_SIZE = DATA_BIN_SIZE_tmp;
-                   //cout<<"new DATA_BIN_SIZE : "<<DATA_BIN_SIZE_tmp<<endl;
-                   //cout<<"max_total_bin : "<<max_total_bin<<endl;
+//                   cout<<"new DATA_BIN_SIZE : "<<DATA_BIN_SIZE_tmp<<endl;
+//                   cout<<"max_total_bin : "<<max_total_bin<<endl;
 
                    // reset all filter values in Detector class
                    detector->get_NewDiodeModel(settings1);

@@ -284,7 +284,7 @@ Signal::~Signal() {
      while (1){
        infile >> time_tmp >> e_field;
        if (!infile.good()) break;
-       cout << time_tmp << " : " << e_field <<endl;
+//       cout << time_tmp << " : " << e_field <<endl;
        ArbitraryWaveform_T.push_back(time_tmp);
        ArbitraryWaveform_V.push_back(e_field);
      }

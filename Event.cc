@@ -35,7 +35,26 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
     Choose_Evt_Type (settings1);
 
     if (Event_type == 0) { // if only neutrino events exist
-        
+        pnu = spectra1->GetNuEnergy();
+        if (settings1->EVENT_MODE == 1){
+//            pnu = pow(10., settings1->PNU[inu_thrown]);
+            settings1->EXPONENT = settings1->PNU[inu_thrown];
+            spectra1 = new Spectra(settings1->EXPONENT);
+            settings1->SELECT_FLAVOR = settings1->NUFLAVORINT[inu_thrown];
+            settings1->NU_NUBAR_SELECT_MODE = settings1->NUBAR[inu_thrown];
+            settings1->SELECT_CURRENT = settings1->CURRENTINT[inu_thrown];
+            settings1->INTERACTION_MODE = 2;
+            settings1->POSNU_R = settings1->IND_POSNU_R[inu_thrown];
+            settings1->POSNU_THETA = settings1->IND_POSNU_THETA[inu_thrown];
+            settings1->POSNU_PHI = settings1->IND_POSNU_PHI[inu_thrown];
+            settings1->NNU_THIS_THETA = 1;
+            settings1->NNU_D_THETA = 0.0;
+            settings1->NNU_THETA = settings1->IND_NNU_THETA[inu_thrown];
+            settings1->NNU_THIS_PHI = 1;
+            settings1->NNU_D_PHI = 0.0;
+            settings1->NNU_PHI = settings1->IND_NNU_PHI[inu_thrown];
+
+        } 
         pnu = spectra1->GetNuEnergy();
 //        cout << pnu << endl;
 /*
@@ -48,8 +67,8 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
 */
         //nuflavor = primary1->GetNuFlavor();
         nuflavor = primary1->GetNuFlavor(settings1);
-
-        nu_nubar = primary1->GetNuNuBar(nuflavor);
+//        nu_nubar = primary1->GetNuNuBar(nuflavor);
+        nu_nubar = primary1->GetNuNuBar(nuflavor, settings1);
 
 
         /*

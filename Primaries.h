@@ -142,9 +142,10 @@ public:
         double GetThisAirColumn(Settings* settings1, Position r_in,Vector nnu,Position posnu, double& cosalpha,double& mytheta, double& cosbeta0,double& mybeta);
 
         // GetAnyDirection for selecting nnu
-        //
-        Vector GetAnyDirection();   // get random direction for nnu. Added this function instead of removing PickAnyDirection in Interaction to prevent confliction
-        Vector GetThatDirection( double theta, double d_theta );   // get direction for nnu near theta angle with d_theta variation. Added this function instead of removing PickAnyDirection in Interaction to prevent confliction
+        Vector GetAnyDirection(double phi, double d_phi, int nnu_this_phi);   // get random direction for nnu. Added this function instead of removing PickAnyDirection in Interaction to prevent confliction
+        Vector GetAnyDirection();
+        Vector GetThatDirection( double theta, double d_theta);   // get direction for nnu near theta angle with d_theta variation. Added this function instead of removing PickAnyDirection in Interaction to prevent confliction
+        Vector GetThatDirection( double theta, double d_theta, double phi, double d_phi, int nnu_this_phi);
         double costheta_nutraject; //theta of nnu with earth center to balloon as z axis 
         double phi_nutraject; //phi of nnu with earth center to balloon as z axis
 
@@ -153,10 +154,12 @@ public:
 	double Gety(Settings *settings1,double pnu,int nu_nubar,int currentint);
 	double Getyweight(double pnu,double y,int nu_nubar,int currentint);
 	string GetCurrent();
+        string GetCurrent(Settings *settings1);
 	string GetNuFlavor();
 	string GetNuFlavor(Settings *settings1);
 
         int GetNuNuBar( string nuflavor );
+        int GetNuNuBar( string nuflavor, Settings *settings1);
 
 
     int IsCalpulser;
@@ -367,7 +370,8 @@ static const double banana_signal_fluct;//Turn off noise for banana plots (setti
 //--------------------------------------------------
 //   void  setNuFlavor(Primaries *primary1,Settings *settings1,int whichray,Counting *count1);
 //-------------------------------------------------- 
- void setCurrent(Primaries *primary1);
+// void setCurrent(Primaries *primary1);
+  void setCurrent(Primaries *primary1, Settings *settings1);
   Position posnu;
   Position posnu_down;
 //--------------------------------------------------

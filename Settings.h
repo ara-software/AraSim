@@ -20,6 +20,7 @@ class Settings
         ~Settings();
         void Initialize();
         void ReadFile(string setupfile);
+        void ReadEvtFile(string evtfile);
 
 
         int CheckCompatibilities(Detector *detector);// check if settings are not compatible to each other
@@ -144,6 +145,12 @@ class Settings
 
         double NNU_D_THETA;     // nnu theta variation from NNU_THETA, when NNU_THIS_THETA=1 case
 
+        int NNU_THIS_PHI; // default 0: nnu angle pure random, 1: set a specific phi
+
+        double NNU_PHI;// default : nnu phi: 45 deg
+
+        double NNU_D_PHI;// default : nnu_d_phi : 5 deg
+
         double CALPUL_OFFCONE_ANGLE;    // for calpulser events, what's the offcone angle value?
 
         double CALPUL_AMP;    // for calpulser events, how strong the calpulser waveforms?
@@ -236,10 +243,12 @@ class Settings
 	
 	
     
-        int NU_NUBAR_SELECT_MODE; // default : 0 = random nu_nubar based on arXiv:1108.3163, section 3, 1 = just nu, 2 = just nubar 
+        int NU_NUBAR_SELECT_MODE; // default : 3 = random nu_nubar based on arXiv:1108.3163, section 3, 0 = just nu, 1 = just nubar 
 
 
         int SELECT_FLAVOR; // default : 0 = random 1:1:1, 1: e, 2: mu, 3: tau
+
+        int SELECT_CURRENT; //default:2:random, 0:nc, 1:cc
 
 
         int AVZ_NORM_FACTOR_MODE; // default : 1 : don't apply sqrt(2) (actually applied but cancel that) as realft assume Hn as double-sided spectrum (invFFT normalization factor 2/N) and also remove dF binning factor in MakeArraysforFFT function, 0 : use normalization factors like in old version
@@ -266,9 +275,20 @@ class Settings
 	double ARBITRARY_EVENT_ATTENUATION; // attenuation of the waveform intensity for arbitrary event waveforms
 	double PICK_ABOVE_HEIGHT;
 
+        int EVENT_MODE;//default: 0: not event mode, 1: event mode
+        int EVENT_NUM;//read in event number in EVENT_MODE=1, no more than 100 events
 
-
-
+//arrays for saving read in event features in EVENT_MODE=1
+        int EVID[100];
+        int NUFLAVORINT[100];
+        int NUBAR[100];
+        double PNU[100];
+        int CURRENTINT[100];
+        double IND_POSNU_R[100];
+        double IND_POSNU_THETA[100];
+        double IND_POSNU_PHI[100];
+        double IND_NNU_THETA[100];
+        double IND_NNU_PHI[100];
     // below : values from icemc
     
     

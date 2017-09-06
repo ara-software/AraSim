@@ -1348,3 +1348,26 @@ Fixed a bug in the data-like output that wrote out the times differently for tri
 Added a control check for incompatible settings between DATA_LIKE_OUTPUT and DETECTOR_STATION settings
 
 ============================================================================
+
+08/28/2017 Yue Pan:
+
+Added features of setting nutrino flavors, current types and nu/antinu by using NU_NUBAR_SELECT_MODE, SELECT_FLAVOR and SELECT_CURRENT
+For more details, see Settings.h
+
+============================================================================
+
+08/30/2017 Yue Pan:
+
+Added features of setting nuetrino momentum directions NNU_THIS_PHI, NNU_PHI, NNU_D_PHI etc
+See Settings.h for usage
+
+============================================================================
+
+09/06/2017 Yue Pan:
+
+Added a mode to read in an individual event list with specific features and run the simulation by setting EVENT_MODE = 1 and EVENT_NUM = event number
+AraSim reads in the individual event list from eventReadIn.txt (no more than 100 events)
+See Settings.h for more details
+
+============================================================================
+

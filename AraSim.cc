@@ -156,9 +156,19 @@ int main(int argc, char **argv) {   // read setup.txt file
   cout<<"EXPONENT : "<<settings1->EXPONENT<<endl;
   cout<<"DETECTOR : "<<settings1->DETECTOR<<endl;
   cout<<"POSNU_RADIUS : "<<settings1->POSNU_RADIUS<<endl;
+  cout << "EVENT_MODE: " << settings1->EVENT_MODE << endl;
+  cout << "EVENT_NUM: " << settings1->EVENT_NUM << endl;
 
+  if (settings1->EVENT_MODE == 1){
+      string evtfile = "eventReadIn.txt";
+      settings1->ReadEvtFile(evtfile);
+      cout<<"Read "<< evtfile <<" file!"<<endl;
+      cout << "EVID    NUFLAVORINT    NUBAR    PNU    CURRENTINT    IND_POSNU_R    IND_POSNU_THETA    IND_POSNU_PHI    IND_NNU_THETA    IND_NNU_PHI" << endl;
 
-
+      for (int i = 0; i < settings1->EVENT_NUM; i++){
+          cout << settings1->EVID[i] << "    " << settings1->NUFLAVORINT[i] << "    " << settings1->NUBAR[i] << "    " << settings1->PNU[i] << "    " << settings1->CURRENTINT[i] << "    " << settings1->IND_POSNU_R[i] << "    " << settings1->IND_POSNU_THETA[i] << "    " << settings1->IND_POSNU_PHI[i] << "    " << settings1->IND_NNU_THETA[i] << "    " << settings1->IND_NNU_PHI[i] << endl;
+      }
+  }
   // set gRandom as TRandom3 when settings1->RANDOM_MODE = 1
   if (settings1->RANDOM_MODE == 1) {
 
@@ -441,18 +451,22 @@ double cur_posnu_z;
 
 
     int nuLimit =0;
-    if (settings1->ONLY_PASSED_EVENTS == 1){
+    if (settings1->EVENT_MODE == 1){ //event mode read in different single events
+        nuLimit = settings1->EVENT_NUM;
+    }
+    else if (settings1->ONLY_PASSED_EVENTS == 1){
       nuLimit = settings1->NNU_PASSED;
-    } else {
+    }
+    else {
       nuLimit = settings1->NNU;
     }
-    
+//    cout << "nuLimit: " << nuLimit << endl; 
     int inu = 0;
     int Events_Thrown = 0;
     int Events_Passed = 0;
     //       for (int inu=0;inu<settings1->NNU;inu++) { // loop over neutrinos
     while (inu < nuLimit){
-      
+//      cout << "inu: " << inu << endl; 
       check_station_DC = 0;
       check_station_DC = 0;
       
@@ -462,8 +476,23 @@ double cur_posnu_z;
 	  cout<<"Thrown "<<Events_Thrown<<endl;
       }
       
+/*      if(settings1->EVENT_MODE == 1){
+          settings1->SELECT_FLAVOR = settings1->NUFLAVORINT[inu];
+          settings1->NU_NUBAR_SELECT_MODE = settings1->NUBAR[inu];
+          settings1->EXPONENT = settings1->PNU[inu];
+          Spectra *spectra=new Spectra(settings1->EXPONENT);
+          settings1->SELECT_CURRENT = settings1->CURRENTINT[inu];
+          settings1->INTERACTION_MODE = 2;
+          settings1->POSNU_R = settings1->IND_POSNU_R[inu];
+          settings1->POSNU_THETA = settings1->IND_POSNU_THETA[inu];
+          settings1->POSNU_PHI = settings1->IND_POSNU_PHI[inu];
+          settings1->NNU_THIS_THETA = 1;
+          settings1->NNU_THETA = settings1->IND_NNU_THETA[inu];
+          settings1->NNU_THIS_PHI = 1;
+          settings1->NNU_PHI = settings1->IND_NNU_PHI[inu];
 
-
+      }
+*/
        //event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1 );
        event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1, Events_Thrown );
        event->inu_passed = -1;
@@ -718,17 +747,20 @@ double cur_posnu_z;
            }
        }
 
-       
-       if (settings1->ONLY_PASSED_EVENTS == 1){
+       if (settings1->EVENT_MODE == 1){
+           inu++;
+       }
+       else if (settings1->ONLY_PASSED_EVENTS == 1){
            if (check_station_DC > 0){
                inu++;
            }
-       } else {
+       }
+       else {
            inu++;
        }
-        if (check_station_DC > 0){
+       if (check_station_DC > 0){
             Events_Passed++;
-        }
+       }
        Events_Thrown++;
        
 
@@ -792,7 +824,8 @@ double cur_posnu_z;
 
 
    cout<<" end loop"<<endl;
-   cout << "Total Events Thrown: " <<     settings1->NNU << endl;
+//   cout << "Total Events Thrown: " <<     settings1->NNU << endl;
+   cout << "Total Events Thrown: " << Events_Thrown << endl;
    cout<<"Total_Global_Pass : "<<Total_Global_Pass<<endl;
    cout<<"Total_Weight : "<<Total_Weight<<endl;
    cout<<"Total_Probability : "<<Total_Probability<<endl;

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <cstdlib>
 #include "Settings.h"
 #include "Detector.h"
@@ -144,11 +145,17 @@ outputdir="outputs"; // directory where outputs go
 
   MAX_POSNU_DEPTH=200.;     // default : 200m depth max
 
-  NNU_THIS_THETA=0;         // default : nnu angle pure random
+  NNU_THIS_THETA=0;         // default 0: nnu angle pure random, 1: set a specific theta
 
   NNU_THETA=0.785;          // default : nnu theta : 45 deg
 
   NNU_D_THETA=0.0873;       // default : nnu d_theta : 5 deg
+
+  NNU_THIS_PHI=0;//default 0: random phi, 1: a specific phi
+
+  NNU_PHI=0.785;// default : nnu phi : 45 deg
+
+  NNU_D_PHI=0.0873;// default : nnu_d_phi : 5 deg
 
     
     CALPULSER_ON=0; // default : calpulsers off
@@ -243,10 +250,11 @@ outputdir="outputs"; // directory where outputs go
 
     ACCUM_TRIG_SEARCH_BINS_STATION0 = 0.; // not actually setting value but gives us how much trigger searched bins there were in the run for station0
 
-    NU_NUBAR_SELECT_MODE = 0; // default : random nu_nubar based on arXiv:1108.3163, section 3, 1 = just nu, 2 = just nubar 
+    NU_NUBAR_SELECT_MODE = 3; // default : 3 = random nu_nubar based on arXiv:1108.3163, section 3, 0 = just nu, 1 = just nubar 
 
 
-    SELECT_FLAVOR = 0; // default : randomly 1:1:1 ratio, 1 : el. 2 : mu, 3 : tau
+    SELECT_FLAVOR = 0; // default : 0 = randomly 1:1:1 ratio, 1 : el. 2 : mu, 3 : tau
+    SELECT_CURRENT = 2; // default: 2:random, 0:nc, 1:cc
 
     OUTPUT_TDR_GRAPH = 0;// saves a few example graphs of the tunnel diode response for a triggered event
 
@@ -267,6 +275,22 @@ outputdir="outputs"; // directory where outputs go
 
     ARBITRARY_EVENT_ATTENUATION = 1.0;
     PICK_ABOVE_HEIGHT = 3000;
+
+    EVENT_MODE = 0;//default: 0: not event mode, 1: event mode
+    EVENT_NUM = 10;//read in event number in EVENT_MODE=1, no more than 100 events
+
+//arrays for saving read in event features in EVENT_MODE=1
+    EVID[100] = {0};
+    NUFLAVORINT[100] = {0};
+    NUBAR[100] = {0};
+    PNU[100] = {0};
+    CURRENTINT[100] = {0};
+    IND_POSNU_R[100] = {0};
+    IND_POSNU_THETA[100] = {0};
+    IND_POSNU_PHI[100] = {0};
+    IND_NNU_THETA[100] = {0};
+    IND_NNU_PHI[100] = {0};
+
 
 }
 
@@ -419,6 +443,16 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "NNU_D_THETA") {
                   NNU_D_THETA = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
+              else if (label == "NNU_THIS_PHI") {
+                  NNU_THIS_PHI = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "NNU_PHI") {
+                  NNU_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "NNU_D_PHI") {
+                  NNU_D_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+
               else if (label == "DATA_LIKE_OUTPUT") {
                   DATA_LIKE_OUTPUT = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -557,6 +591,9 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "SELECT_FLAVOR") {
                   SELECT_FLAVOR = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
+              else if (label == "SELECT_CURRENT") {
+                  SELECT_CURRENT = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
               else if (label == "OUTPUT_TDR_GRAPH") {
                   OUTPUT_TDR_GRAPH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }       
@@ -590,7 +627,12 @@ void Settings::ReadFile(string setupfile) {
 	      else if (label == "PICK_ABOVE_HEIGHT") {
 		PICK_ABOVE_HEIGHT = atof( line.substr(line.find_first_of("=") + 1).c_str() );
 	      }
-
+              else if (label == "EVENT_MODE"){
+                  EVENT_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "EVENT_NUM"){
+                  EVENT_NUM = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
 
 
           }
@@ -601,7 +643,53 @@ void Settings::ReadFile(string setupfile) {
   return;
 }
 
+void Settings::ReadEvtFile(string evtfile){
+    ifstream evtFile(evtfile.c_str());
 
+    std::string line;
+    int l = 0;
+
+    if ( evtFile.is_open() ) {
+        while (evtFile.good() ) {
+            getline(evtFile, line);
+            if (line[0] != "/"[0]) {
+                std::stringstream iss(line);
+                int a, b, c, e;
+                double d, f, g, h, i, j;
+                if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j))
+                    break;
+/*                EVID[i] = atoi(a.c_str());
+                NUFLAVORINT[i] = atoi(b.c_str());
+                NUBAR[i] = atoi(c.c_str());
+                PNU[i] = atof(d.c_str());
+                CURRENTINT[i] = atoi(e.c_str());
+                X[i] = atof(f.c_str());
+                Y[i] = atof(g.c_str());
+                Z[i] = atof(h.c_str());
+                THETA[i] = atof(i.c_str());
+                PHI[i] = atof(j.c_str());
+*/
+
+                EVID[l] = a;
+                NUFLAVORINT[l] = b;
+                NUBAR[l] = c;
+                PNU[l] = d;
+                CURRENTINT[l] = e;
+                IND_POSNU_R[l] = f;
+                IND_POSNU_THETA[l] = g;
+                IND_POSNU_PHI[l] = h;
+                IND_NNU_THETA[l] = i;
+                IND_NNU_PHI[l] = j;
+
+                l++;
+            }
+        }
+        evtFile.close();
+    }
+    else
+        cout << "Unable to open " << evtfile << " file!" << endl;
+    return;
+}
 
 int Settings::CheckCompatibilities(Detector *detector) {
 

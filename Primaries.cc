@@ -304,7 +304,7 @@ Primaries::~Primaries(){//default deconstructor
 int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *settings1,int nu_nubar,int currentint){
   // calculate cross section
   if (pnu<mine[settings1->SIGMAPARAM] || pnu>maxe[settings1->SIGMAPARAM]) {
-    cout <<  "Need a parameterization for this energy region.\n";
+    cout <<  "Need a parameterization for this energy region.(old)\n";
     return 0;
   } //if
   else {
@@ -350,8 +350,9 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
     double sigma_total;
   // calculate cross section
   if (pnu<mine[settings1->SIGMAPARAM] || pnu>maxe[settings1->SIGMAPARAM]) {
-    cout <<  "Need a parameterization for this energy region.\n";
-    return 0;
+    cout <<  "Need a parameterization for this energy region.(new)\n";
+//    return 0;
+      return 1;
   } //if
   else {
    
@@ -417,10 +418,26 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
   return 1;
 } //GetSigma
 
-
-
-
 Vector Primaries::GetAnyDirection() {
+  Vector output;
+  double rndlist[2];
+  gRandom->RndmArray(2,rndlist);
+
+  costheta_nutraject=2*rndlist[0]-1;
+  phi_nutraject=2*PI*rndlist[1];
+  double thetanu=acos(costheta_nutraject);
+
+  double sinthetanu=sin(thetanu);
+  output.SetX(sinthetanu*cos(phi_nutraject));
+  output.SetY(sinthetanu*sin(phi_nutraject));
+  output.SetZ(costheta_nutraject);
+
+  return output;
+}
+
+
+Vector Primaries::GetAnyDirection(double phi, double d_phi, int nnu_this_phi) {
+//Vector Primaries::GetAnyDirection() {
   Vector output;
   double rndlist[2];
   gRandom->RndmArray(2,rndlist);
@@ -429,8 +446,13 @@ Vector Primaries::GetAnyDirection() {
 
  
   // pick a neutrino azimuthal angle
-  phi_nutraject=2*PI*rndlist[1];
-  
+//  phi_nutraject=2*PI*rndlist[1];
+  if (nnu_this_phi == 1){
+      phi_nutraject = (2*rndlist[1]-1) * d_phi + phi;
+  }
+  else{
+      phi_nutraject=2*PI*rndlist[1];
+  }
   // check that these give the right result
   double thetanu=acos(costheta_nutraject);
   
@@ -443,13 +465,31 @@ Vector Primaries::GetAnyDirection() {
   output.SetZ(costheta_nutraject);
 
   return output;
+}
 
+Vector Primaries::GetThatDirection( double theta, double d_theta) {
+  Vector output;
+  double rndlist[2];
+  gRandom->RndmArray(2,rndlist);
 
+  costheta_nutraject=2*rndlist[0]-1;
+  costheta_nutraject= (costheta_nutraject * d_theta) + theta;
+  double thetanu=costheta_nutraject;
+
+  costheta_nutraject= cos( costheta_nutraject );
+  phi_nutraject=2*PI*rndlist[1];
+  
+  double sinthetanu=sin(thetanu);
+  output.SetX(sinthetanu*cos(phi_nutraject));
+  output.SetY(sinthetanu*sin(phi_nutraject));
+  output.SetZ(costheta_nutraject);
+
+  return output;
 }
 
 
-
-Vector Primaries::GetThatDirection( double theta, double d_theta ) {
+Vector Primaries::GetThatDirection( double theta, double d_theta, double phi, double d_phi, int nnu_this_phi) {
+//Vector Primaries::GetThatDirection( double theta, double d_theta) {
   Vector output;
   double rndlist[2];
   gRandom->RndmArray(2,rndlist);
@@ -459,12 +499,15 @@ Vector Primaries::GetThatDirection( double theta, double d_theta ) {
   double thetanu=costheta_nutraject;
 
   costheta_nutraject= cos( costheta_nutraject );
-
-
  
   // pick a neutrino azimuthal angle
-  phi_nutraject=2*PI*rndlist[1];
-  
+//  phi_nutraject=2*PI*rndlist[1];
+  if (nnu_this_phi == 1){
+      phi_nutraject = (2*rndlist[1]-1) * d_phi + phi;//use the specific phi
+  }
+  else{
+      phi_nutraject=2*PI*rndlist[1];
+  }
   // check that these give the right result
   
   double sinthetanu=sin(thetanu);
@@ -476,12 +519,7 @@ Vector Primaries::GetThatDirection( double theta, double d_theta ) {
   output.SetZ(costheta_nutraject);
 
   return output;
-
-
 }
-
-
-
 
 // The interaction
 double Primaries::Gety(Settings *settings1,double pnu,int nu_nubar,int currentint) {
@@ -604,11 +642,28 @@ string Primaries::GetCurrent() {
   return current;
 } //GetCurrent
 
+string Primaries::GetCurrent(Settings *settings1) {
+    string current;
+    double rnd=gRandom->Rndm();
+    if ( settings1->SELECT_CURRENT == 0 ) {
+        current = "nc";
+    }
+    else if (settings1->SELECT_CURRENT == 1){
+        current = "cc";
+    }
+    else{
+        if (rnd<=0.6865254)
+            current = "cc";
+        else
+            current = "nc";
+    }
+    return current;
+}
+
 string Primaries::GetNuFlavor() {
     // pick a neutrino type, flavor ratio 1:1:1
   
   string nuflavor;
-
   double rnd=gRandom->Rndm();
 
   if (rnd<=(1./3.)) {  
@@ -632,7 +687,6 @@ string Primaries::GetNuFlavor(Settings *settings1) {
     // pick a neutrino type, flavor ratio 1:1:1
   
   string nuflavor;
-
   double rnd=gRandom->Rndm();
 
   if ( settings1->SELECT_FLAVOR == 1 ) {
@@ -663,7 +717,29 @@ string Primaries::GetNuFlavor(Settings *settings1) {
   return nuflavor;
 } //GetNuFlavor
 
-
+int Primaries::GetNuNuBar( string nuflavor, Settings *settings1) {
+    double rnd = gRandom->Rndm();
+    int nu_nubar_out = 0;
+    if (settings1->NU_NUBAR_SELECT_MODE == 0)
+        nu_nubar_out = 0;
+    else if (settings1->NU_NUBAR_SELECT_MODE == 1)
+        nu_nubar_out = 1;
+    else {
+        if (nuflavor=="nue") {
+            if ( rnd <= 0.78 )
+                nu_nubar_out = 0;
+            else
+                nu_nubar_out = 1;
+        }
+        else{
+            if ( rnd <= 0.61 )
+                nu_nubar_out = 0;
+            else
+                nu_nubar_out = 1;
+        }
+    }
+    return nu_nubar_out;
+}
 
 
 
@@ -961,17 +1037,19 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
 
 
     if (settings1->NNU_THIS_THETA==1) {    // set specific theta angle for nnu
-        nnu = primary1->GetThatDirection(settings1->NNU_THETA, settings1->NNU_D_THETA);
+        nnu = primary1->GetThatDirection(settings1->NNU_THETA, settings1->NNU_D_THETA, settings1->NNU_PHI, settings1->NNU_D_PHI, settings1->NNU_THIS_PHI);
+//        nnu = primary1->GetThatDirection(settings1->NNU_THETA, settings1->NNU_D_THETA);
     }
     else { // nnu angle random
-        nnu = primary1->GetAnyDirection();
+        nnu = primary1->GetAnyDirection(settings1->NNU_PHI, settings1->NNU_D_PHI, settings1->NNU_THIS_PHI);
+//        nnu = primary1->GetAnyDirection();
     }
         
     cone_axis = nnu;
 
 
-
-    setCurrent(primary1);   // set current of interaction (cc or nc) ! (this should be change if this is secondary interaction. if first interaction was cc, then there is no secondary cc)
+    setCurrent(primary1, settings1);
+//    setCurrent(primary1);   // set current of interaction (cc or nc) ! (this should be change if this is secondary interaction. if first interaction was cc, then there is no secondary cc)
     //cout<<"currentint : "<<currentint<<endl;
 
     // pick posnu (position where neutrino interact with ice
@@ -3169,10 +3247,11 @@ void  Interaction::setNuFlavor(Primaries *primary1,Settings *settings1,int which
 */
 
 
-void  Interaction::setCurrent(Primaries *primary1) {
+void  Interaction::setCurrent(Primaries *primary1, Settings *settings1) {
      // pick whether it is neutral current
       // or charged current
-      current=primary1->GetCurrent();
+//    current=primary1->GetCurrent();
+    current=primary1->GetCurrent(settings1);
 
 
       if (current=="cc")   //For outputting to file

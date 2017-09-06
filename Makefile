@@ -10,8 +10,8 @@ ifeq ($(strip $(BOOST_ROOT)),)
 	BOOST_ROOT = /usr/local/include
 endif
 
-SYSINCLUDES	= -I/usr/include -I$(BOOST_ROOT) #-I$(PLATFORM_DIR)/include
-SYSLIBS         = -L/usr/lib -L/usr/local/lib #-L$(PLATFORM_DIR)/lib
+SYSINCLUDES	= -I/usr/include -I$(BOOST_ROOT) -I$(PLATFORM_DIR)/include
+SYSLIBS         = -L/usr/lib -L$(PLATFORM_DIR)/lib
 
 DLLSUF = ${DllSuf}
 OBJSUF = ${ObjSuf}
@@ -23,7 +23,7 @@ CXX = g++
 
 #Generic and Site Specific Flags
 CXXFLAGS     += $(SYSINCLUDES) $(INC_ARA_UTIL)
-LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl,#--no-as-needed
+LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl,--no-as-needed
 ARA_ROOT_FLAGS = 
 
 # copy from ray_solver_makefile (removed -lAra part)
@@ -45,8 +45,7 @@ PROGRAMS = AraSim
 all : $(PROGRAMS) 
 
 AraSim : $(OBJS)
-	$(LD) -v -L. $(OBJS) $(LDFLAGS) $(LIBS) -o $(PROGRAMS) 
-#	ld -v -L. $(OBJS) $(LDFLAGS) $(LIBS) -o $(PROGRAMS) 
+	$(LD) -L. $(OBJS) $(LDFLAGS) $(LIBS) -o $(PROGRAMS) 
 	@echo "done."
 
 #The library
