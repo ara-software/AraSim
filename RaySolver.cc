@@ -265,11 +265,62 @@ void RaySolver::Solve_Ray_org (Position &source, Position &target, std::vector <
     // Defaults!!!!
     src = source_tmp;
     trg = target_tmp;
+
+    if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 0){
+    // South Pole Values (AraSim original default, based on RICE)
+      ns = 1.35;
+      nd = 1.78;
+      nc = 0.0132;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 1){
+      // South Pole Values (RICE (2004))
+      ns = 1.35;
+      nd = 1.78;
+      nc = 0.014;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 2){
+      // South Pole Values (Eisen (2003))
+      ns = 1.30;
+      nd = 1.78;
+      nc = 0.02;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 3){
+      // South Pole values (Gow)
+      ns = 1.345;
+      nd = 1.78;
+      nc = 0.016;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 10){
+      // Moore's Bay values (MB #1)
+      ns = 1.32;
+      nd = 1.78;
+      nc = 0.029;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 11){
+      // Moore's Bay values (MB #2)
+      ns = 1.299;
+      nd = 1.78;
+      nc = 0.027;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 20){
+      // Byrd values (Ebimuna (1983))
+      ns = 1.316;
+      nd = 1.78;
+      nc = 0.0244;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 30){
+      // Mizuho values (Ebimuna (1983))
+      ns = 1.357;
+      nd = 1.78;
+      nc = 0.027;
+    }
+    else {
+      // South Pole Values (AraSim original default, based on RICE)
+      ns = 1.35;
+      nd = 1.78;
+      nc = 0.0132;
+    } 
+
+
+
+
     
-    ns = 1.35;
-    nd = 1.78;
-    nc = 0.0132;
-    
+
+    //    cout << "ns, nd, nc: " << ns << ", " << nd << ", " << nc << endl;
+
     surface_reflect = true;
     bedrock_reflect = false;
     //requiredAccuracy = 0.1;
@@ -587,10 +638,23 @@ void RaySolver::Solve_Ray_org (double source_x, double source_y, double source_z
     //src = source_tmp;
     //trg = target_tmp;
     
+    
+	//    if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 0){
+    // South Pole Values    
     ns = 1.35;
     nd = 1.78;
     nc = 0.0132;
-    
+
+    //    } else {
+    // Moore's Bay values (MB #1)
+    //ns = 1.32;
+    // nd = 1.78;
+    //nc = 0.029;
+    //    }
+
+    //    cout << "ns, nd, nc: " << ns << ", " << nd << ", " << nc << endl;
+
+
     surface_reflect = true;
     bedrock_reflect = false;
     //requiredAccuracy = 0.1;
@@ -1013,10 +1077,61 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
     src = source_tmp;
     trg = target_tmp;
     
-    ns = 1.35;
-    nd = 1.78;
-    nc = 0.0132;
-    
+    if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 0){
+    // South Pole Values (AraSim original default, based on RICE)
+      ns = 1.35;
+      nd = 1.78;
+      nc = 0.0132;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 1){
+      // South Pole Values (RICE (2004))
+      ns = 1.35;
+      nd = 1.78;
+      nc = 0.014;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 2){
+      // South Pole Values (Eisen (2003))
+      ns = 1.30;
+      nd = 1.78;
+      nc = 0.02;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 3){
+      // South Pole values (Gow)
+      ns = 1.345;
+      nd = 1.78;
+      nc = 0.016;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 10){
+      // Moore's Bay values (MB #1)
+      ns = 1.32;
+      nd = 1.78;
+      nc = 0.029;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 11){
+      // Moore's Bay values (MB #2)
+      ns = 1.299;
+      nd = 1.78;
+      nc = 0.027;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 20){
+      // Byrd values (Ebimuna (1983))
+      ns = 1.316;
+      nd = 1.78;
+      nc = 0.0244;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 30){
+      // Mizuho values (Ebimuna (1983))
+      ns = 1.357;
+      nd = 1.78;
+      nc = 0.027;
+    }
+    else {
+      // South Pole Values (AraSim original default, based on RICE)
+      ns = 1.35;
+      nd = 1.78;
+      nc = 0.0132;
+    } 
+
+
+
+
+
+    //    cout << "ns, nd, nc: " << ns << ", " << nd << ", " << nc << endl;
+
+
     surface_reflect = true;
     bedrock_reflect = false;
     //requiredAccuracy = 0.1;

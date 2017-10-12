@@ -1332,3 +1332,86 @@ removed useless/problematic option in makefile
 added namespace definition in Tools.h
 
 ============================================================================
+
+04/07/2017 Carl Pfendner:
+
+Added option to import geometry from AraRoot for stations 2, 3 - use
+DETECTOR=4, DETECTOR_STATION=2,3,etc
+Added alternative ray tracing models - use RAY_TRACE_ICE_MODEL_PARAMS
+Fixed weight calculation for INTERACTION_MODE=2
+Added ability to set waveform length for output (AraSim and
+AraRoot-like together) and to choose the center of the waveform
+relative to the last triggered bin - use WAVEFORM_LENGTH (in samples)
+and WAVEFORM_CENTER (in samples offset)
+
+============================================================================
+
+06/07/2017 Carl Pfendner:
+
+Added arbitrary event waveform input mode - even_type=10
+Takes arbitrary_waveform.txt and uses that as the input E-field waveform that
+reaches the antenna
+Also fixed the UsefulStationEvent output to UsefulAtriStationEvent
+class type
+
+============================================================================
+
+06/21/2017 Carl Pfendner:
+
+Added mode to throw events in a cylinder above the ice - INTERACTION_MODE=4
+Primarily used with the arbitrary event generator
+Use PICK_ABOVE_HEIGHT to set the height of the generation cylinder.
+
+============================================================================
+
+07/26/2017 Carl Pfendner:
+
+Changed setting variable WRITE_ALL_EVENTS to DATA_LIKE_OUTPUT
+See Settings.h for usage (0: no data-like output, 1: triggered events)
+Added a control check for incompatible settings between DATA_LIKE_OUTPUT and DETECTOR settings
+
+============================================================================
+
+07/26/2017 Carl Pfendner:
+
+Fixed a bug in the data-like output that wrote out the times differently for triggered channels and non-triggered channels
+
+============================================================================
+
+07/26/2017 Carl Pfendner:
+
+Added a control check for incompatible settings between DATA_LIKE_OUTPUT and DETECTOR_STATION settings
+
+============================================================================
+
+08/28/2017 Yue Pan:
+
+Added features of setting nutrino flavors, current types and nu/antinu by using NU_NUBAR_SELECT_MODE, SELECT_FLAVOR and SELECT_CURRENT
+For more details, see Settings.h
+
+============================================================================
+
+08/30/2017 Yue Pan:
+
+Added features of setting nuetrino momentum directions NNU_THIS_PHI, NNU_PHI, NNU_D_PHI etc
+See Settings.h for usage
+
+============================================================================
+
+09/06/2017 Yue Pan:
+
+Added a mode to read in an individual event list with specific features and run the simulation by setting EVENT_MODE = 1 and EVENT_NUM = event number
+AraSim reads in the individual event list from eventReadIn.txt (no more than 100 events)
+See Settings.h for more details
+
+============================================================================
+
+10/12/2017 Carl Pfendner:
+
+Added APPLY_NOISE_FIGURE mode to settings to attempt to include the calibration information from Thomas 
+WARNING!!: this is incomplete as of this edit. The channel dependent
+noise figures do not work correctly yet.
+Added ANTENNA_MODE mode to settings to allow for new antenna models to
+be imported 
+The newest mode allows the use of a separate antenna model for the top
+VPol antennas in the layout.

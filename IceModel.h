@@ -13,8 +13,13 @@ class Settings;
 
 //Constants relating to all ice models
 const double FIRNDEPTH=-150.;                // depth of the firn, in meters: currently a constant over all ice
+// input files for Crust 2.0
+const string crust20_in="data/outcr"; // Crust 2.0 data
+const string crust20_out="altitudes.txt"; // output file for plotting
 
 class IceModel : public EarthModel {
+
+
 
 protected:
   int ice_model;
@@ -92,6 +97,7 @@ private:
 
 
 public:
+
 
 
   //BEDMAP data
@@ -202,9 +208,6 @@ void GetFresnel (
 
 
 }; //class IceModel
-// input files for Crust 2.0
-const string crust20_in="data/outcr"; // Crust 2.0 data
-const string crust20_out="altitudes.txt"; // output file for plotting
 
 
 #endif //ICEMODEL_H

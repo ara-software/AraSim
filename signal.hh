@@ -177,6 +177,12 @@ double changle; // cherenkov angle
   static const double NICE;                 // index of refraction of ice
   static const double NSALT;                 // index of refraction of salt
   static const double CHANGLE_ICE; // cherenkov angle in ice
+
+  std::vector<double> ArbitraryWaveform_V;
+  std::vector<double> ArbitraryWaveform_T;
+  void ReadArbitraryWaveform(std::string target);
+
+
   void SetMedium(int medium) {
     MEDIUM=medium;
     if (MEDIUM!=0) {
@@ -260,6 +266,7 @@ void SetLPM(double lpm) {
   }
 
 
-}; //class Position
+
+}; //class signal
 
 #endif

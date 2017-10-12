@@ -4,7 +4,7 @@
 NFOUR=1024
 
 
-EXPONENT=21
+EXPONENT=19.8
 NNU=100 // number of neutrino events
 NNU_PASSED=10 // number of neutrino events that are allowed to pass the trigger
 ONLY_PASSED_EVENTS=1 // 0 (default): AraSim throws NNU events whether or not they pass; 1: AraSim throws events until the number of events that pass the trigger is equal to NNU_PASSED (WARNING: may cause long run times if reasonable values are not chosen)
@@ -48,37 +48,24 @@ TRIG_MODE=0 // use vpol, hpol separated trigger mode. by default N_TRIG_V=3, N_T
 //N_TRIG_V=4
 //N_TRIG_H=4
 
-number_of_stations=1
-core_x=10000
-core_y=10000
-
 ///////////////////
-
-//DATA_SAVE_MODE=2
 
 // Settings for Arbitrary event generation
 //EVENT_TYPE=10 // arbitrary event type
 //INTERACTION_MODE=2 // pick exact location using settings below
-//POSNU_THETA=1.7 // interaction location elevation angle in radians
-//POSNU_THETA=-0.5 // interaction location elevation angle in radians
-//POSNU_PHI=0 // interaction location azimuthal angle in radians
-//POSNU_R=1000 // interaction location radius in meters
+//POSNU_THETA=-0.89 // interaction location elevation angle in radians
+//POSNU_PHI=2.38 // interaction location azimuthal angle in radians
+//POSNU_R=1050.3 // interaction location radius in meters
 
 //INTERACTION_MODE=4 // pick interaction location within cylindrical volume above the ice
 //PICK_ABOVE_HEIGHT=3000.
 
-// Settings for Station A2-like simulation
+//DATA_SAVE_MODE=2
 //DETECTOR=4
 //DETECTOR_STATION=2
+//number_of_stations=1
+
 //DATA_LIKE_OUTPUT=1
-
-
-///////////////////////// Other Alternate Settings //////////////////
-
-
-//POSNU_RADIUS=5000
-//RAYSOL_RANGE=7000
-
 //SELECT_FLAVOR=1
 //NU_NUBAR_SELECT_MODE=1
 //SELECT_CURRENT=1 //default 2: get from ratios in Ghandi etal paper, 0: nc, 1: cc
@@ -86,12 +73,10 @@ core_y=10000
 //NNU_THETA=0.785
 //NNU_D_THETA=0.0873
 //NNU_D_THETA=0.0
-
-//NOISE_EVENTS=16
-//NOISE_EVENTS=1
-
-//NOISE=0
-//NOISE_TEMP_MODE=1
-//ANTENNA_MODE=1
-//APPLY_NOISE_FIGURE=1
-//ALL_ANT_V_ON=0
+//NNU_THIS_PHI=1 //default 0: random phi, 1: use NNU_PHI
+//NNU_PHI=4.0
+//NNU_D_PHI=0.0873
+//NNU_D_PHI=0.0
+EVENT_MODE=1
+EVENT_NUM=5//no more than 100 events
+//WRITE_ALL_EVENTS=1

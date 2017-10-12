@@ -1920,7 +1920,8 @@ void EarthModel::ReadCrust(string test) {
     int loc=thisline.find("type, latitude, longitude,"); 
     
     if (loc!=(int)(string::npos)) {      
-      
+
+
       beginindex=thisline.find_first_not_of(" ",57);
       
       endindex=thisline.find_first_of(" ",61);
@@ -1953,6 +1954,8 @@ void EarthModel::ReadCrust(string test) {
     for (int i=0;i<7;i++) {
       getline(infile,thisline,'\n');
       
+      //      cerr << "test2" << endl;
+
       endindex=thisline.length()-1;
       beginindex=thisline.find_last_of("0123456789",1000);
       layertype=thisline.substr(beginindex+3,endindex-beginindex);
@@ -1997,7 +2000,7 @@ void EarthModel::ReadCrust(string test) {
       beginindex=thisline.find_first_not_of(" ",endindex);
       endindex=thisline.find_first_of(" ",beginindex);
 
-     
+      //      cerr << "test3" << endl;
       sdensity=thisline.substr(beginindex,endindex-beginindex);
 
       double ddensity=(double)atof(sdensity.c_str());

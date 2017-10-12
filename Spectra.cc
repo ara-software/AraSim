@@ -347,7 +347,7 @@ Spectra::Spectra(double EXPONENT) {
       E2dNdEdAdt[i] = pow(10, E2dNdEdAdt[i]);   //to linear
 //      E2dNdEdAdt[i]=log10(EdNdEdAdt[i])+energy[i]-9.;
 
-      cout<<"linear EdNdEdAdt["<<i<<"] : "<<EdNdEdAdt[i]<<endl;
+//      cout<<"linear EdNdEdAdt["<<i<<"] : "<<EdNdEdAdt[i]<<endl;
   }
 
 //--------------------------------------------------

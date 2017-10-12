@@ -217,20 +217,25 @@ class Detector {
         static const int freq_step_max = 60;
         static const int ang_step_max = 2664;
         void ReadVgain(string filename);
+        void ReadVgain(string filename, Settings *settings1);
+	void ReadVgainTop(string filename, Settings *settings1);
         void ReadHgain(string filename);
+	void ReadHgain(string filename, Settings *settings1);
         double Vgain[freq_step_max][ang_step_max];
         double Vphase[freq_step_max][ang_step_max];
+        double VgainTop[freq_step_max][ang_step_max];
+        double VphaseTop[freq_step_max][ang_step_max];
         double Hgain[freq_step_max][ang_step_max];
         double Hphase[freq_step_max][ang_step_max];
         double Freq[freq_step_max];
+
+
+	
 
         void ReadFilter(string filename, Settings *settings1);
         double FilterGain[freq_step_max];   // Filter gain (dB) for Detector freq bin array
         vector <double> FilterGain_databin;   // Filter gain (dB) for DATA_BIN_SIZE bin array
         vector <double> FilterGain_NFOUR;   // Filter gain (dB) for NFOUR bin array
-
-
-
 
         void ReadPreamp(string filename, Settings *settings1);
         double PreampGain[freq_step_max];   // Filter gain (dB) for Detector freq bin array
@@ -281,6 +286,18 @@ class Detector {
         double Rayleigh_TB_ch[16][freq_step_max];   // Filter gain (dB) for Detector freq bin array
         vector < vector <double> > Rayleigh_TB_databin_ch;   // RFCM gain measured value for the TestBed (for each ch)
 
+        void ReadRayleighFit(string filename, Settings *settings1); // will read Rayleigh fit result from the file
+        vector < vector <double> > Rayleigh_databin_ch;   // RFCM gain measured value for the TestBed (for each ch)
+
+	void ReadNoiseFigure(string filename, Settings *settings1); 
+	double NoiseFig_ch[16][freq_step_max];
+	vector < vector < double > > NoiseFig_databin_ch;
+
+
+	vector <double> transV_databin;
+	vector <double> transVTop_databin;
+	vector <double> transH_databin;
+
 
         void FlattoEarth_ARA(IceModel *icesurface);
         void FlattoEarth_ARA_sharesurface(IceModel *icesurface);  // each station share the lowest surface
@@ -304,6 +321,8 @@ class Detector {
         vector <ARA_station> stations;
         vector <Antenna_string> strings;
 
+	int NoiseFig_numCh;
+
         vector <double> freq_forfft;
 
         double GetGain(double freq, double theta, double phi, int ant_m, int ant_o);    //read antenna gain at certain angle, certain type, and certain orientation
@@ -312,6 +331,11 @@ class Detector {
         double GetGain_1D(double freq, double theta, double phi, int ant_m);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain
 
         double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
+
+        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, int ant_number);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
+
+	
+
 
         double GetAntPhase(double freq, double theta, double phi, int ant_m); // return antenna phase with 2-D interpolation
 
@@ -348,6 +372,13 @@ class Detector {
 
         double GetRayleighFit(int ch, int bin) { return Rayleigh_TB_ch[ch][bin]; }   // same bin with Vgain, Hgain
         double GetRayleighFit_databin(int ch, int bin) { return Rayleigh_TB_databin_ch[ch][bin]; }   // bin for FFT
+
+
+        double GetNoiseFig_databin(int ch, int bin) { return NoiseFig_databin_ch[ch%16][bin]; }   // bin for FFT
+        double GetTransm_databin(int ch, int bin) {	if(ch%16<4){return transVTop_databin[bin];}
+							else if(ch%16<8){return transV_databin[bin];} 
+							else{return transH_databin[bin];} }   // bin for FFT
+        void ReadNoiseFig_New(Settings *settings1); // get noise Figure array with new DATA_BIN_SIZE
 
         
         double GetGainOffset( int StationID, int ch, Settings *settings1 );  // returns voltage factor for specific channel gain off set
@@ -414,11 +445,12 @@ class Detector {
     
 #ifdef ARA_UTIL_EXISTS
     void UseAntennaInfo (int stationNum, Settings *settings1);
+    void ImportStationInfo (Settings *settings1, int StationIndex, int StationID);
 #endif
 
 // more general used function
-    void GetSSAfromChannel ( int stationNum, int channelNum, int * antennaNum, int * stringNum, Settings *settings1);
-    int GetChannelfromStringAntenna ( int stationNum, int stringnum, int antennanum, Settings *settings1);
+    void GetSSAfromChannel ( int stationID, int channelNum, int * antennaNum, int * stringNum, Settings *settings1);
+    int GetChannelfromStringAntenna ( int stationID, int stringnum, int antennanum, Settings *settings1);
    
     
     /*
@@ -460,6 +492,7 @@ class Detector {
 
     void SetupInstalledStations();
     void PrepareVectorsInstalled();
+    void PrepareVectorsInstalled(int importedStation);
 
     void SetupIdealStations();
 

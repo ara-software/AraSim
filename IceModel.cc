@@ -63,11 +63,7 @@ IceModel::IceModel() {
 
 IceModel::IceModel(int model,int earth_model,int moorebay) : EarthModel(earth_model),mooreBayFlag(moorebay) {
 
-  
   setUpIceModel(model);
-
- 
-
 
  }
 
@@ -121,7 +117,7 @@ void IceModel::setUpIceModel(int model) {
       i++;
     }
   shelfup.close();
-   
+
   ifstream westlandup("data/westland_attenlength_up.txt");
   if(westlandup.fail())
     {cerr << "Failed to open westland_attenlength_up.txt";
@@ -149,7 +145,7 @@ void IceModel::setUpIceModel(int model) {
     }
   sheetdown.close();
 
-  
+
   ifstream shelfdown("data/iceshelf_attenlength_down.txt");
   if(shelfdown.fail())
     {
@@ -722,8 +718,8 @@ Position IceModel::WhereDoesItEnter(const Position &posnu,const Vector &nnu) con
     else if (delta<=-0.001) {
 	
 	//cout << "Error in interaction position.  whichray is " << whichray << "\n";
-	cout << "lon, lat from WhereDoesItEnter is " << " " << lon << " " << lat << "\n";
-	cout << "geoid, surface, p, surface-p are " << Geoid(lat) << " " << Surface(lon,lat) << ", " << p << " , "<<(Surface(lon,lat)-p)<<"\n";
+      //	cout << "lon, lat from WhereDoesItEnter is " << " " << lon << " " << lat << "\n";
+      //	cout << "geoid, surface, p, surface-p are " << Geoid(lat) << " " << Surface(lon,lat) << ", " << p << " , "<<(Surface(lon,lat)-p)<<"\n";
 	
     } //else if: error: interaction takes place above the surface
     
@@ -868,8 +864,8 @@ Position IceModel::WhereDoesItLeave(const Position &posnu,const Vector &nnu) con
     else if (delta<=-0.001) {
 	
 	//cout << "Error in interaction position.  whichray is " << whichray << "\n";
-	cout << "lon, lat from WhereDoesItLeave is " << " " << lon << " " << lat << "\n";
-	cout << "geoid, surface, p, surface-p are " << Geoid(lat) << " " << Surface(lon,lat) << " " << p << " , "<<(Surface(lon,lat)-p)<<"\n";
+      //	cout << "lon, lat from WhereDoesItLeave is " << " " << lon << " " << lat << "\n";
+      //	cout << "geoid, surface, p, surface-p are " << Geoid(lat) << " " << Surface(lon,lat) << " " << p << " , "<<(Surface(lon,lat)-p)<<"\n";
 	
     } //else if: error: interaction takes place above the surface
     

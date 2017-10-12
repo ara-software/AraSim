@@ -13,11 +13,15 @@
 //Include output format to enable reading by analysis software AraRoot
 #ifdef ARA_UTIL_EXISTS
 #include "UsefulIcrrStationEvent.h"
+#include "UsefulAtriStationEvent.h"
+#include "AraGeomTool.h"
 #endif
 #endif
 
 #ifdef ARA_UTIL_EXISTS
 class UsefulIcrrStationEvent;
+class UsefulAtriStationEvent;
+class AraGeomTool;
 #endif
 
 class Detector;
@@ -232,7 +236,8 @@ class Report {
     
 #ifdef ARA_UTIL_EXISTS
 
-    void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, UsefulIcrrStationEvent *theUsefulEvent);
+    void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulIcrrStationEvent *theUsefulEvent);
+    void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulAtriStationEvent *theUsefulEvent);
 #endif
     
     void ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger);
@@ -283,6 +288,8 @@ class Report {
         void ApplyPreamp_databin(int bin_n, Detector *detector, double &vmmhz);
         void ApplyPreamp_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyPreamp_OutZero (double freq, Detector *detector, double &vmmhz);
+
+	void ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double &vmmhz, Settings *settings1);
 
         // apply gain in FOAM
         void ApplyFOAM(int bin_n, Detector *detector, double &vmmhz);

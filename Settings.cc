@@ -1,9 +1,16 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <cstdlib>
 #include "Settings.h"
 #include "Detector.h"
+
+bool AraUtilExists = false;
+
+#ifdef ARA_UTIL_EXISTS
+#include "AraRootVersion.h"
+#endif
 
 ClassImp(Settings);
 
@@ -41,7 +48,19 @@ outputdir="outputs"; // directory where outputs go
 
 // end of values from icemc
 
+ ARASIM_VERSION_MAJOR = ARA_SIM_MAJOR;
+ ARASIM_VERSION_MINOR = ARA_SIM_MINOR;
+ ARASIM_VERSION_SUBMINOR = ARA_SIM_SUBMINOR;
+ ARASIM_VERSION = (double)ARASIM_VERSION_MAJOR + (double)ARASIM_VERSION_MINOR * 0.001 + (double)ARASIM_VERSION_SUBMINOR * 0.000001;
+ 
+ ARAROOT_VERSION = 0.;
 
+ ARAUTIL_EXISTS = false;
+#ifdef ARA_UTIL_EXISTS
+ ARAUTIL_EXISTS = true;
+ ARAROOT_VERSION = (double)ARA_ROOT_MAJOR + (double)ARA_ROOT_MINOR * 0.01;
+#endif
+ 
 
   NNU=100;
 
@@ -78,7 +97,7 @@ outputdir="outputs"; // directory where outputs go
 
   TAUDECAY=1;           //default : let taudecay as secondary interactions
 
-  TIMESTEP=(0.5)*1.E-9;  // default, in sec
+  TIMESTEP=(0.625)*1.E-9;  // default, in sec (old default: 0.5E-9, new default 0.625E-9
 
   PHASE=90.;            // default : 90 deg phase (it means all imaginary values)
 
@@ -90,7 +109,7 @@ outputdir="outputs"; // directory where outputs go
 
   TRIG_SCAN_MODE=0;	// default 0 (old mode) 1: new mode (faster) 2: scan all Pthresh values 3: scan also all N out of 8 
   
-  POWERTHRESHOLD=-6.15; // default : -6.15
+  POWERTHRESHOLD=-6.06; // old default : -6.15, new default: -6.06
 
   MAXT_DIODE=70.E-9;    // default : 70 ns
 
@@ -106,7 +125,7 @@ outputdir="outputs"; // directory where outputs go
 
   TRIG_TIMEOUT=1.E-6;       // default : 1us
 
-  TRIG_WINDOW=1.1E-7;       // default : 110 ns
+  TRIG_WINDOW=1.7E-7;       // old default : 110 ns, new default: 170 ns
 
   NOISE_EVENTS=16;        // default : 16 events
 
@@ -120,19 +139,25 @@ outputdir="outputs"; // directory where outputs go
     
   BORE_HOLE_ANTENNA_LAYOUT=0;   // default : 0 (VHVH)
 
-  WRITE_ALL_EVENTS=0; //default : 0 (writes only globally triggered events)
-
+  DATA_LIKE_OUTPUT=1; //default : 0 (doesn't write out data-like events)
+    
   RAYSOL_RANGE=5000; // default : 5000 m
 
   PICK_POSNU_DEPTH=0;     //default : 0 pick posnu depth from 0 to ice depth
 
   MAX_POSNU_DEPTH=200.;     // default : 200m depth max
 
-  NNU_THIS_THETA=0;         // default : nnu angle pure random
+  NNU_THIS_THETA=0;         // default 0: nnu angle pure random, 1: set a specific theta
 
   NNU_THETA=0.785;          // default : nnu theta : 45 deg
 
   NNU_D_THETA=0.0873;       // default : nnu d_theta : 5 deg
+
+  NNU_THIS_PHI=0;//default 0: random phi, 1: a specific phi
+
+  NNU_PHI=0.785;// default : nnu phi : 45 deg
+
+  NNU_D_PHI=0.0873;// default : nnu_d_phi : 5 deg
 
     
     CALPULSER_ON=0; // default : calpulsers off
@@ -147,7 +172,7 @@ outputdir="outputs"; // directory where outputs go
     
     USE_INSTALLED_TRIGGER_SETTINGS = 0; // default : 0 - use idealized settings for the trigger
     
-    NUM_INSTALLED_STATIONS = 2;
+    NUM_INSTALLED_STATIONS = 4;
 
     CALPUL_OFFCONE_ANGLE = 35.;
 
@@ -227,17 +252,50 @@ outputdir="outputs"; // directory where outputs go
 
     ACCUM_TRIG_SEARCH_BINS_STATION0 = 0.; // not actually setting value but gives us how much trigger searched bins there were in the run for station0
 
-    NU_NUBAR_SELECT_MODE = 0; // default : random nu_nubar based on arXiv:1108.3163, section 3, 1 = just nu, 2 = just nubar 
+    NU_NUBAR_SELECT_MODE = 3; // default : 3 = random nu_nubar based on arXiv:1108.3163, section 3, 0 = just nu, 1 = just nubar 
 
 
-    SELECT_FLAVOR = 0; // default : randomly 1:1:1 ratio, 1 : el. 2 : mu, 3 : tau
+    SELECT_FLAVOR = 0; // default : 0 = randomly 1:1:1 ratio, 1 : el. 2 : mu, 3 : tau
+    SELECT_CURRENT = 2; // default: 2:random, 0:nc, 1:cc
 
     OUTPUT_TDR_GRAPH = 0;// saves a few example graphs of the tunnel diode response for a triggered event
 
 
     AVZ_NORM_FACTOR_MODE = 1; // default : 1 : don't apply sqrt(2) (actually applied but cancel that) as realft assume Hn as double-sided spectrum (invFFT normalization factor 2/N) and also remove dF binning factor in MakeArraysforFFT function, 0 : use normalization factors like in old version
 
+    number_of_stations = 1;
 
+    RAY_TRACE_ICE_MODEL_PARAMS=0; // Default: South Pole values fitted from RICE data
+
+    WAVEFORM_LENGTH = 64/2*20; // Default: 64 digitization samples per block / 2 samples per waveform value * 20 blocks (value used for 2013-2016)
+    
+    WAVEFORM_CENTER = 0; // Default: 0, no offset in waveform centering
+
+    POSNU_R = 1000.;
+    POSNU_THETA=-3.1415926535/4.;
+    POSNU_PHI=0.;
+
+    ARBITRARY_EVENT_ATTENUATION = 1.0;
+    PICK_ABOVE_HEIGHT = 3000;
+
+    EVENT_MODE = 0;//default: 0: not event mode, 1: event mode
+    EVENT_NUM = 10;//read in event number in EVENT_MODE=1, no more than 100 events
+    ANTENNA_MODE=0; //default: 0 - old antenna model information
+    APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
+
+
+
+//arrays for saving read in event features in EVENT_MODE=1
+    EVID[100] = {0};
+    NUFLAVORINT[100] = {0};
+    NUBAR[100] = {0};
+    PNU[100] = {0};
+    CURRENTINT[100] = {0};
+    IND_POSNU_R[100] = {0};
+    IND_POSNU_THETA[100] = {0};
+    IND_POSNU_PHI[100] = {0};
+    IND_NNU_THETA[100] = {0};
+    IND_NNU_PHI[100] = {0};
 
 }
 
@@ -280,6 +338,9 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "DETECTOR") {
                   DETECTOR = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "DETECTOR_STATION") {
+                  DETECTOR_STATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "INTERACTION_MODE") {
                   INTERACTION_MODE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
@@ -390,8 +451,18 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "NNU_D_THETA") {
                   NNU_D_THETA = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-              else if (label == "WRITE_ALL_EVENTS") {
-                  WRITE_ALL_EVENTS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              else if (label == "NNU_THIS_PHI") {
+                  NNU_THIS_PHI = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "NNU_PHI") {
+                  NNU_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "NNU_D_PHI") {
+                  NNU_D_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+
+              else if (label == "DATA_LIKE_OUTPUT") {
+                  DATA_LIKE_OUTPUT = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "V_MIMIC_MODE") {
                   V_MIMIC_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
@@ -528,12 +599,56 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "SELECT_FLAVOR") {
                   SELECT_FLAVOR = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
+              else if (label == "SELECT_CURRENT") {
+                  SELECT_CURRENT = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
               else if (label == "OUTPUT_TDR_GRAPH") {
                   OUTPUT_TDR_GRAPH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }       
               else if (label == "AVZ_NORM_FACTOR_MODE") {
                   AVZ_NORM_FACTOR_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }              
+	      else if (label == "number_of_stations") {
+		number_of_stations = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+	      else if (label == "RAY_TRACE_ICE_MODEL_PARAMS") {
+		RAY_TRACE_ICE_MODEL_PARAMS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+	      else if (label == "WAVEFORM_LENGTH") {
+		WAVEFORM_LENGTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+	      else if (label == "WAVEFORM_CENTER") {
+		WAVEFORM_CENTER = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+	      else if (label == "POSNU_R") {
+		POSNU_R = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+	      else if (label == "POSNU_THETA") {
+		POSNU_THETA = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+	      else if (label == "POSNU_PHI") {
+		POSNU_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+	      else if (label == "ARBITRARY_EVENT_ATTENUATION") {
+		ARBITRARY_EVENT_ATTENUATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+	      else if (label == "PICK_ABOVE_HEIGHT") {
+		PICK_ABOVE_HEIGHT = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+              else if (label == "EVENT_MODE"){
+                  EVENT_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "EVENT_NUM"){
+                  EVENT_NUM = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "ANTENNA_MODE"){
+                  ANTENNA_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "APPLY_NOISE_FIGURE"){
+                  APPLY_NOISE_FIGURE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+
+
 
 
           }
@@ -544,7 +659,53 @@ void Settings::ReadFile(string setupfile) {
   return;
 }
 
+void Settings::ReadEvtFile(string evtfile){
+    ifstream evtFile(evtfile.c_str());
 
+    std::string line;
+    int l = 0;
+
+    if ( evtFile.is_open() ) {
+        while (evtFile.good() ) {
+            getline(evtFile, line);
+            if (line[0] != "/"[0]) {
+                std::stringstream iss(line);
+                int a, b, c, e;
+                double d, f, g, h, i, j;
+                if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j))
+                    break;
+/*                EVID[i] = atoi(a.c_str());
+                NUFLAVORINT[i] = atoi(b.c_str());
+                NUBAR[i] = atoi(c.c_str());
+                PNU[i] = atof(d.c_str());
+                CURRENTINT[i] = atoi(e.c_str());
+                X[i] = atof(f.c_str());
+                Y[i] = atof(g.c_str());
+                Z[i] = atof(h.c_str());
+                THETA[i] = atof(i.c_str());
+                PHI[i] = atof(j.c_str());
+*/
+
+                EVID[l] = a;
+                NUFLAVORINT[l] = b;
+                NUBAR[l] = c;
+                PNU[l] = d;
+                CURRENTINT[l] = e;
+                IND_POSNU_R[l] = f;
+                IND_POSNU_THETA[l] = g;
+                IND_POSNU_PHI[l] = h;
+                IND_NNU_THETA[l] = i;
+                IND_NNU_PHI[l] = j;
+
+                l++;
+            }
+        }
+        evtFile.close();
+    }
+    else
+        cout << "Unable to open " << evtfile << " file!" << endl;
+    return;
+}
 
 int Settings::CheckCompatibilities(Detector *detector) {
 
@@ -590,7 +751,8 @@ int Settings::CheckCompatibilities(Detector *detector) {
 
     // check if there's enough system temperature values prepared for NOISE_TEMP_MODE=1
     if (NOISE_TEMP_MODE==1) {// use different system temperature values for different chs
-        if (detector->params.number_of_antennas > (int)(detector->Temp_TB_ch.size()) ) {
+      if (DETECTOR==3 && (detector->params.number_of_antennas > (int)(detector->Temp_TB_ch.size())) ) {
+	  cout << detector->params.number_of_antennas << " : " <<(int)(detector->Temp_TB_ch.size()) << endl;
             cerr<<"System temperature values are not enough for all channels! Check number of channels you are using and numbers in data/system_temperature.csv"<<endl;
             num_err++;
         }
@@ -633,12 +795,14 @@ int Settings::CheckCompatibilities(Detector *detector) {
         num_err++;
     }
 
+    /*
     //if (NOISE_TEMP_MODE==1 && DETECTOR!=3) {
     if (NOISE_TEMP_MODE==1 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
         //cerr<<"NOISE_TEMP_MODE=1 only works with DETECTOR=3!"<<endl;
         cerr<<"NOISE_TEMP_MODE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
         num_err++;
     }
+    */
 
     //if (NOISE_TEMP_MODE==2 && DETECTOR!=3) {
     if (NOISE_TEMP_MODE==2 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
@@ -711,12 +875,51 @@ int Settings::CheckCompatibilities(Detector *detector) {
     }
 
 
-
-
     // This is for only ideal stations
     if (TRIG_ONLY_LOW_CH_ON==1 && DETECTOR==3) {
         cerr<<"TRIG_ONLY_LOW_CH_ON=1 doesn't work with DETECTOR=3!"<<endl;
         num_err++;
+    }
+
+    if (DATA_LIKE_OUTPUT != 0 && (DETECTOR==0 || DETECTOR==1 || DETECTOR==2)) {
+        cerr<<"DATA_LIKE_OUTPUT=1,2 doesn't work with DETECTOR=0,1,2"<<endl;
+        cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format; without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
+        num_err++;
+    }
+
+    if (DATA_LIKE_OUTPUT != 0 && (DETECTOR_STATION>3)) {
+        cerr<<"DATA_LIKE_OUTPUT=1,2 doesn't work with DETECTOR_STATION>3"<<endl;
+        cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format; without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
+        num_err++;
+    }
+    /*
+    if(NOISE == 2 && (DETECTOR==0 || DETECTOR==1 || DETECTOR==2)){
+      cerr << "CALIBRATION_MODE=1 doesn't work with DETECTOR=0,1,2" << endl;
+      cerr << "CALIBRATION_MODE controls the response from installed stations 2,3 and thus has no real relevance for DETECTOR=0,1,2" << endl;
+      num_err++;
+    }
+    */
+
+    // This is for installed stations
+    if (DETECTOR == 4 ) {
+      if (ARAUTIL_EXISTS == false){
+	cerr << "DETECTOR=4 only works with an installation of AraRoot" << endl;
+	num_err++;
+      } else {
+	
+	cerr << "DETECTOR is set to 4" << endl; 
+	cerr << "Setting READGEOM to 1" << endl;
+	READGEOM=1;
+
+	cerr << "Setting number_of_stations to 1" << endl;
+	number_of_stations = 1;
+
+	if (DETECTOR_STATION <0 || DETECTOR_STATION >= NUM_INSTALLED_STATIONS){
+	  cerr << "DETECTOR_STATION is not set to a valid station number" << endl;
+	  num_err++;
+	}
+		
+      }
     }
 
 

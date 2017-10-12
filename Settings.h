@@ -3,7 +3,7 @@
 
 #include <string>
 #include "TObject.h"
-
+#include "AraSimVersion.h"
 
 class Detector;
 
@@ -20,11 +20,18 @@ class Settings
         ~Settings();
         void Initialize();
         void ReadFile(string setupfile);
+        void ReadEvtFile(string evtfile);
 
 
         int CheckCompatibilities(Detector *detector);// check if settings are not compatible to each other
 
+	int ARASIM_VERSION_MAJOR;
+        int ARASIM_VERSION_MINOR;
+        int ARASIM_VERSION_SUBMINOR;
+        double ARASIM_VERSION;
 
+        double ARAROOT_VERSION;
+	bool ARAUTIL_EXISTS;
         int NNU;
 
   // NEED TO FIGURE OUT A GOOD WAY TO READ THIS IN AND STORE THEM.
@@ -42,7 +49,12 @@ class Settings
 
         int DETECTOR;   // choose detector layout
 
-        int INTERACTION_MODE;   // method to choose interaction point posnu. 0 : PickUnbiased, 1 : PickNear
+	int DETECTOR_STATION; // for DETECTOR=4, indicates the single station to be simulated
+	                      // 0 = testbed, 1 = A1, 2 = A2, 3 = A3
+
+	int number_of_stations; // the number of stations to be used in the simulation
+
+        int INTERACTION_MODE;   // method to choose interaction point posnu. 0 : PickUnbiased, 1 : PickNear, 2 : PickExact, 3 : PickAboveIce
 
         double POSNU_RADIUS;    //PickNear radius in meter
 
@@ -66,7 +78,7 @@ class Settings
 
         int NFOUR;              // number of total bins for FFT. has to be power of 2 values
 
-        int NOISE;              // noise condition settings degault 0 ( : thermal flat noise), 1 : Rayleigh dist. fit for installed TestBed geom
+        int NOISE;              // noise condition settings degault 0 ( : thermal flat noise), 1 : Rayleigh dist. fit for installed TestBed geom, 2: Noise figure values for station 2 (??) from Thomas Meures 2015/2016
 
         int ATMOSPHERE;         // include atmosphere 1, no 0
 
@@ -101,10 +113,12 @@ class Settings
 
         int BORE_HOLE_ANTENNA_LAYOUT;   // 0 = (V-H-V-H), 1 = (V-H-V), 2 = (V-H-V-V), 3 = (V-H-H-H), 4 = (V-H-H) default : 0
     
-        int WRITE_ALL_EVENTS; // 0 only write globally triggered events, 1 Write all event events including events that are not globally triggered
+        int DATA_LIKE_OUTPUT; // Formerly WRITE_ALL_EVENTS, the mode numbering has changed as well
+	                      // 0 - don't write any information to the data-like output tree
+                              // 1 - only write globally triggered events,
+                              // 2 - Write all event events including events that are not globally triggered
         // Note: NNU is the number of neutrinos that have been thrown in total, not just globally triggered events
         // When writing all events, the waveform stored in UsefulAraSimEvent->VoltsRF[] is just the untriggered, noiseless waveform of the initial signal, and it has not propagated to the antenna yet.
-        // Hong added : 2 don't write any info to UsefulAraSimEvent (to reduce output root file)
 
         double RAYSOL_RANGE;    // direct distance limit to do raysolver. If distance between posnu and antenna is bigger than RAYSOL_RANGE, AraSim will not try RaySol for that event. Default : 3000 m
 
@@ -132,6 +146,12 @@ class Settings
         double NNU_THETA;       // nnu theta when NNU_THIS_THETA=1
 
         double NNU_D_THETA;     // nnu theta variation from NNU_THETA, when NNU_THIS_THETA=1 case
+
+        int NNU_THIS_PHI; // default 0: nnu angle pure random, 1: set a specific phi
+
+        double NNU_PHI;// default : nnu phi: 45 deg
+
+        double NNU_D_PHI;// default : nnu_d_phi : 5 deg
 
         double CALPUL_OFFCONE_ANGLE;    // for calpulser events, what's the offcone angle value?
 
@@ -217,7 +237,6 @@ class Settings
         
         int TRIG_ONLY_LOW_CH_ON;    // if trigger will occur with all chs (0, default) or only lower 8 chs (1)
 
-
     
         double ACCUM_TRIG_SEARCH_BINS_STATION0; // not actually setting value but gives us how much trigger searched bins there were in the run
 
@@ -226,16 +245,58 @@ class Settings
 	
 	
     
-        int NU_NUBAR_SELECT_MODE; // default : 0 = random nu_nubar based on arXiv:1108.3163, section 3, 1 = just nu, 2 = just nubar 
+        int NU_NUBAR_SELECT_MODE; // default : 3 = random nu_nubar based on arXiv:1108.3163, section 3, 0 = just nu, 1 = just nubar 
 
 
         int SELECT_FLAVOR; // default : 0 = random 1:1:1, 1: e, 2: mu, 3: tau
 
+        int SELECT_CURRENT; //default:2:random, 0:nc, 1:cc
+
 
         int AVZ_NORM_FACTOR_MODE; // default : 1 : don't apply sqrt(2) (actually applied but cancel that) as realft assume Hn as double-sided spectrum (invFFT normalization factor 2/N) and also remove dF binning factor in MakeArraysforFFT function, 0 : use normalization factors like in old version
 
+	int RAY_TRACE_ICE_MODEL_PARAMS; // which parameter set is used for the exponential ice model (defined in RayTrace_IceModel.cc) 
+	//0 : default, South Pole model (fitted from RICE data
+	//1 : South Pole model fitted from RICE #2
+	//2 : South Pole (Eisen (2003))
+	//3 : South Pole (Gow)
+	//10 : Moore's Bay Model 1
+	//11 : Moore's Bay Model 2
+	//20 : Byrd (Ebimuna (1983))
+	//30 : Mizuho (Ebimuna (1983))
 
+	int WAVEFORM_LENGTH; // the number of samples in the waveform length for V_mimic and UsefulAtriStationEvent, default: 64/2*20 = 640
 
+	int WAVEFORM_CENTER; // the relative location of the center of the write-out window with respect to the last triggered bin (which is laced at the center of the window by default), this effectively provides a global delay in the write-out window across all channels: positive values shift the write-out window to later times in the waveform, negative values shift the window to earlier times, default: 0
+
+	double POSNU_R; // default: 1000; meters from station center
+	double POSNU_THETA; // default: -PI/4; elevation angle from station center coordinates
+	double POSNU_PHI; // default: 0; azimuth angle from station center coordinates
+	// Only using INTERACTION_MODE = 2, these values set the position of the interaction point; can be used in EVENT_TYPE = 0 and 10
+
+	double ARBITRARY_EVENT_ATTENUATION; // attenuation of the waveform intensity for arbitrary event waveforms
+	double PICK_ABOVE_HEIGHT;
+
+        int EVENT_MODE;//default: 0: not event mode, 1: event mode
+        int EVENT_NUM;//read in event number in EVENT_MODE=1, no more than 100 events
+
+	int ANTENNA_MODE; // 0: old default antenna models bicone/rotated dipole
+	                   // 1: using different antenna response for the top Vpol antennas, otherwise same as old default
+
+	int APPLY_NOISE_FIGURE; // 0: do not apply new noise figure from Thomas Meures 2016
+	                        // 1: apply new noise figure to data
+
+//arrays for saving read in event features in EVENT_MODE=1
+        int EVID[100];
+        int NUFLAVORINT[100];
+        int NUBAR[100];
+        double PNU[100];
+        int CURRENTINT[100];
+        double IND_POSNU_R[100];
+        double IND_POSNU_THETA[100];
+        double IND_POSNU_PHI[100];
+        double IND_NNU_THETA[100];
+        double IND_NNU_PHI[100];
     // below : values from icemc
     
     
@@ -344,6 +405,7 @@ int MAXRAY;
 
 int horizontal_banana_points;
   int vertical_banana_points;
+
 
 
 

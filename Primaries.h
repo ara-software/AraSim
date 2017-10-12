@@ -142,9 +142,10 @@ public:
         double GetThisAirColumn(Settings* settings1, Position r_in,Vector nnu,Position posnu, double& cosalpha,double& mytheta, double& cosbeta0,double& mybeta);
 
         // GetAnyDirection for selecting nnu
-        //
-        Vector GetAnyDirection();   // get random direction for nnu. Added this function instead of removing PickAnyDirection in Interaction to prevent confliction
-        Vector GetThatDirection( double theta, double d_theta );   // get direction for nnu near theta angle with d_theta variation. Added this function instead of removing PickAnyDirection in Interaction to prevent confliction
+        Vector GetAnyDirection(double phi, double d_phi, int nnu_this_phi);   // get random direction for nnu. Added this function instead of removing PickAnyDirection in Interaction to prevent confliction
+        Vector GetAnyDirection();
+        Vector GetThatDirection( double theta, double d_theta);   // get direction for nnu near theta angle with d_theta variation. Added this function instead of removing PickAnyDirection in Interaction to prevent confliction
+        Vector GetThatDirection( double theta, double d_theta, double phi, double d_phi, int nnu_this_phi);
         double costheta_nutraject; //theta of nnu with earth center to balloon as z axis 
         double phi_nutraject; //phi of nnu with earth center to balloon as z axis
 
@@ -153,10 +154,12 @@ public:
 	double Gety(Settings *settings1,double pnu,int nu_nubar,int currentint);
 	double Getyweight(double pnu,double y,int nu_nubar,int currentint);
 	string GetCurrent();
+        string GetCurrent(Settings *settings1);
 	string GetNuFlavor();
 	string GetNuFlavor(Settings *settings1);
 
         int GetNuNuBar( string nuflavor );
+        int GetNuNuBar( string nuflavor, Settings *settings1);
 
 
     int IsCalpulser;
@@ -244,7 +247,13 @@ class Interaction  {
  Interaction(); // default constructor
  //Interaction(string inttype,Primaries *primary1,Settings *settings1,int whichray,Counting *count1);
 
+
+
  Interaction (double pnu, string nuflavor, int nu_nubar, int &n_interactions, IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 ); // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc
+
+Interaction (IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 ); // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc
+
+ Interaction (Settings *settings1, Detector *detector, IceModel *antarctica, Primaries *primary1, Signal *signal); // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc
 
  ~Interaction();
 
@@ -283,6 +292,7 @@ class Interaction  {
   int WhereDoesItExitIce ( const Position &posnu, const Vector &nnu, double stepsize, Position &r_enterice_output, IceModel *antarctica);
   int WhereDoesItExitIceForward ( const Position &posnu, const Vector &nnu, double stepsize, Position &r_enterice_output, IceModel *antarctica);
   void FlattoEarth ( IceModel *antarctica, double X, double Y, double D);
+  void FlattoEarth_AboveIce ( IceModel *antarctica, double X, double Y, double D, double height);
   void FlattoEarth_Near_Surface ( IceModel *antarctica, double X, double Y, double D, double max_depth);
   void FlattoEarth_Spherical ( IceModel *antarctica, double X, double Y, double Z);
 
@@ -290,6 +300,7 @@ class Interaction  {
   double PickNear_Sphere (IceModel *antarctica, Detector *detector, Settings *settings1);
 
   void PickExact(IceModel *antarctica, Detector *detector, Settings *settings1, double R, double Theta, double Phi);
+  void PickNear_Cylinder_AboveIce (IceModel *antarctica, Detector *detector, Settings *settings1);
 
   bool Does_Interact(double x, double y, double z,
 		     double theta, double phi, double r,
@@ -359,7 +370,8 @@ static const double banana_signal_fluct;//Turn off noise for banana plots (setti
 //--------------------------------------------------
 //   void  setNuFlavor(Primaries *primary1,Settings *settings1,int whichray,Counting *count1);
 //-------------------------------------------------- 
- void setCurrent(Primaries *primary1);
+// void setCurrent(Primaries *primary1);
+  void setCurrent(Primaries *primary1, Settings *settings1);
   Position posnu;
   Position posnu_down;
 //--------------------------------------------------

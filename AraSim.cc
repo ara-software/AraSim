@@ -64,6 +64,8 @@ using namespace std;
 #ifdef ARA_UTIL_EXISTS
 #include "UsefulIcrrStationEvent.h"
 ClassImp(UsefulIcrrStationEvent);
+#include "UsefulAtriStationEvent.h"
+ClassImp(UsefulAtriStationEvent);
 #endif
 
 class EarthModel; //class
@@ -154,9 +156,19 @@ int main(int argc, char **argv) {   // read setup.txt file
   cout<<"EXPONENT : "<<settings1->EXPONENT<<endl;
   cout<<"DETECTOR : "<<settings1->DETECTOR<<endl;
   cout<<"POSNU_RADIUS : "<<settings1->POSNU_RADIUS<<endl;
+  cout << "EVENT_MODE: " << settings1->EVENT_MODE << endl;
+  cout << "EVENT_NUM: " << settings1->EVENT_NUM << endl;
 
+  if (settings1->EVENT_MODE == 1){
+      string evtfile = "eventReadIn.txt";
+      settings1->ReadEvtFile(evtfile);
+      cout<<"Read "<< evtfile <<" file!"<<endl;
+      cout << "EVID    NUFLAVORINT    NUBAR    PNU    CURRENTINT    IND_POSNU_R    IND_POSNU_THETA    IND_POSNU_PHI    IND_NNU_THETA    IND_NNU_PHI" << endl;
 
-
+      for (int i = 0; i < settings1->EVENT_NUM; i++){
+          cout << settings1->EVID[i] << "    " << settings1->NUFLAVORINT[i] << "    " << settings1->NUBAR[i] << "    " << settings1->PNU[i] << "    " << settings1->CURRENTINT[i] << "    " << settings1->IND_POSNU_R[i] << "    " << settings1->IND_POSNU_THETA[i] << "    " << settings1->IND_POSNU_PHI[i] << "    " << settings1->IND_NNU_THETA[i] << "    " << settings1->IND_NNU_PHI[i] << endl;
+      }
+  }
   // set gRandom as TRandom3 when settings1->RANDOM_MODE = 1
   if (settings1->RANDOM_MODE == 1) {
 
@@ -170,14 +182,8 @@ int main(int argc, char **argv) {   // read setup.txt file
     //cout<<"first random from TRandom3 : "<<test_randm3->Rndm()<<"\n";
     cout<<"first random : "<<gRandom->Rndm()<<"\n";
 
-
-
-
-
-
-
 //  IceModel *icemodel=new IceModel(ICE_MODEL + NOFZ*10,CONSTANTICETHICKNESS * 1000 + CONSTANTCRUST * 100 + FIXEDELEVATION * 10 + 0,MOOREBAY);// creates Antarctica ice model
-  IceModel *icemodel=new IceModel(settings1->ICE_MODEL + settings1->NOFZ*10,settings1->CONSTANTICETHICKNESS * 1000 + settings1->CONSTANTCRUST * 100 + settings1->FIXEDELEVATION * 10 + 0,settings1->MOOREBAY);// creates Antarctica ice model
+    IceModel *icemodel=new IceModel(settings1->ICE_MODEL + settings1->NOFZ*10,settings1->CONSTANTICETHICKNESS * 1000 + settings1->CONSTANTCRUST * 100 + settings1->FIXEDELEVATION * 10 + 0,settings1->MOOREBAY);// creates Antarctica ice model
   //IceModel inherits from EarthModel  
 
   cout<<endl;
@@ -259,12 +265,44 @@ cout<<"called RaySolver"<<endl;
     cout << "Make output file that is readable by AraRoot" << endl;
 
 #ifdef ARA_UTIL_EXISTS
-    UsefulIcrrStationEvent *theEvent = 0;
-    
+    UsefulIcrrStationEvent *theIcrrEvent =0;
+    UsefulAtriStationEvent *theAtriEvent =0;
+  
+
     TTree *eventTree;
+
+    double weight = 0.;
     eventTree = new TTree("eventTree","Tree of ARA Events");
-    //eventTree->Branch("event",&theEvent);
-    eventTree->Branch("UsefulARAStationEvent",&theEvent);
+    eventTree->Branch("UsefulIcrrStationEvent", &theIcrrEvent);
+    eventTree->Branch("UsefulAtriStationEvent",&theAtriEvent);
+    eventTree->Branch("weight", &weight);
+
+  /*
+    UsefulIcrrStationEvent *theIcrrEventArray[3];
+    for (int i = 0; i < 3; i++){
+      theIcrrEvent[i] = 0;
+    }
+    UsefulAtriStationEvent *theAtriEventArray[38];
+    for (int i = 0; i < 38; i++){
+      theAtriEvent[i] = 0;
+    }
+    */
+
+
+    /*
+    TTree *eventTree0;
+    eventTree0 = new TTree("eventTree0","Tree of Station 0 ARA Events");
+    eventTree0->Branch("UsefulIcrrStationEvent",&theIcrrEventArray[0]);
+    TTree *eventTree1;
+    eventTree1 = new TTree("eventTree1","Tree of Station 1 ARA Events");
+    eventTree1->Branch("UsefulAtriStationEvent",&theAtriEventArray[1]);
+    TTree *eventTree2;
+    eventTree2 = new TTree("eventTree2","Tree of Station 2 ARA Events");
+    eventTree2->Branch("UsefulAtriStationEvent",&theAtriEventArray[2]);
+    TTree *eventTree3;
+    eventTree3 = new TTree("eventTree3","Tree of Station 3 ARA Events");
+    eventTree3->Branch("UsefulAtriStationEvent",&theAtriEventArray[3]);
+    */
 #endif
 
 
@@ -416,44 +454,64 @@ double cur_posnu_z;
 
 
     int nuLimit =0;
-    if (settings1->ONLY_PASSED_EVENTS == 1){
+    if (settings1->EVENT_MODE == 1){ //event mode read in different single events
+        nuLimit = settings1->EVENT_NUM;
+    }
+    else if (settings1->ONLY_PASSED_EVENTS == 1){
       nuLimit = settings1->NNU_PASSED;
-    } else {
+    }
+    else {
       nuLimit = settings1->NNU;
     }
-    
+//    cout << "nuLimit: " << nuLimit << endl; 
     int inu = 0;
     int Events_Thrown = 0;
     int Events_Passed = 0;
     //       for (int inu=0;inu<settings1->NNU;inu++) { // loop over neutrinos
     while (inu < nuLimit){
+//      cout << "inu: " << inu << endl; 
+      check_station_DC = 0;
+      check_station_DC = 0;
+      
+      if ( settings1->DEBUG_MODE_ON==0 ) {
+	std::cerr<<"*";
+	if ( Events_Thrown%100 == 0 )
+	  cout<<"Thrown "<<Events_Thrown<<endl;
+      }
+      
+/*      if(settings1->EVENT_MODE == 1){
+          settings1->SELECT_FLAVOR = settings1->NUFLAVORINT[inu];
+          settings1->NU_NUBAR_SELECT_MODE = settings1->NUBAR[inu];
+          settings1->EXPONENT = settings1->PNU[inu];
+          Spectra *spectra=new Spectra(settings1->EXPONENT);
+          settings1->SELECT_CURRENT = settings1->CURRENTINT[inu];
+          settings1->INTERACTION_MODE = 2;
+          settings1->POSNU_R = settings1->IND_POSNU_R[inu];
+          settings1->POSNU_THETA = settings1->IND_POSNU_THETA[inu];
+          settings1->POSNU_PHI = settings1->IND_POSNU_PHI[inu];
+          settings1->NNU_THIS_THETA = 1;
+          settings1->NNU_THETA = settings1->IND_NNU_THETA[inu];
+          settings1->NNU_THIS_PHI = 1;
+          settings1->NNU_PHI = settings1->IND_NNU_PHI[inu];
 
-        check_station_DC = 0;
-        check_station_DC = 0;
-        
-       if ( settings1->DEBUG_MODE_ON==0 ) {
-           std::cerr<<"*";
-           if ( Events_Thrown%100 == 0 )
-               cout<<"Thrown "<<Events_Thrown<<endl;
-       }
-
-
-
+      }
+*/
        //event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1 );
        event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1, Events_Thrown );
-        event->inu_passed = -1;
+       event->inu_passed = -1;
         
        report = new Report(detector, settings1);
-
+       
+        
         
 #ifdef ARA_UTIL_EXISTS
-       theEvent = new UsefulIcrrStationEvent();
+       theIcrrEvent = new UsefulIcrrStationEvent();
+       theAtriEvent = new UsefulAtriStationEvent();
 #endif
 
 
        // go further only if we picked up usable posnu
        if (event->Nu_Interaction[0].pickposnu>0) {
-
 
            /*
            if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0) {// noise waveforms will be generated for each evts
@@ -482,13 +540,37 @@ double cur_posnu_z;
            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent);
            report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown);
            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent, Events_Thrown);
-           
-           
+
+
 #ifdef ARA_UTIL_EXISTS
-           int stationID = 0;
-           if (report->stations[stationID].Global_Pass) {
-               report->MakeUsefulEvent(detector, settings1, trigger, stationID, theEvent);
+	   if (settings1->DATA_LIKE_OUTPUT !=0){
+	   int stationID;
+	   int stationIndex;
+	   if (settings1->DETECTOR == 4){
+	     stationID = settings1->DETECTOR_STATION;
+	     stationIndex = 0;
+           } else {
+	     stationID = 0;
+	     stationIndex = 0;
            }
+
+	   if (report->stations[stationIndex].Global_Pass) {
+	     //report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theIcrrEvent);
+	     cout << endl << "Making useful event" << endl;
+	     report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theAtriEvent);
+	     /*
+	     for (int i_chan = 0; i_chan< 16; i_chan++){
+	       int elecChan = AraGeomTool::Instance()->getElecChanFromRFChan(i_chan, stationID);
+	       int string_i = detector->getStringfromArbAntID( stationIndex, i_chan);
+	       int antenna_i = detector->getAntennafromArbAntID( stationIndex, i_chan);
+	       cout << "Output: " << elecChan << " : " << theAtriEvent->fTimes[elecChan][1] <<  " : " << report->stations[stationIndex].strings[string_i].antennas[antenna_i].time_mimic[1] << endl;
+	     }
+	     */
+	   }
+
+	   weight = event->Nu_Interaction[0].weight;
+	   }
+	   //	   cout << "weight: " << weight <<endl;	   
 #endif
            
            report->ClearUselessfromConnect(detector, settings1, trigger);
@@ -518,14 +600,22 @@ double cur_posnu_z;
 
            for (int i=0; i<detector->params.number_of_stations; i++) {
 #ifdef ARA_UTIL_EXISTS
-               if (settings1->DETECTOR == 3 && i == 0){ theEvent->numRFChans = 14; }
-               else { theEvent->numRFChans = 16; }
+	     if (settings1->DATA_LIKE_OUTPUT != 0){
+               if (settings1->DETECTOR == 3 && i == 0)
+		 { theIcrrEvent->numRFChans = 14; }
+	       else if (settings1->DETECTOR == 4 && settings1->DETECTOR_STATION == 0)
+		 { theIcrrEvent->numRFChans = 14; }
+               else { 
+		 theAtriEvent->fNumChannels = 20; 
+		 theIcrrEvent->numRFChans = 16; 
+	       }
+	     }
 #endif
                
                if (max_dt < report->stations[i].max_arrival_time - report->stations[i].min_arrival_time) max_dt = report->stations[i].max_arrival_time - report->stations[i].min_arrival_time;
                // check the total global trigger passed
                if (report->stations[i].Global_Pass) {
-
+		 
                    cout<<"\nGlobal_Pass : "<<report->stations[i].Global_Pass<<" evt : "<<inu<<" added weight : "<<event->Nu_Interaction[0].weight<<endl;
                    
                    if ( check_station_DC == 0) { // count trigger pass only once per event
@@ -541,9 +631,13 @@ double cur_posnu_z;
                        else if (settings1->INTERACTION_MODE==0) {
                            count1->incrementEventsFound( event->Nu_Interaction[0].probability, event );
                        }
-                       else if (settings1->INTERACTION_MODE==3) {
-                           count1->incrementEventsFound( event->Nu_Interaction[0].probability, event );
-                       }
+		       else if (settings1->INTERACTION_MODE==3) {
+			 count1->incrementEventsFound( event->Nu_Interaction[0].probability, event );
+		       }
+		       else if (settings1->INTERACTION_MODE==4) {
+			 count1->incrementEventsFound( event->Nu_Interaction[0].weight, event );
+		       }
+
                        
                        
                    }
@@ -563,12 +657,12 @@ double cur_posnu_z;
        AraTree2->Fill();   //fill interaction every events
 
        // for 1, save all events whether passed trigger or not
-       if (settings1->WRITE_ALL_EVENTS==1) {
+       if (settings1->DATA_LIKE_OUTPUT==2) {
            //theEvent = &report->theUsefulEvent;
            eventTree->Fill();
        }
        // for 0, save events which passed trigger
-       else if (settings1->WRITE_ALL_EVENTS==0) {
+       else if (settings1->DATA_LIKE_OUTPUT==1) {
            //if ( Global_Pass_Flag == 1 ) {
            if ( check_station_DC > 0 ) {
                //theEvent = &report->theUsefulEvent;
@@ -593,7 +687,6 @@ double cur_posnu_z;
        }
 
 
-
        // test FILL_TREE_MODE
        if (settings1->FILL_TREE_MODE==0) { // fill event event
            
@@ -601,13 +694,14 @@ double cur_posnu_z;
 
 #ifdef ARA_UTIL_EXISTS
 
+
            // for 1, save all events whether passed trigger or not
-           if (settings1->WRITE_ALL_EVENTS==1) {
+           if (settings1->DATA_LIKE_OUTPUT==2) {
                //theEvent = &report->theUsefulEvent;
                eventTree->Fill();
            }
            // for 0, save events which passed trigger
-           else if (settings1->WRITE_ALL_EVENTS==0) {
+           else if (settings1->DATA_LIKE_OUTPUT==1) {
                if ( check_station_DC > 0 ) {
                    //theEvent = &report->theUsefulEvent;
                    eventTree->Fill();
@@ -620,13 +714,15 @@ double cur_posnu_z;
            if (event->Nu_Interaction[0].pickposnu>0) {
                AraTree2->Fill();   //fill interaction every events
 #ifdef ARA_UTIL_EXISTS
+
+
                // for 1, save all events whether passed trigger or not
-               if (settings1->WRITE_ALL_EVENTS==1) {
+               if (settings1->DATA_LIKE_OUTPUT==2) {
                    //theEvent = &report->theUsefulEvent;
                    eventTree->Fill();
                }
                // for 0, save events which passed trigger
-               else if (settings1->WRITE_ALL_EVENTS==0) {
+               else if (settings1->DATA_LIKE_OUTPUT==1) {
                    if ( check_station_DC > 0 ) {
                        //theEvent = &report->theUsefulEvent;
                        eventTree->Fill();
@@ -642,12 +738,12 @@ double cur_posnu_z;
 #ifdef ARA_UTIL_EXISTS
 
                // for 1, save all events whether passed trigger or not
-               if (settings1->WRITE_ALL_EVENTS==1) {
+               if (settings1->DATA_LIKE_OUTPUT==2) {
                    //theEvent = &report->theUsefulEvent;
                    eventTree->Fill();
                }
                // for 0, save events which passed trigger
-               else if (settings1->WRITE_ALL_EVENTS==0) {
+               else if (settings1->DATA_LIKE_OUTPUT==1) {
                    if ( check_station_DC > 0 ) {
                        //theEvent = &report->theUsefulEvent;
                        eventTree->Fill();
@@ -657,17 +753,20 @@ double cur_posnu_z;
            }
        }
 
-       
-       if (settings1->ONLY_PASSED_EVENTS == 1){
+       if (settings1->EVENT_MODE == 1){
+           inu++;
+       }
+       else if (settings1->ONLY_PASSED_EVENTS == 1){
            if (check_station_DC > 0){
                inu++;
            }
-       } else {
+       }
+       else {
            inu++;
        }
-        if (check_station_DC > 0){
+       if (check_station_DC > 0){
             Events_Passed++;
-        }
+       }
        Events_Thrown++;
        
 
@@ -692,7 +791,8 @@ double cur_posnu_z;
  delete event;
  delete report;
 #ifdef ARA_UTIL_EXISTS
- delete theEvent;
+ delete theIcrrEvent;
+ delete theAtriEvent;
 #endif
 
 
@@ -730,7 +830,8 @@ double cur_posnu_z;
 
 
    cout<<" end loop"<<endl;
-   cout << "Total Events Thrown: " <<     settings1->NNU << endl;
+//   cout << "Total Events Thrown: " <<     settings1->NNU << endl;
+   cout << "Total Events Thrown: " << Events_Thrown << endl;
    cout<<"Total_Global_Pass : "<<Total_Global_Pass<<endl;
    cout<<"Total_Weight : "<<Total_Weight<<endl;
    cout<<"Total_Probability : "<<Total_Probability<<endl;
