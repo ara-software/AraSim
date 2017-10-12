@@ -175,6 +175,9 @@ int main(int argc, char **argv) {   // read setup.txt file
     // test TRandom3
     TRandom3 *test_randm3 = new TRandom3 (0);
     gRandom = test_randm3;
+  } else {
+      gRandom->SetSeed(settings1->SEED + atoi(run_no.c_str() ) );
+      
   }
     //cout<<"first random from TRandom3 : "<<test_randm3->Rndm()<<"\n";
     cout<<"first random : "<<gRandom->Rndm()<<"\n";
@@ -499,6 +502,8 @@ double cur_posnu_z;
         
        report = new Report(detector, settings1);
        
+        
+        
 #ifdef ARA_UTIL_EXISTS
        theIcrrEvent = new UsefulIcrrStationEvent();
        theAtriEvent = new UsefulAtriStationEvent();
@@ -536,7 +541,7 @@ double cur_posnu_z;
            report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown);
            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent, Events_Thrown);
 
-                      
+
 #ifdef ARA_UTIL_EXISTS
 	   if (settings1->DATA_LIKE_OUTPUT !=0){
 	   int stationID;
@@ -567,7 +572,7 @@ double cur_posnu_z;
 	   }
 	   //	   cout << "weight: " << weight <<endl;	   
 #endif
-               
+           
            report->ClearUselessfromConnect(detector, settings1, trigger);
 	   for(int i=0;i<event->Nu_Interaction.size(); i++) event->Nu_Interaction[i].clear_useless(settings1);
 

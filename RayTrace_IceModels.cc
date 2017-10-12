@@ -30,7 +30,7 @@ void exponentialRefractiveIndex::indexOfRefractionWithDerivative(double z, doubl
 	}
 }
 
-RayTrace::indexOfRefractionModel::RayEstimate exponentialRefractiveIndex::estimateRayAngle(double sourceDepth, double receiverDepth, double distance) const{
+RayTrace::indexOfRefractionModel::RayEstimate exponentialRefractiveIndex::estimateRayAngle(double sourceDepth, double receiverDepth, double distance) const {
 	if(B==0.0){
 		//in this degenerate case, n(z)==A for all z
 		//which causes problems when we divide by (n-A) and (n0-A) below
@@ -38,14 +38,18 @@ RayTrace::indexOfRefractionModel::RayEstimate exponentialRefractiveIndex::estima
 		double theta=atan(distance/(sourceDepth-receiverDepth));
 		if(theta<0.0)
 			theta+=RayTrace::pi;
-		return(RayEstimate(SOLUTION,theta));
+		return(RayEstimate(SOLUTION,theta)); // return status: SOLUTION (which is 0), angle: theta
 	}
-	
+            
 	double n0=A+B*exp(C*sourceDepth);
+        //std::cout<<"source n0 : "<<n0<<std::endl; // changed
 	double n=A+B*exp(C*receiverDepth);
+        //std::cout<<"receiver n : "<<n<<std::endl; // changed
 	bool swap=(n<n0);
-	if(swap)
-		std::swap(n,n0);
+	if(swap) {
+            std::swap(n,n0);
+            //std::cout<<"swap!"<<std::endl; // changed (so that src is always near surface?)
+        }
 	double s1=1e-10;
 	double s2=1.0;
 	
@@ -65,11 +69,18 @@ RayTrace::indexOfRefractionModel::RayEstimate exponentialRefractiveIndex::estima
 	c=A/b;
 	fmid=log((((sqrt(n*n-a)+b)/(n-A))+c)/(((sqrt(n0*n0-a)+b)/(n0-A))+c))-((b*sDiff)/(s2*n0));
 	
-	if(f*fmid>=0.0 || std::isnan(f) || std::isnan(fmid))
-		return(RayEstimate());
+	if(f*fmid>=0.0 || std::isnan(f) || std::isnan(fmid)) {
+            //std::cout<<"f*fmin>=0 | f nan | fmid nan"<<std::endl; // changed
+            return(RayEstimate());
+        }
 	
 	double ds;
 	double rtb=(f<0.0?(ds=s2-s1,s1):(ds=s1-s2,s2));
+        // changed
+        //std::cout<<"f:"<<f<<std::endl;
+        //std::cout<<"s1:"<<s1<<", s2:"<<s2<<std::endl;
+        //std::cout<<"s2-s1:"<<s2-s1<<", s1-s2:"<<s1-s2<<std::endl;
+        //std::cout<<"ds:"<<ds<<", rtb:"<<rtb<<std::endl;
 	const unsigned int maxIter=40;
 	unsigned int i;
 	for(i=0; i<maxIter; i++){
@@ -84,15 +95,23 @@ RayTrace::indexOfRefractionModel::RayEstimate exponentialRefractiveIndex::estima
 		if(std::abs(fmid)<1.0e-4)
 			break;
 	}
-	if(i==maxIter)
-		return(RayEstimate());
+	if(i==maxIter) {
+                //std::cout<<"i=maxIter"<<std::endl; // changed
+                return(RayEstimate());
+        }
 	if(swap){
-		if(sourceDepth>receiverDepth)
+		if(sourceDepth>receiverDepth) {
+                        //std::cout<<"swap & src_depth("<<sourceDepth<<") > rec_depth("<<receiverDepth<<")"<<std::endl; // changed
 			return(RayEstimate(SOLUTION,RayTrace::pi-asin((n0/n)*s)));
+                }
+                //std::cout<<"swap & src_depth("<<sourceDepth<<") <= rec_depth("<<receiverDepth<<")"<<std::endl; // changed
 		return(RayEstimate(SOLUTION,asin((n0/n)*s)));
 	}
-	if(sourceDepth<receiverDepth)
+	if(sourceDepth<receiverDepth) {
+                //std::cout<<"src_depth("<<sourceDepth<<") < rec_depth("<<receiverDepth<<")"<<std::endl; // changed
 		return(RayEstimate(SOLUTION,asin(s)));
+        }
+        //std::cout<<"just return from RayEstimate"<<std::endl; // changed
 	return(RayEstimate(SOLUTION,RayTrace::pi-asin(s)));
 }
 

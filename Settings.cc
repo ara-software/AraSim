@@ -135,6 +135,8 @@ outputdir="outputs"; // directory where outputs go
 
   RANDOM_MODE=1;            // default : 1 (seed is unique in time/space)
 
+  SEED=1; // default: 1, only applies if RANDOM_MODE=0, provides base seed value and run number taken from arguments is added to this value in order to submit multiple repeatable runs instead of only one single long repeatable run
+    
   BORE_HOLE_ANTENNA_LAYOUT=0;   // default : 0 (VHVH)
 
   DATA_LIKE_OUTPUT=1; //default : 0 (doesn't write out data-like events)
@@ -295,7 +297,6 @@ outputdir="outputs"; // directory where outputs go
     IND_NNU_THETA[100] = {0};
     IND_NNU_PHI[100] = {0};
 
-
 }
 
 void Settings::ReadFile(string setupfile) {
@@ -415,6 +416,9 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "RANDOM_MODE") {
                   RANDOM_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "SEED") {
+                  SEED = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "BORE_HOLE_ANTENNA_LAYOUT") {
                   BORE_HOLE_ANTENNA_LAYOUT = atoi( line.substr(line.find_first_of("=") + 1).c_str() );

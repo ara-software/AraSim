@@ -883,6 +883,8 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
     Position source_tmp = source;
     Position target_tmp = target;
 
+    double distance_org = source.Distance( target );
+
     int test;
 
 //--------------------------------------------------
@@ -890,6 +892,13 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 //-------------------------------------------------- 
     Earth_to_Flat_same_angle (source_tmp, target_tmp, antarctica);
     
+
+    double distance_flat = source_tmp.Distance( target_tmp );
+
+    if ( fabs(distance_org - distance_flat) > 1. ) // if more than 1m difference
+        cout<<"source, target distance, org: "<<distance_org<<", flat: "<<distance_flat<<endl;
+
+
     // set error message in case posnu is above Surface
     if (source_tmp.GetZ() > 0.) {
         source_over_surface = 1;
@@ -1131,6 +1140,13 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
     frequency = 300;
     polarization = RayTrace::pi/2;
 
+
+    // change accuracy value as a functin of phys_dist
+    if ( distance_org / 1000. > requiredAccuracy ) 
+        requiredAccuracy = distance_org / 1000.; // loosen accuracy cut value
+
+
+
     if (settings1->NOFZ == 1){
         
         refractionModel=boost::shared_ptr<exponentialRefractiveIndex>(new exponentialRefractiveIndex(ns,nd,nc));
@@ -1150,6 +1166,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 		refl|=RayTrace::SurfaceReflection;
 	if(bedrock_reflect)
 		refl|=RayTrace::BedrockReflection;
+
 /*	
 	src.SetX(src_x);
 	src.SetY(src_y);
@@ -1257,6 +1274,16 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
                             outputs[4].push_back( it->pathTime );   // time in s (not ns)
                             //std::cout<<"outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<"pathLen : "<<it->pathLen<<"\n";
 
+
+                            // test if raysol dist is shorter than physical distance
+                            if ( distance_flat - it->pathLen >= 10. ) // if more than 10m difference
+                            {
+                                //cout<<"source, target physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
+                                //cout<<"source(z:"<<src.GetZ()<<"), target(z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
+                                cout<<"source(x:"<<src.GetX()<<" y:"<<src.GetY()<<" z:"<<src.GetZ()<<"), target(x:"<<trg.GetX()<<" y:"<<trg.GetY()<<" z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
+                            }
+
+
                             std::string pathfilename;
                             if ( sol_no == 0 ) {
                                 pathfilename = "./pathfile_0.txt";
@@ -1320,6 +1347,16 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
                             outputs[3].push_back(it->reflectionAngle);
                             outputs[4].push_back( it->pathTime );   // time in s (not ns)
                             //std::cout<<"outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<"pathLen : "<<it->pathLen<<"\n";
+
+
+                            // test if raysol dist is shorter than physical distance
+                            if ( distance_flat - it->pathLen >= 10. ) // if more than 10m difference
+                            {
+                                //cout<<"source, target physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", excsol"<<endl;
+                                //cout<<"source(z:"<<src.GetZ()<<"), target(z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
+                                cout<<"source(x:"<<src.GetX()<<" y:"<<src.GetY()<<" z:"<<src.GetZ()<<"), target(x:"<<trg.GetX()<<" y:"<<trg.GetY()<<" z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
+                            }
+
 
 
                             std::string pathfilename;

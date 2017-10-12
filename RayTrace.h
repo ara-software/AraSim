@@ -663,6 +663,9 @@ namespace RayTrace{
 		///\param requiredAccuracy The maximum distance by which the result may miss the target
 		///\return The initial angle of the best solution ray path
 		std::pair<double,double> refineRoot(double emit_depth, const rayTargetRecord& target, const TraceRecord& seed, bool rising, unsigned short allowedReflections, double requiredAccuracy, int &sol_error ) const;
+
+		std::pair<double,double> evenmore_refineRoot(double emit_depth, const rayTargetRecord& target, const TraceRecord& seed, double angle_min, double angle_max, bool rising, unsigned short allowedReflections, double requiredAccuracy, int &sol_error ) const;
+
 		
 		///\brief Attempts to locate the ray path with passes the farthest above the given target
 		///

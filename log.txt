@@ -1298,6 +1298,41 @@ Added a printGeometry method to Detector class.
 
 ============================================================================
 
+08/25/14 Eugene Hong;
+
+Fixed RayTracing code.
+In previous RayTracing, in specific conditions ray solution was not properly calculated (miss distance which is the distance between final result and target location was far different from required accuracy value).
+In RayTrace, I added a condition check term which see if ray solution is in required accuracy (default 0.2m, if physical distance between target and source is more than 200m, change the value to physical distance / 1000).
+If the condition is not met, throw away the ray solution.
+Further investigation is recommended to fix bugs buried in ray tracing code.
+
+============================================================================
+
+08/25/14 2 Eugene Hong;
+
+Added one saturation study example code.
+getSatStudy.cc
+M.getSatStudy
+
+after compiling AraSim, compile getSatStudy with
+make -f M.getSatStudy
+
+Then read specific AraSim output root file with getSatStudy.
+It will generate posnu distribution and other useful plots that are related to saturation effect from output root file.
+Make sure you make outputs/plots/SatStudy
+folder to store the plots.
+
+============================================================================
+
+08/12/16 C Pfendner;
+
+updated static const double variables to static constexpr in
+counting.hh
+removed useless/problematic option in makefile
+added namespace definition in Tools.h
+
+============================================================================
+
 04/07/2017 Carl Pfendner:
 
 Added option to import geometry from AraRoot for stations 2, 3 - use
