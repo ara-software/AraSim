@@ -1296,6 +1296,7 @@ in your setup file
 Added utilities to get the waveforms and hit times in vectors from Report class.
 Added a printGeometry method to Detector class.
 
+
 ============================================================================
 
 08/25/14 Eugene Hong;
@@ -1332,6 +1333,7 @@ removed useless/problematic option in makefile
 added namespace definition in Tools.h
 
 ============================================================================
+<<<<<<< .working
 
 04/07/2017 Carl Pfendner:
 
@@ -1415,3 +1417,6 @@ Added ANTENNA_MODE mode to settings to allow for new antenna models to
 be imported 
 The newest mode allows the use of a separate antenna model for the top
 VPol antennas in the layout.
+
+============================================================================
+
