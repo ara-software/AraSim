@@ -8,6 +8,7 @@
 #include "Vector.h"
 #include "Tools.h"
 #include "Trigger.h"
+#include "Constants.h"
 
 #include <iostream>
 #include <sstream>
@@ -16,7 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "TRandom3.h"
-#include "Constants.h"
+#include "TMath.h"
 
 #include <cstdlib>
 
@@ -514,6 +515,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                    // calculate the polarization vector at the source
                                    Pol_vector = GetPolarization (event->Nu_Interaction[0].nnu, launch_vector);
 
+
                                    icemodel->GetFresnel( ray_output[1][ray_sol_cnt],    // launch_angle
                                                         ray_output[2][ray_sol_cnt],     // rec_angle
                                                         ray_output[3][ray_sol_cnt],     // reflect_angle
@@ -525,7 +527,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                         mag,
                                                         Pol_vector);                    // input src Pol and return Pol at trg
 
-                                   
+
 
                                    if ( ray_output[3][ray_sol_cnt] < PI/2. ) {  // when not reflected at the surface, angle = 100
                                        stations[i].strings[j].antennas[k].reflection.push_back(1);  // say this is reflected ray
@@ -616,16 +618,29 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                        freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
                                             */
                                            if ( settings1->ALL_ANT_V_ON==0 ) {
+					     if (settings1->ANTENNA_MODE == 0){
                                                heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
-                                                           antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type), 
+												antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type), 
                                                            freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					     }
+					     if (settings1->ANTENNA_MODE == 1){
+					       heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+												antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k), 
+								   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					     }
                                            }
                                            else if ( settings1->ALL_ANT_V_ON==1 ) {
+					     if (settings1->ANTENNA_MODE == 0){
                                                heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
-                                                           antenna_theta, antenna_phi, 0), 
-                                                           freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
-                                           }
-
+												antenna_theta, antenna_phi, 0), 
+								   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					     }
+					     if (settings1->ANTENNA_MODE == 1){
+                                               heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+												antenna_theta, antenna_phi, 0, k), 
+								   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					     }
+					   }
 
                                            //cout<<"n_medium : "<<icemodel->GetN(detector->stations[i].strings[j].antennas[k])<<endl;
                                            //cout<<"gain : "<<detector->stations[i].strings[j].antennas[k].GetG(detector, freq_tmp*1.E-6, antenna_theta, antenna_phi)<<endl;
@@ -840,6 +855,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                                freq_lastbin = freq_tmp;
 
+
+
                                                /*
                                                // Get ant gain with 2-D interpolation (may have bug?) 
                                                //
@@ -848,14 +865,32 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                            freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
                                                 */
                                                if ( settings1->ALL_ANT_V_ON==0 ) {
+						 if (settings1->ANTENNA_MODE == 0){
                                                    heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
                                                                antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type), 
                                                                freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+						 }
+						 if (settings1->ANTENNA_MODE == 1){
+                                                   heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+													    antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k), 
+                                                               freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+						 }
                                                }
                                                else if ( settings1->ALL_ANT_V_ON==1 ) {
-                                                   heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
-                                                               antenna_theta, antenna_phi, 0), 
-                                                               freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+                                                   
+						 if (settings1->ANTENNA_MODE == 0){
+						   heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+													    antenna_theta, antenna_phi, 0), 
+									       freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+						 }
+						 if (settings1->ANTENNA_MODE == 1){
+						   heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+													    antenna_theta, antenna_phi, 0, k), 
+									       freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+						 }
+						 
+
+
                                                }
 
 
@@ -874,14 +909,29 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                                freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
                                                     */
                                                    if ( settings1->ALL_ANT_V_ON==0 ) {
+						     if (settings1->ANTENNA_MODE == 0){
                                                        heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
-                                                                   antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type), 
-                                                                   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+													antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type), 
+									   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+						     }
+        
+						     if (settings1->ANTENNA_MODE == 1){
+                                                       heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+													antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k), 
+									   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+						     }
                                                    }
                                                    else if ( settings1->ALL_ANT_V_ON==1 ) {
+						     if (settings1->ANTENNA_MODE == 0){
                                                        heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
                                                                    antenna_theta, antenna_phi, 0), 
                                                                    freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+						     }
+						     if (settings1->ANTENNA_MODE == 1){
+                                                       heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+													antenna_theta, antenna_phi, 0, k), 
+									   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+						     }
                                                    }
 
 
@@ -998,6 +1048,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					 // initially give raysol has actual signal
 					 stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] = 1;
 					 
+
 					 int waveform_bin = (int)signal->ArbitraryWaveform_V.size();
 					 //					 cout << waveform_bin << endl;
 					 
@@ -1053,7 +1104,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					   
 					 }
 					 
-					 
+
 					 
 					 // just get peak from the array
 					 //stations[i].strings[j].antennas[k].PeakV.push_back( FindPeak(detector->CalPulserWF_V, CP_bin) );
@@ -1072,7 +1123,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					 
 					 freq_lastbin = freq_tmp;
 					 
-					 
+
 					 
 					 /*
 					 // heff last bin for transmitter ant
@@ -1167,17 +1218,32 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					   */
 					 
 					   if ( settings1->ALL_ANT_V_ON==0 ) {
+					     if (settings1->ANTENNA_MODE == 0){
 					     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 											      antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type), 
 								 freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					     }
+					     if (settings1->ANTENNA_MODE == 1){
+					       heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+												antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type,k), 
+								   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					     }
 					   }
+
 					   else if ( settings1->ALL_ANT_V_ON==1 ) {
-					     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
-											      antenna_theta, antenna_phi, 0), 
-								 freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					     if (settings1->ANTENNA_MODE == 0){
+					       heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+												antenna_theta, antenna_phi, 0), 
+								   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+
+					     }
+					     if (settings1->ANTENNA_MODE == 1){
+					       heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+												antenna_theta, antenna_phi, 0,k), 
+								   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					       
+					     }					
 					   }
-					   
-					   
 					   
 					   stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back( heff );
 					   
@@ -1215,7 +1281,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					   
 					 }// end for freq bin
 					 
-					 
+
 					 // now get time domain waveform back by inv fft
 					 Tools::realft(V_forfft,-1,stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);
 					 
@@ -1233,7 +1299,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					 
 					 
 					 
-					 
+
 					 
 					 for (int n=0; n<settings1->NFOUR/2; n++) {
 					   
@@ -1314,7 +1380,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					 }
 					 
 					 
-					 
+		
 					 // just get peak from the array
 					 //stations[i].strings[j].antennas[k].PeakV.push_back( FindPeak(detector->CalPulserWF_V, CP_bin) );
 					 stations[i].strings[j].antennas[k].PeakV.push_back( -1. );// just let -1.
@@ -1333,21 +1399,35 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					 freq_lastbin = freq_tmp;
 					 
 					 
-					 
+
 					 
 					 // heff last bin for transmitter ant
 					 double heff_lastbin_trans;
 					 double ant_theta_trans = ray_output[1][ray_sol_cnt] * DEGRAD; // from 0 to 180
 					 //cout<<"ant theta trans : "<<ant_theta_trans<<"deg"<<endl;
 					 if ( settings1->ALL_ANT_V_ON==0 ) {
+					   if (settings1->ANTENNA_MODE == 0){
 					   heff_lastbin_trans = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 													  ant_theta_trans, antenna_phi, detector->stations[i].strings[j].antennas[k].type), 
 									     freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu) );
+					   }
+					   if (settings1->ANTENNA_MODE == 1){
+					     heff_lastbin_trans = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+													    ant_theta_trans, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k), 
+									       freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu) );
+					   }
 					 }
 					 else if ( settings1->ALL_ANT_V_ON==1 ) {
-					   heff_lastbin_trans = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+					   if (settings1->ANTENNA_MODE == 0){
+					     heff_lastbin_trans = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 													  ant_theta_trans, antenna_phi, 0), 
 									     freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu) );
+					   }
+					   if (settings1->ANTENNA_MODE == 1){
+					     heff_lastbin_trans = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+													    ant_theta_trans, antenna_phi, 0,k), 
+									     freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu) );
+					   }
 					 }
 					 
 					 
@@ -1362,14 +1442,28 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					 freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
 					 */
 					 if ( settings1->ALL_ANT_V_ON==0 ) {
+					   if (settings1->ANTENNA_MODE == 0){
 					   heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 												    antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type), 
 								       freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					   }
+					   if (settings1->ANTENNA_MODE == 1){
+					   heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+												    antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type,k), 
+								       freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					   }
 					 }
 					 else if ( settings1->ALL_ANT_V_ON==1 ) {
+					   if (settings1->ANTENNA_MODE == 0){
 					   heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 												    antenna_theta, antenna_phi, 0), 
 								       freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					 }
+					   if (settings1->ANTENNA_MODE == 1){
+					   heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+												    antenna_theta, antenna_phi, 0, k), 
+								       freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					 }
 					 }
 					 
 					 
@@ -1410,14 +1504,28 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					   // apply ant factors (transmitter ant)
 					   //
 					   if ( settings1->ALL_ANT_V_ON==0 ) {
+					     if (settings1->ANTENNA_MODE == 0){
 					     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 											      ant_theta_trans, antenna_phi, detector->stations[i].strings[j].antennas[k].type), 
 								 freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu) );
+					     }
+					     if (settings1->ANTENNA_MODE == 1){
+					     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+											      ant_theta_trans, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k), 
+								 freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu) );
+					     }
 					   }
 					   else if ( settings1->ALL_ANT_V_ON==1 ) {
+					     if (settings1->ANTENNA_MODE == 0){
 					     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 											      ant_theta_trans, antenna_phi, 0), 
 								 freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu) );
+					     }
+					     if (settings1->ANTENNA_MODE == 1){
+					     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+											      ant_theta_trans, antenna_phi, 0, k), 
+								 freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu) );
+					     }
 					   }
 					   //
 					   if ( n > 0 ) {
@@ -1448,17 +1556,31 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					     freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
 					   */
 					   if ( settings1->ALL_ANT_V_ON==0 ) {
+					     if (settings1->ANTENNA_MODE==0){
 					     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 											      antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type), 
 								 freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					     }
+					     if (settings1->ANTENNA_MODE==1){
+					     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+											      antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k), 
+								 freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					     }
 					   }
 					   else if ( settings1->ALL_ANT_V_ON==1 ) {
+					     if (settings1->ANTENNA_MODE ==0){
 					     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 											      antenna_theta, antenna_phi, 0), 
 								 freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					     }
+					     if (settings1->ANTENNA_MODE ==1){
+					     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+											      antenna_theta, antenna_phi, 0,k), 
+								 freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+					     }
 					   }
 					   
-					   
+
 					   
 					   stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back( heff );
 					   
@@ -1687,6 +1809,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                    detector->ReadElectChain_New(settings1);
 
+
+
                    if ( settings1->USE_TESTBED_RFCM_ON==1) {
                        detector->ReadRFCM_New(settings1);
                    }
@@ -1777,14 +1901,14 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                            // save noise ID
                            stations[i].strings[j].antennas[k].noise_ID.push_back( noise_ID[l] );
 
-                           //cout<<"noise_ID for "<<l<<"th noisewaveform is : "<<noise_ID[l]<<"  N_noise : "<<N_noise<<" ray_sol_cnt : "<<stations[i].strings[j].antennas[k].ray_sol_cnt<<endl;
+			   //                           cout<<"noise_ID for "<<l<<"th noisewaveform is : "<<noise_ID[l]<<"  N_noise : "<<N_noise<<" ray_sol_cnt : "<<stations[i].strings[j].antennas[k].ray_sol_cnt<<endl;
 
                        
 
                            // do only if it's not in debugmode
                            if ( debugmode == 0 ) {
 
-
+			     //				   cout << l << " : " << N_noise-1 << " : " << ch_ID << endl;
                                // if we are sharing same noise waveform for all chs, make sure diff chs use diff noise waveforms
                                if ( settings1->NOISE_TEMP_MODE==0) {
                                    if (l == N_noise-1) {    // when it's final noise waveform
@@ -1809,6 +1933,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                    if (l == N_noise-1) {    // when it's final noise waveform
                                        //for (int bin=0; bin<remain_bin; bin++) {
                                        for (int bin=0; bin<settings1->DATA_BIN_SIZE; bin++) {   // test for full window
+					 //		 cout << GetChNumFromArbChID(detector,ch_ID,i,settings1)-1 << " : " << noise_ID[l] << " : " << ch_ID << endl;
                                            trigger->Full_window[ch_ID][bin] = ( trigger->v_noise_timedomain_diode_ch[ GetChNumFromArbChID(detector,ch_ID,i,settings1)-1 ][noise_ID[l]][bin] );
                                            trigger->Full_window_V[ch_ID][bin] = ( trigger->v_noise_timedomain_ch[ GetChNumFromArbChID(detector,ch_ID,i,settings1)-1 ][noise_ID[l]][bin] );
                                        }
@@ -1823,7 +1948,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                    }
                                }
 
-                               // if we are sharing same noise waveform for first 8 chs and share same noisewaveforms for others, make sure diff chs use diff noise waveforms
+			       // if we are sharing same noise waveform for first 8 chs and share same noisewaveforms for others, make sure diff chs use diff noise waveforms
                                else if ( settings1->NOISE_TEMP_MODE==2) {
 
                                    if ( (GetChNumFromArbChID(detector,ch_ID,i,settings1)-1) < 8) {
@@ -1867,14 +1992,16 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                    }
 
 
+
                                }
 
 
                            } // if we are not in debug mode
 
 
-
+			
                        }
+
                        // currently there is a initial spoiled bins (maxt_diode_bin) at the initial Full_window "AND" at the initial of connected noisewaveform (we can fix this by adding values but not accomplished yet)
 
                        //cout<<"done filling noise diode arrays for trigger!"<<endl;
@@ -2398,8 +2525,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 			 int string_i = detector->getStringfromArbAntID( i, ch_loop);
 			 int antenna_i = detector->getAntennafromArbAntID( i, ch_loop);
 			 //			 cout << "string:antenna: " << string_i << " : " << antenna_i << endl;
-			   stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = -1; // no likely init
-                           if (ch_loop == Passed_chs[check_ch] && check_ch<N_pass ) {    // added one more condition (check_ch<N_Pass) for bug in vector Passed_chs.clear()???
+			 stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = -1; // no likely init
+			 if (ch_loop == Passed_chs[check_ch] && check_ch<N_pass ) {    // added one more condition (check_ch<N_Pass) for bug in vector Passed_chs.clear()???
 
 
 
@@ -2917,7 +3044,9 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
     // check if global trigger...
     
     if( (settings1->TRIG_MODE==0&&( N_pass >= settings1->N_TRIG )) || 
-	(settings1->TRIG_MODE==1&&( N_pass_V >= settings1->N_TRIG_V || N_pass_H >= settings1->N_TRIG_H )) 
+	(settings1->TRIG_MODE==1&&( N_pass_V >= settings1->N_TRIG_V || 
+				    N_pass_H >= settings1->N_TRIG_H )
+	 ) 
 	//|| (settings1->TRIG_MODE==2&&( N_pass_0 >= settings1->N_TRIG_0 || N_pass_1 >= settings1->N_TRIG_1 ))
 	){ // if there's a trigger !
       
@@ -3470,7 +3599,7 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 	  int antenna_i = 0;
 	  detector->GetSSAfromChannel(stationID, ch_loop, &antenna_i, &string_i, settings1);
 
-	  cout << ch_loop << " : " << elecChan << " : " << string_i << " : " << antenna_i << endl;
+	  //	  cout << ch_loop << " : " << elecChan << " : " << string_i << " : " << antenna_i << endl;
 
 	  //	  int string_i = detector->getStringfromArbAntID( stationIndex, ch_loop);
 	  //	  int antenna_i = detector->getAntennafromArbAntID( stationIndex, ch_loop);
@@ -4198,6 +4327,37 @@ void Report::ApplyRFCM_databin(int ch, int bin_n, Detector *detector, double &vm
 }
 
 
+void Report::ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double &vmmhz, Settings *settings1) {  // read noise figure and apply unitless gain to vmmhz
+  //cout<<"Entered ApplyNoiseFig_databin    ";
+  //cout<<"vmmhz: "<<vmmhz;
+  
+  double tempNoise = vmmhz*vmmhz;
+  //  cout<<"    1: "<<detector->GetNoiseFig_databin(ch,bin_n);
+  //  cout<<"    2: "<<detector->GetTransm_databin(ch, bin_n);
+  //  cout<<"    3: "<<settings1->NOISE_TEMP;
+  //FILE *fp = fopen("noiseTemp_NOISE_TEMP_MODE_0.txt","a+");
+  if(detector->GetNoiseFig_databin(ch,bin_n)>1.0){vmmhz = TMath::Sqrt( tempNoise*(detector->GetTransm_databin(ch, bin_n)) + tempNoise/(settings1->NOISE_TEMP)*220.0*(detector->GetNoiseFig_databin(ch,bin_n) - 1.0) ) ;  
+    //cout<<"   vmmhz   "<<vmmhz;
+    //cout<<"   bin: "<<bin_n<<" freq: "<<detector->GetFreq(bin_n) << " noise temp: " << 246.0*((detector->GetTransm_databin(ch, bin_n)) + 1.0/(settings1->NOISE_TEMP)*220.0*(detector->GetNoiseFig_databin(ch,bin_n) - 1.0) ) << endl;  
+    //fprintf(fp, "%f   ",246.0*((detector->GetTransm_databin(ch, bin_n)) + 1.0/(settings1->NOISE_TEMP)*220.0*(detector->GetNoiseFig_databin(ch,bin_n) - 1.0) ));
+}
+  else{
+    vmmhz = vmmhz;
+    //fprintf(fp, "%f   ",246.0);
+  }
+  
+  //fclose(fp);
+  //    if(ch==0 && bin_n==2050) cout << "Noise ch: "<< ch <<"   "<< detector->GetNoiseFig_databin(ch,bin_n) << "   " << detector->GetTransm_databin(ch, bin_n)
+//		<< "   " << TMath::Sqrt( tempNoise ) << "   " << vmmhz << endl;
+  //  if(ch==8 && bin_n==2050) cout << "Noise ch: "<< ch <<"   "<< detector->GetNoiseFig_databin(ch,bin_n) << "   " << detector->GetTransm_databin(ch, bin_n)
+  //		<< "   " << TMath::Sqrt( tempNoise ) << "   " << vmmhz << endl;
+  //    if(ch==24 && bin_n==2000) cout << "Noise ch: "<< ch << "   " << detector->GetNoiseFig_databin(ch,bin_n)*220.0/246.0 << "   " << TMath::Sqrt(detector->GetTransm_databin(ch, bin_n) ) << endl;
+  
+}
+
+
+
+
 void Report::GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_theta, double &ant_phi) {   //ant_theta and ant_phi is in degree 
 
     // need to fix some parts.
@@ -4251,6 +4411,9 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
                 ApplyFilter_databin(k, detector, V_tmp);
                 ApplyPreamp_databin(k, detector, V_tmp);
                 ApplyFOAM_databin(k, detector, V_tmp);
+		if (settings1->APPLY_NOISE_FIGURE==1){
+		  ApplyNoiseFig_databin(0,k,detector, V_tmp, settings1);
+		}
             }
             else if (settings1->USE_TESTBED_RFCM_ON == 1) {
                 // apply RFCM gain
@@ -4319,7 +4482,7 @@ void Report::GetNoiseWaveforms_ch(Settings *settings1, Detector *detector, doubl
     if (settings1->NOISE == 0) {    // NOISE == 0 : flat thermal noise with Johnson-Nyquist noise
 
         Vfft_noise_after.clear();  // remove previous Vfft_noise values
-        Vfft_noise_before.clear();  // remove previous Vfft_noise values
+       Vfft_noise_before.clear();  // remove previous Vfft_noise values
         //V_noise_timedomain.clear(); // remove previous V_noise_timedomain values
 
 
@@ -4337,6 +4500,9 @@ void Report::GetNoiseWaveforms_ch(Settings *settings1, Detector *detector, doubl
                 ApplyFilter_databin(k, detector, V_tmp);
                 ApplyPreamp_databin(k, detector, V_tmp);
                 ApplyFOAM_databin(k, detector, V_tmp);
+		if (settings1->APPLY_NOISE_FIGURE==1){
+		  ApplyNoiseFig_databin(ch%16, k, detector, V_tmp, settings1);
+		}
             }
             else if (settings1->USE_TESTBED_RFCM_ON == 1) {
                 // apply RFCM gain
@@ -4420,6 +4586,7 @@ void Report::GetNoiseWaveforms_ch(Settings *settings1, Detector *detector, doubl
                     ApplyFilter_databin(k, detector, V_tmp);
                     ApplyPreamp_databin(k, detector, V_tmp);
                     ApplyFOAM_databin(k, detector, V_tmp);
+
                 }
                 else if (settings1->USE_TESTBED_RFCM_ON == 1) {
                     // apply RFCM gain
@@ -4466,7 +4633,6 @@ void Report::GetNoiseWaveforms_ch(Settings *settings1, Detector *detector, doubl
             V_noise_timedomain.push_back( vnoise[k] );
         }
         */
-
     }
 
     else {  // currently there are no more options!

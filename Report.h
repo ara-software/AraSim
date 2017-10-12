@@ -289,6 +289,8 @@ class Report {
         void ApplyPreamp_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyPreamp_OutZero (double freq, Detector *detector, double &vmmhz);
 
+	void ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double &vmmhz, Settings *settings1);
+
         // apply gain in FOAM
         void ApplyFOAM(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFOAM_databin(int bin_n, Detector *detector, double &vmmhz);

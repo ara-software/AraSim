@@ -48,6 +48,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
     NFOUR = settings1->NFOUR;
     TIMESTEP = settings1->TIMESTEP;
     
+    NoiseFig_numCh=16;
+
     //for (int i=0;i<HALFNFOUR/2;i++) {
     for (int i=0;i<settings1->NFOUR/4;i++) {
         //--------------------------------------------------
@@ -973,10 +975,25 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 #endif
         
         
-        // test read V-pol gain file!!
-        ReadVgain("ARA_bicone6in_output.txt");
-        // test read H-pol gain file!!
-        ReadHgain("ARA_dipoletest1_output.txt");
+
+	if (settings1->ANTENNA_MODE == 0){
+	  // test read V-pol gain file!!
+	  ReadVgain("ARA_bicone6in_output.txt");
+	  // test read H-pol gain file!!
+	  ReadHgain("ARA_dipoletest1_output.txt");
+	}
+	else if (settings1->ANTENNA_MODE == 1) {
+	  // test read V-pol gain file!!
+	  ReadVgain("ARA_bicone6in_output.txt", settings1);
+	  ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
+	  // test read H-pol gain file!!
+	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
+	}
+	
+	//	if (settings1->NOISE == 2){
+	  ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
+	  //	}
+
         // read filter file!!
         ReadFilter("./data/filter.csv", settings1);
         // read preamp gain file!!
@@ -990,8 +1007,11 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	// read threshold values for chs file
 	ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
         // read system temperature for chs file!!
-        if (settings1->NOISE_TEMP_MODE!=0) {
+	cout << "check read testbed temp1" << endl;
+        if (settings1->NOISE_TEMP_MODE != 0) {
+	  
             ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
+
         }
         // read total elec. chain response file!!
         cout<<"start read elect chain"<<endl;
@@ -1426,12 +1446,27 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         
 
         
-        
-        // test read V-pol gain file!!
-        ReadVgain("ARA_bicone6in_output.txt");
-        // test read H-pol gain file!!
-        ReadHgain("ARA_dipoletest1_output.txt");
-        // read filter file!!
+
+	if (settings1->ANTENNA_MODE == 0){
+	  // test read V-pol gain file!!
+	  ReadVgain("ARA_bicone6in_output.txt");
+	  // test read H-pol gain file!!
+	  ReadHgain("ARA_dipoletest1_output.txt");
+	}
+	else if (settings1->ANTENNA_MODE == 1) {
+	  // test read V-pol gain file!!
+	  ReadVgain("ARA_bicone6in_output.txt", settings1);
+	  ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
+	  // test read H-pol gain file!!
+	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
+	}
+	        
+
+	//	if (settings1->NOISE==2){
+	ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
+	  //	}
+
+
         ReadFilter("./data/filter.csv", settings1);
         // read preamp gain file!!
         ReadPreamp("./data/preamp.csv", settings1);
@@ -1444,7 +1479,9 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	// read threshold values for chs file
 	ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
         // read system temperature for chs file!!
-       if (settings1->NOISE_TEMP_MODE!=0) {
+
+	cout << "check read temp testbed 2" << endl;
+       if (settings1->NOISE_TEMP_MODE != 0) {
             ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
         }
         // read total elec. chain response file!!
@@ -1682,10 +1719,23 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
             
             
-            // test read V-pol gain file!!
-            ReadVgain("ARA_bicone6in_output.txt");
-            // test read H-pol gain file!!
-            ReadHgain("ARA_dipoletest1_output.txt");
+
+	    if (settings1->ANTENNA_MODE == 0){
+	      // test read V-pol gain file!!
+	      ReadVgain("ARA_bicone6in_output.txt");
+	      // test read H-pol gain file!!
+	      ReadHgain("ARA_dipoletest1_output.txt");
+	    }
+	    else if (settings1->ANTENNA_MODE == 1) {
+	      // test read V-pol gain file!!
+	      ReadVgain("ARA_bicone6in_output.txt", settings1);
+	      ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
+	      // test read H-pol gain file!!
+	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
+	    }
+
+	    ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
+	      
             // read filter file!!
             ReadFilter("./data/filter.csv", settings1);
             // read preamp gain file!!
@@ -1728,6 +1778,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	    // read threshold values for chs file
 	    ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
             // read system temperature for chs file!!
+	cout << "check read temp testbed 3" << endl;
             if (settings1->NOISE_TEMP_MODE!=0) {
                 ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
             }
@@ -1953,16 +2004,38 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
             
             
-            // test read V-pol gain file!!
-            ReadVgain("ARA_bicone6in_output.txt");
-            // test read H-pol gain file!!
-            ReadHgain("ARA_dipoletest1_output.txt");
+
+
+	    if (settings1->ANTENNA_MODE == 0){
+	      // test read V-pol gain file!!
+	      ReadVgain("ARA_bicone6in_output.txt");
+	      // test read H-pol gain file!!
+	      ReadHgain("ARA_dipoletest1_output.txt");
+	    }
+	    else if (settings1->ANTENNA_MODE == 1) {
+	      // test read V-pol gain file!!
+	      ReadVgain("ARA_bicone6in_output.txt", settings1);
+	      ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
+	      // test read H-pol gain file!!
+	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
+	    }
+
+	    //	    if (settings1->NOISE == 2){
+	      //Read the noise figures
+	      ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
+	      //	    }
+
             // read filter file!!
             ReadFilter("./data/filter.csv", settings1);
             // read preamp gain file!!
             ReadPreamp("./data/preamp.csv", settings1);
             // read FOAM gain file!!
             ReadFOAM("./data/FOAM.csv", settings1);
+
+	    if (settings1->NOISE_TEMP_MODE!=0) {
+	      ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
+	    }
+	    
 
 
 	    if (settings1->DETECTOR_STATION == 0){
@@ -1999,11 +2072,12 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      // read threshold values for chs file
 	      ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
 	      // read system temperature for chs file!!
+	      cout << "check read temp testbed 4" << endl;
 	      if (settings1->NOISE_TEMP_MODE!=0) {
-            ("./data/system_temperature.csv", settings1);// only TestBed for now
+		ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
 	      }
 	    }
-
+	    /*
         if (settings1->DETECTOR_STATION == 2){
             if ( settings1->NOISE==1) {
                 // read Rayleigh fit for freq range, bh channels
@@ -2024,8 +2098,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                 ("./data/system_temperature.csv", settings1);// only TestBed for now
             }
              */
-        }
-        
+	    //        }
+	    /*
         if (settings1->DETECTOR_STATION == 3){
             if ( settings1->NOISE==1) {
                 // read Rayleigh fit for freq range, bh channels
@@ -2044,7 +2118,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                 ("./data/system_temperature.csv", settings1);// only TestBed for now
             }
              */
-        }
+	    //        }
         
         
             // read total elec. chain response file!!
@@ -2131,9 +2205,131 @@ inline void Detector::ReadVgain(string filename) {
 
 }// end ReadVgain
 
+inline void Detector::ReadVgain(string filename, Settings *settings1) {
+    ifstream NecOut( filename.c_str() );
+    const int N = freq_step;
+    double Transm[N];
+    
+    string line;
+    if ( NecOut.is_open() ) {
+        while (NecOut.good() ) {
+
+            for (int i=0; i<freq_step; i++) {
+                getline (NecOut, line);
+                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
+                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
+                    //                    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
+                    getline (NecOut, line); //read SWR
+		    Transm[i] = atof(line.substr(5,11).c_str());
+                    getline (NecOut, line); //read names
+
+                    for (int j=0; j<ang_step; j++) {
+                        getline (NecOut, line); //read data line
+                        //Vgain[i][j] = atof( line.substr( 18 ).c_str() );  // read gain (not dB)
+                        Vgain[i][j] = Transm[i] * atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
+                        Vphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
+                                                
+                        //cout<<"VGain : "<<Vgain[i][j]<<", VPhase : "<<Vphase[i][j]<<endl;
+                        
+                    }// end ang_step
+                    
+                }// end check freq label
+                
+            }// end freq_step
+            
+        }// end while NecOut.good
+        NecOut.close();
+    }// end if file open
+    double xfreq[N];
+    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+    double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    double df_fft;
+    
+    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
+    
+    // now below are values that shared in all channels
+    for (int i=0;i<freq_step;i++) { // copy values
+      xfreq[i] = Freq[i];
+      
+    }
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+      xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
+    
+    
+    Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+      transV_databin.push_back(trans_databin[i]); // from Hz to MHz
+    }
+    
+}// end ReadVgain
+
+
+inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
+    ifstream NecOut( filename.c_str() );
+    const int N = freq_step;
+
+    double Transm[N]; 
+    string line;
+    if ( NecOut.is_open() ) {
+        while (NecOut.good() ) {
+
+            for (int i=0; i<freq_step; i++) {
+                getline (NecOut, line);
+                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
+                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
+                    //                    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
+                    getline (NecOut, line); //read SWR
+		    Transm[i] = atof( line.substr(5, 11).c_str() );
+		      cerr << "Vpol Transm: " << Transm[i] << endl;
+
+                    getline (NecOut, line); //read names
+
+                    for (int j=0; j<ang_step; j++) {
+                        getline (NecOut, line); //read data line
+                        VgainTop[i][j] = Transm[i]*atof( line.substr( 20, 33 ).c_str() );
+                        VphaseTop[i][j] = atof( line.substr( 34 ).c_str() );    // + 180.0/TMath::Pi()*TMath::ATan(-Freq[i]/500.0);  // read gain (not dB)
+                                                
+                        //cout<<"VGain : "<<Vgain[i][j]<<", VPhase : "<<Vphase[i][j]<<endl;
+                        
+                    }// end ang_step
+                    
+                }// end check freq label
+                
+            }// end freq_step
+            
+        }// end while NecOut.good
+        NecOut.close();
+    }// end if file open
+    double xfreq[N];
+    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+    double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    double df_fft;
+    
+    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
+    
+    // now below are values that shared in all channels
+    for (int i=0;i<freq_step;i++) { // copy values
+        xfreq[i] = Freq[i];
+
+    }
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
+    
+
+        Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+        transVTop_databin.push_back(trans_databin[i]); // from Hz to MHz
+    }
+
+
+
+}// end ReadVgainTop
+
 
 inline void Detector::ReadHgain(string filename) {
-    ifstream NecOut( filename.c_str() );
+  ifstream NecOut( filename.c_str() );
     
     string line;
     
@@ -2167,6 +2363,68 @@ inline void Detector::ReadHgain(string filename) {
         NecOut.close();
     }// end if file open
     
+}// end ReadHgain
+
+inline void Detector::ReadHgain(string filename, Settings *settings1) {
+
+    ifstream NecOut( filename.c_str() );    
+    string line;
+    
+    const int N = freq_step;
+    //string line;
+    double Transm[N]; 
+    if ( NecOut.is_open() ) {
+        while (NecOut.good() ) {
+            
+            for (int i=0; i<freq_step; i++) {
+                getline (NecOut, line);
+                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
+                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
+                    //                    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
+                    getline (NecOut, line); //read SWR
+		    Transm[i] = atof( line.substr(5, 11).c_str() );
+                    getline (NecOut, line); //read names
+                    
+                    for (int j=0; j<ang_step; j++) {
+                        getline (NecOut, line); //read data line
+                        //Hgain[i][j] = atof( line.substr( 20 ).c_str() );  // read gain (not dB)
+                        //Hgain[i][j] = atof( line.substr( 18, 25 ).c_str() );  // read gain (not dB)
+                        Hgain[i][j] = Transm[i]*atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
+                        Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
+
+                        //cout<<"HGain : "<<Hgain[i][j]<<", HPhase : "<<Hphase[i][j]<<endl;
+                        
+                    }// end ang_step
+                    
+                }// end check freq label
+                
+            }// end freq_step
+            
+        }// end while NecOut.good
+         NecOut.close();
+    }// end if file open
+    double xfreq[N];
+    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+    double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    double df_fft;
+    
+    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
+    
+    // now below are values that shared in all channels
+    for (int i=0;i<freq_step;i++) { // copy values
+        xfreq[i] = Freq[i];
+
+    }
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
+    
+
+        Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+        transH_databin.push_back(trans_databin[i]); // from Hz to MHz
+    }
+ 
 }// end ReadHgain
 
 
@@ -2546,8 +2804,6 @@ double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m )
 
 
 double Detector::GetGain_1D( double freq, double theta, double phi, int ant_m ) {
-
-
     // find nearest theta, phi bin
     //
     //int i = (int)(theta/5.);
@@ -2716,6 +2972,113 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
 }
 
+
+double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int ant_number) {
+
+
+    // find nearest theta, phi bin
+    //
+    //int i = (int)(theta/5.);
+    //int j = (int)(phi/5.);
+
+    // check if angles range actually theta 0-180, phi 0-360
+    int i = (int)( (theta+2.5)/5. );
+    int j = (int)( (phi+2.5)/5. );
+
+    if ( j == 72 ) j = 0;
+
+    int angle_bin = 37*j+i;
+
+    // now just do linear interpolation at that angle
+    //
+
+    double slope_1; // slope of init part
+
+    double Gout;
+
+    int bin = (int)( (freq - freq_init) / freq_width )+1;
+
+    // Vpol
+    if ( ant_m == 0 ) {
+
+      if(ant_number==0){//bottom Vpol
+        slope_1 = (Vgain[1][angle_bin] - Vgain[0][angle_bin]) / (Freq[1] - Freq[0]);
+
+
+        // if freq is lower than freq_init
+        if ( freq < freq_init ) {
+
+            Gout = slope_1 * (freq - Freq[0]) + Vgain[0][angle_bin];
+        }
+        // if freq is higher than last freq
+        else if ( freq > Freq[freq_step-1] ) {
+
+            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
+            Gout = 0.;
+        }
+
+        else {
+
+            Gout = Vgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vgain[bin][angle_bin]-Vgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        } // not outside the Freq[] range
+      }//bottom Vpol
+      else if(ant_number==2){//Top Vpol
+//	cerr << "Does it happen: yes it happens! " << ant_number << endl;
+        slope_1 = (VgainTop[1][angle_bin] - VgainTop[0][angle_bin]) / (Freq[1] - Freq[0]);
+
+
+        // if freq is lower than freq_init
+        if ( freq < freq_init ) {
+
+            Gout = slope_1 * (freq - Freq[0]) + VgainTop[0][angle_bin];
+        }
+        // if freq is higher than last freq
+        else if ( freq > Freq[freq_step-1] ) {
+
+            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
+            Gout = 0.;
+        }
+
+        else {
+
+            Gout = VgainTop[bin-1][angle_bin] + (freq-Freq[bin-1])*(VgainTop[bin][angle_bin]-VgainTop[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+	}
+      }//Top Vpol
+    
+    } // Vpol case
+
+    // Hpol
+    else if ( ant_m == 1 ) {
+
+        slope_1 = (Hgain[1][angle_bin] - Hgain[0][angle_bin]) / (Freq[1] - Freq[0]);
+
+
+        // if freq is lower than freq_init
+        if ( freq < freq_init ) {
+
+            Gout = slope_1 * (freq - Freq[0]) + Hgain[0][angle_bin];
+        }
+        // if freq is higher than last freq
+        else if ( freq > Freq[freq_step-1] ) {
+
+            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Hgain[freq_step-1][angle_bin];
+            Gout = 0.;
+        }
+
+        else {
+
+            Gout = Hgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hgain[bin][angle_bin]-Hgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        } // not outside the Freq[] range
+    
+    } // Hpol case
+
+
+    if ( Gout < 0. ) // gain can not go below 0
+        Gout = 0.;
+
+    return Gout;
+
+}
 
 
 
@@ -3738,12 +4101,122 @@ inline void Detector::ReadFOAM(string filename, Settings *settings1) {    // wil
     for (int i=0;i<settings1->NFOUR/4+1;i++) {
         FOAMGain_NFOUR.push_back( ygain_NFOUR[i] );
     }
-
-    
-    
-    
 }
 
+void Detector::ReadNoiseFigure(string filename, Settings *settings1)
+{
+cout<<"In ReadNoiseFigure"<<endl;    
+    ifstream nfFile( filename.c_str() );
+    
+    string line;
+    
+    int N=0;
+    
+    vector< vector<double> > all_chNF;
+//    all_chNF.resize(17);
+
+    vector <double> xfreq_tmp;
+    vector <double> yNF_tmp;
+    
+    if ( nfFile.is_open() ) {
+        while (nfFile.good() ) {
+            
+            getline (nfFile, line);
+
+	    istringstream iss(line);
+
+	    while( iss )
+	    {
+	        string sub;
+	        iss >> sub;
+		yNF_tmp.push_back( atof(sub.c_str()) );
+	    }
+	    cout << "freq: " << yNF_tmp[0];
+	    all_chNF.push_back( yNF_tmp );
+	    yNF_tmp.clear();
+	    cout << "   ch1: " << all_chNF[N][1] << endl;
+            
+            N++;
+            
+        }
+        nfFile.close();
+    }
+    else cout<<"Noise Figure file can not opened!!"<<endl;
+     
+    double xfreq[N];  // need array for Tools::SimpleLinearInterpolation
+    double NoiseFig[N];
+
+    int ch_no = 16;// all_chNF[1].size()-2;
+    cerr << "The number of channels: " << ch_no << endl;
+
+    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+    double NoiseFig_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    double df_fft;
+    
+    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
+   cout<<"DATA_BIN_SIZE: "<<settings1->DATA_BIN_SIZE<<" TIMESTEP: "<<settings1->TIMESTEP<<" df_fft: "<<df_fft<<endl; 
+    // now below are values that shared in all channels
+    for (int i=0;i<N;i++) { // copy values
+        xfreq[i] = all_chNF[i][0];
+
+        /*
+        for (int ch=0; ch<ch_no; ch++) {
+            ygain[i] = ygain_tmp[i];
+        }
+        */
+    }
+
+//    FILE *fp=fopen("xfreq_databin_file_NOISE_TEMP_MODE_1.txt","a+");
+
+cout<<"number of f bins: "<<settings1->DATA_BIN_SIZE/2<<endl;
+
+
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+      
+//fprintf(fp,"%f   ",xfreq_databin[i]);
+
+    }
+
+//fprintf(fp,"\n");
+//fclose(fp);
+
+    // set vector array size to number of chs
+    NoiseFig_databin_ch.resize(ch_no);
+    //    cout<<"ch_no: "<<ch_no<<endl;        
+
+    // now loop over channels and do interpolation
+    for (int ch=0; ch<ch_no; ch++) {
+
+        // copy fit values
+      //        cout << "Test reading " << ch;
+        for (int i=0;i<N;i++) {
+            NoiseFig[i] = (all_chNF[i][ch+1]);
+//	    if(i>30 && i<60) cout << xfreq[i] << "   " << NoiseFig[i] << "\t";
+        }
+	//	cout << endl;
+
+        // Tools::SimpleLinearInterpolation will return NoiseFig array (in dB)
+        Tools::SimpleLinearInterpolation( N-1, xfreq, NoiseFig, freq_step, Freq, NoiseFig_ch[ch] );
+	//	cout << "2nd Test reading 2: ";
+//        for (int i=0;i<30;i++){
+//		cout << Freq[i] << "   " <<  NoiseFig_ch[ch][i] << "\t";
+//	} 
+//	cout << endl;
+	Tools::SimpleLinearInterpolation( N-1, xfreq, NoiseFig, settings1->DATA_BIN_SIZE/2, xfreq_databin, NoiseFig_databin );
+	//	cout << "Third test reading next ";
+//        for (int i=0;i<30;i++){
+//		cout << xfreq_databin[i+3000] << "   " << NoiseFig_databin[i+3000] << "\t";
+//	} 
+//	cout << endl;
+
+    
+        for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
+/*if(i%100==0)*/ //cout<<"NoiseFig_databin: "<<NoiseFig_databin[i]<<endl;
+            NoiseFig_databin_ch[ch].push_back( NoiseFig_databin[i] );
+        }
+    }
+}
 
 
 void Detector::ReadFOAM_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
@@ -4652,6 +5125,41 @@ inline void Detector::ReadRayleighFit(string filename, Settings *settings1) {   
 
 
 
+void Detector::ReadNoiseFig_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
+
+    // We can use FilterGain array as a original array
+cout<<"In ReadNoiseFig_New"<<endl;
+
+    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+    double NoiseFig_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    double df_fft;
+    
+    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
+
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
+
+    int NoiseFig_numCh = NoiseFig_databin_ch.size();
+cout<<"NoiseFig_numCh: "<<NoiseFig_numCh<<endl;
+
+    for (int ch=0; ch<NoiseFig_numCh; ch++) {
+
+        Tools::SimpleLinearInterpolation( freq_step, Freq, NoiseFig_ch[ch], settings1->DATA_BIN_SIZE/2, xfreq_databin, NoiseFig_databin );
+            
+        NoiseFig_databin_ch[ch].clear();
+        
+        for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
+            if(i%100==0) cout<<"NoiseFig_databin: "<<NoiseFig_databin[i]<<endl;
+            NoiseFig_databin_ch[ch].push_back( NoiseFig_databin[i] );
+        }
+    }
+
+}
+
+
+
+
 void Detector::ReadRayleigh_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
 
     // We can use FilterGain array as a original array
@@ -5319,6 +5827,7 @@ int Detector::GetChannelfromStringAntenna ( int stationNum, int stringnum, int a
             if (antennanum < int(InstalledStations[1].VHChannel[stringnum].size())){
                 ChannelNum = InstalledStations[1].VHChannel[stringnum][antennanum];
                 return ChannelNum;
+		//return ChannelNum+1; // Lu 06/24/2017
             }
             else {
                 cerr << "Invalid request for station channel map: antenna number" << endl;

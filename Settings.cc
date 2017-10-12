@@ -278,6 +278,10 @@ outputdir="outputs"; // directory where outputs go
 
     EVENT_MODE = 0;//default: 0: not event mode, 1: event mode
     EVENT_NUM = 10;//read in event number in EVENT_MODE=1, no more than 100 events
+    ANTENNA_MODE=0; //default: 0 - old antenna model information
+    APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
+
+
 
 //arrays for saving read in event features in EVENT_MODE=1
     EVID[100] = {0};
@@ -633,6 +637,14 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "EVENT_NUM"){
                   EVENT_NUM = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
+              else if (label == "ANTENNA_MODE"){
+                  ANTENNA_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "APPLY_NOISE_FIGURE"){
+                  APPLY_NOISE_FIGURE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+
+
 
 
           }
@@ -735,7 +747,8 @@ int Settings::CheckCompatibilities(Detector *detector) {
 
     // check if there's enough system temperature values prepared for NOISE_TEMP_MODE=1
     if (NOISE_TEMP_MODE==1) {// use different system temperature values for different chs
-        if (detector->params.number_of_antennas > (int)(detector->Temp_TB_ch.size()) ) {
+      if (DETECTOR==3 && (detector->params.number_of_antennas > (int)(detector->Temp_TB_ch.size())) ) {
+	  cout << detector->params.number_of_antennas << " : " <<(int)(detector->Temp_TB_ch.size()) << endl;
             cerr<<"System temperature values are not enough for all channels! Check number of channels you are using and numbers in data/system_temperature.csv"<<endl;
             num_err++;
         }
@@ -778,12 +791,14 @@ int Settings::CheckCompatibilities(Detector *detector) {
         num_err++;
     }
 
+    /*
     //if (NOISE_TEMP_MODE==1 && DETECTOR!=3) {
     if (NOISE_TEMP_MODE==1 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
         //cerr<<"NOISE_TEMP_MODE=1 only works with DETECTOR=3!"<<endl;
         cerr<<"NOISE_TEMP_MODE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
         num_err++;
     }
+    */
 
     //if (NOISE_TEMP_MODE==2 && DETECTOR!=3) {
     if (NOISE_TEMP_MODE==2 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
@@ -873,9 +888,13 @@ int Settings::CheckCompatibilities(Detector *detector) {
         cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format; without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
         num_err++;
     }
-
-
-    
+    /*
+    if(NOISE == 2 && (DETECTOR==0 || DETECTOR==1 || DETECTOR==2)){
+      cerr << "CALIBRATION_MODE=1 doesn't work with DETECTOR=0,1,2" << endl;
+      cerr << "CALIBRATION_MODE controls the response from installed stations 2,3 and thus has no real relevance for DETECTOR=0,1,2" << endl;
+      num_err++;
+    }
+    */
 
     // This is for installed stations
     if (DETECTOR == 4 ) {

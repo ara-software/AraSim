@@ -78,7 +78,7 @@ class Settings
 
         int NFOUR;              // number of total bins for FFT. has to be power of 2 values
 
-        int NOISE;              // noise condition settings degault 0 ( : thermal flat noise), 1 : Rayleigh dist. fit for installed TestBed geom
+        int NOISE;              // noise condition settings degault 0 ( : thermal flat noise), 1 : Rayleigh dist. fit for installed TestBed geom, 2: Noise figure values for station 2 (??) from Thomas Meures 2015/2016
 
         int ATMOSPHERE;         // include atmosphere 1, no 0
 
@@ -277,6 +277,12 @@ class Settings
 
         int EVENT_MODE;//default: 0: not event mode, 1: event mode
         int EVENT_NUM;//read in event number in EVENT_MODE=1, no more than 100 events
+
+	int ANTENNA_MODE; // 0: old default antenna models bicone/rotated dipole
+	                   // 1: using different antenna response for the top Vpol antennas, otherwise same as old default
+
+	int APPLY_NOISE_FIGURE; // 0: do not apply new noise figure from Thomas Meures 2016
+	                        // 1: apply new noise figure to data
 
 //arrays for saving read in event features in EVENT_MODE=1
         int EVID[100];

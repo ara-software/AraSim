@@ -551,6 +551,7 @@ double cur_posnu_z;
 
 	   if (report->stations[stationIndex].Global_Pass) {
 	     //report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theIcrrEvent);
+	     cout << endl << "Making useful event" << endl;
 	     report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theAtriEvent);
 	     /*
 	     for (int i_chan = 0; i_chan< 16; i_chan++){
