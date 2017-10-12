@@ -1371,3 +1371,12 @@ See Settings.h for more details
 
 ============================================================================
 
+10/12/2017 Carl Pfendner:
+
+Added APPLY_NOISE_FIGURE mode to settings to attempt to include the calibration information from Thomas 
+WARNING!!: this is incomplete as of this edit. The channel dependent
+noise figures do not work correctly yet.
+Added ANTENNA_MODE mode to settings to allow for new antenna models to
+be imported 
+The newest mode allows the use of a separate antenna model for the top
+VPol antennas in the layout.
