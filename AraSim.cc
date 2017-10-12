@@ -504,6 +504,7 @@ double cur_posnu_z;
        
         
         
+        
 #ifdef ARA_UTIL_EXISTS
        theIcrrEvent = new UsefulIcrrStationEvent();
        theAtriEvent = new UsefulAtriStationEvent();
@@ -540,7 +541,6 @@ double cur_posnu_z;
            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent);
            report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown);
            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent, Events_Thrown);
-
 
 #ifdef ARA_UTIL_EXISTS
 	   if (settings1->DATA_LIKE_OUTPUT !=0){
