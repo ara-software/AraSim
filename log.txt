@@ -1418,3 +1418,11 @@ The newest mode allows the use of a separate antenna model for the top
 VPol antennas in the layout.
  
 ============================================================================
+
+10/24/2017 Brian Clark:
+
+Updated UserGuideTex documentation to include info
+from Carl's presentation: http://ara.physics.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=1533
+
+============================================================================
+
