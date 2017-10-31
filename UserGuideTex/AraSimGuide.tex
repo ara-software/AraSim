@@ -143,11 +143,13 @@ for writing this software
 
 (and the having patience to explain everything to me). 
 
+Updated by Brian Clark October 2017.
+
 \room
 
 \today
 
-svn: revision 467
+svn: revision 740
 
 \end{centering}
 
@@ -781,29 +783,36 @@ If you really want to work in the old methods choose \p{NOISE WAVEFORM GENERATE 
 \room
  
 
- \item \textbf{Pick exact} (mode 2): this chooses the position of all $\nu$'s to be at the same location. The position of interaction is built into \arasim at this time (look inside `Primaries.cc' for \p{INTERACTION MODE}==2). 
+ \item \textbf{Pick exact} (mode 2): this chooses the position of all $\nu$'s to be at the same location. 
+
+The position of interaction is built into \arasim at this time (look inside `Primaries.cc' for \p{INTERACTION MODE}==2). 
  
- The position given by default is at $R=1000$m, $\th=-\pi/4 $ and $\phi=-\pi/6 $, which translates into 
+ The default is at $R=1000$m, $\th=-\pi/4 $ and $\phi=-\pi/6 $, which translates into 
   \begin{equation*}  
   x=353.55 \text{m} \quad y=612.37\text{m} \quad z=707.1\text{m}
    \end{equation*}
-  
 
    relative to the station center. This mode is useful for testing reconstruction at a specific location, or for making sure all events have a ray trace solution (see subsection \ref{ray solving}).
+
+    \pr{POSNU\_THETA} interaction location elevation angle in radians
+
+    \pr{POSNU\_PHI} interaction location azimuthal angle in radians
+
+    \pr{POSNU\_R} interaction location radius in meters
    
 %    \item \textbf{Pick near-unbiased} (mode 3): choose position of $\nu$'s in a sphere around center of ARA stations. 
    
 %    \underline{in pick near-unbiased mode only}:
    
 %    \pr{PICKNEARUNBIASED R}=5000 the radius around detector when using above mode 3. This is far enough to contain all relevant events when using single station. Like \p{POSNU RADIUS}, make sure you choose a larger size when using multiple stations. 
+  
+\item \textbf{Above Ice} (mode 4): Throws events in a cylinder above the ice. \p{PICK\_ABOVE\_HEIGHT}=3000m (default) sets the height of the cylinder in which events will be thrown. Meant to be used with the arbitrary event generator mode \p{EVENT\_TYPE}=10 (see section on ``other parameters'').
 
 
 
 \end{itemize}
 
 
-
-The direction of the incoming neutrino can be predetermined using
 
 \pr{NNU THIS THETA}=0 (default) chooses randomly any angle within the range $\th\in [0,\pi]$. mode 1 lets you choose a specific value for $\th$ and some range around that angle. 
 
@@ -822,6 +831,8 @@ The direction of the incoming neutrino can be predetermined using
 \newpage
 
 \subsection{Ray Solving}\label{ray solving}
+
+\pr{RAY\_TRACE\_ICE\_MODEL\_PARAMS}=0 (default). Use a index of refraction model fitted from the RICE data (\url{https://doi.org/10.3189/172756504781829800}). =1 is Soth Pole fitted from RICE 2. =2 is South Pole measurement by Eisen 2003. =3 is South Pole measurement by Gow. =10 and 11 are both models for Moore's Bay. =20 is measurements at Byrd station by Ebimuna 1983. =30 is measurement at Mizuho station by Ebimuna 1983.
 
 \pr{RAYSOL RANGE}=5000 in meters. Each neutrino event is generated at a certain distance from the detector (see subsection \ref{neutrino position}). Before the event is tested for triggering it is tested for plausible ray trace solution. This is simply done by comparing the distance of the position of the neutrino \p{(POSNU)} from the station center to a radius given by \p{RAYSOL RANGE}. If the neutrino is generated outside of \p{RAYSOL RANGE} then \arasim will not test the trigger and just assume there is no ray solution. 
 
@@ -1120,25 +1131,20 @@ We can also determine the way the radio waves move through the antarctic ice usi
 
 \begin{itemize}
  \item \p{DETECTOR} mode 0 unused. 
- 
+
+  \item \p{DETECTOR} mode 4: import real station geometry from AraRoot (requires an AraRoot installation. Make sure to choose a \p{DETECTOR\_STATION}.
+
+  \pr{DETECTOR\_STATION}. Must be used with \p{DETECTOR}=4. Set equal to the station who's geometry you want to import (e.g.\p{DETECTOR\_STATION}=2, =3, etc). Includes the channel mapping to the AraRoot like data structure UsefulAtriStationEvent.
+
  \item \p{DETECTOR} mode 1 (default) ideal ARA station(s). Choose a number of stations between 1 and 7, each with an ideal string and antenna layout. 
  
- \pr{number of stations}=1. Determines the number (between 1 and 7) of stations in the array. The stations are added as a small spiral, with the first in the center, and the other six forming a hexagon around it. 
+ \pr{number of stations}=1. Determines the number (between 1 and 7) of stations in the array. The stations are added as a small spiral, with the first in the center, and the other six forming a hexagon around it.
  
  \begin{figure}[H]
-  
-  \room
-  
-  \begin{centering}
-   
-
-
-
- 
- \begin{tikzpicture}
-  
+    \room
+    \begin{centering}
+      \begin{tikzpicture}
 %     \draw[fill=red!50, ] (0,0) circle[radius=0.5cm] ;
-
     \node[cir] at (0,0) (one) {1};
     \node[cir] at (2,0) (two) {2};
     \node[cir] at (1,1.732) (three) {3};
@@ -1146,35 +1152,20 @@ We can also determine the way the radio waves move through the antarctic ice usi
     \node[cir] at (-2,0) (five) {5};
     \node[cir] at (-1,-1.732) (six) {6};
     \node[cir] at (1, -1.732) (seven) {7};
-    
     \path[line] (one) -- (two);
     \path[line] (two) -- (three);
     \path[line] (three) -- (four);
     \path[line] (four) -- (five);
     \path[line] (five) --node[xshift=-5.5em, yshift=-0.5em] {\p{station spacing}} (six);
     \draw (-1.9,-0.4) -- (-2.1,-0.5) -- (-1.55,-1.5) -- (-1.35,-1.4);
-    
     \path[line] (six) -- (seven);
-  
 %   \node[cir, 
-  
  \end{tikzpicture}
-
    \end{centering}
- 
-
- 
  \caption{The order at which stations are added in \texttt{DETECTOR} = 1 mode}
- 
   \label{single hexagon}
-  
-  
   \room
- 
 \end{figure}
-
-
-
 
 \pr{station spacing}=2000 in meter. Determines the distance between stations in the array (for mode 1 and 2). 
  
@@ -1387,17 +1378,29 @@ In all modes we will save the physics data for all events that are recorded (whi
 
 \room
 
-\pr{WRITE ALL EVENTS}=0. This parameter determines what information is saved to `eventTree', which is supposed to represent the data which will be available for analysis in a real detector. It contains none of the information \arasim uses internally, only what is measured by the detector. The possible modes are:
+\pr{DATA LIKE OUTPUT}=0. This parameter determines what information is saved to `eventTree', which is supposed to represent the data which will be available for analysis in a real detector. It contains none of the information \arasim uses internally, only what is measured by the detector. The possible modes are:
 
 \begin{itemize}
 
- \item mode 0 (default): save only events that are globally triggered. This is the most realistic case in which we only store waveforms for interesting events. 
- 
- \item mode 1: save also the events that did not trigger. This saves empty waveforms for non-globally triggered events. Useful for matching the events in `AraTree2' with those in 'eventTree' but will generate large outputs. 
- 
- \item mode 2: do not save any data, leaving `eventTree' empty. This is useful if we are not interested in doing analysis on the waveforms themselves, and want smaller outputs. 
+  \item mode 0 (default): no data like output.
+
+  \item mode 1 : Output triggered events only.This is the most realistic case in which we only store waveforms for interesting events.
+
+  \item mode 2: Output all events (signal only inserted into data-like output). This saves empty waveforms for non-globally triggered events. Useful for matching the events in `AraTree2' with those in 'eventTree' but will generate large outputs. 
  
 \end{itemize}
+
+%\pr{WRITE ALL EVENTS}=0. This parameter determines what information is saved to `eventTree', which is supposed to represent the data which will be available for analysis in a real detector. It contains none of the information \arasim uses internally, only what is measured by the detector. The possible modes are:
+
+%\begin{itemize}
+
+ %\item mode 0 (default): save only events that are globally triggered. This is the most realistic case in which we only store waveforms for interesting events. 
+ 
+ %\item mode 1: save also the events that did not trigger. This saves empty waveforms for non-globally triggered events. Useful for matching the events in `AraTree2' with those in 'eventTree' but will generate large outputs. 
+ 
+ %\item mode 2: do not save any data, leaving `eventTree' empty. This is useful if we are not interested in doing analysis on the waveforms themselves, and want smaller outputs. 
+ 
+%\end{itemize}
 
 
 \pr{FILL TREE MODE}=0. This parameter decides which events are to be stored in `AraTree2'. 
@@ -1458,8 +1461,11 @@ In all modes we will save the physics data for all events that are recorded (whi
 
 \end{figure}
 
+\pr{WAVEFORM\_LENGTH}=640 (default). This sets the number of samples desired in the waveform output.
 
-\pr{V MIMIC MODE}=0. Every globally trigger event that is saved has a waveform closed off by a certain time window. The time to start recording and to end recording depends on the timing of the trigger and the time delays between channels. How much edges around the peak of the waveform will be saved into the file will depend on the offsets between channels, including factors such as station geometry and cable delays. 
+\pr{WAVEFORM\_CENTER}. This sets the number of bins offset from the current center at which you wish to examine the output. Default is the trigger bin. Basically how displaced is the trigger window from the triggering bin.
+
+\pr{V MIMIC MODE}=0 (deprecated! Testbed only!). Every globally triggered event that is saved has a waveform closed off by a certain time window. The time to start recording and to end recording depends on the timing of the trigger and the time delays between channels. How much edges around the peak of the waveform will be saved into the file will depend on the offsets between channels, including factors such as station geometry and cable delays. 
 
 This mode affects the final time window for waveforms that are saved to file. 
 
@@ -1509,7 +1515,7 @@ Note: if you are not using the Testbed mode (\p{DETECTOR}=3) you should not be c
  
  
  
- \caption{An example of different time windows for modes of \p{V MIMIC MODE} }
+\caption{An example of different time windows for modes of V\_MIMIC\_MODE  } %\p{V MIMIC MODE}
  
  \label{example v mimic mode}
  
@@ -1528,7 +1534,7 @@ Note: if you are not using the Testbed mode (\p{DETECTOR}=3) you should not be c
 
 \pr{RANDOM MODE}=1. At mode 0 we get the same random seed every run. Useful for debugging. The default mode 1 generates a new random seed assuring randomly generated events. 
 
-\pr{EVENT TYPE}=0 (default) for neutrinos. Future releases may include black holes or monopoles. 
+\pr{EVENT TYPE}=0 (default) for neutrinos. =10 arbitary event; this mode takes in a waveform file (currently ``arbitrary\_waveform.txt'') as if it was the E-field one meter from the antenna, and adds time delays.
 
 \pr{LPM}=1. mode 0 no LPM effect. mode 1 (default) LPM effect is used. 
 
@@ -1699,6 +1705,13 @@ Some more explanations on some of the results we can get from \arasim.
 
 working progress
 
+\section{Some References}
+You can always check some of these DocDB sources where some of the features are described.
+\begin{itemize}
+ \item \url{http://ara.physics.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=1533}
+\end{itemize}
+
+
 
 
 \newpage
@@ -1746,6 +1759,12 @@ working progress
 
 \r[1]{INTERACTION MODE}{0: make nu's all over antarctica. 1: pick near (a cylinder around detector). 2: exact location at (353.55, 612.37, 707.1). 3: pick near-unbiased (a sphere around detector)}
 
+\r[]{POSNU\_THETA}{Neutrino interaction location elevation angle in radians. For use with mode \p{INTERACTION\_MODE}=2.}
+
+\r[]{POSNU\_PHI}{Neutrino  interaction location azimuthal angle in radians. For use with mode \p{INTERACTION\_MODE}=2.}
+
+\r[]{POSNU\_R}{Neutrino interaction location radius in meters. For use with mode \p{INTERACTION\_MODE}=2.}
+
 \r[3000]{POSNU RADIUS}{radius around detector in pick near mode.}
 
 \r[5000]{PICKNEARUNBIASED R}{spherical radius around detector in pick near-unbiased mode.}
@@ -1767,6 +1786,8 @@ working progress
 
 
 \rsection{ray solving}
+
+\r[0]{RAY TRACE ICE MODEL PARAMS}{What index of refraction model to use. See Settings.h for list of all available.}
 
 \r[5000]{RAYSOL RANGE}{distance from detector above which we do not attempt a ray solution (there is no trigger check beyond this).}
 
@@ -1835,7 +1856,9 @@ working progress
 
 \rsection{detector layout}
 
-\r[1]{DETECTOR}{0: unused. 1: ideal ARA station. can choose 1 to 7 stations. 2: large array in hexagonal design. 3: testbed.}
+\r[1]{DETECTOR}{0: unused. 1: ideal ARA station. can choose 1 to 7 stations. 2: large array in hexagonal design. 3: testbed. 4: Import geometry from AraRoot.}
+
+\r[]{DETECTOR\_STATION}{2, 3, etc. What station's geometry to import from AraRoot. Only works with \p{DETECTOR}=4}
 
 \r[1]{number of stations}{number of stations used in \p{DETECTOR}=1 mode. }
 
@@ -1879,9 +1902,13 @@ working progress
 
 \r{DATA SAVE MODE}{0: save waveforms and primitive spectra to AraTree2 (include spectra at different stages of simulation). 1: save only waveforms after trigger. 2: save just physics data per event.}
 
-\r{WRITE ALL EVENTS}{0: save only triggered events to eventTree (realistic case). 1: fill eventTree with all events (untriggered give zero wf graphs) 2: write nothing (leave eventTree empty)}
+\r[0]{DATA LIKE OUTPUT}{ 0: no data-like output. 1: output triggered events only. 2: output all events (signal only inserted into data-like output).}
 
 \r{FILL TREE MODE}{0: save all events to AraTree2 (triggered or not) 1: don't save events outside of ice (in pick unbiased mode) 2: save just triggered events.}
+
+\r[640]{WAVEFORM LENGTH}{Set the number of samples desired in the waveform output}
+
+\r[]{WAVEFORM CENTER}{The number of bins offset from the current center at which you wish to examine the output. Default center is the triggering bin.}
 
 \r{V MIMIC MODE}{0: save wavforms using standard time window. 1: use offsets from data to get real time windows (TB ONLY!). 2: add manual offsets to thos in 1 (TB ONLY!).}
 \rsection{other parameters}
@@ -1890,7 +1917,7 @@ working progress
 
 \r{SIMULATION MODE}{0: frequency domain. 1: time domain simulation}
 
-\r{EVENT TYPE}{0: neutrinos. other modes in future release.}
+\r[0]{EVENT TYPE}{0: neutrinos. =10 is arbitrary event waveform located in ``arbitrary\_waveform.txt'' file.}
 
 \nopagebreak
 \r[1]{LPM}{0: don't use LPM effect. 1: use LPM (default)}
