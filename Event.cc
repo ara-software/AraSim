@@ -36,7 +36,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
 
     if (Event_type == 0) { // if only neutrino events exist
         pnu = spectra1->GetNuEnergy();
-        if (settings1->EVENT_MODE == 1){
+        if (settings1->EVENT_GENERATION_MODE == 1){
 //            pnu = pow(10., settings1->PNU[inu_thrown]);
             settings1->EXPONENT = settings1->PNU[inu_thrown];
             spectra1 = new Spectra(settings1->EXPONENT);

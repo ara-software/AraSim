@@ -68,9 +68,9 @@ core_y=10000
 //PICK_ABOVE_HEIGHT=3000.
 
 // Settings for Station A2-like simulation
-//DETECTOR=4
-//DETECTOR_STATION=2
-//DATA_LIKE_OUTPUT=1
+DETECTOR=4
+DETECTOR_STATION=2
+DATA_LIKE_OUTPUT=1
 
 
 ///////////////////////// Other Alternate Settings //////////////////
@@ -90,8 +90,12 @@ core_y=10000
 //NOISE_EVENTS=16
 //NOISE_EVENTS=1
 
-//NOISE=0
-//NOISE_TEMP_MODE=1
-//ANTENNA_MODE=1
-//APPLY_NOISE_FIGURE=1
+NOISE_WAVEFORM_GENERATE_MODE=0 // generates new waveforms for every event
+NOISE=0 //flat thermal noise
+NOISE_CHANNEL_MODE=1 //using different noise temperature for each channel
+NOISE_EVENTS=1 // number of noise events which will be store in the
+trigger class for later use
+
+ANTENNA_MODE=1
+APPLY_NOISE_FIGURE=0
 //ALL_ANT_V_ON=0

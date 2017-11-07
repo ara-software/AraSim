@@ -48,9 +48,9 @@ outputdir="outputs"; // directory where outputs go
 
 // end of values from icemc
 
- ARASIM_VERSION_MAJOR = ARA_SIM_MAJOR;
- ARASIM_VERSION_MINOR = ARA_SIM_MINOR;
- ARASIM_VERSION_SUBMINOR = ARA_SIM_SUBMINOR;
+ ARASIM_VERSION_MAJOR = ARASIM_MAJOR;
+ ARASIM_VERSION_MINOR = ARASIM_MINOR;
+ ARASIM_VERSION_SUBMINOR = ARASIM_SUBMINOR;
  ARASIM_VERSION = (double)ARASIM_VERSION_MAJOR + (double)ARASIM_VERSION_MINOR * 0.001 + (double)ARASIM_VERSION_SUBMINOR * 0.000001;
  
  ARAROOT_VERSION = 0.;
@@ -182,7 +182,7 @@ outputdir="outputs"; // directory where outputs go
 
     TRIG_THRES_MODE = 0;    // default trigger threshold (0) will use 1 as offset (so no offset), (1) will use data/threshold_offset.csv as threshold off set factor
 
-    NOISE_TEMP_MODE = 0;    //default noise temp setting (just same temp for all chs), 1 : all chs have different systemp, 2 : only first 8 chs have different systemp
+    NOISE_CHANNEL_MODE = 0;    //default noise temp setting (just same temp for all chs), 1 : all chs have different systemp, 2 : only first 8 chs have different systemp
 
     USE_TESTBED_RFCM_ON = 0;    // use RFCM measurement for testbed or not
 
@@ -278,14 +278,14 @@ outputdir="outputs"; // directory where outputs go
     ARBITRARY_EVENT_ATTENUATION = 1.0;
     PICK_ABOVE_HEIGHT = 3000;
 
-    EVENT_MODE = 0;//default: 0: not event mode, 1: event mode
-    EVENT_NUM = 10;//read in event number in EVENT_MODE=1, no more than 100 events
+    EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: event mode
+    //    EVENT_NUM = 10;//read in event number in EVENT_GENERATION_MODE=1, no more than 100 events
     ANTENNA_MODE=0; //default: 0 - old antenna model information
     APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
 
 
-
-//arrays for saving read in event features in EVENT_MODE=1
+    /*
+//arrays for saving read in event features in EVENT_GENERATION_MODE=1
     EVID[100] = {0};
     NUFLAVORINT[100] = {0};
     NUBAR[100] = {0};
@@ -296,7 +296,7 @@ outputdir="outputs"; // directory where outputs go
     IND_POSNU_PHI[100] = {0};
     IND_NNU_THETA[100] = {0};
     IND_NNU_PHI[100] = {0};
-
+    */
 }
 
 void Settings::ReadFile(string setupfile) {
@@ -485,8 +485,8 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "TRIG_THRES_MODE") {
                   TRIG_THRES_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }              
-              else if (label == "NOISE_TEMP_MODE") {
-                  NOISE_TEMP_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              else if (label == "NOISE_CHANNEL_MODE") {
+                  NOISE_CHANNEL_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "CONST_MEANDIODE") {
                   CONST_MEANDIODE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
@@ -635,12 +635,12 @@ void Settings::ReadFile(string setupfile) {
 	      else if (label == "PICK_ABOVE_HEIGHT") {
 		PICK_ABOVE_HEIGHT = atof( line.substr(line.find_first_of("=") + 1).c_str() );
 	      }
-              else if (label == "EVENT_MODE"){
-                  EVENT_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              else if (label == "EVENT_GENERATION_MODE"){
+                  EVENT_GENERATION_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
-              else if (label == "EVENT_NUM"){
-                  EVENT_NUM = atoi(line.substr(line.find_first_of("=") + 1).c_str());
-              }
+	      //              else if (label == "EVENT_NUM"){
+	      //                  EVENT_NUM = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+	      //              }
               else if (label == "ANTENNA_MODE"){
                   ANTENNA_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
@@ -685,7 +685,7 @@ void Settings::ReadEvtFile(string evtfile){
                 THETA[i] = atof(i.c_str());
                 PHI[i] = atof(j.c_str());
 */
-
+/*
                 EVID[l] = a;
                 NUFLAVORINT[l] = b;
                 NUBAR[l] = c;
@@ -696,11 +696,28 @@ void Settings::ReadEvtFile(string evtfile){
                 IND_POSNU_PHI[l] = h;
                 IND_NNU_THETA[l] = i;
                 IND_NNU_PHI[l] = j;
+*/
+                EVID.push_back(a);
+                NUFLAVORINT.push_back(b);
+                NUBAR.push_back(c);
+                PNU.push_back(d);
+                CURRENTINT.push_back(e);
+                IND_POSNU_R.push_back(f);
+                IND_POSNU_THETA.push_back(g);
+                IND_POSNU_PHI.push_back(h);
+                IND_NNU_THETA.push_back(i);
+                IND_NNU_PHI.push_back(j);
+
 
                 l++;
             }
         }
         evtFile.close();
+	if (NNU == 0 || NNU > EVID.size()){
+	  //	  EVENT_NUM = EVID.size();
+	  NNU = EVID.size();
+	}
+	
     }
     else
         cout << "Unable to open " << evtfile << " file!" << endl;
@@ -725,22 +742,22 @@ int Settings::CheckCompatibilities(Detector *detector) {
 
     // check reasonable number of noise waveforms
     if (NOISE_WAVEFORM_GENERATE_MODE == 0) { // if generating new noise waveforms for every events
-        if (NOISE_TEMP_MODE == 0) {// share all noise waveforms same with other channels
+        if (NOISE_CHANNEL_MODE == 0) {// share all noise waveforms same with other channels
             //if (NOISE_EVENTS < detector->params.number_of_antennas) { // this is too low number of events!
             if (NOISE_EVENTS < detector->max_number_of_antennas_station) { // this is too low number of events!
                 cerr<<"NOISE_EVENTS too less! At least use "<<detector->max_number_of_antennas_station<<"!"<<endl;
                 num_err++;
             }
         }
-        else if (NOISE_TEMP_MODE == 1) {// each chs will have separate noise waveforms
+        else if (NOISE_CHANNEL_MODE == 1) {// each chs will have separate noise waveforms
             if (NOISE_EVENTS > 1) { // this case 1 waveform is enough for each channels
-                cerr<<"NOISE_EVENTS too many! With NOISE_WAVEFORM_GENERATE_MODE==0 and NOISE_TEMP_MODE==1, just use NOISE_EVENTS=1"<<endl;
+                cerr<<"NOISE_EVENTS too many! With NOISE_WAVEFORM_GENERATE_MODE==0 and NOISE_CHANNEL_MODE==1, just use NOISE_EVENTS=1"<<endl;
                 num_err++;
             }
         }
     }
     if (NOISE_WAVEFORM_GENERATE_MODE == 1) { // if generating noise waveforms in the begining and keep use them
-        if (NOISE_TEMP_MODE == 0) {// share all noise waveforms same with other channels
+        if (NOISE_CHANNEL_MODE == 0) {// share all noise waveforms same with other channels
             //if (NOISE_EVENTS < detector->params.number_of_antennas) { // this is too low number of events!
             if (NOISE_EVENTS < detector->max_number_of_antennas_station) { // this is too low number of events!
                 cerr<<"NOISE_EVENTS too less! At least use "<<detector->max_number_of_antennas_station<<"!"<<endl;
@@ -749,8 +766,8 @@ int Settings::CheckCompatibilities(Detector *detector) {
         }
     }
 
-    // check if there's enough system temperature values prepared for NOISE_TEMP_MODE=1
-    if (NOISE_TEMP_MODE==1) {// use different system temperature values for different chs
+    // check if there's enough system temperature values prepared for NOISE_CHANNEL_MODE=1
+    if (NOISE_CHANNEL_MODE==1) {// use different system temperature values for different chs
       if (DETECTOR==3 && (detector->params.number_of_antennas > (int)(detector->Temp_TB_ch.size())) ) {
 	  cout << detector->params.number_of_antennas << " : " <<(int)(detector->Temp_TB_ch.size()) << endl;
             cerr<<"System temperature values are not enough for all channels! Check number of channels you are using and numbers in data/system_temperature.csv"<<endl;
@@ -796,18 +813,18 @@ int Settings::CheckCompatibilities(Detector *detector) {
     }
 
     /*
-    //if (NOISE_TEMP_MODE==1 && DETECTOR!=3) {
-    if (NOISE_TEMP_MODE==1 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
-        //cerr<<"NOISE_TEMP_MODE=1 only works with DETECTOR=3!"<<endl;
-        cerr<<"NOISE_TEMP_MODE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
+    //if (NOISE_CHANNEL_MODE==1 && DETECTOR!=3) {
+    if (NOISE_CHANNEL_MODE==1 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
+        //cerr<<"NOISE_CHANNEL_MODE=1 only works with DETECTOR=3!"<<endl;
+        cerr<<"NOISE_CHANNEL_MODE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
         num_err++;
     }
     */
 
-    //if (NOISE_TEMP_MODE==2 && DETECTOR!=3) {
-    if (NOISE_TEMP_MODE==2 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
-        //cerr<<"NOISE_TEMP_MODE=2 only works with DETECTOR=3!"<<endl;
-        cerr<<"NOISE_TEMP_MODE=2 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
+    //if (NOISE_CHANNEL_MODE==2 && DETECTOR!=3) {
+    if (NOISE_CHANNEL_MODE==2 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
+        //cerr<<"NOISE_CHANNEL_MODE=2 only works with DETECTOR=3!"<<endl;
+        cerr<<"NOISE_CHANNEL_MODE=2 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
         num_err++;
     }
 
@@ -869,8 +886,8 @@ int Settings::CheckCompatibilities(Detector *detector) {
         num_err++;
     }
 
-    if (NOISE==1 && NOISE_TEMP_MODE==0) {
-        cerr<<"NOISE=1 don't work with NOISE_TEMP_MODE=0!"<<endl;
+    if (NOISE==1 && NOISE_CHANNEL_MODE==0) {
+        cerr<<"NOISE=1 don't work with NOISE_CHANNEL_MODE=0!"<<endl;
         num_err++;
     }
 

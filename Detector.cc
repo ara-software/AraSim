@@ -429,7 +429,10 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         double next_dir = PI*2./3;
 
         for (int istation = 0; istation < (int)params.number_of_stations; istation++) {
+	  stations[istation].StationID=istation;
+	
             if (station_count < (int)params.number_of_stations - 1) {
+
 
                 if ( station_count < 6 ) { // first layer
                     stations[station_count].SetX( params.core_x + (double)params.station_spacing * cos( (PI/3.) * (double)station_count ) );
@@ -1008,7 +1011,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
         // read system temperature for chs file!!
 	cout << "check read testbed temp1" << endl;
-        if (settings1->NOISE_TEMP_MODE != 0) {
+        if (settings1->NOISE_CHANNEL_MODE != 0) {
 	  
             ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
 
@@ -1481,7 +1484,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         // read system temperature for chs file!!
 
 	cout << "check read temp testbed 2" << endl;
-       if (settings1->NOISE_TEMP_MODE != 0) {
+       if (settings1->NOISE_CHANNEL_MODE != 0) {
             ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
         }
         // read total elec. chain response file!!
@@ -1779,7 +1782,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	    ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
             // read system temperature for chs file!!
 	cout << "check read temp testbed 3" << endl;
-            if (settings1->NOISE_TEMP_MODE!=0) {
+            if (settings1->NOISE_CHANNEL_MODE!=0) {
                 ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
             }
 	    
@@ -1911,8 +1914,9 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         ImportStationInfo(settings1, 0, settings1->DETECTOR_STATION);
 #endif
 //            UseAntennaInfo(1, settings1);
+	int stationID = settings1->DETECTOR_STATION;
         for (int i = 0; i < (int)params.number_of_stations; i++){
-	  stations[i].StationID = i;
+	  stations[i].StationID = settings1->DETECTOR_STATION;
 	  if (settings1->USE_INSTALLED_TRIGGER_SETTINGS == 0){
 	    stations[i].NFOUR = 1024;
 	    stations[i].TIMESTEP = 1./2.6*1.E-9;
@@ -1950,7 +1954,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      stations[0].strings[j].antennas[k].GetY() << " : " <<
 	      stations[0].strings[j].antennas[k].GetZ() << " : \t" <<
 	      //GetChannelfromStringAntenna ( 0, j, k)<<
-	      GetChannelfromStringAntenna ( 0, j, k, settings1)<<
+	      GetChannelfromStringAntenna ( stationID, j, k, settings1)<<
 	      endl;
 	    
 	    params.number_of_antennas++;
@@ -2032,7 +2036,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             // read FOAM gain file!!
             ReadFOAM("./data/FOAM.csv", settings1);
 
-	    if (settings1->NOISE_TEMP_MODE!=0) {
+	    if (settings1->NOISE_CHANNEL_MODE!=0) {
 	      ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
 	    }
 	    
@@ -2073,7 +2077,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
 	      // read system temperature for chs file!!
 	      cout << "check read temp testbed 4" << endl;
-	      if (settings1->NOISE_TEMP_MODE!=0) {
+	      if (settings1->NOISE_CHANNEL_MODE!=0) {
 		ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
 	      }
 	    }
@@ -2094,7 +2098,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
             // read system temperature for chs file!!
             
-            if (settings1->NOISE_TEMP_MODE!=0) {
+            if (settings1->NOISE_CHANNEL_MODE!=0) {
                 ("./data/system_temperature.csv", settings1);// only TestBed for now
             }
              */
@@ -2114,7 +2118,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             // read threshold values for chs file
             ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
             // read system temperature for chs file!!
-            if (settings1->NOISE_TEMP_MODE!=0) {
+            if (settings1->NOISE_CHANNEL_MODE!=0) {
                 ("./data/system_temperature.csv", settings1);// only TestBed for now
             }
              */
@@ -4141,7 +4145,7 @@ cout<<"In ReadNoiseFigure"<<endl;
         }
         nfFile.close();
     }
-    else cout<<"Noise Figure file can not opened!!"<<endl;
+    else cout<<"Noise Figure file can not be opened!!"<<endl;
      
     double xfreq[N];  // need array for Tools::SimpleLinearInterpolation
     double NoiseFig[N];
@@ -4166,7 +4170,7 @@ cout<<"In ReadNoiseFigure"<<endl;
         */
     }
 
-//    FILE *fp=fopen("xfreq_databin_file_NOISE_TEMP_MODE_1.txt","a+");
+//    FILE *fp=fopen("xfreq_databin_file_NOISE_CHANNEL_MODE_1.txt","a+");
 
 cout<<"number of f bins: "<<settings1->DATA_BIN_SIZE/2<<endl;
 
@@ -5806,7 +5810,7 @@ int Detector::GetChannelfromStringAntenna ( int stationNum, int stringnum, int a
                     return ChannelNum;
                 }
                 else {
-                    cerr << "Invalid request for station channel map: antenna number" << endl;
+                    cerr << "Invalid request for station channel map: antenna number - 3" << endl;
                     return -1;
                 }
             }
@@ -5821,19 +5825,49 @@ int Detector::GetChannelfromStringAntenna ( int stationNum, int stringnum, int a
             return -1;
         }
     }
+
+    else if(settings1->DETECTOR==4){
+      int stationId=settings1->DETECTOR_STATION;
+      //      cout << settings1->DETECTOR << endl;
+      //      int stationId=stationNum;
+      if (stationId < int(InstalledStations.size())){
+	if (stringnum < int(InstalledStations[stationId].VHChannel.size())){
+	  if (antennanum < int(InstalledStations[stationId].VHChannel[stringnum].size())){
+	    ChannelNum = InstalledStations[stationId].VHChannel[stringnum][antennanum];
+	    return ChannelNum+1;
+	  }
+	  else {
+	    cerr << "Invalid request for station channel map: antenna number - 4" << endl;
+	    //cerr << stationId << " : " << stringnum << " : " << antennanum << endl;
+	    return -1;
+	  }
+	}
+	else {
+	  cerr << "Invalid request for station channel map: string number" << endl;
+	  return -1;
+	}
+      }
+      else {
+	cerr << "Invalid request for station channel map: station number" << endl;
+	cout << stationNum << " : " <<  int(InstalledStations.size()) << endl;
+	return -1;
+      }
+
+
+    }
     // if only ideal stations are in use and also installed ARA1a (use ARA1a ch mapping for now)
     else {
-        if (stringnum < int(InstalledStations[1].VHChannel.size())){
-            if (antennanum < int(InstalledStations[1].VHChannel[stringnum].size())){
-                ChannelNum = InstalledStations[1].VHChannel[stringnum][antennanum];
-                return ChannelNum;
-		//return ChannelNum+1; // Lu 06/24/2017
-            }
-            else {
-                cerr << "Invalid request for station channel map: antenna number" << endl;
-                return -1;
-            }
-        }
+      if (stringnum < int(InstalledStations[1].VHChannel.size())){
+	if (antennanum < int(InstalledStations[1].VHChannel[stringnum].size())){
+	  ChannelNum = InstalledStations[1].VHChannel[stringnum][antennanum];
+	  return ChannelNum;
+	  //return ChannelNum+1; // Lu 06/24/2017
+	}
+	else {
+	  cerr << "Invalid request for station channel map: antenna number - test" << endl;
+	  return -1;
+	}
+      }
     }
     // we can add new case when mixed installed and ideal stations case later
 

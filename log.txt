@@ -1427,3 +1427,24 @@ from Carl's presentation: http://ara.physics.wisc.edu/cgi-bin/DocDB/ShowDocument
 
 ============================================================================
 
+2017/11/3 Carl Pfendner:
+
+Changed name of NOISE_TEMP_MODE to NOISE_CHANNEL_MODE
+Needed to make noise figure insertion work correctly and for the mode
+name to make sense
+
+============================================================================
+
+2017/11/07 Carl Pfendner:
+
+Renamed EVENT_MODE setting to EVENT_GENERATION_MODE
+Provides more description of its function, less confusion with EVENT_TYPE
+Changed EVENT_MODE=1 input arrays to dynamically sized vector,
+automatically adjustable read-in
+
+============================================================================
+
+
+
+
+

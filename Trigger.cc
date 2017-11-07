@@ -58,13 +58,13 @@ Trigger::Trigger(Detector *detector, Settings *settings1) {
     imaxbin = NFOUR/4 - detector->ibinshift + detector->idelaybeforepeak + detector->iwindow;
 
 
-    if (settings1->NOISE_TEMP_MODE == 0) {
+    if (settings1->NOISE_CHANNEL_MODE == 0) {
     
         V_noise_freqbin = sqrt( (double)(settings1->DATA_BIN_SIZE) * 50. * KBOLTZ * settings1->NOISE_TEMP / (settings1->TIMESTEP * 2.) );
     }
 
-    else if (settings1->NOISE_TEMP_MODE == 1) {
-    
+    else if (settings1->NOISE_CHANNEL_MODE == 1) {
+      cout << "Detector.params.numberofantennas: " << detector->params.number_of_antennas << endl;
         for (int ch=0; ch<detector->params.number_of_antennas; ch++) {
             //V_noise_freqbin_ch.push_back( sqrt( (double)(settings1->DATA_BIN_SIZE) * 50. * KBOLTZ * settings1->NOISE_TEMP / (settings1->TIMESTEP * 2.) ) );
             V_noise_freqbin_ch.push_back( sqrt( (double)(settings1->DATA_BIN_SIZE) * 50. * KBOLTZ * detector->GetTemp(0, ch, settings1) / (settings1->TIMESTEP * 2.) ) );
@@ -72,7 +72,7 @@ Trigger::Trigger(Detector *detector, Settings *settings1) {
     }
 
     // mode 2 : make separate noise waveforms for just first 8 chs
-    else if (settings1->NOISE_TEMP_MODE == 2) {
+    else if (settings1->NOISE_CHANNEL_MODE == 2) {
     
         for (int ch=0; ch<8; ch++) {
             V_noise_freqbin_ch.push_back( sqrt( (double)(settings1->DATA_BIN_SIZE) * 50. * KBOLTZ * detector->GetTemp(0, ch, settings1) / (settings1->TIMESTEP * 2.) ) );
@@ -94,12 +94,12 @@ void Trigger::Reset_V_noise_freqbin(Settings *settings1, Detector *detector) {
     V_noise_freqbin_ch.clear();
 
 
-    if (settings1->NOISE_TEMP_MODE == 0) {
+    if (settings1->NOISE_CHANNEL_MODE == 0) {
     
         V_noise_freqbin = sqrt( (double)(settings1->DATA_BIN_SIZE) * 50. * KBOLTZ * settings1->NOISE_TEMP / (settings1->TIMESTEP * 2.) );
     }
 
-    else if (settings1->NOISE_TEMP_MODE == 1) {
+    else if (settings1->NOISE_CHANNEL_MODE == 1) {
     
         for (int ch=0; ch<detector->params.number_of_antennas; ch++) {
             //V_noise_freqbin_ch.push_back( sqrt( (double)(settings1->DATA_BIN_SIZE) * 50. * KBOLTZ * settings1->NOISE_TEMP / (settings1->TIMESTEP * 2.) ) );
@@ -108,7 +108,7 @@ void Trigger::Reset_V_noise_freqbin(Settings *settings1, Detector *detector) {
     }
 
     // mode 2 : make separate noise waveforms for just first 8 chs
-    else if (settings1->NOISE_TEMP_MODE == 2) {
+    else if (settings1->NOISE_CHANNEL_MODE == 2) {
     
         for (int ch=0; ch<8; ch++) {
             V_noise_freqbin_ch.push_back( sqrt( (double)(settings1->DATA_BIN_SIZE) * 50. * KBOLTZ * detector->GetTemp(0, ch, settings1) / (settings1->TIMESTEP * 2.) ) );
@@ -132,24 +132,24 @@ void Trigger::SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *r
     // same with icemc -> anita -> Initialize
 
     // if using default noise temp setting (same temp for all chs)
-if (settings1->NOISE_TEMP_MODE == 0) {
-
+  if (settings1->NOISE_CHANNEL_MODE == 0) {
+    
     int ngeneratedevents=settings1->NOISE_EVENTS;  // should this value read at Settings class
     double v_noise[settings1->DATA_BIN_SIZE];    // noise voltage time domain (with filter applied)
-
+    
     meandiode = 0.;
     rmsdiode = 0.;
-
+    
     rmsvoltage = 0.;
-
+    
     v_noise_timedomain.resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
     v_noise_timedomain_diode.resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
-
+    
     cerr<<"Generating noise waveforms"<<endl;
     int print_steps;
     if ( ngeneratedevents > 10 ) print_steps = ngeneratedevents/10;
     else print_steps = ngeneratedevents;
-
+    
 
     for (int i=0; i<ngeneratedevents; i++) {
 
@@ -237,12 +237,12 @@ if (settings1->NOISE_TEMP_MODE == 0) {
     }
 
 
-}// if NOISE_TEMP_MODE = 0
+}// if NOISE_CHANNEL_MODE = 0
 
 
 
     // if using mode 1 noise temp setting (different temp for each chs)
-else if (settings1->NOISE_TEMP_MODE == 1) {
+else if (settings1->NOISE_CHANNEL_MODE == 1) {
 
     int ngeneratedevents=settings1->NOISE_EVENTS;  // should this value read at Settings class
     double v_noise[settings1->DATA_BIN_SIZE];    // noise voltage time domain (with filter applied)
@@ -250,6 +250,7 @@ else if (settings1->NOISE_TEMP_MODE == 1) {
 
     int num_chs = detector->params.number_of_antennas;
 
+    cout << "num chs: " << num_chs << endl;
 
     meandiode_ch.resize(num_chs);
     rmsdiode_ch.resize(num_chs);
@@ -369,12 +370,12 @@ for (int ch=0; ch<num_chs; ch++) {
     }
 
 
-}// else if NOISE_TEMP_MODE = 1
+}// else if NOISE_CHANNEL_MODE = 1
 
 
 
     // if using mode 2 noise temp setting (different temp for first 8 chs)
-else if (settings1->NOISE_TEMP_MODE == 2) {
+else if (settings1->NOISE_CHANNEL_MODE == 2) {
 
     int ngeneratedevents=settings1->NOISE_EVENTS;  // should this value read at Settings class
     double v_noise[settings1->DATA_BIN_SIZE];    // noise voltage time domain (with filter applied)
@@ -503,7 +504,7 @@ for (int ch=0; ch<num_chs; ch++) {
 
 
 
-}// else if NOISE_TEMP_MODE = 2
+}// else if NOISE_CHANNEL_MODE = 2
 
 
 
@@ -520,7 +521,7 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
     // same with icemc -> anita -> Initialize
 
     // if using default noise temp setting (same temp for all chs)
-if (settings1->NOISE_TEMP_MODE == 0) {
+if (settings1->NOISE_CHANNEL_MODE == 0) {
 
     int ngeneratedevents=settings1->NOISE_EVENTS;  // should this value read at Settings class
     double v_noise[settings1->DATA_BIN_SIZE];    // noise voltage time domain (with filter applied)
@@ -569,12 +570,12 @@ else if (settings1->TRIG_ANALYSIS_MODE == 1 ) {
 }
 
 
-}// if NOISE_TEMP_MODE = 0
+}// if NOISE_CHANNEL_MODE = 0
 
 
 
     // if using mode 1 noise temp setting (different temp for each chs)
-else if (settings1->NOISE_TEMP_MODE == 1) {
+else if (settings1->NOISE_CHANNEL_MODE == 1) {
 
     int ngeneratedevents=settings1->NOISE_EVENTS;  // should this value read at Settings class
     double v_noise[settings1->DATA_BIN_SIZE];    // noise voltage time domain (with filter applied)
@@ -604,12 +605,15 @@ if (settings1->TRIG_ANALYSIS_MODE != 1 ) {
             // get v_noise array (noise voltage in time domain)
             report->GetNoiseWaveforms_ch(settings1, detector, V_noise_freqbin_ch[ch], v_noise, ch);
 
+	    //	    cout << "After getting noise waveforms" << endl;
+
             // do normal time ordering (not sure if this is necessary)
             Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise);
 
 
             myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin,v_noise_timedomain_diode_ch[ch][i]);
             //
+	    //	    cout << "After convolve" << endl;
 
             for (int m=0; m<settings1->DATA_BIN_SIZE; m++) {
 
@@ -617,6 +621,7 @@ if (settings1->TRIG_ANALYSIS_MODE != 1 ) {
 
             }
 
+	    //	    cout << "after push back " << endl;
 
         }   // get meandiode with 1000 noisewaveforms
 
@@ -642,12 +647,12 @@ else if (settings1->TRIG_ANALYSIS_MODE == 1 ) {
 }
 
 
-}// else if NOISE_TEMP_MODE = 1
+}// else if NOISE_CHANNEL_MODE = 1
 
 
 
     // if using mode 2 noise temp setting (different temp for first 8 chs)
-else if (settings1->NOISE_TEMP_MODE == 2) {
+else if (settings1->NOISE_CHANNEL_MODE == 2) {
 
     int ngeneratedevents=settings1->NOISE_EVENTS;  // should this value read at Settings class
     double v_noise[settings1->DATA_BIN_SIZE];    // noise voltage time domain (with filter applied)
@@ -679,12 +684,15 @@ if (settings1->TRIG_ANALYSIS_MODE != 1 ) {
             report->GetNoiseWaveforms_ch(settings1, detector, V_noise_freqbin_ch[ch], v_noise, ch);
 
 
+
             // do normal time ordering (not sure if this is necessary)
             Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise);
 
 
             myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin,v_noise_timedomain_diode_ch[ch][i]);
             //
+
+
 
             for (int m=0; m<settings1->DATA_BIN_SIZE; m++) {
 
@@ -717,7 +725,7 @@ else if (settings1->TRIG_ANALYSIS_MODE == 1 ) {
 
 
 
-}// else if NOISE_TEMP_MODE = 2
+}// else if NOISE_CHANNEL_MODE = 2
 
 
 
