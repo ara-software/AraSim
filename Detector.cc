@@ -5,7 +5,6 @@
 #include "Settings.h"
 
 #include <iostream>
-#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <math.h>
@@ -35,6 +34,7 @@ Detector::Detector() {
 
 Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) {
     //Detector::Detector(int mode, IceModel *icesurface) {
+    cout << "good" << endl;
     
     // set freq_forfft for later use
     //
@@ -97,14 +97,22 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
     params.number_of_strings = 0;
     params.number_of_antennas = 0;
     
-    
     //initialize few params values.
-    params.freq_step = 60;
+    params.freq_step = 60
     params.ang_step = 2664;
     params.freq_width = 16.667;
     params.freq_init = 83.333;
     params.DeployedStations = 4;
     //end initialize
+    
+    //Parameters to use if using Arianna_WIPLD_hpol.dat
+    /*
+      params.freq_step = 238;//60
+      params.ang_step = 2664;//2664;
+      params.freq_width = 5; //16.667;
+      params.freq_init = 15;//83.333;
+      params.DeployedStations = 4;
+    */
     
     //copy freq_width, freq_init in params to Detector freq_width, freq_init
     freq_step = params.freq_step;
@@ -504,7 +512,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
         
 //        cout<<"total station_count : "<<station_count<<endl;
-        if (station_count != (int)params.number_of_stations) cout<<"\n\tError, station number not match !"<<endl;        
+        if (station_count != (int)params.number_of_stations) cout<<"\n\tError, station number not match !"<<endl;       
         
         //
         // set antenna values from parameters
@@ -978,6 +986,12 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 #endif
         
         
+<<<<<<< .mine
+        // test read V-pol gain file!!
+        ReadVgain("Arianna_WIPLD_hpol.dat");
+        // test read H-pol gain file!!
+        ReadHgain("Arianna_WIPLD_hpol.dat");
+=======
 
 	if (settings1->ANTENNA_MODE == 0){
 	  // test read V-pol gain file!!
@@ -997,6 +1011,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	  ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 	  //	}
 
+>>>>>>> .r741
         // read filter file!!
         ReadFilter("./data/filter.csv", settings1);
         // read preamp gain file!!
@@ -1449,6 +1464,15 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         
 
         
+<<<<<<< .mine
+        
+        // test read V-pol gain file!!
+        ReadVgain("ARA_bicone6in_output.txt");//Use Arianna_WIPLD_hpol.dat for Arianna antenna model.
+        // test read H-pol gain file!!
+        ReadHgain("ARA_dipoletest1_output.txt");//
+        // read filter file!!
+=======
+	 
 
 	if (settings1->ANTENNA_MODE == 0){
 	  // test read V-pol gain file!!
@@ -1470,6 +1494,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	  //	}
 
 
+>>>>>>> .r741
         ReadFilter("./data/filter.csv", settings1);
         // read preamp gain file!!
         ReadPreamp("./data/preamp.csv", settings1);
@@ -1722,6 +1747,12 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
             
             
+<<<<<<< .mine
+            // test read V-pol gain file!!
+            ReadVgain("Arianna_WIPLD_hpol.dat");
+            // test read H-pol gain file!!
+            ReadHgain("Arianna_WIPLD_hpol.dat");
+=======
 
 	    if (settings1->ANTENNA_MODE == 0){
 	      // test read V-pol gain file!!
@@ -1739,6 +1770,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 	    ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 	      
+>>>>>>> .r741
             // read filter file!!
             ReadFilter("./data/filter.csv", settings1);
             // read preamp gain file!!
@@ -2183,19 +2215,20 @@ inline void Detector::ReadVgain(string filename) {
             for (int i=0; i<freq_step; i++) {
                 getline (NecOut, line);
                 if ( line.substr(0, line.find_first_of(":")) == "freq ") {
-                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-                    //                    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
-                    getline (NecOut, line); //read SWR
-
-                    getline (NecOut, line); //read names
-
-                    for (int j=0; j<ang_step; j++) {
-                        getline (NecOut, line); //read data line
-                        //Vgain[i][j] = atof( line.substr( 18 ).c_str() );  // read gain (not dB)
-                        Vgain[i][j] = atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
-                        Vphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
-                                                
-                        //cout<<"VGain : "<<Vgain[i][j]<<", VPhase : "<<Vphase[i][j]<<endl;
+		  Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
+		  cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
+		  getline (NecOut, line); //read SWR
+		  
+		  getline (NecOut, line); //read names
+		  
+		  for (int j=0; j<ang_step; j++) {
+		    getline (NecOut, line); //read data line
+		    //Vgain[i][j] = atof( line.substr( 18 ).c_str() );  // read gain (not dB)
+		    Vgain[i][j] = atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
+		    Vphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
+		    //	cout << atof( line.substr( 20, 33 ).c_str() ) << endl;
+		    
+		    //	cout<<"VGain : "<<Vgain[i][j]<<", VPhase : "<<Vphase[i][j]<<endl;
                         
                     }// end ang_step
                     
@@ -2338,24 +2371,25 @@ inline void Detector::ReadHgain(string filename) {
     string line;
     
     if ( NecOut.is_open() ) {
+      //  cout << "OK"  <<endl;
         while (NecOut.good() ) {
             
             for (int i=0; i<freq_step; i++) {
                 getline (NecOut, line);
                 if ( line.substr(0, line.find_first_of(":")) == "freq ") {
                     Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-                    //                    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
-                    getline (NecOut, line); //read SWR
+		    //	    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
+		    getline (NecOut, line); //read SWR
                     getline (NecOut, line); //read names
                     
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
                         //Hgain[i][j] = atof( line.substr( 20 ).c_str() );  // read gain (not dB)
                         //Hgain[i][j] = atof( line.substr( 18, 25 ).c_str() );  // read gain (not dB)
-                        Hgain[i][j] = atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
-                        Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
+			Hgain[i][j] = atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
+			Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
 
-                        //cout<<"HGain : "<<Hgain[i][j]<<", HPhase : "<<Hphase[i][j]<<endl;
+			//      cout<<"HGain : "<<Hgain[i][j]<<", HPhase : "<<Hphase[i][j]<<endl;
                         
                     }// end ang_step
                     
@@ -2570,9 +2604,7 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
     
     Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
     
-
-    if ( Gout < 0. ) // gain can not go below 0
-        Gout = 0.;
+    //  cout<<Gout<<endl;
     
     return Gout;
     
@@ -2683,10 +2715,7 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m) {
     
     Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
     
-
-    if ( Gout < 0. ) // gain can not go below 0
-        Gout = 0.;
-    
+    cout<<Gout<<endl;
     return Gout;
     
     
@@ -2881,9 +2910,6 @@ double Detector::GetGain_1D( double freq, double theta, double phi, int ant_m ) 
     } // Hpol case
 
 
-    if ( Gout < 0. ) // gain can not go below 0
-        Gout = 0.;
-
     return Gout;
 
 }
@@ -2968,9 +2994,6 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     
     } // Hpol case
 
-
-    if ( Gout < 0. ) // gain can not go below 0
-        Gout = 0.;
 
     return Gout;
 
@@ -3350,7 +3373,7 @@ double Detector::GetFilterGain_1D_OutZero( double freq ) {
     } // not outside the Freq[] range
     
 
-
+    
     return Gout;
 
 }
@@ -3681,7 +3704,7 @@ inline void Detector::FlattoEarth_ARA_sharesurface(IceModel *icesurface) {    //
     double Dist = 0.;   //for sqrt(x^2 + y^2)
     double R1 = icesurface->Surface(0.,0.); // from core of earth to surface at theta, phi = 0.
     //--------------------------------------------------
-    //     double R1 = icesurface->Geoid(0.); // from core of earth to surface at theta, phi = 0.
+    //     double R1 = icesurface->Geoid(0.); // from core of eart to surface at theta, phi = 0.
     //-------------------------------------------------- 
     double theta_tmp;
     double phi_tmp;
@@ -6325,26 +6348,6 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
             ant_ID = ant_ID - stations[stationID].strings[i].antennas.size();
         }
     }
-}
-
-void Detector::printGeometry(int station_i){
- 
-  cout<<"  ch   |      X      |      Y      |      Z      |"<<endl;
-  cout<<"-------+-------------+-------------+-------------+"<<endl;
-      
-  for(int ch=0;ch<stations[station_i].number_of_antennas; ch++){
-   
-    int string_i = getStringfromArbAntID( station_i, ch);
-    int antenna_i = getAntennafromArbAntID( station_i, ch);
-    
-    double x=stations[station_i].strings[string_i].antennas[antenna_i].GetX()-stations[station_i].GetX();
-    double y=stations[station_i].strings[string_i].antennas[antenna_i].GetY()-stations[station_i].GetY();
-    double z=stations[station_i].strings[string_i].antennas[antenna_i].GetZ()-stations[station_i].GetZ();
-    
-    cout<<"  "<<setw(3)<<ch<<"  |"<<setw(11)<<x<<"  |"<<setw(11)<<y<<"  |"<<setw(11)<<z<<"  |"<<endl;
-    
-  }
-  
 }
 
 Detector::~Detector() {

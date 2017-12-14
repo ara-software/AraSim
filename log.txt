@@ -1445,6 +1445,9 @@ automatically adjustable read-in
 ============================================================================
 
 
+2017/14/12 Jorge Torres:
+
+Modified Detector.cc parameters so that it can read the Arianna antenna model input file. Included the file Arianna_WIPLD_hpol.dat that needs to be changed in Detector.cc as well.
 
 
-
+============================================================================
