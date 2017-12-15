@@ -117,10 +117,6 @@ class Antenna_r {
         //
         vector <double> PeakV;  // peak voltage in time domain
         vector <int> Rank;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
-
-	//	vector <double> PeakV_fromFullWaveform; // peak voltage in time domain taken from full waveform, including noise at the time of signal insertion
-	//	vector <int> Rank_fromFullWaveform;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
-
         int Trig_Pass; // 0 if not passed the trigger, 1 if passed the trigger
         //vector <int> Trig_Pass; // 0 if not passed the trigger, 1 if passed the trigger
 

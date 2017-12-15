@@ -58,15 +58,15 @@ public:
   static const int NCOSTHETA=180;
   static const int NPHI=180;
 
-  //  constexpr static const double COSTHETAMAX=1.0;
-  //  constexpr static const double COSTHETAMIN=0.0;
-  //  constexpr static const double PHIMAX=2*3.14159;
-  //  constexpr static const double PHIMIN=0.;
+  constexpr static const double COSTHETAMAX=1.0;
+  constexpr static const double COSTHETAMIN=0.0;
+  constexpr static const double PHIMAX=2*3.14159;
+  constexpr static const double PHIMIN=0.;
 
-  static const double COSTHETAMAX=1.0;
-  static const double COSTHETAMIN=0.0;
-  static const double PHIMAX=2*3.14159;
-  static const double PHIMIN=0.;
+  //static const double COSTHETAMAX=1.0;
+  //static const double COSTHETAMIN=0.0;
+  //static const double PHIMAX=2*3.14159;
+  //static const double PHIMIN=0.;
 
  double weights_rin[NCOSTHETA][NPHI];
 
@@ -78,11 +78,11 @@ public:
   static const int NBINS=10; // keep track of the number of events found, binned
   // by weights
 
-  //  constexpr static const double MIN_LOGWEIGHT=-3;
-  //  constexpr static const double MAX_LOGWEIGHT=0;
+  constexpr static const double MIN_LOGWEIGHT=-3;
+  constexpr static const double MAX_LOGWEIGHT=0;
 
-  static const double MIN_LOGWEIGHT=-3;
-  static const double MAX_LOGWEIGHT=0;
+  //static const double MIN_LOGWEIGHT=-3;
+  //static const double MAX_LOGWEIGHT=0;
 
   double eventsfound_binned[NBINS]; 
   double eventsfound_binned_e[NBINS];

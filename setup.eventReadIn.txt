@@ -65,8 +65,6 @@ TRIG_MODE=0 // use vpol, hpol separated trigger mode. by default N_TRIG_V=3, N_T
 //DETECTOR_STATION=2
 //number_of_stations=1
 
-//DETECTOR=1
-
 //DATA_LIKE_OUTPUT=1
 //SELECT_FLAVOR=1
 //NU_NUBAR_SELECT_MODE=1
@@ -79,6 +77,6 @@ TRIG_MODE=0 // use vpol, hpol separated trigger mode. by default N_TRIG_V=3, N_T
 //NNU_PHI=4.0
 //NNU_D_PHI=0.0873
 //NNU_D_PHI=0.0
-EVENT_GENERATION_MODE=1
-//EVENT_NUM=5//no more than 100 events
+EVENT_MODE=1
+EVENT_NUM=5//no more than 100 events
 //WRITE_ALL_EVENTS=1

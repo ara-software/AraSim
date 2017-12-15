@@ -1420,34 +1420,3 @@ VPol antennas in the layout.
 
 ============================================================================
 
-10/31/2017 Brian Clark:
-
-Updated UserGuideTex documentation to include info
-from Carl's presentation: http://ara.physics.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=1533
-
-============================================================================
-
-2017/11/3 Carl Pfendner:
-
-Changed name of NOISE_TEMP_MODE to NOISE_CHANNEL_MODE
-Needed to make noise figure insertion work correctly and for the mode
-name to make sense
-
-============================================================================
-
-2017/11/07 Carl Pfendner:
-
-Renamed EVENT_MODE setting to EVENT_GENERATION_MODE
-Provides more description of its function, less confusion with EVENT_TYPE
-Changed EVENT_MODE=1 input arrays to dynamically sized vector,
-automatically adjustable read-in
-
-============================================================================
-
-
-2017/14/12 Jorge Torres:
-
-Modified Detector.cc parameters so that it can read the Arianna antenna model input file. Included the file Arianna_WIPLD_hpol.dat that needs to be changed in Detector.cc as well.
-
-
-============================================================================

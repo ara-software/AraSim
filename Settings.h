@@ -161,11 +161,11 @@ class Settings
 
         int TRIG_THRES_MODE;    // if trigger threshold will use no specific offset value (0, default). or use data/threshold_offset.csv file values as a threshold offset for each chs
 
-        int NOISE_CHANNEL_MODE;    // if using same noise temp for all chs (0, default), using diff temp for all chs (1), using diff temp for first 8 chs and share same temp for other chs (2), using same noise temp but allowing to use noise
+        int NOISE_TEMP_MODE;    // if using same noise temp for all chs (0, default), using diff temp for all chs (1), using diff temp for first 8 chs and share same temp for other chs (2)
 
         double CONST_MEANDIODE;
     
-        double CONST_RMSDIODE;  // in case NOISE_CHANNEL_MODE = 1, just using this CONST_RMSDIODE value for threshold
+        double CONST_RMSDIODE;  // in case NOISE_TEMP_MODE = 1, just using this CONST_RMSDIODE value for threshold
 
 
         int USE_TESTBED_RFCM_ON;    // use RFCM measurement for testbed or not (default 0)
@@ -277,8 +277,8 @@ class Settings
 	double ARBITRARY_EVENT_ATTENUATION; // attenuation of the waveform intensity for arbitrary event waveforms
 	double PICK_ABOVE_HEIGHT;
 
-        int EVENT_GENERATION_MODE;//default: 0: not event mode, 1: event mode
-	//        int EVENT_NUM;//number of events to read in, using EVENT_GENERATION_MODE=1, default initial 0: read in the number of events in the input file, resets to total number of events read in
+        int EVENT_MODE;//default: 0: not event mode, 1: event mode
+        int EVENT_NUM;//read in event number in EVENT_MODE=1, no more than 100 events
 
 	int ANTENNA_MODE; // 0: old default antenna models bicone/rotated dipole
 	                   // 1: using different antenna response for the top Vpol antennas, otherwise same as old default
@@ -286,21 +286,17 @@ class Settings
 	int APPLY_NOISE_FIGURE; // 0: do not apply new noise figure from Thomas Meures 2016
 	                        // 1: apply new noise figure to data
 
-
-//arrays for saving read in event features in EVENT_GENERATION_MODE=1
-        vector<int> EVID;
-        vector<int> NUFLAVORINT;
-        vector<int> NUBAR;
-        vector<double> PNU;
-        vector<int> CURRENTINT;
-        vector<double> IND_POSNU_R;
-        vector<double> IND_POSNU_THETA;
-        vector<double> IND_POSNU_PHI;
-        vector<double> IND_NNU_THETA;
-        vector<double> IND_NNU_PHI;
-
-
-
+//arrays for saving read in event features in EVENT_MODE=1
+        int EVID[100];
+        int NUFLAVORINT[100];
+        int NUBAR[100];
+        double PNU[100];
+        int CURRENTINT[100];
+        double IND_POSNU_R[100];
+        double IND_POSNU_THETA[100];
+        double IND_POSNU_PHI[100];
+        double IND_NNU_THETA[100];
+        double IND_NNU_PHI[100];
     // below : values from icemc
     
     
