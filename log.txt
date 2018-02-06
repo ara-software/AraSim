@@ -1445,9 +1445,20 @@ automatically adjustable read-in
 ============================================================================
 
 
-2017/14/12 Jorge Torres:
+2017/12/14 Jorge Torres:
 
 Modified Detector.cc parameters so that it can read the Arianna antenna model input file. Included the file Arianna_WIPLD_hpol.dat that needs to be changed in Detector.cc as well.
 
 
 ============================================================================
+
+
+2018/02/06 Carl Pfendner:
+
+Edited the Detector.cc settings so that the ARIANNA WIPLD antenna can
+be selected through the setup file; use ANTENNA_MODE=2 to use ARIANNA
+log periodic antennas
+also removed Detector::printGeometry function from Detector class
+
+============================================================================
+

@@ -2052,6 +2052,12 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      // test read H-pol gain file!!
 	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
 	    }
+	    else if (settings1->ANTENNA_MODE == 2){
+	      // test read V-pol gain file!!
+	      ReadVgain("Arianna_WIPLD_hpol.dat");
+	      // test read H-pol gain file!!
+	      ReadHgain("Arianna_WIPLD_hpol.dat");
+	    }
 
 	    //	    if (settings1->NOISE == 2){
 	      //Read the noise figures

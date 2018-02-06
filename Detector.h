@@ -504,9 +504,6 @@ class Detector {
     vector <double> CalPulserWF_V;
 
 
-    void printGeometry(int station_i=0);
-    
-    
         ~Detector();    //destructor
 
         ClassDef(Detector,1);
