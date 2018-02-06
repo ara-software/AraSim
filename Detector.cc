@@ -98,7 +98,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
     params.number_of_antennas = 0;
     
     //initialize few params values.
-    params.freq_step = 60
+    params.freq_step = 60;
     params.ang_step = 2664;
     params.freq_width = 16.667;
     params.freq_init = 83.333;
@@ -106,13 +106,14 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
     //end initialize
     
     //Parameters to use if using Arianna_WIPLD_hpol.dat
-    /*
+    
+    if (settings1->ANTENNA_MODE == 2){
       params.freq_step = 238;//60
       params.ang_step = 2664;//2664;
       params.freq_width = 5; //16.667;
       params.freq_init = 15;//83.333;
       params.DeployedStations = 4;
-    */
+    }
     
     //copy freq_width, freq_init in params to Detector freq_width, freq_init
     freq_step = params.freq_step;
@@ -986,12 +987,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 #endif
         
         
-<<<<<<< .mine
-        // test read V-pol gain file!!
-        ReadVgain("Arianna_WIPLD_hpol.dat");
-        // test read H-pol gain file!!
-        ReadHgain("Arianna_WIPLD_hpol.dat");
-=======
 
 	if (settings1->ANTENNA_MODE == 0){
 	  // test read V-pol gain file!!
@@ -1006,12 +1001,18 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	  // test read H-pol gain file!!
 	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
 	}
+	else if (settings1->ANTENNA_MODE == 2){
+	  // test read V-pol gain file!!
+	  ReadVgain("Arianna_WIPLD_hpol.dat");
+	  // test read H-pol gain file!!
+	  ReadHgain("Arianna_WIPLD_hpol.dat");
+	}
 	
 	//	if (settings1->NOISE == 2){
 	  ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 	  //	}
 
->>>>>>> .r741
+
         // read filter file!!
         ReadFilter("./data/filter.csv", settings1);
         // read preamp gain file!!
@@ -1464,15 +1465,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         
 
         
-<<<<<<< .mine
-        
-        // test read V-pol gain file!!
-        ReadVgain("ARA_bicone6in_output.txt");//Use Arianna_WIPLD_hpol.dat for Arianna antenna model.
-        // test read H-pol gain file!!
-        ReadHgain("ARA_dipoletest1_output.txt");//
-        // read filter file!!
-=======
-	 
 
 	if (settings1->ANTENNA_MODE == 0){
 	  // test read V-pol gain file!!
@@ -1487,14 +1479,17 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	  // test read H-pol gain file!!
 	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
 	}
-	        
+	else if (settings1->ANTENNA_MODE == 2){
+	  // test read V-pol gain file!!
+	  ReadVgain("Arianna_WIPLD_hpol.dat");
+	  // test read H-pol gain file!!
+	  ReadHgain("Arianna_WIPLD_hpol.dat");
+	}
 
 	//	if (settings1->NOISE==2){
 	ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 	  //	}
 
-
->>>>>>> .r741
         ReadFilter("./data/filter.csv", settings1);
         // read preamp gain file!!
         ReadPreamp("./data/preamp.csv", settings1);
@@ -1747,12 +1742,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
             
             
-<<<<<<< .mine
-            // test read V-pol gain file!!
-            ReadVgain("Arianna_WIPLD_hpol.dat");
-            // test read H-pol gain file!!
-            ReadHgain("Arianna_WIPLD_hpol.dat");
-=======
+
+
 
 	    if (settings1->ANTENNA_MODE == 0){
 	      // test read V-pol gain file!!
@@ -1767,10 +1758,16 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      // test read H-pol gain file!!
 	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
 	    }
+	    else if (settings1->ANTENNA_MODE == 2) {
+	      // test read V-pol gain file!!
+	      ReadVgain("Arianna_WIPLD_hpol.dat");
+	      // test read H-pol gain file!!
+	      ReadHgain("Arianna_WIPLD_hpol.dat");
+	    }
+	    
 
 	    ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 	      
->>>>>>> .r741
             // read filter file!!
             ReadFilter("./data/filter.csv", settings1);
             // read preamp gain file!!
