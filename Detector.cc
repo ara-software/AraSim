@@ -384,13 +384,18 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         else if (params.bore_hole_antenna_layout == 6) { // VV layout
             params.number_of_antennas_string = 2;
         }
-	else if (params.bore_hole_antenna_layout == 7) { // V layout
+        else if (params.bore_hole_antenna_layout == 7) { // V layout
             params.number_of_antennas_string = 1;
         }
-
-        
-        
-        
+        else if (params.bore_hole_antenna_layout == 8) { // HHHH layout
+            params.number_of_antennas_string = 4;
+        }
+        else if (params.bore_hole_antenna_layout == 9) { // HH layout
+            params.number_of_antennas_string = 2;
+        }
+        else if (params.bore_hole_antenna_layout == 10) { // H layout
+            params.number_of_antennas_string = 1;
+        }
         
         //
         // caculate number of stations, strings, antennas 
@@ -695,34 +700,35 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     
                 } // end if bore hole antenna layout = 3 (where VHHH way)
 
-                else if ( params.bore_hole_antenna_layout == 5 || 
-			  params.bore_hole_antenna_layout == 6 || 
-			  params.bore_hole_antenna_layout == 7 ) {   // it's V-V-V-V or V-V or V
-                    
+                
+                else if ( params.bore_hole_antenna_layout == 5 ||
+                         params.bore_hole_antenna_layout == 6 ||
+                         params.bore_hole_antenna_layout == 7 ) {   // it's V-V-V-V or V-V or V
+                    cout << "BORE_HOLE_ANTENNA_LAYOUT: ";
                     for (int j=0; j<params.number_of_strings_station; j++) {
                         for (int k=0; k<params.number_of_antennas_string; k++) {
-			  
-			  if (settings1->BH_ANT_SEP_DIST_ON==0) 
-                            stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
-			  
-			  else if (settings1->BH_ANT_SEP_DIST_ON==1) {
-			    z_btw_total = 0.;
-			    for (int l=0; l<k+1; l++) {
-			      z_btw_total += z_btw_array[l];
-			    }
-			    stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
-			  }
-
-			  stations[i].strings[j].antennas[k].type = 0;   // all antennas v-pol			  
                             
-			  if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
-			    stations[i].strings[j].antennas[k].orient = 0;
-			  }
-			  else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
-			    if ( j==0||j==3 ) {
-			      if ( k==0||k==1 ) {
-				stations[i].strings[j].antennas[k].orient = 0;
-			      }
+                            if (settings1->BH_ANT_SEP_DIST_ON==0)
+                                stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
+                            
+                            else if (settings1->BH_ANT_SEP_DIST_ON==1) {
+                                z_btw_total = 0.;
+                                for (int l=0; l<k+1; l++) {
+                                    z_btw_total += z_btw_array[l];
+                                }
+                                stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
+                            }
+                            
+                            stations[i].strings[j].antennas[k].type = 0;   // all antennas v-pol
+                            cout << " V ";
+                            if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+                                stations[i].strings[j].antennas[k].orient = 0;
+                            }
+                            else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
+                                if ( j==0||j==3 ) {
+                                    if ( k==0||k==1 ) {
+                                        stations[i].strings[j].antennas[k].orient = 0;
+                                    }
                                     else {
                                         stations[i].strings[j].antennas[k].orient = 1;
                                     }
@@ -739,8 +745,55 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                             }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
                         }
                     }
-                    
+                    cout << endl;
                 } // end if bore hole antenna layout = 5,6,7 (VVVV, VV, V)
+                else if ( params.bore_hole_antenna_layout == 8 ||
+                         params.bore_hole_antenna_layout == 9 ||
+                         params.bore_hole_antenna_layout == 10 ) {   // it's H-H-H-H or H-H or H
+                    cout << "BORE_HOLE_ANTENNA_LAYOUT: ";
+                    
+                    for (int j=0; j<params.number_of_strings_station; j++) {
+                        for (int k=0; k<params.number_of_antennas_string; k++) {
+                            
+                            if (settings1->BH_ANT_SEP_DIST_ON==0)
+                                stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
+                            
+                            else if (settings1->BH_ANT_SEP_DIST_ON==1) {
+                                z_btw_total = 0.;
+                                for (int l=0; l<k+1; l++) {
+                                    z_btw_total += z_btw_array[l];
+                                }
+                                stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
+                            }
+                            
+                            stations[i].strings[j].antennas[k].type = 1;   // all antennas h-pol
+                            cout << " H ";
+                            if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+                                stations[i].strings[j].antennas[k].orient = 0;
+                            }
+                            else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
+                                if ( j==0||j==3 ) {
+                                    if ( k==0||k==1 ) {
+                                        stations[i].strings[j].antennas[k].orient = 0;
+                                    }
+                                    else {
+                                        stations[i].strings[j].antennas[k].orient = 1;
+                                    }
+                                }
+                                else {
+                                    if ( k==0||k==1 ) {
+                                        stations[i].strings[j].antennas[k].orient = 1;
+                                    }
+                                    else {
+                                        stations[i].strings[j].antennas[k].orient = 0;
+                                    }
+                                }
+                                
+                            }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+                        }
+                    }
+                    cout << endl;
+                } // end if bore hole antenna layout = 8,9,10 (HHHH, HH, H)
                 
                 //
                 // set surface antenna postions
@@ -941,9 +994,101 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     }
                     
                 } // end if bore hole antenna layout = 3 (where VHHH way)
-                
-                
-                
+                    
+                else if ( params.bore_hole_antenna_layout == 5 ||
+                         params.bore_hole_antenna_layout == 6 ||
+                         params.bore_hole_antenna_layout == 7 ) {   // it's V-V-V-V or V-V or V
+                    cout << "BORE_HOLE_ANTENNA_LAYOUT: ";
+                    for (int j=0; j<params.number_of_strings_station; j++) {
+                        for (int k=0; k<params.number_of_antennas_string; k++) {
+                            
+                            if (settings1->BH_ANT_SEP_DIST_ON==0)
+                                stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
+                            
+                            else if (settings1->BH_ANT_SEP_DIST_ON==1) {
+                                z_btw_total = 0.;
+                                for (int l=0; l<k+1; l++) {
+                                    z_btw_total += z_btw_array[l];
+                                }
+                                stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
+                            }
+                            
+                            stations[i].strings[j].antennas[k].type = 0;   // all antennas v-pol
+                            cout << " V ";
+                            if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+                                stations[i].strings[j].antennas[k].orient = 0;
+                            }
+                            else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
+                                if ( j==0||j==3 ) {
+                                    if ( k==0||k==1 ) {
+                                        stations[i].strings[j].antennas[k].orient = 0;
+                                    }
+                                    else {
+                                        stations[i].strings[j].antennas[k].orient = 1;
+                                    }
+                                }
+                                else {
+                                    if ( k==0||k==1 ) {
+                                        stations[i].strings[j].antennas[k].orient = 1;
+                                    }
+                                    else {
+                                        stations[i].strings[j].antennas[k].orient = 0;
+                                    }
+                                }
+                                
+                            }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+                        }
+                    }
+                    cout << endl;
+                } // end if bore hole antenna layout = 5,6,7 (VVVV, VV, V)
+                else if ( params.bore_hole_antenna_layout == 8 ||
+                         params.bore_hole_antenna_layout == 9 ||
+                         params.bore_hole_antenna_layout == 10 ) {   // it's H-H-H-H or H-H or H
+                    cout << "BORE_HOLE_ANTENNA_LAYOUT: ";
+                    
+                    for (int j=0; j<params.number_of_strings_station; j++) {
+                        for (int k=0; k<params.number_of_antennas_string; k++) {
+                            
+                            if (settings1->BH_ANT_SEP_DIST_ON==0)
+                                stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
+                            
+                            else if (settings1->BH_ANT_SEP_DIST_ON==1) {
+                                z_btw_total = 0.;
+                                for (int l=0; l<k+1; l++) {
+                                    z_btw_total += z_btw_array[l];
+                                }
+                                stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
+                            }
+                            
+                            stations[i].strings[j].antennas[k].type = 1;   // all antennas h-pol
+                            cout << " H ";
+                            if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+                                stations[i].strings[j].antennas[k].orient = 0;
+                            }
+                            else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
+                                if ( j==0||j==3 ) {
+                                    if ( k==0||k==1 ) {
+                                        stations[i].strings[j].antennas[k].orient = 0;
+                                    }
+                                    else {
+                                        stations[i].strings[j].antennas[k].orient = 1;
+                                    }
+                                }
+                                else {
+                                    if ( k==0||k==1 ) {
+                                        stations[i].strings[j].antennas[k].orient = 1;
+                                    }
+                                    else {
+                                        stations[i].strings[j].antennas[k].orient = 0;
+                                    }
+                                }
+                                
+                            }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+                        }
+                    }
+                    cout << endl;
+                } // end if bore hole antenna layout = 8,9,10 (HHHH, HH, H)
+                    
                 
                 //
                 // set surface antenna postions
@@ -1183,7 +1328,24 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         else if (params.bore_hole_antenna_layout == 4) { // VHH layout
             params.number_of_antennas_string = 3;
         }
-        
+        else if (params.bore_hole_antenna_layout == 5) { // VVVV layout
+            params.number_of_antennas_string = 4;
+        }
+        else if (params.bore_hole_antenna_layout == 6) { // VV layout
+            params.number_of_antennas_string = 2;
+        }
+        else if (params.bore_hole_antenna_layout == 7) { // V layout
+            params.number_of_antennas_string = 1;
+        }
+        else if (params.bore_hole_antenna_layout == 8) { // HHHH layout
+            params.number_of_antennas_string = 4;
+        }
+        else if (params.bore_hole_antenna_layout == 9) { // HH layout
+            params.number_of_antennas_string = 2;
+        }
+        else if (params.bore_hole_antenna_layout == 10) { // H layout
+            params.number_of_antennas_string = 1;
+        }
         
         
         
@@ -1433,9 +1595,99 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                 }
             } // end if bore hole antenna layout = 3 (where VHHH way)
             
-            
-            
-            
+            else if ( params.bore_hole_antenna_layout == 5 ||
+                     params.bore_hole_antenna_layout == 6 ||
+                     params.bore_hole_antenna_layout == 7 ) {   // it's V-V-V-V or V-V or V
+                cout << "BORE_HOLE_ANTENNA_LAYOUT: ";
+                for (int j=0; j<params.number_of_strings_station; j++) {
+                    for (int k=0; k<params.number_of_antennas_string; k++) {
+                        
+                        if (settings1->BH_ANT_SEP_DIST_ON==0)
+                            stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
+                        
+                        else if (settings1->BH_ANT_SEP_DIST_ON==1) {
+                            z_btw_total = 0.;
+                            for (int l=0; l<k+1; l++) {
+                                z_btw_total += z_btw_array[l];
+                            }
+                            stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
+                        }
+                        
+                        stations[i].strings[j].antennas[k].type = 0;   // all antennas v-pol
+                        cout << " V ";
+                        if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+                            stations[i].strings[j].antennas[k].orient = 0;
+                        }
+                        else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
+                            if ( j==0||j==3 ) {
+                                if ( k==0||k==1 ) {
+                                    stations[i].strings[j].antennas[k].orient = 0;
+                                }
+                                else {
+                                    stations[i].strings[j].antennas[k].orient = 1;
+                                }
+                            }
+                            else {
+                                if ( k==0||k==1 ) {
+                                    stations[i].strings[j].antennas[k].orient = 1;
+                                }
+                                else {
+                                    stations[i].strings[j].antennas[k].orient = 0;
+                                }
+                            }
+                            
+                        }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+                    }
+                }
+                cout << endl;
+            } // end if bore hole antenna layout = 5,6,7 (VVVV, VV, V)
+            else if ( params.bore_hole_antenna_layout == 8 ||
+                     params.bore_hole_antenna_layout == 9 ||
+                     params.bore_hole_antenna_layout == 10 ) {   // it's H-H-H-H or H-H or H
+                cout << "BORE_HOLE_ANTENNA_LAYOUT: ";
+                
+                for (int j=0; j<params.number_of_strings_station; j++) {
+                    for (int k=0; k<params.number_of_antennas_string; k++) {
+                        
+                        if (settings1->BH_ANT_SEP_DIST_ON==0)
+                            stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
+                        
+                        else if (settings1->BH_ANT_SEP_DIST_ON==1) {
+                            z_btw_total = 0.;
+                            for (int l=0; l<k+1; l++) {
+                                z_btw_total += z_btw_array[l];
+                            }
+                            stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
+                        }
+                        
+                        stations[i].strings[j].antennas[k].type = 1;   // all antennas h-pol
+                        cout << " H ";
+                        if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+                            stations[i].strings[j].antennas[k].orient = 0;
+                        }
+                        else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
+                            if ( j==0||j==3 ) {
+                                if ( k==0||k==1 ) {
+                                    stations[i].strings[j].antennas[k].orient = 0;
+                                }
+                                else {
+                                    stations[i].strings[j].antennas[k].orient = 1;
+                                }
+                            }
+                            else {
+                                if ( k==0||k==1 ) {
+                                    stations[i].strings[j].antennas[k].orient = 1;
+                                }
+                                else {
+                                    stations[i].strings[j].antennas[k].orient = 0;
+                                }
+                            }
+                            
+                        }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+                    }
+                }
+                cout << endl;
+            } // end if bore hole antenna layout = 8,9,10 (HHHH, HH, H)
             
             
             
@@ -2718,7 +2970,7 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m) {
     
     Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
     
-    cout<<Gout<<endl;
+    //cout<<Gout<<endl;
     return Gout;
     
     

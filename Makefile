@@ -10,8 +10,8 @@ ifeq ($(strip $(BOOST_ROOT)),)
 	BOOST_ROOT = /usr/local/include
 endif
 
-SYSINCLUDES	= -I/usr/include -I$(BOOST_ROOT) -I$(PLATFORM_DIR)/include
-SYSLIBS         = -L/usr/lib -L$(PLATFORM_DIR)/lib
+SYSINCLUDES	= -I/usr/include -I$(BOOST_ROOT) -I$(ARA_UTIL_INSTALL_DIR)/include
+SYSLIBS         = -L/usr/lib -L$(ARA_UTIL_INSTALL_DIR)/lib -lAraEvent -L/datapool/software/anita/lib/ -lRootFftwWrapper 
 
 DLLSUF = ${DllSuf}
 OBJSUF = ${ObjSuf}
@@ -22,10 +22,8 @@ SRCSUF = ${SrcSuf}
 CXX = g++
 
 #Generic and Site Specific Flags
-CXXFLAGS     += $(SYSINCLUDES) $(INC_ARA_UTIL)
-LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl
-#,--no-as-needed
-#LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL)
+CXXFLAGS     += $(INC_ARA_UTIL) $(SYSINCLUDES) 
+LDFLAGS      += -g $(LD_ARA_UTIL) -I$(BOOST_ROOT) $(ROOTLDFLAGS) -L. 
 ARA_ROOT_FLAGS = 
 
 # copy from ray_solver_makefile (removed -lAra part)
@@ -33,7 +31,8 @@ ARA_ROOT_FLAGS =
 # added for Fortran to C++
 
 
-LIBS	= $(ROOTLIBS) -lMinuit $(SYSLIBS) -lsqlite3
+LIBS	= $(ROOTLIBS) -lMinuit $(SYSLIBS) 
+#-lsqlite3
 GLIBS	= $(ROOTGLIBS) $(SYSLIBS)
 
 # ROOT_LIBRARY = libAra.${DLLSUF}
@@ -47,7 +46,7 @@ PROGRAMS = AraSim
 all : $(PROGRAMS) 
 
 AraSim : $(OBJS)
-	$(LD) -L. $(OBJS) $(LDFLAGS) $(LIBS) -o $(PROGRAMS) 
+	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $(PROGRAMS) 
 	@echo "done."
 
 #The library
@@ -78,7 +77,7 @@ endif
 	@echo "<**Compiling**> "$<
 	$(CXX) $(CXXFLAGS) $ -c $< -o  $@
 
-%.$(OBJSUF) : %.cc %.h
+%.$(OBJSUF) : %.cc
 	@echo "<**Compiling**> "$<
 	$(CXX) $(CXXFLAGS) $ -c $< -o  $@
 

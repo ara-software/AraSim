@@ -177,10 +177,10 @@ int main(int argc, char **argv) {   // read setup.txt file
     gRandom = test_randm3;
   } else {
       gRandom->SetSeed(settings1->SEED + atoi(run_no.c_str() ) );
-      
+      //gRandom->SetSeed(settings1->SEED );
   }
     //cout<<"first random from TRandom3 : "<<test_randm3->Rndm()<<"\n";
-    cout<<"first random : "<<gRandom->Rndm()<<"\n";
+    cout<<"first random : "<<gRandom->Rndm()<< " RANDOM_MODE "<< settings1->RANDOM_MODE << " SEED " << settings1->SEED <<  "\n";
 
 //  IceModel *icemodel=new IceModel(ICE_MODEL + NOFZ*10,CONSTANTICETHICKNESS * 1000 + CONSTANTCRUST * 100 + FIXEDELEVATION * 10 + 0,MOOREBAY);// creates Antarctica ice model
     IceModel *icemodel=new IceModel(settings1->ICE_MODEL + settings1->NOFZ*10,settings1->CONSTANTICETHICKNESS * 1000 + settings1->CONSTANTCRUST * 100 + settings1->FIXEDELEVATION * 10 + 0,settings1->MOOREBAY);// creates Antarctica ice model
@@ -264,6 +264,39 @@ cout<<"called RaySolver"<<endl;
 
     cout << "Make output file that is readable by AraRoot" << endl;
 
+    TTree *eventTreeSlim;
+    double weight = 0.;
+    double event_x, event_y, event_z;
+    double nu_vector_phi, nu_vector_theta;
+    double gain, r;
+    int globalPassBin;
+    vector<double> viewingAngle;
+    vector<double> arrivalAngle;
+    vector<vector< double > > Vm_beforeAntenna;
+    vector<vector< double > > Vm_beforeAntenna_T;
+    /*
+    for (int i = 0; i < 2; i++){
+      viewingAngle[i]=0.;
+      arrivalAngle[i]=0.;
+    }
+    */
+    eventTreeSlim = new TTree("eventTreeSlim","Tree of ARA Events");
+    eventTreeSlim->Branch("weight", &weight);
+    eventTreeSlim->Branch("event_x", &event_x);
+    eventTreeSlim->Branch("event_y", &event_y);
+    eventTreeSlim->Branch("event_z", &event_z);
+    eventTreeSlim->Branch("nu_vector_phi", &nu_vector_phi);
+    eventTreeSlim->Branch("nu_vector_theta", &nu_vector_theta);
+    eventTreeSlim->Branch("gain", &gain);
+    eventTreeSlim->Branch("r", &r);
+    eventTreeSlim->Branch("globalPassBin", &globalPassBin);
+    eventTreeSlim->Branch("viewingAngle", "std::vector<double>", &viewingAngle);
+    eventTreeSlim->Branch("arrivalAngle", "std::vector<double>", &arrivalAngle);
+    eventTreeSlim->Branch("Vm_beforeAntenna", "std::vector<std::vector<double> >", &Vm_beforeAntenna);
+    eventTreeSlim->Branch("Vm_beforeAntenna_T", "std::vector<std::vector<double> >", &Vm_beforeAntenna_T);
+
+
+
 #ifdef ARA_UTIL_EXISTS
     UsefulIcrrStationEvent *theIcrrEvent =0;
     UsefulAtriStationEvent *theAtriEvent =0;
@@ -271,7 +304,7 @@ cout<<"called RaySolver"<<endl;
 
     TTree *eventTree;
 
-    double weight = 0.;
+    //    double weight = 0.;
     eventTree = new TTree("eventTree","Tree of ARA Events");
     eventTree->Branch("UsefulIcrrStationEvent", &theIcrrEvent);
     eventTree->Branch("UsefulAtriStationEvent",&theAtriEvent);
@@ -413,6 +446,9 @@ double cur_posnu_z;
 
     cout << "Calpulser_on: " << settings1->CALPULSER_ON << endl;
 
+    double station_center[detector->params.number_of_stations][3];
+
+
     // test Detector set correctly
     cout<<"number of stations : "<<detector->params.number_of_stations << endl;
     cout<<"total number of antennas : "<<detector->params.number_of_antennas << endl;
@@ -422,10 +458,25 @@ double cur_posnu_z;
             for (int k=0; k<detector->stations[i].strings[j].antennas.size(); k++) {
                 ch_count++;
                 cout<<"station["<<i<<"].strings["<<j<<"].antennas["<<k<<"] no_ch:"<<ch_count<<endl;
+                station_center[i][0] += detector->stations[i].strings[j].antennas[k].GetX();
+                station_center[i][1] += detector->stations[i].strings[j].antennas[k].GetY();
+                station_center[i][2] += detector->stations[i].strings[j].antennas[k].R();
             }
         }
     }
+    station_center[0][0] = station_center[0][0]/(double)ch_count;
+    station_center[0][1] = station_center[0][1]/(double)ch_count;
+    station_center[0][2] = station_center[0][2]/(double)ch_count;
 
+
+    cout << "station center: " << station_center[0][0] << " : " << station_center[0][1] << " : " << station_center[0][2] << endl;
+
+    double station_surface[3];
+    station_surface[0] = detector->stations[0].GetX();
+    station_surface[1] = detector->stations[0].GetY();
+    station_surface[2] = icemodel->Surface( detector->stations[0].Lon(), detector->stations[0].Lat());
+
+    cout << "Surface-Center:" << station_surface[0] - station_center[0][0] << " : " << station_surface[1] - station_center[0][1] << " : " << station_surface[2] - station_center[0][2] << endl;
 
 
         
@@ -499,9 +550,10 @@ double cur_posnu_z;
        //event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1 );
        event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1, Events_Thrown );
        event->inu_passed = -1;
-        
-       report = new Report(detector, settings1);
        
+      
+       report = new Report(detector, settings1);
+      
         
 #ifdef ARA_UTIL_EXISTS
        theIcrrEvent = new UsefulIcrrStationEvent();
@@ -511,6 +563,47 @@ double cur_posnu_z;
 
        // go further only if we picked up usable posnu
        if (event->Nu_Interaction[0].pickposnu>0) {
+      
+         weight = event->Nu_Interaction[0].weight;
+
+         double x = event->Nu_Interaction[0].posnu.GetX();
+         double y = event->Nu_Interaction[0].posnu.GetY();
+         double z = event->Nu_Interaction[0].posnu.R();
+
+         nu_vector_phi = event->Nu_Interaction[0].nnu.Phi();
+         nu_vector_theta = event->Nu_Interaction[0].nnu.Theta();
+
+         event_x = x-station_surface[0];
+         event_y = y-station_surface[1];
+         event_z = z-station_surface[2];
+
+	 double x_from_ant = x-station_center[0][0];
+	 double y_from_ant = y-station_center[0][1];
+	 double z_from_ant = z-station_center[0][2];
+
+	 double r_from_ant = sqrt(x_from_ant*x_from_ant+y_from_ant*y_from_ant+z_from_ant*z_from_ant);
+
+	 double theta_for_ant = 90. - asin(z_from_ant/r_from_ant)*180/3.1415;
+	 double phi_for_ant = atan2(y_from_ant, x_from_ant)*180/3.1415;
+
+	 gain = detector->GetGain(300, theta_for_ant, phi_for_ant, 0);
+	 r = r_from_ant;
+
+
+
+	 /*
+	 cout << "Global: " << x << " : " << y << " : " << z << " : " << endl;
+	 cout << "From ant: " << x_from_ant << " : " << y_from_ant << " : " << z_from_ant << endl;
+	 cout << "Angles: " << theta_for_ant << " : " << phi_for_ant << endl;
+	 cout << "Gain: " << gain << endl;
+	 */
+	 
+
+
+
+
+
+
 
            /*
            if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0) {// noise waveforms will be generated for each evts
@@ -539,6 +632,24 @@ double cur_posnu_z;
            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent);
            report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown);
            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent, Events_Thrown);
+	   viewingAngle.resize(report->stations[0].strings[0].antennas[0].view_ang.size());
+	   arrivalAngle.resize(report->stations[0].strings[0].antennas[0].rec_ang.size());
+	   Vm_beforeAntenna.resize(report->stations[0].strings[0].antennas[0].Vm_zoom.size());
+	   Vm_beforeAntenna_T.resize(report->stations[0].strings[0].antennas[0].Vm_zoom_T.size());
+	   for (int i = 0; i < report->stations[0].strings[0].antennas[0].view_ang.size(); i++){
+	     viewingAngle[i] = report->stations[0].strings[0].antennas[0].view_ang[i];
+	     arrivalAngle[i] = report->stations[0].strings[0].antennas[0].rec_ang[i];
+	     Vm_beforeAntenna[i].resize(report->stations[0].strings[0].antennas[0].Vm_zoom[i].size());
+	     Vm_beforeAntenna_T[i].resize(report->stations[0].strings[0].antennas[0].Vm_zoom_T[i].size());
+	     for (int j = 0; j < report->stations[0].strings[0].antennas[0].Vm_zoom[i].size(); j++){
+	       Vm_beforeAntenna[i][j] = report->stations[0].strings[0].antennas[0].Vm_zoom[i][j];
+	       Vm_beforeAntenna_T[i][j] = report->stations[0].strings[0].antennas[0].Vm_zoom_T[i][j];
+	     }
+	     //	     cout << "Angles " << i << " : " << viewingAngle[i]*180./3.1415 << " : " << arrivalAngle[i]*180./3.1415 << endl;
+	   }
+	   globalPassBin = report->stations[0].Global_Pass;
+	  
+	   eventTreeSlim->Fill();
 
 #ifdef ARA_UTIL_EXISTS
 	   if (settings1->DATA_LIKE_OUTPUT !=0){

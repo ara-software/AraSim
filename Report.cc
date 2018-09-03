@@ -376,7 +376,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
     int debugmode = 0;
     if ( settings1->DEBUG_MODE_ON == 1 && evt < settings1->DEBUG_SKIP_EVT ) debugmode = 1;
     //else if ( settings1->DEBUG_MODE_ON == 1 && evt >= settings1->DEBUG_SKIP_EVT ) cout<<"After DEBUG_SKIP_EVT"<<endl;
-    else if ( settings1->DEBUG_MODE_ON == 1 && evt >= settings1->DEBUG_SKIP_EVT ) cout<<evt<<" "<<endl;
+    else if ( settings1->DEBUG_MODE_ON == 1 && evt >= settings1->DEBUG_SKIP_EVT ) cout<<"Event " << evt<<" "<<endl;
     // skip most of computation intensive processes if debugmode == 1
     
     
@@ -610,7 +610,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                            freq_tmp = detector->GetFreq(l); // freq in Hz
 
-					   cout << "Check 1" << endl;
+					   //cout << "Check 1" << endl;
                                            /*
                                            // Get ant gain with 2-D interpolation (may have bug?) 
                                            //
@@ -668,7 +668,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                            
                                            ApplyAntFactors(heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, vmmhz1m_tmp);
 
-					   cout << "Check 2" << endl;
+					   //cout << "Check 2" << endl;
                                            //stations[i].strings[j].antennas[k].VHz_antfactor[ray_sol_cnt].push_back( vmmhz1m_tmp );
 
                                            // apply filter
@@ -793,15 +793,16 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                                double V_forfft[ stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] ];
                                                double T_forfft[ stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] ];
-
+						
                                                for (int n=0; n<stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]; n++) {
 
                                                    if ( n<outbin ) {
+						       
                                                        stations[i].strings[j].antennas[k].Vm_zoom[ray_sol_cnt].push_back( Earray[n] );
                                                        stations[i].strings[j].antennas[k].Vm_zoom_T[ray_sol_cnt].push_back( Tarray[n] );
+						      }
 
-                                                   }
-
+                                                   
                                                    // make Tarray, Earray located at the center of Nnew array
                                                    //T_forfft[n] = Tarray[outbin/2] - (dT_forfft*(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]/2)) + (double)n*dT_forfft;
 
