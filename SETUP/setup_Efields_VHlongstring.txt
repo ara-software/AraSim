@@ -30,7 +30,7 @@ NNU_PASSED=10 // (DEFAULT=10) when using ONLY_PASSED_EVENTS this determines how 
  
 //NOISE_EVENTS=16 // (DEFAULT=16) the number of noise wf generated. 
 //CGP
-NOISE_EVENTS=80 // (DEFAULT=16) the number of noise wf generated.	
+NOISE_EVENTS=82 // (DEFAULT=16) the number of noise wf generated.	
 
 //CGP
 NOISE_CHANNEL_MODE=0
@@ -159,8 +159,8 @@ R_string=0 //
  
 // SAW: Control whether it's a V/H string
 //BORE_HOLE_ANTENNA_LAYOUT=10 // (DEFAULT=0) order of antennas on the string. 0: HVHV. 1: VHV. 2: VVHV. 3: HHHV. 4: HHV. 5: VVVV. 6: VV. 7: V. 8: HHHH. 9: HH. 10: H.
-//CGP - set to 40-antenna strings
-BORE_HOLE_ANTENNA_LAYOUT=40 
+//CGP - set to 41-antenna strings
+BORE_HOLE_ANTENNA_LAYOUT=41 
 
 // SAW: Control the depth
 //z_max=200 // (DEFAULT=200) lowest antenna position on the string. in meters depth 
