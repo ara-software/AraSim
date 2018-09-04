@@ -21,7 +21,7 @@ EXPONENT=2 // (DEFAULT=19) the energy spectrum of the neutrinos.
  
 ONLY_PASSED_EVENTS=0 // (DEFAULT=0) 0: runs NNU neutrinos. 1: runs until NNU_PASSED neutrinos globally trigger. 
  
-NNU=3 // (DEFAULT=100) The total number of neutrinos thrown. 
+NNU=50000 // (DEFAULT=100) The total number of neutrinos thrown. 
  
 NNU_PASSED=10 // (DEFAULT=10) when using ONLY_PASSED_EVENTS this determines how many events will pass the trigger. 
  
