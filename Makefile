@@ -10,8 +10,10 @@ ifeq ($(strip $(BOOST_ROOT)),)
 	BOOST_ROOT = /usr/local/include
 endif
 
-SYSINCLUDES	= -I/usr/include -I$(BOOST_ROOT) -I$(ARA_UTIL_INSTALL_DIR)/include
-SYSLIBS         = -L/usr/lib -L$(ARA_UTIL_INSTALL_DIR)/lib -lAraEvent -L/datapool/software/anita/lib/ -lRootFftwWrapper 
+#SYSINCLUDES	= -I/usr/include -I$(BOOST_ROOT) -I$(ARA_UTIL_INSTALL_DIR)/includ
+SYSINCLUDES	= -I/usr/include -I$(BOOST_ROOT) -I$(ARA_UTIL_INSTALL_DIR)/include -I$(PLATFORM_DIR)/include
+#SYSLIBS         = -L/usr/lib -L$(ARA_UTIL_INSTALL_DIR)/lib -lAraEvent -L/datapool/software/anita/lib/ -lRootFftwWrapper 
+SYSLIBS         = -L/usr/lib -L$(ARA_UTIL_INSTALL_DIR)/lib -lAraEvent -L/datapool/software/anita/lib/ -lRootFftwWrapper -L$(PLATFORM_DIR)/lib
 
 DLLSUF = ${DllSuf}
 OBJSUF = ${ObjSuf}
@@ -22,7 +24,7 @@ SRCSUF = ${SrcSuf}
 CXX = g++
 
 #Generic and Site Specific Flags
-CXXFLAGS     += $(INC_ARA_UTIL) $(SYSINCLUDES) 
+CXXFLAGS     += $(INC_ARA_UTIL) $(SYSINCLUDES) -std=c++11
 LDFLAGS      += -g $(LD_ARA_UTIL) -I$(BOOST_ROOT) $(ROOTLDFLAGS) -L. 
 ARA_ROOT_FLAGS = 
 

@@ -270,10 +270,12 @@ cout<<"called RaySolver"<<endl;
     double nu_vector_phi, nu_vector_theta;
     double gain, r;
     int globalPassBin;
-    vector<double> viewingAngle;
-    vector<double> arrivalAngle;
-    vector<vector< double > > Vm_beforeAntenna;
-    vector<vector< double > > Vm_beforeAntenna_T;
+    vector<vector<vector<double> > > viewingAngle;
+    vector<vector<vector<double> > > arrivalAngle;
+    vector<vector<vector<vector<double> > > > Vm_beforeAntenna;
+    vector<vector<vector<vector<double> > > > Vm_beforeAntenna_T;
+    vector<vector<int> > antennaType;
+
     /*
     for (int i = 0; i < 2; i++){
       viewingAngle[i]=0.;
@@ -290,10 +292,12 @@ cout<<"called RaySolver"<<endl;
     eventTreeSlim->Branch("gain", &gain);
     eventTreeSlim->Branch("r", &r);
     eventTreeSlim->Branch("globalPassBin", &globalPassBin);
-    eventTreeSlim->Branch("viewingAngle", "std::vector<double>", &viewingAngle);
-    eventTreeSlim->Branch("arrivalAngle", "std::vector<double>", &arrivalAngle);
-    eventTreeSlim->Branch("Vm_beforeAntenna", "std::vector<std::vector<double> >", &Vm_beforeAntenna);
-    eventTreeSlim->Branch("Vm_beforeAntenna_T", "std::vector<std::vector<double> >", &Vm_beforeAntenna_T);
+    eventTreeSlim->Branch("viewingAngle", "std::vector<std::vector<std::vector<double> > >", &viewingAngle);
+    eventTreeSlim->Branch("arrivalAngle", "std::vector<std::vector<std::vector<double> > >", &arrivalAngle);
+    eventTreeSlim->Branch("Vm_beforeAntenna", "std::vector<std::vector<std::vector<std::vector<double> > > >", &Vm_beforeAntenna);
+    eventTreeSlim->Branch("Vm_beforeAntenna_T", "std::vector<std::vector<std::vector<std::vector<double> > > >", &Vm_beforeAntenna_T);
+    eventTreeSlim->Branch("antennaType", "std::vector<std::vector<int> >", &antennaType);
+    
 
 
 
@@ -632,21 +636,47 @@ double cur_posnu_z;
            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent);
            report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown);
            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent, Events_Thrown);
-	   viewingAngle.resize(report->stations[0].strings[0].antennas[0].view_ang.size());
-	   arrivalAngle.resize(report->stations[0].strings[0].antennas[0].rec_ang.size());
-	   Vm_beforeAntenna.resize(report->stations[0].strings[0].antennas[0].Vm_zoom.size());
-	   Vm_beforeAntenna_T.resize(report->stations[0].strings[0].antennas[0].Vm_zoom_T.size());
-	   for (int i = 0; i < report->stations[0].strings[0].antennas[0].view_ang.size(); i++){
-	     viewingAngle[i] = report->stations[0].strings[0].antennas[0].view_ang[i];
-	     arrivalAngle[i] = report->stations[0].strings[0].antennas[0].rec_ang[i];
-	     Vm_beforeAntenna[i].resize(report->stations[0].strings[0].antennas[0].Vm_zoom[i].size());
-	     Vm_beforeAntenna_T[i].resize(report->stations[0].strings[0].antennas[0].Vm_zoom_T[i].size());
-	     for (int j = 0; j < report->stations[0].strings[0].antennas[0].Vm_zoom[i].size(); j++){
-	       Vm_beforeAntenna[i][j] = report->stations[0].strings[0].antennas[0].Vm_zoom[i][j];
-	       Vm_beforeAntenna_T[i][j] = report->stations[0].strings[0].antennas[0].Vm_zoom_T[i][j];
-	     }
-	     //	     cout << "Angles " << i << " : " << viewingAngle[i]*180./3.1415 << " : " << arrivalAngle[i]*180./3.1415 << endl;
-	   }
+	   
+	   viewingAngle.resize(report->stations[0].strings.size());
+	   arrivalAngle.resize(report->stations[0].strings.size());
+	   Vm_beforeAntenna.resize(report->stations[0].strings.size());
+	   Vm_beforeAntenna_T.resize(report->stations[0].strings.size());
+	   antennaType.resize(report->stations[0].strings.size());
+
+	   for (int i_string = 0; i_string < report->stations[0].strings.size(); i_string++){
+	     viewingAngle[i_string].resize(report->stations[0].strings[i_string].antennas.size());
+	     arrivalAngle[i_string].resize(report->stations[0].strings[i_string].antennas.size());
+	     Vm_beforeAntenna[i_string].resize(report->stations[0].strings[i_string].antennas.size());
+	     Vm_beforeAntenna_T[i_string].resize(report->stations[0].strings[i_string].antennas.size());
+	     antennaType[i_string].resize(report->stations[0].strings[i_string].antennas.size());
+
+	     for (int i_antenna = 0; i_antenna < report->stations[0].strings[i_string].antennas.size(); i_antenna++){
+
+	       antennaType[i_string][i_antenna] = detector->stations[0].strings[i_string].antennas[i_antenna].type;
+	      
+	       viewingAngle[i_string][i_antenna].resize(report->stations[0].strings[i_string].antennas[i_antenna].view_ang.size());
+	       arrivalAngle[i_string][i_antenna].resize(report->stations[0].strings[i_string].antennas[i_antenna].rec_ang.size());
+	       Vm_beforeAntenna[i_string][i_antenna].resize(report->stations[0].strings[i_string].antennas[i_antenna].Vm_zoom.size());
+	       Vm_beforeAntenna_T[i_string][i_antenna].resize(report->stations[0].strings[i_string].antennas[i_antenna].Vm_zoom_T.size());
+ 
+	       
+	       
+	       for (int i_raysol = 0; i_raysol < report->stations[0].strings[i_string].antennas[i_antenna].view_ang.size(); i_raysol++){
+		 
+		 viewingAngle[i_string][i_antenna][i_raysol] = report->stations[0].strings[i_string].antennas[i_antenna].view_ang[i_raysol];
+		 arrivalAngle[i_string][i_antenna][i_raysol] = report->stations[0].strings[i_string].antennas[i_antenna].rec_ang[i_raysol];
+		 Vm_beforeAntenna[i_string][i_antenna][i_raysol].resize(report->stations[0].strings[i_string].antennas[i_antenna].Vm_zoom[i_raysol].size());
+		 Vm_beforeAntenna_T[i_string][i_antenna][i_raysol].resize(report->stations[0].strings[i_string].antennas[i_antenna].Vm_zoom_T[i_raysol].size());
+		 
+		 for (int i_time = 0; i_time < report->stations[0].strings[i_string].antennas[i_antenna].Vm_zoom[i_raysol].size(); i_time++){
+		   Vm_beforeAntenna[i_string][i_antenna][i_raysol][i_time] = report->stations[0].strings[i_string].antennas[i_antenna].Vm_zoom[i_raysol][i_time];
+		   Vm_beforeAntenna_T[i_string][i_antenna][i_raysol][i_time] = report->stations[0].strings[i_string].antennas[i_antenna].Vm_zoom_T[i_raysol][i_time];
+		   //	     cout << "Angles " << i << " : " << viewingAngle[i]*180./3.1415 << " : " << arrivalAngle[i]*180./3.1415 << endl;
+		 } // end time loop
+	       } // end ray sol loop
+	     } // end antenna loop
+	   } // end string loop
+
 	   globalPassBin = report->stations[0].Global_Pass;
 	  
 	   eventTreeSlim->Fill();

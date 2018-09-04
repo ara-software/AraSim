@@ -317,6 +317,10 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
   //  cout << "TEST1" << endl;
 
+
+  //CGP - don't convolve waveforms - incompatible number of antennas 80 vs expected 16
+  int AraSimLiteMode = 1;
+
     int ray_sol_cnt;
     double viewangle;
     Position launch_vector; // direction of ray at the source
@@ -1908,7 +1912,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                        
 
                            // do only if it's not in debugmode
-                           if ( debugmode == 0 ) {
+                           if ( debugmode == 0 && AraSimLiteMode ==0) {
 
 			     //				   cout << l << " : " << N_noise-1 << " : " << ch_ID << endl;
                                // if we are sharing same noise waveform for all chs, make sure diff chs use diff noise waveforms
@@ -2028,8 +2032,9 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                        connect_signals.clear();
 
 
+
                        // do only if it's not in debugmode
-                       if ( debugmode == 0 ) {
+                       if ( debugmode == 0 && AraSimLiteMode==0) {
 
 
 
@@ -2068,7 +2073,6 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 
 
-
                            // grap noise waveform (NFOUR/2 bins or NFOUR) for diode convlv
                            for (int m=0; m<stations[i].strings[j].antennas[k].ray_sol_cnt; m++) {   // loop over raysol numbers
                                // when ray_sol_cnt == 0, this loop inside codes will not run
@@ -2081,7 +2085,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                        // do two convlv with double array m, m+1
                                        //
 
-                                       Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m+1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m+1], noise_ID, ch_ID, i);
+				                                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m+1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m+1], noise_ID, ch_ID, i);
                                    }
                                    else if ( connect_signals[m] == 0 ) {
 				     // cout << noise_ID << " : " << ch_ID << " : " << i << " : " << endl;
@@ -2153,7 +2157,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                            } // end loop over raysols
 
-
+			   
 
                            //cout<<"done convlv for signal + noise"<<endl;
                            //
@@ -2176,10 +2180,10 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                } // for strings
 
 
-                       
+	       //	       cout << "TEST1" << endl;                       
 
                // do only if it's not in debugmode
-               if ( debugmode == 0 ) {
+               if ( debugmode == 0  && AraSimLiteMode==0) {
 
 
 
@@ -2739,9 +2743,9 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 	       
 // 	       else if(settings1->TRIG_SCAN_MODE==3) triggerCheckLoopScanNumbers();
                        
-           } // if it's not debugmode
+	       } // if it's not debugmode
 
-
+	       //	       cout << "TEST2" << endl;                       
 
                    // delete noise waveforms 
        if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0) {// noise waveforms will be generated for each evts
@@ -3676,6 +3680,8 @@ void Report::ClearUselessfromConnect(Detector *detector, Settings *settings1, Tr
 // this one is for single signal
 void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex) {
 
+  //  cout << ID << " : " << StationIndex << " : " <<signalbin << endl;
+
     int BINSIZE = settings1->NFOUR/2;
 
 //    int BINSIZE = detector->stations[StationIndex].NFOUR/2;
@@ -3689,9 +3695,16 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
         bin_value = signalbin - BINSIZE/2 + bin;
 
         // save the noise + signal waveform
-                           
+	//	cout << V[bin] << endl;                           
         if ( settings1->NOISE_CHANNEL_MODE==0) {
+	  //	    cout << "TEST"<< endl;
+	  //	  cout <<"Test1 : " << bin << endl;
+	  //	  cout << bin_value << " : " << settings1->DATA_BIN_SIZE << " : " << endl;
+	  //	  cout << noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] << " : " << V[bin] << endl;
+
             V_total_forconvlv.push_back( trigger->v_noise_timedomain[ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
+	    //	  	    cout << "TEST1"<< endl;
+
         }
         else if ( settings1->NOISE_CHANNEL_MODE==1) {
             V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[ GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 ][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
@@ -3714,12 +3727,12 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 //    trigger->myconvlv( V_total_forconvlv, detector->stations[StationIndex].NFOUR, detector->fdiode_real, V_total_forconvlv);
 //
     trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv);
-
+    //        cout << "TEST 2" << endl;
     // do replace the part we get from noise + signal
     for (int bin=signalbin-BINSIZE/2+(trigger->maxt_diode_bin); bin<signalbin+BINSIZE/2; bin++) {
         trigger->Full_window[ID][bin] = V_total_forconvlv[bin - signalbin + BINSIZE/2];
         trigger->Full_window_V[ID][bin] += V[bin - signalbin + BINSIZE/2];
-
+	//	cout << bin << endl;
         //
         // electronics saturation effect
         if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;

@@ -33,6 +33,12 @@
 #pragma link C++ class Primaries+;
 #pragma link C++ class Interaction+;
 
+#pragma link C++ class vector<vector<vector<double> > >+;
+#pragma link C++ class vector<vector<vector<vector<double> > > >+;
+
+
+
+
 #ifdef ARA_UTIL_EXISTS
 // #pragma link C++ class AtriEventHkData+;
 // #pragma link C++ class AtriSensorHkData+;

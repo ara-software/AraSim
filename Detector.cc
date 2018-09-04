@@ -161,7 +161,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                         for (int i=0; i<(int) params.number_of_strings; i++) {
                             strings.push_back(temp);
                         }
-                        cout<<"read numner_of_strings"<<endl;
+                        cout<<"read number_of_strings"<<endl;
                         //                        Parameters.number_of_strings = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
                     }
                     else if (label == "antenna_string") {
@@ -254,7 +254,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         
         // initialize info
         params.number_of_stations = 1;
-        params.number_of_strings_station = 4;   // ARA-1 has 4 strings
+	params.number_of_strings_station = 4;   // ARA-1 has 4 strings
         params.number_of_antennas_string = 4; // 4 antennas on each strings
         params.number_of_surfaces_station = 4;
         
@@ -354,6 +354,10 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                         params.antenna_orientation = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
                         cout<<"read antenna_orientation"<<endl;
                     }
+                    else if (label == "number_of_strings_station") {
+                        params.number_of_strings_station = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
+                        cout<<"read number of strings"<<endl;
+                    }
                 }
             }
             ARA_N.close();
@@ -396,6 +400,10 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         else if (params.bore_hole_antenna_layout == 10) { // H layout
             params.number_of_antennas_string = 1;
         }
+	else if (params.bore_hole_antenna_layout == 40) { //40V/40H
+	  params.number_of_antennas_string = 40;
+	}
+
         
         //
         // caculate number of stations, strings, antennas 
@@ -529,6 +537,16 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             for (int i=0; i<params.number_of_stations; i++) {
                 
                 //
+
+	      double angle_step = 2*PI/params.number_of_strings_station;
+
+	      // set string postions based on station position
+	      for (int i_string = 0; i_string < params.number_of_strings_station; i_string++){
+		stations[i].strings[i_string].SetX( stations[i].GetX() + (R_string * cos(i_string*angle_step+angle_step/2.)) );
+		stations[i].strings[i_string].SetY( stations[i].GetY() + (R_string * sin(i_string*angle_step+angle_step/2.)) );
+	      }
+
+	      /*
                 // set string postions based on station position
                 stations[i].strings[0].SetX( stations[i].GetX() - (R_string * cos(PI/4.)) );
                 stations[i].strings[0].SetY( stations[i].GetY() + (R_string * sin(PI/4.)) );
@@ -541,7 +559,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                 
                 stations[i].strings[3].SetX( stations[i].GetX() + (R_string * cos(PI/4.)) );
                 stations[i].strings[3].SetY( stations[i].GetY() - (R_string * sin(PI/4.)) );
-                
+	      */                
+
                 
                 //
                 // set antenna postions in borehole
@@ -794,6 +813,61 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     }
                     cout << endl;
                 } // end if bore hole antenna layout = 8,9,10 (HHHH, HH, H)
+
+
+                else if ( params.bore_hole_antenna_layout == 40 ){ // 40V/40H
+                    cout << "BORE_HOLE_ANTENNA_LAYOUT: ";
+                    
+                    for (int j=0; j<params.number_of_strings_station; j++) {
+                        for (int k=0; k<params.number_of_antennas_string; k++) {
+                            
+                            if (settings1->BH_ANT_SEP_DIST_ON==0)
+                                stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
+                            
+                            else if (settings1->BH_ANT_SEP_DIST_ON==1) {
+                                z_btw_total = 0.;
+                                for (int l=0; l<k+1; l++) {
+                                    z_btw_total += z_btw_array[l];
+                                }
+                                stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
+                            }
+
+			    if (j == 0){
+			      stations[i].strings[j].antennas[k].type = 0;   // all antennas v-pol
+			      cout << " V ";
+			    }
+			    if (j == 1){
+			      stations[i].strings[j].antennas[k].type = 1;   // all antennas h-pol
+			      cout << " H ";
+			    }
+
+                            if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+                                stations[i].strings[j].antennas[k].orient = 0;
+                            }
+                            else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
+                                if ( j==0||j==3 ) {
+                                    if ( k==0||k==1 ) {
+                                        stations[i].strings[j].antennas[k].orient = 0;
+                                    }
+                                    else {
+                                        stations[i].strings[j].antennas[k].orient = 1;
+                                    }
+                                }
+                                else {
+                                    if ( k==0||k==1 ) {
+                                        stations[i].strings[j].antennas[k].orient = 1;
+                                    }
+                                    else {
+                                        stations[i].strings[j].antennas[k].orient = 0;
+                                    }
+                                }
+                                
+                            }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+                        }
+                    }
+                    cout << endl;
+                } // end if bore hole antenna layout = 40 (40V/40H)
+
                 
                 //
                 // set surface antenna postions
@@ -1133,6 +1207,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         
         
 
+
+	
 	if (settings1->ANTENNA_MODE == 0){
 	  // test read V-pol gain file!!
 	  ReadVgain("ARA_bicone6in_output.txt");
@@ -1159,7 +1235,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 
         // read filter file!!
-        ReadFilter("./data/filter.csv", settings1);
+	  ReadFilter("./data/filter.csv", settings1);
         // read preamp gain file!!
         ReadPreamp("./data/preamp.csv", settings1);
         // read FOAM gain file!!
@@ -1184,6 +1260,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         cout<<"done read elect chain"<<endl;
         
         
+	
     } // if mode == 1
     
     

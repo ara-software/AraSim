@@ -11,24 +11,31 @@
 // We are hacking AraSim a bit by defining a string of only Hpols to get the horizontal component of the electric field
 // and then the doing a second run with just the vertical component of the electric field.
 // 
+// CGP: Carl Pfendner
+// Adjusted some parameters including adding a mode for long V and H test strings
  
 // SAW: Throwing on an E^-2 spectrum
 EXPONENT=2 // (DEFAULT=19) the energy spectrum of the neutrinos. 
- 
 
 // number of neutrinos (user guide: see section 3.2 page 7) //
  
 ONLY_PASSED_EVENTS=0 // (DEFAULT=0) 0: runs NNU neutrinos. 1: runs until NNU_PASSED neutrinos globally trigger. 
  
-NNU=50000 // (DEFAULT=100) The total number of neutrinos thrown. 
+NNU=3 // (DEFAULT=100) The total number of neutrinos thrown. 
  
 NNU_PASSED=10 // (DEFAULT=10) when using ONLY_PASSED_EVENTS this determines how many events will pass the trigger. 
  
 
 // generating noise (user guide: see section 3.3 page 8) //
  
-NOISE_EVENTS=16 // (DEFAULT=16) the number of noise wf generated. 
- 
+//NOISE_EVENTS=16 // (DEFAULT=16) the number of noise wf generated. 
+//CGP
+NOISE_EVENTS=80 // (DEFAULT=16) the number of noise wf generated.	
+
+//CGP
+NOISE_CHANNEL_MODE=0
+
+
 NOISE_WAVEFORM_GENERATE_MODE=0 // (DEFAULT=0) new noise wf are generated for each event. 1: old mode all noise wf are made beforehand. 
  
 NOISE=0 // (DEFAULT=0) 0: flat thermal distribution. 1: calibrated Rayleigh noise 
@@ -72,7 +79,9 @@ RAYSOL_RANGE=5000 // (DEFAULT=5000) distance from detector above which we do not
  
 USE_INSTALLED_TRIGGER_SETTINGS=0 // (DEFAULT=0) 0: ideal detector trigger settings. 1: use triggering as implemented in real stations (testbed only!). 
  
-TRIG_ANALYSIS_MODE=0 // (DEFAULT=0) 0: signal+noise. 1: signal only. 2: noise only 
+//TRIG_ANALYSIS_MODE=0 // (DEFAULT=0) 0: signal+noise. 1: signal only. 2: noise only 
+//CGP
+TRIG_ANALYSIS_MODE=1 // (DEFAULT=0) 0: signal+noise. 1: signal only. 2: noise only 
  
 POWERTHRESHOLD=-6.15 // (DEFAULT=-6.15) the trigger threshold (the closer to zero the weaker the threshold. measured in sigmas above the noise floor. 
   
@@ -139,15 +148,24 @@ core_x=10000 // (DEFAULT=10000) location of array in global coordinates, used to
  
 core_y=10000 // (DEFAULT=10000) same as above. 
  
-number_of_strings_per_station=4 // (DEFAULT=4) number of strings on an ideal station. 
+//number_of_strings_per_station=4 // (DEFAULT=4) number of strings on an ideal station. 
+//CGP - make two strings - one VPol and one HPOL
+number_of_strings_station=2 // (DEFAULT=4) number of strings on an ideal station. 
  
-R_string=10 // (DEFAULT=10) distance of string poisitions from center of station. in meters. 
+//R_string=10 // (DEFAULT=10) distance of string poisitions from
+center of station. in meters. 
+//CGP - make both strings centrally located
+R_string=0 //
  
 // SAW: Control whether it's a V/H string
-BORE_HOLE_ANTENNA_LAYOUT=10 // (DEFAULT=0) order of antennas on the string. 0: HVHV. 1: VHV. 2: VVHV. 3: HHHV. 4: HHV. 5: VVVV. 6: VV. 7: V. 8: HHHH. 9: HH. 10: H.
+//BORE_HOLE_ANTENNA_LAYOUT=10 // (DEFAULT=0) order of antennas on the string. 0: HVHV. 1: VHV. 2: VVHV. 3: HHHV. 4: HHV. 5: VVVV. 6: VV. 7: V. 8: HHHH. 9: HH. 10: H.
+//CGP - set to 40-antenna strings
+BORE_HOLE_ANTENNA_LAYOUT=40 
 
 // SAW: Control the depth
-z_max=200 // (DEFAULT=200) lowest antenna position on the string. in meters depth 
+//z_max=200 // (DEFAULT=200) lowest antenna position on the string. in meters depth 
+//CGP
+z_max=201 // (DEFAULT=200) lowest antenna position on the string. in meters depth 
  
 // Running with antenna separations fixed at 5m and each one is 5 m above the other one
 BH_ANT_SEP_DIST_ON=0 // (DEFAULT=1) 0: all distances are the same (choose z_btw ). 1: choose each distance youself (use z_btwAB ). 
@@ -180,7 +198,7 @@ V_MIMIC_MODE=0 // (DEFAULT=0) 0: save wavforms using standard time window. 1: us
 // other parameters (user guide: see section 3.11 page 19) //
 //SAW: WE WANT TO SET THE SAME RANDOM SEED FOR EACH SIM SO
 //     THAT HORIZONTAL AND VERTICAL POLARIZATION STRINGS ARE LOOKING AT THE SAME ELECTRIC FIELDS 
-RANDOM_MODE=0 // (DEFAULT=1) 0: same random seed (debugging). 1: new random seed for simulations 
+RANDOM_MODE=1 // (DEFAULT=1) 0: same random seed (debugging). 1: new random seed for simulations 
  
 SIMULATION_MODE=1 // (DEFAULT=0) 0: frequency domain. 1: time domain simulation 
  
