@@ -298,6 +298,7 @@ class Settings
         vector<double> IND_POSNU_PHI;
         vector<double> IND_NNU_THETA;
         vector<double> IND_NNU_PHI;
+        vector<double> ELAST;
 
 
 
@@ -310,7 +311,8 @@ class Settings
     // if which=3 then 0 or 1
     double SIGMA_FACTOR; // factor to multiply cross section by for error analysis
     int SIGMAPARAM; // 0=Reno, 1=Connolly et al. 2011 for cross section parametrization
-    int YPARAM; // 0=Reno, 1=Connolly et al. 2011 for cross section parametrization
+    int YPARAM; // 0=Reno, 1=Connolly et al. 2011 for cross section parametrization, 2 = a specific elast_y
+    double ELAST_Y;
 
     int SIGMA_SELECT; // when in SIGMAPARAM=1 case, 0 : (default) use mean value, 1 : use upper bound, 2 : use lower bound
 

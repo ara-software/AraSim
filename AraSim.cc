@@ -101,9 +101,8 @@ int main(int argc, char **argv) {   // read setup.txt file
   int MOOREBAY=0; //1=use Moore's Bay measured ice field attenuation length for the west land, otherwise use South Pole data
   double EXPONENT=19.; // 10^19 eV neutrinos only
 */  
-
+  
   Settings *settings1 = new Settings();
-
 
   cout<<"\n\tDefault values!"<<endl;
   cout<<"NNU : "<<settings1->NNU<<endl;
@@ -160,13 +159,14 @@ int main(int argc, char **argv) {   // read setup.txt file
   //  cout << "EVENT_NUM: " << settings1->EVENT_NUM << endl;
 
   if (settings1->EVENT_GENERATION_MODE == 1){
-      string evtfile = "eventReadIn.txt";
+//      string evtfile = "eventReadIn.txt";
+      string evtfile = string(argv[argc - 1]);
       settings1->ReadEvtFile(evtfile);
       cout<<"Read "<< evtfile <<" file!"<<endl;
-      cout << "EVID    NUFLAVORINT    NUBAR    PNU    CURRENTINT    IND_POSNU_R    IND_POSNU_THETA    IND_POSNU_PHI    IND_NNU_THETA    IND_NNU_PHI" << endl;
+      cout << "EVID    NUFLAVORINT    NUBAR    PNU    CURRENTINT    IND_POSNU_R    IND_POSNU_THETA    IND_POSNU_PHI    IND_NNU_THETA    IND_NNU_PHI    ELAST" << endl;
 
       for (int i = 0; i < settings1->NNU; i++){
-          cout << settings1->EVID[i] << "    " << settings1->NUFLAVORINT[i] << "    " << settings1->NUBAR[i] << "    " << settings1->PNU[i] << "    " << settings1->CURRENTINT[i] << "    " << settings1->IND_POSNU_R[i] << "    " << settings1->IND_POSNU_THETA[i] << "    " << settings1->IND_POSNU_PHI[i] << "    " << settings1->IND_NNU_THETA[i] << "    " << settings1->IND_NNU_PHI[i] << endl;
+          cout << settings1->EVID[i] << "    " << settings1->NUFLAVORINT[i] << "    " << settings1->NUBAR[i] << "    " << settings1->PNU[i] << "    " << settings1->CURRENTINT[i] << "    " << settings1->IND_POSNU_R[i] << "    " << settings1->IND_POSNU_THETA[i] << "    " << settings1->IND_POSNU_PHI[i] << "    " << settings1->IND_NNU_THETA[i] << "    " << settings1->IND_NNU_PHI[i] << "    " << settings1->ELAST[i] << endl;
       }
   }
   // set gRandom as TRandom3 when settings1->RANDOM_MODE = 1

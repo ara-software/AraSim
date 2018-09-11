@@ -549,7 +549,6 @@ double Primaries::Gety(Settings *settings1,double pnu,int nu_nubar,int currentin
 
   	return x;   
   }//old Gety
-
   else if (settings1->YPARAM==1) { //use prescription in Connolly et al.2011
   	//nu_nubar=0;
 	double pnuGeV=pnu/1.E9;
@@ -558,7 +557,9 @@ double Primaries::Gety(Settings *settings1,double pnu,int nu_nubar,int currentin
 	double elast_y=m_myY->pickY(nu_nubar,currentint,epsilon);
 	return elast_y;   
   }//current Gety
-
+  else if (settings1->YPARAM == 2){//use a specific elast_y
+      return settings1->ELAST_Y;
+  }
 } //Gety
 
 double Primaries::Getyweight(double pnu, double y, int nu_nubar, int currentint){
@@ -2376,6 +2377,7 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
     
     
 //    std::cout << "DetectorStation:X:Y:: "  << detector->stations[0].GetX() << " : " << detector->stations[0].GetY() << std::endl;
+    printf("avgx: %.5f, avgy: %.5f, avgz: %.5f, detectorx: %.5f, detectory: %.5f, detectorz: %.5f, icesurface: %.5f\n", avgX, avgY, avgZ, detector->stations[0].GetX(), detector->stations[0].GetY(), detector->stations[0].GetZ(), antarctica->Surface(detector->stations[0].Lon(), detector->stations[0].Lat()));
     
 
     //calculate posnu's X, Y wrt detector core

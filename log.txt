@@ -1462,3 +1462,11 @@ also removed Detector::printGeometry function from Detector class
 
 ============================================================================
 
+2018/09/11 Yue Pan:
+
+Added the inelasticity parameter in EVENT_GENERATION_MODE.
+Modified the file read in function in EVENT_GENERATION_MODE so that it can
+read an event list with an arbitrary filename.
+Run it as: ./AraSim $SETUP_FILE $RUN_NUM $OUTPUT_DIR $EVENTLIST
+
+============================================================================

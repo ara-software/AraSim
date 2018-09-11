@@ -40,7 +40,8 @@ outputdir="outputs"; // directory where outputs go
  BW_SEAVEYS=FREQ_HIGH_SEAVEYS-FREQ_LOW_SEAVEYS;
  SIGMAPARAM=1;  // Connolly et al. 2011 default cross section parametrization
  SIGMA_FACTOR=1.;   // default sigma factor : 1
- YPARAM=1;  // Connolly et al. 2011 default y parametrization
+ YPARAM=1;  // 1: Connolly et al. 2011 default y parametrization, 2: Set ELAST_Y yourself
+ ELAST_Y = 0.0;
  UNBIASED_SELECTION=1.; // (0) pick neutrino interaction in the ice and neutrino from any direction or (1) choose neutrino interaction point in the horizon on the balloon in the ice and neutrino direction on the cerenkov cone
 
  SIGMA_SELECT=0; // when in SIGMAPARAM=1 case, 0 : (default) use mean value, 1 : use upper bound, 2 : use lower bound
@@ -593,6 +594,9 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "YPARAM") {
                   YPARAM = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }              
+              else if (label == "ELAST_Y") {
+                 ELAST_Y = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
               else if (label == "NU_NUBAR_SELECT_MODE") {
                   NU_NUBAR_SELECT_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }              
@@ -671,8 +675,8 @@ void Settings::ReadEvtFile(string evtfile){
             if (line[0] != "/"[0]) {
                 std::stringstream iss(line);
                 int a, b, c, e;
-                double d, f, g, h, i, j;
-                if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j))
+                double d, f, g, h, i, j, k;
+                if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j >> k))
                     break;
 /*                EVID[i] = atoi(a.c_str());
                 NUFLAVORINT[i] = atoi(b.c_str());
@@ -707,6 +711,7 @@ void Settings::ReadEvtFile(string evtfile){
                 IND_POSNU_PHI.push_back(h);
                 IND_NNU_THETA.push_back(i);
                 IND_NNU_PHI.push_back(j);
+                ELAST.push_back(k);
 
 
                 l++;
