@@ -358,6 +358,10 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                         params.number_of_strings_station = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
                         cout<<"read number of strings"<<endl;
                     }
+                    else if (label == "number_of_antennas_string") {
+                        params.number_of_antennas_string = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
+                        cout<<"read number of antennas per string"<<endl;
+                    }
                 }
             }
             ARA_N.close();
