@@ -1470,3 +1470,18 @@ read an event list with an arbitrary filename.
 Run it as: ./AraSim $SETUP_FILE $RUN_NUM $OUTPUT_DIR $EVENTLIST
 
 ============================================================================
+
+
+2018/09/17 Brian Clark:
+
+Added hook for "CUSTOM_ELECTRONICS" inside Settings
+This way, the user can load a custom electronics system response (gain and phase)
+into AraSim. This is useful for comparison work for the next generation radio array
+with programs like NuRadioMC and Pyrex.
+
+CUSTOM_ELECTRONICS=0 is default, and is the AraSim standard "ARA_Electronics_TotalGain_TwoFilters.txt"
+CUSTOM_ELECTRONCIS=1 will call the user defined "custom_electronics.txt" file
+
+This also required modifying Detector.cc to check settings1 for which electronics to load.
+
+============================================================================

@@ -1042,8 +1042,17 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         }
         // read total elec. chain response file!!
         cout<<"start read elect chain"<<endl;
-        ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
-        //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
+        if(settings1->CUSTOM_ELECTRONICS==0){
+            //read the standard ARA electronics
+            cout<<"     Reading standard ARA electronics response"<<endl;
+             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
+            //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
+        }
+        else if (settings1->CUSTOM_ELECTRONICS==1){
+            //read a custom user defined electronics gain
+            cout<<"     Reading custom electronics response"<<endl;
+             ReadElectChain("./data/custom_electronics.txt", settings1);
+        }
         cout<<"done read elect chain"<<endl;
         
         
@@ -1517,9 +1526,17 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         }
         // read total elec. chain response file!!
         cout<<"start read elect chain"<<endl;
-        ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
-        //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
-        cout<<"done read elect chain"<<endl;
+        if(settings1->CUSTOM_ELECTRONICS==0){
+            //read the standard ARA electronics
+            cout<<"     Reading standard ARA electronics response"<<endl;
+             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
+            //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
+        }
+        else if (settings1->CUSTOM_ELECTRONICS==1){
+            //read a custom user defined electronics gain
+            cout<<"     Reading custom electronics response"<<endl;
+             ReadElectChain("./data/custom_electronics.txt", settings1);
+        }
         
         
     }
@@ -1825,8 +1842,17 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	    
             // read total elec. chain response file!!
 	    cout<<"start read elect chain"<<endl;
-            ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
+        if(settings1->CUSTOM_ELECTRONICS==0){
+            //read the standard ARA electronics
+            cout<<"     Reading standard ARA electronics response"<<endl;
+             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
             //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
+        }
+        else if (settings1->CUSTOM_ELECTRONICS==1){
+            //read a custom user defined electronics gain
+            cout<<"     Reading custom electronics response"<<endl;
+             ReadElectChain("./data/custom_electronics.txt", settings1);
+        }
 	    cout<<"done read elect chain"<<endl;
 	    
 
@@ -2170,8 +2196,17 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         
             // read total elec. chain response file!!
 	    cout<<"start read elect chain"<<endl;
-            ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
+        if(settings1->CUSTOM_ELECTRONICS==0){
+            //read the standard ARA electronics
+            cout<<"     Reading standard ARA electronics response"<<endl;
+             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
             //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
+        }
+        else if (settings1->CUSTOM_ELECTRONICS==1){
+            //read a custom user defined electronics gain
+            cout<<"     Reading custom electronics response"<<endl;
+             ReadElectChain("./data/custom_electronics.txt", settings1);
+        }
 	    cout<<"done read elect chain"<<endl;
     
 	    // if calpulser case

@@ -286,6 +286,9 @@ class Settings
 	int APPLY_NOISE_FIGURE; // 0: do not apply new noise figure from Thomas Meures 2016
 	                        // 1: apply new noise figure to data
 
+	int CUSTOM_ELECTRONICS; //0 (default): use the regular "ARA_Electronics_TotalGain_TwoFilter.txt" file
+							//1 : load a custom electronics file, stored as "custom_electronics.txt" in the `data` directory
+
 
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
         vector<int> EVID;
