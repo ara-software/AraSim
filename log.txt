@@ -1449,7 +1449,6 @@ automatically adjustable read-in
 
 Modified Detector.cc parameters so that it can read the Arianna antenna model input file. Included the file Arianna_WIPLD_hpol.dat that needs to be changed in Detector.cc as well.
 
-
 ============================================================================
 
 
@@ -1471,7 +1470,6 @@ Run it as: ./AraSim $SETUP_FILE $RUN_NUM $OUTPUT_DIR $EVENTLIST
 
 ============================================================================
 
-
 2018/09/17 Brian Clark:
 
 Added hook for "CUSTOM_ELECTRONICS" inside Settings
@@ -1485,3 +1483,11 @@ CUSTOM_ELECTRONCIS=1 will call the user defined "custom_electronics.txt" file
 This also required modifying Detector.cc to check settings1 for which electronics to load.
 
 ============================================================================
+
+2018/09/18 Carl Pfendner:
+
+Added flexible antennas_per_string and strings_per_station to setup file read-in
+
+============================================================================
+
+
