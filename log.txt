@@ -1521,5 +1521,21 @@ LPDA_MODE = 1 : use the LPDA
 
 5C) Allow Detector.cc to actually load the new custom electronics files (Brian)
 
+6) Committ two new TRIG_SCAN_MODEs (Brian)
+
+TRIG_SCAN_MODE=9 now selects the hi-lo triggering scheme with the following conditions:
+    IMPORTANT:
+        It is only good with noise turned off (TRIG_ANALYSIS_MODE=1)
+        It is only good with custom-electronics turned on (CUSTOM_ELECTRONICS=1)
+        To access the LPDA trigger, it must have LPDAs enabled (LPDA_MODE=1), meaning no Hpols
+    It will trigger on either
+        (1) 2/4 LPDA at 4.1 sigma
+        (2) 4/4 5m dipoles at 3 sigma
+        (3) one phased array antenna at 2 sigma
+    Where sigma = 9.6 microvolts (9.6e-6 volts)
+
+TRIG_SCAN_MODE=10 selects the simple voltage-threshold tripping trigger
+    IMPORTANT: It is only good with noise turned off, and with custom-electronics turned on
+    Will trigger if any channels has more than 40 microvolts (9.6e-6 volts)
 
 ============================================================================
