@@ -1491,3 +1491,8 @@ Added flexible antennas_per_string and strings_per_station to setup file read-in
 ============================================================================
 
 
+2018/09/25 Brian Clark:
+
+Add branch for NGRA design work, in branches/ngra_design_studies
+
+============================================================================
