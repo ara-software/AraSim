@@ -106,14 +106,15 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
     //end initialize
     
     //Parameters to use if using Arianna_WIPLD_hpol.dat
-    
-    if (settings1->ANTENNA_MODE == 2){
+    /*
+    if (settings1->ANTENNA_MODE == 2){//Leave commented out as reference. JT
       params.freq_step = 238;//60
       params.ang_step = 2664;//2664;
       params.freq_width = 5; //16.667;
       params.freq_init = 15;//83.333;
       params.DeployedStations = 4;
-    }
+      }*/
+   
     
     //copy freq_width, freq_init in params to Detector freq_width, freq_init
     freq_step = params.freq_step;
@@ -144,7 +145,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
     ////////////////////////////////////////////////////////////////////////////////////    
     
     if (mode == 0) {
-        cout<<"\n\tDector mode 0 : testbed"<<endl;
+        cout<<"\n\tDetector mode 0 : testbed"<<endl;
         ifstream testbed( testbed_file.c_str() );
         cout<<"We use "<<testbed_file.c_str()<<" as antenna info."<<endl;
         
@@ -161,7 +162,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                         for (int i=0; i<(int) params.number_of_strings; i++) {
                             strings.push_back(temp);
                         }
-                        cout<<"read numner_of_strings"<<endl;
+                        cout<<"read numner_of_strings = " << params.number_of_strings << endl;
                         //                        Parameters.number_of_strings = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
                     }
                     else if (label == "antenna_string") {
@@ -284,11 +285,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         params.antenna_orientation = 0;     // all antenna facing x
         params.bore_hole_antenna_layout = settings1->BORE_HOLE_ANTENNA_LAYOUT;
         // finish initialization
-        //
-        
-        
-        
-        
         
         // Read new parameters if there are...
         if ( ARA_N.is_open() ) {
@@ -354,14 +350,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                         params.antenna_orientation = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
                         cout<<"read antenna_orientation"<<endl;
                     }
-                    else if (label == "number_of_strings_station") {
-                        params.number_of_strings_station = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read number of strings"<<endl;
-                    }
-                    else if (label == "number_of_antennas_string") {
-                        params.number_of_antennas_string = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read number of antennas per string"<<endl;
-                    }
                 }
             }
             ARA_N.close();
@@ -395,10 +383,23 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	else if (params.bore_hole_antenna_layout == 7) { // V layout
             params.number_of_antennas_string = 1;
         }
+        else if (params.bore_hole_antenna_layout == 8) { // surface strawman layout
+            params.number_of_strings_station = 1;
+            params.number_of_antennas_string = 3;
+        }
+        else if (params.bore_hole_antenna_layout == 11){// design a
+            params.number_of_strings_station = 9;
+            params.number_of_antennas_string = 1;
+        }
+        else if (params.bore_hole_antenna_layout == 12){// design b
+            params.number_of_strings_station = 21;
+            params.number_of_antennas_string = 1;
+        }
+        else if (params.bore_hole_antenna_layout == 13){// desigh c
+            params.number_of_strings_station = 21;
+            params.number_of_antennas_string = 1;
+        }
 
-        
-        
-        
         
         //
         // caculate number of stations, strings, antennas 
@@ -530,7 +531,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             //SetupInstalledStations();
 
             for (int i=0; i<params.number_of_stations; i++) {
-                
                 //
                 // set string postions based on station position
                 stations[i].strings[0].SetX( stations[i].GetX() - (R_string * cos(PI/4.)) );
@@ -544,8 +544,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                 
                 stations[i].strings[3].SetX( stations[i].GetX() + (R_string * cos(PI/4.)) );
                 stations[i].strings[3].SetY( stations[i].GetY() - (R_string * sin(PI/4.)) );
-                
-                
                 //
                 // set antenna postions in borehole
                 // and set type (h or v pol antenna) and set orientation (facing x or y)
@@ -749,6 +747,385 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     }
                     
                 } // end if bore hole antenna layout = 5,6,7 (VVVV, VV, V)
+                else if (params.bore_hole_antenna_layout == 8){ // strawman LPDAs only; set R_string=0 
+                    stations[i].strings[0].antennas[0].SetZ(-5);//dipole
+                    stations[i].strings[0].antennas[0].type = 1;
+                    stations[i].strings[0].antennas[0].orient = 1;
+
+                    stations[i].strings[0].antennas[1].SetZ(-2);//LPDA
+                    stations[i].strings[0].antennas[1].type = 2;
+                    stations[i].strings[0].antennas[1].orient = 1;
+
+                    stations[i].strings[0].antennas[2].SetZ(-2);//LPDA
+                    stations[i].strings[0].antennas[2].type = 2;
+                    stations[i].strings[0].antennas[2].orient = 0;
+
+                    stations[i].strings[0].SetX( stations[i].GetX() );
+                    stations[i].strings[0].SetY( stations[i].GetY() );
+                }
+                else if (params.bore_hole_antenna_layout == 11){
+                    stations[i].strings[0].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[0].antennas[0].type = 0;
+                    stations[i].strings[0].antennas[0].orient = 1;
+
+                    stations[i].strings[1].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[1].antennas[0].type = 1;
+                    stations[i].strings[1].antennas[0].orient = 1;
+
+                    stations[i].strings[2].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[2].antennas[0].type = 1;
+                    stations[i].strings[2].antennas[0].orient = 1;
+
+                    stations[i].strings[3].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[3].antennas[0].type = 1;
+                    stations[i].strings[3].antennas[0].orient = 1;
+
+                    stations[i].strings[4].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[4].antennas[0].type = 1;
+                    stations[i].strings[4].antennas[0].orient = 1;
+
+                    stations[i].strings[5].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[5].antennas[0].type = 0;
+                    stations[i].strings[5].antennas[0].orient = 1;
+
+                    stations[i].strings[6].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[6].antennas[0].type = 0;
+                    stations[i].strings[6].antennas[0].orient = 1;
+
+                    stations[i].strings[7].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[7].antennas[0].type = 0;
+                    stations[i].strings[7].antennas[0].orient = 1;
+
+                    stations[i].strings[8].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[8].antennas[0].type = 0;
+                    stations[i].strings[8].antennas[0].orient = 1;
+
+                    stations[i].strings[0].SetX( stations[i].GetX() );
+                    stations[i].strings[0].SetY( stations[i].GetY() );
+
+                    stations[i].strings[1].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[1].SetY( stations[i].GetY() );
+
+                    stations[i].strings[2].SetX( stations[i].GetX() );
+                    stations[i].strings[2].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[3].SetX( stations[i].GetX() );
+                    stations[i].strings[3].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[4].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[4].SetY( stations[i].GetY() );
+                   
+                    stations[i].strings[5].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[5].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[6].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[6].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[7].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[7].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[8].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[8].SetY( stations[i].GetY() + 3);
+                }
+                else if(params.bore_hole_antenna_layout == 12){
+                    stations[i].strings[0].antennas[0].SetZ(-85);//bicone
+                    stations[i].strings[0].antennas[0].type = 0;
+                    stations[i].strings[0].antennas[0].orient = 1;
+
+                    stations[i].strings[1].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[1].antennas[0].type = 1;
+                    stations[i].strings[1].antennas[0].orient = 1;
+
+                    stations[i].strings[2].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[2].antennas[0].type = 1;
+                    stations[i].strings[2].antennas[0].orient = 1;
+
+                    stations[i].strings[3].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[3].antennas[0].type = 1;
+                    stations[i].strings[3].antennas[0].orient = 1;
+
+                    stations[i].strings[4].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[4].antennas[0].type = 1;
+                    stations[i].strings[4].antennas[0].orient = 1;
+
+                    stations[i].strings[5].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[5].antennas[0].type = 0;
+                    stations[i].strings[5].antennas[0].orient = 1;
+
+                    stations[i].strings[6].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[6].antennas[0].type = 0;
+                    stations[i].strings[6].antennas[0].orient = 1;
+
+                    stations[i].strings[7].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[7].antennas[0].type = 0;
+                    stations[i].strings[7].antennas[0].orient = 1;
+
+                    stations[i].strings[8].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[8].antennas[0].type = 0;
+                    stations[i].strings[8].antennas[0].orient = 1;
+
+                    stations[i].strings[9].antennas[0].SetZ(-20);//bicone
+                    stations[i].strings[9].antennas[0].type = 0;
+                    stations[i].strings[9].antennas[0].orient = 1;
+
+                    stations[i].strings[10].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[10].antennas[0].type = 0;
+                    stations[i].strings[10].antennas[0].orient = 1;
+
+                    stations[i].strings[11].antennas[0].SetZ(-80);//bicone
+                    stations[i].strings[11].antennas[0].type = 0;
+                    stations[i].strings[11].antennas[0].orient = 1;
+
+                    stations[i].strings[12].antennas[0].SetZ(-100);//bicone
+                    stations[i].strings[12].antennas[0].type = 0;
+                    stations[i].strings[12].antennas[0].orient = 1;
+
+                    stations[i].strings[13].antennas[0].SetZ(-20);//bicone
+                    stations[i].strings[13].antennas[0].type = 0;
+                    stations[i].strings[13].antennas[0].orient = 1;
+
+                    stations[i].strings[14].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[14].antennas[0].type = 0;
+                    stations[i].strings[14].antennas[0].orient = 1;
+
+                    stations[i].strings[15].antennas[0].SetZ(-80);//bicone
+                    stations[i].strings[15].antennas[0].type = 0;
+                    stations[i].strings[15].antennas[0].orient = 1;
+
+                    stations[i].strings[16].antennas[0].SetZ(-100);//bicone
+                    stations[i].strings[16].antennas[0].type = 0;
+                    stations[i].strings[16].antennas[0].orient = 1;
+
+                    stations[i].strings[17].antennas[0].SetZ(-20);//bicone
+                    stations[i].strings[17].antennas[0].type = 0;
+                    stations[i].strings[17].antennas[0].orient = 1;
+
+                    stations[i].strings[18].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[18].antennas[0].type = 0;
+                    stations[i].strings[18].antennas[0].orient = 1;
+
+                    stations[i].strings[19].antennas[0].SetZ(-80);//bicone
+                    stations[i].strings[19].antennas[0].type = 0;
+                    stations[i].strings[19].antennas[0].orient = 1;
+
+                    stations[i].strings[20].antennas[0].SetZ(-100);//bicone
+                    stations[i].strings[20].antennas[0].type = 0;
+                    stations[i].strings[20].antennas[0].orient = 1;
+
+                    stations[i].strings[0].SetX( stations[i].GetX() );
+                    stations[i].strings[0].SetY( stations[i].GetY() );
+
+                    stations[i].strings[1].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[1].SetY( stations[i].GetY() );
+
+                    stations[i].strings[2].SetX( stations[i].GetX() );
+                    stations[i].strings[2].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[3].SetX( stations[i].GetX() );
+                    stations[i].strings[3].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[4].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[4].SetY( stations[i].GetY() );
+                   
+                    stations[i].strings[5].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[5].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[6].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[6].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[7].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[7].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[8].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[8].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[9].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[9].SetY( stations[i].GetY() );
+
+                    stations[i].strings[10].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[10].SetY( stations[i].GetY() );
+
+                    stations[i].strings[11].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[11].SetY( stations[i].GetY() );
+
+                    stations[i].strings[12].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[12].SetY( stations[i].GetY() );
+
+                    stations[i].strings[13].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[13].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[14].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[14].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[15].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[15].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[16].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[16].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[17].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[17].SetY( stations[i].GetY() - 13);
+                
+                    stations[i].strings[18].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[18].SetY( stations[i].GetY() - 13);
+                
+                    stations[i].strings[19].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[19].SetY( stations[i].GetY() - 13);
+
+                    stations[i].strings[20].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[20].SetY( stations[i].GetY() - 13);
+
+                }
+                else if(params.bore_hole_antenna_layout == 13){
+                    stations[i].strings[0].antennas[0].SetZ(-50);//bicone
+                    stations[i].strings[0].antennas[0].type = 0;
+                    stations[i].strings[0].antennas[0].orient = 1;
+
+                    stations[i].strings[1].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[1].antennas[0].type = 1;
+                    stations[i].strings[1].antennas[0].orient = 1;
+
+                    stations[i].strings[2].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[2].antennas[0].type = 1;
+                    stations[i].strings[2].antennas[0].orient = 1;
+
+                    stations[i].strings[3].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[3].antennas[0].type = 1;
+                    stations[i].strings[3].antennas[0].orient = 1;
+
+                    stations[i].strings[4].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[4].antennas[0].type = 1;
+                    stations[i].strings[4].antennas[0].orient = 1;
+
+                    stations[i].strings[5].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[5].antennas[0].type = 0;
+                    stations[i].strings[5].antennas[0].orient = 1;
+
+                    stations[i].strings[6].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[6].antennas[0].type = 0;
+                    stations[i].strings[6].antennas[0].orient = 1;
+
+                    stations[i].strings[7].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[7].antennas[0].type = 0;
+                    stations[i].strings[7].antennas[0].orient = 1;
+
+                    stations[i].strings[8].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[8].antennas[0].type = 0;
+                    stations[i].strings[8].antennas[0].orient = 1;
+
+                    stations[i].strings[9].antennas[0].SetZ(-21);//bicone
+                    stations[i].strings[9].antennas[0].type = 0;
+                    stations[i].strings[9].antennas[0].orient = 1;
+
+                    stations[i].strings[10].antennas[0].SetZ(-34);//bicone
+                    stations[i].strings[10].antennas[0].type = 0;
+                    stations[i].strings[10].antennas[0].orient = 1;
+
+                    stations[i].strings[11].antennas[0].SetZ(-47);//bicone
+                    stations[i].strings[11].antennas[0].type = 0;
+                    stations[i].strings[11].antennas[0].orient = 1;
+
+                    stations[i].strings[12].antennas[0].SetZ(-60);//bicone
+                    stations[i].strings[12].antennas[0].type = 0;
+                    stations[i].strings[12].antennas[0].orient = 1;
+
+                    stations[i].strings[13].antennas[0].SetZ(-21);//bicone
+                    stations[i].strings[13].antennas[0].type = 0;
+                    stations[i].strings[13].antennas[0].orient = 1;
+
+                    stations[i].strings[14].antennas[0].SetZ(-34);//bicone
+                    stations[i].strings[14].antennas[0].type = 0;
+                    stations[i].strings[14].antennas[0].orient = 1;
+
+                    stations[i].strings[15].antennas[0].SetZ(-47);//bicone
+                    stations[i].strings[15].antennas[0].type = 0;
+                    stations[i].strings[15].antennas[0].orient = 1;
+
+                    stations[i].strings[16].antennas[0].SetZ(-60);//bicone
+                    stations[i].strings[16].antennas[0].type = 0;
+                    stations[i].strings[16].antennas[0].orient = 1;
+
+                    stations[i].strings[17].antennas[0].SetZ(-21);//bicone
+                    stations[i].strings[17].antennas[0].type = 0;
+                    stations[i].strings[17].antennas[0].orient = 1;
+
+                    stations[i].strings[18].antennas[0].SetZ(-34);//bicone
+                    stations[i].strings[18].antennas[0].type = 0;
+                    stations[i].strings[18].antennas[0].orient = 1;
+
+                    stations[i].strings[19].antennas[0].SetZ(-47);//bicone
+                    stations[i].strings[19].antennas[0].type = 0;
+                    stations[i].strings[19].antennas[0].orient = 1;
+
+                    stations[i].strings[20].antennas[0].SetZ(-60);//bicone
+                    stations[i].strings[20].antennas[0].type = 0;
+                    stations[i].strings[20].antennas[0].orient = 1;
+
+                    stations[i].strings[0].SetX( stations[i].GetX() );
+                    stations[i].strings[0].SetY( stations[i].GetY() );
+
+                    stations[i].strings[1].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[1].SetY( stations[i].GetY() );
+
+                    stations[i].strings[2].SetX( stations[i].GetX() );
+                    stations[i].strings[2].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[3].SetX( stations[i].GetX() );
+                    stations[i].strings[3].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[4].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[4].SetY( stations[i].GetY() );
+                   
+                    stations[i].strings[5].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[5].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[6].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[6].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[7].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[7].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[8].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[8].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[9].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[9].SetY( stations[i].GetY() );
+
+                    stations[i].strings[10].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[10].SetY( stations[i].GetY() );
+
+                    stations[i].strings[11].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[11].SetY( stations[i].GetY() );
+
+                    stations[i].strings[12].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[12].SetY( stations[i].GetY() );
+
+                    stations[i].strings[13].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[13].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[14].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[14].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[15].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[15].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[16].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[16].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[17].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[17].SetY( stations[i].GetY() - 13);
+                
+                    stations[i].strings[18].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[18].SetY( stations[i].GetY() - 13);
+                
+                    stations[i].strings[19].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[19].SetY( stations[i].GetY() - 13);
+
+                    stations[i].strings[20].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[20].SetY( stations[i].GetY() - 13);
+
+                }
+
                 
                 //
                 // set surface antenna postions
@@ -770,12 +1147,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
             }// loop over stations i
 
-
             // for idealized geometry, number of antennas in a station is constant
             max_number_of_antennas_station = params.number_of_strings_station * params.number_of_antennas_string;
-
-
-
 
         } // if idealized geometry
 #ifdef ARA_UTIL_EXISTS
@@ -950,7 +1323,384 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     
                 } // end if bore hole antenna layout = 3 (where VHHH way)
                 
+                else if (params.bore_hole_antenna_layout == 8){ // strawman LPDAs only
+                    stations[i].strings[0].antennas[0].SetZ(-5);//dipole
+                    stations[i].strings[0].antennas[0].type = 1;
+                    stations[i].strings[0].antennas[0].orient = 1;
+
+                    stations[i].strings[0].antennas[1].SetZ(-2);//LPDA
+                    stations[i].strings[0].antennas[1].type = 2;
+                    stations[i].strings[0].antennas[1].orient = 1;
+
+                    stations[i].strings[0].antennas[2].SetZ(-2);//LPDA
+                    stations[i].strings[0].antennas[2].type = 2;
+                    stations[i].strings[0].antennas[2].orient = 0;
+
+                    stations[i].strings[0].SetX( stations[i].GetX() );
+                    stations[i].strings[0].SetY( stations[i].GetY() );
+                }
+                else if (params.bore_hole_antenna_layout == 11){
+                    stations[i].strings[0].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[0].antennas[0].type = 0;
+                    stations[i].strings[0].antennas[0].orient = 1;
+
+                    stations[i].strings[1].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[1].antennas[0].type = 1;
+                    stations[i].strings[1].antennas[0].orient = 1;
+
+                    stations[i].strings[2].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[2].antennas[0].type = 1;
+                    stations[i].strings[2].antennas[0].orient = 1;
+
+                    stations[i].strings[3].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[3].antennas[0].type = 1;
+                    stations[i].strings[3].antennas[0].orient = 1;
+
+                    stations[i].strings[4].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[4].antennas[0].type = 1;
+                    stations[i].strings[4].antennas[0].orient = 1;
+
+                    stations[i].strings[5].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[5].antennas[0].type = 0;
+                    stations[i].strings[5].antennas[0].orient = 1;
+
+                    stations[i].strings[6].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[6].antennas[0].type = 0;
+                    stations[i].strings[6].antennas[0].orient = 1;
+
+                    stations[i].strings[7].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[7].antennas[0].type = 0;
+                    stations[i].strings[7].antennas[0].orient = 1;
+
+                    stations[i].strings[8].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[8].antennas[0].type = 0;
+                    stations[i].strings[8].antennas[0].orient = 1;
+
+                    stations[i].strings[0].SetX( stations[i].GetX() );
+                    stations[i].strings[0].SetY( stations[i].GetY() );
+
+                    stations[i].strings[1].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[1].SetY( stations[i].GetY() );
+
+                    stations[i].strings[2].SetX( stations[i].GetX() );
+                    stations[i].strings[2].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[3].SetX( stations[i].GetX() );
+                    stations[i].strings[3].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[4].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[4].SetY( stations[i].GetY() );
+                   
+                    stations[i].strings[5].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[5].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[6].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[6].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[7].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[7].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[8].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[8].SetY( stations[i].GetY() + 3);
+
+                }
+                else if(params.bore_hole_antenna_layout == 12){
+                    stations[i].strings[0].antennas[0].SetZ(-85);//bicone
+                    stations[i].strings[0].antennas[0].type = 0;
+                    stations[i].strings[0].antennas[0].orient = 1;
+
+                    stations[i].strings[1].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[1].antennas[0].type = 1;
+                    stations[i].strings[1].antennas[0].orient = 1;
+
+                    stations[i].strings[2].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[2].antennas[0].type = 1;
+                    stations[i].strings[2].antennas[0].orient = 1;
+
+                    stations[i].strings[3].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[3].antennas[0].type = 1;
+                    stations[i].strings[3].antennas[0].orient = 1;
+
+                    stations[i].strings[4].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[4].antennas[0].type = 1;
+                    stations[i].strings[4].antennas[0].orient = 1;
+
+                    stations[i].strings[5].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[5].antennas[0].type = 0;
+                    stations[i].strings[5].antennas[0].orient = 1;
+
+                    stations[i].strings[6].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[6].antennas[0].type = 0;
+                    stations[i].strings[6].antennas[0].orient = 1;
+
+                    stations[i].strings[7].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[7].antennas[0].type = 0;
+                    stations[i].strings[7].antennas[0].orient = 1;
+
+                    stations[i].strings[8].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[8].antennas[0].type = 0;
+                    stations[i].strings[8].antennas[0].orient = 1;
+
+                    stations[i].strings[9].antennas[0].SetZ(-20);//bicone
+                    stations[i].strings[9].antennas[0].type = 0;
+                    stations[i].strings[9].antennas[0].orient = 1;
+
+                    stations[i].strings[10].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[10].antennas[0].type = 0;
+                    stations[i].strings[10].antennas[0].orient = 1;
+
+                    stations[i].strings[11].antennas[0].SetZ(-80);//bicone
+                    stations[i].strings[11].antennas[0].type = 0;
+                    stations[i].strings[11].antennas[0].orient = 1;
+
+                    stations[i].strings[12].antennas[0].SetZ(-100);//bicone
+                    stations[i].strings[12].antennas[0].type = 0;
+                    stations[i].strings[12].antennas[0].orient = 1;
+
+                    stations[i].strings[13].antennas[0].SetZ(-20);//bicone
+                    stations[i].strings[13].antennas[0].type = 0;
+                    stations[i].strings[13].antennas[0].orient = 1;
+
+                    stations[i].strings[14].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[14].antennas[0].type = 0;
+                    stations[i].strings[14].antennas[0].orient = 1;
+
+                    stations[i].strings[15].antennas[0].SetZ(-80);//bicone
+                    stations[i].strings[15].antennas[0].type = 0;
+                    stations[i].strings[15].antennas[0].orient = 1;
+
+                    stations[i].strings[16].antennas[0].SetZ(-100);//bicone
+                    stations[i].strings[16].antennas[0].type = 0;
+                    stations[i].strings[16].antennas[0].orient = 1;
+
+                    stations[i].strings[17].antennas[0].SetZ(-20);//bicone
+                    stations[i].strings[17].antennas[0].type = 0;
+                    stations[i].strings[17].antennas[0].orient = 1;
+
+                    stations[i].strings[18].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[18].antennas[0].type = 0;
+                    stations[i].strings[18].antennas[0].orient = 1;
+
+                    stations[i].strings[19].antennas[0].SetZ(-80);//bicone
+                    stations[i].strings[19].antennas[0].type = 0;
+                    stations[i].strings[19].antennas[0].orient = 1;
+
+                    stations[i].strings[20].antennas[0].SetZ(-100);//bicone
+                    stations[i].strings[20].antennas[0].type = 0;
+                    stations[i].strings[20].antennas[0].orient = 1;
+
+                    stations[i].strings[0].SetX( stations[i].GetX() );
+                    stations[i].strings[0].SetY( stations[i].GetY() );
+
+                    stations[i].strings[1].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[1].SetY( stations[i].GetY() );
+
+                    stations[i].strings[2].SetX( stations[i].GetX() );
+                    stations[i].strings[2].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[3].SetX( stations[i].GetX() );
+                    stations[i].strings[3].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[4].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[4].SetY( stations[i].GetY() );
+                   
+                    stations[i].strings[5].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[5].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[6].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[6].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[7].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[7].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[8].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[8].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[9].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[9].SetY( stations[i].GetY() );
+
+                    stations[i].strings[10].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[10].SetY( stations[i].GetY() );
+
+                    stations[i].strings[11].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[11].SetY( stations[i].GetY() );
+
+                    stations[i].strings[12].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[12].SetY( stations[i].GetY() );
+
+                    stations[i].strings[13].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[13].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[14].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[14].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[15].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[15].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[16].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[16].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[17].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[17].SetY( stations[i].GetY() - 13);
                 
+                    stations[i].strings[18].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[18].SetY( stations[i].GetY() - 13);
+                
+                    stations[i].strings[19].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[19].SetY( stations[i].GetY() - 13);
+
+                    stations[i].strings[20].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[20].SetY( stations[i].GetY() - 13);
+                }
+                else if(params.bore_hole_antenna_layout == 13){
+                    stations[i].strings[0].antennas[0].SetZ(-50);//bicone
+                    stations[i].strings[0].antennas[0].type = 0;
+                    stations[i].strings[0].antennas[0].orient = 1;
+
+                    stations[i].strings[1].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[1].antennas[0].type = 1;
+                    stations[i].strings[1].antennas[0].orient = 1;
+
+                    stations[i].strings[2].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[2].antennas[0].type = 1;
+                    stations[i].strings[2].antennas[0].orient = 1;
+
+                    stations[i].strings[3].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[3].antennas[0].type = 1;
+                    stations[i].strings[3].antennas[0].orient = 1;
+
+                    stations[i].strings[4].antennas[0].SetZ(-2);//lpda
+                    stations[i].strings[4].antennas[0].type = 1;
+                    stations[i].strings[4].antennas[0].orient = 1;
+
+                    stations[i].strings[5].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[5].antennas[0].type = 0;
+                    stations[i].strings[5].antennas[0].orient = 1;
+
+                    stations[i].strings[6].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[6].antennas[0].type = 0;
+                    stations[i].strings[6].antennas[0].orient = 1;
+
+                    stations[i].strings[7].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[7].antennas[0].type = 0;
+                    stations[i].strings[7].antennas[0].orient = 1;
+
+                    stations[i].strings[8].antennas[0].SetZ(-5);//bicone
+                    stations[i].strings[8].antennas[0].type = 0;
+                    stations[i].strings[8].antennas[0].orient = 1;
+
+                    stations[i].strings[9].antennas[0].SetZ(-21);//bicone
+                    stations[i].strings[9].antennas[0].type = 0;
+                    stations[i].strings[9].antennas[0].orient = 1;
+
+                    stations[i].strings[10].antennas[0].SetZ(-34);//bicone
+                    stations[i].strings[10].antennas[0].type = 0;
+                    stations[i].strings[10].antennas[0].orient = 1;
+
+                    stations[i].strings[11].antennas[0].SetZ(-47);//bicone
+                    stations[i].strings[11].antennas[0].type = 0;
+                    stations[i].strings[11].antennas[0].orient = 1;
+
+                    stations[i].strings[12].antennas[0].SetZ(-60);//bicone
+                    stations[i].strings[12].antennas[0].type = 0;
+                    stations[i].strings[12].antennas[0].orient = 1;
+
+                    stations[i].strings[13].antennas[0].SetZ(-21);//bicone
+                    stations[i].strings[13].antennas[0].type = 0;
+                    stations[i].strings[13].antennas[0].orient = 1;
+
+                    stations[i].strings[14].antennas[0].SetZ(-34);//bicone
+                    stations[i].strings[14].antennas[0].type = 0;
+                    stations[i].strings[14].antennas[0].orient = 1;
+
+                    stations[i].strings[15].antennas[0].SetZ(-47);//bicone
+                    stations[i].strings[15].antennas[0].type = 0;
+                    stations[i].strings[15].antennas[0].orient = 1;
+
+                    stations[i].strings[16].antennas[0].SetZ(-60);//bicone
+                    stations[i].strings[16].antennas[0].type = 0;
+                    stations[i].strings[16].antennas[0].orient = 1;
+
+                    stations[i].strings[17].antennas[0].SetZ(-21);//bicone
+                    stations[i].strings[17].antennas[0].type = 0;
+                    stations[i].strings[17].antennas[0].orient = 1;
+
+                    stations[i].strings[18].antennas[0].SetZ(-34);//bicone
+                    stations[i].strings[18].antennas[0].type = 0;
+                    stations[i].strings[18].antennas[0].orient = 1;
+
+                    stations[i].strings[19].antennas[0].SetZ(-47);//bicone
+                    stations[i].strings[19].antennas[0].type = 0;
+                    stations[i].strings[19].antennas[0].orient = 1;
+
+                    stations[i].strings[20].antennas[0].SetZ(-60);//bicone
+                    stations[i].strings[20].antennas[0].type = 0;
+                    stations[i].strings[20].antennas[0].orient = 1;
+
+                    stations[i].strings[0].SetX( stations[i].GetX() );
+                    stations[i].strings[0].SetY( stations[i].GetY() );
+
+                    stations[i].strings[1].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[1].SetY( stations[i].GetY() );
+
+                    stations[i].strings[2].SetX( stations[i].GetX() );
+                    stations[i].strings[2].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[3].SetX( stations[i].GetX() );
+                    stations[i].strings[3].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[4].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[4].SetY( stations[i].GetY() );
+                   
+                    stations[i].strings[5].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[5].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[6].SetX( stations[i].GetX() + 3);
+                    stations[i].strings[6].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[7].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[7].SetY( stations[i].GetY() - 3);
+
+                    stations[i].strings[8].SetX( stations[i].GetX() - 3);
+                    stations[i].strings[8].SetY( stations[i].GetY() + 3);
+
+                    stations[i].strings[9].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[9].SetY( stations[i].GetY() );
+
+                    stations[i].strings[10].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[10].SetY( stations[i].GetY() );
+
+                    stations[i].strings[11].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[11].SetY( stations[i].GetY() );
+
+                    stations[i].strings[12].SetX( stations[i].GetX() + 15);
+                    stations[i].strings[12].SetY( stations[i].GetY() );
+
+                    stations[i].strings[13].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[13].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[14].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[14].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[15].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[15].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[16].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[16].SetY( stations[i].GetY() + 13);
+
+                    stations[i].strings[17].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[17].SetY( stations[i].GetY() - 13);
+                
+                    stations[i].strings[18].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[18].SetY( stations[i].GetY() - 13);
+                
+                    stations[i].strings[19].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[19].SetY( stations[i].GetY() - 13);
+
+                    stations[i].strings[20].SetX( stations[i].GetX() - 7.5);
+                    stations[i].strings[20].SetY( stations[i].GetY() - 13);
+                }
+
                 
                 
                 //
@@ -996,26 +1746,40 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         
         
 
-	if (settings1->ANTENNA_MODE == 0){
+	if (settings1->ANTENNA_MODE == 0){//standard, old antenna models
+	  cout << "Using old, standard antenna models"<<endl;
 	  // test read V-pol gain file!!
 	  ReadVgain("ARA_bicone6in_output.txt");
 	  // test read H-pol gain file!!
-	  ReadHgain("ARA_dipoletest1_output.txt");
+	  if (settings1->LPDA_MODE == 1){
+	    ReadHgain("ARIANNA_LPDA.txt");
+	    cout << "Using ARIANNA LPDA as hpol"<<endl;
+	  }
+	  ReadHgain("ARA_dipoletest1_output.txt");	    
 	}
 	else if (settings1->ANTENNA_MODE == 1) {
 	  // test read V-pol gain file!!
 	  ReadVgain("ARA_bicone6in_output.txt", settings1);
 	  ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
 	  // test read H-pol gain file!!
+	  if (settings1->LPDA_MODE == 1){
+	    ReadHgain("ARIANNA_LPDA.txt");
+	    cout << "Using ARIANNA LPDA as hpol"<<endl;
+	  }
 	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
 	}
-	else if (settings1->ANTENNA_MODE == 2){
+	else if (settings1->ANTENNA_MODE == 2){//New antenna models from Simon A.
+	  cout << "Using new antenna models from Simon A."<<endl;
 	  // test read V-pol gain file!!
-	  ReadVgain("Arianna_WIPLD_hpol.dat");
+	  ReadVgain("VPol_XFDTD_FullPlate.txt");
 	  // test read H-pol gain file!!
-	  ReadHgain("Arianna_WIPLD_hpol.dat");
+	  if (settings1->LPDA_MODE == 1){
+	    ReadHgain("ARIANNA_LPDA.txt");
+	    cout << "Using ARIANNA LPDA as hpol"<<endl;
+	  }
+	  ReadHgain("HPol_XFDTD_CurrentMod.txt");
 	}
-	
+        	
 	//	if (settings1->NOISE == 2){
 	  ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 	  //	}
@@ -1049,13 +1813,11 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
         }
         else if (settings1->CUSTOM_ELECTRONICS==1){
-            //read a custom user defined electronics gain
+        //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
              ReadElectChain("./data/custom_electronics.txt", settings1);
         }
         cout<<"done read elect chain"<<endl;
-        
-        
     } // if mode == 1
     
     
@@ -1106,10 +1868,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         params.bore_hole_antenna_layout = settings1->BORE_HOLE_ANTENNA_LAYOUT;
         // finish initialization
         //
-        
-        
-        
-        
         
         
         // Read new parameters if there are...
@@ -1182,8 +1940,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         }
         // finished reading new parameters
         
-        
-        
         // set number of antennas in a string
         if (params.bore_hole_antenna_layout == 0) { // VHVH layout
             params.number_of_antennas_string = 4;
@@ -1201,10 +1957,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             params.number_of_antennas_string = 3;
         }
         
-        
-        
-        
-        
         //
         // caculate number of stations, strings, antennas 
         params.number_of_stations = 1 + (3 * params.stations_per_side) * (params.stations_per_side - 1);
@@ -1212,10 +1964,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         params.number_of_strings = params.number_of_stations * params.number_of_strings_station;
         params.number_of_antennas = params.number_of_strings * params.number_of_antennas_string;
         // 
-        
-        
-        
-        //
         // prepare vectors
         for (int i=0; i<params.number_of_stations; i++) {
             stations.push_back(temp_station);
@@ -1236,15 +1984,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             
         }
         // end perpare vectors
-        //
-        
-        
-        
-        
-        
-        
-        
-        
         //
         // for ARA-37 (or more than 1 station case), need code for setting position for all 37 stations here!
         //
@@ -1296,10 +2035,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             
             stations[i].strings[3].SetX( stations[i].GetX() + (R_string * cos(PI/4.)) );
             stations[i].strings[3].SetY( stations[i].GetY() - (R_string * sin(PI/4.)) );
-            
-            
-            
-            
             //
             // set antenna postions in borehole
             // and set type (h or v pol antenna) and set orientation (facing x or y)
@@ -1481,28 +2216,42 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         max_number_of_antennas_station = params.number_of_strings_station * params.number_of_antennas_string;
         
 
-        
-
-	if (settings1->ANTENNA_MODE == 0){
+     
+	if (settings1->ANTENNA_MODE == 0){//standard, old antenna models
+	  cout << "Using old, standard antenna models"<<endl;
 	  // test read V-pol gain file!!
 	  ReadVgain("ARA_bicone6in_output.txt");
 	  // test read H-pol gain file!!
-	  ReadHgain("ARA_dipoletest1_output.txt");
+	  if (settings1->LPDA_MODE == 1){
+	    ReadHgain("ARIANNA_LPDA.txt");
+	    cout << "Using ARIANNA LPDA as hpol"<<endl;
+	  }
+	  ReadHgain("ARA_dipoletest1_output.txt");	    
 	}
 	else if (settings1->ANTENNA_MODE == 1) {
 	  // test read V-pol gain file!!
 	  ReadVgain("ARA_bicone6in_output.txt", settings1);
 	  ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
 	  // test read H-pol gain file!!
+	  if (settings1->LPDA_MODE == 1){
+	    ReadHgain("ARIANNA_LPDA.txt");
+	    cout << "Using ARIANNA LPDA as hpol"<<endl;
+	  }
 	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
 	}
-	else if (settings1->ANTENNA_MODE == 2){
+	else if (settings1->ANTENNA_MODE == 2){//New antenna models from Simon A.
+	  cout << "Using new antenna models from Simon A."<<endl;
 	  // test read V-pol gain file!!
-	  ReadVgain("Arianna_WIPLD_hpol.dat");
+	  ReadVgain("VPol_XFDTD_FullPlate.txt");
 	  // test read H-pol gain file!!
-	  ReadHgain("Arianna_WIPLD_hpol.dat");
+	  if (settings1->LPDA_MODE == 1){
+	    ReadHgain("ARIANNA_LPDA.txt");
+	    cout << "Using ARIANNA LPDA as hpol"<<endl;
+	  }
+	  ReadHgain("HPol_XFDTD_CurrentMod.txt");
 	}
 
+	
 	//	if (settings1->NOISE==2){
 	ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 	  //	}
@@ -1533,10 +2282,11 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
         }
         else if (settings1->CUSTOM_ELECTRONICS==1){
-            //read a custom user defined electronics gain
+        //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
              ReadElectChain("./data/custom_electronics.txt", settings1);
         }
+        cout<<"done read elect chain"<<endl;
         
         
     }
@@ -1764,30 +2514,39 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                 if (max_number_of_antennas_station < antenna_count) max_number_of_antennas_station = antenna_count;
             }
 
-
             
-            
-
-
-
-	    if (settings1->ANTENNA_MODE == 0){
+	    if (settings1->ANTENNA_MODE == 0){//standard, old antenna models
+	      cout << "Using old, standard antenna models"<<endl;
 	      // test read V-pol gain file!!
 	      ReadVgain("ARA_bicone6in_output.txt");
 	      // test read H-pol gain file!!
-	      ReadHgain("ARA_dipoletest1_output.txt");
+	      if (settings1->LPDA_MODE == 1){
+		ReadHgain("ARIANNA_LPDA.txt");
+		cout << "Using ARIANNA LPDA as hpol"<<endl;
+	      }
+	      ReadHgain("ARA_dipoletest1_output.txt");	    
 	    }
 	    else if (settings1->ANTENNA_MODE == 1) {
 	      // test read V-pol gain file!!
 	      ReadVgain("ARA_bicone6in_output.txt", settings1);
 	      ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
 	      // test read H-pol gain file!!
+	      if (settings1->LPDA_MODE == 1){
+		ReadHgain("ARIANNA_LPDA.txt");
+		cout << "Using ARIANNA LPDA as hpol"<<endl;
+	      }
 	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
 	    }
-	    else if (settings1->ANTENNA_MODE == 2) {
+	    else if (settings1->ANTENNA_MODE == 2){//New antenna models from Simon A.
+	      cout << "Using new antenna models from Simon A."<<endl;
 	      // test read V-pol gain file!!
-	      ReadVgain("Arianna_WIPLD_hpol.dat");
+	      ReadVgain("VPol_XFDTD_FullPlate.txt");
 	      // test read H-pol gain file!!
-	      ReadHgain("Arianna_WIPLD_hpol.dat");
+	      if (settings1->LPDA_MODE == 1){
+		ReadHgain("ARIANNA_LPDA.txt");
+		cout << "Using ARIANNA LPDA as hpol"<<endl;
+	      }
+	      ReadHgain("HPol_XFDTD_CurrentMod.txt");
 	    }
 	    
 
@@ -1842,17 +2601,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	    
             // read total elec. chain response file!!
 	    cout<<"start read elect chain"<<endl;
-        if(settings1->CUSTOM_ELECTRONICS==0){
-            //read the standard ARA electronics
-            cout<<"     Reading standard ARA electronics response"<<endl;
-             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
+            ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
             //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
-        }
-        else if (settings1->CUSTOM_ELECTRONICS==1){
-            //read a custom user defined electronics gain
-            cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/custom_electronics.txt", settings1);
-        }
 	    cout<<"done read elect chain"<<endl;
 	    
 
@@ -2069,28 +2819,39 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             }
 
 
-            
-            
-
-
-	    if (settings1->ANTENNA_MODE == 0){
+  
+	    if (settings1->ANTENNA_MODE == 0){//standard, old antenna models
+	      cout << "Using old, standard antenna models"<<endl;
 	      // test read V-pol gain file!!
 	      ReadVgain("ARA_bicone6in_output.txt");
 	      // test read H-pol gain file!!
-	      ReadHgain("ARA_dipoletest1_output.txt");
+	      if (settings1->LPDA_MODE == 1){
+		ReadHgain("ARIANNA_LPDA.txt");
+		cout << "Using ARIANNA LPDA as hpol"<<endl;
+	      }
+	      ReadHgain("ARA_dipoletest1_output.txt");	    
 	    }
 	    else if (settings1->ANTENNA_MODE == 1) {
 	      // test read V-pol gain file!!
 	      ReadVgain("ARA_bicone6in_output.txt", settings1);
 	      ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
 	      // test read H-pol gain file!!
+	      if (settings1->LPDA_MODE == 1){
+		ReadHgain("ARIANNA_LPDA.txt");
+		cout << "Using ARIANNA LPDA as hpol"<<endl;
+	      }
 	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
 	    }
-	    else if (settings1->ANTENNA_MODE == 2){
+	    else if (settings1->ANTENNA_MODE == 2){//New antenna models from Simon A.
+	      cout << "Using new antenna models from Simon A."<<endl;
 	      // test read V-pol gain file!!
-	      ReadVgain("Arianna_WIPLD_hpol.dat");
+	      ReadVgain("VPol_XFDTD_FullPlate.txt");
 	      // test read H-pol gain file!!
-	      ReadHgain("Arianna_WIPLD_hpol.dat");
+	      if (settings1->LPDA_MODE == 1){
+		ReadHgain("ARIANNA_LPDA.txt");
+		cout << "Using ARIANNA LPDA as hpol"<<endl;
+	      }
+	      ReadHgain("HPol_XFDTD_CurrentMod.txt");
 	    }
 
 	    //	    if (settings1->NOISE == 2){
@@ -2196,17 +2957,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         
             // read total elec. chain response file!!
 	    cout<<"start read elect chain"<<endl;
-        if(settings1->CUSTOM_ELECTRONICS==0){
-            //read the standard ARA electronics
-            cout<<"     Reading standard ARA electronics response"<<endl;
-             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
+            ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
             //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
-        }
-        else if (settings1->CUSTOM_ELECTRONICS==1){
-            //read a custom user defined electronics gain
-            cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/custom_electronics.txt", settings1);
-        }
 	    cout<<"done read elect chain"<<endl;
     
 	    // if calpulser case
@@ -2262,7 +3014,7 @@ inline void Detector::ReadVgain(string filename) {
                 getline (NecOut, line);
                 if ( line.substr(0, line.find_first_of(":")) == "freq ") {
 		  Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-		  cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
+		  //	  cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
 		  getline (NecOut, line); //read SWR
 		  
 		  getline (NecOut, line); //read names
@@ -2966,83 +3718,54 @@ double Detector::GetGain_1D( double freq, double theta, double phi, int ant_m ) 
 
 // set outside value as 0
 double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m ) {
-
-
     // find nearest theta, phi bin
     //
     //int i = (int)(theta/5.);
     //int j = (int)(phi/5.);
-
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
     int j = (int)( (phi+2.5)/5. );
-
     if ( j == 72 ) j = 0;
-
     int angle_bin = 37*j+i;
-
     // now just do linear interpolation at that angle
     //
-
     double slope_1; // slope of init part
-
     double Gout;
-
     int bin = (int)( (freq - freq_init) / freq_width )+1;
-
     // Vpol
     if ( ant_m == 0 ) {
-
         slope_1 = (Vgain[1][angle_bin] - Vgain[0][angle_bin]) / (Freq[1] - Freq[0]);
-
-
         // if freq is lower than freq_init
         if ( freq < freq_init ) {
-
             Gout = slope_1 * (freq - Freq[0]) + Vgain[0][angle_bin];
         }
         // if freq is higher than last freq
         else if ( freq > Freq[freq_step-1] ) {
-
             //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
             Gout = 0.;
         }
-
         else {
-
             Gout = Vgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vgain[bin][angle_bin]-Vgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
         } // not outside the Freq[] range
-    
     } // Vpol case
-
     // Hpol
     else if ( ant_m == 1 ) {
-
         slope_1 = (Hgain[1][angle_bin] - Hgain[0][angle_bin]) / (Freq[1] - Freq[0]);
-
-
         // if freq is lower than freq_init
         if ( freq < freq_init ) {
-
             Gout = slope_1 * (freq - Freq[0]) + Hgain[0][angle_bin];
         }
         // if freq is higher than last freq
         else if ( freq > Freq[freq_step-1] ) {
-
             //Gout = slope_2 * (freq - Freq[freq_step-1]) + Hgain[freq_step-1][angle_bin];
             Gout = 0.;
         }
-
         else {
-
             Gout = Hgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hgain[bin][angle_bin]-Hgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
         } // not outside the Freq[] range
     
     } // Hpol case
-
-
     return Gout;
-
 }
 
 
@@ -5969,7 +6692,6 @@ void Detector::GetSSAfromChannel ( int stationID, int channelNum, int * antennaN
 void Detector::GetSSAfromChannel ( int stationID, int channelNum, int * antennaNum, int * stringNum, Settings *settings1) {
     *stringNum = -1;
     *antennaNum = -1;
-
     // for the cases when actual installed TestBed stations geom info is in use
     if ( settings1->DETECTOR==3 ) {
       for (int i = 0; i < int(InstalledStations[stationID].VHChannel.size()); i++){
@@ -5986,7 +6708,6 @@ void Detector::GetSSAfromChannel ( int stationID, int channelNum, int * antennaN
       }
     }
     else if (settings1->DETECTOR==4){
-
       for (int i = 0; i < int(InstalledStations[stationID].VHChannel.size()); i++){
 	for (int j = 0; j < int(InstalledStations[stationID].VHChannel[i].size()); j++){
 	  if (channelNum == InstalledStations[stationID].VHChannel[i][j]){
@@ -5995,7 +6716,6 @@ void Detector::GetSSAfromChannel ( int stationID, int channelNum, int * antennaN
 	  }
 	}
       }
-      
       if (*stringNum == -1){
 	cerr << "No string/antenna matches the channel number" << endl;
       }
@@ -6003,7 +6723,6 @@ void Detector::GetSSAfromChannel ( int stationID, int channelNum, int * antennaN
     }
     // if only ideal stations are in use and also installed ARA1a (use ARA1a ch mapping for now)
     else {
-
         for (int i = 0; i < int(InstalledStations[1].VHChannel.size()); i++){
             for (int j = 0; j < int(InstalledStations[1].VHChannel[i].size()); j++){
                 if (channelNum == InstalledStations[1].VHChannel[i][j]){
@@ -6012,12 +6731,10 @@ void Detector::GetSSAfromChannel ( int stationID, int channelNum, int * antennaN
                 }
             }
         }
-    
         if (*stringNum == -1){
             cerr << "No string/antenna matches the channel number" << endl;
         }
     }
-    
     return;
 }
 

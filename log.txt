@@ -1515,5 +1515,11 @@ Control flag is LPDA_MODE. (Jorge)
 LPDA_MODE = 0  (default): do nothing
 LPDA_MODE = 1 : use the LPDA
 
+5A) Update Detector.cc with slightly modified geometries for the strawman and punch stations (Yue)
+
+5B) Allow Detector.cc to actually load the LPDA and XFDTD files (Jorge)
+
+5C) Allow Detector.cc to actually load the new custom electronics files (Brian)
+
 
 ============================================================================
