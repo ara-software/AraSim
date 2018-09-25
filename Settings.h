@@ -282,7 +282,9 @@ class Settings
 
 	int ANTENNA_MODE; // 0: old default antenna models bicone/rotated dipole
 	                   // 1: using different antenna response for the top Vpol antennas, otherwise same as old default
-
+	                   // 2: same as 0, but using new antenna models provided by Simon A.
+	int LPDA_MODE; // 1: Use Arianna's LPDAs for the hpol channels
+	  
 	int APPLY_NOISE_FIGURE; // 0: do not apply new noise figure from Thomas Meures 2016
 	                        // 1: apply new noise figure to data
 

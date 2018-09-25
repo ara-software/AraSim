@@ -1493,11 +1493,27 @@ Added flexible antennas_per_string and strings_per_station to setup file read-in
 
 2018/09/25 Brian Clark:
 
-These will be a series of small committs, all list below.
+These will be a series of small commits, summarizing work by myself, Jorge Torres-Espinosa,
+and Yue Pan. They are the following:
 
-1) Add branch for NGRA design work, in branches/ngra_design_studies
-2) Add Vpol and Hpol XFDTD antenna models
-3) Add ARIANNA LPDA
+1) Add branch for NGRA design work, in branches/ngra_design_studies (Brian)
+
+2) Add Vpol and Hpol XFDTD antenna models (Jorge)
+
+3) Add ARIANNA LPDA (Jorge)
+
+4A) Update Settings.h and Settings.cc to allow for the loading of the CHIBA
+XFDTD files of ARA Vpol and Hpol. (Jorge)
+
+Now ANTENNA_MODE==2 uses vpol and hpol sims from Chiba instead of default bicones/quad slots.
+And, LPDA_MODE allows you to use the ARIANNA LPDA instead of Hpol
+
+
+4B) Add option to use the ARIANNA LPDA in place of the ARA Hpol antennas.
+Control flag is LPDA_MODE. (Jorge)
+
+LPDA_MODE = 0  (default): do nothing
+LPDA_MODE = 1 : use the LPDA
 
 
 ============================================================================
