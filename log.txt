@@ -1493,6 +1493,10 @@ Added flexible antennas_per_string and strings_per_station to setup file read-in
 
 2018/09/25 Brian Clark:
 
-Add branch for NGRA design work, in branches/ngra_design_studies
+These will be a series, all list below.
+
+1) Add branch for NGRA design work, in branches/ngra_design_studies
+2) Add Vpol and Hpol XFDTD antenna models
+
 
 ============================================================================
