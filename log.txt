@@ -1530,9 +1530,9 @@ TRIG_SCAN_MODE=9 now selects the hi-lo triggering scheme with the following cond
         (1) 2/4 LPDA at 4.1 sigma
         (2) 4/4 5m dipoles at 3 sigma
         (3) one phased array antenna at 2 sigma
-    Where sigma = 9.6 microvolts (9.6e-6 volts) IF you're not running with noise and are running with custom electronics
-    If you're running with noise and no custom electronics, it defautls to sigma= trigger->rmsvoltage
-    We cannot currently run with custom_electronics and noise on. 
+    Where sigma = 9.6 microvolts (9.6e-6 volts) IF you're NOT running with noise and ARE running with custom electronics
+    If you're running with no custom electronics, it uses sigma= trigger->rmsvoltage, regardless of noise setting
+    We cannot currently run with custom_electronics on and noise on. 
     There is a check in SETTINGS.cc you from trying to run with noise on and custom electronics on simultaneously
 
 TRIG_SCAN_MODE=10 selects the simple voltage-threshold tripping trigger

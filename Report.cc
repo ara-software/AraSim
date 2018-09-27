@@ -3744,9 +3744,9 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 										//you should only be using CUSTOM_ELECTRONICS right now if the noise is OFF
 										noise_level = 9.3e-6; //noise off
 									}
-									else if(settings1->CUSTOM_ELECTRONICS==0 && (settings1->TRIG_ANALYSIS_MODE==0 || settings1->TRIG_ANALYSIS_MODE==2))
+									else if(settings1->CUSTOM_ELECTRONICS==0)
 									{
-										//we need to use the RMS of the noise, not our unamplified signal level
+										//no custom electronics, so use the RMS of the generated noise
 										noise_level = trigger->rmsvoltage; 
 									}
 
