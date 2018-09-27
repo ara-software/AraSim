@@ -3738,9 +3738,18 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 									bool has_lo=false;
 									double high_check_val = 100000.; //some crazy high value
 									double lo_check_val = -100000.; //some crazy low value
-									double noise_level = 9.3e-6; //9.3 uV
-									//double noise_level = 1.8e-5;
-									//double noise_level = trigger->rmsvoltage; //just assume a constant noise rms
+									double noise_level = 0.;
+									if(settings1->CUSTOM_ELECTRONICS==1 && settings1->TRIG_ANALYSIS_MODE==1)
+									{
+										//you should only be using CUSTOM_ELECTRONICS right now if the noise is OFF
+										noise_level = 9.3e-6; //noise off
+									}
+									else if(settings1->CUSTOM_ELECTRONICS==0 && (settings1->TRIG_ANALYSIS_MODE==0 || settings1->TRIG_ANALYSIS_MODE==2))
+									{
+										//we need to use the RMS of the noise, not our unamplified signal level
+										noise_level = trigger->rmsvoltage; 
+									}
+
 									double lpda_hi = 4.1 * noise_level;
 									double lpda_lo = -4.1 * noise_level;
 									double dipole_hi = 3. * noise_level;
