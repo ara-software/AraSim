@@ -1540,3 +1540,9 @@ TRIG_SCAN_MODE=10 selects the simple voltage-threshold tripping trigger
     Will trigger if any channels has more than 40 microvolts (40e-6)
 
 ============================================================================
+
+2018/10/01 Brian Clark:
+
+Make the trigger module track which channels got triggered
+
+============================================================================
