@@ -1545,4 +1545,8 @@ TRIG_SCAN_MODE=10 selects the simple voltage-threshold tripping trigger
 
 Make the trigger module track which channels got triggered
 
+Make it so that the trigger for the phased array in TRIG_SCAN_MODE=9 triggers
+if the phased array has a high or low of 2 sigma, where the LPDAs and dipoles
+must have high AND low
+
 ============================================================================

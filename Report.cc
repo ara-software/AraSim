@@ -3792,10 +3792,16 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 									we get to say we have a channel with a hi+low trigger
 									*/
 									//see if any channels triggered in this particular 5ns section
+									//dipoles + LPDAs must trigger on hi AND low
 									if(has_hi && has_lo){
 										channel_trig_this_hilo_bin[check_chan]=true; //mark this channel as being hit
-										// printf("		Hi-Lo Trigger!! Chan %d <-------------------\n");
+										// printf("		Hi and Lo Trigger (LPDA/Phased)!! Chan %d <-------------------\n");
 										//this way, if once you've shifted the 5ns over and this channel triggers again, it just keeps getting set hi
+									}
+									//the phased array may trigger on a hi OR low
+									if(string_i==0 && antenna_i==0 && (has_hi || has_lo) ){
+										channel_trig_this_hilo_bin[check_chan]=true; //mark this channel as being hit
+										// printf("		Hi or Lo Trigger (PA)!! Chan %d <-------------------\n");
 									}
 									check_chan++;
 								}//loop over channels
@@ -3825,7 +3831,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 							}
 							if(num_phased_trigger>0){
 								has_phased_trigger=true;
-								//printf("It's the PA that triggered! (%d chans)\n",num_phased_trigger);
+								// printf("It's the PA that triggered! (%d chans)\n",num_phased_trigger);
 								stations[i].strings[0].antennas[0].Trig_Pass = 1;
 							}
 							
@@ -3851,7 +3857,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 							}
 							if(num_lpda_trigger>1){
 								has_lpda_trigger=true;
-								//printf("It's the LPDA that triggered! (%d chans) \n",num_lpda_trigger);
+								// printf("It's the LPDA that triggered! (%d chans) \n",num_lpda_trigger);
 								check_chan=0;
 								while(check_chan<ch_ID){
 									int string_i = detector->getStringfromArbAntID(i, check_chan);
@@ -3890,7 +3896,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 							}
 							if(num_dipole_trigger==4){
 								has_dipole_trigger=true;
-								//printf("It's the Dipoles that triggered! (%d chans)\n",num_dipole_trigger);
+								// printf("It's the Dipoles that triggered! (%d chans)\n",num_dipole_trigger);
 								check_chan=0;
 								while(check_chan<ch_ID){
 									int string_i = detector->getStringfromArbAntID(i, check_chan);
@@ -3899,14 +3905,14 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 									if(channel_trig_this_coincidence[check_chan]==true){
 										stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 1;
 									}
-                                                                        check_chan++;
+									check_chan++;
 								}
 								//check_chan++;
 							}
 
 							if(has_dipole_trigger || has_lpda_trigger || has_phased_trigger){
 								stations[i].Global_Pass = 1; //if this is true in a 50ns window, we've achieved a global trigger!
-								break; //get out, we're done
+								// break; //get out, we're done
 							}
 							trig_i++; //advance the multi-channel coincidence window
 						}//multi-channel coincdience  window loop
