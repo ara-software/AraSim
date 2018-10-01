@@ -3722,7 +3722,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 									int ant_type = detector->stations[i].strings[string_i].antennas[antenna_i].type;
 									double X = detector->stations[i].strings[string_i].antennas[antenna_i].GetX();
 									double Y = detector->stations[i].strings[string_i].antennas[antenna_i].GetY();
-									double Z = detector->stations[i].strings[string_i].antennas[antenna_i].GetZ();
+									double Z = detector->stations[i].strings[string_i].antennas[antenna_i].GetZ() - detector->stations[i].GetZ();
 									//printf("		String %d , Antenna %d, Channel Num %d \n",string_i, antenna_i, channel_num);
 
 									bool has_hi=false;
@@ -3825,7 +3825,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 							}
 							if(num_phased_trigger>0){
 								has_phased_trigger=true;
-								// printf("It's the PA that triggered! (%d chans)\n",num_phased_trigger);
+								//printf("It's the PA that triggered! (%d chans)\n",num_phased_trigger);
 								stations[i].strings[0].antennas[0].Trig_Pass = 1;
 							}
 							
@@ -3851,7 +3851,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 							}
 							if(num_lpda_trigger>1){
 								has_lpda_trigger=true;
-								// printf("It's the LPDA that triggered! (%d chans) \n",num_lpda_trigger);
+								//printf("It's the LPDA that triggered! (%d chans) \n",num_lpda_trigger);
 								check_chan=0;
 								while(check_chan<ch_ID){
 									int string_i = detector->getStringfromArbAntID(i, check_chan);
@@ -3860,8 +3860,9 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 									if(channel_trig_this_coincidence[check_chan]==true){
 										stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 1;
 									}
+                                                                        check_chan++;
 								}
-								check_chan++;
+								//check_chan++;
 							}
 
 							//
@@ -3889,7 +3890,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 							}
 							if(num_dipole_trigger==4){
 								has_dipole_trigger=true;
-								// printf("It's the Dipoles that triggered! (%d chans)\n",num_dipole_trigger);
+								//printf("It's the Dipoles that triggered! (%d chans)\n",num_dipole_trigger);
 								check_chan=0;
 								while(check_chan<ch_ID){
 									int string_i = detector->getStringfromArbAntID(i, check_chan);
@@ -3898,8 +3899,9 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 									if(channel_trig_this_coincidence[check_chan]==true){
 										stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 1;
 									}
+                                                                        check_chan++;
 								}
-								check_chan++;
+								//check_chan++;
 							}
 
 							if(has_dipole_trigger || has_lpda_trigger || has_phased_trigger){

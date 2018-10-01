@@ -421,7 +421,8 @@ double cur_posnu_z;
         for (int j=0; j<detector->stations[i].strings.size(); j++) {
             for (int k=0; k<detector->stations[i].strings[j].antennas.size(); k++) {
                 ch_count++;
-                cout<<"station["<<i<<"].strings["<<j<<"].antennas["<<k<<"] no_ch:"<<ch_count<<endl;
+                cout<<"station["<<i<<"].strings["<<j<<"].antennas["<<k<<"] no_ch:"<<ch_count<< "; x; y; z: " << detector->stations[i].strings[j].antennas[k].GetX() << "; " << detector->stations[i].strings[j].antennas[k].GetY() << "; " << detector->stations[i].strings[j].antennas[k].GetZ();
+                printf(" = %.5f\n", detector->stations[i].strings[j].antennas[k].GetZ());
             }
         }
     }
