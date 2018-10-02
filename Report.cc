@@ -701,7 +701,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
 											}
-                                                                                        if (settings1->ANTENNA_MODE == 3) {
+                                                                                        if (settings1->ANTENNA_MODE == 2) {
 												heff =
 														GaintoHeight(
 																detector->GetGain_1D_OutZero(
