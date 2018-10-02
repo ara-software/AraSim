@@ -1750,34 +1750,46 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	  cout << "Using old, standard antenna models"<<endl;
 	  // test read V-pol gain file!!
 	  ReadVgain("ARA_bicone6in_output.txt");
+          cout << "Read ARA_bicone6in_output.txt" << endl;
 	  // test read H-pol gain file!!
 	  if (settings1->LPDA_MODE == 1){
 	    ReadHgain("ARIANNA_LPDA.txt");
 	    cout << "Using ARIANNA LPDA as hpol"<<endl;
-	  }
-	  ReadHgain("ARA_dipoletest1_output.txt");	    
+	  } 
+          else if (settings1->LPDA_MODE == 0){
+  	    ReadHgain("ARA_dipoletest1_output.txt");	    
+            cout << "Read ARA_dipoletest1_output.txt" << endl;
+          }
 	}
 	else if (settings1->ANTENNA_MODE == 1) {
 	  // test read V-pol gain file!!
 	  ReadVgain("ARA_bicone6in_output.txt", settings1);
+          cout << "Read ARA_bicone6in_output.txt" << endl;
 	  ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
 	  // test read H-pol gain file!!
 	  if (settings1->LPDA_MODE == 1){
 	    ReadHgain("ARIANNA_LPDA.txt");
 	    cout << "Using ARIANNA LPDA as hpol"<<endl;
 	  }
-	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
+          else if (settings1->LPDA_MODE == 0){
+	    ReadHgain("ARA_dipoletest1_output.txt", settings1);
+            cout << "Read ARA_dipoletest1_output.txt" << endl;
+          }
 	}
 	else if (settings1->ANTENNA_MODE == 2){//New antenna models from Simon A.
 	  cout << "Using new antenna models from Simon A."<<endl;
 	  // test read V-pol gain file!!
 	  ReadVgain("VPol_XFDTD_FullPlate.txt");
+          cout << "Read VPol_XFDTD_FullPlate.txt" << endl;
 	  // test read H-pol gain file!!
 	  if (settings1->LPDA_MODE == 1){
 	    ReadHgain("ARIANNA_LPDA.txt");
 	    cout << "Using ARIANNA LPDA as hpol"<<endl;
 	  }
-	  ReadHgain("HPol_XFDTD_CurrentMod.txt");
+          else if (settings1->LPDA_MODE == 0){
+	    ReadHgain("HPol_XFDTD_CurrentMod.txt");
+            cout << "Read HPol_XFDTD_CurrentMod.txt" << endl;
+          }
 	}
         	
 	//	if (settings1->NOISE == 2){
@@ -2221,34 +2233,46 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	  cout << "Using old, standard antenna models"<<endl;
 	  // test read V-pol gain file!!
 	  ReadVgain("ARA_bicone6in_output.txt");
+          cout << "Read ARA_bicone6in_output.txt" << endl;
 	  // test read H-pol gain file!!
 	  if (settings1->LPDA_MODE == 1){
 	    ReadHgain("ARIANNA_LPDA.txt");
 	    cout << "Using ARIANNA LPDA as hpol"<<endl;
 	  }
-	  ReadHgain("ARA_dipoletest1_output.txt");	    
+          else if (settings1->LPDA_MODE == 0){
+	    ReadHgain("ARA_dipoletest1_output.txt");	    
+            cout << "Read ARA_dipoletest1_output.txt" << endl;
+          }
 	}
 	else if (settings1->ANTENNA_MODE == 1) {
 	  // test read V-pol gain file!!
 	  ReadVgain("ARA_bicone6in_output.txt", settings1);
+          cout << "Read ARA_bicone6in_output.txt" << endl;
 	  ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
 	  // test read H-pol gain file!!
 	  if (settings1->LPDA_MODE == 1){
 	    ReadHgain("ARIANNA_LPDA.txt");
 	    cout << "Using ARIANNA LPDA as hpol"<<endl;
 	  }
-	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
+          else if (settings1->LPDA_MODE == 0){
+	    ReadHgain("ARA_dipoletest1_output.txt", settings1);
+            cout << "Read ARA_dipoletest1_output.txt" << endl;
+          }
 	}
 	else if (settings1->ANTENNA_MODE == 2){//New antenna models from Simon A.
 	  cout << "Using new antenna models from Simon A."<<endl;
 	  // test read V-pol gain file!!
 	  ReadVgain("VPol_XFDTD_FullPlate.txt");
+          cout << "Read VPol_XFDTD_FullPlate.txt" << endl;
 	  // test read H-pol gain file!!
 	  if (settings1->LPDA_MODE == 1){
 	    ReadHgain("ARIANNA_LPDA.txt");
 	    cout << "Using ARIANNA LPDA as hpol"<<endl;
 	  }
-	  ReadHgain("HPol_XFDTD_CurrentMod.txt");
+          else if (settings1->LPDA_MODE == 0){
+	    ReadHgain("HPol_XFDTD_CurrentMod.txt");
+            cout << "Read HPol_XFDTD_CurrentMod.txt" << endl;
+          }
 	}
 
 	
@@ -2519,34 +2543,46 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      cout << "Using old, standard antenna models"<<endl;
 	      // test read V-pol gain file!!
 	      ReadVgain("ARA_bicone6in_output.txt");
+              cout << "Read ARA_bicone6in_output.txt" << endl;
 	      // test read H-pol gain file!!
 	      if (settings1->LPDA_MODE == 1){
 		ReadHgain("ARIANNA_LPDA.txt");
 		cout << "Using ARIANNA LPDA as hpol"<<endl;
 	      }
-	      ReadHgain("ARA_dipoletest1_output.txt");	    
+              else if (settings1->LPDA_MODE == 0){
+	        ReadHgain("ARA_dipoletest1_output.txt");	    
+                cout << "Read ARA_dipoletest1_output.txt" << endl;
+              }
 	    }
 	    else if (settings1->ANTENNA_MODE == 1) {
 	      // test read V-pol gain file!!
 	      ReadVgain("ARA_bicone6in_output.txt", settings1);
+              cout << "Read ARA_bicone6in_output.txt" << endl;
 	      ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
 	      // test read H-pol gain file!!
 	      if (settings1->LPDA_MODE == 1){
 		ReadHgain("ARIANNA_LPDA.txt");
 		cout << "Using ARIANNA LPDA as hpol"<<endl;
 	      }
-	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
+              else if (settings1->LPDA_MODE == 0){
+	        ReadHgain("ARA_dipoletest1_output.txt", settings1);
+                cout << "Read ARA_dipoletest1_output.txt" << endl;
+              }
 	    }
 	    else if (settings1->ANTENNA_MODE == 2){//New antenna models from Simon A.
 	      cout << "Using new antenna models from Simon A."<<endl;
 	      // test read V-pol gain file!!
 	      ReadVgain("VPol_XFDTD_FullPlate.txt");
+              cout << "Read VPol_XFDTD_FullPlate.txt" << endl;
 	      // test read H-pol gain file!!
 	      if (settings1->LPDA_MODE == 1){
 		ReadHgain("ARIANNA_LPDA.txt");
 		cout << "Using ARIANNA LPDA as hpol"<<endl;
 	      }
-	      ReadHgain("HPol_XFDTD_CurrentMod.txt");
+              else if (settings1->LPDA_MODE == 0){
+	        ReadHgain("HPol_XFDTD_CurrentMod.txt");
+                cout << "Read HPol_XFDTD_CurrentMod.txt" << endl;
+              }
 	    }
 	    
 
@@ -2824,34 +2860,46 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      cout << "Using old, standard antenna models"<<endl;
 	      // test read V-pol gain file!!
 	      ReadVgain("ARA_bicone6in_output.txt");
+              cout << "Read ARA_bicone6in_output.txt" << endl;
 	      // test read H-pol gain file!!
 	      if (settings1->LPDA_MODE == 1){
 		ReadHgain("ARIANNA_LPDA.txt");
 		cout << "Using ARIANNA LPDA as hpol"<<endl;
 	      }
-	      ReadHgain("ARA_dipoletest1_output.txt");	    
+              else if (settings1->LPDA_MODE == 0){
+	        ReadHgain("ARA_dipoletest1_output.txt");	    
+                cout << "Read ARA_dipoletest1_output.txt" << endl;
+              }
 	    }
 	    else if (settings1->ANTENNA_MODE == 1) {
 	      // test read V-pol gain file!!
 	      ReadVgain("ARA_bicone6in_output.txt", settings1);
+              cout << "Read ARA_bicone6in_output.txt" << endl;
 	      ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
 	      // test read H-pol gain file!!
 	      if (settings1->LPDA_MODE == 1){
 		ReadHgain("ARIANNA_LPDA.txt");
 		cout << "Using ARIANNA LPDA as hpol"<<endl;
 	      }
-	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
+              else if (settings1->LPDA_MODE == 0){
+	        ReadHgain("ARA_dipoletest1_output.txt", settings1);
+                cout << "Read ARA_dipoletest1_output.txt" << endl;
+              }
 	    }
 	    else if (settings1->ANTENNA_MODE == 2){//New antenna models from Simon A.
 	      cout << "Using new antenna models from Simon A."<<endl;
 	      // test read V-pol gain file!!
 	      ReadVgain("VPol_XFDTD_FullPlate.txt");
+              cout << "Read VPol_XFDTD_FullPlate.txt" << endl;
 	      // test read H-pol gain file!!
 	      if (settings1->LPDA_MODE == 1){
 		ReadHgain("ARIANNA_LPDA.txt");
 		cout << "Using ARIANNA LPDA as hpol"<<endl;
 	      }
-	      ReadHgain("HPol_XFDTD_CurrentMod.txt");
+              else if (settings1->LPDA_MODE == 0){
+	        ReadHgain("HPol_XFDTD_CurrentMod.txt");
+                cout << "Read HPol_XFDTD_CurrentMod.txt" << endl;
+              }
 	    }
 
 	    //	    if (settings1->NOISE == 2){

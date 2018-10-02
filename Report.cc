@@ -659,6 +659,20 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
 											}
+                                                                                        if (settings1->ANTENNA_MODE == 2) {
+												heff =
+														GaintoHeight(
+																detector->GetGain_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		detector->stations[i].strings[j].antennas[k].type),
+																freq_tmp,
+																icemodel->GetN(
+																		detector->stations[i].strings[j].antennas[k]));
+											}
+
 										} else if (settings1->ALL_ANT_V_ON
 												== 1) {
 											if (settings1->ANTENNA_MODE == 0) {
@@ -687,6 +701,20 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
 											}
+                                                                                        if (settings1->ANTENNA_MODE == 3) {
+												heff =
+														GaintoHeight(
+																detector->GetGain_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		0),
+																freq_tmp,
+																icemodel->GetN(
+																		detector->stations[i].strings[j].antennas[k]));
+											}
+
 										}
 
 										//cout<<"n_medium : "<<icemodel->GetN(detector->stations[i].strings[j].antennas[k])<<endl;
@@ -965,6 +993,21 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		icemodel->GetN(
 																				detector->stations[i].strings[j].antennas[k]));
 													}
+                                                                                                        if (settings1->ANTENNA_MODE
+															== 2) {
+														heff_lastbin =
+																GaintoHeight(
+																		detector->GetGain_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				detector->stations[i].strings[j].antennas[k].type),
+																		freq_tmp,
+																		icemodel->GetN(
+																				detector->stations[i].strings[j].antennas[k]));
+													}
+
 												} else if (settings1->ALL_ANT_V_ON
 														== 1) {
 
@@ -997,6 +1040,21 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		icemodel->GetN(
 																				detector->stations[i].strings[j].antennas[k]));
 													}
+                                                                                                        if (settings1->ANTENNA_MODE
+															== 2) {
+														heff_lastbin =
+																GaintoHeight(
+																		detector->GetGain_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				0),
+																		freq_tmp,
+																		icemodel->GetN(
+																				detector->stations[i].strings[j].antennas[k]));
+													}
+
 
 												}
 
@@ -1050,6 +1108,21 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			icemodel->GetN(
 																					detector->stations[i].strings[j].antennas[k]));
 														}
+                                                                                                                if (settings1->ANTENNA_MODE
+																== 2) {
+															heff =
+																	GaintoHeight(
+																			detector->GetGain_1D_OutZero(
+																					freq_tmp
+																							* 1.E-6, // to MHz
+																					antenna_theta,
+																					antenna_phi,
+																					detector->stations[i].strings[j].antennas[k].type),
+																			freq_tmp,
+																			icemodel->GetN(
+																					detector->stations[i].strings[j].antennas[k]));
+														}
+
 													} else if (settings1->ALL_ANT_V_ON
 															== 1) {
 														if (settings1->ANTENNA_MODE
@@ -1081,6 +1154,21 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			icemodel->GetN(
 																					detector->stations[i].strings[j].antennas[k]));
 														}
+                                                                                                                if (settings1->ANTENNA_MODE
+																== 2) {
+															heff =
+																	GaintoHeight(
+																			detector->GetGain_1D_OutZero(
+																					freq_tmp
+																							* 1.E-6, // to MHz
+																					antenna_theta,
+																					antenna_phi,
+																					0),
+																			freq_tmp,
+																			icemodel->GetN(
+																					detector->stations[i].strings[j].antennas[k]));
+														}
+
 													}
 
 													stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(
@@ -1490,6 +1578,21 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		icemodel->GetN(
 																				detector->stations[i].strings[j].antennas[k]));
 													}
+                                                                                                        if (settings1->ANTENNA_MODE
+															== 2) {
+														heff =
+																GaintoHeight(
+																		detector->GetGain_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				detector->stations[i].strings[j].antennas[k].type),
+																		freq_tmp,
+																		icemodel->GetN(
+																				detector->stations[i].strings[j].antennas[k]));
+													}
+
 												}
 
 												else if (settings1->ALL_ANT_V_ON
@@ -1525,6 +1628,22 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				detector->stations[i].strings[j].antennas[k]));
 
 													}
+                                                                                                        if (settings1->ANTENNA_MODE
+															== 2) {
+														heff =
+																GaintoHeight(
+																		detector->GetGain_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				0),
+																		freq_tmp,
+																		icemodel->GetN(
+																				detector->stations[i].strings[j].antennas[k]));
+
+													}
+
 												}
 
 												stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(
@@ -1789,6 +1908,20 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																icemodel->GetN(
 																		event->Nu_Interaction[0].posnu));
 											}
+                                                                                        if (settings1->ANTENNA_MODE == 2) {
+												heff_lastbin_trans =
+														GaintoHeight(
+																detector->GetGain_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		ant_theta_trans,
+																		antenna_phi,
+																		detector->stations[i].strings[j].antennas[k].type),
+																freq_tmp,
+																icemodel->GetN(
+																		event->Nu_Interaction[0].posnu));
+											}
+
 										} else if (settings1->ALL_ANT_V_ON
 												== 1) {
 											if (settings1->ANTENNA_MODE == 0) {
@@ -1817,6 +1950,20 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																icemodel->GetN(
 																		event->Nu_Interaction[0].posnu));
 											}
+                                                                                        if (settings1->ANTENNA_MODE == 2) {
+												heff_lastbin_trans =
+														GaintoHeight(
+																detector->GetGain_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		ant_theta_trans,
+																		antenna_phi,
+																		0),
+																freq_tmp,
+																icemodel->GetN(
+																		event->Nu_Interaction[0].posnu));
+											}
+
 										}
 
 										// heff last bin for receiver ant
@@ -1855,6 +2002,20 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
 											}
+                                                                                        if (settings1->ANTENNA_MODE == 2) {
+												heff_lastbin =
+														GaintoHeight(
+																detector->GetGain_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		detector->stations[i].strings[j].antennas[k].type),
+																freq_tmp,
+																icemodel->GetN(
+																		detector->stations[i].strings[j].antennas[k]));
+											}
+
 										} else if (settings1->ALL_ANT_V_ON
 												== 1) {
 											if (settings1->ANTENNA_MODE == 0) {
@@ -1883,6 +2044,20 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
 											}
+                                                                                        if (settings1->ANTENNA_MODE == 2) {
+												heff_lastbin =
+														GaintoHeight(
+																detector->GetGain_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		0),
+																freq_tmp,
+																icemodel->GetN(
+																		detector->stations[i].strings[j].antennas[k]));
+											}
+
 										}
 
 										// apply calpulser waveform
@@ -1945,6 +2120,21 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																	icemodel->GetN(
 																			event->Nu_Interaction[0].posnu));
 												}
+                                                                                                if (settings1->ANTENNA_MODE
+														== 2) {
+													heff =
+															GaintoHeight(
+																	detector->GetGain_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			ant_theta_trans,
+																			antenna_phi,
+																			detector->stations[i].strings[j].antennas[k].type),
+																	freq_tmp,
+																	icemodel->GetN(
+																			event->Nu_Interaction[0].posnu));
+												}
+
 											} else if (settings1->ALL_ANT_V_ON
 													== 1) {
 												if (settings1->ANTENNA_MODE
@@ -1976,6 +2166,21 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																	icemodel->GetN(
 																			event->Nu_Interaction[0].posnu));
 												}
+                                                                                                if (settings1->ANTENNA_MODE
+														== 2) {
+													heff =
+															GaintoHeight(
+																	detector->GetGain_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			ant_theta_trans,
+																			antenna_phi,
+																			0),
+																	freq_tmp,
+																	icemodel->GetN(
+																			event->Nu_Interaction[0].posnu));
+												}
+
 											}
 											//
 											if (n > 0) {
@@ -2068,6 +2273,21 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																	icemodel->GetN(
 																			detector->stations[i].strings[j].antennas[k]));
 												}
+                                                                                                if (settings1->ANTENNA_MODE
+														== 2) {
+													heff =
+															GaintoHeight(
+																	detector->GetGain_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			antenna_theta,
+																			antenna_phi,
+																			detector->stations[i].strings[j].antennas[k].type),
+																	freq_tmp,
+																	icemodel->GetN(
+																			detector->stations[i].strings[j].antennas[k]));
+												}
+
 											} else if (settings1->ALL_ANT_V_ON
 													== 1) {
 												if (settings1->ANTENNA_MODE
@@ -2099,6 +2319,21 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																	icemodel->GetN(
 																			detector->stations[i].strings[j].antennas[k]));
 												}
+                                                                                                if (settings1->ANTENNA_MODE
+														== 2) {
+													heff =
+															GaintoHeight(
+																	detector->GetGain_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			antenna_theta,
+																			antenna_phi,
+																			0),
+																	freq_tmp,
+																	icemodel->GetN(
+																			detector->stations[i].strings[j].antennas[k]));
+												}
+
 											}
 
 											stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(
