@@ -3213,18 +3213,17 @@ inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
 
 inline void Detector::ReadHgain(string filename) {
   ifstream NecOut( filename.c_str() );
-    
     string line;
-    
     if ( NecOut.is_open() ) {
-      //  cout << "OK"  <<endl;
+        //cout << NecOut << "is open"  <<endl;
         while (NecOut.good() ) {
             
             for (int i=0; i<freq_step; i++) {
                 getline (NecOut, line);
                 if ( line.substr(0, line.find_first_of(":")) == "freq ") {
                     Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-		    //	    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
+                    //Freq[i] = freq_init + i * freq_width;
+		    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
 		    getline (NecOut, line); //read SWR
                     getline (NecOut, line); //read names
                     
@@ -3234,9 +3233,7 @@ inline void Detector::ReadHgain(string filename) {
                         //Hgain[i][j] = atof( line.substr( 18, 25 ).c_str() );  // read gain (not dB)
 			Hgain[i][j] = atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
 			Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
-
-			//      cout<<"HGain : "<<Hgain[i][j]<<", HPhase : "<<Hphase[i][j]<<endl;
-                        
+			//cout<<"HGain : "<<Hgain[i][j]<<", HPhase : "<<Hphase[i][j]<<endl;
                     }// end ang_step
                     
                 }// end check freq label
