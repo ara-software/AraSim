@@ -1550,3 +1550,12 @@ if the phased array has a high or low of 2 sigma, where the LPDAs and dipoles
 must have high AND low
 
 ============================================================================
+
+2018/10/02 Yue Pan:
+
+Fixed bugs in LPDA_MODE=1 and ANTENNA_MODE=2
+
+Pay attention that the SWR in ARIANNA_LPDA.txt is not used in AraSim, so I set them to be 0.0. In case you want to use SWR, you should
+do interpolation based on ARIANNA_LPDA_Origin.txt
+
+============================================================================
