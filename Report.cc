@@ -3997,7 +3997,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 										should_i_check_this_chan_for_trigger=true;
 									}
 									//it's a bicone and falls into the "shallow bicone" category
-									else if(ant_type == 0 && Z < -8.){
+									else if(ant_type == 0 && Z > -8.){
 										high_check_val = dipole_hi;
 										lo_check_val = dipole_lo;
 										should_i_check_this_chan_for_trigger=true;
@@ -4122,7 +4122,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 								double Z = detector->stations[i].strings[string_i].antennas[antenna_i].GetZ() - detector->stations[i].GetZ();
 								int ant_type = detector->stations[i].strings[string_i].antennas[antenna_i].type;
 								//need to pull out dipoles close to the surface that are *not* the phased array
-								if(ant_type == 0 && Z < -8. && channel_trig_this_hilo_bin[check_chan]==true && !(string_i==0 && antenna_i==0)){
+								if(ant_type == 0 && Z > -8. && channel_trig_this_hilo_bin[check_chan]==true && !(string_i==0 && antenna_i==0)){
 									num_dipole_trigger++;
 									Passed_chs.push_back(check_chan);
 									channel_trig_this_coincidence[check_chan]=true;
