@@ -723,18 +723,25 @@ void Settings::ReadEvtFile(string evtfile){
                 IND_NNU_THETA[l] = i;
                 IND_NNU_PHI[l] = j;
 */
+                
                 EVID.push_back(a);
                 NUFLAVORINT.push_back(b);
                 NUBAR.push_back(c);
                 PNU.push_back(d);
                 CURRENTINT.push_back(e);
-                IND_POSNU_R.push_back(f);
-                IND_POSNU_THETA.push_back(g);
-                IND_POSNU_PHI.push_back(h);
+                if (EVENT_GENERATION_MODE == 1){
+                    IND_POSNU_R.push_back(f);
+                    IND_POSNU_THETA.push_back(g);
+                    IND_POSNU_PHI.push_back(h);
+                }
+                else if (EVENT_GENERATION_MODE == 2){
+                    IND_POSNU_XX.push_back(f);
+                    IND_POSNU_YY.push_back(g);
+                    IND_POSNU_ZZ.push_back(h);
+                }
                 IND_NNU_THETA.push_back(i);
                 IND_NNU_PHI.push_back(j);
                 ELAST.push_back(k);
-
 
                 l++;
             }

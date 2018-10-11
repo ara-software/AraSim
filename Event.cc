@@ -61,7 +61,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
             settings1->SELECT_FLAVOR = settings1->NUFLAVORINT[inu_thrown];
             settings1->NU_NUBAR_SELECT_MODE = settings1->NUBAR[inu_thrown];
             settings1->SELECT_CURRENT = settings1->CURRENTINT[inu_thrown];
-            settings1->INTERACTION_MODE = 2;
+            settings1->INTERACTION_MODE = 5;
             settings1->POSNU_XX = settings1->IND_POSNU_XX[inu_thrown];
             settings1->POSNU_YY = settings1->IND_POSNU_YY[inu_thrown];
             settings1->POSNU_ZZ = settings1->IND_POSNU_ZZ[inu_thrown];

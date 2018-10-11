@@ -971,7 +971,7 @@ Interaction::Interaction(IceModel *antarctica, Detector *detector, Settings *set
       PickNear_Cylinder_AboveIce (antarctica, detector, settings1);
     }
     else if (settings1->INTERACTION_MODE == 5){
-        PickExactXYZ(antarctica, detector, settings1, settings1->XX, settings1->YY, settings1->ZZ);
+        PickExactXYZ(antarctica, detector, settings1, settings1->POSNU_XX, settings1->POSNU_YY, settings1->POSNU_ZZ);
     }
 
     
@@ -1127,7 +1127,7 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
       PickNear_Cylinder_AboveIce (antarctica, detector, settings1);
     }
     else if (settings1->INTERACTION_MODE == 5) {
-        PickExactXYZ(antarctica, detector, settings1, settings1->XX, settings1->YY, settings1->ZZ);
+        PickExactXYZ(antarctica, detector, settings1, settings1->POSNU_XX, settings1->POSNU_YY, settings1->POSNU_ZZ);
     }
 
 
@@ -1510,7 +1510,7 @@ Interaction::Interaction (Settings *settings1, Detector *detector, IceModel *ant
 	  PickNear_Cylinder_AboveIce (antarctica, detector, settings1);
 	}
         else if (settings1->INTERACTION_MODE == 5){
-            PickExactXYZ(antarctica, detector, settings1, settings1->XX, settings1->YY, settings1->ZZ);
+            PickExactXYZ(antarctica, detector, settings1, settings1->POSNU_XX, settings1->POSNU_YY, settings1->POSNU_ZZ);
         }
     }
 	

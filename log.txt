@@ -1559,3 +1559,10 @@ Pay attention that the SWR in ARIANNA_LPDA.txt is not used in AraSim, so I set t
 do interpolation based on ARIANNA_LPDA_Origin.txt
 
 ============================================================================
+
+2018/10/09 Yue Pan:
+
+Added INTERACTION_MODE=5, in which you can set the vertex position in the setup file with POSNU_XX, POSNU_YY and POSNU_ZZ. They are with
+regard to (average x of antennas, average y of antennas, icesurface)
+
+============================================================================
