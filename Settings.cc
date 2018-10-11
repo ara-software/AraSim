@@ -276,10 +276,14 @@ outputdir="outputs"; // directory where outputs go
     POSNU_THETA=-3.1415926535/4.;
     POSNU_PHI=0.;
 
+    POSNU_XX = 100.0;
+    POSNU_YY = 100.0;
+    POSNU_ZZ = -1000.0;
+
     ARBITRARY_EVENT_ATTENUATION = 1.0;
     PICK_ABOVE_HEIGHT = 3000;
 
-    EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: event mode
+    EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: event mode with POSNU_R, POSNU_THETA, POSNU_PHI, 2: event mode with POSNU_XX, POSNU_YY, POSNU_ZZ
     //    EVENT_NUM = 10;//read in event number in EVENT_GENERATION_MODE=1, no more than 100 events
     ANTENNA_MODE=0; //default: 0 - old antenna model information
     LPDA_MODE = 0; //default 0 = don't use LPDAs; 1 = use arianna's lpdas for hpol channel
@@ -636,6 +640,15 @@ void Settings::ReadFile(string setupfile) {
 	      else if (label == "POSNU_PHI") {
 		POSNU_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
 	      }
+              else if (label == "POSNU_XX") {
+                POSNU_XX = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "POSNU_YY") {
+                POSNU_YY = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "POSNU_ZZ") {
+                POSNU_ZZ = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
 	      else if (label == "ARBITRARY_EVENT_ATTENUATION") {
 		ARBITRARY_EVENT_ATTENUATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
 	      }

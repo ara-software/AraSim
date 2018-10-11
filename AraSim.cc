@@ -159,7 +159,6 @@ int main(int argc, char **argv) {   // read setup.txt file
   //  cout << "EVENT_NUM: " << settings1->EVENT_NUM << endl;
 
   if (settings1->EVENT_GENERATION_MODE == 1){
-//      string evtfile = "eventReadIn.txt";
       string evtfile = string(argv[argc - 1]);
       settings1->ReadEvtFile(evtfile);
       cout<<"Read "<< evtfile <<" file!"<<endl;
@@ -167,6 +166,16 @@ int main(int argc, char **argv) {   // read setup.txt file
 
       for (int i = 0; i < settings1->NNU; i++){
           cout << settings1->EVID[i] << "    " << settings1->NUFLAVORINT[i] << "    " << settings1->NUBAR[i] << "    " << settings1->PNU[i] << "    " << settings1->CURRENTINT[i] << "    " << settings1->IND_POSNU_R[i] << "    " << settings1->IND_POSNU_THETA[i] << "    " << settings1->IND_POSNU_PHI[i] << "    " << settings1->IND_NNU_THETA[i] << "    " << settings1->IND_NNU_PHI[i] << "    " << settings1->ELAST[i] << endl;
+      }
+  }
+  else if (settings1->EVENT_GENERATION_MODE == 2){
+      string evtfile = string(argv[argc - 1]);
+      settings1->ReadEvtFile(evtfile);
+      cout<<"Read "<< evtfile <<" file!"<<endl;
+      cout << "EVID    NUFLAVORINT    NUBAR    PNU    CURRENTINT    IND_POSNU_X    IND_POSNU_Y    IND_POSNU_Z    IND_NNU_THETA    IND_NNU_PHI    ELAST" << endl;
+
+      for (int i = 0; i < settings1->NNU; i++){
+          cout << settings1->EVID[i] << "    " << settings1->NUFLAVORINT[i] << "    " << settings1->NUBAR[i] << "    " << settings1->PNU[i] << "    " << settings1->CURRENTINT[i] << "    " << settings1->IND_POSNU_XX[i] << "    " << settings1->IND_POSNU_YY[i] << "    " << settings1->IND_POSNU_ZZ[i] << "    " << settings1->IND_NNU_THETA[i] << "    " << settings1->IND_NNU_PHI[i] << "    " << settings1->ELAST[i] << endl;
       }
   }
   // set gRandom as TRandom3 when settings1->RANDOM_MODE = 1
@@ -455,7 +464,7 @@ double cur_posnu_z;
 
 
     int nuLimit =0;
-    if (settings1->EVENT_GENERATION_MODE == 1){ //event mode read in different single events
+    if (settings1->EVENT_GENERATION_MODE == 1 || settings1->EVENT_GENERATION_MODE == 2){ //event mode read in different single events
         nuLimit = settings1->NNU;
     }
     else if (settings1->ONLY_PASSED_EVENTS == 1){
@@ -480,23 +489,6 @@ double cur_posnu_z;
 	  cout<<"Thrown "<<Events_Thrown<<endl;
       }
       
-/*      if(settings1->EVENT_GENERATION_MODE == 1){
-          settings1->SELECT_FLAVOR = settings1->NUFLAVORINT[inu];
-          settings1->NU_NUBAR_SELECT_MODE = settings1->NUBAR[inu];
-          settings1->EXPONENT = settings1->PNU[inu];
-          Spectra *spectra=new Spectra(settings1->EXPONENT);
-          settings1->SELECT_CURRENT = settings1->CURRENTINT[inu];
-          settings1->INTERACTION_MODE = 2;
-          settings1->POSNU_R = settings1->IND_POSNU_R[inu];
-          settings1->POSNU_THETA = settings1->IND_POSNU_THETA[inu];
-          settings1->POSNU_PHI = settings1->IND_POSNU_PHI[inu];
-          settings1->NNU_THIS_THETA = 1;
-          settings1->NNU_THETA = settings1->IND_NNU_THETA[inu];
-          settings1->NNU_THIS_PHI = 1;
-          settings1->NNU_PHI = settings1->IND_NNU_PHI[inu];
-
-      }
-*/
        //event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1 );
        event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1, Events_Thrown );
        event->inu_passed = -1;
@@ -752,7 +744,7 @@ double cur_posnu_z;
            }
        }
 
-       if (settings1->EVENT_GENERATION_MODE == 1){
+       if (settings1->EVENT_GENERATION_MODE == 1 || settings1->EVENT_GENERATION_MODE == 2){
            inu++;
        }
        else if (settings1->ONLY_PASSED_EVENTS == 1){

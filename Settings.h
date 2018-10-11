@@ -54,7 +54,7 @@ class Settings
 
 	int number_of_stations; // the number of stations to be used in the simulation
 
-        int INTERACTION_MODE;   // method to choose interaction point posnu. 0 : PickUnbiased, 1 : PickNear, 2 : PickExact, 3 : PickAboveIce
+        int INTERACTION_MODE;   // method to choose interaction point posnu. 0 : PickUnbiased, 1 : PickNear, 2 : PickExact, 3 : PickAboveIce, 5: PickExactXYZ
 
         double POSNU_RADIUS;    //PickNear radius in meter
 
@@ -273,11 +273,14 @@ class Settings
 	double POSNU_THETA; // default: -PI/4; elevation angle from station center coordinates
 	double POSNU_PHI; // default: 0; azimuth angle from station center coordinates
 	// Only using INTERACTION_MODE = 2, these values set the position of the interaction point; can be used in EVENT_TYPE = 0 and 10
+	double POSNU_XX;
+        double POSNU_YY;
+        double POSNU_ZZ;
 
 	double ARBITRARY_EVENT_ATTENUATION; // attenuation of the waveform intensity for arbitrary event waveforms
 	double PICK_ABOVE_HEIGHT;
 
-        int EVENT_GENERATION_MODE;//default: 0: not event mode, 1: event mode
+        int EVENT_GENERATION_MODE;//default: 0: not event mode, 1: event mode with POSNU_R, POSNU_THETA, POSNU_PHI, 2: event mode with POSNU_XX, POSNU_YY, POSNU_ZZ
 	//        int EVENT_NUM;//number of events to read in, using EVENT_GENERATION_MODE=1, default initial 0: read in the number of events in the input file, resets to total number of events read in
 
 	int ANTENNA_MODE; // 0: old default antenna models bicone/rotated dipole
@@ -292,7 +295,7 @@ class Settings
 							//1 : load a custom electronics file, stored as "custom_electronics.txt" in the `data` directory
 
 
-//arrays for saving read in event features in EVENT_GENERATION_MODE=1
+//arrays for saving read in event features in EVENT_GENERATION_MODE=1, 2
         vector<int> EVID;
         vector<int> NUFLAVORINT;
         vector<int> NUBAR;
@@ -301,6 +304,9 @@ class Settings
         vector<double> IND_POSNU_R;
         vector<double> IND_POSNU_THETA;
         vector<double> IND_POSNU_PHI;
+        vector<double> IND_POSNU_XX;
+        vector<double> IND_POSNU_YY;
+        vector<double> IND_POSNU_ZZ;
         vector<double> IND_NNU_THETA;
         vector<double> IND_NNU_PHI;
         vector<double> ELAST;

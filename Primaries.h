@@ -300,6 +300,7 @@ Interaction (IceModel *antarctica, Detector *detector, Settings *settings1, Prim
   double PickNear_Sphere (IceModel *antarctica, Detector *detector, Settings *settings1);
 
   void PickExact(IceModel *antarctica, Detector *detector, Settings *settings1, double R, double Theta, double Phi);
+  void PickExactXYZ(IceModel *antarctica, Detector *detector, Settings *settings1, double X, double Y, double Z);
   void PickNear_Cylinder_AboveIce (IceModel *antarctica, Detector *detector, Settings *settings1);
 
   bool Does_Interact(double x, double y, double z,
