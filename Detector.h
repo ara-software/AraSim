@@ -133,6 +133,8 @@ class Antenna : public Position {
     
     double GetG(Detector *D, double freq, double theta, double phi);    // read gain value from Detector class, return 2-D interpolated value
 
+    double GetZR(Detector *D, double freq, double theta, double phi);
+
 
     //ClassDef(Antenna,1);
     ClassDef(Antenna,3);
@@ -223,10 +225,12 @@ class Detector {
 	void ReadHgain(string filename, Settings *settings1);
         double Vgain[freq_step_max][ang_step_max];
         double Vphase[freq_step_max][ang_step_max];
+        double Vzr[freq_step_max][ang_step_max];
         double VgainTop[freq_step_max][ang_step_max];
         double VphaseTop[freq_step_max][ang_step_max];
         double Hgain[freq_step_max][ang_step_max];
         double Hphase[freq_step_max][ang_step_max];
+        double Hzr[freq_step_max][ang_step_max];
         double Freq[freq_step_max];
 
 
@@ -328,13 +332,18 @@ class Detector {
         double GetGain(double freq, double theta, double phi, int ant_m, int ant_o);    //read antenna gain at certain angle, certain type, and certain orientation
         double GetGain(double freq, double theta, double phi, int ant_m);   //read antenna gain at certain angle, certain type. (orientation : default)
 
+        double GetZr(double freq, double theta, double phi, int ant_m, int ant_o);    //read antenna impedance at certain angle, certain type, and certain orientation
+        double GetZr(double freq, double theta, double phi, int ant_m);   //read antenna impedance at certain angle, certain type. (orientation : default)
+
         double GetGain_1D(double freq, double theta, double phi, int ant_m);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain
 
-        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
+        double GetZr_1D(double freq, double theta, double phi, int ant_m);   //read antenna impedance at certain angle, certain type. (orientation : default) and use 1-D interpolation to get impedance
 
+        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
         double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, int ant_number);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
 
-	
+        double GetZr_1D_OutZero(double freq, double theta, double phi, int ant_m);   //read antenna impedance at certain angle, certain type. (orientation : default) and use 1-D interpolation to get impedance, if freq bigger than freq range, return 0 impedance
+        double GetZr_1D_OutZero(double freq, double theta, double phi, int ant_m, int ant_number);   //read antenna impedance at certain angle, certain type. (orientation : default) and use 1-D interpolation to get impedance, if freq bigger than freq range, return 0 impedance
 
 
         double GetAntPhase(double freq, double theta, double phi, int ant_m); // return antenna phase with 2-D interpolation

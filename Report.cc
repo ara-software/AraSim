@@ -635,12 +635,14 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 											if (settings1->ANTENNA_MODE == 0) {
 												heff =
 														GaintoHeight(
-																detector->GetGain_1D_OutZero(
-																		freq_tmp
-																				* 1.E-6, // to MHz
+																detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, // to MHz
 																		antenna_theta,
 																		antenna_phi,
-																		detector->stations[i].strings[j].antennas[k].type),
+																		detector->stations[i].strings[j].antennas[k].type), 
+                                                                                                                                detector->GetZr_1D_OutZero(freq_tmp * 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		detector->stations[i].strings[j].antennas[k].type), 
 																freq_tmp,
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
@@ -655,6 +657,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		antenna_phi,
 																		detector->stations[i].strings[j].antennas[k].type,
 																		k),
+                                                                                                                                detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		detector->stations[i].strings[j].antennas[k].type,
+																		k),
 																freq_tmp,
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
@@ -663,8 +672,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 												heff =
 														GaintoHeight(
 																detector->GetGain_1D_OutZero(
-																		freq_tmp
-																				* 1.E-6, // to MHz
+																		freq_tmp * 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		detector->stations[i].strings[j].antennas[k].type),
+                                                                                                                                detector->GetZr_1D_OutZero(
+																		freq_tmp * 1.E-6, // to MHz
 																		antenna_theta,
 																		antenna_phi,
 																		detector->stations[i].strings[j].antennas[k].type),
@@ -684,6 +697,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		antenna_theta,
 																		antenna_phi,
 																		0),
+                                                                                                                                detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		0),
 																freq_tmp,
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
@@ -697,6 +716,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		antenna_theta,
 																		antenna_phi,
 																		0, k),
+                                                                                                                                detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		0, k),
 																freq_tmp,
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
@@ -705,6 +730,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 												heff =
 														GaintoHeight(
 																detector->GetGain_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		0),
+																detector->GetZr_1D_OutZero(
 																		freq_tmp
 																				* 1.E-6, // to MHz
 																		antenna_theta,
@@ -974,6 +1005,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				antenna_theta,
 																				antenna_phi,
 																				detector->stations[i].strings[j].antennas[k].type),
+																		detector->GetZr_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				detector->stations[i].strings[j].antennas[k].type),
 																		freq_tmp,
 																		icemodel->GetN(
 																				detector->stations[i].strings[j].antennas[k]));
@@ -989,6 +1026,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				antenna_phi,
 																				detector->stations[i].strings[j].antennas[k].type,
 																				k),
+																		detector->GetZr_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				detector->stations[i].strings[j].antennas[k].type,
+																				k),
 																		freq_tmp,
 																		icemodel->GetN(
 																				detector->stations[i].strings[j].antennas[k]));
@@ -998,6 +1042,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 														heff_lastbin =
 																GaintoHeight(
 																		detector->GetGain_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				detector->stations[i].strings[j].antennas[k].type),
+																		detector->GetZr_1D_OutZero(
 																				freq_tmp
 																						* 1.E-6, // to MHz
 																				antenna_theta,
@@ -1021,6 +1071,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				antenna_theta,
 																				antenna_phi,
 																				0),
+																		detector->GetZr_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				0),
 																		freq_tmp,
 																		icemodel->GetN(
 																				detector->stations[i].strings[j].antennas[k]));
@@ -1036,6 +1092,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				antenna_phi,
 																				0,
 																				k),
+																		detector->GetZr_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				0,
+																				k),
 																		freq_tmp,
 																		icemodel->GetN(
 																				detector->stations[i].strings[j].antennas[k]));
@@ -1045,6 +1108,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 														heff_lastbin =
 																GaintoHeight(
 																		detector->GetGain_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				0),
+																		detector->GetZr_1D_OutZero(
 																				freq_tmp
 																						* 1.E-6, // to MHz
 																				antenna_theta,
@@ -1088,6 +1157,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																					antenna_theta,
 																					antenna_phi,
 																					detector->stations[i].strings[j].antennas[k].type),
+																			detector->GetZr_1D_OutZero(
+																					freq_tmp
+																							* 1.E-6, // to MHz
+																					antenna_theta,
+																					antenna_phi,
+																					detector->stations[i].strings[j].antennas[k].type),
 																			freq_tmp,
 																			icemodel->GetN(
 																					detector->stations[i].strings[j].antennas[k]));
@@ -1104,6 +1179,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																					antenna_phi,
 																					detector->stations[i].strings[j].antennas[k].type,
 																					k),
+																			detector->GetZr_1D_OutZero(
+																					freq_tmp
+																							* 1.E-6, // to MHz
+																					antenna_theta,
+																					antenna_phi,
+																					detector->stations[i].strings[j].antennas[k].type,
+																					k),
 																			freq_tmp,
 																			icemodel->GetN(
 																					detector->stations[i].strings[j].antennas[k]));
@@ -1113,6 +1195,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 															heff =
 																	GaintoHeight(
 																			detector->GetGain_1D_OutZero(
+																					freq_tmp
+																							* 1.E-6, // to MHz
+																					antenna_theta,
+																					antenna_phi,
+																					detector->stations[i].strings[j].antennas[k].type),
+																			detector->GetZr_1D_OutZero(
 																					freq_tmp
 																							* 1.E-6, // to MHz
 																					antenna_theta,
@@ -1135,6 +1223,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																					antenna_theta,
 																					antenna_phi,
 																					0),
+																			detector->GetZr_1D_OutZero(
+																					freq_tmp
+																							* 1.E-6, // to MHz
+																					antenna_theta,
+																					antenna_phi,
+																					0),
 																			freq_tmp,
 																			icemodel->GetN(
 																					detector->stations[i].strings[j].antennas[k]));
@@ -1150,6 +1244,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																					antenna_phi,
 																					0,
 																					k),
+																			detector->GetZr_1D_OutZero(
+																					freq_tmp
+																							* 1.E-6, // to MHz
+																					antenna_theta,
+																					antenna_phi,
+																					0,
+																					k),
 																			freq_tmp,
 																			icemodel->GetN(
 																					detector->stations[i].strings[j].antennas[k]));
@@ -1159,6 +1260,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 															heff =
 																	GaintoHeight(
 																			detector->GetGain_1D_OutZero(
+																					freq_tmp
+																							* 1.E-6, // to MHz
+																					antenna_theta,
+																					antenna_phi,
+																					0),
+																			detector->GetZr_1D_OutZero(
 																					freq_tmp
 																							* 1.E-6, // to MHz
 																					antenna_theta,
@@ -1559,6 +1666,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				antenna_theta,
 																				antenna_phi,
 																				detector->stations[i].strings[j].antennas[k].type),
+																		detector->GetZr_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				detector->stations[i].strings[j].antennas[k].type),
 																		freq_tmp,
 																		icemodel->GetN(
 																				detector->stations[i].strings[j].antennas[k]));
@@ -1574,6 +1687,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				antenna_phi,
 																				detector->stations[i].strings[j].antennas[k].type,
 																				k),
+																		detector->GetZr_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				detector->stations[i].strings[j].antennas[k].type,
+																				k),
 																		freq_tmp,
 																		icemodel->GetN(
 																				detector->stations[i].strings[j].antennas[k]));
@@ -1583,6 +1703,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 														heff =
 																GaintoHeight(
 																		detector->GetGain_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				detector->stations[i].strings[j].antennas[k].type),
+																		detector->GetZr_1D_OutZero(
 																				freq_tmp
 																						* 1.E-6, // to MHz
 																				antenna_theta,
@@ -1607,6 +1733,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				antenna_theta,
 																				antenna_phi,
 																				0),
+																		detector->GetZr_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				0),
 																		freq_tmp,
 																		icemodel->GetN(
 																				detector->stations[i].strings[j].antennas[k]));
@@ -1623,6 +1755,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				antenna_phi,
 																				0,
 																				k),
+																		detector->GetZr_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				0,
+																				k),
 																		freq_tmp,
 																		icemodel->GetN(
 																				detector->stations[i].strings[j].antennas[k]));
@@ -1633,6 +1772,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 														heff =
 																GaintoHeight(
 																		detector->GetGain_1D_OutZero(
+																				freq_tmp
+																						* 1.E-6, // to MHz
+																				antenna_theta,
+																				antenna_phi,
+																				0),
+																		detector->GetZr_1D_OutZero(
 																				freq_tmp
 																						* 1.E-6, // to MHz
 																				antenna_theta,
@@ -1890,6 +2035,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		ant_theta_trans,
 																		antenna_phi,
 																		detector->stations[i].strings[j].antennas[k].type),
+																detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		ant_theta_trans,
+																		antenna_phi,
+																		detector->stations[i].strings[j].antennas[k].type),
+
 																freq_tmp,
 																icemodel->GetN(
 																		event->Nu_Interaction[0].posnu));
@@ -1904,6 +2056,14 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		antenna_phi,
 																		detector->stations[i].strings[j].antennas[k].type,
 																		k),
+																detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		ant_theta_trans,
+																		antenna_phi,
+																		detector->stations[i].strings[j].antennas[k].type,
+																		k),
+
 																freq_tmp,
 																icemodel->GetN(
 																		event->Nu_Interaction[0].posnu));
@@ -1917,6 +2077,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		ant_theta_trans,
 																		antenna_phi,
 																		detector->stations[i].strings[j].antennas[k].type),
+																detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		ant_theta_trans,
+																		antenna_phi,
+																		detector->stations[i].strings[j].antennas[k].type),
+
 																freq_tmp,
 																icemodel->GetN(
 																		event->Nu_Interaction[0].posnu));
@@ -1933,6 +2100,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		ant_theta_trans,
 																		antenna_phi,
 																		0),
+																detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		ant_theta_trans,
+																		antenna_phi,
+																		0),
+
 																freq_tmp,
 																icemodel->GetN(
 																		event->Nu_Interaction[0].posnu));
@@ -1946,6 +2120,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		ant_theta_trans,
 																		antenna_phi,
 																		0, k),
+																detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		ant_theta_trans,
+																		antenna_phi,
+																		0, k),
+
 																freq_tmp,
 																icemodel->GetN(
 																		event->Nu_Interaction[0].posnu));
@@ -1959,6 +2140,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		ant_theta_trans,
 																		antenna_phi,
 																		0),
+																detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		ant_theta_trans,
+																		antenna_phi,
+																		0),
+
 																freq_tmp,
 																icemodel->GetN(
 																		event->Nu_Interaction[0].posnu));
@@ -1984,6 +2172,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		antenna_theta,
 																		antenna_phi,
 																		detector->stations[i].strings[j].antennas[k].type),
+																detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		detector->stations[i].strings[j].antennas[k].type),
+
 																freq_tmp,
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
@@ -1998,6 +2193,14 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		antenna_phi,
 																		detector->stations[i].strings[j].antennas[k].type,
 																		k),
+																detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		detector->stations[i].strings[j].antennas[k].type,
+																		k),
+
 																freq_tmp,
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
@@ -2011,6 +2214,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		antenna_theta,
 																		antenna_phi,
 																		detector->stations[i].strings[j].antennas[k].type),
+																detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		detector->stations[i].strings[j].antennas[k].type),
+
 																freq_tmp,
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
@@ -2027,6 +2237,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		antenna_theta,
 																		antenna_phi,
 																		0),
+																detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		0),
+
 																freq_tmp,
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
@@ -2040,6 +2257,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		antenna_theta,
 																		antenna_phi,
 																		0, k),
+																detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		0, k),
+
 																freq_tmp,
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
@@ -2053,6 +2277,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		antenna_theta,
 																		antenna_phi,
 																		0),
+																detector->GetZr_1D_OutZero(
+																		freq_tmp
+																				* 1.E-6, // to MHz
+																		antenna_theta,
+																		antenna_phi,
+																		0),
+
 																freq_tmp,
 																icemodel->GetN(
 																		detector->stations[i].strings[j].antennas[k]));
@@ -2101,6 +2332,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			ant_theta_trans,
 																			antenna_phi,
 																			detector->stations[i].strings[j].antennas[k].type),
+																	detector->GetZr_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			ant_theta_trans,
+																			antenna_phi,
+																			detector->stations[i].strings[j].antennas[k].type),
+
 																	freq_tmp,
 																	icemodel->GetN(
 																			event->Nu_Interaction[0].posnu));
@@ -2116,6 +2354,14 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			antenna_phi,
 																			detector->stations[i].strings[j].antennas[k].type,
 																			k),
+																	detector->GetZr_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			ant_theta_trans,
+																			antenna_phi,
+																			detector->stations[i].strings[j].antennas[k].type,
+																			k),
+
 																	freq_tmp,
 																	icemodel->GetN(
 																			event->Nu_Interaction[0].posnu));
@@ -2130,6 +2376,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			ant_theta_trans,
 																			antenna_phi,
 																			detector->stations[i].strings[j].antennas[k].type),
+																	detector->GetZr_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			ant_theta_trans,
+																			antenna_phi,
+																			detector->stations[i].strings[j].antennas[k].type),
+
 																	freq_tmp,
 																	icemodel->GetN(
 																			event->Nu_Interaction[0].posnu));
@@ -2147,6 +2400,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			ant_theta_trans,
 																			antenna_phi,
 																			0),
+																	detector->GetZr_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			ant_theta_trans,
+																			antenna_phi,
+																			0),
+
 																	freq_tmp,
 																	icemodel->GetN(
 																			event->Nu_Interaction[0].posnu));
@@ -2162,6 +2422,14 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			antenna_phi,
 																			0,
 																			k),
+																	detector->GetZr_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			ant_theta_trans,
+																			antenna_phi,
+																			0,
+																			k),
+
 																	freq_tmp,
 																	icemodel->GetN(
 																			event->Nu_Interaction[0].posnu));
@@ -2176,6 +2444,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			ant_theta_trans,
 																			antenna_phi,
 																			0),
+																	detector->GetZr_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			ant_theta_trans,
+																			antenna_phi,
+																			0),
+
 																	freq_tmp,
 																	icemodel->GetN(
 																			event->Nu_Interaction[0].posnu));
@@ -2254,6 +2529,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			antenna_theta,
 																			antenna_phi,
 																			detector->stations[i].strings[j].antennas[k].type),
+																	detector->GetZr_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			antenna_theta,
+																			antenna_phi,
+																			detector->stations[i].strings[j].antennas[k].type),
+
 																	freq_tmp,
 																	icemodel->GetN(
 																			detector->stations[i].strings[j].antennas[k]));
@@ -2269,6 +2551,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			antenna_phi,
 																			detector->stations[i].strings[j].antennas[k].type,
 																			k),
+																	detector->GetZr_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			antenna_theta,
+																			antenna_phi,
+																			detector->stations[i].strings[j].antennas[k].type,
+																			k),
 																	freq_tmp,
 																	icemodel->GetN(
 																			detector->stations[i].strings[j].antennas[k]));
@@ -2278,6 +2567,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 													heff =
 															GaintoHeight(
 																	detector->GetGain_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			antenna_theta,
+																			antenna_phi,
+																			detector->stations[i].strings[j].antennas[k].type),
+																	detector->GetZr_1D_OutZero(
 																			freq_tmp
 																					* 1.E-6, // to MHz
 																			antenna_theta,
@@ -2300,6 +2595,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			antenna_theta,
 																			antenna_phi,
 																			0),
+																	detector->GetZr_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			antenna_theta,
+																			antenna_phi,
+																			0),
+
 																	freq_tmp,
 																	icemodel->GetN(
 																			detector->stations[i].strings[j].antennas[k]));
@@ -2315,6 +2617,14 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			antenna_phi,
 																			0,
 																			k),
+																	detector->GetZr_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			antenna_theta,
+																			antenna_phi,
+																			0,
+																			k),
+
 																	freq_tmp,
 																	icemodel->GetN(
 																			detector->stations[i].strings[j].antennas[k]));
@@ -2329,6 +2639,13 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			antenna_theta,
 																			antenna_phi,
 																			0),
+																	detector->GetZr_1D_OutZero(
+																			freq_tmp
+																					* 1.E-6, // to MHz
+																			antenna_theta,
+																			antenna_phi,
+																			0),
+
 																	freq_tmp,
 																	icemodel->GetN(
 																			detector->stations[i].strings[j].antennas[k]));
@@ -5645,7 +5962,6 @@ void Report::GetParameters(Position &src, Position &trg, Vector &nnu, double &vi
 
 	n_trg_pokey = trg.Unit();
 	n_trg_slappy = (trg.Cross(src)).Unit();
-
 }
 
 double Report::GaintoHeight(double gain, double freq, double n_medium) {
@@ -5655,6 +5971,16 @@ double Report::GaintoHeight(double gain, double freq, double n_medium) {
 	// gain is unitless value
 
 	return 2 * sqrt(gain / 4 / PI * CLIGHT * CLIGHT / (freq * freq * n_medium * n_medium) * Zr / (Z0 / n_medium)); // n_medium parts are changed from icemc(I believe this is correct one; E. Hong)
+}
+
+
+double Report::GaintoHeight(double gain, double zr, double freq, double n_medium) {
+
+	// from gain=4*pi*A_eff/lambda^2
+	// and h_eff=2*sqrt(A_eff*Z_rx/Z_air)
+	// gain is unitless value
+
+	return 2 * sqrt(gain / 4 / PI * CLIGHT * CLIGHT / (freq * freq * n_medium * n_medium) * zr / (Z0 / n_medium)); // n_medium parts are changed from icemc(I believe this is correct one; E. Hong)
 }
 
 void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vmmhz) { // vmmhz is input and output. output will have some antenna factors on it

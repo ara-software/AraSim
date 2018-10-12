@@ -1566,3 +1566,9 @@ Added INTERACTION_MODE=5, in which you can set the vertex position in the setup 
 regard to (average x of antennas, average y of antennas, icesurface)
 
 ============================================================================
+
+2018/10/11 Yue Pan:
+
+Rewrote the whole antenna part so that AraSim can now handle nonconstant impedance correctly
+
+============================================================================

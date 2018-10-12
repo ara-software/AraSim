@@ -3071,12 +3071,11 @@ inline void Detector::ReadVgain(string filename) {
 		    getline (NecOut, line); //read data line
 		    //Vgain[i][j] = atof( line.substr( 18 ).c_str() );  // read gain (not dB)
 		    Vgain[i][j] = atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
-		    Vphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
+		    Vphase[i][j] = atof( line.substr( 34, 45 ).c_str() );  // read gain (not dB)
+                    Vzr[i][j] = atof( line.substr( 50 ).c_str() );
 		    //	cout << atof( line.substr( 20, 33 ).c_str() ) << endl;
-		    
-		    //	cout<<"VGain : "<<Vgain[i][j]<<", VPhase : "<<Vphase[i][j]<<endl;
-                        
-                    }// end ang_step
+		    //cout<<"VGain : " << Vgain[i][j] << ", VPhase : " << Vphase[i][j] << ", VZr: " << Vzr[i][j] <<endl;
+                  }// end ang_step
                     
                 }// end check freq label
                 
@@ -3110,10 +3109,9 @@ inline void Detector::ReadVgain(string filename, Settings *settings1) {
                         getline (NecOut, line); //read data line
                         //Vgain[i][j] = atof( line.substr( 18 ).c_str() );  // read gain (not dB)
                         Vgain[i][j] = Transm[i] * atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
-                        Vphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
-                                                
-                        //cout<<"VGain : "<<Vgain[i][j]<<", VPhase : "<<Vphase[i][j]<<endl;
-                        
+                        Vphase[i][j] = atof( line.substr( 34, 45 ).c_str() );  // read gain (not dB)
+                        Vzr[i][j] = atof( line.substr( 50 ).c_str() );
+                        //cout<<"VGain : " << Vgain[i][j] << ", VPhase : " << Vphase[i][j] << ", VZr: " << Vzr[i][j] <<endl;
                     }// end ang_step
                     
                 }// end check freq label
@@ -3223,7 +3221,7 @@ inline void Detector::ReadHgain(string filename) {
                 if ( line.substr(0, line.find_first_of(":")) == "freq ") {
                     Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
                     //Freq[i] = freq_init + i * freq_width;
-		    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
+		    //cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
 		    getline (NecOut, line); //read SWR
                     getline (NecOut, line); //read names
                     
@@ -3232,8 +3230,9 @@ inline void Detector::ReadHgain(string filename) {
                         //Hgain[i][j] = atof( line.substr( 20 ).c_str() );  // read gain (not dB)
                         //Hgain[i][j] = atof( line.substr( 18, 25 ).c_str() );  // read gain (not dB)
 			Hgain[i][j] = atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
-			Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
-			//cout<<"HGain : "<<Hgain[i][j]<<", HPhase : "<<Hphase[i][j]<<endl;
+			Hphase[i][j] = atof( line.substr( 34, 45 ).c_str() );  // read gain (not dB)
+                        Hzr[i][j] = atof( line.substr( 50 ).c_str() );
+                        //cout << "HGain : " << Hgain[i][j] << ", HPhase : " << Hphase[i][j] << ", HZr: " << Hzr[i][j] <<endl;
                     }// end ang_step
                     
                 }// end check freq label
@@ -3271,10 +3270,9 @@ inline void Detector::ReadHgain(string filename, Settings *settings1) {
                         //Hgain[i][j] = atof( line.substr( 20 ).c_str() );  // read gain (not dB)
                         //Hgain[i][j] = atof( line.substr( 18, 25 ).c_str() );  // read gain (not dB)
                         Hgain[i][j] = Transm[i]*atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
-                        Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
-
-                        //cout<<"HGain : "<<Hgain[i][j]<<", HPhase : "<<Hphase[i][j]<<endl;
-                        
+                        Hphase[i][j] = atof( line.substr( 34, 45 ).c_str() );  // read gain (not dB)
+                        Hzr[i][j] = atof( line.substr( 50 ).c_str() );
+                        //cout << "HGain : " << Hgain[i][j] << ", HPhase : " << Hphase[i][j] << ", HZr: " << Hzr[i][j] <<endl;
                     }// end ang_step
                     
                 }// end check freq label
@@ -3311,9 +3309,7 @@ inline void Detector::ReadHgain(string filename, Settings *settings1) {
 
 double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
     //double GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
-    
     //Parameters params;
-    
     // change antenna facing orientation
     if (ant_o == 0) {
         // no change...
@@ -3347,16 +3343,12 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
         cout<<"ant_o will be replaced from "<<ant_o<<" to 0"<<endl;
     }
     // end changing antenna orientation
-    
-    
     int i = (int)(theta/5.);
     int j = (int)(phi/5.);
-    
     double thetai = 5.*( (int)(theta/5.) );
     double thetai1 = 5.*( (int)(theta/5.) + 1.);
     double phij = 5.*( (int)(phi/5.) );
     double phij1 = 5.*( (int)(phi/5.) + 1.);
-    
     double t = (theta - thetai)/(thetai1 - thetai);
     double u = (phi - phij)/(phij1 - phij);
     
@@ -3371,14 +3363,11 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
         //cout<<"Frequency value "<<freq<<" will be replaced to maximum frequency value "<< freq_init + freq_width*((double)freq_step-1.) - 0.01 <<endl;
         freq = freq_init + freq_width*((double)freq_step-1.) - 0.01;
     }
-    
-    
     //    int fx1 = (int)( (freq + (freq_width/2.) - freq_init)/freq_width );
     int fx1 = (int)( (freq - freq_init)/freq_width );
     int fx2 = fx1 + 1;
     //    cout<<"fx1 : "<<fx1<<endl;
     //    cout<<"fx2 : "<<fx2<<endl;
-    
     double Gij, Gi1j, Gij1, Gi1j1, Gout1, Gout2, Gout;
     
     if (ant_m == 0) {   // for V pol antenna!!
@@ -3405,11 +3394,8 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
             Gij1 = Vgain[fx2][(int)(37*(j+1)+i)];
             Gi1j1 = Vgain[fx2][(int)(37*(j+1)+i+1)];
         }
-        
         Gout2 = (1.-t)*(1.-u)*Gij + t*(1.-u)*Gi1j + t*u*Gi1j1 + (1.-t)*u*Gij1;  //Gain at nearest higher freq bin
-        
     }
-    
     else if (ant_m == 1) {   // for H pol antenna!!
         Gij = Hgain[fx1][(int)(37*j+i)];
         Gi1j = Hgain[fx1][(int)(37*j+i+1)];
@@ -3421,9 +3407,7 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
             Gij1 = Hgain[fx1][(int)(37*(j+1)+i)];
             Gi1j1 = Hgain[fx1][(int)(37*(j+1)+i+1)];
         }
-        
         Gout1 = (1.-t)*(1.-u)*Gij + t*(1.-u)*Gi1j + t*u*Gi1j1 + (1.-t)*u*Gij1;  //Gain at nearest smaller freq bin
-        
         Gij = Vgain[fx2][(int)(37*j+i)];
         Gi1j = Vgain[fx2][(int)(37*j+i+1)];
         if ( j == 71 ) {    // doing this as maximum phi is 355 deg
@@ -3434,26 +3418,146 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
             Gij1 = Vgain[fx2][(int)(37*(j+1)+i)];
             Gi1j1 = Vgain[fx2][(int)(37*(j+1)+i+1)];
         }
-        
         Gout2 = (1.-t)*(1.-u)*Gij + t*(1.-u)*Gi1j + t*u*Gi1j1 + (1.-t)*u*Gij1;  //Gain at nearest higher freq bin
     }
-    
     else {
         cout<<"There is no antenna type : "<<ant_m<<" !!"<<endl;
         cout<<"Will return Gain = 0 !!"<<endl;
         Gout1 = 0.;
         Gout2 = 0.;
     }
-    
     Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
-    
     //  cout<<Gout<<endl;
-    
     return Gout;
-    
     // ant_o face x = 0, y = 1, -x = 2, -y = 3
-    
 }
+
+
+double Detector::GetZr(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
+    //double GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
+    //Parameters params;
+    // change antenna facing orientation
+    if (ant_o == 0) {
+        // no change...
+    }
+    else if (ant_o == 1) {
+        if (phi - 90. >= 0.) {
+            phi = phi - 90.;
+        }
+        else {
+            phi = 360. + phi - 90.;
+        }
+    }
+    else if (ant_o == 2) {
+        if (phi - 180. >= 0.) {
+            phi = phi - 180.;
+        }
+        else {
+            phi = 360. + phi - 180.;
+        }
+    }
+    else if (ant_o == 3) {
+        if (phi - 270. >= 0.) {
+            phi = phi - 270.;
+        }
+        else {
+            phi = 360. + phi - 270.;
+        }
+    }
+    else {
+        cout<<"Wrong option selected for antenna orientation "<<ant_o<<" !!"<<endl;
+        cout<<"ant_o will be replaced from "<<ant_o<<" to 0"<<endl;
+    }
+    // end changing antenna orientation
+    int i = (int)(theta/5.);
+    int j = (int)(phi/5.);
+    double thetai = 5.*( (int)(theta/5.) );
+    double thetai1 = 5.*( (int)(theta/5.) + 1.);
+    double phij = 5.*( (int)(phi/5.) );
+    double phij1 = 5.*( (int)(phi/5.) + 1.);
+    double t = (theta - thetai)/(thetai1 - thetai);
+    double u = (phi - phij)/(phij1 - phij);
+    
+    // in case when freq is out of nec2 freq range. use nearest min/max freq bin value. 
+    if ( freq < freq_init ) {
+        //cout<<"Frequency value is smaller than frequency range with Gain."<<endl;
+        //cout<<"Frequency value "<<freq<<" will be replaced to minimum frequency value "<<freq_init<<endl;
+        freq = freq_init;
+    }
+    else if ( freq > (freq_init + freq_width*((double)freq_step-1.) ) ) {
+        //cout<<"Frequency value is bigger than frequency range with Gain."<<endl;
+        //cout<<"Frequency value "<<freq<<" will be replaced to maximum frequency value "<< freq_init + freq_width*((double)freq_step-1.) - 0.01 <<endl;
+        freq = freq_init + freq_width*((double)freq_step-1.) - 0.01;
+    }
+    //    int fx1 = (int)( (freq + (freq_width/2.) - freq_init)/freq_width );
+    int fx1 = (int)( (freq - freq_init)/freq_width );
+    int fx2 = fx1 + 1;
+    //    cout<<"fx1 : "<<fx1<<endl;
+    //    cout<<"fx2 : "<<fx2<<endl;
+    double Gij, Gi1j, Gij1, Gi1j1, Gout1, Gout2, Gout;
+    
+    if (ant_m == 0) {   // for V pol antenna!!
+        Gij = Vzr[fx1][(int)(37*j+i)];
+        Gi1j = Vzr[fx1][(int)(37*j+i+1)];
+        if ( j == 71 ) {    // doing this as maximum phi is 355 deg
+            Gij1 = Vzr[fx1][(int)(i)];
+            Gi1j1 = Vzr[fx1][(int)(i+1)];
+        }
+        else {
+            Gij1 = Vzr[fx1][(int)(37*(j+1)+i)];
+            Gi1j1 = Vzr[fx1][(int)(37*(j+1)+i+1)];
+        }
+        
+        Gout1 = (1.-t)*(1.-u)*Gij + t*(1.-u)*Gi1j + t*u*Gi1j1 + (1.-t)*u*Gij1;  //Gain at nearest smaller freq bin
+        
+        Gij = Vzr[fx2][(int)(37*j+i)];
+        Gi1j = Vzr[fx2][(int)(37*j+i+1)];
+        if ( j == 71 ) {    // doing this as maximum phi is 355 deg
+            Gij1 = Vzr[fx2][(int)(i)];
+            Gi1j1 = Vzr[fx2][(int)(i+1)];
+        }
+        else {
+            Gij1 = Vzr[fx2][(int)(37*(j+1)+i)];
+            Gi1j1 = Vzr[fx2][(int)(37*(j+1)+i+1)];
+        }
+        Gout2 = (1.-t)*(1.-u)*Gij + t*(1.-u)*Gi1j + t*u*Gi1j1 + (1.-t)*u*Gij1;  //Gain at nearest higher freq bin
+    }
+    else if (ant_m == 1) {   // for H pol antenna!!
+        Gij = Hzr[fx1][(int)(37*j+i)];
+        Gi1j = Hzr[fx1][(int)(37*j+i+1)];
+        if ( j == 71 ) {
+            Gij1 = Hzr[fx1][(int)(i)];
+            Gi1j1 = Hzr[fx1][(int)(i+1)];
+        }
+        else {
+            Gij1 = Hzr[fx1][(int)(37*(j+1)+i)];
+            Gi1j1 = Hzr[fx1][(int)(37*(j+1)+i+1)];
+        }
+        Gout1 = (1.-t)*(1.-u)*Gij + t*(1.-u)*Gi1j + t*u*Gi1j1 + (1.-t)*u*Gij1;  //Gain at nearest smaller freq bin
+        Gij = Vzr[fx2][(int)(37*j+i)];
+        Gi1j = Vzr[fx2][(int)(37*j+i+1)];
+        if ( j == 71 ) {    // doing this as maximum phi is 355 deg
+            Gij1 = Vzr[fx2][(int)(i)];
+            Gi1j1 = Vzr[fx2][(int)(i+1)];
+        }
+        else {
+            Gij1 = Vzr[fx2][(int)(37*(j+1)+i)];
+            Gi1j1 = Vzr[fx2][(int)(37*(j+1)+i+1)];
+        }
+        Gout2 = (1.-t)*(1.-u)*Gij + t*(1.-u)*Gi1j + t*u*Gi1j1 + (1.-t)*u*Gij1;  //Gain at nearest higher freq bin
+    }
+    else {
+        cout<<"There is no antenna type : "<<ant_m<<" !!"<<endl;
+        cout<<"Will return Gain = 0 !!"<<endl;
+        Gout1 = 0.;
+        Gout2 = 0.;
+    }
+    Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
+    //  cout<<Gout<<endl;
+    return Gout;
+    // ant_o face x = 0, y = 1, -x = 2, -y = 3
+}
+
 
 
 double Detector::GetGain(double freq, double theta, double phi, int ant_m) {
@@ -3548,28 +3652,118 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m) {
         
         Gout2 = (1.-t)*(1.-u)*Gij + t*(1.-u)*Gi1j + t*u*Gi1j1 + (1.-t)*u*Gij1;  //Gain at nearest higher freq bin
     }
-    
     else {
         cout<<"There is no antenna type : "<<ant_m<<" !!"<<endl;
         cout<<"Will return Gain = 0 !!"<<endl;
         Gout1 = 0.;
         Gout2 = 0.;
     }
-    
     Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
-    
     cout<<Gout<<endl;
     return Gout;
+}
+
+double Detector::GetZr(double freq, double theta, double phi, int ant_m) {
+    
+    //Parameters params;
+    
+    int i = (int)(theta/5.);
+    int j = (int)(phi/5.);
+    
+    double thetai = 5.*( (int)(theta/5.) );
+    double thetai1 = 5.*( (int)(theta/5.) + 1.);
+    double phij = 5.*( (int)(phi/5.) );
+    double phij1 = 5.*( (int)(phi/5.) + 1.);
+    
+    double t = (theta - thetai)/(thetai1 - thetai);
+    double u = (phi - phij)/(phij1 - phij);
     
     
+    // in case when freq is out of nec2 freq range. use nearest min/max freq bin value. 
+    if ( freq < freq_init ) {
+        //cout<<"Frequency value is smaller than frequency range with Gain."<<endl;
+        //cout<<"Frequency value "<<freq<<" will be replaced to minimum frequency value "<<freq_init<<endl;
+        freq = freq_init;
+    }
+    else if ( freq > (freq_init + freq_width*((double)freq_step - 1.) ) ) {
+        //cout<<"Frequency value is bigger than frequency range with Gain."<<endl;
+        //cout<<"Frequency value "<<freq<<" will be replaced to maximum frequency value "<< freq_init + freq_width*((double)freq_step-1.) - 0.01 <<endl;
+        freq = freq_init + freq_width*((double)freq_step-1.) - 0.01;
+    }
+    
+    
+    //    int fx1 = (int)( (freq + (freq_width/2.) - freq_init)/freq_width );
+    int fx1 = (int)( (freq - freq_init)/freq_width );
+    int fx2 = fx1 + 1;
+    
+    double Gij, Gi1j, Gij1, Gi1j1, Gout1, Gout2, Gout;
+    
+    if (ant_m == 0) {   // for V pol antenna!!
+        Gij = Vzr[fx1][(int)(37*j+i)];
+        Gi1j = Vzr[fx1][(int)(37*j+i+1)];
+        if ( j == 71 ) {    // doing this as maximum phi is 355 deg
+            Gij1 = Vzr[fx1][(int)(i)];
+            Gi1j1 = Vzr[fx1][(int)(i+1)];
+        }
+        else {
+            Gij1 = Vzr[fx1][(int)(37*(j+1)+i)];
+            Gi1j1 = Vzr[fx1][(int)(37*(j+1)+i+1)];
+        }
+        
+        Gout1 = (1.-t)*(1.-u)*Gij + t*(1.-u)*Gi1j + t*u*Gi1j1 + (1.-t)*u*Gij1;  //Gain at nearest smaller freq bin
+        
+        Gij = Vzr[fx2][(int)(37*j+i)];
+        Gi1j = Vzr[fx2][(int)(37*j+i+1)];
+        if ( j == 71 ) {    // doing this as maximum phi is 355 deg
+            Gij1 = Vzr[fx2][(int)(i)];
+            Gi1j1 = Vzr[fx2][(int)(i+1)];
+        }
+        else {
+            Gij1 = Vzr[fx2][(int)(37*(j+1)+i)];
+            Gi1j1 = Vzr[fx2][(int)(37*(j+1)+i+1)];
+        }
+        
+        Gout2 = (1.-t)*(1.-u)*Gij + t*(1.-u)*Gi1j + t*u*Gi1j1 + (1.-t)*u*Gij1;  //Gain at nearest higher freq bin
+        
+    }
+    
+    else if (ant_m == 1) {   // for H pol antenna!!
+        Gij = Hzr[fx1][(int)(37*j+i)];
+        Gi1j = Hzr[fx1][(int)(37*j+i+1)];
+        if ( j == 71 ) {
+            Gij1 = Hzr[fx1][(int)(i)];
+            Gi1j1 = Hzr[fx1][(int)(i+1)];
+        }
+        else {
+            Gij1 = Hzr[fx1][(int)(37*(j+1)+i)];
+            Gi1j1 = Hzr[fx1][(int)(37*(j+1)+i+1)];
+        }
+        Gout1 = (1.-t)*(1.-u)*Gij + t*(1.-u)*Gi1j + t*u*Gi1j1 + (1.-t)*u*Gij1;  //Gain at nearest smaller freq bin
+        Gij = Hzr[fx2][(int)(37*j+i)];
+        Gi1j = Hzr[fx2][(int)(37*j+i+1)];
+        if ( j == 71 ) {    // doing this as maximum phi is 355 deg
+            Gij1 = Hzr[fx2][(int)(i)];
+            Gi1j1 = Hzr[fx2][(int)(i+1)];
+        }
+        else {
+            Gij1 = Hzr[fx2][(int)(37*(j+1)+i)];
+            Gi1j1 = Hzr[fx2][(int)(37*(j+1)+i+1)];
+        }
+        Gout2 = (1.-t)*(1.-u)*Gij + t*(1.-u)*Gi1j + t*u*Gi1j1 + (1.-t)*u*Gij1;  //Gain at nearest higher freq bin
+    }
+    else {
+        cout<<"There is no antenna type : "<<ant_m<<" !!"<<endl;
+        cout<<"Will return Zr = 0 !!"<<endl;
+        Gout1 = 0.;
+        Gout2 = 0.;
+    }
+    Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
+    cout<<Gout<<endl;
+    return Gout;
 }
 
 
-
 double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m ) {
-
-
-
     int i = (int)(theta/5.);
     int j = (int)(phi/5.);
     
@@ -3667,13 +3861,7 @@ double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m )
     }
     
     Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
-    
-    
     return Gout;
-
-
-
-
 }
 
 
@@ -3681,83 +3869,100 @@ double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m )
 
 double Detector::GetGain_1D( double freq, double theta, double phi, int ant_m ) {
     // find nearest theta, phi bin
-    //
     //int i = (int)(theta/5.);
     //int j = (int)(phi/5.);
-
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
     int j = (int)( (phi+2.5)/5. );
-
     if ( j == 72 ) j = 0;
-
     int angle_bin = 37*j+i;
-
     // now just do linear interpolation at that angle
-    //
-
     double slope_1, slope_2; // slope of init, final part
-
     double Gout;
-
     int bin = (int)( (freq - freq_init) / freq_width )+1;
-
     // Vpol
     if ( ant_m == 0 ) {
-
         slope_1 = (Vgain[1][angle_bin] - Vgain[0][angle_bin]) / (Freq[1] - Freq[0]);
         slope_2 = (Vgain[freq_step-1][angle_bin] - Vgain[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
-
-
         // if freq is lower than freq_init
         if ( freq < freq_init ) {
-
             Gout = slope_1 * (freq - Freq[0]) + Vgain[0][angle_bin];
         }
         // if freq is higher than last freq
         else if ( freq > Freq[freq_step-1] ) {
-
             Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
         }
-
         else {
-
             Gout = Vgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vgain[bin][angle_bin]-Vgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
         } // not outside the Freq[] range
-    
     } // Vpol case
-
     // Hpol
     else if ( ant_m == 1 ) {
-
         slope_1 = (Hgain[1][angle_bin] - Hgain[0][angle_bin]) / (Freq[1] - Freq[0]);
         slope_2 = (Hgain[freq_step-1][angle_bin] - Hgain[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
-
-
         // if freq is lower than freq_init
         if ( freq < freq_init ) {
-
             Gout = slope_1 * (freq - Freq[0]) + Hgain[0][angle_bin];
         }
         // if freq is higher than last freq
         else if ( freq > Freq[freq_step-1] ) {
-
             Gout = slope_2 * (freq - Freq[freq_step-1]) + Hgain[freq_step-1][angle_bin];
         }
-
         else {
-
             Gout = Hgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hgain[bin][angle_bin]-Hgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
         } // not outside the Freq[] range
-    
     } // Hpol case
-
-
     return Gout;
-
 }
 
 
+double Detector::GetZr_1D( double freq, double theta, double phi, int ant_m ) {
+    // find nearest theta, phi bin
+    //int i = (int)(theta/5.);
+    //int j = (int)(phi/5.);
+    // check if angles range actually theta 0-180, phi 0-360
+    int i = (int)( (theta+2.5)/5. );
+    int j = (int)( (phi+2.5)/5. );
+    if ( j == 72 ) j = 0;
+    int angle_bin = 37*j+i;
+    // now just do linear interpolation at that angle
+    double slope_1, slope_2; // slope of init, final part
+    double Gout;
+    int bin = (int)( (freq - freq_init) / freq_width )+1;
+    // Vpol
+    if ( ant_m == 0 ) {
+        slope_1 = (Vzr[1][angle_bin] - Vzr[0][angle_bin]) / (Freq[1] - Freq[0]);
+        slope_2 = (Vzr[freq_step-1][angle_bin] - Vzr[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
+        // if freq is lower than freq_init
+        if ( freq < freq_init ) {
+            Gout = slope_1 * (freq - Freq[0]) + Vzr[0][angle_bin];
+        }
+        // if freq is higher than last freq
+        else if ( freq > Freq[freq_step-1] ) {
+            Gout = slope_2 * (freq - Freq[freq_step-1]) + Vzr[freq_step-1][angle_bin];
+        }
+        else {
+            Gout = Vzr[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vzr[bin][angle_bin]-Vzr[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        } // not outside the Freq[] range
+    } // Vpol case
+    // Hpol
+    else if ( ant_m == 1 ) {
+        slope_1 = (Hzr[1][angle_bin] - Hzr[0][angle_bin]) / (Freq[1] - Freq[0]);
+        slope_2 = (Hzr[freq_step-1][angle_bin] - Hzr[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
+        // if freq is lower than freq_init
+        if ( freq < freq_init ) {
+            Gout = slope_1 * (freq - Freq[0]) + Hzr[0][angle_bin];
+        }
+        // if freq is higher than last freq
+        else if ( freq > Freq[freq_step-1] ) {
+            Gout = slope_2 * (freq - Freq[freq_step-1]) + Hzr[freq_step-1][angle_bin];
+        }
+        else {
+            Gout = Hzr[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hzr[bin][angle_bin]-Hzr[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        } // not outside the Freq[] range
+    } // Hpol case
+    return Gout;
+}
 
 
 
@@ -3814,116 +4019,196 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 }
 
 
-double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int ant_number) {
-
-
+// set outside value as 0
+double Detector::GetZr_1D_OutZero( double freq, double theta, double phi, int ant_m ) {
     // find nearest theta, phi bin
     //
     //int i = (int)(theta/5.);
     //int j = (int)(phi/5.);
-
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
     int j = (int)( (phi+2.5)/5. );
-
     if ( j == 72 ) j = 0;
-
     int angle_bin = 37*j+i;
-
     // now just do linear interpolation at that angle
     //
-
     double slope_1; // slope of init part
-
     double Gout;
-
     int bin = (int)( (freq - freq_init) / freq_width )+1;
-
     // Vpol
     if ( ant_m == 0 ) {
-
-      if(ant_number==0){//bottom Vpol
-        slope_1 = (Vgain[1][angle_bin] - Vgain[0][angle_bin]) / (Freq[1] - Freq[0]);
-
-
+        slope_1 = (Vzr[1][angle_bin] - Vzr[0][angle_bin]) / (Freq[1] - Freq[0]);
         // if freq is lower than freq_init
         if ( freq < freq_init ) {
+            Gout = slope_1 * (freq - Freq[0]) + Vzr[0][angle_bin];
+        }
+        // if freq is higher than last freq
+        else if ( freq > Freq[freq_step-1] ) {
+            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vzr[freq_step-1][angle_bin];
+            Gout = 0.;
+        }
+        else {
+            Gout = Vzr[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vzr[bin][angle_bin]-Vzr[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        } // not outside the Freq[] range
+    } // Vpol case
+    // Hpol
+    else if ( ant_m == 1 ) {
+        slope_1 = (Hzr[1][angle_bin] - Hzr[0][angle_bin]) / (Freq[1] - Freq[0]);
+        // if freq is lower than freq_init
+        if ( freq < freq_init ) {
+            Gout = slope_1 * (freq - Freq[0]) + Hzr[0][angle_bin];
+        }
+        // if freq is higher than last freq
+        else if ( freq > Freq[freq_step-1] ) {
+            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Hzr[freq_step-1][angle_bin];
+            Gout = 0.;
+        }
+        else {
+            Gout = Hzr[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hzr[bin][angle_bin]-Hzr[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        } // not outside the Freq[] range
+    
+    } // Hpol case
+    return Gout;
+}
 
+
+
+double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int ant_number) {
+    // find nearest theta, phi bin
+    //int i = (int)(theta/5.);
+    //int j = (int)(phi/5.);
+    // check if angles range actually theta 0-180, phi 0-360
+    int i = (int)( (theta+2.5)/5. );
+    int j = (int)( (phi+2.5)/5. );
+    if ( j == 72 ) j = 0;
+    int angle_bin = 37*j+i;
+    // now just do linear interpolation at that angle
+    double slope_1; // slope of init part
+    double Gout;
+    int bin = (int)( (freq - freq_init) / freq_width )+1;
+    // Vpol
+    if ( ant_m == 0 ) {
+      if(ant_number==0){//bottom Vpol
+        slope_1 = (Vgain[1][angle_bin] - Vgain[0][angle_bin]) / (Freq[1] - Freq[0]);
+        // if freq is lower than freq_init
+        if ( freq < freq_init ) {
             Gout = slope_1 * (freq - Freq[0]) + Vgain[0][angle_bin];
         }
         // if freq is higher than last freq
         else if ( freq > Freq[freq_step-1] ) {
-
             //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
             Gout = 0.;
         }
-
         else {
-
             Gout = Vgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vgain[bin][angle_bin]-Vgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
         } // not outside the Freq[] range
       }//bottom Vpol
       else if(ant_number==2){//Top Vpol
 //	cerr << "Does it happen: yes it happens! " << ant_number << endl;
         slope_1 = (VgainTop[1][angle_bin] - VgainTop[0][angle_bin]) / (Freq[1] - Freq[0]);
-
-
         // if freq is lower than freq_init
         if ( freq < freq_init ) {
-
             Gout = slope_1 * (freq - Freq[0]) + VgainTop[0][angle_bin];
         }
         // if freq is higher than last freq
         else if ( freq > Freq[freq_step-1] ) {
-
             //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
             Gout = 0.;
         }
-
         else {
-
             Gout = VgainTop[bin-1][angle_bin] + (freq-Freq[bin-1])*(VgainTop[bin][angle_bin]-VgainTop[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
 	}
       }//Top Vpol
-    
     } // Vpol case
-
     // Hpol
     else if ( ant_m == 1 ) {
-
         slope_1 = (Hgain[1][angle_bin] - Hgain[0][angle_bin]) / (Freq[1] - Freq[0]);
-
-
         // if freq is lower than freq_init
         if ( freq < freq_init ) {
-
             Gout = slope_1 * (freq - Freq[0]) + Hgain[0][angle_bin];
         }
         // if freq is higher than last freq
         else if ( freq > Freq[freq_step-1] ) {
-
             //Gout = slope_2 * (freq - Freq[freq_step-1]) + Hgain[freq_step-1][angle_bin];
             Gout = 0.;
         }
-
         else {
-
             Gout = Hgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hgain[bin][angle_bin]-Hgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
         } // not outside the Freq[] range
-    
     } // Hpol case
-
-
     if ( Gout < 0. ) // gain can not go below 0
         Gout = 0.;
-
     return Gout;
-
 }
 
 
-
-
+double Detector::GetZr_1D_OutZero( double freq, double theta, double phi, int ant_m, int ant_number) {
+    // find nearest theta, phi bin
+    //int i = (int)(theta/5.);
+    //int j = (int)(phi/5.);
+    // check if angles range actually theta 0-180, phi 0-360
+    int i = (int)( (theta+2.5)/5. );
+    int j = (int)( (phi+2.5)/5. );
+    if ( j == 72 ) j = 0;
+    int angle_bin = 37*j+i;
+    // now just do linear interpolation at that angle
+    double slope_1; // slope of init part
+    double Gout;
+    int bin = (int)( (freq - freq_init) / freq_width )+1;
+    // Vpol
+    if ( ant_m == 0 ) {
+      if(ant_number==0){//bottom Vpol
+        slope_1 = (Vzr[1][angle_bin] - Vzr[0][angle_bin]) / (Freq[1] - Freq[0]);
+        // if freq is lower than freq_init
+        if ( freq < freq_init ) {
+            Gout = slope_1 * (freq - Freq[0]) + Vzr[0][angle_bin];
+        }
+        // if freq is higher than last freq
+        else if ( freq > Freq[freq_step-1] ) {
+            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vzr[freq_step-1][angle_bin];
+            Gout = 0.;
+        }
+        else {
+            Gout = Vzr[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vzr[bin][angle_bin]-Vzr[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        } // not outside the Freq[] range
+      }//bottom Vpol
+      else if(ant_number==2){//Top Vpol
+//	cerr << "Does it happen: yes it happens! " << ant_number << endl;
+        slope_1 = (VgainTop[1][angle_bin] - VgainTop[0][angle_bin]) / (Freq[1] - Freq[0]);
+        // if freq is lower than freq_init
+        if ( freq < freq_init ) {
+            Gout = slope_1 * (freq - Freq[0]) + VgainTop[0][angle_bin];
+        }
+        // if freq is higher than last freq
+        else if ( freq > Freq[freq_step-1] ) {
+            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
+            Gout = 0.;
+        }
+        else {
+            Gout = VgainTop[bin-1][angle_bin] + (freq-Freq[bin-1])*(VgainTop[bin][angle_bin]-VgainTop[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+	}
+      }//Top Vpol
+    } // Vpol case
+    // Hpol
+    else if ( ant_m == 1 ) {
+        slope_1 = (Hzr[1][angle_bin] - Hzr[0][angle_bin]) / (Freq[1] - Freq[0]);
+        // if freq is lower than freq_init
+        if ( freq < freq_init ) {
+            Gout = slope_1 * (freq - Freq[0]) + Hzr[0][angle_bin];
+        }
+        // if freq is higher than last freq
+        else if ( freq > Freq[freq_step-1] ) {
+            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Hzr[freq_step-1][angle_bin];
+            Gout = 0.;
+        }
+        else {
+            Gout = Hzr[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hzr[bin][angle_bin]-Hzr[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        } // not outside the Freq[] range
+    } // Hpol case
+    if ( Gout < 0. ) // impedance can not go below 0
+        Gout = 0.;
+    return Gout;
+}
 
 
 double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m ) {
@@ -4436,7 +4721,10 @@ double Antenna::GetG(Detector *D, double freq, double theta, double phi) {
     return D->GetGain(freq, theta, phi, type, orient);
 }
 
+double Antenna::GetZR(Detector *D, double freq, double theta, double phi) {
 
+    return D->GetZr(freq, theta, phi, type, orient);
+}
 
 
 double Surface_antenna::GetG(Detector *D, double freq, double theta, double phi) {
@@ -4972,10 +5260,10 @@ cout<<"In ReadNoiseFigure"<<endl;
 	        iss >> sub;
 		yNF_tmp.push_back( atof(sub.c_str()) );
 	    }
-	    cout << "freq: " << yNF_tmp[0];
+	    //cout << "freq: " << yNF_tmp[0];
 	    all_chNF.push_back( yNF_tmp );
 	    yNF_tmp.clear();
-	    cout << "   ch1: " << all_chNF[N][1] << endl;
+	    //cout << "   ch1: " << all_chNF[N][1] << endl;
             
             N++;
             
@@ -5190,17 +5478,17 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
             N++;
 
             xfreq_tmp.push_back( atof( line.substr(0, line.find_first_of(",")).c_str() ) );
-            cout<<"freq : "<<xfreq_tmp[N]<<"\t";
+            //cout<<"freq : "<<xfreq_tmp[N]<<"\t";
 
             line2 = line.substr( line.find_first_of(",")+1);
 
             ygain_tmp.push_back( atof( line2.substr(0, line2.find_first_of(",")).c_str() ) );
-            cout<<"gain : "<<ygain_tmp[N]<<"\t";
+            //cout<<"gain : "<<ygain_tmp[N]<<"\t";
 
             line3 = line2.substr( line2.find_first_of(",")+1);
 
             phase_tmp.push_back( atof( line3.substr(0).c_str() ) );
-            cout<<"phase : "<<phase_tmp[N]<<" N : "<<N<<endl;
+            //cout<<"phase : "<<phase_tmp[N]<<" N : "<<N<<endl;
 
             /*
             xfreq_tmp.push_back( atof( line.substr(0, 10).c_str() ) );
