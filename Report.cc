@@ -645,7 +645,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		detector->stations[i].strings[j].antennas[k].type), 
 																freq_tmp,
 																icemodel->GetN(
-																		detector->stations[i].strings[j].antennas[k]));
+																		detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
 											if (settings1->ANTENNA_MODE == 1) {
 												heff =
@@ -666,7 +666,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		k),
 																freq_tmp,
 																icemodel->GetN(
-																		detector->stations[i].strings[j].antennas[k]));
+																		detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
                                                                                         if (settings1->ANTENNA_MODE == 2) {
 												heff =
@@ -683,7 +683,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		detector->stations[i].strings[j].antennas[k].type),
 																freq_tmp,
 																icemodel->GetN(
-																		detector->stations[i].strings[j].antennas[k]));
+																		detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
 
 										} else if (settings1->ALL_ANT_V_ON
@@ -705,7 +705,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		0),
 																freq_tmp,
 																icemodel->GetN(
-																		detector->stations[i].strings[j].antennas[k]));
+																		detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
 											if (settings1->ANTENNA_MODE == 1) {
 												heff =
@@ -724,7 +724,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		0, k),
 																freq_tmp,
 																icemodel->GetN(
-																		detector->stations[i].strings[j].antennas[k]));
+																		detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
                                                                                         if (settings1->ANTENNA_MODE == 2) {
 												heff =
@@ -743,7 +743,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																		0),
 																freq_tmp,
 																icemodel->GetN(
-																		detector->stations[i].strings[j].antennas[k]));
+																		detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
 
 										}
@@ -1013,7 +1013,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				detector->stations[i].strings[j].antennas[k].type),
 																		freq_tmp,
 																		icemodel->GetN(
-																				detector->stations[i].strings[j].antennas[k]));
+																				detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 													}
 													if (settings1->ANTENNA_MODE
 															== 1) {
@@ -1035,7 +1035,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				k),
 																		freq_tmp,
 																		icemodel->GetN(
-																				detector->stations[i].strings[j].antennas[k]));
+																				detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 													}
                                                                                                         if (settings1->ANTENNA_MODE
 															== 2) {
@@ -1055,7 +1055,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				detector->stations[i].strings[j].antennas[k].type),
 																		freq_tmp,
 																		icemodel->GetN(
-																				detector->stations[i].strings[j].antennas[k]));
+																				detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 													}
 
 												} else if (settings1->ALL_ANT_V_ON
@@ -1079,7 +1079,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				0),
 																		freq_tmp,
 																		icemodel->GetN(
-																				detector->stations[i].strings[j].antennas[k]));
+																				detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 													}
 													if (settings1->ANTENNA_MODE
 															== 1) {
@@ -1101,7 +1101,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				k),
 																		freq_tmp,
 																		icemodel->GetN(
-																				detector->stations[i].strings[j].antennas[k]));
+																				detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 													}
                                                                                                         if (settings1->ANTENNA_MODE
 															== 2) {
@@ -1121,7 +1121,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				0),
 																		freq_tmp,
 																		icemodel->GetN(
-																				detector->stations[i].strings[j].antennas[k]));
+																				detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 													}
 
 
@@ -1165,7 +1165,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																					detector->stations[i].strings[j].antennas[k].type),
 																			freq_tmp,
 																			icemodel->GetN(
-																					detector->stations[i].strings[j].antennas[k]));
+																					detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 														}
 
 														if (settings1->ANTENNA_MODE
@@ -1188,7 +1188,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																					k),
 																			freq_tmp,
 																			icemodel->GetN(
-																					detector->stations[i].strings[j].antennas[k]));
+																					detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 														}
                                                                                                                 if (settings1->ANTENNA_MODE
 																== 2) {
@@ -1208,7 +1208,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																					detector->stations[i].strings[j].antennas[k].type),
 																			freq_tmp,
 																			icemodel->GetN(
-																					detector->stations[i].strings[j].antennas[k]));
+																					detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 														}
 
 													} else if (settings1->ALL_ANT_V_ON
@@ -1231,7 +1231,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																					0),
 																			freq_tmp,
 																			icemodel->GetN(
-																					detector->stations[i].strings[j].antennas[k]));
+																					detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 														}
 														if (settings1->ANTENNA_MODE
 																== 1) {
@@ -1253,7 +1253,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																					k),
 																			freq_tmp,
 																			icemodel->GetN(
-																					detector->stations[i].strings[j].antennas[k]));
+																					detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 														}
                                                                                                                 if (settings1->ANTENNA_MODE
 																== 2) {
@@ -1273,7 +1273,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																					0),
 																			freq_tmp,
 																			icemodel->GetN(
-																					detector->stations[i].strings[j].antennas[k]));
+																					detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 														}
 
 													}
@@ -1674,7 +1674,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				detector->stations[i].strings[j].antennas[k].type),
 																		freq_tmp,
 																		icemodel->GetN(
-																				detector->stations[i].strings[j].antennas[k]));
+																				detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 													}
 													if (settings1->ANTENNA_MODE
 															== 1) {
@@ -1696,7 +1696,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				k),
 																		freq_tmp,
 																		icemodel->GetN(
-																				detector->stations[i].strings[j].antennas[k]));
+																				detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 													}
                                                                                                         if (settings1->ANTENNA_MODE
 															== 2) {
@@ -1716,7 +1716,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				detector->stations[i].strings[j].antennas[k].type),
 																		freq_tmp,
 																		icemodel->GetN(
-																				detector->stations[i].strings[j].antennas[k]));
+																				detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 													}
 
 												}
@@ -1741,7 +1741,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				0),
 																		freq_tmp,
 																		icemodel->GetN(
-																				detector->stations[i].strings[j].antennas[k]));
+																				detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 
 													}
 													if (settings1->ANTENNA_MODE
@@ -1764,7 +1764,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				k),
 																		freq_tmp,
 																		icemodel->GetN(
-																				detector->stations[i].strings[j].antennas[k]));
+																				detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 
 													}
                                                                                                         if (settings1->ANTENNA_MODE
@@ -1785,7 +1785,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																				0),
 																		freq_tmp,
 																		icemodel->GetN(
-																				detector->stations[i].strings[j].antennas[k]));
+																				detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 
 													}
 
@@ -2044,7 +2044,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																freq_tmp,
 																icemodel->GetN(
-																		event->Nu_Interaction[0].posnu));
+																		event->Nu_Interaction[0].posnu), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
 											if (settings1->ANTENNA_MODE == 1) {
 												heff_lastbin_trans =
@@ -2066,7 +2066,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																freq_tmp,
 																icemodel->GetN(
-																		event->Nu_Interaction[0].posnu));
+																		event->Nu_Interaction[0].posnu), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
                                                                                         if (settings1->ANTENNA_MODE == 2) {
 												heff_lastbin_trans =
@@ -2086,7 +2086,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																freq_tmp,
 																icemodel->GetN(
-																		event->Nu_Interaction[0].posnu));
+																		event->Nu_Interaction[0].posnu), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
 
 										} else if (settings1->ALL_ANT_V_ON
@@ -2109,7 +2109,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																freq_tmp,
 																icemodel->GetN(
-																		event->Nu_Interaction[0].posnu));
+																		event->Nu_Interaction[0].posnu), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
 											if (settings1->ANTENNA_MODE == 1) {
 												heff_lastbin_trans =
@@ -2129,7 +2129,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																freq_tmp,
 																icemodel->GetN(
-																		event->Nu_Interaction[0].posnu));
+																		event->Nu_Interaction[0].posnu), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
                                                                                         if (settings1->ANTENNA_MODE == 2) {
 												heff_lastbin_trans =
@@ -2149,7 +2149,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																freq_tmp,
 																icemodel->GetN(
-																		event->Nu_Interaction[0].posnu));
+																		event->Nu_Interaction[0].posnu), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
 
 										}
@@ -2181,7 +2181,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																freq_tmp,
 																icemodel->GetN(
-																		detector->stations[i].strings[j].antennas[k]));
+																		detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
 											if (settings1->ANTENNA_MODE == 1) {
 												heff_lastbin =
@@ -2203,7 +2203,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																freq_tmp,
 																icemodel->GetN(
-																		detector->stations[i].strings[j].antennas[k]));
+																		detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
                                                                                         if (settings1->ANTENNA_MODE == 2) {
 												heff_lastbin =
@@ -2223,7 +2223,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																freq_tmp,
 																icemodel->GetN(
-																		detector->stations[i].strings[j].antennas[k]));
+																		detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
 
 										} else if (settings1->ALL_ANT_V_ON
@@ -2246,7 +2246,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																freq_tmp,
 																icemodel->GetN(
-																		detector->stations[i].strings[j].antennas[k]));
+																		detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
 											if (settings1->ANTENNA_MODE == 1) {
 												heff_lastbin =
@@ -2266,7 +2266,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																freq_tmp,
 																icemodel->GetN(
-																		detector->stations[i].strings[j].antennas[k]));
+																		detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
                                                                                         if (settings1->ANTENNA_MODE == 2) {
 												heff_lastbin =
@@ -2286,7 +2286,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																freq_tmp,
 																icemodel->GetN(
-																		detector->stations[i].strings[j].antennas[k]));
+																		detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 											}
 
 										}
@@ -2341,7 +2341,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																	freq_tmp,
 																	icemodel->GetN(
-																			event->Nu_Interaction[0].posnu));
+																			event->Nu_Interaction[0].posnu), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 												}
 												if (settings1->ANTENNA_MODE
 														== 1) {
@@ -2364,7 +2364,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																	freq_tmp,
 																	icemodel->GetN(
-																			event->Nu_Interaction[0].posnu));
+																			event->Nu_Interaction[0].posnu), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 												}
                                                                                                 if (settings1->ANTENNA_MODE
 														== 2) {
@@ -2385,7 +2385,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																	freq_tmp,
 																	icemodel->GetN(
-																			event->Nu_Interaction[0].posnu));
+																			event->Nu_Interaction[0].posnu), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 												}
 
 											} else if (settings1->ALL_ANT_V_ON
@@ -2409,7 +2409,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																	freq_tmp,
 																	icemodel->GetN(
-																			event->Nu_Interaction[0].posnu));
+																			event->Nu_Interaction[0].posnu), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 												}
 												if (settings1->ANTENNA_MODE
 														== 1) {
@@ -2432,7 +2432,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																	freq_tmp,
 																	icemodel->GetN(
-																			event->Nu_Interaction[0].posnu));
+																			event->Nu_Interaction[0].posnu), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 												}
                                                                                                 if (settings1->ANTENNA_MODE
 														== 2) {
@@ -2453,7 +2453,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																	freq_tmp,
 																	icemodel->GetN(
-																			event->Nu_Interaction[0].posnu));
+																			event->Nu_Interaction[0].posnu), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 												}
 
 											}
@@ -2538,7 +2538,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																	freq_tmp,
 																	icemodel->GetN(
-																			detector->stations[i].strings[j].antennas[k]));
+																			detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 												}
 												if (settings1->ANTENNA_MODE
 														== 1) {
@@ -2560,7 +2560,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			k),
 																	freq_tmp,
 																	icemodel->GetN(
-																			detector->stations[i].strings[j].antennas[k]));
+																			detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 												}
                                                                                                 if (settings1->ANTENNA_MODE
 														== 2) {
@@ -2580,7 +2580,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 																			detector->stations[i].strings[j].antennas[k].type),
 																	freq_tmp,
 																	icemodel->GetN(
-																			detector->stations[i].strings[j].antennas[k]));
+																			detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 												}
 
 											} else if (settings1->ALL_ANT_V_ON
@@ -2604,7 +2604,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																	freq_tmp,
 																	icemodel->GetN(
-																			detector->stations[i].strings[j].antennas[k]));
+																			detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 												}
 												if (settings1->ANTENNA_MODE
 														== 1) {
@@ -2627,7 +2627,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																	freq_tmp,
 																	icemodel->GetN(
-																			detector->stations[i].strings[j].antennas[k]));
+																			detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 												}
                                                                                                 if (settings1->ANTENNA_MODE
 														== 2) {
@@ -2648,7 +2648,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 																	freq_tmp,
 																	icemodel->GetN(
-																			detector->stations[i].strings[j].antennas[k]));
+																			detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 												}
 
 											}
@@ -5974,13 +5974,19 @@ double Report::GaintoHeight(double gain, double freq, double n_medium) {
 }
 
 
-double Report::GaintoHeight(double gain, double zr, double freq, double n_medium) {
+double Report::GaintoHeight(double gain, double zr, double freq, double n_medium, int antType, int antMode) {
 
 	// from gain=4*pi*A_eff/lambda^2
 	// and h_eff=2*sqrt(A_eff*Z_rx/Z_air)
 	// gain is unitless value
-
+    if (antType == 1 && antMode == 2)
 	return sqrt(gain / 4 / PI * CLIGHT * CLIGHT / (freq * freq) * zr / Z0); // n_medium parts are changed from icemc(I believe this is correct one; E. Hong)
+/*
+    else if (antType == 0 && antMode == 2)
+        return
+*/
+    else
+        return 2 * sqrt(gain / 4 / PI * CLIGHT * CLIGHT / (freq * freq * n_medium * n_medium) * Zr / (Z0 / n_medium));
 }
 
 void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vmmhz) { // vmmhz is input and output. output will have some antenna factors on it
