@@ -5980,13 +5980,13 @@ double Report::GaintoHeight(double gain, double zr, double freq, double n_medium
 	// and h_eff=2*sqrt(A_eff*Z_rx/Z_air)
 	// gain is unitless value
     if (antType == 1 && antMode == 2)
-	return sqrt(gain / 4 / PI * CLIGHT * CLIGHT / (freq * freq) * zr / Z0); // n_medium parts are changed from icemc(I believe this is correct one; E. Hong)
+	return sqrt(gain / 4 / PI * CLIGHT * CLIGHT / (freq * freq) * zr / Z0);
 /*
     else if (antType == 0 && antMode == 2)
         return
 */
     else
-        return 2 * sqrt(gain / 4 / PI * CLIGHT * CLIGHT / (freq * freq * n_medium * n_medium) * Zr / (Z0 / n_medium));
+        return 2 * sqrt(gain / 4 / PI * CLIGHT * CLIGHT / (freq * freq * n_medium * n_medium) * Zr / (Z0 / n_medium));// n_medium parts are changed from icemc(I believe this is correct one; E. Hong)
 }
 
 void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vmmhz) { // vmmhz is input and output. output will have some antenna factors on it

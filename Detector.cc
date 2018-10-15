@@ -4015,6 +4015,8 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
         } // not outside the Freq[] range
     
     } // Hpol case
+    if ( Gout < 0. ) // gain can not go below 0
+        Gout = 0.;
     return Gout;
 }
 
