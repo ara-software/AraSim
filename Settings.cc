@@ -290,7 +290,7 @@ outputdir="outputs"; // directory where outputs go
     APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
 
     CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.tst"
-
+    PHASING_MODE=0; //default: 0, noise is not reduced by factor of sqrt(8). No phased array mode.
 
     /*
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
@@ -673,7 +673,11 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "CUSTOM_ELECTRONICS"){
               	   CUSTOM_ELECTRONICS = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
-
+	      else if (label == "PHASING_MODE"){
+		PHASING_MODE == atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+	      
+	      
 
 
 

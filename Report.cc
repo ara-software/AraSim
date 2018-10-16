@@ -46,7 +46,7 @@ Report::~Report() {
 	Passed_chs.clear();
 	Vfft_noise_after.clear();
 	Vfft_noise_before.clear();
-	//V_noise_timedomain.clear();
+	V_noise_timedomain.clear();
 
 }
 
@@ -290,7 +290,7 @@ void Report::clear_useless(Settings *settings1) { // to reduce the size of outpu
 		Passed_chs.clear();
 		Vfft_noise_after.clear();
 		Vfft_noise_before.clear();
-		//V_noise_timedomain.clear();
+		V_noise_timedomain.clear();
 		// done clear vector info in report head
 		//
 
@@ -4303,10 +4303,24 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 									//we agreed to make the phased array dipole stations[0].strings[0].antennas[0]
 									bool should_i_check_this_chan_for_trigger=false;
 									if(string_i==0 && antenna_i==0){
-										high_check_val = phased_array_hi;
-										lo_check_val = phased_array_lo;
-										should_i_check_this_chan_for_trigger=true;
+									  
+									  if(settings1->PHASING_MODE==1){
+									    high_check_val = phased_array_hi*sqrt(8);
+									    lo_check_val = phased_array_lo*sqrt(8);
+									    should_i_check_this_chan_for_trigger=true;
+									  }
+									  
+									  if(settings1->PHASING_MODE==0){
+									    high_check_val = phased_array_hi;
+									    lo_check_val = phased_array_lo;
+									    should_i_check_this_chan_for_trigger=true;
+									  }
 									}
+									
+									
+
+
+									
 									//(lpdas are type==1 in this hacky trigger mode)
 									else if(ant_type==1){
 										high_check_val = lpda_hi;
@@ -6344,82 +6358,91 @@ void Report::GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_thet
 // generate DATA_BIN_SIZE sized noise waveform array in time domain
 void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v_noise, double *vnoise) {
 
-	if (settings1->NOISE == 0) { // NOISE == 0 : flat thermal noise with Johnson-Nyquist noise
-		//V_noise_fft_bin = sqrt( (double)(NFOUR/2) * 50. * KBOLTZ * T_noise / (2. * TIMESTEP) ); 
-
-		Vfft_noise_after.clear();  // remove previous Vfft_noise values
-		Vfft_noise_before.clear();  // remove previous Vfft_noise values
-		//V_noise_timedomain.clear(); // remove previous V_noise_timedomain values
-
-		double V_tmp; // copy original flat H_n [V] value
-		double current_amplitude, current_phase;
-
-		GetNoisePhase(settings1); // get random phase for noise
-
-		//MakeArraysforFFT_noise(settings1, detector, vhz_noise_tmp , vnoise);
-		// returned array vnoise currently have real value = imag value as no phase term applied
-
-		//for (int k=0; k<settings1->NFOUR/4; k++) {
-		for (int k = 0; k < settings1->DATA_BIN_SIZE / 2; k++) {
-
-			V_tmp = v_noise / sqrt(2.); // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
-
-			if (settings1->USE_TESTBED_RFCM_ON == 0) {
-				ApplyFilter_databin(k, detector, V_tmp);
-				ApplyPreamp_databin(k, detector, V_tmp);
-				ApplyFOAM_databin(k, detector, V_tmp);
-				if (settings1->APPLY_NOISE_FIGURE == 1) {
-					ApplyNoiseFig_databin(0, k, detector, V_tmp, settings1);
-				}
-			} else if (settings1->USE_TESTBED_RFCM_ON == 1) {
-				// apply RFCM gain
-				// as this mode don't have different chs' noise waveform separately, just use ch0 RFCM gain...
-				cerr
-						<< "Trying not allowed mode : NOISE_CHANNEL_MODE=0 and USE_TESTBED_RFCM_ON=1 same time!"
-						<< endl;
-				break;
-				//ApplyRFCM_databin(0, detector, V_tmp);
-			}
-
-			Vfft_noise_before.push_back(V_tmp);
-
-			current_phase = noise_phase[k];
-
-			//Tools::get_random_rician( 0., 0., sqrt(2./ M_PI) * V_tmp, current_amplitude, current_phase);    // use real value array value
-			Tools::get_random_rician(0., 0., sqrt(2. / M_PI) / 1.177 * V_tmp,
-					current_amplitude, current_phase); // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
-
-			// vnoise is currently noise spectrum (before fft, unit : V)
-			//vnoise[2 * k] = sqrt(current_amplitude) * cos(noise_phase[k]);
-			//vnoise[2 * k + 1] = sqrt(current_amplitude) * sin(noise_phase[k]);
-			vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
-			vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
-
-			//vnoise[2 * k] = (V_tmp) * cos(noise_phase[k]);
-			//vnoise[2 * k + 1] = (V_tmp) * sin(noise_phase[k]);
-
-			Vfft_noise_after.push_back(vnoise[2 * k]);
-			Vfft_noise_after.push_back(vnoise[2 * k + 1]);
-
-			// inverse FFT normalization factor!
-			vnoise[2 * k] *= 2. / ((double) settings1->DATA_BIN_SIZE);
-			vnoise[2 * k + 1] *= 2. / ((double) settings1->DATA_BIN_SIZE);
-
-		}
-
-		// now vnoise is time domain waveform
-		Tools::realft(vnoise, -1, settings1->DATA_BIN_SIZE);
-
-		// save timedomain noise to Report class
-		/*
-		 for (int k=0; k<settings1->DATA_BIN_SIZE; k++) {
-		 V_noise_timedomain.push_back( vnoise[k] );
-		 }
-		 */
-
-	} else {  // currently there are no more options!
-		cout << "no noise option for NOISE = " << settings1->NOISE << endl;
+  if (settings1->NOISE == 0) { // NOISE == 0 : flat thermal noise with Johnson-Nyquist noise
+	  
+    Vfft_noise_after.clear();  // remove previous Vfft_noise values
+    Vfft_noise_before.clear();  // remove previous Vfft_noise values
+    V_noise_timedomain.clear(); // remove previous V_noise_timedomain values
+	  
+    double V_tmp; // copy original flat H_n [V] value
+    double current_amplitude, current_phase;
+	  
+    GetNoisePhase(settings1); // get random phase for noise
+	  
+    //MakeArraysforFFT_noise(settings1, detector, vhz_noise_tmp , vnoise);
+    // returned array vnoise currently have real value = imag value as no phase term applied
+	  
+    //for (int k=0; k<settings1->NFOUR/4; k++) {
+    for (int k = 0; k < settings1->DATA_BIN_SIZE / 2; k++) {
+	    
+      V_tmp = v_noise; /*/ sqrt(2.)*/; // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
+	    
+      if (settings1->USE_TESTBED_RFCM_ON == 0) {
+	ApplyFilter_databin(k, detector, V_tmp);
+	ApplyPreamp_databin(k, detector, V_tmp);
+	ApplyFOAM_databin(k, detector, V_tmp);
+	if (settings1->APPLY_NOISE_FIGURE == 1) {
+	  ApplyNoiseFig_databin(0, k, detector, V_tmp, settings1);
 	}
+      } else if (settings1->USE_TESTBED_RFCM_ON == 1) {
+	// apply RFCM gain
+	// as this mode don't have different chs' noise waveform separately, just use ch0 RFCM gain...
+	cerr
+	  << "Trying not allowed mode : NOISE_CHANNEL_MODE=0 and USE_TESTBED_RFCM_ON=1 same time!"
+	  << endl;
+	break;
+	//ApplyRFCM_databin(0, detector, V_tmp);
+      }
+
+      Vfft_noise_before.push_back(V_tmp);
+
+      current_phase = noise_phase[k];
+
+      //Tools::get_random_rician( 0., 0., sqrt(2./ M_PI) * V_tmp, current_amplitude, current_phase);    // use real value array value
+      Tools::get_random_rician(0., 0., sqrt(2. / M_PI) / 1.177 * V_tmp,
+			       current_amplitude, current_phase); // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
+
+      // vnoise is currently noise spectrum (before fft, unit : V)
+      //vnoise[2 * k] = sqrt(current_amplitude) * cos(noise_phase[k]);
+      //vnoise[2 * k + 1] = sqrt(current_amplitude) * sin(noise_phase[k]);
+      vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
+      vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
+
+      //vnoise[2 * k] = (V_tmp) * cos(noise_phase[k]);
+      //vnoise[2 * k + 1] = (V_tmp) * sin(noise_phase[k]);
+
+      Vfft_noise_after.push_back(vnoise[2 * k]);
+      Vfft_noise_after.push_back(vnoise[2 * k + 1]);
+
+      // inverse FFT normalization factor!
+      vnoise[2 * k] *= 2. / ((double) settings1->DATA_BIN_SIZE);
+      vnoise[2 * k + 1] *= 2. / ((double) settings1->DATA_BIN_SIZE);
+
+    }
+
+    Tools::realft(vnoise, -1, settings1->DATA_BIN_SIZE); //Apply fft
+    // now vnoise is time domain waveform
+
+    // save timedomain noise to Report class
+    for (int k=0; k<settings1->DATA_BIN_SIZE; k++) {
+      V_noise_timedomain.push_back( vnoise[k] );
+    }
+
+    /*//Added by Jorge to plot the noise. Just keeping here in case it's necessary later.
+    FILE *fout = fopen("noise_waveform.txt", "w");
+    
+    for(int j=0; j<V_noise_timedomain.size(); j++){
+      //cout << Vm_beforeAntenna_T->at(0)[j]<< ',' << Vm_beforeAntenna->at(0)[j] <<endl;
+      fprintf(fout, "%g %g \n",T_noise_timedomain[j],V_noise_timedomain[j]);
+    }
+    fclose(fout);
+
+		 
+    */
+
+  } else {  // currently there are no more options!
+    cout << "no noise option for NOISE = " << settings1->NOISE << endl;
+  }
 
 }
 
@@ -6430,7 +6453,7 @@ void Report::GetNoiseWaveforms_ch(Settings *settings1, Detector *detector, doubl
 
 		Vfft_noise_after.clear();  // remove previous Vfft_noise values
 		Vfft_noise_before.clear();  // remove previous Vfft_noise values
-		//V_noise_timedomain.clear(); // remove previous V_noise_timedomain values
+		V_noise_timedomain.clear(); // remove previous V_noise_timedomain values
 
 		double V_tmp; // copy original flat H_n [V] value
 		double current_amplitude, current_phase;

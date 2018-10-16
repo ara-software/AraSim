@@ -343,7 +343,7 @@ class Report {
 	
         vector <double> Vfft_noise_after;   // noise Vfft after get_random_rician
         vector <double> Vfft_noise_before;   // noise Vfft before get_random_rician
-        //vector <double> V_noise_timedomain;   // noise V timedomain after get_random_rician and inverse fft
+        vector <double> V_noise_timedomain;   // noise V timedomain after get_random_rician and inverse fft
         double Vfft_noise_org;              // V/Hz for thermal noise from Johnson-Nyquist
 
         vector <double> V_total_forconvlv; // vector array for pure signal diode convlv result
