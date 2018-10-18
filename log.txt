@@ -1587,3 +1587,9 @@ With Cheby1 LPF
 Moved old butterworth to custom_electronics.txt.butterworth
 
 ============================================================================
+
+2018/10/18 Yue Pan:
+
+Made the attenuation model frequency dependent. Only works when SIMULATION_MODE=0 in frequency domain askaryan radiation
+
+============================================================================

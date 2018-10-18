@@ -610,10 +610,21 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 		    // multiply all factors for traveling ice
 		    //vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0)) * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
-		    vmmhz1m_tmp = vmmhz1m_tmp
-		      / ray_output[0][ray_sol_cnt]
-		      * IceAttenFactor * mag
-		      * fresnel; // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                    if (settings1->USE_ARA_ICEATTENU == 1 || settings1->USE_ARA_ICEATTENU == 0){
+		        vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel; // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                    }
+                    else if (settings1->USE_ARA_ICEATTENU == 2){
+                        double IceAttenFactor = 1.;
+                        double dx, dz, dl;
+                        for (int steps = 1; steps < (int) RayStep[ray_sol_cnt][0].size(); steps++) {
+                            dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
+                            dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
+                            dl = sqrt((dx * dx) + (dz * dz));
+                            IceAttenFactor *= exp(-dl / icemodel->GetBessonIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], detector->GetFreq(l) / 1e9));
+                        }
+                        vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel; // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                    }
+
 		    //cout<<"AttenLength : "<<icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0)<<endl;
 
 		    vmmhz1m_sum += vmmhz1m_tmp;
@@ -623,7 +634,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 		    freq_tmp = detector->GetFreq(l); // freq in Hz
 
-		    cout << "Check 1" << endl;
+		    //cout << "Check 1" << endl;
 		    /*
 		    // Get ant gain with 2-D interpolation (may have bug?) 
 		    //
@@ -775,7 +786,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 				    detector->stations[i].strings[j].antennas[k].type,
 				    Pol_factor, vmmhz1m_tmp);
 
-		    cout << "Check 2" << endl;
+		    //cout << "Check 2" << endl;
 		    //stations[i].strings[j].antennas[k].VHz_antfactor[ray_sol_cnt].push_back( vmmhz1m_tmp );
 
 		    // apply filter

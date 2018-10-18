@@ -1003,11 +1003,8 @@ Interaction::Interaction(IceModel *antarctica, Detector *detector, Settings *set
     
     // set vmmhz1m (which is generally used for all detector antennas)
     // vmmhz1m is calculated at 1m, cherenkov angle
-    //
-    
     
     for (int i=0; i<detector->GetFreqBin(); i++) {   // for detector freq bin numbers
-      
       
       d_theta_em.push_back(0); // prepare d_theta_em and d_theta_had for GetSpread
       d_theta_had.push_back(0);
@@ -1024,13 +1021,8 @@ Interaction::Interaction(IceModel *antarctica, Detector *detector, Settings *set
       } else{
 	
       }
-      
-      
-      
     }    // end detector freq bin numbers loop
-    
   }// if SIMULATION_MODE = 0 (freq domain old method)
-  
 }
 
 // Neutrino event Interaction class
