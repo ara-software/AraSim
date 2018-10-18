@@ -1571,13 +1571,19 @@ regard to (average x of antennas, average y of antennas, icesurface)
 
 Rewrote the whole antenna part so that AraSim can now handle nonconstant impedance correctly
 
-============================================================================
-
 
 ============================================================================
 
 2018/10/18 Jorge Torres:
 
 Noise temperature set to 300 K, can be changed by doing NOISE_TEMP=300. Added PHASING_MODE to account for a factor of sqrt(8) noise reduction. Noise on can now by run with CUSTOM_ELECTRONICS=1
+
+============================================================================
+
+2018/10/18 Brian Clark:
+
+Added new custom electronics file which is the NTU amp amplitude and HPF filter
+With Cheby1 LPF
+Moved old butterworth to custom_electronics.txt.butterworth
 
 ============================================================================
