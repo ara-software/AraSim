@@ -1574,3 +1574,10 @@ Rewrote the whole antenna part so that AraSim can now handle nonconstant impedan
 ============================================================================
 
 
+============================================================================
+
+2018/10/18 Jorge Torres:
+
+Noise temperature set to 300 K, can be changed by doing NOISE_TEMP=300. Added PHASING_MODE to account for a factor of sqrt(8) noise reduction.
+
+============================================================================

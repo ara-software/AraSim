@@ -768,13 +768,6 @@ int Settings::CheckCompatibilities(Detector *detector) {
 
     // if there's something not going to work, count thoes settings
 
-    //at present (Sep 27 2018) you cannot use a custom electronics file and run with anything more than signal
-    if(CUSTOM_ELECTRONICS==1 && TRIG_ANALYSIS_MODE!=1){
-      cerr<<"CUSTOM_ELECTRONICS=1, TRIG_ANALYSIS_MODE!=1 are incompatible!"<<endl;
-      cerr<<"To run with custom electronics, you must run with noise off!"<<endl;
-      num_err++;
-    }
-
     if (DETECTOR==1 && READGEOM==1 && detector->params.number_of_stations>1) { // currently only ARA1a one station is possible
         cerr<<"DETECTOR=1, READGEOM=1 is currently only availble with number_of_stations=1 in ARA_N_info.txt file!"<<endl;
         num_err++;

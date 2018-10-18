@@ -4303,9 +4303,8 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 		  double high_check_val = 100000.; //some crazy high value
 		  double lo_check_val = -100000.; //some crazy low value
 		  double noise_level = 0.;
-		  if(settings1->CUSTOM_ELECTRONICS==1 && settings1->TRIG_ANALYSIS_MODE==1){
-		    //you should only be using CUSTOM_ELECTRONICS right now if the noise is OFF
-		    noise_level = 9.3e-6; //noise off
+		  if(settings1->CUSTOM_ELECTRONICS==1){
+		    noise_level = 11e-6; //noise off
 		  }
 		  else if(settings1->CUSTOM_ELECTRONICS==0){
 		    //no custom electronics, so use the RMS of the generated noise

@@ -1,7 +1,7 @@
 EXPONENT=18
 
 //the neutrinos
-NNU=100 //allow this many neutrinos
+NNU=1000 //allow this many neutrinos
 ONLY_PASSED_EVENTS=0 //throw only NNU events
 EVENT_GENERATION_MODE=0 //read in an event list
 
@@ -25,7 +25,7 @@ DATA_BIN_SIZE=4096 //length of pregenerated noise waveforms
 V_MIMIC_MODE=0 // 0 : global trig is in center of readout windows
 TIMESTEP=8.333E-10 //1.2 GHz sampling rate
 TRIG_WINDOW=50e-9 //mult-channel coincidence window in ns
-CUSTOM_ELECTRONICS=0 //yes custom electronics
+CUSTOM_ELECTRONICS=1 //yes custom electronics
 
 //the trigger
 TRIG_ANALYSIS_MODE=2 //0: S+N, 1: S only, 2: N only
