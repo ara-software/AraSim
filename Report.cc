@@ -1407,26 +1407,16 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 			    //stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( volts_forfft[n] );
 			    //stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( V_forfft[n] * 2./(double)(settings1->NFOUR/2) ); // 2/N for inverse FFT normalization factor
 			    //stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( volts_forint[n] * 2./(double)(settings1->NFOUR/2) ); // 2/N for inverse FFT normalization factor
-			    stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(
+			    double phasing_factor =1.;
+          if(j==0 && k==0){
+            if(settings1->PHASING_MODE==1){
+              phasing_factor*=sqrt(8);
+            }
+          }
+          stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(
 											volts_forint[n]
-											* 2.
+											* 2. * phasing_factor
 											/ (double) (stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]));
-
-			    if(settings1->PHASING_MODE==1){ //If phased array is activated
-			      if(j==0 && k==0){//If channel is phased array
-			      stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(
-											  volts_forint[n]
-											  * 2.*sqrt(8)
-											  / (double) (stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt])); // 2/N for inverse FFT normalization factor
-			      // cout<<"Push back this V value "<<stations[i].strings[j].antennas[k].V[ray_sol_cnt][n]<<endl;
-			      
-			      
-			      }//End If phased array is activated
-			    }//End If channel is phased array
-			    
-
-
-			    
 			  } else if (settings1->TRIG_ANALYSIS_MODE
 				     == 2) { // pure noise mode (set signal to 0)
 			    stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(
