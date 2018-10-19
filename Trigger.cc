@@ -170,7 +170,6 @@ void Trigger::SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *r
 	    //bwslice_meandiode[j]+=timedomain_output_e[j][m]/((double)ngeneratedevents*((double)NFOUR/2-maxt_diode/TIMESTEP));
 	    meandiode+=v_noise_timedomain_diode[i][m]/((double)ngeneratedevents * ((double)settings1->DATA_BIN_SIZE-maxt_diode/TIMESTEP));
 	    } // end loop over samples where diode function is fully contained 
-
             v_noise_timedomain[i].push_back(v_noise[m]);    // save pure noise (not diode convlved) waveforms
 
             // save pure noise spectrum before applying Rayleigh distribution (only at first evt as they will be all same)
@@ -291,7 +290,7 @@ for (int ch=0; ch<num_chs; ch++) {
         // do normal time ordering (not sure if this is necessary)
         Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise);
 
-
+	//Apply inverse fft factor of 2*N
 	myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin,v_noise_timedomain_diode_ch[ch][i]);
         //
 

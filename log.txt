@@ -1593,3 +1593,9 @@ Moved old butterworth to custom_electronics.txt.butterworth
 Made the attenuation model frequency dependent by setting USE_ARA_ICEATTENU=2. Only works when SIMULATION_MODE=0 in frequency domain askaryan radiation
 
 ============================================================================
+
+2018/10/19 Jorge Torres & Brian Clark:
+
+Added new filter for customs electronics, named filter_custom.csv. Also, we bypassed applying the FOAM and amps for the noise in the time domain.
+
+============================================================================

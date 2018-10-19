@@ -6404,7 +6404,8 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
 	  
     //for (int k=0; k<settings1->NFOUR/4; k++) {
     for (int k = 0; k < settings1->DATA_BIN_SIZE / 2; k++) {
-	    
+
+      if(settings1->CUSTOM_ELECTRONICS == 0){
       V_tmp = v_noise/sqrt(2.); // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
 	    
       if (settings1->USE_TESTBED_RFCM_ON == 0) {
@@ -6412,6 +6413,7 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
 	ApplyPreamp_databin(k, detector, V_tmp);
 	ApplyFOAM_databin(k, detector, V_tmp);
 	if (settings1->APPLY_NOISE_FIGURE == 1) {
+
 	  ApplyNoiseFig_databin(0, k, detector, V_tmp, settings1);
 	}
       } else if (settings1->USE_TESTBED_RFCM_ON == 1) {
@@ -6423,7 +6425,13 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
 	break;
 	//ApplyRFCM_databin(0, detector, V_tmp);
       }
+      }//No custom_electronics
 
+      else if(settings1->CUSTOM_ELECTRONICS == 1){//Custom_electronics on
+	V_tmp = v_noise/sqrt(2.);
+	ApplyFilter_databin(k, detector, V_tmp);
+      }
+      
       Vfft_noise_before.push_back(V_tmp);
 
       current_phase = noise_phase[k];
@@ -6452,23 +6460,26 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
 
     Tools::realft(vnoise, -1, settings1->DATA_BIN_SIZE); //Apply fft
     // now vnoise is time domain waveform
+    /*
+    vector <double> T_noise_timedomain;
 
     // save timedomain noise to Report class
-    /*   for (int k=0; k<settings1->DATA_BIN_SIZE; k++) {
-	 V_noise_timedomain.push_back( vnoise[k] );
-	 }*/
-
-    /*//Added by Jorge to plot the noise. Just keeping here in case it's necessary later.
+    for (int k=0; k<settings1->DATA_BIN_SIZE; k++) {
+	 T_noise_timedomain.push_back(k);
+	 V_noise_timedomain.push_back(vnoise[k]);
+    }
+    
+    //Added by Jorge to plot the noise. Just keeping here in case it's necessary later.
       FILE *fout = fopen("noise_waveform.txt", "w");
     
       for(int j=0; j<V_noise_timedomain.size(); j++){
-      //cout << Vm_beforeAntenna_T->at(0)[j]<< ',' << Vm_beforeAntenna->at(0)[j] <<endl;
-      fprintf(fout, "%g %g \n",T_noise_timedomain[j],V_noise_timedomain[j]);
+	fprintf(fout, "%g %g \n",T_noise_timedomain[j],V_noise_timedomain[j]);
+	//	cout<<V_noise_timedomain[j]<<endl;
       }
       fclose(fout);
 
 		 
-    */
+       */
 
   } else {  // currently there are no more options!
     cout << "no noise option for NOISE = " << settings1->NOISE << endl;

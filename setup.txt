@@ -1,7 +1,7 @@
-EXPONENT=18
+EXPONENT=21
 
 //the neutrinos
-NNU=1000 //allow this many neutrinos
+NNU=300 //allow this many neutrinos
 ONLY_PASSED_EVENTS=0 //throw only NNU events
 EVENT_GENERATION_MODE=0 //read in an event list
 
@@ -20,7 +20,7 @@ BORE_HOLE_ANTENNA_LAYOUT=11 //design a "strawman + PA"
 //the electronics and noise
 NFOUR=1024 // NFOUR/2 is number of samps in time domain
 NOISE_WAVEFORM_GENERATE_MODE=0 // new noise waveforms for each event
-//NOISE_EVENTS=100 // number of pure noise waveforms
+NOISE_EVENTS=90 // number of pure noise waveforms
 DATA_BIN_SIZE=4096 //length of pregenerated noise waveforms
 V_MIMIC_MODE=0 // 0 : global trig is in center of readout windows
 TIMESTEP=8.333E-10 //1.2 GHz sampling rate
@@ -44,6 +44,6 @@ LPDA_MODE=1
 
 NOISE_WAVEFORM_GENERATE_MODE=0 // generates new waveforms for every event
 NOISE=0 //flat thermal noise
-//NOISE_CHANNEL_MODE=1 //using different noise temperature for each channel
-//NOISE_TEMP=00
+NOISE_CHANNEL_MODE=0 //using different noise temperature for each channel
+NOISE_TEMP=300
 PHASING_MODE=1 //Phased array decreases noise by sqrt(8)
