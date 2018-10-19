@@ -110,7 +110,8 @@ void Tools::realft(double *data, const int isign, int nsize){
   if (isign == 1) {
                 c2 = -0.5;
                 four1(data,1,nsize);
-        } else {
+        }
+  else {
                 c2=0.5;
                 theta = -theta;
         }

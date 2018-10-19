@@ -510,8 +510,6 @@ double cur_posnu_z;
                trigger->GetNewNoiseWaveforms(settings1, detector, report);
            }
            */
-
-
     //--------------------------------------------------
     //        cout<<"inu : "<<inu<<endl;
     //        cout<<"event->pnu : "<<event->pnu<<endl;
@@ -561,7 +559,7 @@ double cur_posnu_z;
 
 	   weight = event->Nu_Interaction[0].weight;
 	   }
-	   //	   cout << "weight: " << weight <<endl;	   
+	   //cout << "weight: " << weight <<endl;	   
 #endif
            
            report->ClearUselessfromConnect(detector, settings1, trigger);

@@ -1571,7 +1571,6 @@ regard to (average x of antennas, average y of antennas, icesurface)
 
 Rewrote the whole antenna part so that AraSim can now handle nonconstant impedance correctly
 
-
 ============================================================================
 
 2018/10/18 Jorge Torres:
@@ -1597,5 +1596,11 @@ Made the attenuation model frequency dependent by setting USE_ARA_ICEATTENU=2. O
 2018/10/19 Jorge Torres & Brian Clark:
 
 Added new filter for customs electronics, named filter_custom.csv. Also, we bypassed applying the FOAM and amps for the noise in the time domain.
+
+============================================================================
+
+2018/10/19 Yue Pan:
+
+Made the attenuation model frequency dependent by setting USE_ARA_ICEATTENU=2. It can now work with SIMULATION_MODE=1
 
 ============================================================================

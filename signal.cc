@@ -606,70 +606,62 @@ void Signal::TaperVmMHz(double viewangle,
 		double deltheta_had,
 		double emfrac,
 		double hadfrac,
-
 		double& vmmhz1m,
 		double& vmmhz1m_em_obs) {
-
   //--EM
-  
     bool calpulser = false;
-  double vmmhz1m_em=0; // V/m/MHz at 1m due to EM component of shower
-double vmmhz1m_had=0; // V/m/MHz at 1m due to HAD component of shower
+    double vmmhz1m_em=0; // V/m/MHz at 1m due to EM component of shower
+    double vmmhz1m_had=0; // V/m/MHz at 1m due to HAD component of shower
 
   // this is the number that get exponentiated
   //  double rtemp=0.5*(viewangle-changle)*(viewangle-changle)/(deltheta_em*deltheta_em);
-  double rtemp=(viewangle-changle)*(viewangle-changle)/(deltheta_em*deltheta_em);
-  
+    double rtemp=(viewangle-changle)*(viewangle-changle)/(deltheta_em*deltheta_em);
 
   //cout << "dangle, deltheta_em is " << viewangle-changle << " " << deltheta_em << "\n";
   //cout << "rtemp (em) is " << rtemp << "\n";
   // the power goes like exp(-(theta_v-theta_c)^2/Delta^2)
     // so the e-field is the same with a 1/2 in the exponential
-    
     if (emfrac>pow(10.,-10.)) { // if there is an em component
         if (calpulser == false){
-            
             if (rtemp<=20) { // if the viewing angle is less than 20 sigma away from the cerankov angle
                 // this is the effect of the em width on the signal
                 vmmhz1m_em=vmmhz1m*exp(-rtemp);
                 
             }
-            else // if it's more than 20 sigma just set it to zero 
-            {vmmhz1m_em=0.;}
-            
-        } else {
+            else{// if it's more than 20 sigma just set it to zero 
+                vmmhz1m_em=0.;
+            }
+        }
+        else {
             vmmhz1m_em = vmmhz1m;
         }
-    } else // if the em component is essentially zero than set this to zero
-            vmmhz1m_em=0;
+    }
+    else{ // if the em component is essentially zero than set this to zero
+        vmmhz1m_em=0;
+    }
 
   //--HAD
   // this is the quantity that gets exponentiated
-
-  rtemp=(viewangle-changle)*(viewangle-changle)/(deltheta_had*deltheta_had);
-
+    rtemp=(viewangle-changle)*(viewangle-changle)/(deltheta_had*deltheta_had);
   //cout << "rtemp (had) is " << rtemp << "\n";
-
   if (hadfrac!=0) { // if there is a hadronic fraction
    if (calpulser == false){
-
     if (rtemp<20) { // if we are less than 20 sigma from cerenkov angle
       vmmhz1m_had=vmmhz1m*exp(-rtemp); // this is the effect of the hadronic width of the signal
    
     }
-    else // if we're more than 20 sigma from cerenkov angle
+    else{// if we're more than 20 sigma from cerenkov angle
       vmmhz1m_had=0.; // just set it to zero
-   } else {
+    }
+   }
+   else {
        vmmhz1m_had = vmmhz1m;
    }
   }
   else 
     vmmhz1m_had=0.;
 
-
   logscalefactor_taper=log10((emfrac*vmmhz1m_em+hadfrac*vmmhz1m_had)/vmmhz1m);
-
-
   //cout << "emfrac, vmmhz1m_em, hadfrac, vmmhz1m_had are " << emfrac << " " << vmmhz1m_em << " " << hadfrac << " " << vmmhz1m_had << "\n";
   vmmhz1m=sin(viewangle)*(emfrac*vmmhz1m_em+hadfrac*vmmhz1m_had);
 
@@ -677,8 +669,6 @@ double vmmhz1m_had=0; // V/m/MHz at 1m due to HAD component of shower
     vmmhz1m_em_obs=0.;
   else
     vmmhz1m_em_obs=sin(viewangle)*emfrac*vmmhz1m_em/vmmhz1m;
-
-
 
 } //TaperVmMHz
 
@@ -866,41 +856,24 @@ double Signal::Greisen(double x_in, double *par) {
 
 // depending on the shower_mode, make Vm array for em shower/had shower or both
 void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins ) {
-
-
-
     double sin_view = sin(viewangle);
     double cos_view = cos(viewangle);
     double sin_changle = sin(changle_ice);
-
     double offcone_factor = 1.-nice*cos_view;
-
-
     //double c_ns = 2.998e-1; // speed of light in m/ns
     double c_ns = CLIGHT *1.e-9; // speed of light in m/ns 
-
     double Const;
-
     double Integrate = 0.;
-
     double V_s;
     //double param_RA[6];
     double param_RA[8];
-
     int shower_bin;
-
     double E_shower;
-
-
-
     // reset Earray and Tarray
     for (int tbin=0; tbin<outbin; tbin++) {
-
         Tarray[tbin] = 0.;
         Earray[tbin] = 0.;
     }
-
-
     // if we drive Askaryan signal from only one shower
     //if ( settings1->SHOWER_MODE == 0 || settings1->SHOWER_MODE == 1 ) { // only EM or only HAD
     if ( settings1->SHOWER_MODE == 0 || settings1->SHOWER_MODE == 1 || settings1->SHOWER_MODE == 3 ) { // only EM or only HAD
@@ -914,21 +887,14 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             param_RA[0] = 0.057;
             param_RA[1] = 2.87;
             param_RA[2] = -3.;
-
             param_RA[3] = -0.03;
             param_RA[4] = -3.05;
             param_RA[5] = -3.5;
-
             E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
-
             //cout<<"E_shower, em : "<<E_shower<<endl;
-
             Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
-
             shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
-
             // do integration
-            //
 
         }
 

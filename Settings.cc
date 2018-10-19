@@ -778,11 +778,6 @@ int Settings::CheckCompatibilities(Detector *detector) {
         num_err++;
     }
 
-    if (USE_ARA_ICEATTENU == 2 && SIMULATION_MODE == 1){
-        cerr << "USE_ARA_ICEATTENU=2 and SIMULATION_MODE=1 is currently not availble! USE_ARA_ICEATTENU=2 is only available in SIMULATION_MODE=0!" << endl;
-        num_err++;
-    }
-
     // check reasonable number of noise waveforms
     if (NOISE_WAVEFORM_GENERATE_MODE == 0) { // if generating new noise waveforms for every events
         if (NOISE_CHANNEL_MODE == 0) {// share all noise waveforms same with other channels
