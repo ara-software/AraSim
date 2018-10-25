@@ -17,9 +17,7 @@ class Signal {
 protected:
   // properties of ice
   double x0ice; 
-  //double X0ICE; // radiation length of ice (meters)
   double ecice;                     // critical energy in ice (MeV)
-  //const static double ECICE; // critical energy in ice (MeV)
   double nice;                      // index of refraction of ice
   double nfirn;                   // index of refraction at the very surface - Peter
   double invnfirn; 
@@ -28,7 +26,6 @@ protected:
   double kelvins_ice;          // temperature in Kelvin (ice+system)
   double changle_ice;
   double aex_ice;  //efficiency for producing charge asymmetry relative to ice.  1 by definition
-  //double n_depth;  // index of refraction at the interaction depth
   double alphaice; // exponent that goes into cutting off the spectrum at high frequencies
   double rm_ice; // moliere radius, in g/cm^2
   double ke_ice; // const staticant in jaime's parameterization, in V/cm/MHz
@@ -73,14 +70,10 @@ double BETAMEDIUM; // exponent, in jaime's parameterization
   static const double RM_SALT; // moliere radius, in g/cm^2
   static const double KR_SALT; // constant in jaime's parameterization
   static const double KR_ICE; // constant in jaime's parameterization
-  //const double X0SALT=0.1024;                // radiation length of salt (meters)
   static const double X0SALT;                // radiation length of salt (meters)
-  //const double ECSALT=40.;                   // critical energy in salt (MeV)
   static const double ECSALT;                   // critical energy in salt (MeV)
   static const double X0ICE; 
-  // //const double X0ICE=0.392; // radiation length of ice (meters)
   static const double ECICE;                     // critical energy in ice (MeV)
-  // //const double ECICE=73.0; // critical energy in ice (MeV)
 static const double AEX_ICE;  //efficiency for producing charge asymmetry relative to ice.  1 by definition
   
 
@@ -98,8 +91,6 @@ static const double AEX_ICE;  //efficiency for producing charge asymmetry relati
   static const double KELVINS_ICE;          // temperature in Kelvin (ice+system)
   static const double KELVINS_SALT;            // temperature in salt (350) + receiver temp (150)
   static const double BETAICE; // exponent, in jaime's parameterization
-  // double NU0_MODIFIED=0.; // nu_0 modified for a specific medium
-  // double NU_R;// parameter for signal parameterization
   static const double BETASALT; // exponent, in jaime's parameterization 
   
 
@@ -152,7 +143,10 @@ double GetELPM();  // elpm
   double Greisen(double x_in, double *par);
 
 
-  //void GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray );
+
+  void EugeneModule( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins );
+  void AskaryanModule( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins );
+ 
   void GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins );
 
   double Param_RE_Tterm(double Tterm, double *par);
@@ -226,7 +220,6 @@ void SetLPM(double lpm) {
     SetChangle(acos(1/N_DEPTH));
 
     SetrhoDepth((N_DEPTH-1.)/0.86*1000.);
-    //SetrhoDepth(RHOICE);
 
     SetX0Depth(X0MEDIUM); // no dependence on rho
 

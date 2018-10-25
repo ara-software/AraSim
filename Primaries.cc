@@ -1271,7 +1271,7 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
            }// if SIMULATION_MODE = 0 (freq domain old method)
 
 
-           else if (settings1->SIMULATION_MODE == 1) { // time domain simulation (new mode)
+           else if (settings1->SIMULATION_MODE == 1 || settings1->SIMULATION_MODE==2) { // time domain simulation (new mode)
 
                // here, we just get the shower profile for EM, HAD showers 
                //

@@ -822,7 +822,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 
 		} // if SIMULATION_MODE = 0
 
-		else if (settings1->SIMULATION_MODE == 1) {
+		else if (settings1->SIMULATION_MODE == 1 || settings1->SIMULATION_MODE==2) {
 
 		  // if event is not calpulser
 		  if (event->IsCalpulser == 0) {
@@ -840,8 +840,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 			      * RADDEG)) {
 
 			// initially give raysol has actual signal
-			stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] =
-			  1;
+			stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] = 1;
 
 			// let's make NFOUR/2 bin of time domain pure signal part for now
 			// later once we understand how to apply antenna phase, total electronics with phase, apply those
@@ -856,7 +855,6 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
                             //cout << "apply freq dependent IceAttenFactor later" << endl;
                         }
 
-
 			// signal before the antenna (get signal at 1m and apply atten factor)
 			signal->GetVm_FarField_Tarray(
 						      event, settings1,
@@ -864,12 +862,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 						      outbin, Tarray, Earray,
 						      stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt]);
 
-			dT_forfft = Tarray[1]
-			  - Tarray[0]; // step in ns
 
-			int Ntmp = settings1->TIMESTEP
-			  * 1.e9 / dT_forfft;
-			stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
+			dT_forfft = Tarray[1] - Tarray[0]; // step in ns
+
+			int Ntmp = settings1->TIMESTEP * 1.e9 / dT_forfft; 
+
+      stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
 			while (Ntmp > 1) {
 			  Ntmp = Ntmp / 2;
 			  stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] =
@@ -880,6 +878,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 			  stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]
 			  * settings1->NFOUR
 			  / 2;
+
 			// now new NFOUR for zero padding
 
 			// now we have to make NFOUR/2 number of bins with random init time
@@ -896,7 +895,6 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 			    stations[i].strings[j].antennas[k].Vm_zoom_T[ray_sol_cnt].push_back(
 												Tarray[n]);
 			  }
-
 			  // make Tarray, Earray located at the center of Nnew array
 			  //T_forfft[n] = Tarray[outbin/2] - (dT_forfft*(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]/2)) + (double)n*dT_forfft;
 
@@ -948,15 +946,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 			//
 			// get spectrum with zero padded WF
 			//Tools::realft(volts_forfft,1,settings1->NFOUR/2);
+
 			Tools::realft(V_forfft, 1,
 				      stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);
 
 			//dF_outbin = 1./( (double)(outbin) * (Tarray[1]-Tarray[0])*1.e-9 ); // in Hz
-			dF_Nnew =
-			  1.
-			  / ((double) (stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt])
-			     * (dT_forfft)
-			     * 1.e-9); // in Hz
+			dF_Nnew = 1. / ((double) (stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]) * (dT_forfft) * 1.e-9); // in Hz
 
 			//freq_tmp = dF_Nnew*((double)stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]/2.+1.+0.5);// in Hz 0.5 to place the middle of the bin and avoid zero freq
 			freq_tmp =
@@ -974,8 +969,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 			antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type), 
 			freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
 			*/
-			if (settings1->ALL_ANT_V_ON
-			    == 0) {
+			if (settings1->ALL_ANT_V_ON== 0) {
 			  if (settings1->ANTENNA_MODE
 			      == 0) {
 			    heff_lastbin =
@@ -990,8 +984,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 					   icemodel->GetN(
 							  detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 			  }
-			  if (settings1->ANTENNA_MODE
-			      == 1) {
+			  if (settings1->ANTENNA_MODE== 1) {
 			    heff_lastbin =
 			      GaintoHeight(
 					   detector->GetGain_1D_OutZero(
@@ -1005,8 +998,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 					   icemodel->GetN(
 							  detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 			  }
-			  if (settings1->ANTENNA_MODE
-			      == 2) {
+			  if (settings1->ANTENNA_MODE== 2) {
 			    heff_lastbin =
 			      GaintoHeight(
 					   detector->GetGain_1D_OutZero(
@@ -1019,12 +1011,8 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 					   icemodel->GetN(
 							  detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 			  }
-
-			} else if (settings1->ALL_ANT_V_ON
-				   == 1) {
-
-			  if (settings1->ANTENNA_MODE
-			      == 0) {
+			} else if (settings1->ALL_ANT_V_ON == 1) {
+			  if (settings1->ANTENNA_MODE == 0) {
 			    heff_lastbin =
 			      GaintoHeight(
 					   detector->GetGain_1D_OutZero(
@@ -1037,8 +1025,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 					   icemodel->GetN(
 							  detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 			  }
-			  if (settings1->ANTENNA_MODE
-			      == 1) {
+			  if (settings1->ANTENNA_MODE == 1) {
 			    heff_lastbin =
 			      GaintoHeight(
 					   detector->GetGain_1D_OutZero(
@@ -1052,8 +1039,7 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 					   icemodel->GetN(
 							  detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 			  }
-			  if (settings1->ANTENNA_MODE
-			      == 2) {
+			  if (settings1->ANTENNA_MODE == 2) {
 			    heff_lastbin =
 			      GaintoHeight(
 					   detector->GetGain_1D_OutZero(
@@ -1066,34 +1052,23 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 					   icemodel->GetN(
 							  detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 			  }
-
-
 			}
 
 			//
 			//
-			for (int n = 0;
-			     n
-			       < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]
-			       / 2;
-			     n++) {
+			for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2; n++) {
 
-			  freq_tmp =
-			    dF_Nnew
-			    * ((double) n
-			       + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
+			  freq_tmp = dF_Nnew * ((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
 
 			  /*
 			    heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 			    antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type), 
 			    freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
 			  */
-			  if (settings1->ALL_ANT_V_ON
-			      == 0) {
-			    if (settings1->ANTENNA_MODE
-				== 0) {
+			  if (settings1->ALL_ANT_V_ON == 0) {
+			    if (settings1->ANTENNA_MODE == 0) {
 			      heff =
-				GaintoHeight(
+				      GaintoHeight(
 					     detector->GetGain_1D_OutZero(
 									  freq_tmp
 									  * 1.E-6, // to MHz
@@ -1105,10 +1080,9 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 							    detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 			    }
 
-			    if (settings1->ANTENNA_MODE
-				== 1) {
+			    if (settings1->ANTENNA_MODE== 1) {
 			      heff =
-				GaintoHeight(
+				      GaintoHeight(
 					     detector->GetGain_1D_OutZero(
 									  freq_tmp
 									  * 1.E-6, // to MHz
@@ -1120,10 +1094,9 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 					     icemodel->GetN(
 							    detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 			    }
-			    if (settings1->ANTENNA_MODE
-				== 2) {
+			    if (settings1->ANTENNA_MODE== 2) {
 			      heff =
-				GaintoHeight(
+				      GaintoHeight(
 					     detector->GetGain_1D_OutZero(
 									  freq_tmp
 									  * 1.E-6, // to MHz
@@ -1134,13 +1107,10 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 					     icemodel->GetN(
 							    detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 			    }
-
-			  } else if (settings1->ALL_ANT_V_ON
-				     == 1) {
-			    if (settings1->ANTENNA_MODE
-				== 0) {
+			  } else if (settings1->ALL_ANT_V_ON== 1) {
+			    if (settings1->ANTENNA_MODE== 0) {
 			      heff =
-				GaintoHeight(
+				      GaintoHeight(
 					     detector->GetGain_1D_OutZero(
 									  freq_tmp
 									  * 1.E-6, // to MHz
@@ -1151,10 +1121,9 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 					     icemodel->GetN(
 							    detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 			    }
-			    if (settings1->ANTENNA_MODE
-				== 1) {
+			    if (settings1->ANTENNA_MODE== 1) {
 			      heff =
-				GaintoHeight(
+				      GaintoHeight(
 					     detector->GetGain_1D_OutZero(
 									  freq_tmp
 									  * 1.E-6, // to MHz
@@ -1166,10 +1135,9 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 					     icemodel->GetN(
 							    detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 			    }
-			    if (settings1->ANTENNA_MODE
-				== 2) {
+			    if (settings1->ANTENNA_MODE== 2) {
 			      heff =
-				GaintoHeight(
+				      GaintoHeight(
 					     detector->GetGain_1D_OutZero(
 									  freq_tmp
 									  * 1.E-6, // to MHz
@@ -1180,35 +1148,31 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 					     icemodel->GetN(
 							    detector->stations[i].strings[j].antennas[k]), detector->stations[i].strings[j].antennas[k].type, settings1->ANTENNA_MODE);
 			    }
-
 			  }
 
-			  stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(
-											 heff);
+			  stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(heff);
 
-                          //apply freq dependent attenuation model
-                          if (settings1->USE_ARA_ICEATTENU == 2){
-                              double IceAttenFactor = 1.;
-                              double dx, dz, dl;
-                              for (int steps = 1; steps < (int) RayStep[ray_sol_cnt][0].size(); steps++) {
-                                  dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
-                                  dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
-                                  dl = sqrt((dx * dx) + (dz * dz));
-                                  IceAttenFactor *= exp(-dl / icemodel->GetBessonIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9));// to GHz
-                              }
-                              //cout << "apply IceAttenFactor to the real part of fft. V_forfft[2 * n] = " << V_forfft[2 * n] << " * " << IceAttenFactor << endl;
-                              V_forfft[2 * n] *= IceAttenFactor;// apply IceAttenFactor to the real part of fft
-                              V_forfft[2 * n + 1] *= IceAttenFactor;// apply IceAttenFactor to the imag part of fft
-                          }
+        //apply freq dependent attenuation model
+        if (settings1->USE_ARA_ICEATTENU == 2){
+            double IceAttenFactor = 1.;
+            double dx, dz, dl;
+            for (int steps = 1; steps < (int) RayStep[ray_sol_cnt][0].size(); steps++) {
+                dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
+                dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
+                dl = sqrt((dx * dx) + (dz * dz));
+                IceAttenFactor *= exp(-dl / icemodel->GetBessonIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9));// to GHz
+            }
+            //cout << "apply IceAttenFactor to the real part of fft. V_forfft[2 * n] = " << V_forfft[2 * n] << " * " << IceAttenFactor << endl;
+            V_forfft[2 * n] *= IceAttenFactor;// apply IceAttenFactor to the real part of fft
+            V_forfft[2 * n + 1] *= IceAttenFactor;// apply IceAttenFactor to the imag part of fft
+        }
 
 
 			  //
 			  // apply ant factors
 			  //
 			  if (n > 0) {
-
-			    if (settings1->ALL_ANT_V_ON
-				== 0) {
+			    if (settings1->ALL_ANT_V_ON == 0) {
 
 			      ApplyAntFactors_Tdomain(
 						      detector->GetAntPhase_1D(
@@ -1262,21 +1226,19 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 							     detector->stations[i].strings[j].antennas[k].type,
 							     Pol_factor,
 							     V_forfft[2 * n],
-							     V_forfft[2 * n
-								      + 1]);
+							     V_forfft[2 * n + 1]);
 			  }
-
 			  //
 			  // apply entire elect chain gain, phase
 			  //
+        // std::cout <<    __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << std::endl;
 			  if (n > 0) {
 			    ApplyElect_Tdomain(
 					       freq_tmp
 					       * 1.e-6,
 					       detector,
 					       V_forfft[2 * n],
-					       V_forfft[2 * n
-							+ 1],
+					       V_forfft[2 * n + 1],
 					       settings1);
 			  } else {
 			    ApplyElect_Tdomain_FirstTwo(
@@ -1286,11 +1248,11 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 							* 1.e-6,
 							detector,
 							V_forfft[2 * n],
-							V_forfft[2 * n
-								 + 1]);
+							V_forfft[2 * n + 1]);
 			  }
+			}// end for freq bin
 
-			}            // end for freq bin
+      // std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << std::endl;
 
 			// now get time domain waveform back by inv fft
 			Tools::realft(V_forfft, -1,
@@ -1308,16 +1270,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 								 T_forint, volts_forint);
 
 			// check what we save as V[], volts_forint? or volts_forfft
-
-			for (int n = 0;
-			     n < settings1->NFOUR / 2;
-			     n++) {
-			  if (settings1->TRIG_ANALYSIS_MODE
-			      != 2) { // not pure noise mode (we need signal)
+			for (int n = 0; n < settings1->NFOUR / 2; n++) {
+			  if (settings1->TRIG_ANALYSIS_MODE != 2) { // not pure noise mode (we need signal)
 			    //stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( volts_forfft[n] );
 			    //stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( V_forfft[n] * 2./(double)(settings1->NFOUR/2) ); // 2/N for inverse FFT normalization factor
 			    //stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( volts_forint[n] * 2./(double)(settings1->NFOUR/2) ); // 2/N for inverse FFT normalization factor
-			    double phasing_factor =1.;
+          double phasing_factor =1.;
           if(j==0 && k==0){
             if(settings1->PHASING_MODE==1){
               phasing_factor*=sqrt(8);
@@ -1327,13 +1285,12 @@ void Report::Connect_Interaction_Detector(Event *event, Detector *detector, RayS
 											volts_forint[n]
 											* 2. * phasing_factor
 											/ (double) (stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]));
-			  } else if (settings1->TRIG_ANALYSIS_MODE
-				     == 2) { // pure noise mode (set signal to 0)
-			    stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(
-											0.);
+			  } else if (settings1->TRIG_ANALYSIS_MODE == 2) { // pure noise mode (set signal to 0)
+			    stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(0.);
 			  }
 
 			}
+
 
 		      }
 		      // see if integrated shower profile LQ is non-zero
@@ -5964,10 +5921,8 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
 }
 
 void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1) { // read elect chain gain (unitless), phase (rad) and apply to V/m
-
   vm_bin0 = vm_bin0 * detector->GetElectGain_1D_OutZero(freq0);
   vm_bin1 = vm_bin1 * detector->GetElectGain_1D_OutZero(freq1);
-
 }
 
 void Report::ApplyPreamp_NFOUR(int bin_n, Detector *detector, double &vmmhz) { // read filter gain in dB and apply unitless gain to vmmhz

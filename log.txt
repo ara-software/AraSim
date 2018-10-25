@@ -1604,3 +1604,9 @@ Added new filter for customs electronics, named filter_custom.csv. Also, we bypa
 Made the attenuation model frequency dependent by setting USE_ARA_ICEATTENU=2. It can now work with SIMULATION_MODE=1
 
 ============================================================================
+
+2018.10/28 Brian Clark:
+
+Added SIMULATION_MODE=2, which is an additional time domain Askaryan model
+In particle, the Hanson & Connolly implementation of Ralston and Buni
+See https://github.com/918particle/AskaryanModule/tree/simplified
