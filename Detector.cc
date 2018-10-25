@@ -3234,6 +3234,103 @@ inline void Detector::ReadHgain(string filename) {
                         //Hgain[i][j] = atof( line.substr( 20 ).c_str() );  // read gain (not dB)
                         //Hgain[i][j] = atof( line.substr( 18, 25 ).c_str() );  // read gain (not dB)
 			Hgain[i][j] = atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
+			Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
+                        //cout << "HGain : " << Hgain[i][j] << ", HPhase : " << Hphase[i][j] <<endl;
+                    }// end ang_step
+                    
+                }// end check freq label
+                
+            }// end freq_step
+            
+        }// end while NecOut.good
+        NecOut.close();
+    }// end if file open
+    
+}// end ReadHgain
+
+inline void Detector::ReadHgain(string filename, Settings *settings1) {
+
+    ifstream NecOut( filename.c_str() );    
+    string line;
+    
+    const int N = freq_step;
+    //string line;
+    double Transm[N]; 
+    if ( NecOut.is_open() ) {
+        while (NecOut.good() ) {
+            
+            for (int i=0; i<freq_step; i++) {
+                getline (NecOut, line);
+                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
+                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
+                    //                    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
+                    getline (NecOut, line); //read SWR
+		    Transm[i] = atof( line.substr(5, 11).c_str() );
+                    getline (NecOut, line); //read names
+                    
+                    for (int j=0; j<ang_step; j++) {
+                        getline (NecOut, line); //read data line
+                        //Hgain[i][j] = atof( line.substr( 20 ).c_str() );  // read gain (not dB)
+                        //Hgain[i][j] = atof( line.substr( 18, 25 ).c_str() );  // read gain (not dB)
+                        Hgain[i][j] = Transm[i]*atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
+                        Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
+                        //cout << "HGain : " << Hgain[i][j] << ", HPhase : " << Hphase[i][j] << endl;
+                    }// end ang_step
+                    
+                }// end check freq label
+                
+            }// end freq_step
+            
+        }// end while NecOut.good
+         NecOut.close();
+    }// end if file open
+    double xfreq[N];
+    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+    double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    double df_fft;
+    
+    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
+    
+    // now below are values that shared in all channels
+    for (int i=0;i<freq_step;i++) { // copy values
+        xfreq[i] = Freq[i];
+
+    }
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
+    
+
+        Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+        transH_databin.push_back(trans_databin[i]); // from Hz to MHz
+    }
+ 
+}// end ReadHgain
+
+
+
+inline void Detector::ReadHgainAndZr(string filename) {
+  ifstream NecOut( filename.c_str() );
+    string line;
+    if ( NecOut.is_open() ) {
+        //cout << NecOut << "is open"  <<endl;
+        while (NecOut.good() ) {
+            
+            for (int i=0; i<freq_step; i++) {
+                getline (NecOut, line);
+                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
+                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
+                    //Freq[i] = freq_init + i * freq_width;
+		    //cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
+		    getline (NecOut, line); //read SWR
+                    getline (NecOut, line); //read names
+                    
+                    for (int j=0; j<ang_step; j++) {
+                        getline (NecOut, line); //read data line
+                        //Hgain[i][j] = atof( line.substr( 20 ).c_str() );  // read gain (not dB)
+                        //Hgain[i][j] = atof( line.substr( 18, 25 ).c_str() );  // read gain (not dB)
+			Hgain[i][j] = atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
 			Hphase[i][j] = atof( line.substr( 34, 45 ).c_str() );  // read gain (not dB)
                         Hzr[i][j] = atof( line.substr( 50 ).c_str() );
                         //cout << "HGain : " << Hgain[i][j] << ", HPhase : " << Hphase[i][j] << ", HZr: " << Hzr[i][j] <<endl;
@@ -3249,7 +3346,7 @@ inline void Detector::ReadHgain(string filename) {
     
 }// end ReadHgain
 
-inline void Detector::ReadHgain(string filename, Settings *settings1) {
+inline void Detector::ReadHgainAndZr(string filename, Settings *settings1) {
 
     ifstream NecOut( filename.c_str() );    
     string line;

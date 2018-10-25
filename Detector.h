@@ -223,6 +223,8 @@ class Detector {
 	void ReadVgainTop(string filename, Settings *settings1);
         void ReadHgain(string filename);
 	void ReadHgain(string filename, Settings *settings1);
+        void ReadHgainAndZr(string filename);
+        void ReadHgainAndZr(string filename, Settings *settings1);
         double Vgain[freq_step_max][ang_step_max];
         double Vphase[freq_step_max][ang_step_max];
         double Vzr[freq_step_max][ang_step_max];
