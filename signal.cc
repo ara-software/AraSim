@@ -718,12 +718,12 @@ void Signal::AskaryanModule( Event *event, Settings *settings1, double viewangle
     } // if shower_mode = 3
 
     h->setAskTheta(viewangle);
-    
+    h->setAskR(1.);
     //and now to get the Askaryan emission from the model
     vector<vector<float> > Eshow = h->E_t();
     vector<float> eTheta = Eshow.at(1); //get the theta component
     for(int jj=0; jj<outbin; jj++){
-      Earray[jj] = eTheta[jj]*atten_factor*1.0e3;
+      Earray[jj] = eTheta[jj]*atten_factor;
     }
     delete h;
     delete freqs;
@@ -795,10 +795,11 @@ void Signal::AskaryanModule( Event *event, Settings *settings1, double viewangle
           h->lpmEffect();
         }
         h->setAskTheta(viewangle);
+	h->setAskR(1.);
         vector<vector<float> > Eshow = h->E_t();
         vector<float> eTheta = Eshow.at(1); //get the theta component
         for(int jj=0; jj<outbin; jj++){
-          Earray[jj] = eTheta[jj] * atten_factor * 1.0e3;
+          Earray[jj] = eTheta[jj] * atten_factor;
         }
         delete h;
       }
@@ -808,11 +809,12 @@ void Signal::AskaryanModule( Event *event, Settings *settings1, double viewangle
         h->setFormScale(1/(sqrt(2.0*3.14159)*0.051)); //The 0.051 is in meters, so the 1/e width is 5.1 cm.
         h->setAskFreq(freqs);
         h->hadShower(event->pnu/1.0e9);
-        h->setAskTheta(viewangle);
+	h->setAskTheta(viewangle);
+	h->setAskR(1.);
         vector<vector<float> > Eshow = h->E_t();
         vector<float> eTheta = Eshow.at(1); //get the theta component
         for(int jj=0; jj<outbin; jj++){
-          Earray[jj] += eTheta[jj] * atten_factor * 1.0e3;
+          Earray[jj] += eTheta[jj] * atten_factor;
         }
         delete h;
       }
