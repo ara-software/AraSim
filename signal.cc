@@ -692,28 +692,28 @@ void Signal::AskaryanModule( Event *event, Settings *settings1, double viewangle
 
     // if EM shower only (always)
     if ( settings1->SHOWER_MODE == 0 ) {
-      h->emShower(event->pnu/1.0e9); //energy in GeV
+      h->emShower(event->pnu/1.0e9*event->Nu_Interaction[0].emfrac); //energy in GeV
       if(settings1->LPM==1){ //we want the LPM effect
         h->lpmEffect();
       }
     }
     // if HAD shower only (always)
     else if ( settings1->SHOWER_MODE == 1 ) {
-      h->hadShower(event->pnu/1.0e9); //energy in GeV
+      h->hadShower(event->pnu/1.0e9*event->Nu_Interaction[0].hadfrac); //energy in GeV
     }
 
     // EM or HAD shower only depending on the energy of the shower
     else if ( settings1->SHOWER_MODE == 3 ) {
       // if EM shower dominant
       if ( event->Nu_Interaction[0].primary_shower == 0 ) {
-        h->emShower(event->pnu/1.0e9); //energy in GeV
+        h->emShower(event->pnu/1.0e9*event->Nu_Interaction[0].emfrac); //energy in GeV
         if(settings1->LPM==1){ //we want the LPM effect
           h->lpmEffect();
         }
       }
       // if HAD shower dominant
       else if ( event->Nu_Interaction[0].primary_shower == 1 ) {
-        h->hadShower(event->pnu/1.0e9); //energy in GeV 
+        h->hadShower(event->pnu/1.0e9*event->Nu_Interaction[0].hadfrac); //energy in GeV 
       }
     } // if shower_mode = 3
 
@@ -790,12 +790,12 @@ void Signal::AskaryanModule( Event *event, Settings *settings1, double viewangle
         Askaryan *h = new Askaryan();
         h->setFormScale(1/(sqrt(2.0*3.14159)*0.051)); //The 0.051 is in meters, so the 1/e width is 5.1 cm.
         h->setAskFreq(freqs);
-        h->emShower(event->pnu/1.0e9);
+        h->emShower(event->pnu/1.0e9*event->Nu_Interaction[0].emfrac);
         if(settings1->LPM==1){ //yes use LPM
           h->lpmEffect();
         }
         h->setAskTheta(viewangle);
-	h->setAskR(1.);
+        h->setAskR(1.);
         vector<vector<float> > Eshow = h->E_t();
         vector<float> eTheta = Eshow.at(1); //get the theta component
         for(int jj=0; jj<outbin; jj++){
@@ -808,9 +808,9 @@ void Signal::AskaryanModule( Event *event, Settings *settings1, double viewangle
         Askaryan *h = new Askaryan();
         h->setFormScale(1/(sqrt(2.0*3.14159)*0.051)); //The 0.051 is in meters, so the 1/e width is 5.1 cm.
         h->setAskFreq(freqs);
-        h->hadShower(event->pnu/1.0e9);
-	h->setAskTheta(viewangle);
-	h->setAskR(1.);
+        h->hadShower(event->pnu/1.0e9*event->Nu_Interaction[0].hadfrac);
+        h->setAskTheta(viewangle);
+        h->setAskR(1.);
         vector<vector<float> > Eshow = h->E_t();
         vector<float> eTheta = Eshow.at(1); //get the theta component
         for(int jj=0; jj<outbin; jj++){
