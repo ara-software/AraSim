@@ -355,11 +355,8 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
       return 1;
   } //if
   else {
-   
     //nu_nubar=1;//default.
     //nu=0, nubar=1
-
-
     if(nu_nubar!=0 && nu_nubar!=1){   
       cout<<"nu_nubar is not defined correctly!\n";
       return 0;
@@ -368,21 +365,15 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
       cout<<"Current is not cc or nc!\n";
       return 0;
     }
-
-    
     if(settings1->SIGMAPARAM==0){ // Reno
       // fit to cross sections calculated by M.H. Reno using the same method as Gandhi et al, but with the CTEQ6-DIS parton distribution functions instead of the CTEQ4-DIS distribution functions
       sigma=(2.501E-39)*pow(pnu/1.E9,0.3076)*settings1->SIGMA_FACTOR; // 10^18 eV - 10^21 eV(use this one for ANITA)
       //sigma=(1.2873E-39)*pow(pnu/1.E9,0.33646)*SIGMA_FACTOR; // 10^17 eV - 10^20 eV (use this one for SalSA)
-
       sigma_total = sigma;
-
     }//old code
     else if (settings1->SIGMAPARAM==1) {//Connolly et al.
       double pnuGeV=pnu/1.E9;//Convert eV to GeV.
       double epsilon=log10(pnuGeV);
-
-
       if ( settings1->SIGMA_SELECT == 0 ) {// use mean value
 
           sigma=settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][currentint]->Eval(epsilon))/1.E4;//convert cm to meters. multiply by (1m^2/10^4 cm^2).
@@ -403,9 +394,6 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
           sigma=settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][currentint]->Eval(epsilon))/1.E4;//convert cm to meters. multiply by (1m^2/10^4 cm^2).
           sigma_total = (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][0]->Eval(epsilon))/1.E4) + (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][1]->Eval(epsilon))/1.E4);
       }
-
-
-      
       if(m_hsigma->GetEntries()<2000){
 	m_hsigma->Fill(epsilon, log10(sigma));
       }

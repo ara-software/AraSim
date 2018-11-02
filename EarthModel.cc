@@ -2166,6 +2166,7 @@ void EarthModel::EarthCurvature(double *array,double depth_temp) {
 
   Position parray;
   parray.SetXYZ(array[0],array[1],array[2]);
+  cout << "Uncurved x, y, z: " << array[0] << ", " << array[1] << ", " << array[2] << endl;
 
   // adjust array coordinates so that it fits to a curved earth surface at a specific depth 
   double length=Surface(parray)-depth_temp; // length=distance from center of earth
@@ -2180,5 +2181,6 @@ void EarthModel::EarthCurvature(double *array,double depth_temp) {
   array[0]=length*sin(rxdtheta)*cos(rxdphi);// have the array sit on a sphere of radius "length"
   array[1]=length*sin(rxdtheta)*sin(rxdphi);
   array[2]=length*cos(rxdtheta);
+  cout << "Curved x, y, z: " << array[0] << ", " << array[1] << ", " << array[2] << endl;
 
 }

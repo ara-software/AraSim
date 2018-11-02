@@ -868,11 +868,11 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     stations[i].strings[9].antennas[0].type = 0;
                     stations[i].strings[9].antennas[0].orient = 1;
 
-                    stations[i].strings[10].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[10].antennas[0].SetZ(-47);//bicone
                     stations[i].strings[10].antennas[0].type = 0;
                     stations[i].strings[10].antennas[0].orient = 1;
 
-                    stations[i].strings[11].antennas[0].SetZ(-80);//bicone
+                    stations[i].strings[11].antennas[0].SetZ(-73);//bicone
                     stations[i].strings[11].antennas[0].type = 0;
                     stations[i].strings[11].antennas[0].orient = 1;
 
@@ -884,11 +884,11 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     stations[i].strings[13].antennas[0].type = 0;
                     stations[i].strings[13].antennas[0].orient = 1;
 
-                    stations[i].strings[14].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[14].antennas[0].SetZ(-47);//bicone
                     stations[i].strings[14].antennas[0].type = 0;
                     stations[i].strings[14].antennas[0].orient = 1;
 
-                    stations[i].strings[15].antennas[0].SetZ(-80);//bicone
+                    stations[i].strings[15].antennas[0].SetZ(-73);//bicone
                     stations[i].strings[15].antennas[0].type = 0;
                     stations[i].strings[15].antennas[0].orient = 1;
 
@@ -900,11 +900,11 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     stations[i].strings[17].antennas[0].type = 0;
                     stations[i].strings[17].antennas[0].orient = 1;
 
-                    stations[i].strings[18].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[18].antennas[0].SetZ(-47);//bicone
                     stations[i].strings[18].antennas[0].type = 0;
                     stations[i].strings[18].antennas[0].orient = 1;
 
-                    stations[i].strings[19].antennas[0].SetZ(-80);//bicone
+                    stations[i].strings[19].antennas[0].SetZ(-73);//bicone
                     stations[i].strings[19].antennas[0].type = 0;
                     stations[i].strings[19].antennas[0].orient = 1;
 
@@ -1445,11 +1445,11 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     stations[i].strings[9].antennas[0].type = 0;
                     stations[i].strings[9].antennas[0].orient = 1;
 
-                    stations[i].strings[10].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[10].antennas[0].SetZ(-47);//bicone
                     stations[i].strings[10].antennas[0].type = 0;
                     stations[i].strings[10].antennas[0].orient = 1;
 
-                    stations[i].strings[11].antennas[0].SetZ(-80);//bicone
+                    stations[i].strings[11].antennas[0].SetZ(-73);//bicone
                     stations[i].strings[11].antennas[0].type = 0;
                     stations[i].strings[11].antennas[0].orient = 1;
 
@@ -1461,11 +1461,11 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     stations[i].strings[13].antennas[0].type = 0;
                     stations[i].strings[13].antennas[0].orient = 1;
 
-                    stations[i].strings[14].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[14].antennas[0].SetZ(-47);//bicone
                     stations[i].strings[14].antennas[0].type = 0;
                     stations[i].strings[14].antennas[0].orient = 1;
 
-                    stations[i].strings[15].antennas[0].SetZ(-80);//bicone
+                    stations[i].strings[15].antennas[0].SetZ(-73);//bicone
                     stations[i].strings[15].antennas[0].type = 0;
                     stations[i].strings[15].antennas[0].orient = 1;
 
@@ -1477,11 +1477,11 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     stations[i].strings[17].antennas[0].type = 0;
                     stations[i].strings[17].antennas[0].orient = 1;
 
-                    stations[i].strings[18].antennas[0].SetZ(-40);//bicone
+                    stations[i].strings[18].antennas[0].SetZ(-47);//bicone
                     stations[i].strings[18].antennas[0].type = 0;
                     stations[i].strings[18].antennas[0].orient = 1;
 
-                    stations[i].strings[19].antennas[0].SetZ(-80);//bicone
+                    stations[i].strings[19].antennas[0].SetZ(-73);//bicone
                     stations[i].strings[19].antennas[0].type = 0;
                     stations[i].strings[19].antennas[0].orient = 1;
 

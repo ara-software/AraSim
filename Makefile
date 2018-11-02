@@ -10,8 +10,8 @@ ifeq ($(strip $(BOOST_ROOT)),)
 	BOOST_ROOT = /usr/local/include
 endif
 
-SYSINCLUDES	= -I/usr/include -I$(BOOST_ROOT) -I$(PLATFORM_DIR)/include
-SYSLIBS         = -L/usr/lib -L$(PLATFORM_DIR)/lib
+SYSINCLUDES	= -I/usr/include -I$(BOOST_ROOT) -I$(PLATFORM_DIR)/include -I$(FFTW_UTIL)/include
+SYSLIBS         = -L/usr/lib -L$(PLATFORM_DIR)/lib -L$(FFTW_UTIL)/lib
 
 DLLSUF = ${DllSuf}
 OBJSUF = ${ObjSuf}
