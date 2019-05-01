@@ -32,9 +32,6 @@
 #include "TVector3.h"
 #include "TRotation.h"
 #include "TSpline.h"
-//#include "TObject.h"
-
-//#include <fftw3.h>
 
 using namespace std;
 
@@ -74,32 +71,7 @@ void test();
 
 string outputdir="outputs";
 
-//--------------------------------------------------
-// extern"C" {
-//     void model_(int *ii);
-// }
-//-------------------------------------------------- 
-
-
-//int main() {
 int main(int argc, char **argv) {   // read setup.txt file
-
-
-    // below is replace by Settings class Initialize() member.
-    /*    
-        const int NNU=100;
-
-        // NEED TO FIGURE OUT A GOOD WAY TO READ THIS IN AND STORE THEM.
-        // INPUT FILE AGAIN?  SOMETHING ELSE?
-        //These were moved here from IceModel under the new compilation scheme
-        int ICE_MODEL=0; //Select ice model to be used.  0 = Crust 2.0 , 1 = BEDMAP.
-        int NOFZ=1; // 1=depth dependent index of refraction,0=off
-        int CONSTANTCRUST=0; // set crust density and thickness to constant values.
-        int CONSTANTICETHICKNESS=0; // set ice thickness to constant value
-        int FIXEDELEVATION=0; // fix the elevation to the thickness of ice.
-        int MOOREBAY=0; //1=use Moore's Bay measured ice field attenuation length for the west land, otherwise use South Pole data
-        double EXPONENT=19.; // 10^19 eV neutrinos only
-    */  
     
     Settings *settings1 = new Settings();
 
@@ -173,8 +145,8 @@ int main(int argc, char **argv) {   // read setup.txt file
         gRandom->SetSeed(settings1->SEED + atoi(run_no.c_str() ) );
             
     }
-        //cout<<"first random from TRandom3 : "<<test_randm3->Rndm()<<"\n";
-        cout<<"first random : "<<gRandom->Rndm()<<"\n";
+    //cout<<"first random from TRandom3 : "<<test_randm3->Rndm()<<"\n";
+    cout<<"first random : "<<gRandom->Rndm()<<"\n";
 
     // IceModel *icemodel=new IceModel(ICE_MODEL + NOFZ*10,CONSTANTICETHICKNESS * 1000 + CONSTANTCRUST * 100 + FIXEDELEVATION * 10 + 0,MOOREBAY);// creates Antarctica ice model
     IceModel *icemodel=new IceModel(settings1->ICE_MODEL + settings1->NOFZ*10,settings1->CONSTANTICETHICKNESS * 1000 + settings1->CONSTANTCRUST * 100 + settings1->FIXEDELEVATION * 10 + 0,settings1->MOOREBAY);// creates Antarctica ice model
@@ -305,14 +277,6 @@ int main(int argc, char **argv) {   // read setup.txt file
     Signal *signal = new Signal (settings1);
     signal->SetMedium(0);   // set medium as ice
     cout<<"finish calling secondaries and signal"<<endl;
-
-
-
-
-
-    //--------------------------------------------------
-    // TH1F *hy=new TH1F("hy","hy",100,0.,1.); // histogram for inelasticity
-    //-------------------------------------------------- 
 
     // before start looping events set noise values (this case, thermal)
     trigger->SetMeanRmsDiode(settings1, detector, report);
@@ -455,24 +419,7 @@ int main(int argc, char **argv) {   // read setup.txt file
             if ( Events_Thrown%100 == 0 )
                 cout<<"Thrown "<<Events_Thrown<<endl;
         }
-            
-        /*
-        if(settings1->EVENT_GENERATION_MODE == 1){
-            settings1->SELECT_FLAVOR = settings1->NUFLAVORINT[inu];
-            settings1->NU_NUBAR_SELECT_MODE = settings1->NUBAR[inu];
-            settings1->EXPONENT = settings1->PNU[inu];
-            Spectra *spectra=new Spectra(settings1->EXPONENT);
-            settings1->SELECT_CURRENT = settings1->CURRENTINT[inu];
-            settings1->INTERACTION_MODE = 2;
-            settings1->POSNU_R = settings1->IND_POSNU_R[inu];
-            settings1->POSNU_THETA = settings1->IND_POSNU_THETA[inu];
-            settings1->POSNU_PHI = settings1->IND_POSNU_PHI[inu];
-            settings1->NNU_THIS_THETA = 1;
-            settings1->NNU_THETA = settings1->IND_NNU_THETA[inu];
-            settings1->NNU_THIS_PHI = 1;
-            settings1->NNU_PHI = settings1->IND_NNU_PHI[inu];
-        }
-        */
+
         // event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1 );
         event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1, Events_Thrown );
         event->inu_passed = -1;
@@ -722,8 +669,8 @@ int main(int argc, char **argv) {   // read setup.txt file
         */
 
         // if(inu==nuLimit){
-        // cout<<endl<<"sizeof: Report= "<<sizeof(*report)<<"  station= "<<sizeof(report->stations[0])<<"  antenna= "<<sizeof(report->stations[0].strings[0].antennas[0])<<endl;
-        // cout<<"sizeof: Event= "<<sizeof(*event)<<" Interaction= "<<sizeof(event->Nu_Interaction[0])<<"  TOTAL SIZE= "<<sizeof(*report)+sizeof(*event)+sizeof(report->stations[0])+16*sizeof(report->stations[0].strings[0].antennas[0])+sizeof(event->Nu_Interaction[0])<<endl;
+        //      cout<<endl<<"sizeof: Report= "<<sizeof(*report)<<"  station= "<<sizeof(report->stations[0])<<"  antenna= "<<sizeof(report->stations[0].strings[0].antennas[0])<<endl;
+        //      cout<<"sizeof: Event= "<<sizeof(*event)<<" Interaction= "<<sizeof(event->Nu_Interaction[0])<<"  TOTAL SIZE= "<<sizeof(*report)+sizeof(*event)+sizeof(report->stations[0])+16*sizeof(report->stations[0].strings[0].antennas[0])+sizeof(event->Nu_Interaction[0])<<endl;
         // }
 
         delete event;
@@ -851,8 +798,6 @@ int main(int argc, char **argv) {   // read setup.txt file
     }
 
 
-
-
     //--------------------------------------------------
     //   cout<<"Total NNU : "<<settings1->NNU<<", PickUnbiased passed NNU : "<<nnu_pass<<endl;
     //-------------------------------------------------- 
@@ -883,13 +828,6 @@ int main(int argc, char **argv) {   // read setup.txt file
     }
 
     cout<<"max_dt : "<<max_dt<<endl;
-
-
-    //--------------------------------------------------
-    // int ii = 1;
-    // model_(&ii);
-    //-------------------------------------------------- 
- 
     cout<<"rmsdiode= "<<trigger->rmsdiode<<endl;
 
     delete raysolver;
