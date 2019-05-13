@@ -1,0 +1,4 @@
+*.o
+eventSimDict.C
+eventSimDict.h
+AraSim
