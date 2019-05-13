@@ -1,68 +1,38 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <math.h>
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <vector>
-#include <time.h>
-#include "TTreeIndex.h"
-#include "TChain.h"
-#include "TH1.h"
-#include "TF1.h"
-#include "TF2.h"
+// ROOT includes
 #include "TFile.h"
-#include "TRandom.h"
-#include "TRandom2.h"
 #include "TRandom3.h" 
 #include "TTree.h"
-#include "TLegend.h"
-#include "TLine.h"
-#include "TROOT.h"
-#include "TPostScript.h"
-#include "TCanvas.h"
-#include "TH2F.h"
-#include "TText.h"
-#include "TProfile.h"
-#include "TGraphErrors.h"
-#include "TStyle.h"
-#include "TMath.h"
-#include <unistd.h>
-#include "TVector3.h"
-#include "TRotation.h"
-#include "TSpline.h"
+
+// AraSim includes
+//vector and position must be first
+#include "Vector.h"
+#include "Position.h"
+
+#include "Constants.h"
+#include "counting.hh"
+#include "Detector.h"
+#include "EarthModel.h"
+#include "Efficiencies.h"
+#include "Event.h"
+#include "IceModel.h"
+#include "Primaries.h"
+#include "Ray.h"
+#include "Report.h"
+#include "RaySolver.h"
+#include "secondaries.hh"
+#include "Settings.h"
+#include "signal.hh"
+#include "Spectra.h"
+#include "Tools.h"
+#include "Trigger.h"
 
 using namespace std;
 
-#include "Tools.h"
-#include "Constants.h"
-#include "Vector.h"
-#include "Position.h"
-#include "EarthModel.h"
-#include "IceModel.h"
-#include "Efficiencies.h"
-#include "Spectra.h"
-#include "Event.h"
-#include "Trigger.h"
-#include "Detector.h"
-#include "Settings.h"
-#include "counting.hh"
-#include "Primaries.h"
-#include "signal.hh"
-#include "secondaries.hh"
-
-#include "Ray.h"
-#include "RaySolver.h"
-#include "Report.h"
-
-//#include "UsefulIcrrStationEvent.h"
-
 #ifdef ARA_UTIL_EXISTS
-#include "UsefulIcrrStationEvent.h"
-ClassImp(UsefulIcrrStationEvent);
-#include "UsefulAtriStationEvent.h"
-ClassImp(UsefulAtriStationEvent);
+    #include "UsefulIcrrStationEvent.h"
+    ClassImp(UsefulIcrrStationEvent);
+    #include "UsefulAtriStationEvent.h"
+    ClassImp(UsefulAtriStationEvent);
 #endif
 
 class EarthModel; //class
