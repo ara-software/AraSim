@@ -34,7 +34,7 @@ ARA_ROOT_FLAGS =
 # added for Fortran to C++
 
 
-LIBS	= $(ROOTLIBS) -lMinuit $(SYSLIBS) -lsqlite3
+LIBS	= $(ROOTLIBS) -lMinuit $(SYSLIBS)
 GLIBS	= $(ROOTGLIBS) $(SYSLIBS)
 
 # ROOT_LIBRARY = libAra.${DLLSUF}
