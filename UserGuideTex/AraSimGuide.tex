@@ -563,7 +563,7 @@ Adding lines like this: `\p{PARAMETER}= N' will set the appropriate parameter to
 
 \pr{EXPONENT}=19. This determines the energy spectrum of the incoming neutrinos. 
 
-For selecting a single energy choose values \p{EXPONENT}= $N$. When $10<N<20$, \arasim will generate neutrinos with energies $E=10^N$eV. Taking values too low or too high may lead to strange results in the simulation (The ARA detector should work well for neutrinos at energies of $E\sim 10^{15} - 10^{20}$eV only). 
+For selecting a single energy choose values \p{EXPONENT}= $N$; {\bf N is an integer}. When $10<N<20$, \arasim will generate neutrinos with energies $E=10^N$eV. Taking values too low or too high may lead to strange results in the simulation (The ARA detector should work well for neutrinos at energies of $E\sim 10^{15} - 10^{20}$eV only). 
 
 In order to simulate real spectra of neutrinos, so each neutrino energy is randomly chosen from a distribution of energies, use \p{EXPONENT}= $N$ with values $1<N<4$, or $N\geq30$. 
 
