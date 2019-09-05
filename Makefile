@@ -41,7 +41,7 @@ ROOT_LIBRARY = libAra.${DLLSUF}
 
 OBJS = Vector.o EarthModel.o IceModel.o Trigger.o Ray.o Tools.o Efficiencies.o Event.o Detector.o Position.o Spectra.o RayTrace.o RayTrace_IceModels.o signal.o secondaries.o Settings.o Primaries.o counting.o RaySolver.o Report.o eventSimDict.o AraSim.o
 CCFILE = Vector.cc EarthModel.cc IceModel.cc Trigger.cc Ray.cc Tools.cc Efficiencies.cc Event.cc Detector.cc Spectra.cc Position.cc RayTrace.cc signal.cc secondaries.cc RayTrace_IceModels.cc Settings.cc Primaries.cc counting.cc RaySolver.cc Report.cc AraSim.cc
-CLASS_HEADERS = Trigger.h Detector.h Settings.h Spectra.h IceModel.h Primaries.h Report.h Event.h #need to add headers which added to Tree Branch
+CLASS_HEADERS = Trigger.h Detector.h Settings.h Spectra.h IceModel.h Primaries.h Report.h Event.h RayTrace.h RayTrace_IceModels.h#need to add headers which added to Tree Branch
 
 PROGRAMS = AraSim
 
@@ -52,7 +52,7 @@ AraSim : $(OBJS)
 	@echo "done."
 
 #The library
-$(ROOT_LIBRARY) :
+$(ROOT_LIBRARY) : $(OBJS) 
 	@echo "Linking $@ ..."
 ifeq ($(PLATFORM),macosx)
 # We need to make both the .dylib and the .so
@@ -66,7 +66,7 @@ else
 endif
 endif
 else
-	$(LD) $(SOFLAGS) $(LDFLAGS) $(G77LDFLAGS) $(LIBS) -o $@
+	$(LD) $(SOFLAGS) $(LDFLAGS) $(G77LDFLAGS) $(LIBS) $^ -o $@
 endif
 
 ##-bundle
