@@ -29,3 +29,4 @@ extern "C" void G__set_cpp_environmenteventSimDict() {
   G__add_compiledheader("Report.h");
   G__add_compiledheader("Event.h");
   G__add_compiledheader("RayTrace.h");
+}
