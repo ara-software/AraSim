@@ -33,6 +33,18 @@
 #pragma link C++ class Primaries+;
 #pragma link C++ class Interaction+;
 
+/*
+#pragma link C++ namespace RayTrace;
+#pragma link C++ struct RayTrace::TraceRecord+;
+#pragma link C++ struct RayTrace::TraceFinder+;
+#pragma link C++ struct RayTrace::minimalRayPosition+;
+#pragma link C++ struct RayTrace::rayPosition+;
+#pragma link C++ struct RayTrace::fullRayPosition+;
+#pragma link C++ struct RayTrace::rayTargetRecord+;
+#pragma link C++ class RayTrace::indexOfRefractionModel+;
+#pragma link C++ class RayTrace::attenuationModel+;
+*/ 
+
 #ifdef ARA_UTIL_EXISTS
 // #pragma link C++ class AtriEventHkData+;
 // #pragma link C++ class AtriSensorHkData+;
