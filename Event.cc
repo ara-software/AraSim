@@ -35,9 +35,11 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
     Choose_Evt_Type (settings1);
 
     if (Event_type == 0) { // if only neutrino events exist
+       
         pnu = spectra1->GetNuEnergy();
+        
         if (settings1->EVENT_GENERATION_MODE == 1){
-//            pnu = pow(10., settings1->PNU[inu_thrown]);
+            // pnu = pow(10., settings1->PNU[inu_thrown]);
             settings1->EXPONENT = settings1->PNU[inu_thrown];
             spectra1 = new Spectra(settings1->EXPONENT);
             settings1->SELECT_FLAVOR = settings1->NUFLAVORINT[inu_thrown];
@@ -55,20 +57,20 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
             settings1->NNU_PHI = settings1->IND_NNU_PHI[inu_thrown];
             settings1->YPARAM = 2;
             settings1->ELAST_Y = settings1->ELAST[inu_thrown];
-        } 
+        }
         pnu = spectra1->GetNuEnergy();
-//        cout << pnu << endl;
-/*
+        // cout << pnu << endl;
+        /*
         double hereTheta = 10.;
         Vector output;
         output.SetX(-1.*TMath::Sin(hereTheta*3.1415926535/180.));
         output.SetY(0.);
         output.SetZ(TMath::Cos(hereTheta*3.1415926535/180.));
         nnu = output;
-*/
+        */
         //nuflavor = primary1->GetNuFlavor();
         nuflavor = primary1->GetNuFlavor(settings1);
-//        nu_nubar = primary1->GetNuNuBar(nuflavor);
+        // nu_nubar = primary1->GetNuNuBar(nuflavor);
         nu_nubar = primary1->GetNuNuBar(nuflavor, settings1);
 
 
@@ -81,12 +83,15 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         }
         */
         
-        if (nuflavor=="nue")
+        if (nuflavor=="nue"){
             nuflavorint=1;
-        else if (nuflavor=="numu")
+        }
+        else if (nuflavor=="numu"){
             nuflavorint=2;
-        else if (nuflavor=="nutau")
+        }
+        else if (nuflavor=="nutau"){
             nuflavorint=3;
+        }
 
         Interaction *Nu_temp;
         //Report *report_tmp;
@@ -100,34 +105,32 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         delete Nu_temp;
 
         // for multiple interactions...
-/*
+        /*
         while (interaction_count < n_interactions) {    // not sure if this will work???
-
             Nu_tmp = new Interaction (...., n_interactions );
-
             Nu_Interaction.push_back( Nu_tmp );
         }
-*/
+        */
         
     } 
 
     if (Event_type == 10) { // if only arbitrary events exist
         
   
-      pnu = 0;
-//        cout << pnu << endl;
-/*
+        pnu = 0;
+        // cout << pnu << endl;
+        /*
         double hereTheta = 10.;
         Vector output;
         output.SetX(-1.*TMath::Sin(hereTheta*3.1415926535/180.));
         output.SetY(0.);
         output.SetZ(TMath::Cos(hereTheta*3.1415926535/180.));
         nnu = output;
-*/
-        //nuflavor = primary1->GetNuFlavor();
-      nuflavor = "";
-      nuflavorint = 0;
-      nu_nubar = 0;
+        */
+        // nuflavor = primary1->GetNuFlavor();
+        nuflavor = "";
+        nuflavorint = 0;
+        nu_nubar = 0;
 
 
         /*
@@ -140,27 +143,25 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         */
         
         Interaction *Nu_temp;
-        //Report *report_tmp;
+        // Report *report_tmp;
 
         Nu_temp = new Interaction (settings1, detector, icemodel, primary1, signal );
-        //report_tmp = new Report(detector ,settings1);
+        // report_tmp = new Report(detector ,settings1);
         
         Nu_Interaction.push_back(*Nu_temp);  // for the first interaction
-        //test_report.push_back(*report_tmp);
+        // test_report.push_back(*report_tmp);
 
         delete Nu_temp;
 
         // for multiple interactions...
-/*
+        /*
         while (interaction_count < n_interactions) {    // not sure if this will work???
-
             Nu_tmp = new Interaction (...., n_interactions );
-
             Nu_Interaction.push_back( Nu_tmp );
         }
-*/
-        
-    } 
+        */
+
+    }
 
     IsCalpulser = primary1->IsCalpulser;
 
@@ -172,7 +173,6 @@ Event::~Event() {
 
 
 void Event::delete_all() {
-
     Nu_Interaction.clear();
 }
 
@@ -184,19 +184,15 @@ void Event::Choose_Evt_Type (Settings *settings1) {
         Event_type = 0;
     }
     else if (settings1->EVENT_TYPE == 10){
-      //            cout<<"Currently, only neutrino events possible!"<<endl;
-      //            cout<<"Change Evt_type from "<<settings1->EVENT_TYPE<<" to 0"<<endl;
-      Event_type = 10;
+        //            cout<<"Currently, only neutrino events possible!"<<endl;
+        //            cout<<"Change Evt_type from "<<settings1->EVENT_TYPE<<" to 0"<<endl;
+        Event_type = 10;
     }
     else {
-      cout<<"Currently, only neutrino (EVET_TYPE=0) and arbitrary (EVENT_TYPE=10) events possible!"<<endl;
-      cout<<"Change Evt_type from "<<settings1->EVENT_TYPE<<" to 0"<<endl;
-      Event_type = 0;
+        cout<<"Currently, only neutrino (EVET_TYPE=0) and arbitrary (EVENT_TYPE=10) events possible!"<<endl;
+        cout<<"Change Evt_type from "<<settings1->EVENT_TYPE<<" to 0"<<endl;
+        Event_type = 0;
     }
-
-    
-    
-    
 }
 
 
