@@ -1,10 +1,11 @@
-#include "Tools.h"
-#include <iostream>
 #include <cmath>
+#include <fstream> 
+#include <iostream>
 #include <vector>
+
+#include "Tools.h"
 #include "TSpline.h"
 #include "TH2F.h"
-#include <fstream> 
 #include "Constants.h"
 
 using std::cout;
@@ -384,7 +385,7 @@ double Tools::dvMax(const vector<double> x) {
 double Tools::dsMax(TSpline5 *sp) {
     vector<double> y;
     double maxn;
- double blah1,blah2;
+    double blah1,blah2;
     for (int i=0;i<sp->GetNp();i++) {
         sp->GetKnot(i,blah1,blah2);
         y.push_back(blah2);
