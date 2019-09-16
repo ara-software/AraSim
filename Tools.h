@@ -5,11 +5,6 @@
 #ifndef TOOLS_H_
 #define TOOLS_H_
 
-
-//#include "TSpline.h"
-//#include "TH1.h"
-/* #include "TGraph.h" */
-/* #include "TH2F.h" */
 #include "TRandom3.h" 
 #include <iostream>
 #include <fstream>
