@@ -67,21 +67,8 @@ class Tools {
     static void GetNextNumberAsString(ifstream& fin,ofstream& fout,string& number);
 
     static void SimpleLinearInterpolation(int n1, double *x1, double *y1, int n2, double *x2, double *y2 );
-
     static void SimpleLinearInterpolation_OutZero(int n1, double *x1, double *y1, int n2, double *x2, double *y2 );
-
-
-    static void SimpleLinearInterpolation_extend_180cut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 ); 
-
-
-    static void SimpleLinearInterpolation_extend_PIcut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 ); 
-
-    static void SimpleLinearInterpolation_OutZero_180cut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 ); 
-
-    static void SimpleLinearInterpolation_OutZero_PIcut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 ); 
-
     static double SimpleLinearInterpolation_extend_Single(int n1, double *x1, double *y1, double x2 );
-
 
     static  void get_random_rician(double signal, double signal_phase, double sigma, double& amplitude, double &phase);
     static  void get_circular_bivariate_normal_random_variable(double& rand_gauss_a, double& rand_gauss_b);

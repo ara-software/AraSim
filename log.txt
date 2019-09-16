@@ -1490,4 +1490,14 @@ Added flexible antennas_per_string and strings_per_station to setup file read-in
 
 ============================================================================
 
+2019/09/16 Brian Clark
+
+Cleanup tabs in the Tools class, including the removal of several deprecated functions
+which are not used anywhere else in AraSim currently
+
+// static void SimpleLinearInterpolation_extend_180cut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 ); 
+// static void SimpleLinearInterpolation_extend_PIcut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 ); 
+// static void SimpleLinearInterpolation_OutZero_180cut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 ); 
+// static void SimpleLinearInterpolation_OutZero_PIcut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 );
+
 
