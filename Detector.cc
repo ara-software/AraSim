@@ -998,16 +998,16 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 	if (settings1->ANTENNA_MODE == 0){
 	  // test read V-pol gain file!!
-	  ReadVgain("ARA_bicone6in_output.txt");
+	  ReadVgain("ARA_bicone6in_output_updated2019.txt");
 	  // test read H-pol gain file!!
-	  ReadHgain("ARA_dipoletest1_output.txt");
+	  ReadHgain("ARA_dipoletest1_output_updated2016.txt");
 	}
 	else if (settings1->ANTENNA_MODE == 1) {
 	  // test read V-pol gain file!!
-	  ReadVgain("ARA_bicone6in_output.txt", settings1);
-	  ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
+	  ReadVgain("ARA_bicone6in_output_updated2019.txt", settings1);
+	  ReadVgainTop("ARA_VPresult_topTrec_updated2019.txt", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
+	  ReadHgain("ARA_dipoletest1_output_updated2016.txt", settings1);
 	}
 	else if (settings1->ANTENNA_MODE == 2){
 	  // test read V-pol gain file!!
@@ -1485,16 +1485,16 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 	if (settings1->ANTENNA_MODE == 0){
 	  // test read V-pol gain file!!
-	  ReadVgain("ARA_bicone6in_output.txt");
+	  ReadVgain("ARA_bicone6in_output_updated2019.txt");
 	  // test read H-pol gain file!!
-	  ReadHgain("ARA_dipoletest1_output.txt");
+	  ReadHgain("ARA_dipoletest1_output_updated2016.txt");
 	}
 	else if (settings1->ANTENNA_MODE == 1) {
 	  // test read V-pol gain file!!
-	  ReadVgain("ARA_bicone6in_output.txt", settings1);
-	  ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
+	  ReadVgain("ARA_bicone6in_output_updated2019.txt", settings1);
+	  ReadVgainTop("ARA_VPresult_topTrec_updated2019.txt", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
+	  ReadHgain("ARA_dipoletest1_output_updated2016.txt", settings1);
 	}
 	else if (settings1->ANTENNA_MODE == 2){
 	  // test read V-pol gain file!!
@@ -1772,16 +1772,16 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 	    if (settings1->ANTENNA_MODE == 0){
 	      // test read V-pol gain file!!
-	      ReadVgain("ARA_bicone6in_output.txt");
+	      ReadVgain("ARA_bicone6in_output_updated2019.txt");
 	      // test read H-pol gain file!!
-	      ReadHgain("ARA_dipoletest1_output.txt");
+	      ReadHgain("ARA_dipoletest1_output_updated2016.txt");
 	    }
 	    else if (settings1->ANTENNA_MODE == 1) {
 	      // test read V-pol gain file!!
-	      ReadVgain("ARA_bicone6in_output.txt", settings1);
-	      ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
+	      ReadVgain("ARA_bicone6in_output_updated2019.txt", settings1);
+	      ReadVgainTop("ARA_VPresult_topTrec_updated2019.txt", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
+	      ReadHgain("ARA_dipoletest1_output_updated2016.txt", settings1);
 	    }
 	    else if (settings1->ANTENNA_MODE == 2) {
 	      // test read V-pol gain file!!
@@ -2075,16 +2075,16 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 	    if (settings1->ANTENNA_MODE == 0){
 	      // test read V-pol gain file!!
-	      ReadVgain("ARA_bicone6in_output.txt");
+	      ReadVgain("ARA_bicone6in_output_updated2019.txt");
 	      // test read H-pol gain file!!
-	      ReadHgain("ARA_dipoletest1_output.txt");
+	      ReadHgain("ARA_dipoletest1_output_updated2016.txt");
 	    }
 	    else if (settings1->ANTENNA_MODE == 1) {
 	      // test read V-pol gain file!!
-	      ReadVgain("ARA_bicone6in_output.txt", settings1);
-	      ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
+	      ReadVgain("ARA_bicone6in_output_updated2019.txt", settings1);
+	      ReadVgainTop("ARA_VPresult_topTrec_updated2019.txt", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
+	      ReadHgain("ARA_dipoletest1_output_updated2016.txt", settings1);
 	    }
 	    else if (settings1->ANTENNA_MODE == 2){
 	      // test read V-pol gain file!!
