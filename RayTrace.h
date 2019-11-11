@@ -705,7 +705,8 @@ namespace RayTrace{
 		///\param rm The index of refraction model to be used
 		///\param am The attenuation model to be used
 
-#ifndef __CINT__
+		TraceFinder(indexOfRefractionModel * rm,attenuationModel*  am):rModel(rm),aModel(am){}
+#if  !defined(__CINT__) || defined(__CLING__)
 
 		TraceFinder(boost::shared_ptr<const indexOfRefractionModel> rm,boost::shared_ptr<const attenuationModel> am):rModel(rm),aModel(am){}
 #endif		
@@ -838,7 +839,7 @@ namespace RayTrace{
 		///Gets the index of refraction model used by this TraceFinder
 		///\return The index of refraction model
 
-#ifndef __CINT__
+#if  !defined(__CINT__) || defined(__CLING__)
 		boost::shared_ptr<const indexOfRefractionModel> getRefractionModel() const{
 			return(rModel);
 		}
