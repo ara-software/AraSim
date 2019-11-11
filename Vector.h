@@ -19,142 +19,138 @@
 class Vector {
 //class Vector : public TObject {
 
-protected:
-  //Class variables
-  double x; //x component of vector
-  double y; //y component of vector
-  double z; //z component of vector
-  double theta;  //theta component of vector in radians
-  double phi; //phi component of vector in radians
+  protected:
+    //Class variables
+    double x; //x component of vector
+    double y; //y component of vector
+    double z; //z component of vector
+    double theta;  //theta component of vector in radians
+    double phi; //phi component of vector in radians
 
-  double r; //r component of vector
+    double r; //r component of vector
 
-  //Class private functions
-  void UpdateThetaPhi(); 
-  void UpdateXYZ(); 
-  //This method finds theta and phi from the x,y,z Cartesian coordinates.  
-  //It should be called at any time that the x,y,z components are modified,
-  //so that the theta and phi components are current at all times.
+    //Class private functions
+    void UpdateThetaPhi(); 
+    void UpdateXYZ(); 
+    //This method finds theta and phi from the x,y,z Cartesian coordinates.  
+    //It should be called at any time that the x,y,z components are modified,
+    //so that the theta and phi components are current at all times.
 
+  public:
+    friend Vector operator +(const Vector& vector1, const Vector& vector2);
+    //Add two vectors component by component
 
+    friend void operator +=(Vector& vector1, const Vector& vector2);
 
+    friend Vector operator -(const Vector& vector1, const Vector& vector2);
+    //Subtract two vectors component by component
 
+    friend void operator -=(Vector& vector1, const Vector& vector2);
 
-public:
-  friend Vector operator +(const Vector& vector1, const Vector& vector2);
-  //Add two vectors component by component
+    friend Vector operator -(const Vector& vec);
+    //Gives the negative of a vector
 
-  friend void operator +=(Vector& vector1, const Vector& vector2);
+    friend double operator *(const Vector& vector1, const Vector& vector2);
+    //Take the dot product of two vectors
 
-  friend Vector operator -(const Vector& vector1, const Vector& vector2);
-  //Subtract two vectors component by component
+    friend Vector operator /(const Vector &v, const double& a);
+    //Divide a vector by a scalar
 
-  friend void operator -=(Vector& vector1, const Vector& vector2);
+    friend Vector operator *(const double& a, const Vector& v);
+    //Multiply a vector by a scalar
 
-  friend Vector operator -(const Vector& vec);
-  //Gives the negative of a vector
+    friend std::ostream& operator <<(std::ostream& outs, const Vector& vec);
+    //Print the three rectangular components of the vector to the screen
 
-  friend double operator *(const Vector& vector1, const Vector& vector2);
-  //Take the dot product of two vectors
+    double operator [](int i) const;
+    //Returns an element of the vector.  vector[0] is the x component,
+    //vector[1] is the y component, and vector[2] is the z component.
 
-  friend Vector operator /(const Vector &v, const double& a);
-  //Divide a vector by a scalar
+    Vector(double x_inp,double y_inp,double z_inp);
+    //Constructor: Initialize a new vector with given values of x, y, and z.
 
-  friend Vector operator *(const double& a, const Vector& v);
-  //Multiply a vector by a scalar
+    Vector(double *xarray);
+    //Constructor: Initialize a new vector with elements of xarray giving values 
+    // of x,y,z.
 
-  friend std::ostream& operator <<(std::ostream& outs, const Vector& vec);
-  //Print the three rectangular components of the vector to the screen
+    Vector(double theta, double phi);
+    //Constructor: Initialize a new vector with unit length and in the
+    //theta, phi direction.
+    //theta and phi must be in RADIANS!
+    //Accepts theta from 0 to PI, and any phi.
+    
+    Vector();
+    //Default constructor: Initialize a unit vector in the z direction.
 
-  double operator [](int i) const;
-  //Returns an element of the vector.  vector[0] is the x component,
-  //vector[1] is the y component, and vector[2] is the z component.
+    Vector RotateX(double angle) const;
+    //Returns the vector rotated counterclockwise (right handed coordinates) 
+    //by "angle" radians about the X axis.
+    //N.B. : Returns a new Vector object.  Does not change the vector it is called from.
 
-  Vector(double x_inp,double y_inp,double z_inp);
-  //Constructor: Initialize a new vector with given values of x, y, and z.
+    Vector RotateY(double angle) const;
+    //Returns the vector rotated counterclockwise (right handed coordinates) 
+    //by "angle" radians about the Y axis.
+    //N.B. : Returns a new Vector object.  Does not change the vector it is called from.
 
-  Vector(double *xarray);
-  //Constructor: Initialize a new vector with elements of xarray giving values 
-  // of x,y,z.
+    Vector RotateZ(double angle) const;
+    //Returns the vector rotated counterclockwise (right handed coordinates) 
+    //by "angle" radians about the Z axis.
+    //N.B. : Returns a new Vector object.  Does not change the vector it is called from.
 
-  Vector(double theta, double phi);
-  //Constructor: Initialize a new vector with unit length and in the
-  //theta, phi direction.
-  //theta and phi must be in RADIANS!
-  //Accepts theta from 0 to PI, and any phi.
-  
-  Vector();
-  //Default constructor: Initialize a unit vector in the z direction.
+    Vector Cross(const Vector &vec) const;
+    //Takes the cross product  this x vec.
 
-  Vector RotateX(double angle) const;
-  //Returns the vector rotated counterclockwise (right handed coordinates) 
-  //by "angle" radians about the X axis.
-  //N.B. : Returns a new Vector object.  Does not change the vector it is called from.
+    double Dot(const Vector &vec) const;
+    //Takes the dot product  this x vec.
 
-  Vector RotateY(double angle) const;
-  //Returns the vector rotated counterclockwise (right handed coordinates) 
-  //by "angle" radians about the Y axis.
-  //N.B. : Returns a new Vector object.  Does not change the vector it is called from.
+    Vector Rotate(double angle, const Vector &axis) const;
+    //Returns the vector that is this vector rotated around the vector "axis" by angle (in radians) "angle".
 
-  Vector RotateZ(double angle) const;
-  //Returns the vector rotated counterclockwise (right handed coordinates) 
-  //by "angle" radians about the Z axis.
-  //N.B. : Returns a new Vector object.  Does not change the vector it is called from.
+    Vector Zero();
+    //zero the vector
 
-  Vector Cross(const Vector &vec) const;
-  //Takes the cross product  this x vec.
+    double Mag() const;
+    //Returns the magnitude of this vector.
 
-  double Dot(const Vector &vec) const;
-//Takes the dot product  this x vec.
+    double Angle(const Vector &vec) const;
+    //Returns the 3-dimensional angle between this vector and the argument.
 
-  Vector Rotate(double angle, const Vector &axis) const;
-  //Returns the vector that is this vector rotated around the vector "axis" by angle (in radians) "angle".
+    Vector ChangeCoord(const Vector &new_x_axis,const Vector &new_y_axis) const;
+    Vector ChangeCoord(const Vector &new_z_axis) const;
+    //Returns this vector, rotated to a new coordinate system with the argument as the z-axis.
+    //The vector is rotated in such a way that a vector pointing in the z direction will be 
+    //rotated onto the new axis.
 
-  Vector Zero();
-  //zero the vector
-
-  double Mag() const;
-  //Returns the magnitude of this vector.
-
-  double Angle(const Vector &vec) const;
-  //Returns the 3-dimensional angle between this vector and the argument.
-
-  Vector ChangeCoord(const Vector &new_x_axis,const Vector &new_y_axis) const;
-  Vector ChangeCoord(const Vector &new_z_axis) const;
-  //Returns this vector, rotated to a new coordinate system with the argument as the z-axis.
-  //The vector is rotated in such a way that a vector pointing in the z direction will be 
-  //rotated onto the new axis.
-
-  Vector Unit() const;
-  //Returns a unit vector in the same direction as this vector.
+    Vector Unit() const;
+    //Returns a unit vector in the same direction as this vector.
 
 
-  void RotateUz(const Vector &NewUzVector);
-  // Change original z-axis to match the new vector                                      
-  // Note the new vector must be normalized                                              
+    void RotateUz(const Vector &NewUzVector);
+    // Change original z-axis to match the new vector                                      
+    // Note the new vector must be normalized                                              
 
 
-  //Accessor functions
-  double GetX() const;
-  double GetY() const;
-  double GetZ() const;
-  double R() const;
-  double Theta() const;
-  double Phi() const;
-  void Print() const;
-  void PrintSp() const;
+    //Accessor functions
+    double GetX() const;
+    double GetY() const;
+    double GetZ() const;
+    double R() const;
+    double Theta() const;
+    double Phi() const;
+    void Print() const;
+    void PrintSp() const;
 
-  //Mutator functions
-  void SetX(double inp);
-  void SetY(double inp);
-  void SetZ(double inp);
-  void SetXYZ(double inpx,double inpy,double inpz);
-  
-  void SetR(double inpr);
-  void SetThetaPhi(double inptheta,double inpphi);
-  void SetRThetaPhi(double inpr,double inptheta,double inpphi);
+    //Mutator functions
+    void SetX(double inp);
+    void SetY(double inp);
+    void SetZ(double inp);
+    void SetXYZ(double inpx,double inpy,double inpz);
+    
+    void SetR(double inpr);
+    void SetThetaPhi(double inptheta,double inpphi);
+    void SetRThetaPhi(double inpr,double inptheta,double inpphi);
 
-  void Reset(double x_inp, double y_inp, double z_inp);
+    void Reset(double x_inp, double y_inp, double z_inp);
 
   ClassDef(Vector,1);
 

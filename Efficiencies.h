@@ -25,7 +25,6 @@ public:
 
 protected:
 
-
 };
 
 #endif //EFFICIENCIES_H

@@ -27,7 +27,7 @@ public:
   int nchanceinhell[2]; // based on depth, 
   // signal has a chance to pass after accounting for ice attenuation and 1/r
   int nchanceinhell_1overr[2]; // after 1/r
-// signal has chance of passing
+  // signal has chance of passing
   int nchanceinhell_fresnel[2]; // after fresnel coefficients
   // signal has chance of passing
 
@@ -55,7 +55,7 @@ public:
   int toolow[2];  // there is an interaction in the ice
 
 
-// variables for counting neutrinos and reporting results.
+  // variables for counting neutrinos and reporting results.
   int nnu_e;  //counting the number of e,mu,tau neutrinos
   int nnu_mu;  
   int nnu_tau;
@@ -68,7 +68,7 @@ public:
   static constexpr double PHIMAX=2*3.14159;
   static constexpr double PHIMIN=0.;
 
- double weights_rin[NCOSTHETA][NPHI];
+  double weights_rin[NCOSTHETA][NPHI];
 
   void findCosthetaPhiBins(Position r_in,int &icostheta,int &iphi);
   void IncrementWeights_r_in(Position r_in,double weight) ;
@@ -94,8 +94,6 @@ public:
   //void incrementEventsFound(double weight,Interaction *interaction1);
   void incrementEventsFound(double weight,Event *event);
   static int findWeightBin(double logweight);
-  //
-
 
 protected:
 
