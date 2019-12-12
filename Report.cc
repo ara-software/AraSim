@@ -2292,6 +2292,18 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                    trig_j = 0;
                    while (trig_j < ch_ID ) {
 
+                    
+                    // need to mask out a trigger channel when necessary
+                    // which is when emulating real station 2 in config 3-5 only
+                    if(settings1->DETECTOR==4 && settings1->DETECTOR_STATION==2){
+                        if(settings1->DETECTOR_STATION_LIVETIME_CONFIG>2){
+                            if(trig_j==9){
+                                trig_j++;
+                                continue;
+                            }
+                        }
+                    }
+
                        int offset=0;
                        if(settings1->DETECTOR==4){
                            // only try to calculate the offset of DETECTOR=4, and we can guarantee that there will be an entry for triggerDelay[trig_j]
