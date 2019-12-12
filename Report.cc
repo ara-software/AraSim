@@ -2292,6 +2292,13 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                    trig_j = 0;
                    while (trig_j < ch_ID ) {
 
+                       int offset=0;
+                       if(settings1->DETECTOR==4){
+                           // only try to calculate the offset of DETECTOR=4, and we can guarantee that there will be an entry for triggerDelay[trig_j]
+                           // otherwise, if someone simulates an ideal station and changes the number of channels, this will segfault in a very hard to debug way
+                           offset = int((mostDelay -  triggerDelay[trig_j]) / (settings1->TIMESTEP * 1e9));
+                       }
+
                        int string_i = detector->getStringfromArbAntID( i, trig_j);
                        int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
 
@@ -2310,7 +2317,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                    if ( settings1->NOISE_CHANNEL_MODE==0) {
                                        // with threshold offset by chs
-				     if ( trigger->Full_window[trig_j][trig_i+trig_bin] < (detector->GetThres(i, channel_num-1, settings1) * trigger->rmsdiode * detector->GetThresOffset( i, channel_num-1,settings1) ) ) {   // if this channel passed the trigger!
+				                        if ( trigger->Full_window[trig_j][trig_i+trig_bin] < (detector->GetThres(i, channel_num-1, settings1) * trigger->rmsdiode * detector->GetThresOffset( i, channel_num-1,settings1) ) ) {   // if this channel passed the trigger!
                                            //cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
                                            //stations[i].strings[(int)((trig_j)/4)].antennas[(int)((trig_j)%4)].Trig_Pass = trig_i+trig_bin;
                                            stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i+trig_bin;
@@ -2481,10 +2488,11 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                if ( settings1->NOISE_CHANNEL_MODE==0) {
                                    // with threshold offset by chs
-                                   if ( trigger->Full_window[trig_j][trig_i+trig_bin] < (detector->GetThres(i, channel_num-1, settings1) * trigger->rmsdiode * detector->GetThresOffset( i, channel_num-1,settings1) ) ) {   // if this channel passed the trigger!
+                                   if( trig_i+offset+trig_bin >= settings1->DATA_BIN_SIZE ) break; //if trigger window hits wf end, cannot scan this channel further with this trig_i
+                                   if ( trigger->Full_window[trig_j][trig_i+trig_bin+offset] < (detector->GetThres(i, channel_num-1, settings1) * trigger->rmsdiode * detector->GetThresOffset( i, channel_num-1,settings1) ) ) {   // if this channel passed the trigger!
                                        //cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
                                        //stations[i].strings[(int)((trig_j)/4)].antennas[(int)((trig_j)%4)].Trig_Pass = trig_i+trig_bin;
-                                       stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i+trig_bin;
+                                       stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i+trig_bin+offset;
                                        N_pass++;
                                        if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0) { // Vpol
                                            N_pass_V++;
@@ -2499,8 +2507,9 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                }
                                else if ( settings1->NOISE_CHANNEL_MODE==1) {
                                    // with threshold offset by chs
-                                   if ( trigger->Full_window[trig_j][trig_i+trig_bin] < (detector->GetThres(i, channel_num-1, settings1) * trigger->rmsdiode_ch[channel_num-1] * detector->GetThresOffset( i, channel_num-1,settings1) ) ) {   // if this channel passed the trigger!
-                                       stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i+trig_bin;
+                                   if( trig_i+offset+trig_bin >= settings1->DATA_BIN_SIZE ) break; //if trigger window hits wf end, cannot scan this channel further with this trig_i
+                                   if ( trigger->Full_window[trig_j][trig_i+trig_bin+offset] < (detector->GetThres(i, channel_num-1, settings1) * trigger->rmsdiode_ch[channel_num-1] * detector->GetThresOffset( i, channel_num-1,settings1) ) ) {   // if this channel passed the trigger!
+                                       stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i+trig_bin+offset;
                                        N_pass++;
                                        if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0) { // Vpol
                                            N_pass_V++;
