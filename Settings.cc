@@ -43,8 +43,6 @@ void Settings::Initialize() {
         UNBIASED_SELECTION=1.; // (0) pick neutrino interaction in the ice and neutrino from any direction or (1) choose neutrino interaction point in the horizon on the balloon in the ice and neutrino direction on the cerenkov cone
 
         SIGMA_SELECT=0; // when in SIGMAPARAM=1 case, 0 : (default) use mean value, 1 : use upper bound, 2 : use lower bound
-
-
     // end of values from icemc
 
     ARASIM_VERSION_MAJOR = ARASIM_MAJOR;
@@ -733,48 +731,48 @@ int Settings::CheckCompatibilities(Detector *detector) {
     // if there's something not going to work, count thoes settings
 
     if (DETECTOR==1 && READGEOM==1 && detector->params.number_of_stations>1) { // currently only ARA1a one station is possible
-            cerr<<"DETECTOR=1, READGEOM=1 is currently only availble with number_of_stations=1 in ARA_N_info.txt file!"<<endl;
-            num_err++;
+        cerr<<"DETECTOR=1, READGEOM=1 is currently only availble with number_of_stations=1 in ARA_N_info.txt file!"<<endl;
+        num_err++;
     }
 
     if (DETECTOR==2 && READGEOM==1) { // currently READGEOM (using actual installed stations info) is not available in DETECTOR=2
-            cerr<<"DETECTOR=2 and READGEOM=1 is currently not availble! Only ideal stations are available in DETECTOR=2!"<<endl;
-            num_err++;
+        cerr<<"DETECTOR=2 and READGEOM=1 is currently not availble! Only ideal stations are available in DETECTOR=2!"<<endl;
+        num_err++;
     }
 
     // check reasonable number of noise waveforms
     if (NOISE_WAVEFORM_GENERATE_MODE == 0) { // if generating new noise waveforms for every events
-            if (NOISE_CHANNEL_MODE == 0) {// share all noise waveforms same with other channels
-                    //if (NOISE_EVENTS < detector->params.number_of_antennas) { // this is too low number of events!
-                    if (NOISE_EVENTS < detector->max_number_of_antennas_station) { // this is too low number of events!
-                            cerr<<"NOISE_EVENTS too less! At least use "<<detector->max_number_of_antennas_station<<"!"<<endl;
-                            num_err++;
-                    }
+        if (NOISE_CHANNEL_MODE == 0) {// share all noise waveforms same with other channels
+            //if (NOISE_EVENTS < detector->params.number_of_antennas) { // this is too low number of events!
+            if (NOISE_EVENTS < detector->max_number_of_antennas_station) { // this is too low number of events!
+                cerr<<"NOISE_EVENTS too less! At least use "<<detector->max_number_of_antennas_station<<"!"<<endl;
+                num_err++;
             }
-            else if (NOISE_CHANNEL_MODE == 1) {// each chs will have separate noise waveforms
-                    if (NOISE_EVENTS > 1) { // this case 1 waveform is enough for each channels
-                            cerr<<"NOISE_EVENTS too many! With NOISE_WAVEFORM_GENERATE_MODE==0 and NOISE_CHANNEL_MODE==1, just use NOISE_EVENTS=1"<<endl;
-                            num_err++;
-                    }
+        }
+        else if (NOISE_CHANNEL_MODE == 1) {// each chs will have separate noise waveforms
+            if (NOISE_EVENTS > 1) { // this case 1 waveform is enough for each channels
+                cerr<<"NOISE_EVENTS too many! With NOISE_WAVEFORM_GENERATE_MODE==0 and NOISE_CHANNEL_MODE==1, just use NOISE_EVENTS=1"<<endl;
+                num_err++;
             }
+        }
     }
     if (NOISE_WAVEFORM_GENERATE_MODE == 1) { // if generating noise waveforms in the begining and keep use them
-            if (NOISE_CHANNEL_MODE == 0) {// share all noise waveforms same with other channels
-                    //if (NOISE_EVENTS < detector->params.number_of_antennas) { // this is too low number of events!
-                    if (NOISE_EVENTS < detector->max_number_of_antennas_station) { // this is too low number of events!
-                            cerr<<"NOISE_EVENTS too less! At least use "<<detector->max_number_of_antennas_station<<"!"<<endl;
-                            num_err++;
-                    }
+        if (NOISE_CHANNEL_MODE == 0) {// share all noise waveforms same with other channels
+            //if (NOISE_EVENTS < detector->params.number_of_antennas) { // this is too low number of events!
+            if (NOISE_EVENTS < detector->max_number_of_antennas_station) { // this is too low number of events!
+                cerr<<"NOISE_EVENTS too less! At least use "<<detector->max_number_of_antennas_station<<"!"<<endl;
+                num_err++;
             }
+        }
     }
 
     // check if there's enough system temperature values prepared for NOISE_CHANNEL_MODE=1
     if (NOISE_CHANNEL_MODE==1) {// use different system temperature values for different chs
         if (DETECTOR==3 && (detector->params.number_of_antennas > (int)(detector->Temp_TB_ch.size())) ) {
-    cout << detector->params.number_of_antennas << " : " <<(int)(detector->Temp_TB_ch.size()) << endl;
-                    cerr<<"System temperature values are not enough for all channels! Check number of channels you are using and numbers in data/system_temperature.csv"<<endl;
-                    num_err++;
-            }
+            cout << detector->params.number_of_antennas << " : " <<(int)(detector->Temp_TB_ch.size()) << endl;
+            cerr<<"System temperature values are not enough for all channels! Check number of channels you are using and numbers in data/system_temperature.csv"<<endl;
+            num_err++;
+        }
     }
 
     /*
@@ -795,21 +793,21 @@ int Settings::CheckCompatibilities(Detector *detector) {
 
     // if BH_ANT_SEP_DIST_ON=1, we can't use READGEOM=1 (actual installed geom)
     if (BH_ANT_SEP_DIST_ON==1 && READGEOM==1) {
-            cerr<<"BH_ANT_SEP_DIST_ON=1 is only available in ideal station geom (READGEOM=0)!"<<endl; 
-            num_err++;
+        cerr<<"BH_ANT_SEP_DIST_ON=1 is only available in ideal station geom (READGEOM=0)!"<<endl; 
+        num_err++;
     }
 
     // TRIG_MODE=1 (Vpol, Hpol separated) will not work with testbed station mode
     if (TRIG_MODE==1 && DETECTOR==3) {
-            cerr<<"TRIG_MODE=1 is not available in TestBed mode (DETECTOR=3)!"<<endl; 
-            num_err++;
+        cerr<<"TRIG_MODE=1 is not available in TestBed mode (DETECTOR=3)!"<<endl; 
+        num_err++;
     }
 
     // check modes which will only work for actual installed TestBed case
     //
     if (TRIG_ONLY_BH_ON==1 && DETECTOR!=3) {
-            cerr<<"TRIG_ONLY_BH_ON=1 only works with DETECTOR=3!"<<endl;
-            num_err++;
+        cerr<<"TRIG_ONLY_BH_ON=1 only works with DETECTOR=3!"<<endl;
+        num_err++;
     }
 
     /*
@@ -823,91 +821,91 @@ int Settings::CheckCompatibilities(Detector *detector) {
 
     //if (NOISE_CHANNEL_MODE==2 && DETECTOR!=3) {
     if (NOISE_CHANNEL_MODE==2 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
-            //cerr<<"NOISE_CHANNEL_MODE=2 only works with DETECTOR=3!"<<endl;
-            cerr<<"NOISE_CHANNEL_MODE=2 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
-            num_err++;
+        //cerr<<"NOISE_CHANNEL_MODE=2 only works with DETECTOR=3!"<<endl;
+        cerr<<"NOISE_CHANNEL_MODE=2 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
+        num_err++;
     }
 
     if (DETECTOR==3 && READGEOM==0) {
-            cerr<<"DETECTOR=3 will always need READGEOM=1"<<endl;
-            num_err++;
+        cerr<<"DETECTOR=3 will always need READGEOM=1"<<endl;
+        num_err++;
     }
 
     if (USE_TESTBED_RFCM_ON==1 && DETECTOR!=3) {
-            cerr<<"USE_TESTBED_RFCM_ON=1 only works with DETECTOR=3!"<<endl;
-            num_err++;
+        cerr<<"USE_TESTBED_RFCM_ON=1 only works with DETECTOR=3!"<<endl;
+        num_err++;
     }
 
     if (USE_CH_GAINOFFSET==1 && DETECTOR!=3) {
-            cerr<<"USE_CH_GAINOFFSET=1 only works with DETECTOR=3!"<<endl;
-            num_err++;
+        cerr<<"USE_CH_GAINOFFSET=1 only works with DETECTOR=3!"<<endl;
+        num_err++;
     }
 
     if (TRIG_THRES_MODE==1 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
-            //cerr<<"TRIG_THRES_MODE=1 and 2 only works with DETECTOR=3!"<<endl;
-            cerr<<"TRIG_THRES_MODE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
-            num_err++;
+        //cerr<<"TRIG_THRES_MODE=1 and 2 only works with DETECTOR=3!"<<endl;
+        cerr<<"TRIG_THRES_MODE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
+        num_err++;
     }
 
     if (TRIG_THRES_MODE==2 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
-            //cerr<<"TRIG_THRES_MODE=1 and 2 only works with DETECTOR=3!"<<endl;
-            cerr<<"TRIG_THRES_MODE=2 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
-            num_err++;
+        //cerr<<"TRIG_THRES_MODE=1 and 2 only works with DETECTOR=3!"<<endl;
+        cerr<<"TRIG_THRES_MODE=2 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
+        num_err++;
     }
 
     if (USE_MANUAL_GAINOFFSET==1 && DETECTOR!=3) {
-            cerr<<"USE_MANUAL_GAINOFFSET=1 only works with DETECTOR=3!"<<endl;
-            num_err++;
+        cerr<<"USE_MANUAL_GAINOFFSET=1 only works with DETECTOR=3!"<<endl;
+        num_err++;
     }
 
     if (CALPULSER_ON!=0 && DETECTOR!=3) {
-            cerr<<"CALPULSER_ON=1 and above only works with DETECTOR=3!"<<endl;
-            num_err++;
+        cerr<<"CALPULSER_ON=1 and above only works with DETECTOR=3!"<<endl;
+        num_err++;
     }
 
     if ((V_MIMIC_MODE==1||V_MIMIC_MODE==2) && DETECTOR!=3) {
-            cerr<<"V_MIMIC_MODE=1 and 2 only works with DETECTOR=3!"<<endl;
-            num_err++;
+        cerr<<"V_MIMIC_MODE=1 and 2 only works with DETECTOR=3!"<<endl;
+        num_err++;
     }
     
     if (USE_MANUAL_GAINOFFSET==1 && USE_CH_GAINOFFSET==1) {
-            cerr<<"Can not use USE_MANUAL_GAINOFFSET=1 and USE_CH_GAINOFFSET=1 same time!"<<endl;
-            num_err++;
+        cerr<<"Can not use USE_MANUAL_GAINOFFSET=1 and USE_CH_GAINOFFSET=1 same time!"<<endl;
+        num_err++;
     }
 
     //if (NOISE==1 && DETECTOR!=3) {
     if (NOISE==1 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
-            cerr<<"NOISE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
-            num_err++;
+        cerr<<"NOISE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
+        num_err++;
     }
 
     if (NOISE==1 && USE_TESTBED_RFCM_ON==1) {
-            cerr<<"NOISE=1 only works with USE_TESTBED_RFCM_ON=0!"<<endl;
-            num_err++;
+        cerr<<"NOISE=1 only works with USE_TESTBED_RFCM_ON=0!"<<endl;
+        num_err++;
     }
 
     if (NOISE==1 && NOISE_CHANNEL_MODE==0) {
-            cerr<<"NOISE=1 don't work with NOISE_CHANNEL_MODE=0!"<<endl;
-            num_err++;
+        cerr<<"NOISE=1 don't work with NOISE_CHANNEL_MODE=0!"<<endl;
+        num_err++;
     }
 
 
     // This is for only ideal stations
     if (TRIG_ONLY_LOW_CH_ON==1 && DETECTOR==3) {
-            cerr<<"TRIG_ONLY_LOW_CH_ON=1 doesn't work with DETECTOR=3!"<<endl;
-            num_err++;
+        cerr<<"TRIG_ONLY_LOW_CH_ON=1 doesn't work with DETECTOR=3!"<<endl;
+        num_err++;
     }
 
     if (DATA_LIKE_OUTPUT != 0 && (DETECTOR==0 || DETECTOR==1 || DETECTOR==2)) {
-            cerr<<"DATA_LIKE_OUTPUT=1,2 doesn't work with DETECTOR=0,1,2"<<endl;
-            cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format; without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
-            num_err++;
+        cerr<<"DATA_LIKE_OUTPUT=1,2 doesn't work with DETECTOR=0,1,2"<<endl;
+        cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format; without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
+        num_err++;
     }
 
     if (DATA_LIKE_OUTPUT != 0 && (DETECTOR_STATION>3)) {
-            cerr<<"DATA_LIKE_OUTPUT=1,2 doesn't work with DETECTOR_STATION>3"<<endl;
-            cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format; without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
-            num_err++;
+        cerr<<"DATA_LIKE_OUTPUT=1,2 doesn't work with DETECTOR_STATION>3"<<endl;
+        cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format; without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
+        num_err++;
     }
     /*
     if(NOISE == 2 && (DETECTOR==0 || DETECTOR==1 || DETECTOR==2)){
