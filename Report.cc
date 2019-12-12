@@ -2220,6 +2220,60 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 	       if(settings1->TRIG_SCAN_MODE==0){// ******************** old mode left as-is ********************
 
+                /*
+                    We need to add some logic to deal with what happens when we are running in A2 and A3 mode
+                    with config specific trigger delay settings
+                */
+
+                // these must always be set
+                for(int localchan=0; localchan<16; localchan++){
+                    triggerDelay[localchan]=0;
+                    mostDelay=0;
+                }
+
+                if(settings1->DETECTOR==4 && settings1->DETECTOR_STATION_LIVETIME_CONFIG>0){ // if emulating a real station, and we want config selection power
+
+                    if(settings1->DETECTOR_STATION==2){ // if station 2
+                        
+                        if(settings1->DETECTOR_STATION_LIVETIME_CONFIG==2 || settings1->DETECTOR_STATION_LIVETIME_CONFIG==5){ // if config 5 or 5 in A2
+                            triggerDelay[4] = 81.4 + 100;
+                            triggerDelay[5] = 73.2 + 100;
+                            triggerDelay[6] = 15.4 + 100;
+                            triggerDelay[7] = 7.2  + 100;
+
+                            // string 0 = D2, string 2 = D4, string3 = D1
+                            triggerDelay[0] = triggerDelay[8] = triggerDelay[12]  = 81.4;
+                            triggerDelay[1] = triggerDelay[9] = triggerDelay[13]  = 73.2;
+                            triggerDelay[2] = triggerDelay[10] = triggerDelay[14] = 15.4;
+                            triggerDelay[3] = triggerDelay[11] = triggerDelay[15] = 7.2;
+
+                            mostDelay = triggerDelay[4]; 
+
+                        }
+                    }
+
+                    if(settings1->DETECTOR_STATION==3){
+
+                        if(settings1->DETECTOR_STATION_LIVETIME_CONFIG==2 || settings1->DETECTOR_STATION_LIVETIME_CONFIG==4){ // if config 2 or 4 in A3
+
+                            // string 0 = D2, order 0-3 BV-BH-TV-TH
+                            triggerDelay[0] = 81.4 + 100;
+                            triggerDelay[1] = 73.2 + 100;
+                            triggerDelay[2] = 15.4 + 100;
+                            triggerDelay[3] = 7.2  + 100;
+
+                            // string 1 = D3, string 2 = D4, string3 = D1
+                            triggerDelay[4] = triggerDelay[8] = triggerDelay[12]  = 81.4;
+                            triggerDelay[5] = triggerDelay[9] = triggerDelay[13]  = 73.2;
+                            triggerDelay[6] = triggerDelay[10] = triggerDelay[14] = 15.4;
+                            triggerDelay[7] = triggerDelay[11] = triggerDelay[15] = 7.2;
+
+                            mostDelay = triggerDelay[0]; 
+
+                        }
+                    }
+                }
+
                // avoid really long trig_window_bin case (change trig_window to check upto max_total_bin)
                if (max_total_bin - trig_window_bin <= trig_i) trig_window_bin = max_total_bin - trig_i -1;
 	       

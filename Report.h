@@ -365,6 +365,11 @@ class Report {
 
 		double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
 
+		// two parameters for controlling the trigger delay for each channel (only use in real station emulation mode)
+		// and a variable for setting which has the "most" delay
+		double triggerDelay[16];
+		double mostDelay;
+
 
 		ClassDef(Report,1);
 

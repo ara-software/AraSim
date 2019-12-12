@@ -1514,3 +1514,6 @@ Also clean-up tabs in Vector class
   =1,2,3,4,5 are the five configs from the A2/A3 4yr analysis
   >5 is not supported currently and will throw an error
   will also throw an error if attempt to use for stations besides 2 and 3
+
+- in Report.h and Report.cc add triggerDelay and mostDelay variables, and fill them correctly, for when we need
+  to adjust triggering and readout parameters
