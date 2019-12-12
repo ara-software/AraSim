@@ -1502,3 +1502,15 @@ which are not used anywhere else in AraSim currently
 
 
 Also clean-up tabs in Vector class
+
+============================================================================
+
+2019/12/12 Brian Clark
+
+- Cleanup Settings class with correct tabs
+
+- Add DETECTOR_STATION_LIVETIME_CONFIG, which allows for configuration selection when run in detector 2/3 mode
+  =0 is default (do nothing special)
+  =1,2,3,4,5 are the five configs from the A2/A3 4yr analysis
+  >5 is not supported currently and will throw an error
+  will also throw an error if attempt to use for stations besides 2 and 3

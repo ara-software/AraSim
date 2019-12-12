@@ -339,6 +339,9 @@ void Settings::ReadFile(string setupfile) {
                 else if (label == "DETECTOR_STATION") {
                     DETECTOR_STATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
                 }
+                else if (label == "DETECTOR_STATION_LIVETIME_CONFIG") {
+                    DETECTOR_STATION_LIVETIME_CONFIG = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+                }
                 else if (label == "INTERACTION_MODE") {
                     INTERACTION_MODE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
                 }
@@ -932,6 +935,20 @@ int Settings::CheckCompatibilities(Detector *detector) {
             if (DETECTOR_STATION <0 || DETECTOR_STATION >= NUM_INSTALLED_STATIONS){
                 cerr << "DETECTOR_STATION is not set to a valid station number" << endl;
                 num_err++;
+            }
+            if(DETECTOR_STATION_LIVETIME_CONFIG>0){
+                if((int)DETECTOR_STATION==2 || (int)DETECTOR_STATION==3){
+                    cerr<<"DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<endl;
+                    if(DETECTOR_STATION_LIVETIME_CONFIG>5){
+                        cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only five expected configurations"<<endl;
+                        num_err++;
+                    }
+                }
+                else{
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but DETECTOR_STATION is "<<DETECTOR_STATION<<endl;
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is only valid for A2 and A3 "<<endl;
+                    num_err++;
+                }
             }
         }
     }
