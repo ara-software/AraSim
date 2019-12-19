@@ -975,6 +975,18 @@ int Settings::CheckCompatibilities(Detector *detector) {
        num_err++;
     }
 
+    //Signal chain uncertainty estimate is only compatible with simulating with actual installed stations
+    if (DETECTOR != 4 && USE_SIGNAL_CHAIN_LOWER_BOUND > 0){
+       cerr<<"USE_SIGNAL_CHAIN_LOWER_BOUND>0 doesn't work with DETECTOR!=4."<<endl;
+       num_err++;
+    }
+
+    //Signal chain uncertainty estimate is only compatible with simulating with actual installed stations 1 and above. TestBed is a different beast
+    if (DETECTOR == 4 && DETECTOR_STATION==0 && USE_SIGNAL_CHAIN_LOWER_BOUND > 0){
+       cerr<<"USE_SIGNAL_CHAIN_LOWER_BOUND>0 doesn't work with DETECTOR_STATION==0. The signal chain measurements are done with ARA deep stations."<<endl;
+       num_err++;
+    }
+
 
     return num_err;
 }
