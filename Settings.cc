@@ -294,6 +294,12 @@ void Settings::Initialize() {
     IND_NNU_THETA[100] = {0};
     IND_NNU_PHI[100] = {0};
     */
+
+    USE_SIGNAL_CHAIN_LOWER_BOUND = 0; // default: 0 -- don't replace signal chain efficiency with lower bound. 1: replace with lower bound
+    SC_EFFICIENCY_ERROR_V = 0.9;     //Lower bound of Vpol signal chain efficiency
+    SC_EFFICIENCY_ERROR_H = 0.68;    //Lower bound of Hpol signal chain efficiency
+
+
 }
 
 void Settings::ReadFile(string setupfile) {
@@ -652,12 +658,22 @@ void Settings::ReadFile(string setupfile) {
                 else if (label == "CUSTOM_ELECTRONICS"){
                     CUSTOM_ELECTRONICS = atoi(line.substr(line.find_first_of("=") + 1).c_str());
                 }
-            }
-        }
-        setFile.close();
-    }
-    else cout<<"Unable to open "<<setupfile<<" file!"<<endl;
-    return;
+              else if (label == "USE_SIGNAL_CHAIN_LOWER_BOUND"){
+                  USE_SIGNAL_CHAIN_LOWER_BOUND = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SC_EFFICIENCY_ERROR_V"){
+                  SC_EFFICIENCY_ERROR_V = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SC_EFFICIENCY_ERROR_H"){
+              	   SC_EFFICIENCY_ERROR_H = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+
+          }
+      }
+      setFile.close();
+  }
+  else cout<<"Unable to open "<<setupfile<<" file!"<<endl;
+  return;
 }
 
 void Settings::ReadEvtFile(string evtfile){
@@ -952,6 +968,13 @@ int Settings::CheckCompatibilities(Detector *detector) {
             }
         }
     }
+
+    //Signal chain uncertainty estimate is only compatible with using different TV/BV
+    if (ANTENNA_MODE != 1 && USE_SIGNAL_CHAIN_LOWER_BOUND > 0){
+       cerr<<"USE_SIGNAL_CHAIN_LOWER_BOUND>0 doesn't work with ANTENNA_MODE!=1"<<endl;
+       num_err++;
+    }
+
 
     return num_err;
 }
