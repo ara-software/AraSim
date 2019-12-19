@@ -1966,7 +1966,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
         
         //        cout<<"total station_count : "<<station_count<<endl;
-        if (station_count != (int)params.number_of_stations) cout<<"\n\tError, station number not match !"<<endl;
+        //if (station_count != (int)params.number_of_stations) cout<<"\n\tError, station number not match !"<<endl;
         
         //
         // set antenna values from parameters
@@ -2507,6 +2507,7 @@ inline void Detector::ReadHgain(string filename, Settings *settings1) {
       for(int i=0;i<60;i++){
          in >> tempFilterFreq >> tempFilter;
          filterValue[i] = tempFilter;
+         //cout<<"filterValue: "<<filterValue[i]<<endl;
          filterFreq[i] = tempFilterFreq;
       }
    }
@@ -2539,6 +2540,7 @@ inline void Detector::ReadHgain(string filename, Settings *settings1) {
                         Hgain[i][j] = Transm[i]*atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
                         } else { //systematic error estimate: 600MHz low-pass filter + SC effi. lower bound
                         Hgain[i][j] = Transm[i] * atof( line.substr( 20, 33 ).c_str() ) * filterValue[i] * settings1->SC_EFFICIENCY_ERROR_H;  // read gain (not dB)
+                        //cout<<"SC effi low H: "<<settings1->SC_EFFICIENCY_ERROR_H<<endl;
                         }
  
                         Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
