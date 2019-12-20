@@ -408,11 +408,18 @@ class Settings
             /* int USEPOSITIONWEIGHTS=1;// whether or not to restrict the neutrino position so it is within the horizon of the balloon */
             /* int WRITE_FILE=0; //Select whether or not to write a new input file for CreateHorizons */
 
+
             int USEPOSITIONWEIGHTS;// whether or not to restrict the neutrino position so it is within the horizon of the balloon
             int WRITE_FILE; //Select whether or not to write a new input file for CreateHorizons
 
             int MINRAY;
             int MAXRAY;
+
+            //Implemented for signal chain calibration uncertainty estimate - 12/17/2019 MYL
+            int USE_SIGNAL_CHAIN_LOWER_BOUND; //Switch to replace the signal chain efficiency by its error lower bound. Use this for systematic estimation. Default 0: do not use lower bound. 1: use lower bound.
+            double SC_EFFICIENCY_ERROR_V; //Total estimated signal chain efficiency error for Vpol from Meures. Measured in power. Only used when USE_SIGNAL_CHAIN_LOWER_BOUND=1. Default: 0.9, representing a 10% deficiency
+            double SC_EFFICIENCY_ERROR_H; //Total estimated signal chain efficiency error for Hpol from Meures. Measured in power. Only used when USE_SIGNAL_CHAIN_LOWER_BOUND=1. Default: 0.68, representing a 32% deficiency
+
 
             int horizontal_banana_points;
             int vertical_banana_points;

@@ -1519,3 +1519,19 @@ Also clean-up tabs in Vector class
   to adjust triggering and readout parameters
 
 - additionally, add trigger masking to Report.cc when in ==0 trig mode ("old" mode) for emulating station a2 in configs >2
+
+============================================================================
+
+2019/12/19
+
+In the a23_4yr_diffuse branch, added feature to estimate signal chain efficiency uncertainty. The uncertainty is represented as a scale-down of the antenna gains consisting of a 600MHz low-pass filter and a drop in gain values by 10% and 32% for Vpol and Hpol, respectively.
+
+Three Settings paramters are added:
+- USE_SIGNAL_CHAIN_LOWER_BOUND: default 0 -  pre-scaling antenna gains, the default AraSim values. 1 - scale the gains to produce lower bound values as described above.
+- SC_EFFICIENCY_ERROR_V: default 0.9 - the gain drop for Vpol to be used when USE_SIGNAL_CHAIN_LOWER_BOUND=1
+- SC_EFFICIENCY_ERROR_H: default 0.68 - the gain drop for Vpol to be used when USE_SIGNAL_CHAIN_LOWER_BOUND=1
+
+One data file is added:
+- filter7pole600MHz.txt: 600MHz low-pass curve data (vs freq)
+
+

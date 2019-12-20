@@ -1966,7 +1966,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
         
         //        cout<<"total station_count : "<<station_count<<endl;
-        if (station_count != (int)params.number_of_stations) cout<<"\n\tError, station number not match !"<<endl;
+        //if (station_count != (int)params.number_of_stations) cout<<"\n\tError, station number not match !"<<endl;
         
         //
         // set antenna values from parameters
@@ -2289,6 +2289,23 @@ inline void Detector::ReadVgain(string filename) {
 }// end ReadVgain
 
 inline void Detector::ReadVgain(string filename, Settings *settings1) {
+
+   // Read 600MHz low-pass filter for uncertainty estimate
+   ifstream in;
+   in.open("filter7pole600MHz.txt", std::ifstream::in);
+   double filterValue[60];
+   double filterFreq[60];
+   double tempFilter, tempFilterFreq;
+
+   if(in.good()){
+      for(int i=0;i<60;i++){
+         in >> tempFilterFreq >> tempFilter;
+         filterValue[i] = tempFilter;
+         filterFreq[i] = tempFilterFreq;
+      }
+   }
+   in.close();
+
     ifstream NecOut( filename.c_str() );
     const int N = freq_step;
     double Transm[N];
@@ -2309,7 +2326,11 @@ inline void Detector::ReadVgain(string filename, Settings *settings1) {
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
                         //Vgain[i][j] = atof( line.substr( 18 ).c_str() );  // read gain (not dB)
-                        Vgain[i][j] = Transm[i] * atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
+                        if (settings1->USE_SIGNAL_CHAIN_LOWER_BOUND == 0){ //default
+                           Vgain[i][j] = Transm[i] * atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
+                        } else { //systematic error estimate: 600MHz low-pass filter + SC effi. lower bound
+                           Vgain[i][j] = Transm[i] * atof( line.substr( 20, 33 ).c_str() ) * filterValue[i] * settings1->SC_EFFICIENCY_ERROR_V;  // read gain (not dB)
+                        }
                         Vphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
                                                 
                         //cout<<"VGain : "<<Vgain[i][j]<<", VPhase : "<<Vphase[i][j]<<endl;
@@ -2349,6 +2370,24 @@ inline void Detector::ReadVgain(string filename, Settings *settings1) {
 
 
 inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
+
+   // Read 600MHz low-pass filter for uncertainty estimate
+   ifstream in;
+   in.open("filter7pole600MHz.txt", std::ifstream::in);
+   double filterValue[60];
+   double filterFreq[60];
+   double tempFilter, tempFilterFreq;
+
+   if(in.good()){
+      for(int i=0;i<60;i++){
+         in >> tempFilterFreq >> tempFilter;
+         filterValue[i] = tempFilter;
+         filterFreq[i] = tempFilterFreq;
+      }
+   }
+   in.close();
+
+
     ifstream NecOut( filename.c_str() );
     const int N = freq_step;
 
@@ -2370,7 +2409,12 @@ inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
 
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
+                        if(settings1->USE_SIGNAL_CHAIN_LOWER_BOUND == 0){
                         VgainTop[i][j] = Transm[i]*atof( line.substr( 20, 33 ).c_str() );
+                        } else { //systematic error estimate: 600MHz low-pass filter + SC effi. lower bound
+                        VgainTop[i][j] = Transm[i] * atof( line.substr( 20, 33 ).c_str() ) * filterValue[i] * settings1->SC_EFFICIENCY_ERROR_V;  // read gain (not dB)
+                        }
+ 
                         VphaseTop[i][j] = atof( line.substr( 34 ).c_str() );    // + 180.0/TMath::Pi()*TMath::ATan(-Freq[i]/500.0);  // read gain (not dB)
                                                 
                         //cout<<"VGain : "<<Vgain[i][j]<<", VPhase : "<<Vphase[i][j]<<endl;
@@ -2412,6 +2456,7 @@ inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
 
 
 inline void Detector::ReadHgain(string filename) {
+
   ifstream NecOut( filename.c_str() );
     
     string line;
@@ -2451,6 +2496,24 @@ inline void Detector::ReadHgain(string filename) {
 
 inline void Detector::ReadHgain(string filename, Settings *settings1) {
 
+   // Read 600MHz low-pass filter for uncertainty estimate
+   ifstream in;
+   in.open("filter7pole600MHz.txt", std::ifstream::in);
+   double filterValue[60];
+   double filterFreq[60];
+   double tempFilter, tempFilterFreq;
+
+   if(in.good()){
+      for(int i=0;i<60;i++){
+         in >> tempFilterFreq >> tempFilter;
+         filterValue[i] = tempFilter;
+         //cout<<"filterValue: "<<filterValue[i]<<endl;
+         filterFreq[i] = tempFilterFreq;
+      }
+   }
+   in.close();
+
+
     ifstream NecOut( filename.c_str() );    
     string line;
     
@@ -2473,7 +2536,13 @@ inline void Detector::ReadHgain(string filename, Settings *settings1) {
                         getline (NecOut, line); //read data line
                         //Hgain[i][j] = atof( line.substr( 20 ).c_str() );  // read gain (not dB)
                         //Hgain[i][j] = atof( line.substr( 18, 25 ).c_str() );  // read gain (not dB)
+                        if(settings1->USE_SIGNAL_CHAIN_LOWER_BOUND == 0){
                         Hgain[i][j] = Transm[i]*atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
+                        } else { //systematic error estimate: 600MHz low-pass filter + SC effi. lower bound
+                        Hgain[i][j] = Transm[i] * atof( line.substr( 20, 33 ).c_str() ) * filterValue[i] * settings1->SC_EFFICIENCY_ERROR_H;  // read gain (not dB)
+                        //cout<<"SC effi low H: "<<settings1->SC_EFFICIENCY_ERROR_H<<endl;
+                        }
+ 
                         Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
 
                         //cout<<"HGain : "<<Hgain[i][j]<<", HPhase : "<<Hphase[i][j]<<endl;
