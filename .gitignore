@@ -3,3 +3,4 @@
 eventSimDict.C
 eventSimDict.h
 AraSim
+*.ipynb
