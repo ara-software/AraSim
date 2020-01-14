@@ -49,7 +49,7 @@ void Settings::Initialize() {
     ARASIM_VERSION_MINOR = ARASIM_MINOR;
     ARASIM_VERSION_SUBMINOR = ARASIM_SUBMINOR;
     ARASIM_VERSION = (double)ARASIM_VERSION_MAJOR + (double)ARASIM_VERSION_MINOR * 0.001 + (double)ARASIM_VERSION_SUBMINOR * 0.000001;
- 
+
     ARAROOT_VERSION = 0.;
 
     ARAUTIL_EXISTS = false;
@@ -57,7 +57,7 @@ void Settings::Initialize() {
         ARAUTIL_EXISTS = true;
         ARAROOT_VERSION = (double)ARA_ROOT_MAJOR + (double)ARA_ROOT_MINOR * 0.01;
     #endif
-    
+
     NNU=100;
 
     // NEED TO FIGURE OUT A GOOD WAY TO READ THIS IN AND STORE THEM.
@@ -70,7 +70,7 @@ void Settings::Initialize() {
     FIXEDELEVATION=0; // fix the elevation to the thickness of ice.
     MOOREBAY=0; //1=use Moore's Bay measured ice field attenuation length for the west land, otherwise use South Pole data
     USE_ARA_ICEATTENU=1; // use ARA measured ice attenuation value
-    
+
     EXPONENT=19.; // 10^19 eV neutrinos only
 
     DETECTOR=1;   //ARA layout with small number of stations
@@ -98,13 +98,13 @@ void Settings::Initialize() {
     PHASE=90.;            // default : 90 deg phase (it means all imaginary values)
 
     NFOUR=1024;           // default : 1024, same as in icemc
-        
+
     NOISE=0;              // degault : 0, flat thermal noise, 1 : for TestBed (DETECTOR=3), use Rayleigh distribution fitted for borehole channels
 
     ATMOSPHERE=1;         // default : 1, include atmosphere
 
-    TRIG_SCAN_MODE=0;   // default 0 (old mode) 1: new mode (faster) 2: scan all Pthresh values 3: scan also all N out of 8 
-    
+    TRIG_SCAN_MODE=0;   // default 0 (old mode) 1: new mode (faster) 2: scan all Pthresh values 3: scan also all N out of 8
+
     POWERTHRESHOLD=-6.06; // old default : -6.15, new default: -6.06
 
     MAXT_DIODE=70.E-9;    // default : 70 ns
@@ -132,11 +132,11 @@ void Settings::Initialize() {
     RANDOM_MODE=1;            // default : 1 (seed is unique in time/space)
 
     SEED=1; // default: 1, only applies if RANDOM_MODE=0, provides base seed value and run number taken from arguments is added to this value in order to submit multiple repeatable runs instead of only one single long repeatable run
-        
+
     BORE_HOLE_ANTENNA_LAYOUT=0;   // default : 0 (VHVH)
 
     DATA_LIKE_OUTPUT=1; //default : 0 (doesn't write out data-like events)
-        
+
     RAYSOL_RANGE=5000; // default : 5000 m
 
     PICK_POSNU_DEPTH=0;     //default : 0 pick posnu depth from 0 to ice depth
@@ -155,19 +155,19 @@ void Settings::Initialize() {
 
     NNU_D_PHI=0.0873;// default : nnu_d_phi : 5 deg
 
-        
+
     CALPULSER_ON=0; // default : calpulsers off
-    
+
     TESTBED_ON=0; // default : 0 stations[0] is ARA1 not Testbed
-    
+
     READGEOM=0; // default : 0 : use idealized geometry and do not read in from sqlite database
-    
+
     V_MIMIC_MODE = 0; // default : 0 - write out all chs where global triggered bin is center of the window
                                             // 1 - same as above 0 mode but apply TestBed ch delay - average BH ch delay
                                             // 2 - same as above 0 mode but apply TestBed ch delay - average BH ch delay + additional delay to match with actual TestBed data waveforms
-        
+
     USE_INSTALLED_TRIGGER_SETTINGS = 0; // default : 0 - use idealized settings for the trigger
-    
+
     NUM_INSTALLED_STATIONS = 4;
 
     CALPUL_OFFCONE_ANGLE = 35.;
@@ -189,7 +189,7 @@ void Settings::Initialize() {
     CONST_RMSDIODE = 1.346e-13; // also from one run
 
     USE_MANUAL_GAINOFFSET = 0; //if use gain offset file to read values or just use constant gain offset from setup file (default 0 : use file)
-                    
+
     MANUAL_GAINOFFSET_VALUE = 1.; // gain offset value
 
     NOISE_WAVEFORM_GENERATE_MODE = 0; // mode 0 (default) will generate noise waveforms newly for each events. other values will use first generated noise waveforms for later events (huge mem usage)
@@ -248,7 +248,7 @@ void Settings::Initialize() {
 
     ACCUM_TRIG_SEARCH_BINS_STATION0 = 0.; // not actually setting value but gives us how much trigger searched bins there were in the run for station0
 
-    NU_NUBAR_SELECT_MODE = 3; // default : 3 = random nu_nubar based on arXiv:1108.3163, section 3, 0 = just nu, 1 = just nubar 
+    NU_NUBAR_SELECT_MODE = 3; // default : 3 = random nu_nubar based on arXiv:1108.3163, section 3, 0 = just nu, 1 = just nubar
 
 
     SELECT_FLAVOR = 0; // default : 0 = randomly 1:1:1 ratio, 1 : el. 2 : mu, 3 : tau
@@ -264,7 +264,7 @@ void Settings::Initialize() {
     RAY_TRACE_ICE_MODEL_PARAMS=0; // Default: South Pole values fitted from RICE data
 
     WAVEFORM_LENGTH = 64/2*20; // Default: 64 digitization samples per block / 2 samples per waveform value * 20 blocks (value used for 2013-2016)
-    
+
     WAVEFORM_CENTER = 0; // Default: 0, no offset in waveform centering
 
     POSNU_R = 1000.;
@@ -298,14 +298,14 @@ void Settings::Initialize() {
     USE_SIGNAL_CHAIN_LOWER_BOUND = 0; // default: 0 -- don't replace signal chain efficiency with lower bound. 1: replace with lower bound
     SC_EFFICIENCY_ERROR_V = 0.9;     //Lower bound of Vpol signal chain efficiency
     SC_EFFICIENCY_ERROR_H = 0.68;    //Lower bound of Hpol signal chain efficiency
-
+    SYSTEMATICS_IceAtten = 0; //Default: Average value (red line) from Eugene's attenuation model (http://radiorm.physics.ohio-state.edu/elog/Write-Ups/170504_105713/Thesis_-_Eugene_Hong.pdf, p. 54), 1 = lower bound, 2 = upper bound
 
 }
 
 void Settings::ReadFile(string setupfile) {
 
     ifstream setFile (setupfile.c_str());
-    
+
     string line, label;
 
     if ( setFile.is_open() ) {
@@ -477,7 +477,7 @@ void Settings::ReadFile(string setupfile) {
                 }
                 else if (label == "NUM_INSTALLED_STATIONS") {
                     NUM_INSTALLED_STATIONS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-                }              
+                }
                 else if (label == "CALPUL_OFFCONE_ANGLE") {
                     CALPUL_OFFCONE_ANGLE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
                 }
@@ -486,10 +486,10 @@ void Settings::ReadFile(string setupfile) {
                 }
                 else if (label == "TRIG_ONLY_BH_ON") {
                     TRIG_ONLY_BH_ON = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-                }              
+                }
                 else if (label == "TRIG_THRES_MODE") {
                     TRIG_THRES_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-                }              
+                }
                 else if (label == "NOISE_CHANNEL_MODE") {
                     NOISE_CHANNEL_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
                 }
@@ -582,28 +582,28 @@ void Settings::ReadFile(string setupfile) {
                 }
                 else if (label == "TRIG_ONLY_LOW_CH_ON") {
                     TRIG_ONLY_LOW_CH_ON = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-                }              
+                }
                 else if (label == "USE_ARA_ICEATTENU") {
                     USE_ARA_ICEATTENU = atof( line.substr(line.find_first_of("=") + 1).c_str() );
                 }
                 else if (label == "SIGMA_SELECT") {
                     SIGMA_SELECT = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-                }              
+                }
                 else if (label == "SIGMAPARAM") {
                     SIGMAPARAM = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-                }              
+                }
                 else if (label == "SIGMA_FACTOR") {
                     SIGMA_FACTOR = atof( line.substr(line.find_first_of("=") + 1).c_str() );
                 }
                 else if (label == "YPARAM") {
                     YPARAM = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-                }              
+                }
                 else if (label == "ELAST_Y") {
                     ELAST_Y = atof( line.substr(line.find_first_of("=") + 1).c_str() );
                 }
                 else if (label == "NU_NUBAR_SELECT_MODE") {
                     NU_NUBAR_SELECT_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-                }              
+                }
                 else if (label == "SELECT_FLAVOR") {
                     SELECT_FLAVOR = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
                 }
@@ -612,7 +612,7 @@ void Settings::ReadFile(string setupfile) {
                 }
                 else if (label == "OUTPUT_TDR_GRAPH") {
                     OUTPUT_TDR_GRAPH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-                }       
+                }
                 else if (label == "AVZ_NORM_FACTOR_MODE") {
                     AVZ_NORM_FACTOR_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
                 }
@@ -667,6 +667,9 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "SC_EFFICIENCY_ERROR_H"){
               	   SC_EFFICIENCY_ERROR_H = atof(line.substr(line.find_first_of("=") + 1).c_str());
               }
+              else if (label == "SYSTEMATICS_IceAtten"){
+              	   SYSTEMATICS_IceAtten = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
 
           }
       }
@@ -691,7 +694,7 @@ void Settings::ReadEvtFile(string evtfile){
                 double d, f, g, h, i, j, k;
                 if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j >> k))
                     break;
-                            
+
                 /*
                 EVID[i] = atoi(a.c_str());
                 NUFLAVORINT[i] = atoi(b.c_str());
@@ -798,13 +801,13 @@ int Settings::CheckCompatibilities(Detector *detector) {
     // if INTERACTION_MODE is 0 (sphere area and obtain Aeff), make sure using GETCHORD_MODE=1
     if (INTERACTION_MODE==0) { // picknear_sphere mode
             if (GETCHORD_MODE==0) { // but use old getchord mode (not working!)
-                    cerr<<"In INTERACTION_MODE=0, you have to use GETCHORD_MODE=1"<<endl; 
+                    cerr<<"In INTERACTION_MODE=0, you have to use GETCHORD_MODE=1"<<endl;
                     num_err++;
             }
     }
     else if (INTERACTION_MODE==1) { // picknear_cylinder mode
             if (GETCHORD_MODE==1) { // but use new getchord mode (not working!)
-                    cerr<<"In INTERACTION_MODE=1, you have to use GETCHORD_MODE=0"<<endl; 
+                    cerr<<"In INTERACTION_MODE=1, you have to use GETCHORD_MODE=0"<<endl;
                     num_err++;
             }
     }
@@ -812,13 +815,13 @@ int Settings::CheckCompatibilities(Detector *detector) {
 
     // if BH_ANT_SEP_DIST_ON=1, we can't use READGEOM=1 (actual installed geom)
     if (BH_ANT_SEP_DIST_ON==1 && READGEOM==1) {
-        cerr<<"BH_ANT_SEP_DIST_ON=1 is only available in ideal station geom (READGEOM=0)!"<<endl; 
+        cerr<<"BH_ANT_SEP_DIST_ON=1 is only available in ideal station geom (READGEOM=0)!"<<endl;
         num_err++;
     }
 
     // TRIG_MODE=1 (Vpol, Hpol separated) will not work with testbed station mode
     if (TRIG_MODE==1 && DETECTOR==3) {
-        cerr<<"TRIG_MODE=1 is not available in TestBed mode (DETECTOR=3)!"<<endl; 
+        cerr<<"TRIG_MODE=1 is not available in TestBed mode (DETECTOR=3)!"<<endl;
         num_err++;
     }
 
@@ -886,7 +889,7 @@ int Settings::CheckCompatibilities(Detector *detector) {
         cerr<<"V_MIMIC_MODE=1 and 2 only works with DETECTOR=3!"<<endl;
         num_err++;
     }
-    
+
     if (USE_MANUAL_GAINOFFSET==1 && USE_CH_GAINOFFSET==1) {
         cerr<<"Can not use USE_MANUAL_GAINOFFSET=1 and USE_CH_GAINOFFSET=1 same time!"<<endl;
         num_err++;
@@ -941,7 +944,7 @@ int Settings::CheckCompatibilities(Detector *detector) {
             num_err++;
         } else {
 
-            cerr << "DETECTOR is set to 4" << endl; 
+            cerr << "DETECTOR is set to 4" << endl;
             cerr << "Setting READGEOM to 1" << endl;
             READGEOM=1;
 

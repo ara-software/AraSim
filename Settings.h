@@ -10,7 +10,7 @@ class Detector;
 using namespace std;
 //using std::string;
 
-class Settings 
+class Settings
 {
     protected:
 
@@ -86,7 +86,7 @@ class Settings
         int ATMOSPHERE;         // include atmosphere 1, no 0
 
         int TRIG_SCAN_MODE;
-        
+
         double POWERTHRESHOLD;  // power threshold value. default -4.41 (same with icemc powerthreshold)
 
         double MAXT_DIODE;      // diode model max time, default : 70.e-9s
@@ -111,11 +111,11 @@ class Settings
         int N_TRIG;         // number of coincidence channels triggered in TRIG_WINDOW default : 3
 
         int RANDOM_MODE;    // 0 : same random number generate, 1 : TRandom3(0) used. purely randomly generated (seed is guaranteed to be unique in space and time)
-    
+
         int SEED; // default: 1, only applies if RANDOM_MODE=0, provides base seed value and run number taken from arguments is added to this value in order to submit multiple repeatable runs instead of only one single long repeatable run
 
         int BORE_HOLE_ANTENNA_LAYOUT;   // 0 = (V-H-V-H), 1 = (V-H-V), 2 = (V-H-V-V), 3 = (V-H-H-H), 4 = (V-H-H) default : 0
-    
+
         int DATA_LIKE_OUTPUT; // Formerly WRITE_ALL_EVENTS, the mode numbering has changed as well
                           // 0 - don't write any information to the data-like output tree
                               // 1 - only write globally triggered events,
@@ -126,20 +126,20 @@ class Settings
         double RAYSOL_RANGE;    // direct distance limit to do raysolver. If distance between posnu and antenna is bigger than RAYSOL_RANGE, AraSim will not try RaySol for that event. Default : 3000 m
 
         int CALPULSER_ON; // 0: no calpulsers in event list, 1: only throws calpulser 1 events, 2: only throws calpulser 2 events, 3: throws both calpulser 1 and 2 events alternating between them, 4: throws calpulser 1 and 2 events integrated with the simulated data (not yet implemented)
-    
+
         int TESTBED_ON;
-    
+
         int READGEOM;
-    
+
         int V_MIMIC_MODE; // default : 0 - write out all chs where global triggered bin is center of the window
                         // 1 - same as above 0 mode but apply TestBed ch delay - average BH ch delay
                         // 2 - same as above 0 mode but apply TestBed ch delay - average BH ch delay + additional delay to match with actual TestBed data waveforms
-    
+
         int USE_INSTALLED_TRIGGER_SETTINGS; // default : 0 - use idealized settings for the trigger
         //other options:  1 - use trigger settings for installed stations, i.e. trigger window, etc.
-    
+
         int NUM_INSTALLED_STATIONS; // the number of stations including the testbed that are in reality installed in the ice and have position and electronics information
-    
+
         int PICK_POSNU_DEPTH;  // whether use MAX_POSNU_DEPTH or not. 0 : pick posnu depth full ice depth, 1 : pick posnu depth only MAX_POSNU_DEPTH
 
         double MAX_POSNU_DEPTH;  // maximum posnu depth when above PICK_POSNU_DEPTH=1
@@ -167,17 +167,17 @@ class Settings
         int NOISE_CHANNEL_MODE;    // if using same noise temp for all chs (0, default), using diff temp for all chs (1), using diff temp for first 8 chs and share same temp for other chs (2), using same noise temp but allowing to use noise
 
         double CONST_MEANDIODE;
-    
+
         double CONST_RMSDIODE;  // in case NOISE_CHANNEL_MODE = 1, just using this CONST_RMSDIODE value for threshold
 
 
         int USE_TESTBED_RFCM_ON;    // use RFCM measurement for testbed or not (default 0)
-    
+
         double RFCM_OFFSET;  // if above USE_TESTBED_RFCM_ON = 1, we need RFCM attenuator factor cancel (default 80)
 
 
         int USE_MANUAL_GAINOFFSET; //whether use additional gain offset after all ant, elect chain. default 0 : don't apply any additional gain, 1 :  use gain offset
-    
+
         int USE_CH_GAINOFFSET; // only if USE_MANUAL_GAINOFFSET = 1, default 0 : apply constant gain to all channels which is MANUAL_GAINOFFSET_VALUE, 1 : apply ch gain offset by using data/preamp_gain_offset.csv file (only installed TestBed mode available)
 
 
@@ -197,7 +197,7 @@ class Settings
         int TRIG_MODE; // default 0 : if any antennas got passed N_TRIG or more, global trig. 1 : either Vpol or Hpol antennas got passed N_TRIG_V or N_TRIG_H respectively, global trig.
 
         int N_TRIG_V; // default : 3 (3 out of Vpolchannels in a station)
-    
+
         int N_TRIG_H; // default : 3 (3 out of Hpol channels in a station)
 
         int FILL_TREE_MODE; // default 0 : fill tree for all events, 1 : fill tree only usable posnu events, 2 : fill tree only trigger passed events
@@ -214,12 +214,12 @@ class Settings
 
         int SHOWER_PARAM_MODEL; // shower profile parameter, 0 = fit function from Jaime, 1 = fit from Carl (OSU), default 0
 
-        double OFFCONE_LIMIT; // offcone cut angel (deg) to reduce computation time 
+        double OFFCONE_LIMIT; // offcone cut angel (deg) to reduce computation time
 
 
         int ALL_ANT_V_ON; // default 1 : use both Vpol, Hpol ant gain from Vpol ant model but for Hpol ant case response is in Hpol, not Vpol, 0 : use Vpol ant gain from Vpol model, Hpol ant gain from Hpol model (where Hpol ant model is not reliable).
 
-    
+
         int PHASE_SKIP_MODE; // skip applying phase in t-domain mode (SIMULATION_MODE = 1). default 0 : don't skip (apply all phase), 1 : only upto Askaryan radiation, 2 : only upto antenna
 
 
@@ -231,24 +231,24 @@ class Settings
         double V_SATURATION; // default 1., output voltage saturation due to amplifier limit. by default it's +-1. V
 
 
-    
+
         int ADDITIONAL_DEPTH_ON; // whether add more depth to each antenas, default : 0 (not on)
-    
+
         double ADDITIONAL_DEPTH; // additional depth value, default 100, only applied when ADDITIONAL_DEPTH_ON=1
 
 
-        
+
         int TRIG_ONLY_LOW_CH_ON;    // if trigger will occur with all chs (0, default) or only lower 8 chs (1)
 
-    
+
         double ACCUM_TRIG_SEARCH_BINS_STATION0; // not actually setting value but gives us how much trigger searched bins there were in the run
 
 
         int OUTPUT_TDR_GRAPH;// saves a few example graphs of the tunnel diode response for a triggered event
-    
-    
-    
-        int NU_NUBAR_SELECT_MODE; // default : 3 = random nu_nubar based on arXiv:1108.3163, section 3, 0 = just nu, 1 = just nubar 
+
+
+
+        int NU_NUBAR_SELECT_MODE; // default : 3 = random nu_nubar based on arXiv:1108.3163, section 3, 0 = just nu, 1 = just nubar
 
 
         int SELECT_FLAVOR; // default : 0 = random 1:1:1, 1: e, 2: mu, 3: tau
@@ -258,7 +258,7 @@ class Settings
 
         int AVZ_NORM_FACTOR_MODE; // default : 1 : don't apply sqrt(2) (actually applied but cancel that) as realft assume Hn as double-sided spectrum (invFFT normalization factor 2/N) and also remove dF binning factor in MakeArraysforFFT function, 0 : use normalization factors like in old version
 
-        int RAY_TRACE_ICE_MODEL_PARAMS; // which parameter set is used for the exponential ice model (defined in RayTrace_IceModel.cc) 
+        int RAY_TRACE_ICE_MODEL_PARAMS; // which parameter set is used for the exponential ice model (defined in RayTrace_IceModel.cc)
         //0 : default, South Pole model (fitted from RICE data
         //1 : South Pole model fitted from RICE #2
         //2 : South Pole (Eisen (2003))
@@ -309,7 +309,7 @@ class Settings
 
 
         // below : values from icemc
-    
+
             int UNBIASED_SELECTION;
             int WHICH; // which payload to use 0=Anita-lite,1=Ross,2=Smex,3=make your own
             int CYLINDRICALSYMMETRY; // is it cylindrically symmetric =1 if which=1,2, =0 if which=0
@@ -325,9 +325,9 @@ class Settings
             int TRIGGERSCHEME;  // frequency domain voltage, frequency domain energy, time domain diode integration
             int ZEROSIGNAL;  // zero the signal to see how many of our hits are noise hits
             int REMOVEPOLARIZATION; //Disable polarizations
-        
+
             int EVENTSMAP;//whether draw the events distribution map
-        
+
             int WHICHRAYS;  // how many rays to look at (1) direct only (2) direct and down-going.
 
             // trigger
@@ -340,9 +340,9 @@ class Settings
 
 
             //int CHMASKING=1; // whether or not to include channel masking
-            //int PHIMASKING=1; // whether or not to include phi masking  
+            //int PHIMASKING=1; // whether or not to include phi masking
             int CHMASKING; // whether or not to include channel masking
-            int PHIMASKING; // whether or not to include phi masking  
+            int PHIMASKING; // whether or not to include phi masking
 
             //int NLAYERS=0;
             //int NANTENNAS=0;
@@ -356,7 +356,7 @@ class Settings
 
             int ONLYFINAL; // only write to final histogram
             int HIST_MAX_ENTRIES; //maximum number of events to put in histograms
-            int HIST;          //write to histograms 
+            int HIST;          //write to histograms
             double BW; // BANDWIDTH
             //int DISCONES=1; // whether or not to use discones
             int DISCONES; // whether or not to use discones
@@ -423,6 +423,7 @@ class Settings
 
             int horizontal_banana_points;
             int vertical_banana_points;
+            int SYSTEMATICS_IceAtten;
 
         // end of values from icemc
 
@@ -432,4 +433,3 @@ class Settings
 
 };
 #endif
-

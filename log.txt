@@ -45,7 +45,7 @@ Also, we can change the center of pentagon array (core_x, core_y),
 distance between stations (station_spacing)
 
 In mode 1 : total number of stations (number_of_stations)
-            
+
 In mode 2 : number of stations on the side (stations_per_side)
 
 More detail will be shown on AraSim_doc.pdf file.
@@ -82,7 +82,7 @@ More detail, see AraSim_doc.pdf file.
     GetGain function in Detector -> use freq_step, ang_step, freq_width, freq_init in Detector instead of same values in Parameters class (it causes returning wrong vales... and I don't understand why)
 
 
-3) some other minor changes : 
+3) some other minor changes :
     Ray class : added WhereDoesItLeave function from icemc ray class
     EarthModel class : added TRandom3.h header file
     counting class : add from icemc (need for Primaries class)
@@ -498,7 +498,7 @@ AraRoot like output data in AraOut.root file.
 For that, if your machine doesn't have AraRoot installed, AraSim may not
 compile or run correctly.
 In that case, try to add new environment variables and try again.
-For example, you can add 
+For example, you can add
 
 export ARASIM_SYS=( the location where your AraSim is located )
 export LD_LIBRARY_PATH=$ARASIM_SYS/lib:$LD_LIBRARY_PATH
@@ -581,7 +581,7 @@ cout<<event->Nu_Interaction[0].changle;
 
 Fixed few bugs.
 
-1) fixed switched NC, CC mode. Previously in Primary class it recognized NC : 1 and CC : 0 index while the array (m_fsigma) to calculate the cross setion used opposite way. 
+1) fixed switched NC, CC mode. Previously in Primary class it recognized NC : 1 and CC : 0 index while the array (m_fsigma) to calculate the cross setion used opposite way.
 
 2) When we calcuate the weight (probability to survive to posnu), so far AraSim used either NC or CC cross section (depending on which interaction it
 is at posnu). Now when we calcuate the weight, AraSim uses the total cross section (NC + CC).
@@ -598,12 +598,12 @@ For example,
 
     noise_ID is a vector array as there could be more than 1 pure noise waveform used for trigger analysis (almost all cases it will be just one value, actually if there's more than one value, current AraSim can't handle that case correctly).
 
-    If above noise_ID value is 10, that means for that event, antenna, 
-    
+    If above noise_ID value is 10, that means for that event, antenna,
+
     trigger->v_noise_timedomain[ 10 ][ noise waveform data, size : settings->DATA_BIN_SIZE, default 16384 ]
 
     above pure noise waveform is used fot trigger analysis.
-    For the channels which passed the trigger (report->stations[i].strings[j].antennas[k].Trig_Pass is not 0), V_mimic waveform should used the pure noise waveform 
+    For the channels which passed the trigger (report->stations[i].strings[j].antennas[k].Trig_Pass is not 0), V_mimic waveform should used the pure noise waveform
 
     trigger->v_noise_timedomain[ noise_ID ][ 512 bins where Trig_Pass bin value is located at the center ]
 
@@ -741,7 +741,7 @@ By default, if you use different system temperature modes (NOISE_TEMP_MODE=1 or 
 Additional to this difference, you can give an offset to the threshold to each channels.
 TRIG_THRES_MODE=0 will not give any threshold offset (default)
 TRIG_THRES_MODE=1 will read data/threshold_offset.csv file and apply those values to each channels. (ex. if the value for ch1 in csv file is 2, threshold will be rms_diode * powerthreshold * 2)
-TRIG_THRES_MODE=2 will not read data/threshold_offset.csv file but use the gain offset for each channels as threshold offset. (ex. if gain offset for ch1 is 2, threshold will be rms_diode * powerthreshold * 2^2) 
+TRIG_THRES_MODE=2 will not read data/threshold_offset.csv file but use the gain offset for each channels as threshold offset. (ex. if gain offset for ch1 is 2, threshold will be rms_diode * powerthreshold * 2^2)
 
 
 ===============================================================================
@@ -837,7 +837,7 @@ Added new NOISE mode. After obtaining the Rayleigh distribution fit from force t
 NOISE=0 uses just flat thermal noise spectrum from constant temperature and apply preamp, filter gains to them.
 NOISE=1 uses Rayleigh distribution bit value from TestBed data (distribution at different freq values) so don't use any preamp filter gain for noise waveforms.
 
-Currently NOISE=1 mode is available with 
+Currently NOISE=1 mode is available with
 DETECTOR=3
 READGEOM=1
 NOISE_TEMP_MODE=1 or 2
@@ -970,7 +970,7 @@ Massive update
 
 
 3) minor update : saturation in electronics chain is implemented.
-    
+
     V_SATURATION in setup wil set the limit voltage in degitized waveform.
     Degitized waveform values which have outside the range +-V_SATURATION will be forced to + or - V_SATURATION value.
     By default V_SATURATION = 1.0 which is 1.0 V or 1000 mV
@@ -1037,7 +1037,7 @@ Like old Calpulser mode, currently Calpulser mode will work only with DETECTOR=3
 Added ability to define output directory for argc==4, at argv[3]
 added inverse exponential index of refraction model with NOFZ=2
 added conditional dependence on AraRoot for AraRoot-like output
-	checks if ARA_UTIL_INSTALL_DIR exists and links against the libraries there to make a UsefulIcrrStationEvent 
+	checks if ARA_UTIL_INSTALL_DIR exists and links against the libraries there to make a UsefulIcrrStationEvent
 
 ===============================================================================
 
@@ -1122,22 +1122,22 @@ AraOut.setup.txt.run0.root instead of AraOut.setupdirectory/setup.txt.run0.root
 
 * can now add third parameter to AraSim for output directory:
 
-./AraSim setup.txt 0 /path/to/output/dir/ 
+./AraSim setup.txt 0 /path/to/output/dir/
 
 can add slash in the end or not
 
 * in Spectra.cc : added new EXPONENT values between 510 and 650 (including), so we can have non-integer energy values:
 
-the formula is E=10^X with X=(EXPONENT-400)/10 
+the formula is E=10^X with X=(EXPONENT-400)/10
 
 so if you want 10^18.3eV use EXPONENT=400+18.3*10=583
 
-added a bash script to make a dynamic load library "library.sh"  
-run it and get "libSim.so" which is useful for loading all the simulation files you need to link with. 
+added a bash script to make a dynamic load library "library.sh"
+run it and get "libSim.so" which is useful for loading all the simulation files you need to link with.
 
-added the user guide in its own directory. 
+added the user guide in its own directory.
 
-modified the StandardDefinitions.mk : commented out the parts where it calls ARA_UTIL_INSTALL_DIR 
+modified the StandardDefinitions.mk : commented out the parts where it calls ARA_UTIL_INSTALL_DIR
 (it messed up my installation and I think in general AraRoot conflicts with AraSim)
 
 
@@ -1151,10 +1151,10 @@ Triggering upgrade:
 
 -in TRIG_SCAN_MODE=0 triggering works same as before (default)
 -in TRIG_SCAN_MODE=1 triggering is faster using circular buffer (10-15% for time domain, 40-50% for freq domain)
--in TRIG_SCAN_MODE=2 choose low POWERTHRESHOLD, for each triggered event get above what Pthresh this would trigger (e.g. event can trigger if threshold was -5.7). 
--results for mode 2 saved in report->stations[].TDR_all and TDR_Hpol and TDR_Vpol and sorted from highest to lowest in TDR_Vpol_sorted etc. (TDR= Tunnel Diode Response). 
+-in TRIG_SCAN_MODE=2 choose low POWERTHRESHOLD, for each triggered event get above what Pthresh this would trigger (e.g. event can trigger if threshold was -5.7).
+-results for mode 2 saved in report->stations[].TDR_all and TDR_Hpol and TDR_Vpol and sorted from highest to lowest in TDR_Vpol_sorted etc. (TDR= Tunnel Diode Response).
 
-So for one run at TRIG_SCAN_MODE=2 and POWERTHRESHOLD=-4 and TRIG_MODE=1 (trigger on Hpol and Vpol seperately) and N_TRIG_H=N_TRIG_V=3 we will get for each event the maximum number of channels and maximum POWERTHRESHOLD combination on which it would trigger (e.g. it could trigger at -6.1 in 3 channels or -5.9 at 4 channels). Don't need to run different runs for different Pthresh or N_TRIG, can make the cuts out of the outputfile. 
+So for one run at TRIG_SCAN_MODE=2 and POWERTHRESHOLD=-4 and TRIG_MODE=1 (trigger on Hpol and Vpol seperately) and N_TRIG_H=N_TRIG_V=3 we will get for each event the maximum number of channels and maximum POWERTHRESHOLD combination on which it would trigger (e.g. it could trigger at -6.1 in 3 channels or -5.9 at 4 channels). Don't need to run different runs for different Pthresh or N_TRIG, can make the cuts out of the outputfile.
 
 
 ============================================================================
@@ -1169,7 +1169,7 @@ So for one run at TRIG_SCAN_MODE=2 and POWERTHRESHOLD=-4 and TRIG_MODE=1 (trigge
 04/24/14 Eugene Hong;
 
 Added new ARA measured Ice Attenuation factor mode.
-Settings, 
+Settings,
 USE_ARA_ICEATTENU=1
 uses new ARA measured Ice Attenuation length (300MHz value across entire frequencies).
 Also it uses ray trace steps information to account different attenuation length as a function of depth.
@@ -1185,9 +1185,9 @@ To go back to old method, use USE_ARA_ICEATTENU=0
 
 Added new sigma (neutrino cross section) boundary values.
 When we use Connolly et al 2011 (http://arxiv.org/abs/1102.0691, Fig1, Fig2 plots and Table 3 and 4 for parameter values) cross section mode (SIGMAPARAM=1),
-We can use mean cross section (by default) with 
-Settings, 
-SIGMA_SELECT=0 
+We can use mean cross section (by default) with
+Settings,
+SIGMA_SELECT=0
 
 and upper bound value by
 SIGMA_SELECT=1
@@ -1248,13 +1248,13 @@ So Veff/Aeff will be simply decided by INTERACTION_MODE=1 or 0.
 
 06/23/14 Guy Nir:
 
-Added SingleChannelTriggers to Antenna_r in Report class. Saves the total number of triggers in each channel. 
-Added SCT_threshold_pass Antenna_r in Report class. A vector of the Pthresh values for each single channel trigger. 
-Added TRIG_SCAN_MODE=3 to settings, that tells AraSim to fill SCT_threshold_pass with values. 
+Added SingleChannelTriggers to Antenna_r in Report class. Saves the total number of triggers in each channel.
+Added SCT_threshold_pass Antenna_r in Report class. A vector of the Pthresh values for each single channel trigger.
+Added TRIG_SCAN_MODE=3 to settings, that tells AraSim to fill SCT_threshold_pass with values.
 
-Added OUTPUT_TDR_GRAPH to settings, which tells AraSim to save some tunnel diode output waveforms, for debugging. 
+Added OUTPUT_TDR_GRAPH to settings, which tells AraSim to save some tunnel diode output waveforms, for debugging.
 
-Added TGraph *getWaveform(...) function to Report class, to get the waveforms from V_mimic and time_mimic vectors. 
+Added TGraph *getWaveform(...) function to Report class, to get the waveforms from V_mimic and time_mimic vectors.
 
 ============================================================================
 
@@ -1266,9 +1266,9 @@ I am still working to confirm the effective area mode is working properly.
 
 07/08/14 Guy Nir:
 
-Added Interaction::clear_useless() method to clear the shower profile vectors. 
+Added Interaction::clear_useless() method to clear the shower profile vectors.
 These vectors took a very large volume in the output files, especially when saving all events.
-This only applies in DATA_SAVE_MODE>0. 
+This only applies in DATA_SAVE_MODE>0.
 
 ============================================================================
 
@@ -1410,11 +1410,11 @@ See Settings.h for more details
 
 10/12/2017 Carl Pfendner:
 
-Added APPLY_NOISE_FIGURE mode to settings to attempt to include the calibration information from Thomas 
+Added APPLY_NOISE_FIGURE mode to settings to attempt to include the calibration information from Thomas
 WARNING!!: this is incomplete as of this edit. The channel dependent
 noise figures do not work correctly yet.
 Added ANTENNA_MODE mode to settings to allow for new antenna models to
-be imported 
+be imported
 The newest mode allows the use of a separate antenna model for the top
 VPol antennas in the layout.
 
@@ -1495,9 +1495,9 @@ Added flexible antennas_per_string and strings_per_station to setup file read-in
 Cleanup tabs in the Tools class, including the removal of several deprecated functions
 which are not used anywhere else in AraSim currently
 
-// static void SimpleLinearInterpolation_extend_180cut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 ); 
-// static void SimpleLinearInterpolation_extend_PIcut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 ); 
-// static void SimpleLinearInterpolation_OutZero_180cut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 ); 
+// static void SimpleLinearInterpolation_extend_180cut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 );
+// static void SimpleLinearInterpolation_extend_PIcut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 );
+// static void SimpleLinearInterpolation_OutZero_180cut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 );
 // static void SimpleLinearInterpolation_OutZero_PIcut(int n1, double *x1, double *y1, int n2, double *x2, double *y2 );
 
 
@@ -1534,4 +1534,9 @@ Three Settings paramters are added:
 One data file is added:
 - filter7pole600MHz.txt: 600MHz low-pass curve data (vs freq)
 
+============================================================================
 
+2020/01/14 Jorge Torres
+
+- Added the parameter SYSTEMATICS_IceAtten. The default value is zero, which uses Eugene's attenuation model (http://radiorm.physics.ohio-state.edu/elog/Write-Ups/170504_105713/Thesis_-_Eugene_Hong.pdf, p. 54), red line.
+Values 1 and 2 are used for lower and upper bound, respectively. The values are hardcoded in the IceModel class.
