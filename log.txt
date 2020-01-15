@@ -1511,3 +1511,6 @@ Split Settings::CheckCompatibilities function to two - one that does not require
 The former is moved to be called right after the setup file is read, which spares having to instantiate all class objects before 
 we even check parameter compatibility. The latter is left as is.
 
+2020/01/15 Ming-Yuan Lu
+Rename overloaded Settings::CheckCompatibilities functions to Settings::CheckCompatibilitiesSettings() & Settings::CheckCompatibilitiesDetector(Detector *detector) to avoid confusion.
+

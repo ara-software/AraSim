@@ -734,7 +734,7 @@ void Settings::ReadEvtFile(string evtfile){
     return;
 }
 
-int Settings::CheckCompatibilities(Detector *detector) {
+int Settings::CheckCompatibilitiesDetector(Detector *detector) {
 
     int num_err = 0;
 
@@ -788,7 +788,7 @@ int Settings::CheckCompatibilities(Detector *detector) {
     return num_err;
 }
 
-int Settings::CheckCompatibilities() {
+int Settings::CheckCompatibilitiesSettings() {
 
     int num_err = 0;
 
