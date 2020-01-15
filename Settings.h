@@ -22,8 +22,8 @@ class Settings
         void ReadFile(string setupfile);
         void ReadEvtFile(string evtfile);
 
-
-        int CheckCompatibilities(Detector *detector);// check if settings are not compatible to each other
+        int CheckCompatibilitiesSettings();// check if settings are not compatible to each other
+        int CheckCompatibilitiesDetector(Detector *detector);// check if settings are not compatible to each other. checking against initialized Detector *detector object
 
 	int ARASIM_VERSION_MAJOR;
         int ARASIM_VERSION_MINOR;

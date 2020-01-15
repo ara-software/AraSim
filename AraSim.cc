@@ -83,6 +83,12 @@ int main(int argc, char **argv) {   // read setup.txt file
     settings1->ReadFile(setupfile);
     cout<<"Read "<<setupfile<<" file!"<<endl;
 
+    int settings_compatibility_error = settings1->CheckCompatibilitiesSettings();
+    if (settings_compatibility_error > 0) {
+        cerr<<"There are "<< settings_compatibility_error<<" errors from settings. Check error messages."<<endl;
+        return -1;
+    }
+ 
     cout<<"\n\tNew values!"<<endl;
     cout<<"NNU : "<<settings1->NNU<<endl;
     cout<<"ICE_MODEL : "<<settings1->ICE_MODEL<<endl;
@@ -345,9 +351,9 @@ int main(int argc, char **argv) {   // read setup.txt file
                 
     // check if settings have to compatibility problems
     // if there's any, stop AraSim
-    int settings_compatibility_error = settings1->CheckCompatibilities(detector);
+    settings_compatibility_error = settings1->CheckCompatibilitiesDetector(detector);
     if (settings_compatibility_error > 0) {
-        cerr<<"There are "<< settings_compatibility_error<<" errors from settings. Check error messages."<<endl;
+        cerr<<"There are "<< settings_compatibility_error<<" errors from settings after Detector class instance is initialized. Check error messages."<<endl;
         return -1;
     }
         

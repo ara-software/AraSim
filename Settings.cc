@@ -734,7 +734,7 @@ void Settings::ReadEvtFile(string evtfile){
     return;
 }
 
-int Settings::CheckCompatibilities(Detector *detector) {
+int Settings::CheckCompatibilitiesDetector(Detector *detector) {
 
     int num_err = 0;
 
@@ -784,6 +784,14 @@ int Settings::CheckCompatibilities(Detector *detector) {
             num_err++;
         }
     }
+
+    return num_err;
+}
+
+int Settings::CheckCompatibilitiesSettings() {
+
+    int num_err = 0;
+
 
     /*
     // if INTERACTION_MODE is 0 (sphere area and obtain Aeff), make sure using GETCHORD_MODE=1
@@ -948,6 +956,12 @@ int Settings::CheckCompatibilities(Detector *detector) {
 		
       }
     }
+
+   //Check that DETECTOR_STATION=0 is only used with DETECTOR=3
+   if (DETECTOR_STATION==0 && DETECTOR!=3){
+      cerr << " DETECTOR_STATION=0 doesn't work with DETECTOR!=3. If you want to work with TestBed, use DETECTOR=3 & DETECTOR_STATION=0" << endl;
+      num_err++;
+   }
 
 
     return num_err;

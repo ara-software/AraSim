@@ -1502,3 +1502,15 @@ which are not used anywhere else in AraSim currently
 
 
 Also clean-up tabs in Vector class
+
+2019/12/21 Ming-Yuan Lu
+
+Implement a check that requires DETECTOR_STATION=0 to be used with DETECTOR=3
+
+Split Settings::CheckCompatibilities function to two - one that does not require a instantiated Detector object, and one that does. 
+The former is moved to be called right after the setup file is read, which spares having to instantiate all class objects before 
+we even check parameter compatibility. The latter is left as is.
+
+2020/01/15 Ming-Yuan Lu
+Rename overloaded Settings::CheckCompatibilities functions to Settings::CheckCompatibilitiesSettings() & Settings::CheckCompatibilitiesDetector(Detector *detector) to avoid confusion.
+
