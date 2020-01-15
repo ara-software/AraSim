@@ -936,7 +936,11 @@ int Settings::CheckCompatibilities(Detector *detector) {
         num_err++;
     }
     */
-
+    if (SYSTEMATICS_IceAtten > 0 && (USE_ARA_ICEATTENU==0)) {
+        cerr<<"SYSTEMATICS_IceAtten=1,2 doesn't work with USE_ARA_ICEATTENU=0"<<endl;
+        cerr<<"SYSTEMATICS_IceAtten=1,2 are upper/lower bounds for Eugene's attenuation model, which doesn't correspond to USE_ARA_ICEATTENU=0 "<<endl;
+        num_err++;
+    }
     // This is for installed stations
     if (DETECTOR == 4 ) {
         if (ARAUTIL_EXISTS == false){
