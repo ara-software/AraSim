@@ -1503,6 +1503,7 @@ which are not used anywhere else in AraSim currently
 
 Also clean-up tabs in Vector class
 
+<<<<<<< HEAD
 ============================================================================
 
 2019/12/12 Brian Clark
@@ -1536,7 +1537,25 @@ One data file is added:
 
 ============================================================================
 
+2019/12/21 Ming-Yuan Lu
+
+Implement a check that requires DETECTOR_STATION=0 to be used with DETECTOR=3
+
+Split Settings::CheckCompatibilities function to two - one that does not require a instantiated Detector object, and one that does. 
+The former is moved to be called right after the setup file is read, which spares having to instantiate all class objects before 
+we even check parameter compatibility. The latter is left as is.
+
+============================================================================
+
 2020/01/14 Jorge Torres
 
 - Added the parameter SYSTEMATICS_IceAtten. The default value is zero, which uses Eugene's attenuation model (http://radiorm.physics.ohio-state.edu/elog/Write-Ups/170504_105713/Thesis_-_Eugene_Hong.pdf, p. 54), red line.
 Values 1 and 2 are used for lower and upper bound, respectively. The values are hardcoded in the IceModel class.
+
+============================================================================
+
+
+2020/01/15 Ming-Yuan Lu
+Rename overloaded Settings::CheckCompatibilities functions to Settings::CheckCompatibilitiesSettings() & Settings::CheckCompatibilitiesDetector(Detector *detector) to avoid confusion.
+
+
