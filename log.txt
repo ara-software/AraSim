@@ -1538,5 +1538,7 @@ One data file is added:
 
 2020/01/14 Jorge Torres
 
+In the a23_4yr_diffuse branch, added feature to estimate signal chain efficiency uncertainty. The uncertainty is represented as a scale-down of the antenna gains consisting of a 600MHz low-pass filter and a drop in gain values by 10% and 32% for Vpol and Hpol, respectively.
+
 - Added the parameter SYSTEMATICS_IceAtten. The default value is zero, which uses Eugene's attenuation model (http://radiorm.physics.ohio-state.edu/elog/Write-Ups/170504_105713/Thesis_-_Eugene_Hong.pdf, p. 54), red line.
 Values 1 and 2 are used for lower and upper bound, respectively. The values are hardcoded in the IceModel class.
