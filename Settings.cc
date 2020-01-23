@@ -299,7 +299,7 @@ void Settings::Initialize() {
     SC_EFFICIENCY_ERROR_V = 0.9;     //Lower bound of Vpol signal chain efficiency
     SC_EFFICIENCY_ERROR_H = 0.68;    //Lower bound of Hpol signal chain efficiency
     SYSTEMATICS_IceAtten = 0; //Default: Average value (red line) from Eugene's attenuation model (http://radiorm.physics.ohio-state.edu/elog/Write-Ups/170504_105713/Thesis_-_Eugene_Hong.pdf, p. 54), 1 = lower bound, 2 = upper bound
-
+    SYSTEMATICS_Askaryan = 0; //Default:askaryan signal is not changed at all. =1 scale up the askaryan signal by 12%, =2 scale down the askaryan signal by 12%. The 12% comes from Eugene's thesis, Fg. 5.12.
 }
 
 void Settings::ReadFile(string setupfile) {
@@ -670,6 +670,9 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "SYSTEMATICS_IceAtten"){
               	   SYSTEMATICS_IceAtten = atof(line.substr(line.find_first_of("=") + 1).c_str());
               }
+              else if (label == "SYSTEMATICS_Askaryan"){
+                   SYSTEMATICS_IceAtten = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
 
           }
       }
@@ -984,7 +987,7 @@ int Settings::CheckCompatibilitiesSettings() {
         }
     }
 
- 
+
     //Check that DETECTOR_STATION=0 is only used with DETECTOR=3
     if (DETECTOR_STATION==0 && DETECTOR!=3){
        cerr << " DETECTOR_STATION=0 doesn't work with DETECTOR!=3. If you want to work with TestBed, use DETECTOR=3 & DETECTOR_STATION=0" << endl;

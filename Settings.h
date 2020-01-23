@@ -424,6 +424,7 @@ class Settings
             int horizontal_banana_points;
             int vertical_banana_points;
             int SYSTEMATICS_IceAtten;
+            int SYSTEMATICS_Askaryan;
 
         // end of values from icemc
 
