@@ -295,6 +295,9 @@ void Settings::Initialize() {
     IND_NNU_PHI[100] = {0};
     */
 
+    DETECTOR_STATION=2; //default: 2, meaning ARA02 (A2)
+    DETECTOR_STATION_LIVETIME_CONFIG=0; //default 0: no special config
+
     USE_SIGNAL_CHAIN_LOWER_BOUND = 0; // default: 0 -- don't replace signal chain efficiency with lower bound. 1: replace with lower bound
     SC_EFFICIENCY_ERROR_V = 0.9;     //Lower bound of Vpol signal chain efficiency
     SC_EFFICIENCY_ERROR_H = 0.68;    //Lower bound of Hpol signal chain efficiency

@@ -1559,5 +1559,7 @@ Values 1 and 2 are used for lower and upper bound, respectively. The values are 
 
 2020/01/15 Ming-Yuan Lu
 Rename overloaded Settings::CheckCompatibilities functions to Settings::CheckCompatibilitiesSettings() & Settings::CheckCompatibilitiesDetector(Detector *detector) to avoid confusion.
+============================================================================
 
-
+2020/01/24 Ming-Yuan Lu
+Initialize Settings::DETECTOR_STATION to be 2, and Settings::DETECTOR_STATION_LIVETIME_CONFIG to be 0
