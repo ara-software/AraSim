@@ -1004,10 +1004,10 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	}
 	else if (settings1->ANTENNA_MODE == 1) {
 	  // test read V-pol gain file!!
-	  ReadVgain("ARA_bicone6in_output.txt", settings1);
-	  ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
+	  ReadVgainSettings("ARA_bicone6in_output_updated2016.txt", settings1);
+	  ReadVgainTopSettings("ARA_VPresult_topTrec.txt", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
+	  ReadHgainSettings("ARA_dipoletest1_output_updated2016.txt", settings1);
 	}
 	else if (settings1->ANTENNA_MODE == 2){
 	  // test read V-pol gain file!!
@@ -1491,10 +1491,10 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	}
 	else if (settings1->ANTENNA_MODE == 1) {
 	  // test read V-pol gain file!!
-	  ReadVgain("ARA_bicone6in_output.txt", settings1);
-	  ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
+	  ReadVgainSettings("ARA_bicone6in_output_updated2016.txt", settings1);
+	  ReadVgainTopSettings("ARA_VPresult_topTrec.txt", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
+	  ReadHgainSettings("ARA_dipoletest1_output_updated2016.txt", settings1);
 	}
 	else if (settings1->ANTENNA_MODE == 2){
 	  // test read V-pol gain file!!
@@ -1778,10 +1778,10 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	    }
 	    else if (settings1->ANTENNA_MODE == 1) {
 	      // test read V-pol gain file!!
-	      ReadVgain("ARA_bicone6in_output.txt", settings1);
-	      ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
+	      ReadVgainSettings("ARA_bicone6in_output_updated2016.txt", settings1);
+	      ReadVgainTopSettings("ARA_VPresult_topTrec.txt", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
+	      ReadHgainSettings("ARA_dipoletest1_output_updated2016.txt", settings1);
 	    }
 	    else if (settings1->ANTENNA_MODE == 2) {
 	      // test read V-pol gain file!!
@@ -2081,10 +2081,10 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	    }
 	    else if (settings1->ANTENNA_MODE == 1) {
 	      // test read V-pol gain file!!
-	      ReadVgain("ARA_bicone6in_output.txt", settings1);
-	      ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
+	      ReadVgainSettings("ARA_bicone6in_output_updated2016.txt", settings1);
+	      ReadVgainTopSettings("ARA_VPresult_topTrec.txt", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
+	      ReadHgainSettings("ARA_dipoletest1_output_updated2016.txt", settings1);
 	    }
 	    else if (settings1->ANTENNA_MODE == 2){
 	      // test read V-pol gain file!!
@@ -2288,7 +2288,7 @@ inline void Detector::ReadVgain(string filename) {
 
 }// end ReadVgain
 
-inline void Detector::ReadVgain(string filename, Settings *settings1) {
+inline void Detector::ReadVgainSettings(string filename, Settings *settings1) {
     ifstream NecOut( filename.c_str() );
     const int N = freq_step;
     double Transm[N];
@@ -2303,13 +2303,13 @@ inline void Detector::ReadVgain(string filename, Settings *settings1) {
                     Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
                     //                    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
                     getline (NecOut, line); //read SWR
-		    Transm[i] = atof(line.substr(5,11).c_str());
+           		     Transm[i] = atof(line.substr(5,11).c_str()); //What says "SWR" in "ARA_bicone6in_output_updated2016.txt" is actually trasnmission coefficient - MYL 01/23/20
                     getline (NecOut, line); //read names
 
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
                         //Vgain[i][j] = atof( line.substr( 18 ).c_str() );  // read gain (not dB)
-                        Vgain[i][j] = Transm[i] * atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
+                        Vgain[i][j] = /*Transm[i] **/ atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB) //Transm[i] commented for in the antenna gain files "realized gain" is provided and so the transmission coefficient does not need to be multiplied one more time - MLY 01/23/20
                         Vphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
                                                 
                         //cout<<"VGain : "<<Vgain[i][j]<<", VPhase : "<<Vphase[i][j]<<endl;
@@ -2348,7 +2348,7 @@ inline void Detector::ReadVgain(string filename, Settings *settings1) {
 }// end ReadVgain
 
 
-inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
+inline void Detector::ReadVgainTopSettings(string filename, Settings *settings1) {
     ifstream NecOut( filename.c_str() );
     const int N = freq_step;
 
@@ -2363,14 +2363,14 @@ inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
                     Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
                     //                    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
                     getline (NecOut, line); //read SWR
-		    Transm[i] = atof( line.substr(5, 11).c_str() );
-		      cerr << "Vpol Transm: " << Transm[i] << endl;
+		              Transm[i] = atof( line.substr(5, 11).c_str() ); //What say "SWR" in "ARA_VPresult_topTrec.txt" is actually transmission coefficient - MYL 01/23/20
+		              //cerr << "Vpol Transm: " << Transm[i] << endl;
 
                     getline (NecOut, line); //read names
 
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
-                        VgainTop[i][j] = Transm[i]*atof( line.substr( 20, 33 ).c_str() );
+                        VgainTop[i][j] = /*Transm[i]**/atof( line.substr( 20, 33 ).c_str() ) ; //Transm[i] commented for in the antenna gain files "realized gain" is provided and so the transmission coefficient does not need to be multiplied one more time - MLY 01/23/20
                         VphaseTop[i][j] = atof( line.substr( 34 ).c_str() );    // + 180.0/TMath::Pi()*TMath::ATan(-Freq[i]/500.0);  // read gain (not dB)
                                                 
                         //cout<<"VGain : "<<Vgain[i][j]<<", VPhase : "<<Vphase[i][j]<<endl;
@@ -2449,7 +2449,7 @@ inline void Detector::ReadHgain(string filename) {
     
 }// end ReadHgain
 
-inline void Detector::ReadHgain(string filename, Settings *settings1) {
+inline void Detector::ReadHgainSettings(string filename, Settings *settings1) {
 
     ifstream NecOut( filename.c_str() );    
     string line;
@@ -2466,14 +2466,14 @@ inline void Detector::ReadHgain(string filename, Settings *settings1) {
                     Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
                     //                    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
                     getline (NecOut, line); //read SWR
-		    Transm[i] = atof( line.substr(5, 11).c_str() );
+            	     Transm[i] = atof( line.substr(5, 11).c_str() ); //What says "SWR" in "ARA_dipoletest1_output_updated2016.txt" is actually transmission coefficient - MYL 01/23/20 
                     getline (NecOut, line); //read names
                     
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
                         //Hgain[i][j] = atof( line.substr( 20 ).c_str() );  // read gain (not dB)
                         //Hgain[i][j] = atof( line.substr( 18, 25 ).c_str() );  // read gain (not dB)
-                        Hgain[i][j] = Transm[i]*atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
+                        Hgain[i][j] = /*Transm[i]**/atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB) //Transm[i] commented for in the antenna gain files "realized gain" is provided and so the transmission coefficient does not need to be multiplied one more time - MLY 01/23/20                      
                         Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
 
                         //cout<<"HGain : "<<Hgain[i][j]<<", HPhase : "<<Hphase[i][j]<<endl;
