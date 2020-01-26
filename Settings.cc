@@ -671,7 +671,7 @@ void Settings::ReadFile(string setupfile) {
               	   SYSTEMATICS_IceAtten = atof(line.substr(line.find_first_of("=") + 1).c_str());
               }
               else if (label == "SYSTEMATICS_Askaryan"){
-                   SYSTEMATICS_IceAtten = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                   SYSTEMATICS_Askaryan = atof(line.substr(line.find_first_of("=") + 1).c_str());
               }
 
           }
