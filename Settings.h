@@ -50,6 +50,7 @@ class Settings
         int DETECTOR;   // choose detector layout
 
         int DETECTOR_STATION; // for DETECTOR=4, indicates the single station to be simulated
+                           //default is 2
                           // 0 = testbed, 1 = A1, 2 = A2, 3 = A3
 
         int DETECTOR_STATION_LIVETIME_CONFIG; // only to be used with DETECTOR=4 (real station), and DETECTOR_STATION=2 or =3 (A2/A3)
