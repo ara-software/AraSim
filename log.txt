@@ -1333,8 +1333,6 @@ removed useless/problematic option in makefile
 added namespace definition in Tools.h
 
 ============================================================================
-<<<<<<< .working
-
 04/07/2017 Carl Pfendner:
 
 Added option to import geometry from AraRoot for stations 2, 3 - use
@@ -1502,8 +1500,6 @@ which are not used anywhere else in AraSim currently
 
 
 Also clean-up tabs in Vector class
-
-<<<<<<< HEAD
 ============================================================================
 
 2019/12/12 Brian Clark
@@ -1560,6 +1556,12 @@ Values 1 and 2 are used for lower and upper bound, respectively. The values are 
 2020/01/15 Ming-Yuan Lu
 Rename overloaded Settings::CheckCompatibilities functions to Settings::CheckCompatibilitiesSettings() & Settings::CheckCompatibilitiesDetector(Detector *detector) to avoid confusion.
 ============================================================================
-
 2020/01/24 Ming-Yuan Lu
 Initialize Settings::DETECTOR_STATION to be 2, and Settings::DETECTOR_STATION_LIVETIME_CONFIG to be 0
+============================================================================
+
+2020/01/27 Brian Clark
+Add SYSTEMATICS_nofz to wiggle RAY_TRACE_ICE_MODEL_PARAMS within uncertainties.
+=0=default fit values
+=1=make larger by uncertainties
+=2=make smaller by uncertainties

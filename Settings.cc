@@ -303,6 +303,8 @@ void Settings::Initialize() {
     SC_EFFICIENCY_ERROR_H = 0.68;    //Lower bound of Hpol signal chain efficiency
     SYSTEMATICS_IceAtten = 0; //Default: Average value (red line) from Eugene's attenuation model (http://radiorm.physics.ohio-state.edu/elog/Write-Ups/170504_105713/Thesis_-_Eugene_Hong.pdf, p. 54), 1 = lower bound, 2 = upper bound
     SYSTEMATICS_Askaryan = 0; //Default:askaryan signal is not changed at all. =1 scale up the askaryan signal by 12%, =2 scale down the askaryan signal by 12%. The 12% comes from Eugene's thesis, Fg. 5.12.
+    SYSTEMATICS_Askaryan = 0; // = 0 = default = do nothing; for NOFZ=1 and RAY_TRACE_ICE_MODEL_PARAMS=0, apply the upper bound (=1) and lower bound (=2)
+
 }
 
 void Settings::ReadFile(string setupfile) {
@@ -674,8 +676,12 @@ void Settings::ReadFile(string setupfile) {
               	   SYSTEMATICS_IceAtten = atof(line.substr(line.find_first_of("=") + 1).c_str());
               }
               else if (label == "SYSTEMATICS_Askaryan"){
-                   SYSTEMATICS_IceAtten = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                   SYSTEMATICS_Askaryan = atof(line.substr(line.find_first_of("=") + 1).c_str());
               }
+              else if (label == "SYSTEMATICS_nofz"){
+                   SYSTEMATICS_nofz = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+
 
           }
       }
@@ -1013,6 +1019,11 @@ int Settings::CheckCompatibilitiesSettings() {
     if (DETECTOR == 4 && DETECTOR_STATION==0 && USE_SIGNAL_CHAIN_LOWER_BOUND > 0){
        cerr<<"USE_SIGNAL_CHAIN_LOWER_BOUND>0 doesn't work with DETECTOR_STATION==0. The signal chain measurements are done with ARA deep stations."<<endl;
        num_err++;
+    }
+
+    if(SYSTEMATICS_nofz>0 && RAY_TRACE_ICE_MODEL_PARAMS!=0){
+        cerr<<"SYSTEMATICS_nofz>0 only works with the default AraSim model RAY_TRACE_ICE_MODEL_PARAMS=0."<<endl;
+        num_err++;
     }
 
 

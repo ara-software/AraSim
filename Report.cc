@@ -769,9 +769,18 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                                // signal before the antenna (get signal at 1m and apply atten factor)
                                                signal->GetVm_FarField_Tarray( event, settings1, viewangle, atten_factor, outbin, Tarray, Earray, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt] );
-                                               if(settings1->SYSTEMATICS_Askaryan>0){
-                                                 if(settings1->SYSTEMATICS_Askaryan==1) for(int kk=0;kk<64;kk++){Earray[kk]*=1.12;}
-                                                 if(settings1->SYSTEMATICS_Askaryan==2) for(int kk=0;kk<64;kk++){Earray[kk]*=0.88;}
+                                               // cout << "\033[1;31mAskaryan Signal accessed here\033[0m\n";
+					                                       if(settings1->SYSTEMATICS_Askaryan>0){
+                                                   if(settings1->SYSTEMATICS_Askaryan==1) for(int kk=0;kk<64;kk++){
+                                                     // printf("Before:%e \n",Earray[kk]);
+                                                     Earray[kk]*=1.12;
+                                                     // printf("After:%e \n",Earray[kk]);
+                                                   }
+                                                   if(settings1->SYSTEMATICS_Askaryan==2) for(int kk=0;kk<64;kk++){
+                                                     // printf("Before:%e \n",Earray[kk]);
+                                                     Earray[kk]*=0.88;
+                                                     // printf("After:%e \n",Earray[kk]);
+                                                   }
                                                }
 
 

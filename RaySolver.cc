@@ -1076,12 +1076,38 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
     // Defaults!!!!
     src = source_tmp;
     trg = target_tmp;
-    
+
     if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 0){
     // South Pole Values (AraSim original default, based on RICE)
       ns = 1.35;
       nd = 1.78;
       nc = 0.0132;
+
+      // printf("Old ns, nd, nc: %.4f, %.4f, %.4f \n", ns, nd, nc);
+
+      // if we wan to wiggle parameter uncertaintties
+      double adjust_ns=0.;
+      double adjust_nd=0.;
+      double adjust_nc=0.;
+
+      if(settings1->SYSTEMATICS_nofz==1){ // upper bound
+        adjust_ns=0.022;
+        adjust_nd=0.016;
+        adjust_nc=0.0017;
+      }
+      if(settings1->SYSTEMATICS_nofz==2){ // lower bound
+        adjust_ns=-0.022;
+        adjust_nd=-0.016;
+        adjust_nc=-0.0017;
+      }
+
+      ns+=adjust_ns;
+      nd+=adjust_nd;
+      nc+=adjust_nc;
+
+      // printf("New ns, nd, nc: %.4f, %.4f, %.4f \n", ns, nd, nc);
+
+
     } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 1){
       // South Pole Values (RICE (2004))
       ns = 1.35;
@@ -1123,10 +1149,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
       ns = 1.35;
       nd = 1.78;
       nc = 0.0132;
-    } 
-
-
-
+    }
 
 
     //    cout << "ns, nd, nc: " << ns << ", " << nd << ", " << nc << endl;
