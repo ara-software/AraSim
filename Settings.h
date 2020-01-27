@@ -423,8 +423,9 @@ class Settings
 
             int horizontal_banana_points;
             int vertical_banana_points;
-            int SYSTEMATICS_IceAtten;
-            int SYSTEMATICS_Askaryan;
+            int SYSTEMATICS_IceAtten; //Default: Average value (red line) from Eugene's attenuation model (http://radiorm.physics.ohio-state.edu/elog/Write-Ups/170504_105713/Thesis_-_Eugene_Hong.pdf, p. 54), 1 = lower bound, 2 = upper bound
+            int SYSTEMATICS_Askaryan; //Default:askaryan signal is not changed at all. =1 scale up the askaryan signal by 12%, =2 scale down the askaryan signal by 12%. The 12% comes from Eugene's thesis, Fg. 5.12.
+            int SYSTEMATICS_nofz; // = 0 = default = do nothing; for NOFZ=1 and RAY_TRACE_ICE_MODEL_PARAMS=0, apply the upper bound (=1) and lower bound (=2)
 
         // end of values from icemc
 

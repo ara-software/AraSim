@@ -1561,3 +1561,11 @@ Values 1 and 2 are used for lower and upper bound, respectively. The values are 
 Rename overloaded Settings::CheckCompatibilities functions to Settings::CheckCompatibilitiesSettings() & Settings::CheckCompatibilitiesDetector(Detector *detector) to avoid confusion.
 
 
+============================================================================
+
+
+2020/01/27 Brian Clark
+Add SYSTEMATICS_nofz to wiggle RAY_TRACE_ICE_MODEL_PARAMS within uncertainties.
+=0=default fit values
+=1=make larger by uncertainties
+=2=make smaller by uncertainties
