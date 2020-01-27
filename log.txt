@@ -1514,3 +1514,7 @@ we even check parameter compatibility. The latter is left as is.
 2020/01/15 Ming-Yuan Lu
 Rename overloaded Settings::CheckCompatibilities functions to Settings::CheckCompatibilitiesSettings() & Settings::CheckCompatibilitiesDetector(Detector *detector) to avoid confusion.
 
+2020/01/23 Ming-Yuan Lu
+1. Renamed ReadVgain(string filename, Settings *settings1), ReadVgainTop(string filename, Settings *settings1), ReadHgain(string filename, Settings *settings1) to ReadVgainSettings(string filename, Settings *settings1), ReadVgainTopSettings(string filename, Settings *settings1), ReadHgainSettings(string filename, Settings *settings1) to prevent confusion over overloaded function names.
+2. For calls to ReadVgainSettings and ReadHgainSettings, pass the correct "..._updated2016.txt" files as arguments to be read. Before, they were reading the wrong hard-coded filenames.
+3. In these 3 functions, stop multiplying the transmission coefficient one more time to the realized gain values as read from the .txt files.
