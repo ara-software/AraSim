@@ -1083,7 +1083,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
       nd = 1.78;
       nc = 0.0132;
 
-      printf("Old ns, nd, nc: %.4f, %.4f, %.4f \n", ns, nd, nc);
+      // printf("Old ns, nd, nc: %.4f, %.4f, %.4f \n", ns, nd, nc);
 
       // if we wan to wiggle parameter uncertaintties
       double adjust_ns=0.;
@@ -1105,7 +1105,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
       nd+=adjust_nd;
       nc+=adjust_nc;
 
-      printf("New ns, nd, nc: %.4f, %.4f, %.4f \n", ns, nd, nc);
+      // printf("New ns, nd, nc: %.4f, %.4f, %.4f \n", ns, nd, nc);
 
 
     } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 1){
