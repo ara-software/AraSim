@@ -303,7 +303,7 @@ void Settings::Initialize() {
     SC_EFFICIENCY_ERROR_H = 0.68;    //Lower bound of Hpol signal chain efficiency
     SYSTEMATICS_IceAtten = 0; //Default: Average value (red line) from Eugene's attenuation model (http://radiorm.physics.ohio-state.edu/elog/Write-Ups/170504_105713/Thesis_-_Eugene_Hong.pdf, p. 54), 1 = lower bound, 2 = upper bound
     SYSTEMATICS_Askaryan = 0; //Default:askaryan signal is not changed at all. =1 scale up the askaryan signal by 12%, =2 scale down the askaryan signal by 12%. The 12% comes from Eugene's thesis, Fg. 5.12.
-    SYSTEMATICS_Askaryan = 0; // = 0 = default = do nothing; for NOFZ=1 and RAY_TRACE_ICE_MODEL_PARAMS=0, apply the upper bound (=1) and lower bound (=2)
+    SYSTEMATICS_nofz = 0; // = 0 = default = do nothing; for NOFZ=1 and RAY_TRACE_ICE_MODEL_PARAMS=0, apply the upper bound (=1) and lower bound (=2)
 
 }
 
