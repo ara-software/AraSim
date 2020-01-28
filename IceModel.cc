@@ -224,7 +224,7 @@ if ( file.is_open() ) {
     */
   //The following hardcoded numbers correspond to a model derived by Eugene Hong, based on ice attenuation measurements (c.f. TestBed paper). This is the default mode usedf by AraSim.
  //More details can be found on Eugene's Thesis: http://radiorm.physics.ohio-state.edu/elog/Write-Ups/170504_105713/Thesis_-_Eugene_Hong.pdf, p. 54 and 132.
-
+SYSTEMAT_IceAtten = settings1->SYSTEMATICS_IceAtten;
  ARA_IceAtten_bin = 53;
  if(SYSTEMAT_IceAtten == 0){
    double ARA_IceAtten_Depth_tmp0[53] = { 72.7412,   76.5697,    80.3982,    91.8836,    95.7121,    107.198,    118.683,    133.997,    153.139,    179.939,    206.738,    245.023,    298.622,    356.049,    405.819,    470.904,    516.845,    566.616,    616.386,    669.985,    727.412,    784.839,    838.438,    899.694,    949.464,    1003.06,    1060.49,    1121.75,    1179.17,    1236.6,    1297.86,    1347.63,    1405.05,    1466.31,    1516.08,    1565.85,    1611.79,    1657.73,    1699.85,    1745.79,    1791.73,    1833.84,    1883.61,    1929.56,    1990.81,    2052.07,    2109.49,    2170.75,    2232.01,    2304.75,    2362.17,    2431.09,    2496.17 };
