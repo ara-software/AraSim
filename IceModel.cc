@@ -25,9 +25,6 @@ using namespace std;
 //class Interaction;
 
 // int SYSTEMAT_IceAtten;
-
-Settings *settings1 = new Settings();
-int SYSTEMAT_IceAtten = settings1->SYSTEMATICS_IceAtten;
 //
 //Parameters of the BEDMAP ice model. (See http://www.antarctica.ac.uk/aedc/bedmap/download/)
 int nCols_ice=1200; //number of columns in data, set by header file (should be 1200)
@@ -227,18 +224,26 @@ if ( file.is_open() ) {
     */
   //The following hardcoded numbers correspond to a model derived by Eugene Hong, based on ice attenuation measurements (c.f. TestBed paper). This is the default mode usedf by AraSim.
  //More details can be found on Eugene's Thesis: http://radiorm.physics.ohio-state.edu/elog/Write-Ups/170504_105713/Thesis_-_Eugene_Hong.pdf, p. 54 and 132.
- double ARA_IceAtten_Depth_tmp[53];
- double ARA_IceAtten_Length_tmp[53];
- if(SYSTEMAT_IceAtten == 0){
- double ARA_IceAtten_Depth_tmp[53] = { 72.7412,   76.5697,    80.3982,    91.8836,    95.7121,    107.198,    118.683,    133.997,    153.139,    179.939,    206.738,    245.023,    298.622,    356.049,    405.819,    470.904,    516.845,    566.616,    616.386,    669.985,    727.412,    784.839,    838.438,    899.694,    949.464,    1003.06,    1060.49,    1121.75,    1179.17,    1236.6,    1297.86,    1347.63,    1405.05,    1466.31,    1516.08,    1565.85,    1611.79,    1657.73,    1699.85,    1745.79,    1791.73,    1833.84,    1883.61,    1929.56,    1990.81,    2052.07,    2109.49,    2170.75,    2232.01,    2304.75,    2362.17,    2431.09,    2496.17 };
 
- double ARA_IceAtten_Length_tmp[53] = { 1994.67,   1952,    1896,    1842.67,    1797.33,    1733.33,    1680,    1632,    1586.67,    1552,    1522.67,    1501.33,    1474.67,    1458.67,    1437.33,    1416,    1392,    1365.33,    1344,    1312,    1274.67,    1242.67,    1205.33,    1168,    1128,    1090.67,    1048,    1008,    965.333,    920,    874.667,    834.667,    797.333,    752,    714.667,    677.333,    648,    616,    589.333,    557.333,    530.667,    506.667,    477.333,    453.333,    418.667,    389.333,    362.667,    333.333,    309.333,    285.333,    264,    242.667,    221.333 };
+ ARA_IceAtten_bin = 53;
+ if(SYSTEMAT_IceAtten == 0){
+   double ARA_IceAtten_Depth_tmp0[53] = { 72.7412,   76.5697,    80.3982,    91.8836,    95.7121,    107.198,    118.683,    133.997,    153.139,    179.939,    206.738,    245.023,    298.622,    356.049,    405.819,    470.904,    516.845,    566.616,    616.386,    669.985,    727.412,    784.839,    838.438,    899.694,    949.464,    1003.06,    1060.49,    1121.75,    1179.17,    1236.6,    1297.86,    1347.63,    1405.05,    1466.31,    1516.08,    1565.85,    1611.79,    1657.73,    1699.85,    1745.79,    1791.73,    1833.84,    1883.61,    1929.56,    1990.81,    2052.07,    2109.49,    2170.75,    2232.01,    2304.75,    2362.17,    2431.09,    2496.17 };
+
+   double ARA_IceAtten_Length_tmp0[53] = { 1994.67,   1952,    1896,    1842.67,    1797.33,    1733.33,    1680,    1632,    1586.67,    1552,    1522.67,    1501.33,    1474.67,    1458.67,    1437.33,    1416,    1392,    1365.33,    1344,    1312,    1274.67,    1242.67,    1205.33,    1168,    1128,    1090.67,    1048,    1008,    965.333,    920,    874.667,    834.667,    797.333,    752,    714.667,    677.333,    648,    616,    589.333,    557.333,    530.667,    506.667,    477.333,    453.333,    418.667,    389.333,    362.667,    333.333,    309.333,    285.333,    264,    242.667,    221.333 };
+
+   for (int bin=0; bin<ARA_IceAtten_bin; bin++) {
+       ARA_IceAtten_Depth[bin] = ARA_IceAtten_Depth_tmp0[bin];
+       ARA_IceAtten_Length[bin] = ARA_IceAtten_Length_tmp0[bin];
+       printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth_tmp0[bin],ARA_IceAtten_Length_tmp0[bin]);
+       cout << SYSTEMAT_IceAtten << endl;
+   }
+
 }
 
  //Lower bound (in the plot sense)
  //if lower bound, then
  if(SYSTEMAT_IceAtten == 1){
-   double ARA_IceAtten_Depth_tmp[53] =
+   double ARA_IceAtten_Depth_tmp1[53] =
    { 171.  ,  189.  ,  258.44,  358.67,  455.76,  572.28,  635.86,
      687.97,  746.55,  795.13,  839.62,  871.98,  898.61,  914.15,
      934.88,  960.2 ,  991.4 , 1025.34, 1049.71, 1086.29, 1125.33,
@@ -248,7 +253,7 @@ if ( file.is_open() ) {
      2061.24, 2105.99, 2170.81, 2242.16, 2299.54, 2358.97, 2405.13,
      2450.  , 2450.  , 2450.  , 2450. };
 
-     double ARA_IceAtten_Length_tmp[53] =
+  double ARA_IceAtten_Length_tmp1[53] =
      { 1994.67 , 1952.   , 1896.   , 1842.67 , 1797.33 , 1733.33 ,
        1680.   , 1632.   , 1586.67 , 1552.   , 1522.67 , 1501.33 ,
        1474.67 , 1458.67 , 1437.33 , 1416.   , 1392.   , 1365.33 ,
@@ -258,12 +263,19 @@ if ( file.is_open() ) {
        648.   ,  616.   ,  589.333,  557.333,  530.667,  506.667,
        477.333,  453.333,  418.667,  389.333,  362.667,  333.333,
        309.333,  285.333,  264.   ,  242.667,  221.333 };
+
+       for (int bin=0; bin<ARA_IceAtten_bin; bin++) {
+           ARA_IceAtten_Depth[bin] = ARA_IceAtten_Depth_tmp1[bin];
+           ARA_IceAtten_Length[bin] = ARA_IceAtten_Length_tmp1[bin];
+           printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth_tmp1[bin],ARA_IceAtten_Length_tmp1[bin]);
+           cout << SYSTEMAT_IceAtten << endl;
+       }
      }
 
    //Upper bound
    //if upper bound, then
    if(SYSTEMAT_IceAtten == 2){
-     double ARA_IceAtten_Depth_tmp[53] =
+     double ARA_IceAtten_Depth_tmp2[53] =
      { 79.9 ,   81.78,   85.3 ,   87.97,   91.87,   97.73,  101.95,
        109.4 ,  123.  ,  132.93,  141.24,  146.53,  153.01,  156.89,
        168.5 ,  184.5 ,  202.5 ,  245.45,  281.28,  362.2 ,  471.68,
@@ -273,7 +285,7 @@ if ( file.is_open() ) {
        1792.54, 1829.06, 1892.58, 1959.24, 2017.25, 2082.31, 2137.69,
        2194.45, 2245.24, 2302.73, 2369.08};
 
-       double ARA_IceAtten_Length_tmp[53] =
+      double ARA_IceAtten_Length_tmp2[53] =
        { 1994.67 , 1952.   , 1896.   , 1842.67 , 1797.33 , 1733.33 ,
          1680.   , 1632.   , 1586.67 , 1552.   , 1522.67 , 1501.33 ,
          1474.67 , 1458.67 , 1437.33 , 1416.   , 1392.   , 1365.33 ,
@@ -283,15 +295,14 @@ if ( file.is_open() ) {
          648.   ,  616.   ,  589.333,  557.333,  530.667,  506.667,
          477.333,  453.333,  418.667,  389.333,  362.667,  333.333,
          309.333,  285.333,  264.   ,  242.667,  221.333};
+
+         for (int bin=0; bin<ARA_IceAtten_bin; bin++) {
+             ARA_IceAtten_Depth[bin] = ARA_IceAtten_Depth_tmp2[bin];
+             ARA_IceAtten_Length[bin] = ARA_IceAtten_Length_tmp2[bin];
+             printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth_tmp2[bin],ARA_IceAtten_Length_tmp2[bin]);
+             cout << SYSTEMAT_IceAtten << endl;
+         }
        }
-
-  ARA_IceAtten_bin = 53;
-  for (int bin=0; bin<ARA_IceAtten_bin; bin++) {
-
-      ARA_IceAtten_Depth[bin] = ARA_IceAtten_Depth_tmp[bin];
-      ARA_IceAtten_Length[bin] = ARA_IceAtten_Length_tmp[bin];
-  }
-
 
 
 }
