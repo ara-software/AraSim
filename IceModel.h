@@ -183,7 +183,6 @@ void GetFresnel (
   int ARA_IceAtten_bin;
 
   double GetARAIceAttenuLength(double depth);
-
   //  void FillArraysforTree(double lon_ground[1068][869],double lat_ground[1068][869],double lon_ice[1200][1000],double lat_ice[1200][1000],double lon_water[1200][1000],double lat_water[1200][1000]);
 
   // below three members are copied from icemc icemodel.
