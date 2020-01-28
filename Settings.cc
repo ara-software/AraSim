@@ -673,13 +673,13 @@ void Settings::ReadFile(string setupfile) {
               	   SC_EFFICIENCY_ERROR_H = atof(line.substr(line.find_first_of("=") + 1).c_str());
               }
               else if (label == "SYSTEMATICS_IceAtten"){
-              	   SYSTEMATICS_IceAtten = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              	   SYSTEMATICS_IceAtten = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
               else if (label == "SYSTEMATICS_Askaryan"){
-                   SYSTEMATICS_Askaryan = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                   SYSTEMATICS_Askaryan = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
               else if (label == "SYSTEMATICS_nofz"){
-                   SYSTEMATICS_nofz = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                   SYSTEMATICS_nofz = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
 
 
