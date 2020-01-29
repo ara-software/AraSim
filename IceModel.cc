@@ -228,55 +228,62 @@ if ( file.is_open() ) {
  // int SYSTEMAT_IceAtten = 0;
  ARA_IceAtten_bin = 53;
  if(SYSTEMATICS_IceAttenuation == 0){
-   double ARA_IceAtten_Depth_tmp0[53] = { 72.7412,   76.5697,    80.3982,    91.8836,    95.7121,    107.198,    118.683,    133.997,    153.139,    179.939,    206.738,    245.023,    298.622,    356.049,    405.819,    470.904,    516.845,    566.616,    616.386,    669.985,    727.412,    784.839,    838.438,    899.694,    949.464,    1003.06,    1060.49,    1121.75,    1179.17,    1236.6,    1297.86,    1347.63,    1405.05,    1466.31,    1516.08,    1565.85,    1611.79,    1657.73,    1699.85,    1745.79,    1791.73,    1833.84,    1883.61,    1929.56,    1990.81,    2052.07,    2109.49,    2170.75,    2232.01,    2304.75,    2362.17,    2431.09,    2496.17 };
-
-   double ARA_IceAtten_Length_tmp0[53] = { 1994.67,   1952,    1896,    1842.67,    1797.33,    1733.33,    1680,    1632,    1586.67,    1552,    1522.67,    1501.33,    1474.67,    1458.67,    1437.33,    1416,    1392,    1365.33,    1344,    1312,    1274.67,    1242.67,    1205.33,    1168,    1128,    1090.67,    1048,    1008,    965.333,    920,    874.667,    834.667,    797.333,    752,    714.667,    677.333,    648,    616,    589.333,    557.333,    530.667,    506.667,    477.333,    453.333,    418.667,    389.333,    362.667,    333.333,    309.333,    285.333,    264,    242.667,    221.333 };
-
-   for (int bin=0; bin<ARA_IceAtten_bin; bin++) {
-       ARA_IceAtten_Depth[bin] = ARA_IceAtten_Depth_tmp0[bin];
-       ARA_IceAtten_Length[bin] = ARA_IceAtten_Length_tmp0[bin];
-       printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth_tmp0[bin],ARA_IceAtten_Length_tmp0[bin]);
-       // cout << SYSTEMATICS_IceAttenuation << endl;
-   }
-
+   double ARA_IceAtten_Depth_central[53] = 
+      { 72.7412,   76.5697,    80.3982,    91.8836,    95.7121,    107.198,    
+        118.683,    133.997,    153.139,    179.939,    206.738,    245.023,    
+        298.622,    356.049,    405.819,    470.904,    516.845,    566.616,    
+        616.386,    669.985,    727.412,    784.839,    838.438,    899.694,    
+        949.464,    1003.06,    1060.49,    1121.75,    1179.17,    1236.6,    
+        1297.86,    1347.63,    1405.05,    1466.31,    1516.08,    1565.85,    
+        1611.79,    1657.73,    1699.85,    1745.79,    1791.73,    1833.84,    
+        1883.61,    1929.56,    1990.81,    2052.07,    2109.49,    2170.75,    
+        2232.01,    2304.75,    2362.17,    2431.09,    2496.17 };
+   double ARA_IceAtten_Length_central[53] = 
+      { 1994.67,   1952,    1896,    1842.67,    1797.33,    1733.33,    
+        1680,      1632,    1586.67, 1552,       1522.67,    1501.33,    
+        1474.67,   1458.67, 1437.33, 1416,       1392,       1365.33,    
+        1344,      1312,    1274.67, 1242.67,    1205.33,    1168,    
+        1128,    1090.67,    1048,    1008,      965.333,    920,    
+        874.667,    834.667,    797.333,    752,    714.667, 677.333,    
+        648,    616,    589.333,    557.333,    530.667,    506.667,    
+        477.333,    453.333,    418.667,    389.333,    362.667,    
+        333.333,    309.333,    285.333,    264,    242.667,    221.333 };
+   std::copy(begin(ARA_IceAtten_Depth_central), end(ARA_IceAtten_Depth_central), begin(ARA_IceAtten_Depth));
+   std::copy(begin(ARA_IceAtten_Length_central), end(ARA_IceAtten_Length_central), begin(ARA_IceAtten_Length));
 }
 
  //Lower bound (in the plot sense)
  //if lower bound, then
  if(SYSTEMATICS_IceAttenuation == 1){
-   double ARA_IceAtten_Depth_tmp1[53] =
-   { 171.  ,  189.  ,  258.44,  358.67,  455.76,  572.28,  635.86,
-     687.97,  746.55,  795.13,  839.62,  871.98,  898.61,  914.15,
-     934.88,  960.2 ,  991.4 , 1025.34, 1049.71, 1086.29, 1125.33,
-     1157.33, 1194.67, 1232.  , 1272.  , 1310.88, 1360.67, 1411.97,
-     1464.5 , 1512.58, 1561.93, 1603.87, 1640.  , 1693.15, 1739.18,
-     1792.38, 1829.23, 1858.77, 1885.91, 1937.53, 1980.5 , 2016.73,
-     2061.24, 2105.99, 2170.81, 2242.16, 2299.54, 2358.97, 2405.13,
-     2450.  , 2450.  , 2450.  , 2450. };
+   double ARA_IceAtten_Depth_low[53] =
+     { 171.  ,  189.  ,  258.44,  358.67,  455.76,  572.28,  635.86,
+       687.97,  746.55,  795.13,  839.62,  871.98,  898.61,  914.15,
+       934.88,  960.2 ,  991.4 , 1025.34, 1049.71, 1086.29, 1125.33,
+       1157.33, 1194.67, 1232.  , 1272.  , 1310.88, 1360.67, 1411.97,
+       1464.5 , 1512.58, 1561.93, 1603.87, 1640.  , 1693.15, 1739.18,
+       1792.38, 1829.23, 1858.77, 1885.91, 1937.53, 1980.5 , 2016.73,
+       2061.24, 2105.99, 2170.81, 2242.16, 2299.54, 2358.97, 2405.13,
+       2450.  , 2450.  , 2450.  , 2450. };
 
-  double ARA_IceAtten_Length_tmp1[53] =
-     { 1994.67 , 1952.   , 1896.   , 1842.67 , 1797.33 , 1733.33 ,
-       1680.   , 1632.   , 1586.67 , 1552.   , 1522.67 , 1501.33 ,
-       1474.67 , 1458.67 , 1437.33 , 1416.   , 1392.   , 1365.33 ,
-       1344.   , 1312.   , 1274.67 , 1242.67 , 1205.33 , 1168.   ,
-       1128.   , 1090.67 , 1048.   , 1008.   ,  965.333,  920.   ,
-       874.667,  834.667,  797.333,  752.   ,  714.667,  677.333,
-       648.   ,  616.   ,  589.333,  557.333,  530.667,  506.667,
-       477.333,  453.333,  418.667,  389.333,  362.667,  333.333,
-       309.333,  285.333,  264.   ,  242.667,  221.333 };
-
-       for (int bin=0; bin<ARA_IceAtten_bin; bin++) {
-           ARA_IceAtten_Depth[bin] = ARA_IceAtten_Depth_tmp1[bin];
-           ARA_IceAtten_Length[bin] = ARA_IceAtten_Length_tmp1[bin];
-           // printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth_tmp1[bin],ARA_IceAtten_Length_tmp1[bin]);
-           // cout << SYSTEMATICS_IceAttenuation << endl;
-       }
-     }
+    double ARA_IceAtten_Length_low[53] =
+       { 1994.67 , 1952.   , 1896.   , 1842.67 , 1797.33 , 1733.33 ,
+         1680.   , 1632.   , 1586.67 , 1552.   , 1522.67 , 1501.33 ,
+         1474.67 , 1458.67 , 1437.33 , 1416.   , 1392.   , 1365.33 ,
+         1344.   , 1312.   , 1274.67 , 1242.67 , 1205.33 , 1168.   ,
+         1128.   , 1090.67 , 1048.   , 1008.   ,  965.333,  920.   ,
+         874.667,  834.667,  797.333,  752.   ,  714.667,  677.333,
+         648.   ,  616.   ,  589.333,  557.333,  530.667,  506.667,
+         477.333,  453.333,  418.667,  389.333,  362.667,  333.333,
+         309.333,  285.333,  264.   ,  242.667,  221.333 };
+  
+    std::copy(begin(ARA_IceAtten_Depth_low), end(ARA_IceAtten_Depth_low), begin(ARA_IceAtten_Depth));
+    std::copy(begin(ARA_IceAtten_Length_low), end(ARA_IceAtten_Length_low), begin(ARA_IceAtten_Length));
+  }
 
    //Upper bound
    //if upper bound, then
-   if(SYSTEMATICS_IceAttenuation == 2){
-     double ARA_IceAtten_Depth_tmp2[53] =
+  if(SYSTEMATICS_IceAttenuation == 2){
+     double ARA_IceAtten_Depth_high[53] =
      { 79.9 ,   81.78,   85.3 ,   87.97,   91.87,   97.73,  101.95,
        109.4 ,  123.  ,  132.93,  141.24,  146.53,  153.01,  156.89,
        168.5 ,  184.5 ,  202.5 ,  245.45,  281.28,  362.2 ,  471.68,
@@ -286,7 +293,7 @@ if ( file.is_open() ) {
        1792.54, 1829.06, 1892.58, 1959.24, 2017.25, 2082.31, 2137.69,
        2194.45, 2245.24, 2302.73, 2369.08};
 
-      double ARA_IceAtten_Length_tmp2[53] =
+      double ARA_IceAtten_Length_high[53] =
        { 1994.67 , 1952.   , 1896.   , 1842.67 , 1797.33 , 1733.33 ,
          1680.   , 1632.   , 1586.67 , 1552.   , 1522.67 , 1501.33 ,
          1474.67 , 1458.67 , 1437.33 , 1416.   , 1392.   , 1365.33 ,
@@ -297,13 +304,14 @@ if ( file.is_open() ) {
          477.333,  453.333,  418.667,  389.333,  362.667,  333.333,
          309.333,  285.333,  264.   ,  242.667,  221.333};
 
-         for (int bin=0; bin<ARA_IceAtten_bin; bin++) {
-             ARA_IceAtten_Depth[bin] = ARA_IceAtten_Depth_tmp2[bin];
-             ARA_IceAtten_Length[bin] = ARA_IceAtten_Length_tmp2[bin];
-             printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth_tmp2[bin],ARA_IceAtten_Length_tmp2[bin]);
-             // cout << SYSTEMATICS_IceAttenuation << endl;
-         }
-       }
+      std::copy(begin(ARA_IceAtten_Depth_high), end(ARA_IceAtten_Depth_high), begin(ARA_IceAtten_Depth));
+      std::copy(begin(ARA_IceAtten_Length_high), end(ARA_IceAtten_Length_high), begin(ARA_IceAtten_Length));
+  }
+
+   for (int bin=0; bin<ARA_IceAtten_bin; bin++) {
+    printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth[bin],ARA_IceAtten_Length[bin]);
+   }
+
 }
 
 // read depth in positive value and return attenuation length (m) at the depth
@@ -398,109 +406,109 @@ Position IceModel::PickBalloonPosition() const {
 //       int err;
 //       // Does it leave in an ice bin
 //       if (IceThickness(thisnuexitearth) && thisnuexitearth.Lat()<COASTLINE) { // if this is an ice bin in the Antarctic
-// 	//cout << "inu is " << inu << " it's in ice.\n";
-// 	//cout << "this is an ice bin.\n";
-// 	thisnuexitice=thisnuexitearth;
-// 	thisr_exitice=thisnuexitearth;
-// 	if (thisnuexitice.Mag()>Surface(thisnuexitice)) { // if the exit point is above the surface
-// 	  if ((thisnuexitice.Mag()-Surface(thisnuexitice))/cos(interaction1->nnu.Theta())>5.E3) {
-// 	    WhereDoesItExitIce(inu,thisnuexitearth,interaction1->nnu,5.E3, // then back up and find it more precisely
-// 			       thisr_exitice);
-// 	    thisnuexitice=(5000.)*interaction1->nnu;
-// 	    thisnuexitice+=thisr_exitice;
-// 	    count1++;
-// 	  }
-// 	  if ((thisnuexitice.Mag()-Surface(thisnuexitice))/cos(interaction1->nnu.Theta())>5.E2) {
+//  //cout << "inu is " << inu << " it's in ice.\n";
+//  //cout << "this is an ice bin.\n";
+//  thisnuexitice=thisnuexitearth;
+//  thisr_exitice=thisnuexitearth;
+//  if (thisnuexitice.Mag()>Surface(thisnuexitice)) { // if the exit point is above the surface
+//    if ((thisnuexitice.Mag()-Surface(thisnuexitice))/cos(interaction1->nnu.Theta())>5.E3) {
+//      WhereDoesItExitIce(inu,thisnuexitearth,interaction1->nnu,5.E3, // then back up and find it more precisely
+//             thisr_exitice);
+//      thisnuexitice=(5000.)*interaction1->nnu;
+//      thisnuexitice+=thisr_exitice;
+//      count1++;
+//    }
+//    if ((thisnuexitice.Mag()-Surface(thisnuexitice))/cos(interaction1->nnu.Theta())>5.E2) {
 //
-// 	    WhereDoesItExitIce(inu,thisnuexitice,interaction1->nnu,5.E2, // then back up and find it more precisely
-// 			       thisr_exitice);
-// 	    thisnuexitice=5.E2*interaction1->nnu;
-// 	    thisnuexitice+=thisr_exitice;
-// 	    count1++;
-// 	  }
-// 	  if ((thisnuexitice.Mag()-Surface(thisnuexitice))/cos(interaction1->nnu.Theta())>50.) {
+//      WhereDoesItExitIce(inu,thisnuexitice,interaction1->nnu,5.E2, // then back up and find it more precisely
+//             thisr_exitice);
+//      thisnuexitice=5.E2*interaction1->nnu;
+//      thisnuexitice+=thisr_exitice;
+//      count1++;
+//    }
+//    if ((thisnuexitice.Mag()-Surface(thisnuexitice))/cos(interaction1->nnu.Theta())>50.) {
 //
-// 	    WhereDoesItExitIce(inu,thisnuexitice,interaction1->nnu,50., // then back up and find it more precisely
-// 			     thisr_exitice);
-// 	    count1++;
-// 	  } // end third wheredoesitexit
-// 	  thisnuexitice=thisr_exitice;
-// 	} // if the exit point overshoots
-// 	else
-// 	  thisnuexitice=thisnuexitearth;
+//      WhereDoesItExitIce(inu,thisnuexitice,interaction1->nnu,50., // then back up and find it more precisely
+//           thisr_exitice);
+//      count1++;
+//    } // end third wheredoesitexit
+//    thisnuexitice=thisr_exitice;
+//  } // if the exit point overshoots
+//  else
+//    thisnuexitice=thisnuexitearth;
 //
-// 	// should also correct for undershooting
+//  // should also correct for undershooting
 //     if (count1>10)
 //       cout << "count1 is " << count1 << "\n";
 //       } // if it's an Antarctic ice bin
 //       else { // it leaves a rock bin so back up and find where it leaves ice
-// 	//cout << "inu is " << inu << " it's in rock.\n";
-// 	if (thisr_in.Distance(thisnuexitearth)>5.E4) {
-// 	  count2++;
-// 	  if (WhereDoesItExitIce(inu,thisnuexitearth,interaction1->nnu,5.E4, // then back up and find it more precisely
-// 				 thisr_exitice)) {
+//  //cout << "inu is " << inu << " it's in rock.\n";
+//  if (thisr_in.Distance(thisnuexitearth)>5.E4) {
+//    count2++;
+//    if (WhereDoesItExitIce(inu,thisnuexitearth,interaction1->nnu,5.E4, // then back up and find it more precisely
+//         thisr_exitice)) {
 //
-// 	    thisnuexitice=(5.E4)*interaction1->nnu;
-// 	    thisnuexitice+=thisr_exitice;
-// 	    //cout << "inu is " << inu << " I'm here 1.\n";
+//      thisnuexitice=(5.E4)*interaction1->nnu;
+//      thisnuexitice+=thisr_exitice;
+//      //cout << "inu is " << inu << " I'm here 1.\n";
 //
-// 	  }
-// 	  else {
-// 	    interaction1->neverseesice=1;
+//    }
+//    else {
+//      interaction1->neverseesice=1;
 //             interaction1->pickunbiased = 0;
-// 	    return 0;
-// 	  }
-// 	}
-// 	else
-// 	  thisnuexitice=thisnuexitearth;
-// 	//   WhereDoesItExitIce(inu,thisnuexit,interaction1->nnu,5.E4, // then back up and find it more precisely
-// // 			     thisr_exitice);
-// // 	  thisnuexit=5.E4*interaction1->nnu;
-// // 	  thisnuexit+=thisr_exitice;
-// 	if (thisr_in.Distance(thisnuexitice)>5.E3) {
+//      return 0;
+//    }
+//  }
+//  else
+//    thisnuexitice=thisnuexitearth;
+//  //   WhereDoesItExitIce(inu,thisnuexit,interaction1->nnu,5.E4, // then back up and find it more precisely
+// //            thisr_exitice);
+// //     thisnuexit=5.E4*interaction1->nnu;
+// //     thisnuexit+=thisr_exitice;
+//  if (thisr_in.Distance(thisnuexitice)>5.E3) {
 //
 //
-// 	  if (WhereDoesItExitIce(inu,thisnuexitice,interaction1->nnu,5.E3, // then back up and find it more precisely
-// 				  thisr_exitice)) {
-// 	    count2++;
-// 	    //interaction1->neverseesice=1;
-// 	    thisnuexitice=5.E3*interaction1->nnu;
-// 	    thisnuexitice+=thisr_exitice;
-// 	    //cout << "inu is " << inu << " I'm here 2\n";
-// 	    //return 0;
+//    if (WhereDoesItExitIce(inu,thisnuexitice,interaction1->nnu,5.E3, // then back up and find it more precisely
+//          thisr_exitice)) {
+//      count2++;
+//      //interaction1->neverseesice=1;
+//      thisnuexitice=5.E3*interaction1->nnu;
+//      thisnuexitice+=thisr_exitice;
+//      //cout << "inu is " << inu << " I'm here 2\n";
+//      //return 0;
 //
-// 	  }
-// 	}
-// 	if (thisr_in.Distance(thisnuexitice)>5.E2) {
-//
-//
-// 	  if (WhereDoesItExitIce(inu,thisnuexitice,interaction1->nnu,5.E2, // then back up and find it more precisely
-// 				  thisr_exitice)) {
-// 	    count2++;
-// 	    //interaction1->neverseesice=1;
-//
-// 	    thisnuexitice=5.E2*interaction1->nnu;
-// 	    thisnuexitice+=thisr_exitice;
-// 	    //cout << "inu is " << inu << " I'm here 3\n";
-// 	    //return 0;
-// 	  }
-//
-// 	}
-// 	if (thisr_in.Distance(thisnuexitice)>50.) {
+//    }
+//  }
+//  if (thisr_in.Distance(thisnuexitice)>5.E2) {
 //
 //
-// 	  if (WhereDoesItExitIce(inu,thisnuexitice,interaction1->nnu,50., // then back up and find it more precisely
-// 				  thisr_exitice)) {
-// 	    //interaction1->neverseesice=1;
-// 	    count2++;
-// 	    //cout << "inu is " << inu << " I'm here 4\n";
-// 	    //return 0;
-// 	  }
-// 	}
-// 	thisnuexitice=thisr_exitice;
-// 	if (count2>10)
-// 	  cout << "count1 is " << count2 << "\n";
-// 	//	else return 0;  // never reaches any ice or is it because our step is too big
+//    if (WhereDoesItExitIce(inu,thisnuexitice,interaction1->nnu,5.E2, // then back up and find it more precisely
+//          thisr_exitice)) {
+//      count2++;
+//      //interaction1->neverseesice=1;
+//
+//      thisnuexitice=5.E2*interaction1->nnu;
+//      thisnuexitice+=thisr_exitice;
+//      //cout << "inu is " << inu << " I'm here 3\n";
+//      //return 0;
+//    }
+//
+//  }
+//  if (thisr_in.Distance(thisnuexitice)>50.) {
+//
+//
+//    if (WhereDoesItExitIce(inu,thisnuexitice,interaction1->nnu,50., // then back up and find it more precisely
+//          thisr_exitice)) {
+//      //interaction1->neverseesice=1;
+//      count2++;
+//      //cout << "inu is " << inu << " I'm here 4\n";
+//      //return 0;
+//    }
+//  }
+//  thisnuexitice=thisr_exitice;
+//  if (count2>10)
+//    cout << "count1 is " << count2 << "\n";
+//  //  else return 0;  // never reaches any ice or is it because our step is too big
 //       } // if the nu leaves a rock bin
 //     } // end wheredoesitleave
 //     else {
@@ -510,29 +518,29 @@ Position IceModel::PickBalloonPosition() const {
 //     }
 //     // end finding where it leaves ice
 //
-// // 	if (thisnuexit.Mag()<Surface(thisnuexit)) { // if the exit point is below the surface
-// // 	  WhereDoesItExitIceForward(thisnuexit,interaction1->nnu,20., // then find it more finely
-// // 			     thisr_exitice);
-// // 	  thisnuexit=thisr_enterice;
-// // 	  // then back up and find it more precisely
-// // 	}
+// //   if (thisnuexit.Mag()<Surface(thisnuexit)) { // if the exit point is below the surface
+// //     WhereDoesItExitIceForward(thisnuexit,interaction1->nnu,20., // then find it more finely
+// //            thisr_exitice);
+// //     thisnuexit=thisr_enterice;
+// //     // then back up and find it more precisely
+// //   }
 //
 //     if (WhereDoesItEnterIce(thisnuexitearth,interaction1->nnu,5.E3, // first pass with sort of course binning
-// 			    thisr_enterice)) {
+//          thisr_enterice)) {
 //       thisr_enterice_tmp=thisr_enterice+5.E3*interaction1->nnu;
 //       //cout << "inu is " << inu << " thisr_enterice is ";thisr_enterice.Print();
 //       if (WhereDoesItEnterIce(thisr_enterice_tmp,interaction1->nnu,20., // second pass with finer binning
-// 			      thisr_enterice)) {
-// 	//cout << "inu is " << inu << " thisr_enterice is ";thisr_enterice.Print();
-// 	//cout << "entersice is ";thisr_enterice.Print();
-// 	//cout << "thisnuexitice is ";thisnuexitice.Print();
-// 	interaction1->pathlength_inice=thisr_enterice.Distance(thisnuexitice);
-// 	//cout << "distance is " << distance << "\n";
-// 	//cout << "inu " << inu << " thisr_enterice, thisnuexitice are ";thisr_enterice.Print();thisnuexitice.Print();
-// 	interaction1->posnu=interaction1->pathlength_inice*gRandom->Rndm()*interaction1->nnu;
-// 	interaction1->posnu=interaction1->posnu+thisr_enterice;
-// 	//cout << "inu" << inu << " thisr_enterice, thisnuexitice are ";thisr_enterice.Print();thisnuexitice.Print();
-// 	//cout << "inu " << inu << " distance is " << distance << "\n";
+//            thisr_enterice)) {
+//  //cout << "inu is " << inu << " thisr_enterice is ";thisr_enterice.Print();
+//  //cout << "entersice is ";thisr_enterice.Print();
+//  //cout << "thisnuexitice is ";thisnuexitice.Print();
+//  interaction1->pathlength_inice=thisr_enterice.Distance(thisnuexitice);
+//  //cout << "distance is " << distance << "\n";
+//  //cout << "inu " << inu << " thisr_enterice, thisnuexitice are ";thisr_enterice.Print();thisnuexitice.Print();
+//  interaction1->posnu=interaction1->pathlength_inice*gRandom->Rndm()*interaction1->nnu;
+//  interaction1->posnu=interaction1->posnu+thisr_enterice;
+//  //cout << "inu" << inu << " thisr_enterice, thisnuexitice are ";thisr_enterice.Print();thisnuexitice.Print();
+//  //cout << "inu " << inu << " distance is " << distance << "\n";
 //       }
 //     }
 //     else {
@@ -674,8 +682,8 @@ Vector IceModel::GetSurfaceNormal(const Position &r_out) const {
 } //method GetSurfaceNormal
 
 Position IceModel::WhereDoesItEnterIce(const Position &posnu,
-				       const Vector &nnu,
-				       double stepsize) const {
+               const Vector &nnu,
+               double stepsize) const {
   // now get exit point...
   //   see my geometry notes.
   // parameterize the neutrino trajectory and just see where it
@@ -716,20 +724,20 @@ Position IceModel::WhereDoesItEnterIce(const Position &posnu,
       local_surface = Surface(lon,lat);
 
       if (lat>COASTLINE)
-	left_edge=1;
+  left_edge=1;
 
       rock2=pow((local_surface - IceThickness(lon,lat) - WaterDepth(lon,lat)),2);
       surface2=pow(local_surface,2);
 
       if (ice_model==0) {
-	if ((int)(lat)==COASTLINE && rock_previous2 < x2 && surface2 > x2)
-	  left_edge=1;
+  if ((int)(lat)==COASTLINE && rock_previous2 < x2 && surface2 > x2)
+    left_edge=1;
       } //if (Crust 2.0)
     } //if (neutrino has stepped into new lon/lat bin)
 
     if ((x_previous2>rock_previous2 && x2<rock2)
-	|| (x_previous2<surface_previous2 && x2>surface2)
-	|| left_edge) {
+  || (x_previous2<surface_previous2 && x2>surface2)
+  || left_edge) {
 
       r_enterice = x;
       // this gets you out of the loop.
@@ -774,16 +782,16 @@ Position IceModel::WhereDoesItEnter(const Position &posnu,const Vector &nnu) con
     // if interaction occurs below surface, as it should
 
     if (delta>-0.001) {
-	a=p*costheta+sqrt(R*R*costheta*costheta+2*delta*R*sintheta*sintheta); // chord length
-	if (a<0) {
-	    cout << "Negative chord length: " << a << "\n";
-	} //end if
+  a=p*costheta+sqrt(R*R*costheta*costheta+2*delta*R*sintheta*sintheta); // chord length
+  if (a<0) {
+      cout << "Negative chord length: " << a << "\n";
+  } //end if
     } //end if (interaction below surface)
     else if (delta<=-0.001) {
 
-	//cout << "Error in interaction position.  whichray is " << whichray << "\n";
-      //	cout << "lon, lat from WhereDoesItEnter is " << " " << lon << " " << lat << "\n";
-      //	cout << "geoid, surface, p, surface-p are " << Geoid(lat) << " " << Surface(lon,lat) << ", " << p << " , "<<(Surface(lon,lat)-p)<<"\n";
+  //cout << "Error in interaction position.  whichray is " << whichray << "\n";
+      //  cout << "lon, lat from WhereDoesItEnter is " << " " << lon << " " << lat << "\n";
+      //  cout << "geoid, surface, p, surface-p are " << Geoid(lat) << " " << Surface(lon,lat) << ", " << p << " , "<<(Surface(lon,lat)-p)<<"\n";
 
     } //else if: error: interaction takes place above the surface
 
@@ -842,11 +850,11 @@ int IceModel::WhereDoesItEnter_sphere(const Position &sphere_in, const Vector &n
 
     // if sphere_in is inside the earth
     if (delta>-0.001) {
-	//a=p*costheta+sqrt(R*R*costheta*costheta+2*delta*R*sintheta*sintheta); // chord length
-	a=p*costheta + sqrt(R*R-p*p*sintheta*sintheta); // chord length
-	if (a<0) {
-	    cout << "Negative chord length: " << a << "\n";
-	} //end if
+  //a=p*costheta+sqrt(R*R*costheta*costheta+2*delta*R*sintheta*sintheta); // chord length
+  a=p*costheta + sqrt(R*R-p*p*sintheta*sintheta); // chord length
+  if (a<0) {
+      cout << "Negative chord length: " << a << "\n";
+  } //end if
 
         // first approx
         r_in = sphere_in - a*nnu;
@@ -920,16 +928,16 @@ Position IceModel::WhereDoesItLeave(const Position &posnu,const Vector &nnu) con
     // if interaction occurs below surface, as it should
 
     if (delta>-0.001) {
-	a=sqrt(R*R*costheta*costheta+2*delta*R*sintheta*sintheta) - p*costheta; // chord length
-	if (a<0) {
-	    cout << "Negative chord length: " << a << "\n";
-	} //end if
+  a=sqrt(R*R*costheta*costheta+2*delta*R*sintheta*sintheta) - p*costheta; // chord length
+  if (a<0) {
+      cout << "Negative chord length: " << a << "\n";
+  } //end if
     } //end if (interaction below surface)
     else if (delta<=-0.001) {
 
-	//cout << "Error in interaction position.  whichray is " << whichray << "\n";
-      //	cout << "lon, lat from WhereDoesItLeave is " << " " << lon << " " << lat << "\n";
-      //	cout << "geoid, surface, p, surface-p are " << Geoid(lat) << " " << Surface(lon,lat) << " " << p << " , "<<(Surface(lon,lat)-p)<<"\n";
+  //cout << "Error in interaction position.  whichray is " << whichray << "\n";
+      //  cout << "lon, lat from WhereDoesItLeave is " << " " << lon << " " << lat << "\n";
+      //  cout << "geoid, surface, p, surface-p are " << Geoid(lat) << " " << Surface(lon,lat) << " " << p << " , "<<(Surface(lon,lat)-p)<<"\n";
 
     } //else if: error: interaction takes place above the surface
 
@@ -950,9 +958,9 @@ Position IceModel::WhereDoesItLeave(const Position &posnu,const Vector &nnu) con
 // Below WhereDoesItEnterIce is from icemodel in icemc.
 //--------------------------------------------------
 // int IceModel::WhereDoesItEnterIce(const Position &posnu,
-// 				       const Vector &nnu,
-// 				       double stepsize,
-// 				       Position &r_enterice) {
+//               const Vector &nnu,
+//               double stepsize,
+//               Position &r_enterice) {
 //   // now get exit point...
 //   //   see my geometry notes.
 //   // parameterize the neutrino trajectory and just see where it
@@ -1002,14 +1010,14 @@ Position IceModel::WhereDoesItLeave(const Position &posnu,const Vector &nnu) con
 //       surface2=pow(local_surface,2);
 //
 //       if (ice_model==0) {
-// 	if ((int)(lat)==COASTLINE && rock_previous2 < x2 && surface2 > x2)
-// 	  left_edge=1;
+//  if ((int)(lat)==COASTLINE && rock_previous2 < x2 && surface2 > x2)
+//    left_edge=1;
 //       } //if (Crust 2.0)
 //     } //if (neutrino has stepped into new lon/lat bin)
 //
 //     if ((((x_previous2>rock_previous2 && x2<rock2) // crosses rock boundary from above
-// 	 || (x_previous2<surface_previous2 && x2>surface2)) && ice_thickness>0 && lat<COASTLINE) // crosses surface boundary from below
-// 	|| left_edge) {
+//   || (x_previous2<surface_previous2 && x2>surface2)) && ice_thickness>0 && lat<COASTLINE) // crosses surface boundary from below
+//  || left_edge) {
 //       //  cout << "lat, COASTLINE, left_edge is " << lat << " " << COASTLINE<< " " << left_edge << "\n";
 //       //cout << "x_previous2, surface_previous, x2, surface2 are " << x_previous2 << " " << surface_previous2 << " " << x2 << " " << surface2 << "\n";
 //       r_enterice = x;
@@ -1042,9 +1050,9 @@ Position IceModel::WhereDoesItLeave(const Position &posnu,const Vector &nnu) con
 //
 //
 // int IceModel::WhereDoesItExitIce(int inu,const Position &posnu,
-// 				       const Vector &nnu,
-// 				       double stepsize,
-// 				       Position &r_enterice) {
+//               const Vector &nnu,
+//               double stepsize,
+//               Position &r_enterice) {
 //   // now get exit point...
 //   //   see my geometry notes.
 //   // parameterize the neutrino trajectory and just see where it
@@ -1105,8 +1113,8 @@ Position IceModel::WhereDoesItLeave(const Position &posnu,const Vector &nnu) con
 //       surface2=pow(local_surface,2);
 //
 //       if (ice_model==0) {
-// 	if ((int)(lat)==COASTLINE && rock_previous2 < x2 && surface2 > x2)
-// 	  left_edge=1;
+//  if ((int)(lat)==COASTLINE && rock_previous2 < x2 && surface2 > x2)
+//    left_edge=1;
 //       } //if (Crust 2.0)
 //     } //if (neutrino has stepped into new lon/lat bin)
 //
@@ -1114,8 +1122,8 @@ Position IceModel::WhereDoesItLeave(const Position &posnu,const Vector &nnu) con
 //       cout << "inu, x_previous2, rock_previous2, x2, rock2 are " << inu << " " << x_previous2 << " " << rock_previous2 << " " << x2 << " " << rock2 << "\n";
 //
 //     if ((((x_previous2<rock_previous2 && x2>rock2) // crosses rock boundary from above
-// 	 || (x_previous2>surface_previous2 && x2<surface2)) && ice_thickness>0 && lat<COASTLINE) // crosses surface boundary from above
-// 	|| left_edge) {
+//   || (x_previous2>surface_previous2 && x2<surface2)) && ice_thickness>0 && lat<COASTLINE) // crosses surface boundary from above
+//  || left_edge) {
 //       //  cout << "lat, COASTLINE, left_edge is " << lat << " " << COASTLINE<< " " << left_edge << "\n";
 //       //cout << "x_previous2, surface_previous, x2, surface2 are " << x_previous2 << " " << surface_previous2 << " " << x2 << " " << surface2 << "\n";
 //       r_enterice = x;
@@ -1358,33 +1366,33 @@ double IceModel::EffectiveAttenuationLength(const Position &pos,const int &which
     {
       depth_index=int(depth*419.9/localmaxdepth);//use 420 m ice shelf attenuation length data as the standard, squeeze or stretch if localmaxdepth is longer or shorter than 420m.
       if(RossIceShelf(pos) || RonneIceShelf(pos))
-	{
-	  if(whichray==0)
-	    attenuation_length=l_shelfup[depth_index];
-	  else if(whichray==1)
-	    attenuation_length=l_shelfdown[depth_index];
-	  else
-	    cerr << " wrong attenuation length " <<endl;
+  {
+    if(whichray==0)
+      attenuation_length=l_shelfup[depth_index];
+    else if(whichray==1)
+      attenuation_length=l_shelfdown[depth_index];
+    else
+      cerr << " wrong attenuation length " <<endl;
 
-	  //for sanity check
-	  if((depth_index+0.5)!=d_shelfup[depth_index])
-	    {
-	      cerr << "the index of the array l_iceshelfup is wrong!" << endl;
-	      exit(1);
-	    }
-	}
+    //for sanity check
+    if((depth_index+0.5)!=d_shelfup[depth_index])
+      {
+        cerr << "the index of the array l_iceshelfup is wrong!" << endl;
+        exit(1);
+      }
+  }
       else //in ice sheet of westland
-	{
-	  if(whichray==0)
-	    attenuation_length=l_westlandup[depth_index];
-	  else if(whichray==1)
-	    attenuation_length=l_westlanddown[depth_index];
-	  else
-	    cerr << " wrong attenuation length " <<endl;
-      	}
+  {
+    if(whichray==0)
+      attenuation_length=l_westlandup[depth_index];
+    else if(whichray==1)
+      attenuation_length=l_westlanddown[depth_index];
+    else
+      cerr << " wrong attenuation length " <<endl;
+        }
 
       if(mooreBayFlag)//if use Moore's Bay measured data for the west land
-	attenuation_length*=1.717557; //about 450 m (field attenuation length) for one whole way when assuming -3dB for the power loss at the bottom
+  attenuation_length*=1.717557; //about 450 m (field attenuation length) for one whole way when assuming -3dB for the power loss at the bottom
     }
   else //in east antarctica or constant ice thickness
      {
@@ -1394,14 +1402,14 @@ double IceModel::EffectiveAttenuationLength(const Position &pos,const int &which
 //        }
        depth_index =int(depth*(2809.9/localmaxdepth));
        //if (inu<10)
-	 //       cout << "depth_index is " << depth_index << "\n";
+   //       cout << "depth_index is " << depth_index << "\n";
 
        if(whichray==0)
-	 attenuation_length =l_sheetup[depth_index];
+   attenuation_length =l_sheetup[depth_index];
        else if(whichray==1)
-	 attenuation_length =l_sheetdown[depth_index];
+   attenuation_length =l_sheetdown[depth_index];
        else
-	 cerr << " wrong attenuation length " <<endl;
+   cerr << " wrong attenuation length " <<endl;
      } //else
 
   return attenuation_length;
@@ -1422,34 +1430,34 @@ double IceModel::EffectiveAttenuationLength(Settings *settings1, const Position 
     {
       depth_index=int(depth*419.9/localmaxdepth);//use 420 m ice shelf attenuation length data as the standard, squeeze or stretch if localmaxdepth is longer or shorter than 420m.
       if(RossIceShelf(pos) || RonneIceShelf(pos))
-	{
-	  if(whichray==0)
-	    attenuation_length=l_shelfup[depth_index];
-	  else if(whichray==1)
-	    attenuation_length=l_shelfdown[depth_index];
-	  else
-	    cerr << " wrong attenuation length " <<endl;
+  {
+    if(whichray==0)
+      attenuation_length=l_shelfup[depth_index];
+    else if(whichray==1)
+      attenuation_length=l_shelfdown[depth_index];
+    else
+      cerr << " wrong attenuation length " <<endl;
 
-	  //for sanity check
-	  if((depth_index+0.5)!=d_shelfup[depth_index])
-	    {
-	      cerr << "the index of the array l_iceshelfup is wrong!" << endl;
-	      exit(1);
-	    }
-	}
+    //for sanity check
+    if((depth_index+0.5)!=d_shelfup[depth_index])
+      {
+        cerr << "the index of the array l_iceshelfup is wrong!" << endl;
+        exit(1);
+      }
+  }
       else //in ice sheet of westland
-	{
-	  if(whichray==0)
-	    attenuation_length=l_westlandup[depth_index];
-	  else if(whichray==1)
-	    attenuation_length=l_westlanddown[depth_index];
-	  else
-	    cerr << " wrong attenuation length " <<endl;
-      	}
+  {
+    if(whichray==0)
+      attenuation_length=l_westlandup[depth_index];
+    else if(whichray==1)
+      attenuation_length=l_westlanddown[depth_index];
+    else
+      cerr << " wrong attenuation length " <<endl;
+        }
 
       //if(mooreBayFlag)//if use Moore's Bay measured data for the west land
       if(settings1->MOOREBAY)//if use Moore's Bay measured data for the west land
-	attenuation_length*=1.717557; //about 450 m (field attenuation length) for one whole way when assuming -3dB for the power loss at the bottom
+  attenuation_length*=1.717557; //about 450 m (field attenuation length) for one whole way when assuming -3dB for the power loss at the bottom
     }
   else //in east antarctica or constant ice thickness
      {
@@ -1459,14 +1467,14 @@ double IceModel::EffectiveAttenuationLength(Settings *settings1, const Position 
 //        }
        depth_index =int(depth*(2809.9/localmaxdepth));
        //if (inu<10)
-	 //       cout << "depth_index is " << depth_index << "\n";
+   //       cout << "depth_index is " << depth_index << "\n";
 
        if(whichray==0)
-	 attenuation_length =l_sheetup[depth_index];
+   attenuation_length =l_sheetup[depth_index];
        else if(whichray==1)
-	 attenuation_length =l_sheetdown[depth_index];
+   attenuation_length =l_sheetdown[depth_index];
        else
-	 cerr << " wrong attenuation length " <<endl;
+   cerr << " wrong attenuation length " <<endl;
      } //else
 
   return attenuation_length;
@@ -1604,8 +1612,8 @@ void IceModel::ReadIceThickness() {
   int temp1,temp2,temp3,temp4,temp5,temp6;
 
   IceThicknessFile >> tempBuf1 >> temp1 >> tempBuf2 >> temp2
-		   >> tempBuf3 >> temp3 >> tempBuf4 >> temp4
-		   >> tempBuf5 >> temp5 >> tempBuf6 >> temp6;
+       >> tempBuf3 >> temp3 >> tempBuf4 >> temp4
+       >> tempBuf5 >> temp5 >> tempBuf6 >> temp6;
 
   if(tempBuf1 == string("ncols")) {
     nCols_ice=temp1;
@@ -1633,7 +1641,7 @@ void IceModel::ReadIceThickness() {
     for(int colNum=0;colNum<nCols_ice;colNum++) {
       IceThicknessFile >> theValue;
       if(theValue==NODATA)
-	theValue=0; //Set ice depth to 0 where we have no data.
+  theValue=0; //Set ice depth to 0 where we have no data.
       ice_thickness_array[colNum][rowNum] = double(theValue); //This stores data as ice_thickness_array[easting][northing]
     }//for
   }//for
@@ -1661,8 +1669,8 @@ void IceModel::ReadGroundBed() {
   int temp1,temp2,temp3,temp4,temp5,temp6;
 
   GroundBedFile >> tempBuf1 >> temp1 >> tempBuf2 >> temp2
-		>> tempBuf3 >> temp3 >> tempBuf4 >> temp4
-		>> tempBuf5 >> temp5 >> tempBuf6 >> temp6;
+    >> tempBuf3 >> temp3 >> tempBuf4 >> temp4
+    >> tempBuf5 >> temp5 >> tempBuf6 >> temp6;
 
   if(tempBuf1 == string("ncols")) {
     nCols_ground=temp1;
@@ -1692,7 +1700,7 @@ void IceModel::ReadGroundBed() {
       GroundBedFile >> theValue;
 
       if(theValue==NODATA)
-	theValue=0; //Set elevation to 0 where we have no data.
+  theValue=0; //Set elevation to 0 where we have no data.
       ground_elevation[colNum][rowNum] = double(theValue);
       //if (theValue != -96 && theValue != 0)
       //cout<<"ground_elevation: "<<theValue<<endl;
@@ -1722,8 +1730,8 @@ void IceModel::ReadWaterDepth() {
   int temp1,temp2,temp3,temp4,temp5,temp6;
 
   WaterDepthFile >> tempBuf1 >> temp1 >> tempBuf2 >> temp2
-		 >> tempBuf3 >> temp3 >> tempBuf4 >> temp4
-		 >> tempBuf5 >> temp5 >> tempBuf6 >> temp6;
+     >> tempBuf3 >> temp3 >> tempBuf4 >> temp4
+     >> tempBuf5 >> temp5 >> tempBuf6 >> temp6;
 
   if(tempBuf1 == string("ncols")) {
     nCols_water=temp1;
@@ -1753,7 +1761,7 @@ void IceModel::ReadWaterDepth() {
       WaterDepthFile >> theValue;
 
       if(theValue==NODATA)
-	theValue=0; //Set depth to 0 where we have no data.
+  theValue=0; //Set depth to 0 where we have no data.
       water_depth[colNum][rowNum] = double(theValue);
     }//for
   }//for
