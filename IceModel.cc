@@ -236,7 +236,7 @@ if ( file.is_open() ) {
        ARA_IceAtten_Depth[bin] = ARA_IceAtten_Depth_tmp0[bin];
        ARA_IceAtten_Length[bin] = ARA_IceAtten_Length_tmp0[bin];
        printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth_tmp0[bin],ARA_IceAtten_Length_tmp0[bin]);
-       cout << SYSTEMATICS_IceAttenuation << endl;
+       // cout << SYSTEMATICS_IceAttenuation << endl;
    }
 
 }
@@ -268,8 +268,8 @@ if ( file.is_open() ) {
        for (int bin=0; bin<ARA_IceAtten_bin; bin++) {
            ARA_IceAtten_Depth[bin] = ARA_IceAtten_Depth_tmp1[bin];
            ARA_IceAtten_Length[bin] = ARA_IceAtten_Length_tmp1[bin];
-           printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth_tmp1[bin],ARA_IceAtten_Length_tmp1[bin]);
-           cout << SYSTEMATICS_IceAttenuation << endl;
+           // printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth_tmp1[bin],ARA_IceAtten_Length_tmp1[bin]);
+           // cout << SYSTEMATICS_IceAttenuation << endl;
        }
      }
 
@@ -301,7 +301,7 @@ if ( file.is_open() ) {
              ARA_IceAtten_Depth[bin] = ARA_IceAtten_Depth_tmp2[bin];
              ARA_IceAtten_Length[bin] = ARA_IceAtten_Length_tmp2[bin];
              printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth_tmp2[bin],ARA_IceAtten_Length_tmp2[bin]);
-             cout << SYSTEMATICS_IceAttenuation << endl;
+             // cout << SYSTEMATICS_IceAttenuation << endl;
          }
        }
 }
