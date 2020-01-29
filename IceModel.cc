@@ -226,6 +226,8 @@ if ( file.is_open() ) {
  //More details can be found on Eugene's Thesis: http://radiorm.physics.ohio-state.edu/elog/Write-Ups/170504_105713/Thesis_-_Eugene_Hong.pdf, p. 54 and 132.
 //SYSTEMAT_IceAtten = settings1->SYSTEMATICS_IceAtten;
  // int SYSTEMAT_IceAtten = 0;
+ // NB: the difference in the three models are the *depths* not the *length*s
+ // NB: that's a somewhat non-traditional way of doing it, but should work
  ARA_IceAtten_bin = 53;
  if(SYSTEMATICS_IceAttenuation == 0){
    double ARA_IceAtten_Depth_central[53] = 
