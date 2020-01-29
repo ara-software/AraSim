@@ -311,7 +311,7 @@ if ( file.is_open() ) {
   }
 
    for (int bin=0; bin<ARA_IceAtten_bin; bin++) {
-    printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth[bin],ARA_IceAtten_Length[bin]);
+    // printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth[bin],ARA_IceAtten_Length[bin]);
    }
 
 }
