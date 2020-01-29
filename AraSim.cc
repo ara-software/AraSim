@@ -1,6 +1,6 @@
 // ROOT includes
 #include "TFile.h"
-#include "TRandom3.h" 
+#include "TRandom3.h"
 #include "TTree.h"
 
 // AraSim includes
@@ -42,7 +42,7 @@ void test();
 string outputdir="outputs";
 
 int main(int argc, char **argv) {   // read setup.txt file
-    
+
     Settings *settings1 = new Settings();
 
     cout<<"\n\tDefault values!"<<endl;
@@ -88,7 +88,7 @@ int main(int argc, char **argv) {   // read setup.txt file
         cerr<<"There are "<< settings_compatibility_error<<" errors from settings. Check error messages."<<endl;
         return -1;
     }
- 
+
     cout<<"\n\tNew values!"<<endl;
     cout<<"NNU : "<<settings1->NNU<<endl;
     cout<<"ICE_MODEL : "<<settings1->ICE_MODEL<<endl;
@@ -119,35 +119,35 @@ int main(int argc, char **argv) {   // read setup.txt file
         gRandom = test_randm3;
     } else {
         gRandom->SetSeed(settings1->SEED + atoi(run_no.c_str() ) );
-            
+
     }
     //cout<<"first random from TRandom3 : "<<test_randm3->Rndm()<<"\n";
     cout<<"first random : "<<gRandom->Rndm()<<"\n";
 
     // IceModel *icemodel=new IceModel(ICE_MODEL + NOFZ*10,CONSTANTICETHICKNESS * 1000 + CONSTANTCRUST * 100 + FIXEDELEVATION * 10 + 0,MOOREBAY);// creates Antarctica ice model
-    IceModel *icemodel=new IceModel(settings1->ICE_MODEL + settings1->NOFZ*10,settings1->CONSTANTICETHICKNESS * 1000 + settings1->CONSTANTCRUST * 100 + settings1->FIXEDELEVATION * 10 + 0,settings1->MOOREBAY);// creates Antarctica ice model
-    // IceModel inherits from EarthModel  
+    IceModel *icemodel=new IceModel(settings1->ICE_MODEL + settings1->NOFZ*10,settings1->CONSTANTICETHICKNESS * 1000 + settings1->CONSTANTCRUST * 100 + settings1->FIXEDELEVATION * 10 + 0,settings1->MOOREBAY, settings1->SYSTEMATICS_IceAtten);// creates Antarctica ice model
+    // IceModel inherits from EarthModel
 
     cout<<endl;
     cout<<"Surface at (log:0, lat:0) : "<<icemodel->Surface(0., 0.)<<endl;
     cout<<"SurfaceAboveGeoid at (log:0, lat:0) : "<<icemodel->SurfaceAboveGeoid(0., 0.)<<endl;
-    
+
     // Detector *detector=new Detector(settings1, icemodel); // builds antenna array, 0 for testbed
     Detector *detector=new Detector(settings1, icemodel, setupfile ); // builds antenna array, 0 for testbed
     cout<<"end calling detector"<<endl;
     // Detector *detector=new Detector(settings1->DETECTOR); // builds antenna array, 0 for testbed
 
-    Trigger *trigger=new Trigger(detector, settings1); // builds the trigger  
+    Trigger *trigger=new Trigger(detector, settings1); // builds the trigger
     // Efficiencies *efficiencies=new Efficiencies(detector->getnRx(),outputdir); // keeps track of efficiencies at each stage of the simulation
     Efficiencies *efficiencies=new Efficiencies(100,outputdir); // keeps track of efficiencies at each stage of the simulation
     cout<<"called Efficiencies"<<endl;
-    
+
     Spectra *spectra=new Spectra(settings1->EXPONENT); // gets library (or whatever) of neutrino spectra
     cout<<"called Spectra"<<endl;
 
     Ray *ray = new Ray(); // construct Ray class
     cout<<"called Ray"<<endl;
-    
+
 
     // test PickUnbiased in IceModel.
     Counting *count1 = new Counting();
@@ -160,7 +160,7 @@ int main(int argc, char **argv) {   // read setup.txt file
     //--------------------------------------------------
     //   Interaction *interaction1=new Interaction("nu",primary1,settings1,whichray,count1);
     //   cout<<"called Interaction1"<<endl;
-    //-------------------------------------------------- 
+    //--------------------------------------------------
 
     Event *event = new Event();
     cout<<"called Event"<<endl;
@@ -207,7 +207,7 @@ int main(int argc, char **argv) {   // read setup.txt file
     #ifdef ARA_UTIL_EXISTS
         UsefulIcrrStationEvent *theIcrrEvent =0;
         UsefulAtriStationEvent *theAtriEvent =0;
-    
+
 
         TTree *eventTree;
 
@@ -265,7 +265,7 @@ int main(int argc, char **argv) {   // read setup.txt file
 
     double max_dt = 0.; // max arrival time difference
 
-    int Total_Global_Pass = 0;  // total global trigger passed number 
+    int Total_Global_Pass = 0;  // total global trigger passed number
     double Total_Weight = 0.;
     double Total_Probability = 0.;
 
@@ -311,13 +311,13 @@ int main(int argc, char **argv) {   // read setup.txt file
 
     ofstream TrigWind;
     TrigWind.open("outputs/TrigWindowStudy.txt");
-        
-        
+
+
     // for (int iTrigWind = 10; iTrigWind < 201; iTrigWind = iTrigWind+10){
-        
+
     //  double TRIG_WINDOW_Size = double (iTrigWind * 1.0E-9);
     //  settings1->TRIG_WINDOW = TRIG_WINDOW_Size;
-                
+
     Total_Global_Pass = 0;
     cout<<"begin looping events!!"<<endl;
 
@@ -348,7 +348,7 @@ int main(int argc, char **argv) {   // read setup.txt file
 
 
 
-                
+
     // check if settings have to compatibility problems
     // if there's any, stop AraSim
     settings_compatibility_error = settings1->CheckCompatibilitiesDetector(detector);
@@ -356,7 +356,7 @@ int main(int argc, char **argv) {   // read setup.txt file
         cerr<<"There are "<< settings_compatibility_error<<" errors from settings after Detector class instance is initialized. Check error messages."<<endl;
         return -1;
     }
-        
+
     #ifndef ARA_UTIL_EXISTS
         if (settings1->DETECTOR == 3 && settings1->READGEOM == 1){
             cerr << "ERROR::InstalledStation geometry not available without AraRoot installation!" << endl;
@@ -368,7 +368,7 @@ int main(int argc, char **argv) {   // read setup.txt file
     // test autoflush
     // AraTree2->SetAutoFlush(0);
 
-    // reset accumulative trig search bin info 
+    // reset accumulative trig search bin info
     settings1->ACCUM_TRIG_SEARCH_BINS_STATION0 = 0.;
 
     int nuLimit =0;
@@ -381,13 +381,13 @@ int main(int argc, char **argv) {   // read setup.txt file
     else {
         nuLimit = settings1->NNU;
     }
-    // cout << "nuLimit: " << nuLimit << endl; 
+    // cout << "nuLimit: " << nuLimit << endl;
     int inu = 0;
     int Events_Thrown = 0;
     int Events_Passed = 0;
     // for (int inu=0;inu<settings1->NNU;inu++) { // loop over neutrinos
     while (inu < nuLimit){
-        // cout << "inu: " << inu << endl; 
+        // cout << "inu: " << inu << endl;
         check_station_DC = 0;
         check_station_DC = 0;
         if ( settings1->DEBUG_MODE_ON==0 ) {
@@ -399,9 +399,9 @@ int main(int argc, char **argv) {   // read setup.txt file
         // event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1 );
         event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1, Events_Thrown );
         event->inu_passed = -1;
-                
+
         report = new Report(detector, settings1);
-                        
+
         #ifdef ARA_UTIL_EXISTS
             theIcrrEvent = new UsefulIcrrStationEvent();
             theAtriEvent = new UsefulAtriStationEvent();
@@ -429,7 +429,7 @@ int main(int argc, char **argv) {   // read setup.txt file
             // cout<<"nu_flavor : "<<event->nuflavor<<endl;
             // cout<<"event->Nu_Interaction[0].vmmhz1m[0] : "<<event->Nu_Interaction[0].vmmhz1m[0]<<endl;
             // cout<<"pickposnu : "<<event->Nu_Interaction[0].pickposnu<<endl;
-            //-------------------------------------------------- 
+            //--------------------------------------------------
 
             // connect Interaction class (nu interaction with ice) and Detector class (detector properties and layout)
             // save signal, noise at each antennas to Report class
@@ -466,9 +466,9 @@ int main(int argc, char **argv) {   // read setup.txt file
                     }
                     weight = event->Nu_Interaction[0].weight;
                 }
-                // cout << "weight: " << weight <<endl;    
+                // cout << "weight: " << weight <<endl;
             #endif
-                     
+
             report->ClearUselessfromConnect(detector, settings1, trigger);
             for(int i=0;i<event->Nu_Interaction.size(); i++)
                 event->Nu_Interaction[i].clear_useless(settings1);
@@ -496,24 +496,24 @@ int main(int argc, char **argv) {   // read setup.txt file
                             { theIcrrEvent->numRFChans = 14; }
                         else if (settings1->DETECTOR == 4 && settings1->DETECTOR_STATION == 0)
                             { theIcrrEvent->numRFChans = 14; }
-                        else { 
-                            theAtriEvent->fNumChannels = 20; 
-                            theIcrrEvent->numRFChans = 16; 
+                        else {
+                            theAtriEvent->fNumChannels = 20;
+                            theIcrrEvent->numRFChans = 16;
                         }
                     }
                 #endif
-                     
+
                 if (max_dt < report->stations[i].max_arrival_time - report->stations[i].min_arrival_time)
                     max_dt = report->stations[i].max_arrival_time - report->stations[i].min_arrival_time;
                 // check the total global trigger passed
                 if (report->stations[i].Global_Pass) {
                     cout<<"\nGlobal_Pass : "<<report->stations[i].Global_Pass<<" evt : "<<inu<<" added weight : "<<event->Nu_Interaction[0].weight<<endl;
                     if ( check_station_DC == 0) { // count trigger pass only once per event
-                             
+
                         Total_Global_Pass ++;
                         Total_Weight += event->Nu_Interaction[0].weight;
                         Total_Probability += event->Nu_Interaction[0].probability;
-                             
+
                         // test increment weight
                         if (settings1->INTERACTION_MODE==1) {
                             count1->incrementEventsFound( event->Nu_Interaction[0].weight, event );
@@ -526,10 +526,10 @@ int main(int argc, char **argv) {   // read setup.txt file
                         }
                         else if (settings1->INTERACTION_MODE==4) {
                             count1->incrementEventsFound( event->Nu_Interaction[0].weight, event );
-                        }    
+                        }
                     }
                     check_station_DC++;
-                    event->inu_passed = Events_Passed; 
+                    event->inu_passed = Events_Passed;
                 }
             }
 
@@ -563,7 +563,7 @@ int main(int argc, char **argv) {   // read setup.txt file
 
 
         // test FILL_TREE_MODE
-        if (settings1->FILL_TREE_MODE==0) { // fill event event  
+        if (settings1->FILL_TREE_MODE==0) { // fill event event
             AraTree2->Fill();   //fill interaction every events
             #ifdef ARA_UTIL_EXISTS
                 // for 1, save all events whether passed trigger or not
@@ -580,7 +580,7 @@ int main(int argc, char **argv) {   // read setup.txt file
                 }
             #endif
         }
-        else if (settings1->FILL_TREE_MODE==1) { // fill only usable posnu event 
+        else if (settings1->FILL_TREE_MODE==1) { // fill only usable posnu event
             if (event->Nu_Interaction[0].pickposnu>0) {
                 AraTree2->Fill();   //fill interaction every events
                 #ifdef ARA_UTIL_EXISTS
@@ -599,7 +599,7 @@ int main(int argc, char **argv) {   // read setup.txt file
                 #endif
             }
         }
-        else if (settings1->FILL_TREE_MODE==2) { // fill only triggered event    
+        else if (settings1->FILL_TREE_MODE==2) { // fill only triggered event
             if (check_station_DC>0) {
                 AraTree2->Fill();   //fill interaction every events
                 #ifdef ARA_UTIL_EXISTS
@@ -633,7 +633,7 @@ int main(int argc, char **argv) {   // read setup.txt file
             Events_Passed++;
         }
         Events_Thrown++;
-             
+
 
         //theEvent = NULL;
 
@@ -666,10 +666,10 @@ int main(int argc, char **argv) {   // read setup.txt file
 
     // }// end trigger window loop
     TrigWind.close();
-                                         
+
     //--------------------------------------------------
     //    cFull_window_V->Print("test_V_mimic.pdf");
-    //-------------------------------------------------- 
+    //--------------------------------------------------
 
     ofstream weight_file;
     //weight_file.open(("./weight_output/weight_"+setupfile).c_str());
@@ -690,7 +690,7 @@ int main(int argc, char **argv) {   // read setup.txt file
     cout<<"Total_Global_Pass : "<<Total_Global_Pass<<endl;
     cout<<"Total_Weight : "<<Total_Weight<<endl;
     cout<<"Total_Probability : "<<Total_Probability<<endl;
-                             
+
     if (settings1->INTERACTION_MODE==1) {
         weight_file << "Total_Weight="<<Total_Weight<<endl;
     }
@@ -724,7 +724,7 @@ int main(int argc, char **argv) {   // read setup.txt file
         double error_minus = 0;
         Counting::findErrorOnSumWeights( count1->eventsfound_binned, error_plus, error_minus );
 
-        /*       
+        /*
         Veff_test = IceVolume * 4. * PI * signal->RHOICE / signal->RHOH20 * Total_Weight / (double)(settings1->NNU);
 
         // account all factors to error
@@ -776,7 +776,7 @@ int main(int argc, char **argv) {   // read setup.txt file
 
     //--------------------------------------------------
     //   cout<<"Total NNU : "<<settings1->NNU<<", PickUnbiased passed NNU : "<<nnu_pass<<endl;
-    //-------------------------------------------------- 
+    //--------------------------------------------------
 
     // remove noisewaveform info if DATA_SAVE_MODE == 2
     // remove noisewaveform info if DATA_SAVE_MODE is not 0
@@ -792,7 +792,7 @@ int main(int argc, char **argv) {   // read setup.txt file
     AraFile->Write();
     // AraFile->Close();
 
-    efficiencies->summarize(); // summarize the results in an output file  
+    efficiencies->summarize(); // summarize the results in an output file
 
     double freq[detector->GetFreqBin()], Filter[detector->GetFreqBin()];
     double Filter_E[detector->GetFreqBin()];
@@ -822,12 +822,12 @@ int main(int argc, char **argv) {   // read setup.txt file
     cout<<"outputdir= "<<outputdir<<endl;
 
     // Please do not delete this test line
-    // Please leave 'test(); return 0;' as the last lines in 
+    // Please leave 'test(); return 0;' as the last lines in
     // AraSim.cc before '} //end main'
     // These test lines are used to verify that AraSim completed properly.
 
     test();
-    return 0;   
+    return 0;
 } //end main
 
 
