@@ -250,8 +250,10 @@ if ( file.is_open() ) {
         648,    616,    589.333,    557.333,    530.667,    506.667,    
         477.333,    453.333,    418.667,    389.333,    362.667,    
         333.333,    309.333,    285.333,    264,    242.667,    221.333 };
-   std::copy(begin(ARA_IceAtten_Depth_central), end(ARA_IceAtten_Depth_central), begin(ARA_IceAtten_Depth));
-   std::copy(begin(ARA_IceAtten_Length_central), end(ARA_IceAtten_Length_central), begin(ARA_IceAtten_Length));
+
+   std::copy(ARA_IceAtten_Depth_central,ARA_IceAtten_Depth_central+ARA_IceAtten_bin,ARA_IceAtten_Depth);
+   std::copy(ARA_IceAtten_Length_central,ARA_IceAtten_Length_central+ARA_IceAtten_bin,ARA_IceAtten_Length);
+
 }
 
  //Lower bound (in the plot sense)
@@ -278,8 +280,9 @@ if ( file.is_open() ) {
          477.333,  453.333,  418.667,  389.333,  362.667,  333.333,
          309.333,  285.333,  264.   ,  242.667,  221.333 };
   
-    std::copy(begin(ARA_IceAtten_Depth_low), end(ARA_IceAtten_Depth_low), begin(ARA_IceAtten_Depth));
-    std::copy(begin(ARA_IceAtten_Length_low), end(ARA_IceAtten_Length_low), begin(ARA_IceAtten_Length));
+    std::copy(ARA_IceAtten_Depth_low, ARA_IceAtten_Depth_low+ARA_IceAtten_bin, ARA_IceAtten_Depth);
+    std::copy(ARA_IceAtten_Length_low, ARA_IceAtten_Length_low+ARA_IceAtten_bin, ARA_IceAtten_Length);
+
   }
 
    //Upper bound
@@ -306,12 +309,13 @@ if ( file.is_open() ) {
          477.333,  453.333,  418.667,  389.333,  362.667,  333.333,
          309.333,  285.333,  264.   ,  242.667,  221.333};
 
-      std::copy(begin(ARA_IceAtten_Depth_high), end(ARA_IceAtten_Depth_high), begin(ARA_IceAtten_Depth));
-      std::copy(begin(ARA_IceAtten_Length_high), end(ARA_IceAtten_Length_high), begin(ARA_IceAtten_Length));
+      std::copy(ARA_IceAtten_Depth_high, ARA_IceAtten_Depth_high+ARA_IceAtten_bin, ARA_IceAtten_Depth);
+      std::copy(ARA_IceAtten_Length_high,ARA_IceAtten_Length_high+ARA_IceAtten_bin, ARA_IceAtten_Length);
+
   }
 
    for (int bin=0; bin<ARA_IceAtten_bin; bin++) {
-    // printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth[bin],ARA_IceAtten_Length[bin]);
+     //printf("bin:%i, ARA_IceAtten_Depth:%f, ARA_IceAtten_Length_tmp:%f \n", bin,ARA_IceAtten_Depth[bin],ARA_IceAtten_Length[bin]);
    }
 
 }
