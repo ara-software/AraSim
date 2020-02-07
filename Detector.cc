@@ -2403,7 +2403,7 @@ inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
                     //                    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
                     getline (NecOut, line); //read SWR
 		    Transm[i] = atof( line.substr(5, 11).c_str() );
-		      cerr << "Vpol Transm: " << Transm[i] << endl;
+		      // cerr << "Vpol Transm: " << Transm[i] << endl;
 
                     getline (NecOut, line); //read names
 
@@ -4273,10 +4273,10 @@ cout<<"In ReadNoiseFigure"<<endl;
 	        iss >> sub;
 		yNF_tmp.push_back( atof(sub.c_str()) );
 	    }
-	    cout << "freq: " << yNF_tmp[0];
+	    // cout << "freq: " << yNF_tmp[0];
 	    all_chNF.push_back( yNF_tmp );
 	    yNF_tmp.clear();
-	    cout << "   ch1: " << all_chNF[N][1] << endl;
+	    // cout << "   ch1: " << all_chNF[N][1] << endl;
             
             N++;
             
@@ -4491,17 +4491,17 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
             N++;
 
             xfreq_tmp.push_back( atof( line.substr(0, line.find_first_of(",")).c_str() ) );
-            cout<<"freq : "<<xfreq_tmp[N]<<"\t";
+            // cout<<"freq : "<<xfreq_tmp[N]<<"\t";
 
             line2 = line.substr( line.find_first_of(",")+1);
 
             ygain_tmp.push_back( atof( line2.substr(0, line2.find_first_of(",")).c_str() ) );
-            cout<<"gain : "<<ygain_tmp[N]<<"\t";
+            // cout<<"gain : "<<ygain_tmp[N]<<"\t";
 
             line3 = line2.substr( line2.find_first_of(",")+1);
 
             phase_tmp.push_back( atof( line3.substr(0).c_str() ) );
-            cout<<"phase : "<<phase_tmp[N]<<" N : "<<N<<endl;
+            // cout<<"phase : "<<phase_tmp[N]<<" N : "<<N<<endl;
 
             /*
             xfreq_tmp.push_back( atof( line.substr(0, 10).c_str() ) );
