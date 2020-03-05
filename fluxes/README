@@ -4,7 +4,7 @@ EXPONENT from 12 ~ 100 dat files are from Fenfang Wu in UC Irvine.
 Can add more models (EXPONENT >= 100 && EXPONENT < 200 is empty).
 
 In the file, first line is the number of data points,
-and from the second line, first column : energy in log, second column : flux E^2dN/dE [GeV/(cm^2*str*s)].
+and from the second line, first column : energy (in eV) in log, second column : flux E^2dN/dE [GeV/(cm^2*str*s)].
 
 32. essfig9.dat-----ESS's paper in Physical Review D, Volume 64, 093010 scaled(using fig4 for the ratio of nu_e/nu_mu) FIG 9 for nu_mu+nu_e
 
@@ -57,5 +57,5 @@ and from the second line, first column : energy in log, second column : flux E^2
 
 224. Kotera2010_max.dat-----Kotera flux max from ARA paper arXiv:1105.2854v1, Fig.27 Kotera et al. '10 max
 
-
+225. Cuoco_CenA.dat-------Cuoco et. al. flux from Centarurs A (Cen A). Fig 2, arXiv:0712.1830
 
