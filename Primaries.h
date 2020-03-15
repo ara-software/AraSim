@@ -132,7 +132,8 @@ public:
   TSpline3* cs_fsigma[2][2]; // spline for cooper-sarkar central sigma values
   TSpline3* cs_fsigma_upper[2][2]; // spline for cooper-sarkar upper limit sigma values
   TSpline3* cs_fsigma_lower[2][2]; // spline for cooper-sarkar lower limit sigma values
-
+  TSpline3* cs_fsigma_uncertainty_upper[2][2]; // the *relative* [%] upper uncertainties
+  TSpline3* cs_fsigma_uncertainty_lower[2][2]; // the rrelative* [%] lower uncertainties
 
 	static const int NSIGMAS=3;// number of possible cross section models
 	// 0=Gandhi et al.

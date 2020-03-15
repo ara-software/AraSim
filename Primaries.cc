@@ -265,16 +265,24 @@ Primaries::Primaries(){//constructor
   vector<double> nu_cc;    // nu cc cross section [pb]
   vector<double> nu_cc_ul; // nu cc cross section upper limit [pb]
   vector<double> nu_cc_ll; // nu cc cross section lower limit [pb]
+  vector<double> nu_cc_uu; // nu cc cross section upper uncertainties [%]
+  vector<double> nu_cc_lu; // nu cc cross section lower uncertainties [%]
   vector<double> nu_nc;    // nu nc cross section
   vector<double> nu_nc_ul; // nu nc cross section upper limit [pb]
   vector<double> nu_nc_ll; // nu nc cross section lower limit [pb]
+  vector<double> nu_nc_uu; // nu cc cross section upper uncertainties [%]
+  vector<double> nu_nc_lu; // nu cc cross section lower uncertainties [%]
 
   vector<double> nubar_cc;    // nubar cc cross section [pb]
   vector<double> nubar_cc_ul; // nubar cc cross section upper limit [pb]
   vector<double> nubar_cc_ll; // nubar cc cross section lower limit [pb]
+  vector<double> nubar_cc_uu; // nu cc cross section upper uncertainties [%]
+  vector<double> nubar_cc_lu; // nu cc cross section lower uncertainties [%]
   vector<double> nubar_nc;    // nubar nc cross section [pb]
   vector<double> nubar_nc_ul; // nubar nc cross section upper limit [pb]
   vector<double> nubar_nc_ll; // nubar nc cross section lower limit [pb]
+  vector<double> nubar_nc_uu; // nu cc cross section upper uncertainties [%]
+  vector<double> nubar_nc_lu; // nu cc cross section lower uncertainties [%]
 
   // first, load the neutrino (nu) cross sections
   ifstream fin_nu("./data/coopersarkar_sigma_nu.csv");
@@ -290,17 +298,26 @@ Primaries::Primaries(){//constructor
         result.push_back(atof(substr.c_str()));
       }
       energy.push_back(result[0]); // energy
+      
       nu_cc.push_back(result[1]); // charged current cross-section
-      nu_nc.push_back(result[5]); // neutral current cross-section
-
-      double cc_ul = (1+result[2]); // 1 + upper uncertainty on cc (result[2]>0)
-      double cc_ll = (1+result[4]); // 1 + lower uncertainty on cc (result[4]<0)
+      double cc_ul = (result[2]); 
+      double cc_ll = (result[4]); 
+      nu_cc_uu.push_back(cc_ul);
+      nu_cc_lu.push_back(cc_ll);
+      cc_ul+=1.; // 1 + upper uncertainty on cc (result[2]>0)
+      cc_ll+=1.; // 1 + lower uncertainty on cc (result[4]<0)
       nu_cc_ul.push_back(result[1]*cc_ul);
       nu_cc_ll.push_back(result[1]*cc_ll);
-      
 
-      double nc_ul = (1+result[6]); // 1 + upper uncertainty on nc (result[6]>0)
-      double nc_ll = (1+result[8]); // 1 + lower uncertainty on nc (result[8]<0)
+      
+      nu_nc.push_back(result[5]); // neutral current cross-section
+      double nc_ul = (result[6]); 
+      double nc_ll = (result[8]); 
+      nu_nc_uu.push_back(nc_ul);
+      nu_nc_lu.push_back(nc_ll);
+      cout<<nc_ll<<endl;
+      nc_ul+=1.; // 1 + upper uncertainty on nc (result[6]>0)
+      nc_ll+=1.; // 1 + lower uncertainty on nc (result[8]<0)
       nu_nc_ul.push_back(result[5]*nc_ul);
       nu_nc_ll.push_back(result[5]*nc_ll);
     }
@@ -325,15 +342,22 @@ Primaries::Primaries(){//constructor
         result.push_back(atof(substr.c_str()));
       }
       nubar_cc.push_back(result[1]); // charged current cross-section
-      nubar_nc.push_back(result[5]); // neutral current cross-section
-
-      double cc_ul = (1+result[2]); // 1 + upper uncertainty on cc (result[2]>0)
-      double cc_ll = (1+result[4]); // 1 + lower uncertainty on cc (result[4]<0)
+      double cc_ul = (result[2]); 
+      double cc_ll = (result[4]); 
+      nubar_cc_uu.push_back(cc_ul);
+      nubar_cc_lu.push_back(cc_ll);
+      cc_ul+=1.; // 1 + upper uncertainty on cc (result[2]>0)
+      cc_ll+=1.; // 1 + lower uncertainty on cc (result[4]<0)
       nubar_cc_ul.push_back(result[1]*cc_ul);
       nubar_cc_ll.push_back(result[1]*cc_ll);
 
-      double nc_ul = (1+result[6]); // 1 + upper uncertainty on nc (result[6]>0)
-      double nc_ll = (1+result[8]); // 1 + lower uncertainty on nc (result[8]<0)
+      nubar_nc.push_back(result[5]); // neutral current cross-section
+      double nc_ul = (result[6]); 
+      double nc_ll = (result[8]); 
+      nubar_nc_uu.push_back(nc_ul);
+      nubar_nc_lu.push_back(nc_ll);
+      nc_ul+=1.; // 1 + upper uncertainty on nc (result[6]>0)
+      nc_ll+=1.; // 1 + lower uncertainty on nc (result[8]<0)
       nubar_nc_ul.push_back(result[5]*nc_ul);
       nubar_nc_ll.push_back(result[5]*nc_ll);
     }
@@ -343,7 +367,7 @@ Primaries::Primaries(){//constructor
   // for(int i=0; i<energy.size(); i++){
   //  printf("Energy %e, sigma %e, err+ %.2f, err- %.2f \n", energy[i], nubar_cc[i], nubar_cc_ul[i], nubar_cc_ll[i]);
   // }
-  // cout<<""<<endl;  
+  // cout<<""<<endl;
 
   // go to log-space to do the spline, where we don't have to fit as many orders of magnitude
   vector<double> logenergy;
@@ -399,21 +423,29 @@ Primaries::Primaries(){//constructor
   cs_fsigma[0][0] = new TSpline3("nu nc", &logenergy[0], &nu_lognc[0], logenergy.size());
     cs_fsigma_upper[0][0] = new TSpline3("nu nc ul", &logenergy[0], &nu_lognc_ul[0], logenergy.size());
     cs_fsigma_lower[0][0] = new TSpline3("nu nc ll", &logenergy[0], &nu_lognc_ll[0], logenergy.size());
+    cs_fsigma_uncertainty_upper[0][0] = new TSpline3("nu nc uu", &logenergy[0], &nu_nc_uu[0], logenergy.size());
+    cs_fsigma_uncertainty_lower[0][0] = new TSpline3("nu nc lu", &logenergy[0], &nu_nc_lu[0], logenergy.size());
   
   // nu cc
   cs_fsigma[0][1] = new TSpline3("nu cc", &logenergy[0], &nu_logcc[0], logenergy.size());
     cs_fsigma_upper[0][1] = new TSpline3("nu cc ul", &logenergy[0], &nu_logcc_ul[0], logenergy.size());
     cs_fsigma_lower[0][1] = new TSpline3("nu cc ll", &logenergy[0], &nu_logcc_ll[0], logenergy.size());
+    cs_fsigma_uncertainty_upper[0][1] = new TSpline3("nu cc uu", &logenergy[0], &nu_cc_uu[0], logenergy.size());
+    cs_fsigma_uncertainty_lower[0][1] = new TSpline3("nu cc lu", &logenergy[0], &nu_cc_lu[0], logenergy.size());
 
   // nubar nc
   cs_fsigma[1][0] = new TSpline3("nubar nc", &logenergy[0], &nubar_lognc[0], logenergy.size());
     cs_fsigma_upper[1][0] = new TSpline3("nubar nc ul", &logenergy[0], &nubar_lognc_ul[0], logenergy.size());
     cs_fsigma_lower[1][0] = new TSpline3("nubar nc ll", &logenergy[0], &nubar_lognc_ll[0], logenergy.size());
+    cs_fsigma_uncertainty_upper[1][0] = new TSpline3("nubar nc uu", &logenergy[0], &nubar_nc_uu[0], logenergy.size());
+    cs_fsigma_uncertainty_lower[1][0] = new TSpline3("nubar nc lu", &logenergy[0], &nubar_nc_lu[0], logenergy.size());
 
   // nubar cc
   cs_fsigma[1][1] = new TSpline3("nubar cc", &logenergy[0], &nubar_logcc[0], logenergy.size());
     cs_fsigma_upper[1][1] = new TSpline3("nubar cc ul", &logenergy[0], &nubar_logcc_ul[0], logenergy.size());
     cs_fsigma_lower[1][1] = new TSpline3("nubar cc ll", &logenergy[0], &nubar_logcc_ll[0], logenergy.size());
+    cs_fsigma_uncertainty_upper[1][1] = new TSpline3("nubar cc uu", &logenergy[0], &nubar_cc_uu[0], logenergy.size());
+    cs_fsigma_uncertainty_lower[1][1] = new TSpline3("nubar cc lu", &logenergy[0], &nubar_cc_lu[0], logenergy.size());
 
   
   run_old_code=0;//for GetSigma() & Gety() runs of the old code if 1, else runs current code.
@@ -556,6 +588,25 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
 
           sigma=settings1->SIGMA_FACTOR*(m_fsigma_lower[nu_nubar][currentint]->Eval(epsilon))/1.E4;//convert cm to meters. multiply by (1m^2/10^4 cm^2).
           sigma_total = (settings1->SIGMA_FACTOR*(m_fsigma_lower[nu_nubar][0]->Eval(epsilon))/1.E4) + (settings1->SIGMA_FACTOR*(m_fsigma_lower[nu_nubar][1]->Eval(epsilon))/1.E4);
+      }
+      else if (settings1->SIGMA_SELECT==3){ // use Cooper-Sarkar upper uncertainties
+        double cs_uncertainty_this = cs_fsigma_uncertainty_upper[nu_nubar][currentint]->Eval(epsilon);
+        cs_uncertainty_this+=1.; // turn it into a multiplicative factor
+        double cs_uncertainty_nc = cs_fsigma_uncertainty_upper[nu_nubar][0]->Eval(epsilon);
+        double cs_uncertainty_cc = cs_fsigma_uncertainty_upper[nu_nubar][1]->Eval(epsilon);
+        
+        sigma=settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][currentint]->Eval(epsilon))/1.E4*cs_uncertainty_this ;//convert cm to meters. multiply by (1m^2/10^4 cm^2).
+        sigma_total = (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][0]->Eval(epsilon))/1.E4*cs_uncertainty_nc) + (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][1]->Eval(epsilon))/1.E4*cs_uncertainty_cc);
+      }
+      else if(settings1->SIGMA_SELECT==4){ // use Cooper-Sarkar lower uncertainties
+        double cs_uncertainty_this = cs_fsigma_uncertainty_lower[nu_nubar][currentint]->Eval(epsilon);
+        cs_uncertainty_this+=1.; // turn it into a multiplicative factor
+        double cs_uncertainty_nc = cs_fsigma_uncertainty_lower[nu_nubar][0]->Eval(epsilon);
+        double cs_uncertainty_cc = cs_fsigma_uncertainty_lower[nu_nubar][1]->Eval(epsilon);
+        
+        sigma=settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][currentint]->Eval(epsilon))/1.E4*cs_uncertainty_this ;//convert cm to meters. multiply by (1m^2/10^4 cm^2).
+        sigma_total = (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][0]->Eval(epsilon))/1.E4*cs_uncertainty_nc) + (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][1]->Eval(epsilon))/1.E4*cs_uncertainty_cc);
+
       }
       else {// if other values are chosen, just use mean value
 
