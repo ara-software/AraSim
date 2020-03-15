@@ -1565,3 +1565,9 @@ Add SYSTEMATICS_nofz to wiggle RAY_TRACE_ICE_MODEL_PARAMS within uncertainties.
 =0=default fit values
 =1=make larger by uncertainties
 =2=make smaller by uncertainties
+
+============================================================================
+
+
+2020/03/15 Brian Clark
+Add Cooper-Sarkar cross-section model. Activated by using SIGMAPARAM=2

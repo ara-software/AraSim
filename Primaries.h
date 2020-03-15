@@ -19,6 +19,7 @@
 #include "Vector.h"
 #include <vector>
 #include "Position.h"
+#include "TSpline.h"
 
 //--------------------------------------------------
 // class Interaction;
@@ -125,10 +126,18 @@ public:
 	double c3_lower[2][2];
 	double c4_lower[2][2];
 
+  // cooper sarkar
+  // first index is nu/nu bar [0][x] = nu, [1][x] = nu-bar
+  // second index is nc/cc [x][0] = nc, [x][1] = cc
+  TSpline3* cs_fsigma[2][2]; // spline for cooper-sarkar central sigma values
+  TSpline3* cs_fsigma_upper[2][2]; // spline for cooper-sarkar upper limit sigma values
+  TSpline3* cs_fsigma_lower[2][2]; // spline for cooper-sarkar lower limit sigma values
 
-	static const int NSIGMAS=2;// number of possible cross section models
+
+	static const int NSIGMAS=3;// number of possible cross section models
 	// 0=Gandhi et al.
 	// 1=Connolly et al. 2011
+  // 2=Cooper-Sarkar et. al. 2011 (https://arxiv.org/abs/1106.3723)
 	double mine[NSIGMAS];// minimum energy for cross section parametrizations, in eV
 	double maxe[NSIGMAS]; //max
 

@@ -258,22 +258,181 @@ Primaries::Primaries(){//constructor
   ymax_low=1.E-3;
   ymin_high=ymax_low;
   ymax_high=1.;
+
+  // cooper-sarkar cross-section version
+
+  vector<double> energy; // energy [GeV]
+  vector<double> nu_cc;    // nu cc cross section [pb]
+  vector<double> nu_cc_ul; // nu cc cross section upper limit [pb]
+  vector<double> nu_cc_ll; // nu cc cross section lower limit [pb]
+  vector<double> nu_nc;    // nu nc cross section
+  vector<double> nu_nc_ul; // nu nc cross section upper limit [pb]
+  vector<double> nu_nc_ll; // nu nc cross section lower limit [pb]
+
+  vector<double> nubar_cc;    // nubar cc cross section [pb]
+  vector<double> nubar_cc_ul; // nubar cc cross section upper limit [pb]
+  vector<double> nubar_cc_ll; // nubar cc cross section lower limit [pb]
+  vector<double> nubar_nc;    // nubar nc cross section [pb]
+  vector<double> nubar_nc_ul; // nubar nc cross section upper limit [pb]
+  vector<double> nubar_nc_ll; // nubar nc cross section lower limit [pb]
+
+  // first, load the neutrino (nu) cross sections
+  ifstream fin_nu("./data/coopersarkar_sigma_nu.csv");
+  string line;
+  if(fin_nu.is_open()){
+    while(fin_nu.good()){
+      getline(fin_nu, line);
+      stringstream s_stream(line);
+      vector<double> result;
+      while(s_stream.good()){
+        string substr;
+        getline(s_stream, substr, ',');
+        result.push_back(atof(substr.c_str()));
+      }
+      energy.push_back(result[0]); // energy
+      nu_cc.push_back(result[1]); // charged current cross-section
+      nu_nc.push_back(result[5]); // neutral current cross-section
+
+      double cc_ul = (1+result[2]); // 1 + upper uncertainty on cc (result[2]>0)
+      double cc_ll = (1+result[4]); // 1 + lower uncertainty on cc (result[4]<0)
+      nu_cc_ul.push_back(result[1]*cc_ul);
+      nu_cc_ll.push_back(result[1]*cc_ll);
+      
+
+      double nc_ul = (1+result[6]); // 1 + upper uncertainty on nc (result[6]>0)
+      double nc_ll = (1+result[8]); // 1 + lower uncertainty on nc (result[8]<0)
+      nu_nc_ul.push_back(result[5]*nc_ul);
+      nu_nc_ll.push_back(result[5]*nc_ll);
+    }
+  }
+  fin_nu.close();
+
+  // for(int i=0; i<energy.size(); i++){
+  //  printf("Energy %e, sigma %e, err+ %.2f, err- %.2f \n", energy[i], nu_cc[i], nu_cc_ul[i], nu_cc_ll[i]);
+  // }
+  // cout<<""<<endl;
+
+  // then, load the anti-neutrino (nubar) cross sections
+  ifstream fin_nubar("./data/coopersarkar_sigma_nubar.csv");
+  if(fin_nubar.is_open()){
+    while(fin_nubar.good()){
+      getline(fin_nubar, line);
+      stringstream s_stream(line);
+      vector<double> result;
+      while(s_stream.good()){
+        string substr;
+        getline(s_stream, substr, ',');
+        result.push_back(atof(substr.c_str()));
+      }
+      nubar_cc.push_back(result[1]); // charged current cross-section
+      nubar_nc.push_back(result[5]); // neutral current cross-section
+
+      double cc_ul = (1+result[2]); // 1 + upper uncertainty on cc (result[2]>0)
+      double cc_ll = (1+result[4]); // 1 + lower uncertainty on cc (result[4]<0)
+      nubar_cc_ul.push_back(result[1]*cc_ul);
+      nubar_cc_ll.push_back(result[1]*cc_ll);
+
+      double nc_ul = (1+result[6]); // 1 + upper uncertainty on nc (result[6]>0)
+      double nc_ll = (1+result[8]); // 1 + lower uncertainty on nc (result[8]<0)
+      nubar_nc_ul.push_back(result[5]*nc_ul);
+      nubar_nc_ll.push_back(result[5]*nc_ll);
+    }
+  }
+  fin_nubar.close();
+
+  // for(int i=0; i<energy.size(); i++){
+  //  printf("Energy %e, sigma %e, err+ %.2f, err- %.2f \n", energy[i], nubar_cc[i], nubar_cc_ul[i], nubar_cc_ll[i]);
+  // }
+  // cout<<""<<endl;  
+
+  // go to log-space to do the spline, where we don't have to fit as many orders of magnitude
+  vector<double> logenergy;
+  
+  vector<double> nu_logcc;
+    vector<double> nu_logcc_ul;
+    vector<double> nu_logcc_ll;
+  vector<double> nu_lognc;
+    vector<double> nu_lognc_ul;
+    vector<double> nu_lognc_ll;
+
+  vector<double> nubar_logcc;
+    vector<double> nubar_logcc_ul;
+    vector<double> nubar_logcc_ll;
+  vector<double> nubar_lognc;
+    vector<double> nubar_lognc_ul;
+    vector<double> nubar_lognc_ll;
+  
+  for(int i=0; i<energy.size(); i++){
+    logenergy.push_back(log10(energy[i]));
+    
+    nu_logcc.push_back(log10(nu_cc[i]));
+      nu_logcc_ul.push_back(log10(nu_cc_ul[i]));
+      nu_logcc_ll.push_back(log10(nu_cc_ll[i]));
+    nu_lognc.push_back(log10(nu_nc[i]));
+      nu_lognc_ul.push_back(log10(nu_nc_ul[i]));
+      nu_lognc_ll.push_back(log10(nu_nc_ll[i]));
+    
+
+    nubar_logcc.push_back(log10(nubar_cc[i]));
+      nubar_logcc_ul.push_back(log10(nubar_cc_ul[i]));
+      nubar_logcc_ll.push_back(log10(nubar_cc_ll[i]));
+    nubar_lognc.push_back(log10(nubar_nc[i]));
+      nubar_lognc_ul.push_back(log10(nubar_nc_ul[i]));
+      nubar_lognc_ll.push_back(log10(nubar_nc_ll[i]));
+  }
+
+  /*
+    build a table of objects which have an "Eval" method, 
+    to match what Eugene did for the Connolly et. al result
+    use the TSpline class specifically because it comes with the ROOT histogram library
+    if we had used "standard" ROOT interpolation schemes 
+    e.g. (https://root.cern.ch/function-interpolation)
+    we would have introduced MathMore (and GSL) as requirement to AraSim
+    which we are trying to avoid
+
+
+    first index is nu/nu bar [0][x] = nu, [1][x] = nu-bar
+    second index is nc/cc [x][0] = nc, [x][1] = cc
+  */
+
+  // nu nc
+  cs_fsigma[0][0] = new TSpline3("nu nc", &logenergy[0], &nu_lognc[0], logenergy.size());
+    cs_fsigma_upper[0][0] = new TSpline3("nu nc ul", &logenergy[0], &nu_lognc_ul[0], logenergy.size());
+    cs_fsigma_lower[0][0] = new TSpline3("nu nc ll", &logenergy[0], &nu_lognc_ll[0], logenergy.size());
+  
+  // nu cc
+  cs_fsigma[0][1] = new TSpline3("nu cc", &logenergy[0], &nu_logcc[0], logenergy.size());
+    cs_fsigma_upper[0][1] = new TSpline3("nu cc ul", &logenergy[0], &nu_logcc_ul[0], logenergy.size());
+    cs_fsigma_lower[0][1] = new TSpline3("nu cc ll", &logenergy[0], &nu_logcc_ll[0], logenergy.size());
+
+  // nubar nc
+  cs_fsigma[1][0] = new TSpline3("nubar nc", &logenergy[0], &nubar_lognc[0], logenergy.size());
+    cs_fsigma_upper[1][0] = new TSpline3("nubar nc ul", &logenergy[0], &nubar_lognc_ul[0], logenergy.size());
+    cs_fsigma_lower[1][0] = new TSpline3("nubar nc ll", &logenergy[0], &nubar_lognc_ll[0], logenergy.size());
+
+  // nubar cc
+  cs_fsigma[1][1] = new TSpline3("nubar cc", &logenergy[0], &nubar_logcc[0], logenergy.size());
+    cs_fsigma_upper[1][1] = new TSpline3("nubar cc ul", &logenergy[0], &nubar_logcc_ul[0], logenergy.size());
+    cs_fsigma_lower[1][1] = new TSpline3("nubar cc ll", &logenergy[0], &nubar_logcc_ll[0], logenergy.size());
+
   
   run_old_code=0;//for GetSigma() & Gety() runs of the old code if 1, else runs current code.
 
   // 0=Reno
   // 1=Connolly et al. 2011
+  // 2=Cooper-Sarkar et. al. 2011
   mine[0]=1.2E15;
   //mine[1]=1.E4;// minimum energy for cross section parametrizations
   mine[1]=1.E13;// minimum energy for cross section parametrizations
+  mine[2]=5.e10;
   maxe[0]=1.E21;
   maxe[1]=1.E21; // use the same upper limit for reno as for connolly et al.
+  maxe[2]=1.E21; // go up to 1E21, though note these final points are an extrapolation; cooper-sarkar only publish up to 5E20
+
 
 
   // added for air col
   GetAir(col1);
-
-
 
 
 
@@ -402,15 +561,35 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
 
           sigma=settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][currentint]->Eval(epsilon))/1.E4;//convert cm to meters. multiply by (1m^2/10^4 cm^2).
           sigma_total = (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][0]->Eval(epsilon))/1.E4) + (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][1]->Eval(epsilon))/1.E4);
-      }
-
-
-      
+      }   
       if(m_hsigma->GetEntries()<2000){
-	m_hsigma->Fill(epsilon, log10(sigma));
+	     m_hsigma->Fill(epsilon, log10(sigma));
       }
     }//else current code
+    else if(settings1->SIGMAPARAM==2){//Cooper-Sarkar et al.
+      double pnuGeV=pnu/1.E9;
+      double epsilon=log10(pnuGeV);
+      if(settings1->SIGMA_SELECT==0){// use mean value
+        sigma=settings1->SIGMA_FACTOR*(pow(10.,cs_fsigma[nu_nubar][currentint]->Eval(epsilon)))/1.E40; //convert picobarns to m^2
+        sigma_total = (settings1->SIGMA_FACTOR*(pow(10.,m_fsigma[nu_nubar][0]->Eval(epsilon)))/1.E40) + (settings1->SIGMA_FACTOR*(pow(10.,m_fsigma[nu_nubar][1]->Eval(epsilon)))/1.E40);
+      }
+      else if(settings1->SIGMA_SELECT==1){// use upper bound value
+        sigma=settings1->SIGMA_FACTOR*(pow(10.,cs_fsigma_upper[nu_nubar][currentint]->Eval(epsilon)))/1.E40; //convert picobarns to m^2
+        sigma_total = (settings1->SIGMA_FACTOR*(pow(10.,m_fsigma_upper[nu_nubar][0]->Eval(epsilon)))/1.E40) + (settings1->SIGMA_FACTOR*(pow(10.,m_fsigma_upper[nu_nubar][1]->Eval(epsilon)))/1.E40);
+      }
+      else if(settings1->SIGMA_SELECT==1){// use lower bound value
+        sigma=settings1->SIGMA_FACTOR*(pow(10.,cs_fsigma_lower[nu_nubar][currentint]->Eval(epsilon)))/1.E40; //convert picobarns to m^2
+        sigma_total = (settings1->SIGMA_FACTOR*(pow(10.,m_fsigma_lower[nu_nubar][0]->Eval(epsilon)))/1.E40) + (settings1->SIGMA_FACTOR*(pow(10.,m_fsigma_lower[nu_nubar][1]->Eval(epsilon)))/1.E40);
+      }
+      else{// if other values are chosen, just use mean value
+        sigma=settings1->SIGMA_FACTOR*(pow(10.,cs_fsigma[nu_nubar][currentint]->Eval(epsilon)))/1.0E40; //convert picobarns to m^2
+        sigma_total = (settings1->SIGMA_FACTOR*(pow(10.,m_fsigma[nu_nubar][0]->Eval(epsilon)))/1.E40) + (settings1->SIGMA_FACTOR*(pow(10.,m_fsigma[nu_nubar][1]->Eval(epsilon)))/1.E40);
+      }
+    }
   }//if
+
+
+
   // interaction length in kg/m^2
   
   len_int_kgm2=M_NUCL/sigma; // kg/m^2
