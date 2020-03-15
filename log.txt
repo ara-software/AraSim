@@ -1574,9 +1574,9 @@ Add Cooper-Sarkar cross-section model. Activated by using SIGMAPARAM=2.
 
 Also, add two new SIGMA_SELECT modes (3 and 4) for use with SIGMAPARAM=1.
 Modes 3 and 4 allow you to use the upper and lower bounds (respectively)
-from Cooper-Sarkar, but apply them to the Connolly cross-section limit.
+from Cooper-Sarkar, but apply them to the Connolly cross-section calculation.
 So, if SIGMAPARAM=1 and SIGMA_SELECT=3, then the cross-section used will
-be the Connolly cross section, but reduced by the lower bound uncertainty
+be the Connolly cross section, but increased by the upper bound uncertainty
 as computed by Cooper-Sarkar. This is a "hack" to see what happens to
 the Connolly result if you assume the Cooper-Sarkar uncertainties
 which are smaller than those derived in Connolly et. al.
