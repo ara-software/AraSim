@@ -304,6 +304,8 @@ Primaries::Primaries(){//constructor
       double cc_ll = (result[4]); 
       nu_cc_uu.push_back(cc_ul);
       nu_cc_lu.push_back(cc_ll);
+      cc_ul/=100.; // convert from % to fraction
+      cc_ll/=100.; // convert from % to fraction
       cc_ul+=1.; // 1 + upper uncertainty on cc (result[2]>0)
       cc_ll+=1.; // 1 + lower uncertainty on cc (result[4]<0)
       nu_cc_ul.push_back(result[1]*cc_ul);
@@ -315,7 +317,8 @@ Primaries::Primaries(){//constructor
       double nc_ll = (result[8]); 
       nu_nc_uu.push_back(nc_ul);
       nu_nc_lu.push_back(nc_ll);
-      cout<<nc_ll<<endl;
+      nc_ul/=100.;
+      nc_ll/=100.;
       nc_ul+=1.; // 1 + upper uncertainty on nc (result[6]>0)
       nc_ll+=1.; // 1 + lower uncertainty on nc (result[8]<0)
       nu_nc_ul.push_back(result[5]*nc_ul);
@@ -346,6 +349,8 @@ Primaries::Primaries(){//constructor
       double cc_ll = (result[4]); 
       nubar_cc_uu.push_back(cc_ul);
       nubar_cc_lu.push_back(cc_ll);
+      cc_ul/=100.; // convert from % to fraction
+      cc_ll/=100.; // convert from % to fraction
       cc_ul+=1.; // 1 + upper uncertainty on cc (result[2]>0)
       cc_ll+=1.; // 1 + lower uncertainty on cc (result[4]<0)
       nubar_cc_ul.push_back(result[1]*cc_ul);
@@ -356,6 +361,8 @@ Primaries::Primaries(){//constructor
       double nc_ll = (result[8]); 
       nubar_nc_uu.push_back(nc_ul);
       nubar_nc_lu.push_back(nc_ll);
+      nc_ul/=100.;
+      nc_ll/=100.;
       nc_ul+=1.; // 1 + upper uncertainty on nc (result[6]>0)
       nc_ll+=1.; // 1 + lower uncertainty on nc (result[8]<0)
       nubar_nc_ul.push_back(result[5]*nc_ul);
@@ -591,22 +598,29 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
       }
       else if (settings1->SIGMA_SELECT==3){ // use Cooper-Sarkar upper uncertainties
         double cs_uncertainty_this = cs_fsigma_uncertainty_upper[nu_nubar][currentint]->Eval(epsilon);
-        cs_uncertainty_this+=1.; // turn it into a multiplicative factor
+        	cs_uncertainty_this/=100.; // change from % to fraction
+        	cs_uncertainty_this+=1.; // turn it into a multiplicative factor
         double cs_uncertainty_nc = cs_fsigma_uncertainty_upper[nu_nubar][0]->Eval(epsilon);
+        	cs_uncertainty_nc/=100.;
+       	 cs_uncertainty_nc+=1.;
         double cs_uncertainty_cc = cs_fsigma_uncertainty_upper[nu_nubar][1]->Eval(epsilon);
-        
+        	cs_uncertainty_cc/=100.;
+        	cs_uncertainty_cc+=1.;
         sigma=settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][currentint]->Eval(epsilon))/1.E4*cs_uncertainty_this ;//convert cm to meters. multiply by (1m^2/10^4 cm^2).
         sigma_total = (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][0]->Eval(epsilon))/1.E4*cs_uncertainty_nc) + (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][1]->Eval(epsilon))/1.E4*cs_uncertainty_cc);
       }
       else if(settings1->SIGMA_SELECT==4){ // use Cooper-Sarkar lower uncertainties
         double cs_uncertainty_this = cs_fsigma_uncertainty_lower[nu_nubar][currentint]->Eval(epsilon);
-        cs_uncertainty_this+=1.; // turn it into a multiplicative factor
+        	cs_uncertainty_this/=100.; // change from % to fraction
+        	cs_uncertainty_this+=1.; // turn it into a multiplicative factor
         double cs_uncertainty_nc = cs_fsigma_uncertainty_lower[nu_nubar][0]->Eval(epsilon);
+        	cs_uncertainty_nc/=100.;
+        	cs_uncertainty_nc+=1.;
         double cs_uncertainty_cc = cs_fsigma_uncertainty_lower[nu_nubar][1]->Eval(epsilon);
-        
+        	cs_uncertainty_cc/=100.;
+        	cs_uncertainty_cc+=1.;
         sigma=settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][currentint]->Eval(epsilon))/1.E4*cs_uncertainty_this ;//convert cm to meters. multiply by (1m^2/10^4 cm^2).
         sigma_total = (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][0]->Eval(epsilon))/1.E4*cs_uncertainty_nc) + (settings1->SIGMA_FACTOR*(m_fsigma[nu_nubar][1]->Eval(epsilon))/1.E4*cs_uncertainty_cc);
-
       }
       else {// if other values are chosen, just use mean value
 
@@ -638,8 +652,6 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
       }
     }
   }//if
-
-
 
   // interaction length in kg/m^2
   
