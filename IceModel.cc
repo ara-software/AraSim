@@ -264,6 +264,40 @@ double IceModel::GetARAIceAttenuLength(double depth) {
 
 }
 
+//here z is depth in negative value
+double IceModel::temperature(double z) {
+        return(-51.5 + z*(-4.5319e-3 + 5.822e-6*z));
+}
+
+// read depth in positive value, freq in GHz and return attenuation length (m) at the depth
+double IceModel::GetBessonIceAttenuLength(double depth, double freq) {
+
+    double AttenL = 0.0;
+    // check if depth is positive value
+    if ( depth < 0. ) {// whether above the ice or wrong value!
+        cerr<<"depth negative! "<<depth<<endl;
+    }
+    else {
+        //AttenL = Tools::SimpleLinearInterpolation_extend_Single(ARA_IceAtten_bin, ARA_IceAtten_Depth, ARA_IceAtten_Length, depth );
+        double t = temperature(-depth);
+        const double f0=0.0001, f2=3.16;
+        const double w0=log(f0), w1=0.0, w2=log(f2), w=log(freq);
+        const double b0=-6.74890+t*(0.026709-t*0.000884);
+        const double b1=-6.22121-t*(0.070927+t*0.001773);
+        const double b2=-4.09468-t*(0.002213+t*0.000332);
+        double a,bb;
+        if(freq<1.){
+                a=(b1*w0-b0*w1)/(w0-w1);
+                bb=(b1-b0)/(w1-w0);
+        }
+        else{
+                a=(b2*w1-b1*w2)/(w1-w2);
+                bb=(b2-b1)/(w2-w1);
+        }
+        AttenL = 1./exp(a+bb*w);
+    }
+    return AttenL;
+}
 
 
 
