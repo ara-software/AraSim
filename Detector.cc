@@ -1060,6 +1060,13 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             cout<<"     Reading custom electronics response"<<endl;
              ReadElectChain("./data/custom_electronics.txt", settings1);
         }
+
+        else if (settings1->CUSTOM_ELECTRONICS==2){
+            //read a custom user defined electronics gain
+            cout<<"     Reading comparison electronics response"<<endl;
+             ReadElectChain("./data/filter_2nd10th_order.txt", settings1);
+        }
+
         cout<<"done read elect chain"<<endl;
 
 
@@ -1545,6 +1552,12 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
              ReadElectChain("./data/custom_electronics.txt", settings1);
         }
 
+        else if (settings1->CUSTOM_ELECTRONICS==2){
+            //read a custom user defined electronics gain
+            cout<<"     Reading comparison electronics response"<<endl;
+             ReadElectChain("./data/filter_2nd10th_order.txt", settings1);
+        }
+
 
     }
 
@@ -1860,8 +1873,13 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             cout<<"     Reading custom electronics response"<<endl;
              ReadElectChain("./data/custom_electronics.txt", settings1);
         }
-	    cout<<"done read elect chain"<<endl;
 
+      else if (settings1->CUSTOM_ELECTRONICS==2){
+          //read a custom user defined electronics gain
+          cout<<"     Reading comparison electronics response"<<endl;
+           ReadElectChain("./data/filter_2nd10th_order.txt", settings1);
+      }
+      cout<<"done read elect chain"<<endl;
 
 
 	    // if calpulser case
@@ -2213,6 +2231,12 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
              ReadElectChain("./data/custom_electronics.txt", settings1);
+        }
+
+        else if (settings1->CUSTOM_ELECTRONICS==2){
+            //read a custom user defined electronics gain
+            cout<<"     Reading comparison electronics response"<<endl;
+             ReadElectChain("./data/filter_2nd10th_order.txt", settings1);
         }
 	    cout<<"done read elect chain"<<endl;
 
