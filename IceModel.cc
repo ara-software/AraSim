@@ -270,7 +270,7 @@ double IceModel::temperature(double z) {
 }
 
 // read depth in positive value, freq in GHz and return attenuation length (m) at the depth
-double IceModel::GetBessonIceAttenuLength(double depth, double freq) {
+double IceModel::GetFreqDepIceAttenuLength(double depth, double freq) {
 
     double AttenL = 0.0;
     // check if depth is positive value
