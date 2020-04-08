@@ -27,49 +27,49 @@ protected:
   int mooreBayFlag;
 
   //Information on horizons - what ice the balloon can see at each position along its path.
- 
- 
+
+
 //   double volume_inhorizon_average; // average volume of ice seen by balloon
 //   vector<int> ilon_inhorizon[NBNPOSITIONS_MAX]; // indices in lon and lat for bins in horizon for NPHI balloon positions along 80 deg latitude line.
 //   vector<int> ilat_inhorizon[NBNPOSITIONS_MAX];
 //   vector<int> easting_inhorizon[NBNPOSITIONS_MAX]; //indicies in easting and northing for bins in horizon for NPHI balloon positions along 80 deg latitude line.
 //   vector<int> northing_inhorizon[NBNPOSITIONS_MAX];
-//   double maxvol_inhorizon[NBNPOSITIONS_MAX]; // maximum volume of ice for a bin 
+//   double maxvol_inhorizon[NBNPOSITIONS_MAX]; // maximum volume of ice for a bin
 
   //BEDMAP utility methods
   double Area(double latitude) const;
 
-void ENtoLonLat(int e_coord, 
+void ENtoLonLat(int e_coord,
 		  int n_coord,
 		  double xLowerLeft,
 		  double yLowerLeft,
-		  
-		  double& lon, 
+
+		  double& lon,
 		  double& lat) const;
 
 
 
   void WaterENtoLonLat(int e,
 		       int n,
-		       
+
 		       double& lon,
 		       double& lat) const;
-  void LonLattoEN(double lon, 
+  void LonLattoEN(double lon,
 		  double lat,
 		  double xLowerLeft,
 		  double yLowerLeft,
-		
-		  int& e_coord, 
+
+		  int& e_coord,
 		  int& n_coord) const;
- 
-  void GroundLonLattoEN(double lon, 
+
+  void GroundLonLattoEN(double lon,
 			double lat,
-			
-			int& e_coord, 
+
+			int& e_coord,
 			int& n_coord) const;
   void WaterLonLattoEN(double lon,
 		       double lat,
-		       
+
 		       int& e_coord,
 		       int& n_coord) const;
 
@@ -107,17 +107,17 @@ public:
 
   void IceENtoLonLat(int e,
 		     int n,
-		     
+
 		     double& lon,
-		     double& lat) const;  
+		     double& lat) const;
   void GroundENtoLonLat(int e,
 			int n,
-			
+
 			double& lon,
 			double& lat) const;
 
   //  const static int NBNPOSITIONS_MAX=26000;
-  //double volume_inhorizon[NBNPOSITIONS_MAX]; // volume of ice within horizon for each balloon phi position 
+  //double volume_inhorizon[NBNPOSITIONS_MAX]; // volume of ice within horizon for each balloon phi position
 //  IceModel();   //default constructor
   IceModel(int model=0,int earth_model=0,int mooreBay=0);
   ~IceModel();
@@ -134,12 +134,12 @@ public:
 
   Position PickBalloonPosition() const;
   //void GetMAXHORIZON(double bn_altitude); // get upper limit on the horizon wrt the balloon.
-  int RossIceShelf(const Position &position) const; 
+  int RossIceShelf(const Position &position) const;
   int IceOnWater(const Position &postition) const;
   int RossExcept(const Position &position) const;
   int RonneIceShelf(const Position &position) const;
-  int WestLand(const Position &pos) const; 
-  int AcceptableRfexit(const Vector &nsurf_rfexit,const Position &rfexit,const Vector &n_exit2rx) const; 
+  int WestLand(const Position &pos) const;
+  int AcceptableRfexit(const Vector &nsurf_rfexit,const Position &rfexit,const Vector &n_exit2rx) const;
   //double GetBalloonPositionWeight(int ibnpos) const;
   int OutsideAntarctica(const Position &pos) const;
   int OutsideAntarctica(double lat) const;
@@ -160,11 +160,11 @@ public:
   double GetN(const Position &pos) const;
   double EffectiveAttenuationLength(const Position &pos, const int &whichray) const;
   double EffectiveAttenuationLength(Settings *settings1, const Position &pos, const int &whichray) const;
-  
-  void IceLonLattoEN(double lon, 
+
+  void IceLonLattoEN(double lon,
 		     double lat,
-		     
-		     int& e_coord, 
+
+		     int& e_coord,
 		     int& n_coord) const;
   int Getice_model();
 
@@ -183,6 +183,9 @@ void GetFresnel (
   int ARA_IceAtten_bin;
 
   double GetARAIceAttenuLength(double depth);
+  double GetFreqDepIceAttenuLength(double depth, double freq);
+  double temperature(double z);
+
 
   //  void FillArraysforTree(double lon_ground[1068][869],double lat_ground[1068][869],double lon_ice[1200][1000],double lat_ice[1200][1000],double lon_water[1200][1000],double lat_water[1200][1000]);
 
@@ -194,12 +197,12 @@ void GetFresnel (
 // 			       const Vector &nnu,
 // 			       double stepsize,
 // 			       Position &r_enterice);
-// 
+//
 //   int WhereDoesItExitIce(int inu,const Position &posnu,
 // 			 const Vector &nnu,
 // 			 double stepsize,
 // 			 Position &r_enterice);
-//-------------------------------------------------- 
+//--------------------------------------------------
   // end three copied members from icemc icemodel.
 
 
