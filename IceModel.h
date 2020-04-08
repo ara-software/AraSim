@@ -183,7 +183,7 @@ void GetFresnel (
   int ARA_IceAtten_bin;
 
   double GetARAIceAttenuLength(double depth);
-  double GetBessonIceAttenuLength(double depth, double freq);
+  double GetFreqDepIceAttenuLength(double depth, double freq);
   double temperature(double z);
 
 
