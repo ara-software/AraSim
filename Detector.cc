@@ -396,6 +396,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                   params.number_of_antennas_string = 1;
         }
         else if (params.bore_hole_antenna_layout == 8) { // A dipole at 100 depth
+                  params.number_of_strings_station = 1;
                   params.number_of_antennas_string = 1;
         }
 
@@ -958,7 +959,10 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                 } // end if bore hole antenna layout = 3 (where VHHH way)
 
 
-
+                else if (params.bore_hole_antenna_layout == 8) { // A dipole at 100 depth
+                  params.number_of_strings_station = 1;
+                  params.number_of_antennas_string = 1;
+                }
 
                 //
                 // set surface antenna postions
@@ -1039,7 +1043,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         // read threshold offset for chs file!!
         ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1);// only TestBed for now
 	// read threshold values for chs file
-	ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
+	      ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
         // read system temperature for chs file!!
 	cout << "check read testbed temp1" << endl;
         if (settings1->NOISE_CHANNEL_MODE != 0) {
