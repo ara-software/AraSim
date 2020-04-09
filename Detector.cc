@@ -279,13 +279,13 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             else z_btw_array[i] = z_btw;
         }
         double z_btw_total;
-        params.stations_per_side = 4;       // total 37 stations
+        params.stations_per_side = 1;       // total 37 stations
         params.station_spacing = 2000.;     // 2km spacing
         params.antenna_orientation = 0;     // all antenna facing x
         params.bore_hole_antenna_layout = settings1->BORE_HOLE_ANTENNA_LAYOUT;
         // finish initialization
         //
-
+        // cout << "\033[1;31mFor comparison\033[0m\n";
 
 
 
@@ -394,9 +394,11 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         }
       	else if (params.bore_hole_antenna_layout == 7) { // V layout
                   params.number_of_antennas_string = 1;
+                  // params.number_of_strings_station = 1;
         }
         else if (params.bore_hole_antenna_layout == 8) { // A dipole at 100 depth
-                  params.number_of_strings_station = 1;
+                  cout << "\033[1;31mFor comparison\033[0m\n";
+                  // params.number_of_strings_station = 1;
                   params.number_of_antennas_string = 1;
         }
 
@@ -712,6 +714,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 			  params.bore_hole_antenna_layout == 7 ) {   // it's V-V-V-V or V-V or V
 
                     for (int j=0; j<params.number_of_strings_station; j++) {
+                      cout << "\033[1;31mNumber of strings:\033[0m\n";
+                      cout << params.number_of_strings_station << endl;
                         for (int k=0; k<params.number_of_antennas_string; k++) {
 
 			  if (settings1->BH_ANT_SEP_DIST_ON==0)
@@ -752,11 +756,17 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                         }
                     }
 
+
                 } // end if bore hole antenna layout = 5,6,7 (VVVV, VV, V)
                 else if (params.bore_hole_antenna_layout == 8){ // vpol at -100
+
                     stations[i].strings[0].antennas[0].SetZ(-100);
                     stations[i].strings[0].antennas[0].type = 0;
                     stations[i].strings[0].antennas[0].orient = 1;
+                    stations[i].strings[0].SetX( stations[i].GetX() );
+                    stations[i].strings[0].SetY( stations[i].GetY() );
+                    cout << "\033[1;31mFor comparison\033[0m\n";
+
                   }
                 //
                 // set surface antenna postions
@@ -960,8 +970,13 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 
                 else if (params.bore_hole_antenna_layout == 8) { // A dipole at 100 depth
-                  params.number_of_strings_station = 1;
-                  params.number_of_antennas_string = 1;
+                  stations[i].strings[0].antennas[0].SetZ(-100);
+                  stations[i].strings[0].antennas[0].type = 0;
+                  stations[i].strings[0].antennas[0].orient = 1;
+                  stations[i].strings[0].SetX( stations[i].GetX() );
+                  stations[i].strings[0].SetY( stations[i].GetY() );
+                  cout << "\033[1;31mFor comparison\033[0m\n";
+
                 }
 
                 //
