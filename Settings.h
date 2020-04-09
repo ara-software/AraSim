@@ -141,17 +141,17 @@ class Settings
 
         double MAX_POSNU_DEPTH;  // maximum posnu depth when above PICK_POSNU_DEPTH=1
 
-        int NNU_THIS_THETA;     // if nnu theta angle will be selected randomly from [0, PI] (default=0) or set nnu theta to near some angle (=1)
+        int NNU_THIS_THETA;     // if nnu theta angle will be selected randomly from [0, PI] (default=0) or set nnu theta to near some angle (=1). Theta = 0 corresponds to an upgoing event and Theta = pi corresponds to a downgoing event.
 
-        double NNU_THETA;       // nnu theta when NNU_THIS_THETA=1
+        double NNU_THETA;       // nnu theta when NNU_THIS_THETA=1. In radians.
 
-        double NNU_D_THETA;     // nnu theta variation from NNU_THETA, when NNU_THIS_THETA=1 case
+        double NNU_D_THETA;     // nnu theta variation from NNU_THETA, when NNU_THIS_THETA=1 case.  Use radians.
 
-        int NNU_THIS_PHI; // default 0: nnu angle pure random, 1: set a specific phi
+        int NNU_THIS_PHI; // default 0: nnu angle pure random, 1: set a specific phi. Phi is in the range [0,2 Pi], where 0 is aligned with the iceflow and it's goes counterclockwise.
 
-        double NNU_PHI;// default : nnu phi: 45 deg
+        double NNU_PHI;// default : nnu phi: 45 deg. Use radians.
 
-        double NNU_D_PHI;// default : nnu_d_phi : 5 deg
+        double NNU_D_PHI;// default : nnu_d_phi : 5 deg  Use radians.
 
         double CALPUL_OFFCONE_ANGLE;    // for calpulser events, what's the offcone angle value?
 
