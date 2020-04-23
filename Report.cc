@@ -620,7 +620,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                            freq_tmp = detector->GetFreq(l); // freq in Hz
 
-					   cout << "Check 1" << endl;
+					   // cout << "Check 1" << endl;
                                            /*
                                            // Get ant gain with 2-D interpolation (may have bug?)
                                            //
@@ -678,7 +678,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                            ApplyAntFactors(heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, vmmhz1m_tmp);
 
-					   cout << "Check 2" << endl;
+					   // cout << "Check 2" << endl;
                                            //stations[i].strings[j].antennas[k].VHz_antfactor[ray_sol_cnt].push_back( vmmhz1m_tmp );
 
                                            // apply filter
@@ -1647,6 +1647,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 					 // now get time domain waveform back by inv fft
 					 Tools::realft(V_forfft,-1,stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);
+           // cout << "\033[1;31mHERE!!!!!!!\033[0m\n";
 
 
 					 // we need to do normal time ordering as we did zero padding(?)
@@ -2760,7 +2761,51 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 	       }// if TRIG_SCAN_MODE==0
 
-	       else if(settings1->TRIG_SCAN_MODE>0) triggerCheckLoop(settings1, detector, event, trigger, i, trig_search_init, max_total_bin, trig_window_bin, settings1->TRIG_SCAN_MODE);
+	       else if(settings1->TRIG_SCAN_MODE>0){
+           if (settings1->TRIG_SCAN_MODE == 10) {
+             // cout << "\033[1;31mUsing simple trigger\033[0m\n";
+             N_pass = 0;
+             N_pass_V = 0;
+             N_pass_H = 0;
+             Passed_chs.clear();
+             for (int ch_loop = 0; ch_loop < ch_ID; ch_loop++) {
+               int string_i = detector->getStringfromArbAntID(i,
+                          ch_loop);
+               int antenna_i = detector->getAntennafromArbAntID(i,
+                            ch_loop);
+               // cout<<"On channel: "<<ch_loop<<", string: "<<string_i<<" antenna: "<<antenna_i<<endl;
+               int num_this_ant = 0;
+               int type =
+           detector->stations[i].strings[string_i].antennas[antenna_i].type; //0 is VPol, 1 is Hpol
+               if (type == 0) { //only trigger on Vpol
+           for (int sols = 0;
+                sols
+                  < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt;
+                sols++) {
+                  // cout << stations[i].strings[string_i].antennas[antenna_i].PeakV[0] << endl;
+             if (stations[i].strings[string_i].antennas[antenna_i].PeakV[0]
+                 > 2*8.35e-6) {
+               cout<<"   Channel "<<ch_loop<< "Peak V value is  "<<stations[i].strings[string_i].antennas[antenna_i].PeakV[sols]<<endl;
+               num_this_ant++;
+             }
+           }
+               }
+               if (num_this_ant > 0) {
+           N_pass_V++;
+           Passed_chs.push_back(ch_loop);
+           stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 1; //set this channel as passing the trigger
+               }
+             }
+             if (N_pass_V > 0) { //this will have it pass the Vpol trigger
+               // cout<<"Pass vpol trigger!"<<endl;
+               // cout << "\033[1;31mUsing simple trigger\033[0m\n";
+
+               stations[i].Global_Pass = 1; //it deserves a global trigger
+             }
+           } //end trigger mode 10
+         }
+
+         else triggerCheckLoop(settings1, detector, event, trigger, i, trig_search_init, max_total_bin, trig_window_bin, settings1->TRIG_SCAN_MODE);
 
 // 	       else if(settings1->TRIG_SCAN_MODE==2) triggerCheckLoopScan();
 

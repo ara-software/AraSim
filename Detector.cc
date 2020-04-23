@@ -285,11 +285,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         params.bore_hole_antenna_layout = settings1->BORE_HOLE_ANTENNA_LAYOUT;
         // finish initialization
         //
-        // cout << "\033[1;31mFor comparison\033[0m\n";
-
-
-
-
         // Read new parameters if there are...
         if ( ARA_N.is_open() ) {
             while (ARA_N.good() ) {
@@ -536,7 +531,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             //SetupInstalledStations();
 
             for (int i=0; i<params.number_of_stations; i++) {
-
+              if(params.number_of_strings_station==4){
                 //
                 // set string postions based on station position
                 stations[i].strings[0].SetX( stations[i].GetX() - (R_string * cos(PI/4.)) );
@@ -550,7 +545,11 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
                 stations[i].strings[3].SetX( stations[i].GetX() + (R_string * cos(PI/4.)) );
                 stations[i].strings[3].SetY( stations[i].GetY() - (R_string * sin(PI/4.)) );
-
+              }
+              if(params.number_of_strings_station==1){
+                stations[i].strings[0].SetX(stations[i].GetX());
+                stations[i].strings[0].SetY(stations[i].GetY());
+                }
 
                 //
                 // set antenna postions in borehole
@@ -765,7 +764,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     stations[i].strings[0].antennas[0].orient = 1;
                     stations[i].strings[0].SetX( stations[i].GetX() );
                     stations[i].strings[0].SetY( stations[i].GetY() );
-                    cout << "\033[1;31mFor comparison\033[0m\n";
+                    // cout << "\033[1;31mFor comparison\033[0m\n";
 
                   }
                 //
@@ -791,8 +790,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
             // for idealized geometry, number of antennas in a station is constant
             max_number_of_antennas_station = params.number_of_strings_station * params.number_of_antennas_string;
-
-
+            // cout << "\033[1;31mFor comparison\033[0m\n";
 
 
         } // if idealized geometry
@@ -845,7 +843,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     }
 
 
-                //
+
                 // set antenna postions in borehole
                 // and set type (h or v pol antenna) and set orientation (facing x or y)
                 if ( params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
@@ -975,7 +973,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                   stations[i].strings[0].antennas[0].orient = 1;
                   stations[i].strings[0].SetX( stations[i].GetX() );
                   stations[i].strings[0].SetY( stations[i].GetY() );
-                  cout << "\033[1;31mFor comparison\033[0m\n";
 
                 }
 
@@ -1040,6 +1037,12 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	  ReadVgain("Arianna_WIPLD_hpol.dat");
 	  // test read H-pol gain file!!
 	  ReadHgain("Arianna_WIPLD_hpol.dat");
+	}
+  else if (settings1->ANTENNA_MODE == 3){
+	  // test read V-pol gain file!!
+	  ReadVgain("XFDTD_Vpol_CrossFeed_150mmHole_n1.78.txt");
+	  // test read H-pol gain file!!
+	  ReadHgain("ARA_dipoletest1_output.txt");
 	}
 
 	//	if (settings1->NOISE == 2){
@@ -1535,6 +1538,12 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	  // test read H-pol gain file!!
 	  ReadHgain("Arianna_WIPLD_hpol.dat");
 	}
+  else if (settings1->ANTENNA_MODE == 3){
+	  // test read V-pol gain file!!
+	  ReadVgain("XFDTD_Vpol_CrossFeed_150mmHole_n1.78.txt");
+	  // test read H-pol gain file!!
+	  ReadHgain("ARA_dipoletest1_output.txt");
+	}
 
 	//	if (settings1->NOISE==2){
 	ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
@@ -1828,7 +1837,12 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      // test read H-pol gain file!!
 	      ReadHgain("Arianna_WIPLD_hpol.dat");
 	    }
-
+      else if (settings1->ANTENNA_MODE == 3){
+        // test read V-pol gain file!!
+        ReadVgain("XFDTD_Vpol_CrossFeed_150mmHole_n1.78.txt");
+        // test read H-pol gain file!!
+        ReadHgain("ARA_dipoletest1_output.txt");
+      }
 
 	    ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 
@@ -2136,6 +2150,12 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      // test read H-pol gain file!!
 	      ReadHgain("Arianna_WIPLD_hpol.dat");
 	    }
+      else if (settings1->ANTENNA_MODE == 3){
+    	  // test read V-pol gain file!!
+    	  ReadVgain("XFDTD_Vpol_CrossFeed_150mmHole_n1.78.txt");
+    	  // test read H-pol gain file!!
+    	  ReadHgain("ARA_dipoletest1_output.txt");
+    	}
 
 	    //	    if (settings1->NOISE == 2){
 	      //Read the noise figures
@@ -2324,7 +2344,7 @@ inline void Detector::ReadVgain(string filename) {
 		    Vphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
 		    //	cout << atof( line.substr( 20, 33 ).c_str() ) << endl;
 
-		    //	cout<<"VGain : "<<Vgain[i][j]<<", VPhase : "<<Vphase[i][j]<<endl;
+		    	 // cout<<"VGain : "<<Vgain[i][j]<<", VPhase : "<<Vphase[i][j]<<endl;
 
                     }// end ang_step
 
