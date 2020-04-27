@@ -878,11 +878,9 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                                         stations[i].strings[j].antennas[k].orient = 0;
                                     }
                                 }
-
                             }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
                         }
                     }
-
                 } // end if bore hole antenna layout = 0 or 1 (where VHVH way but different numbers)
 
 
