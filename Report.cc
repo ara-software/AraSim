@@ -629,19 +629,19 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                        freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
                                             */
                                            if ( settings1->ALL_ANT_V_ON==0 ) {
-					     if (settings1->ANTENNA_MODE == 0){
+					     if (settings1->ANTENNA_MODE == 0 || settings1->ANTENNA_MODE == 3){
                                                heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 												antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
                                                            freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
 					     }
 					     if (settings1->ANTENNA_MODE == 1){
-					       heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+					                                     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 												antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k),
 								   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
 					     }
                                            }
                                            else if ( settings1->ALL_ANT_V_ON==1 ) {
-					     if (settings1->ANTENNA_MODE == 0){
+					     if (settings1->ANTENNA_MODE == 0 || settings1->ANTENNA_MODE == 3){
                                                heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 												antenna_theta, antenna_phi, 0),
 								   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
@@ -675,10 +675,12 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                //cout<<"set signal pol as Vpol + Hpol for Calpulser2 evts"<<endl;
                                                Pol_vector = n_trg_slappy + n_trg_pokey;
                                            }
-
+                                           // cout << "Heff is: ";
+                                           // cout << heff << endl;
                                            ApplyAntFactors(heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, vmmhz1m_tmp);
+                                           // cout << vmmhz1m_tmp << endl;
 
-					   // cout << "Check 2" << endl;
+					                                 // cout << "Check 2" << endl;
                                            //stations[i].strings[j].antennas[k].VHz_antfactor[ray_sol_cnt].push_back( vmmhz1m_tmp );
 
                                            // apply filter
@@ -695,7 +697,6 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                            vmmhz_filter[l] = vmmhz1m_tmp;
 
 
-
                                        }// end for freq bin
 
                                        stations[i].strings[j].antennas[k].Pol_factor.push_back( Pol_factor );
@@ -706,7 +707,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                        //MakeArraysforFFT(settings1, detector, i, stations[i].strings[j].antennas[k].VHz_filter[ray_sol_cnt], volts_forfft);
                                        MakeArraysforFFT(settings1, detector, i, vmmhz_filter, volts_forfft);
 
-
+                                       // for(int ll = 0; ll<100; ll++)cout << volts_forfft[ll] << endl;
 
                                        // save freq domain array which is prepaired for realft
                                        for (int n=0; n<settings1->NFOUR/2; n++) {
@@ -720,10 +721,10 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                        Tools::realft(volts_forfft,-1,settings1->NFOUR/2);
                                        //Tools::realft(volts_forfft,1,settings1->NFOUR/2);
 
-
                                        //cout<<"Finished getting V signal part!!"<<endl;
 
                                        stations[i].strings[j].antennas[k].PeakV.push_back( FindPeak(volts_forfft, settings1->NFOUR/2) );
+                                       // cout << volts_forfft[100] << endl;
                                        // Vfft_noise_org is in fft freq bin!!
                                        // same unit with Vfft [V] but filter not applied
 
@@ -2774,15 +2775,17 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                int antenna_i = detector->getAntennafromArbAntID(i,
                             ch_loop);
                // cout<<"On channel: "<<ch_loop<<", string: "<<string_i<<" antenna: "<<antenna_i<<endl;
+               // cout << stations[i].strings[string_i].antennas[antenna_i].PeakV[0] << endl;
+
                int num_this_ant = 0;
                int type =
            detector->stations[i].strings[string_i].antennas[antenna_i].type; //0 is VPol, 1 is Hpol
+           // cout << type << endl;
                if (type == 0) { //only trigger on Vpol
            for (int sols = 0;
                 sols
                   < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt;
                 sols++) {
-                  // cout << stations[i].strings[string_i].antennas[antenna_i].PeakV[0] << endl;
              if (stations[i].strings[string_i].antennas[antenna_i].PeakV[0]
                  > 2*8.35e-6) {
                cout<<"   Channel "<<ch_loop<< "Peak V value is  "<<stations[i].strings[string_i].antennas[antenna_i].PeakV[sols]<<endl;
