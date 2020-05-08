@@ -1049,7 +1049,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 
         // read filter file!!
-        ReadFilter("./data/filter.csv", settings1);
+        if(settings1->CUSTOM_ELECTRONICS==3) ReadFilter("./data/filter_2nd10th_order.txt", settings1);
+        else ReadFilter("./data/filter.csv", settings1);
         // read preamp gain file!!
         ReadPreamp("./data/preamp.csv", settings1);
         // read FOAM gain file!!
@@ -1547,8 +1548,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 	  //	}
 
-        ReadFilter("./data/filter.csv", settings1);
-        // read preamp gain file!!
+    if(settings1->CUSTOM_ELECTRONICS==3) ReadFilter("./data/filter_2nd10th_order.txt", settings1);
+    else ReadFilter("./data/filter.csv", settings1);        // read preamp gain file!!
         ReadPreamp("./data/preamp.csv", settings1);
         // read FOAM gain file!!
         ReadFOAM("./data/FOAM.csv", settings1);
@@ -1845,8 +1846,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	    ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 
             // read filter file!!
-            ReadFilter("./data/filter.csv", settings1);
-            // read preamp gain file!!
+            if(settings1->CUSTOM_ELECTRONICS==3) ReadFilter("./data/filter_2nd10th_order.txt", settings1);
+            else ReadFilter("./data/filter.csv", settings1);            // read preamp gain file!!
             ReadPreamp("./data/preamp.csv", settings1);
             // read FOAM gain file!!
             ReadFOAM("./data/FOAM.csv", settings1);
@@ -2161,8 +2162,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      //	    }
 
             // read filter file!!
-            ReadFilter("./data/filter.csv", settings1);
-            // read preamp gain file!!
+            if(settings1->CUSTOM_ELECTRONICS==3) ReadFilter("./data/filter_2nd10th_order.txt", settings1);
+            else ReadFilter("./data/filter.csv", settings1);            // read preamp gain file!!
             ReadPreamp("./data/preamp.csv", settings1);
             // read FOAM gain file!!
             ReadFOAM("./data/FOAM.csv", settings1);
@@ -6467,4 +6468,3 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
 Detector::~Detector() {
     cout<<"Destruct class Detector"<<endl;
 }
-                                                        
