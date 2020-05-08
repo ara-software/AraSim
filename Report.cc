@@ -675,23 +675,29 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                //cout<<"set signal pol as Vpol + Hpol for Calpulser2 evts"<<endl;
                                                Pol_vector = n_trg_slappy + n_trg_pokey;
                                            }
-                                           // cout << "Heff is: ";
-                                           // cout << heff << endl;
+
                                            ApplyAntFactors(heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, vmmhz1m_tmp);
                                            // cout << vmmhz1m_tmp << endl;
 
 					                                 // cout << "Check 2" << endl;
                                            //stations[i].strings[j].antennas[k].VHz_antfactor[ray_sol_cnt].push_back( vmmhz1m_tmp );
-
+                                           // cout << "Before filter is: ";
+                                           // cout << vmmhz1m_tmp << endl;
                                            // apply filter
                                            ApplyFilter(l, detector, vmmhz1m_tmp);
-
+                                           // cout << "After filter is: ";
+                                           // cout << vmmhz1m_tmp << endl;
                                            // apply Preamp gain
-                                           ApplyPreamp(l, detector, vmmhz1m_tmp);
 
+                                           // ApplyPreamp(l, detector, vmmhz1m_tmp);
+                                           // cout << "Before gain is: ";
+                                           // cout << vmmhz1m_tmp << endl;
                                            // apply FOAM gain
-                                           ApplyFOAM(l, detector, vmmhz1m_tmp);
 
+
+                                           // ApplyFOAM(l, detector, vmmhz1m_tmp);
+                                           // cout << "After gain is: ";
+                                           // cout << vmmhz1m_tmp << endl;
 
                                            //stations[i].strings[j].antennas[k].VHz_filter[ray_sol_cnt].push_back( vmmhz1m_tmp );
                                            vmmhz_filter[l] = vmmhz1m_tmp;
@@ -731,7 +737,11 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                        // for(int counter=0;counter<settings1->NFOUR/2;counter++) cout << volts_forfft[counter]<<endl;
                                        Tools::NormalTimeOrdering(settings1->NFOUR/2, volts_forfft);
                                        //cout<<"finished NormalTimeOrdering!!"<<endl;
-
+                                       // for(int samp=0; samp<settings1->NFOUR/2;samp++){
+                                       //   cout << volts_forfft[samp]<<",";
+                                       // }
+                                       printf("Peak V direct is %e \n",stations[i].strings[j].antennas[k].PeakV[0]);
+                                        printf("Peak V reflected is %e \n",stations[i].strings[j].antennas[k].PeakV[1]);
                                        for (int n=0; n<settings1->NFOUR/2; n++) {
 
                                            if (settings1->TRIG_ANALYSIS_MODE != 2) { // not pure noise mode (we need signal)
@@ -2802,7 +2812,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
              if (N_pass_V > 0) { //this will have it pass the Vpol trigger
                // cout<<"Pass vpol trigger!"<<endl;
                // cout << "\033[1;31mUsing simple trigger\033[0m\n";
-
+               // cout << i << endl;
                stations[i].Global_Pass = 1; //it deserves a global trigger
              }
            } //end trigger mode 10
