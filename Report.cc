@@ -4102,7 +4102,7 @@ void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_sla
     vmmhz = vmmhz/sqrt(2.)/(1.E6); //sqrt(2) for 3dB spliter for TURF, SURF. 1/TIMESTEP moved to MakeArraysforFFT
     // 1/(1.E6) for V/MHz to V/Hz
 
-
+    printf("polfactor is %f \n",n_trg_pokey[2]);
     // apply antenna effective height and 0.5 (to calculate power with heff), and polarization factor
     // not vmmhz is actually V/Hz unit
     vmmhz = vmmhz * 0.5 * heff * pol_factor;
