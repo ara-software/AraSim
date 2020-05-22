@@ -437,13 +437,14 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 				     double dx, dz, dl;
 				     for (int steps=1; steps<(int)RayStep[ray_sol_cnt][0].size(); steps++) {
-
+                                           printf("RayStep: %f\n",RayStep[ray_sol_cnt][0][steps]);
                                            dx = RayStep[ray_sol_cnt][0][steps-1] - RayStep[ray_sol_cnt][0][steps];
                                            dz = RayStep[ray_sol_cnt][1][steps-1] - RayStep[ray_sol_cnt][1][steps];
                                            dl = sqrt( (dx*dx) + (dz*dz) );
-
+                                           printf("dx = %f, dz = %f, dl = %f \n", dx, dz, dl);
                                            // use new ice model
-                                           IceAttenFactor *= exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps]) );
+                                           IceAttenFactor *= (exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps]) )+exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1])))/2;
+                                           // printf("IceAttenFactor_tmp: %f\n",IceAttenFactor);
                                        }
                                        //cout<<"new iceattenfactor : "<<IceAttenFactor<<", old way : "<<exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0))<<endl;
                                    }
@@ -740,8 +741,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                        // for(int samp=0; samp<settings1->NFOUR/2;samp++){
                                        //   cout << volts_forfft[samp]<<",";
                                        // }
-                                       printf("Peak V direct is %e \n",stations[i].strings[j].antennas[k].PeakV[0]);
-                                        printf("Peak V reflected is %e \n",stations[i].strings[j].antennas[k].PeakV[1]);
+                                       // printf("Peak V direct is %e \n",stations[i].strings[j].antennas[k].PeakV[0]);
+                                       //  printf("Peak V reflected is %e \n",stations[i].strings[j].antennas[k].PeakV[1]);
                                        for (int n=0; n<settings1->NFOUR/2; n++) {
 
                                            if (settings1->TRIG_ANALYSIS_MODE != 2) { // not pure noise mode (we need signal)
@@ -784,6 +785,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                // later once we understand how to apply antenna phase, total electronics with phase, apply those
                                             double atten_factor = 0.;
                                             //    //double atten_factor = 1. / ray_output[0][ray_sol_cnt] * exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0)) * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+
                                             if (settings1->USE_ARA_ICEATTENU == 1 || settings1->USE_ARA_ICEATTENU == 0){
                                               atten_factor = 1. / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel; // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
                                             }
@@ -794,9 +796,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                                // signal before the antenna (get signal at 1m and apply atten factor)
                                                signal->GetVm_FarField_Tarray( event, settings1, viewangle, atten_factor, outbin, Tarray, Earray, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt] );
-
-
-
+                                               cout << "IceAttenFactor is: "<< IceAttenFactor << endl;
+                                               // signal->GetVm_FarField_Tarray( event, settings1, viewangle, 1, outbin, Tarray, Earray, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt] );
 
                                                dT_forfft = Tarray[1] - Tarray[0]; // step in ns
 
@@ -850,8 +851,12 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                // just get peak from the array
                                                stations[i].strings[j].antennas[k].PeakV.push_back( FindPeak(Earray, outbin) );
 
-
-
+                                               // cout << "\033[1;31mI'm here\033[0m\n";
+                                               //
+                                               //
+                                               // for(int kk=0;kk<64;kk++){
+                                               //   cout << Tarray[kk]<< "," << Earray[kk] << endl;
+                                               // }
 
 
 
@@ -1034,6 +1039,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 
 
+                                               cout << "\033[1;31mI'm here\033[0m\n";
 
                                                for (int n=0; n<settings1->NFOUR/2; n++) {
 
@@ -1042,6 +1048,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                        //stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( V_forfft[n] * 2./(double)(settings1->NFOUR/2) ); // 2/N for inverse FFT normalization factor
                                                        //stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( volts_forint[n] * 2./(double)(settings1->NFOUR/2) ); // 2/N for inverse FFT normalization factor
                                                        stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( volts_forint[n] * 2./(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]) ); // 2/N for inverse FFT normalization factor
+                                                       // cout << volts_forint[n] * 2./(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]) << endl;
                                                    }
                                                    else if (settings1->TRIG_ANALYSIS_MODE == 2) { // pure noise mode (set signal to 0)
                                                        stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back( 0. );
@@ -4102,7 +4109,7 @@ void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_sla
     vmmhz = vmmhz/sqrt(2.)/(1.E6); //sqrt(2) for 3dB spliter for TURF, SURF. 1/TIMESTEP moved to MakeArraysforFFT
     // 1/(1.E6) for V/MHz to V/Hz
 
-    printf("polfactor is %f \n",n_trg_pokey[2]);
+    // printf("polfactor is %f \n",n_trg_pokey[2]);
     // apply antenna effective height and 0.5 (to calculate power with heff), and polarization factor
     // not vmmhz is actually V/Hz unit
     vmmhz = vmmhz * 0.5 * heff * pol_factor;
