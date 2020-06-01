@@ -2823,10 +2823,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                stations[i].Global_Pass = 1; //it deserves a global trigger
              }
            } //end trigger mode 10
-         }
-        else if(settings1 -> TRIG_SCAN_MODE==11){
-            cout << "\033[1;31mINSIDE TRIG SCAN MODE 11\033[0m\n";
-            // cout<<"INSIDE TRIG SCAN MODE 11"<<endl;
+            else if(settings1 -> TRIG_SCAN_MODE==11){
+            // cout << "\033[1;31mINSIDE TRIG SCAN MODE 11\033[0m\n";
             N_pass = 0;
             N_pass_V = 0;
             N_pass_H = 0;
@@ -2859,6 +2857,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                 stations[i].Global_Pass = 1;
             }
         }
+         }
 
          else triggerCheckLoop(settings1, detector, event, trigger, i, trig_search_init, max_total_bin, trig_window_bin, settings1->TRIG_SCAN_MODE);
 
