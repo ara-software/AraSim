@@ -437,11 +437,11 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 				     double dx, dz, dl;
 				     for (int steps=1; steps<(int)RayStep[ray_sol_cnt][0].size(); steps++) {
-                                           printf("RayStep: %f\n",RayStep[ray_sol_cnt][0][steps]);
+                                           // printf("RayStep: %f\n",RayStep[ray_sol_cnt][0][steps]);
                                            dx = RayStep[ray_sol_cnt][0][steps-1] - RayStep[ray_sol_cnt][0][steps];
                                            dz = RayStep[ray_sol_cnt][1][steps-1] - RayStep[ray_sol_cnt][1][steps];
                                            dl = sqrt( (dx*dx) + (dz*dz) );
-                                           printf("dx = %f, dz = %f, dl = %f \n", dx, dz, dl);
+                                           // printf("dx = %f, dz = %f, dl = %f \n", dx, dz, dl);
                                            // use new ice model
                                            IceAttenFactor *= (exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps]) )+exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1])))/2;
                                            // printf("IceAttenFactor_tmp: %f\n",IceAttenFactor);
@@ -1039,7 +1039,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 
 
-                                               cout << "\033[1;31mI'm here\033[0m\n";
+                                               // cout << "\033[1;31mI'm here\033[0m\n";
 
                                                for (int n=0; n<settings1->NFOUR/2; n++) {
 
@@ -2805,7 +2805,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                 sols++) {
              if (stations[i].strings[string_i].antennas[antenna_i].PeakV[0]
                  > 2*8.35e-6) {
-               cout<<"   Channel "<<ch_loop<< "Peak V value is  "<<stations[i].strings[string_i].antennas[antenna_i].PeakV[sols]<<endl;
+               // cout<<"   Channel "<<ch_loop<< "Peak V value is  "<<stations[i].strings[string_i].antennas[antenna_i].PeakV[sols]<<endl;
                num_this_ant++;
              }
            }
