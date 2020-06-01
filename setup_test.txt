@@ -1,6 +1,6 @@
 SIMULATION_MODE=1 //frequency domain askaryan radiation
 //the neutrinos
-NNU=100 //allow this many neutrinos
+NNU=1 //allow this many neutrinos
 ONLY_PASSED_EVENTS=0 //throw only NNU events
 EXPONENT=18// Energy of the neutrino thrown
 INTERACTION_MODE=1 //veff mode
@@ -28,7 +28,7 @@ DATA_LIKE_OUTPUT=0      //do data like output for all events (even untriggered)
 FILL_TREE_MODE=1
 
 USE_ARA_ICEATTENU=2
-//CUSTOM_ELECTRONICS=3
+CUSTOM_ELECTRONICS=4
 //POWERTHRESHOLD=-2.0
 N_TRIG_V=1
 TRIG_SCAN_MODE=11
