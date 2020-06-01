@@ -796,7 +796,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                                // signal before the antenna (get signal at 1m and apply atten factor)
                                                signal->GetVm_FarField_Tarray( event, settings1, viewangle, atten_factor, outbin, Tarray, Earray, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt] );
-                                               cout << "IceAttenFactor is: "<< IceAttenFactor << endl;
+                                               // cout << "IceAttenFactor is: "<< IceAttenFactor << endl;
                                                // signal->GetVm_FarField_Tarray( event, settings1, viewangle, 1, outbin, Tarray, Earray, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt] );
 
                                                dT_forfft = Tarray[1] - Tarray[0]; // step in ns
