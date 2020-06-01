@@ -2824,6 +2824,40 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
              }
            } //end trigger mode 10
          }
+        else if(settings1 -> TRIG_SCAN_MODE==11){
+            // cout<<"INSIDE TRIG SCAN MODE 11"<<endl;
+            N_pass = 0;
+            N_pass_V = 0;
+            N_pass_H = 0;
+            Passed_chs.clear();
+            for(int ch_loop=0; ch_loop < ch_ID; ch_loop++){
+                int string_i = detector -> getStringfromArbAntID(i, ch_loop);
+                int antenna_i = detector -> getAntennafromArbAntID(i, ch_loop);
+                // int channel_num = detector -> GetChannelfromStringAntenna(i, string_i, antenna_i, settings1);
+
+                double max_val=0.0;
+                for(int sample=0; sample<32768; sample++){
+                    double sample_value = trigger->Full_window_V[ch_loop][sample];
+                    if(abs(sample_value)>abs(max_val)){
+                        max_val = sample_value;
+                        // cout<<sample_value<<endl;
+                    }
+                }
+                if(abs(max_val)>1e-30){
+                    cout<<"Max val is "<<max_val<<endl;
+                }
+                if(abs(max_val)>2*15.8e-3){
+                    N_pass_V++;
+                    N_pass++;
+                    Passed_chs.push_back(ch_loop);
+                    stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 1;
+                    // cout<<"Chan "<<ch_loop<<" triggered with peak voltage of "<<max_val<<endl;
+                }
+            }
+            if(N_pass_V > 0){
+                stations[i].Global_Pass = 1;
+            }
+        }
 
          else triggerCheckLoop(settings1, detector, event, trigger, i, trig_search_init, max_total_bin, trig_window_bin, settings1->TRIG_SCAN_MODE);
 
