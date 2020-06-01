@@ -2846,7 +2846,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                 if(abs(max_val)>1e-30){
                     cout<<"Max val is "<<max_val<<endl;
                 }
-                if(abs(max_val)>40e-6){
+                if(abs(max_val)>2*15.8e-3){
                     N_pass_V++;
                     N_pass++;
                     Passed_chs.push_back(ch_loop);
