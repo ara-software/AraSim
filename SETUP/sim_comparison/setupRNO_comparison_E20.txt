@@ -23,7 +23,7 @@ NOFZ=1 //use ice with n(z)
 POSNU_RADIUS=9000 // radius of the cylinder the event is thrown in
 RAYSOL_RANGE=13000 // radius of the cylinder in ray tracer will look for solutions
 //the output
-DATA_SAVE_MODE=0        //save final waveforms + physics data
+DATA_SAVE_MODE=1        //save final waveforms + physics data
 DATA_LIKE_OUTPUT=0      //do data like output for all events (even untriggered)
 FILL_TREE_MODE=1
 

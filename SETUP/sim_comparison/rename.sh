@@ -9,5 +9,8 @@ do
   cp setupRNO_comparison.txt setupRNO_comparison_E"${ENERGY_EXP[$j]}".txt
   sed -i "s/EXPONENT=18/EXPONENT=${ENERGY_EXP[$j]}/g" setupRNO_comparison_E"${ENERGY_EXP[$j]}".txt
   sed -i "s/POSNU_RADIUS=4000/POSNU_RADIUS=${POSNU_RAD[$j]}/g" setupRNO_comparison_E"${ENERGY_EXP[$j]}".txt
+  sed -i "s/DATA_SAVE_MODE=0/DATA_SAVE_MODE=1/g" setupRNO_comparison_E"${ENERGY_EXP[$j]}".txt
 
 done
+
+DATA_SAVE_MODE=0
