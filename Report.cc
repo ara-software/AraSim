@@ -2846,7 +2846,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
              }
            } //end trigger mode 10
             else if(settings1 -> TRIG_SCAN_MODE==11){
-                cout << "\033[1;31mINSIDE TRIG SCAN MODE 11\033[0m\n";
+                // cout << "\033[1;31mINSIDE TRIG SCAN MODE 11\033[0m\n";
                 N_pass = 0;
                 N_pass_V = 0;
                 N_pass_H = 0;
@@ -2856,6 +2856,21 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                     int antenna_i = detector -> getAntennafromArbAntID(i, ch_loop);
                     // int channel_num = detector -> GetChannelfromStringAntenna(i, string_i, antenna_i, settings1);
 
+
+                    // vector<double> somePeaks;
+                    // for(int solution=0; solution<stations[i].strings[string_i].antennas[antenna_i].V.size(); solution++){
+                    //     double local_max = 0.;
+                    //     for(int samp=0; samp<stations[i].strings[string_i].antennas[antenna_i].V[solution].size(); samp++){
+                    //         double local_val = stations[i].strings[string_i].antennas[antenna_i].V[solution][samp];
+                    //         if(abs(local_val)>local_max)
+                    //             local_max = local_val;
+                    //     }
+                    //     somePeaks.push_back(local_max);
+                    // }
+                    // for(int solution=0; solution<somePeaks.size(); solution++){
+                    //     cout<<"Solution "<<solution<<" has peak "<<somePeaks[solution]<<endl;
+                    // }
+
                     double max_val=0.0;
                     for(int sample=0; sample<32768; sample++){
                         double sample_value = trigger->Full_window_V[ch_loop][sample];
@@ -2863,9 +2878,9 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                             max_val = sample_value;
                         }
                     }
-                    if(abs(max_val)>1e-30){
-                        cout<<"Max val is "<<max_val<<endl;
-                    }
+                    // if(abs(max_val)>1e-30){
+                    //     cout<<"Max val is "<<max_val<<endl;
+                    // }
                     max_val*=sqrt(2); // AraSim divides by sqrt(2) for SURF/TURF split, which probably won't happen in case of phasing
                     // if(abs(max_val)>1.5*0.007893285468164238){
                     if(abs(max_val)>925.e-8){
