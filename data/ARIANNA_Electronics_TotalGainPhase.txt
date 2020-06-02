@@ -1,6 +1,7 @@
 Electronics gain (Filter, Preamp, FOAM) and phase
 Total Bin : 257
-Freq(MHz)           Gain(unitless)          Phase(rad)0.000, 0.032, -0.421
+Freq(MHz)           Gain(unitless)          Phase(rad)
+0.000, 0.032, -0.421
 3.906, 0.032, -0.421
 7.812, 0.032, -0.421
 11.719, 0.035, -1.069
