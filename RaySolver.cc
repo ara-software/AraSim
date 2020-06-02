@@ -306,6 +306,11 @@ void RaySolver::Solve_Ray_org (Position &source, Position &target, std::vector <
       ns = 1.357;
       nd = 1.78;
       nc = 0.027;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 40){
+      // RNO-G comparison
+      ns = 1.357;
+      nd = 1.78;
+      nc = 0.01299;
     }
     else {
       // South Pole Values (AraSim original default, based on RICE)
@@ -1117,6 +1122,11 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
       ns = 1.357;
       nd = 1.78;
       nc = 0.027;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 40){
+      // RNO-G comparison
+      ns = 1.357;
+      nd = 1.78;
+      nc = 0.01299;
     }
     else {
       // South Pole Values (AraSim original default, based on RICE)
