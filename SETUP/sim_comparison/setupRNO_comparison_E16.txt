@@ -1,0 +1,37 @@
+SIMULATION_MODE=1 //frequency domain askaryan radiation
+//the neutrinos
+NNU=5000 //allow this many neutrinos
+ONLY_PASSED_EVENTS=0 //throw only NNU events
+EXPONENT=16// Energy of the neutrino thrown
+INTERACTION_MODE=1 //veff mode
+PICK_POSNU_DEPTH=1
+MAX_POSNU_DEPTH=2700
+
+//the detector
+DETECTOR=1 //1 station
+BORE_HOLE_ANTENNA_LAYOUT=8
+number_of_strings_station=1
+//the electronics and noise
+NFOUR=8192 // NFOUR/2 is number of samps in time domain
+V_MIMIC_MODE=0 // 0 : global trig is in center of readout windows
+TIMESTEP=5.0E-10 //2 GHz sampling rate
+//TRIG_WINDOW=5e-10 //mult-channel coincidence window in ns
+//the trigger
+TRIG_ANALYSIS_MODE=1 //0: S+N, 1: S only, 2: N only
+//the ice and ray tracing
+NOFZ=1 //use ice with n(z)
+POSNU_RADIUS=3000 // radius of the cylinder the event is thrown in
+RAYSOL_RANGE=13000 // radius of the cylinder in ray tracer will look for solutions
+//the output
+DATA_SAVE_MODE=0        //save final waveforms + physics data
+DATA_LIKE_OUTPUT=0      //do data like output for all events (even untriggered)
+FILL_TREE_MODE=1
+
+USE_ARA_ICEATTENU=2
+CUSTOM_ELECTRONICS=4
+//POWERTHRESHOLD=-2.0
+N_TRIG_V=1
+TRIG_SCAN_MODE=11
+ANTENNA_MODE=3
+//EVENT_GENERATION_MODE=1
+RAY_TRACE_ICE_MODEL_PARAMS=40
