@@ -392,9 +392,11 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                   // params.number_of_strings_station = 1;
         }
         else if (params.bore_hole_antenna_layout == 8) { // A dipole at 100 depth
-                  cout << "\033[1;31mFor comparison\033[0m\n";
-                  // params.number_of_strings_station = 1;
-                  params.number_of_antennas_string = 1;
+            cout << "\033[1;31mFor comparison\033[0m\n";
+            params.number_of_strings_station = 1;
+            params.number_of_antennas_string = 1;
+            params.number_of_surfaces_station = 0;
+
         }
 
 
@@ -767,19 +769,22 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     // cout << "\033[1;31mFor comparison\033[0m\n";
 
                   }
-                //
-                // set surface antenna postions
-                stations[i].surfaces[0].SetX( stations[i].GetX() + (R_surface * cos(PI/3.)) );
-                stations[i].surfaces[0].SetY( stations[i].GetY() + (R_surface * sin(PI/3.)) );
+                if(params.number_of_surfaces_station>0){
+                    //
+                    // set surface antenna postions
+                    stations[i].surfaces[0].SetX( stations[i].GetX() + (R_surface * cos(PI/3.)) );
+                    stations[i].surfaces[0].SetY( stations[i].GetY() + (R_surface * sin(PI/3.)) );
 
-                stations[i].surfaces[1].SetX( stations[i].GetX() + (R_surface * cos(-PI/3.)) );
-                stations[i].surfaces[1].SetY( stations[i].GetY() + (R_surface * sin(-PI/3.)) );
+                    stations[i].surfaces[1].SetX( stations[i].GetX() + (R_surface * cos(-PI/3.)) );
+                    stations[i].surfaces[1].SetY( stations[i].GetY() + (R_surface * sin(-PI/3.)) );
 
-                stations[i].surfaces[2].SetX( stations[i].GetX() + (R_surface * cos(PI)) );
-                stations[i].surfaces[2].SetY( stations[i].GetY() );
+                    stations[i].surfaces[2].SetX( stations[i].GetX() + (R_surface * cos(PI)) );
+                    stations[i].surfaces[2].SetY( stations[i].GetY() );
 
-                stations[i].surfaces[3].SetX( stations[i].GetX() );
-                stations[i].surfaces[3].SetY( stations[i].GetY() );
+                    stations[i].surfaces[3].SetX( stations[i].GetX() );
+                    stations[i].surfaces[3].SetY( stations[i].GetY() );
+                }
+
 
 
                 stations[i].number_of_antennas = params.number_of_strings_station * params.number_of_antennas_string;
@@ -974,19 +979,22 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
                 }
 
-                //
-                // set surface antenna postions
-                stations[i].surfaces[0].SetX( stations[i].GetX() + (R_surface * cos(PI/3.)) );
-                stations[i].surfaces[0].SetY( stations[i].GetY() + (R_surface * sin(PI/3.)) );
+                if(params.number_of_surfaces_station>0){
+                    //
+                    // set surface antenna postions
+                    stations[i].surfaces[0].SetX( stations[i].GetX() + (R_surface * cos(PI/3.)) );
+                    stations[i].surfaces[0].SetY( stations[i].GetY() + (R_surface * sin(PI/3.)) );
 
-                stations[i].surfaces[1].SetX( stations[i].GetX() + (R_surface * cos(-PI/3.)) );
-                stations[i].surfaces[1].SetY( stations[i].GetY() + (R_surface * sin(-PI/3.)) );
+                    stations[i].surfaces[1].SetX( stations[i].GetX() + (R_surface * cos(-PI/3.)) );
+                    stations[i].surfaces[1].SetY( stations[i].GetY() + (R_surface * sin(-PI/3.)) );
 
-                stations[i].surfaces[2].SetX( stations[i].GetX() + (R_surface * cos(PI)) );
-                stations[i].surfaces[2].SetY( stations[i].GetY() );
+                    stations[i].surfaces[2].SetX( stations[i].GetX() + (R_surface * cos(PI)) );
+                    stations[i].surfaces[2].SetY( stations[i].GetY() );
 
-                stations[i].surfaces[3].SetX( stations[i].GetX() );
-                stations[i].surfaces[3].SetY( stations[i].GetY() );
+                    stations[i].surfaces[3].SetX( stations[i].GetX() );
+                    stations[i].surfaces[3].SetY( stations[i].GetY() );                    
+                }
+
 
 
             } // end loop over stations i
