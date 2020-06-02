@@ -12,9 +12,9 @@ DETECTOR=1 //1 station
 BORE_HOLE_ANTENNA_LAYOUT=8
 number_of_strings_station=1
 //the electronics and noise
-NFOUR=4096 // NFOUR/2 is number of samps in time domain
+NFOUR=8192 // NFOUR/2 is number of samps in time domain
 V_MIMIC_MODE=0 // 0 : global trig is in center of readout windows
-TIMESTEP=5.0E-11 //20 GHz sampling rate
+TIMESTEP=5.0E-10 //20 GHz sampling rate
 //TRIG_WINDOW=5e-10 //mult-channel coincidence window in ns
 //the trigger
 TRIG_ANALYSIS_MODE=1 //0: S+N, 1: S only, 2: N only
