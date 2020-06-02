@@ -951,6 +951,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 						     }
                                                    }
                                                    else if ( settings1->ALL_ANT_V_ON==1 ) {
+
+
 						     if (settings1->ANTENNA_MODE == 0){
                                                        heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
                                                                    antenna_theta, antenna_phi, 0),
@@ -961,7 +963,11 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 													antenna_theta, antenna_phi, 0, k),
 									   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
 						     }
-                                                   }
+                             if (settings1->ANTENNA_MODE == 3){
+                                                       heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
+                                                    antenna_theta, antenna_phi, 0, k),
+                                       freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+                             }                                                   }
 
 
 
@@ -2805,7 +2811,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                 sols++) {
              if (stations[i].strings[string_i].antennas[antenna_i].PeakV[0]
                  > 2*8.35e-6) {
-               // cout<<"   Channel "<<ch_loop<< "Peak V value is  "<<stations[i].strings[string_i].antennas[antenna_i].PeakV[sols]<<endl;
+               cout<<"   Channel "<<ch_loop<< "Peak V value is  "<<stations[i].strings[string_i].antennas[antenna_i].PeakV[sols]<<endl;
                num_this_ant++;
              }
            }
@@ -2839,8 +2845,10 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                         double sample_value = trigger->Full_window_V[ch_loop][sample];
                         if(abs(sample_value)>abs(max_val)){
                             max_val = sample_value;
-                            cout<<sample_value<<endl;
+                            // cout<<sample_value<<endl;
                         }
+                        // if(abs(sample_value)>0)
+                            // cout<<sample_value<<endl;
                     }
                     if(abs(max_val)>1e-30){
                         cout<<"Max val is "<<max_val<<endl;
@@ -3815,7 +3823,7 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
         bin_value = signalbin - BINSIZE/2 + bin;
 
         // save the noise + signal waveform
-
+        // cout << "\033[1;31mVoltage value "<<V[bin]<<"\033[0m\n";
         if ( settings1->NOISE_CHANNEL_MODE==0) {
             V_total_forconvlv.push_back( trigger->v_noise_timedomain[ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
         }
@@ -4189,8 +4197,6 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
             else if (vm_img<0.) phase_current = -PI;
             else phase_current = 0.;
         }
-
-
 
         // V amplitude
         double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
