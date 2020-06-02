@@ -1095,6 +1095,10 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             cout<<"     Reading comparison electronics response"<<endl;
              ReadElectChain("./data/filter_2nd10th_order.txt", settings1);
         }
+        else if ( settings1->CUSTOM_ELECTRONICS==4){
+            cout << "\033[1;31mREADING ARIANNA AMP RESPONSE\033[0m\n";
+            ReadElectChain("./data/ARIANNA_Electronics_TotalGainPhase.txt", settings1);
+        }
 
         cout<<"done read elect chain"<<endl;
 
@@ -1593,7 +1597,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
              ReadElectChain("./data/filter_2nd10th_order.txt", settings1);
         }
         else if (settings1->CUSTOM_ELECTRONICS==4){
-            cout<<"     Reading ARIANN amp response"<<endl;
+            cout << "\033[1;31mREADING ARIANNA AMP RESPONSE\033[0m\n";
             ReadElectChain("./data/ARIANNA_Electronics_TotalGainPhase.txt", settings1);
         }
 
@@ -1924,7 +1928,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
            ReadElectChain("./data/filter_2nd10th_order.txt", settings1);
       }
     else if (settings1->CUSTOM_ELECTRONICS==4){
-        cout<<"     Reading ARIANN amp response"<<endl;
+        cout << "\033[1;31mREADING ARIANNA AMP RESPONSE\033[0m\n";
         ReadElectChain("./data/ARIANNA_Electronics_TotalGainPhase.txt", settings1);
     }
       cout<<"done read elect chain"<<endl;
