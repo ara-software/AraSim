@@ -2883,7 +2883,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                     // }
                     max_val*=sqrt(2); // AraSim divides by sqrt(2) for SURF/TURF split, which probably won't happen in case of phasing
                     // if(abs(max_val)>1.5*0.007893285468164238){
-                    if(abs(max_val)>925.e-8){
+                    if(abs(max_val)>13.875E-6){
                         N_pass_V++;
                         N_pass++;
                         Passed_chs.push_back(ch_loop);
