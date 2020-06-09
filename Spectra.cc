@@ -33,7 +33,7 @@ Spectra::Spectra(double EXPONENT) {
 
   double Emuons[E_bin]; // E dN/dE/dA/dt for neutrinos that are produced as muon neutrinos or muon antineutrinos.
   double Eelectrons[E_bin];// E dN/dE/dA/dt for neutrinos that are produced as electron neutrinos or muon antineutrinos.
-  
+
   for (int i=0;i<E_bin;i++) {
     energy[i]=16.+((double)i)*0.12; // initial E_bin = 50. energy = 16 ~ 22 eV
     Emuons[i]=-30.;
@@ -87,13 +87,13 @@ Spectra::Spectra(double EXPONENT) {
   {
       pnu_EXPONENT = EXPONENT;
   }
-  
+
   else if (EXPONENT_model>=510. && EXPONENT_model<=650.) // g.n. added so we can have simulations at E^2=17.8 not just whole numbers
   {
       pnu_EXPONENT = (EXPONENT_model - 400)/10;
 	cout<<"**************** energy is "<<pnu_EXPONENT<<" *******************"<<endl;
   }
-  
+
   else if (EXPONENT==30.) // ESS baseline model. Used to be EXPONENT "0"
   {
       E_bin = 9;
@@ -112,7 +112,7 @@ Spectra::Spectra(double EXPONENT) {
     Eelectrons[9]=-30.; // 20.5 punt------ not using above here
     Eelectrons[10]=-30.; // 21.0 punt
     Eelectrons[11]=-30.; // 21.5 punt
-  
+
     // lower curve of Figure 9 of ES&S
     // astro-ph/0101216
        Emuons[0]=-17.1;  //16.
@@ -127,7 +127,7 @@ Spectra::Spectra(double EXPONENT) {
        Emuons[9]=-19.9; // 20.5 punt------not using above here
        Emuons[10]=-30.; // 21.0 punt
        Emuons[11]=-30.; // 21.5 punt
-  
+
     for (int i=0;i<E_bin;i++) {
         energy[i] = 16.+((double)i)/2.;   // in log, in eV
         EdNdEdAdt[i] = log10( pow(10., Eelectrons[i]) + pow(10., Emuons[i]) );   // in log
@@ -155,7 +155,7 @@ Spectra::Spectra(double EXPONENT) {
     Eelectrons[9]=-30.; // 20.5 punt------ not using above here
     Eelectrons[10]=-30.; // 21.0 punt
     Eelectrons[11]=-30.; // 21.5 punt
-    
+
     // muon component of Figure 4 of ES&S
     // astro-ph/0101216
     Emuons[0]=-17.8; // 16.
@@ -170,10 +170,10 @@ Spectra::Spectra(double EXPONENT) {
     Emuons[9]=-30.; // 20.5 punt
     Emuons[10]=-30.; // 21.0 punt
     Emuons[11]=-30.; // 21.5 punt
-    
+
     for(int i=0;i<E_bin;i++)
       emuratio[i]=Eelectrons[i]/Emuons[i];
-    
+
     // upper curve in Figure 9 of ES&S
     // astro-ph/0101216
     Emuons[0]=-16.85;  //16.
@@ -188,20 +188,20 @@ Spectra::Spectra(double EXPONENT) {
     Emuons[9]=-19.75; // 20.5 punt
     Emuons[10]=-30.; // 21.0 punt
     Emuons[11]=-30.; // 21.5 punt
-    
-    
+
+
     for(int i=0;i<E_bin;i++) {
       Eelectrons[i]=Emuons[i]*emuratio[i];
       cout << "Eelectrons, Emuons are " << Eelectrons[i] << " " << Emuons[i] << "\n";
     }
-  
+
     for (int i=0;i<E_bin;i++) {
       energy[i] = 16.+((double)i)/2.;   // in log, in eV
       EdNdEdAdt[i]=log10( pow(10.,Eelectrons[i]) + pow(10.,Emuons[i]) );  // in log.
       E2dNdEdAdt[i] = EdNdEdAdt[i] + (energy[i] - 9.);    // in log, in GeV
       cout << "EdNdEdAdt are " << EdNdEdAdt[i] << "\n";
     }
-    
+
   } // end if ESS-cosmological constant
 
 
@@ -268,7 +268,7 @@ Spectra::Spectra(double EXPONENT) {
   {
       GetFlux("Ave2005_Fe_Emax21.5.dat");
   }
-  
+
   else if (EXPONENT==202.)
   {
       GetFlux("Ave2005_Fe_Emax22.0.dat");
@@ -314,6 +314,13 @@ Spectra::Spectra(double EXPONENT) {
       GetFlux("Kotera2010_max.dat");
   }
 
+  else if (EXPONENT==225.)
+  {
+      GetFlux("Cuoco_CenA.dat");
+      cout << "\033[1;31mUsing Cuoco et al. flux\033[0m\n";
+
+  }
+
 
 
 
@@ -331,9 +338,9 @@ Spectra::Spectra(double EXPONENT) {
     for (int i=0;i<12;i++) {
       E2dNdEdAdt[i]=log10(EdNdEdAdt[i])+energy[i]-9.;
     }
-    
+
     spectrum=new TSpline5("spectrum",energy,EdNdEdAdt,12);
-    
+
   }
   else
     // find the max so we can normalise it
@@ -341,9 +348,9 @@ Spectra::Spectra(double EXPONENT) {
 */
 
 
-  // From log to linear!!  
+  // From log to linear!!
   for (int i=0;i<E_bin;i++) {
-      EdNdEdAdt[i] = pow(10, EdNdEdAdt[i]);     //to linear 
+      EdNdEdAdt[i] = pow(10, EdNdEdAdt[i]);     //to linear
       E2dNdEdAdt[i] = pow(10, E2dNdEdAdt[i]);   //to linear
 //      E2dNdEdAdt[i]=log10(EdNdEdAdt[i])+energy[i]-9.;
 
@@ -353,19 +360,19 @@ Spectra::Spectra(double EXPONENT) {
 //--------------------------------------------------
 //   gEdNdEdAdt = new TGraph(E_bin, energy, EdNdEdAdt);
 //   gE2dNdEdAdt = new TGraph(E_bin, energy, E2dNdEdAdt);
-// 
+//
 //   sEdNdEdAdt = new TSpline3("sEdNdEdAdt", gEdNdEdAdt);
 //   sE2dNdEdAdt = new TSpline3("sE2dNdEdAdt", gE2dNdEdAdt);
-//-------------------------------------------------- 
+//--------------------------------------------------
 
   maxflux=Tools::dMax(EdNdEdAdt,E_bin);
 
 
- 
+
 }
 
 double  Spectra::GetNuEnergy_bin() {
-  
+
   double thisenergy=16.; // arbitrary initialisation
   double thisflux=2.; // initialise higher than max
   double max=1.;
@@ -374,19 +381,19 @@ double  Spectra::GetNuEnergy_bin() {
   double minenergy=Tools::dMin(energy,E_bin);
   // this uses the dartboard approach
   //cout << "minenergy, maxenergy are " << minenergy << " " << maxenergy << "\n";
-  
+
   if (EXPONENT_model>=10. && EXPONENT_model<30.) {
       return pow(10.,pnu_EXPONENT);
   }
 
   else {
-  
+
   while(thisflux>max) {
-    // pick an energy  
+    // pick an energy
     thisenergy=Rand3.Rndm()*(maxenergy-minenergy)+minenergy; // pick energy at random between the highest and lowest
-    // the energy array is actually filled with energy exponents 
+    // the energy array is actually filled with energy exponents
     // and thisenergy starts from 0 so it has an offset
-    
+
     energybin=Tools::Getifreq(thisenergy,minenergy,maxenergy,E_bin);
     //max=gspectrum[(int)EXPONENT]->Eval(thisenergy,0,"S")/maxflux; // this is the maximum the normalized flux can be in this bin, always less than 1
     max=EdNdEdAdt[energybin]/maxflux;
@@ -394,7 +401,7 @@ double  Spectra::GetNuEnergy_bin() {
   } //while
   return pow(10.,thisenergy);
   }
-	
+
 } //Pick Neutrino Energy
 
 
@@ -402,7 +409,7 @@ double  Spectra::GetNuEnergy_bin() {
 
 
 double  Spectra::GetNuEnergy() {
-  
+
   double thisenergy=16.; // arbitrary initialisation
   double thisflux=2.; // initialise higher than max
   double max=1.;
@@ -411,19 +418,19 @@ double  Spectra::GetNuEnergy() {
   double minenergy=Tools::dMin(energy,E_bin);
   // this uses the dartboard approach
   //cout << "minenergy, maxenergy are " << minenergy << " " << maxenergy << "\n";
-  
+
   if ((EXPONENT_model>=10. && EXPONENT_model<30.) || (EXPONENT_model>=510. && EXPONENT_model<=650.)) {
       return pow(10.,pnu_EXPONENT);
   }
 
   else {
-  
+
   while(thisflux>max) {
-    // pick an energy  
+    // pick an energy
     thisenergy=Rand3.Rndm()*(maxenergy-minenergy)+minenergy; // pick energy at random between the highest and lowest
-    // the energy array is actually filled with energy exponents 
+    // the energy array is actually filled with energy exponents
     // and thisenergy starts from 0 so it has an offset
-    
+
     // get interpolated flux at "thisenergy"
     max=SimpleLinearInterpolation_value(E_bin, energy, EdNdEdAdt, thisenergy ) / maxflux; // normalize to 1
     //cout<<"interpolated max : "<<max<<", thisenergy : "<<thisenergy<<endl;
@@ -436,7 +443,7 @@ double  Spectra::GetNuEnergy() {
   } //while
   return pow(10.,thisenergy);
   }
-	
+
 } //Pick Neutrino Energy
 
 
@@ -490,13 +497,13 @@ inline void Spectra::GetFlux(string filename)
     cout<<"We are using "<<filename.c_str()<<" as the flux data."<<endl;
     cout<<"total lines in the file are "<<NLINES<<endl;
     E_bin = NLINES;
-    
+
 //    double flux[NLINES];//E2dNdE GeV cm^-2 s^-1 sr^-1
-    
+
     for(int i=0;i<NLINES;i++) {
         influx>>energy[i]>>E2dNdEdAdt[i];
     }
-    
+
     for(int i=0;i<E_bin;i++) {
 //        EdNdEdAdt[i]=pow(10.,(flux[i]+9.-energy[i]));
         EdNdEdAdt[i] = E2dNdEdAdt[i] + 9. - energy[i];  // change from GeV to eV and E2dN -> EdN
@@ -510,19 +517,19 @@ inline void Spectra::GetFlux(string filename)
 // TGraph *Spectra::GetGEdNdEdAdt() {
 //     return gEdNdEdAdt;
 // }
-// 
+//
 // TGraph *Spectra::GetGE2dNdEdAdt() {
 //     return gE2dNdEdAdt;
 // }
-// 
+//
 // TSpline3 *Spectra::GetSEdNdEdAdt() {
 //     return sEdNdEdAdt;
 // }
-// 
+//
 // TSpline3 *Spectra::GetSE2dNdEdAdt() {
 //     return sE2dNdEdAdt;
 // }
-//-------------------------------------------------- 
+//--------------------------------------------------
 
 double *Spectra::Getenergy() {
     return energy;
@@ -609,4 +616,3 @@ int Spectra::IsMonoenergetic() {
     }
     return out;
 }
-
