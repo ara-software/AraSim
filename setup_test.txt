@@ -1,6 +1,6 @@
 SIMULATION_MODE=1 //frequency domain askaryan radiation
 //the neutrinos
-NNU=1 //allow this many neutrinos
+NNU=10000 //allow this many neutrinos
 ONLY_PASSED_EVENTS=0 //throw only NNU events
 EXPONENT=18// Energy of the neutrino thrown
 INTERACTION_MODE=1 //veff mode
@@ -14,7 +14,7 @@ number_of_strings_station=1
 //the electronics and noise
 NFOUR=8192 // NFOUR/2 is number of samps in time domain
 V_MIMIC_MODE=0 // 0 : global trig is in center of readout windows
-TIMESTEP=5.0E-10 //20 GHz sampling rate
+TIMESTEP=5.0E-10 //2 GHz sampling rate
 //TRIG_WINDOW=5e-10 //mult-channel coincidence window in ns
 //the trigger
 TRIG_ANALYSIS_MODE=1 //0: S+N, 1: S only, 2: N only
