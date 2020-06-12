@@ -797,6 +797,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                                // signal before the antenna (get signal at 1m and apply atten factor)
                                                signal->GetVm_FarField_Tarray( event, settings1, viewangle, atten_factor, outbin, Tarray, Earray, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt] );
+                                               // signal->GetVm_FarField_Tarray( event, settings1, viewangle, 1, outbin, Tarray, Earray, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt] );
                                                // cout << "IceAttenFactor is: "<< IceAttenFactor << endl;
                                                // signal->GetVm_FarField_Tarray( event, settings1, viewangle, 1, outbin, Tarray, Earray, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt] );
 
@@ -804,6 +805,10 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                                int Ntmp = settings1->TIMESTEP*1.e9 / dT_forfft;
                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
+                                               for(int jj=0; jj<64;jj++){
+                                                 printf("%0.3f,%0.3e\n",Tarray[jj],Earray[jj]);
+                                               }
+                                               cout << "Done" << endl;
                                                while ( Ntmp>1 ) {
                                                    Ntmp = Ntmp / 2;
                                                    stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]*2;
@@ -2881,7 +2886,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                     // if(abs(max_val)>1e-30){
                     //     cout<<"Max val is "<<max_val<<endl;
                     // }
-                    max_val*=sqrt(2); // AraSim divides by sqrt(2) for SURF/TURF split, which probably won't happen in case of phasing
+                    // max_val*=sqrt(2); // AraSim divides by sqrt(2) for SURF/TURF split, which probably won't happen in case of phasing
                     // if(abs(max_val)>1.5*0.007893285468164238){
                     if(abs(max_val)>13.875E-6){
                         N_pass_V++;
