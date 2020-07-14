@@ -1136,15 +1136,26 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
     bedrock_reflect = false;
     //requiredAccuracy = 0.1;
     //requiredAccuracy = 0.5;
-    requiredAccuracy = 0.2;
+    //requiredAccuracy = 0.2;
     frequency = 300;
     polarization = RayTrace::pi/2;
 
 
     // change accuracy value as a functin of phys_dist
-    if ( distance_org / 1000. > requiredAccuracy ) 
-        requiredAccuracy = distance_org / 1000.; // loosen accuracy cut value
+    //if ( distance_org / 1000. > requiredAccuracy ) 
+    //    requiredAccuracy = distance_org / 1000.; // loosen accuracy cut value
 
+    if (settings1->Z_THIS_TOLERANCE == 0){
+        requiredAccuracy = 0.2;
+
+        if ( distance_org / 1000. > requiredAccuracy ) // change accuracy value as a functin of phys_dist
+                requiredAccuracy = distance_org / 1000.; // loosen accuracy cut value
+    }
+    if (settings1->Z_THIS_TOLERANCE == 1){
+
+        requiredAccuracy = settings1->Z_TOLERANCE;
+        //cout<<"Z tolerance is "<<requiredAccuracy<<"m"<<endl;
+    }
 
 
     if (settings1->NOFZ == 1){

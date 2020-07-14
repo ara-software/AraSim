@@ -160,7 +160,10 @@ outputdir="outputs"; // directory where outputs go
 
   NNU_D_PHI=0.0873;// default : nnu_d_phi : 5 deg
 
-    
+  Z_THIS_TOLERANCE=0; // 0 : (default) use default 'requiredAccuracy' parameter for ray tracing, 1 : change 'requiredAccuracy' parameter by Z_TOLERANCE
+
+  Z_TOLERANCE=0.2; // 0.2 : (default)   
+ 
     CALPULSER_ON=0; // default : calpulsers off
     
     TESTBED_ON=0; // default : 0 stations[0] is ARA1 not Testbed
@@ -462,6 +465,13 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "NNU_D_PHI") {
                   NNU_D_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+
+	      else if (label == "Z_THIS_TOLERANCE") {
+                  Z_THIS_TOLERANCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+	      else if (label == "Z_TOLERANCE") {
+                  Z_TOLERANCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
 
               else if (label == "DATA_LIKE_OUTPUT") {
