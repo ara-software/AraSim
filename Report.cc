@@ -610,7 +610,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                            freq_tmp = detector->GetFreq(l); // freq in Hz
 
-					   cout << "Check 1" << endl;
+					   //cout << "Check 1" << endl;
                                            /*
                                            // Get ant gain with 2-D interpolation (may have bug?) 
                                            //
@@ -668,7 +668,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                            
                                            ApplyAntFactors(heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, vmmhz1m_tmp);
 
-					   cout << "Check 2" << endl;
+					   //cout << "Check 2" << endl;
                                            //stations[i].strings[j].antennas[k].VHz_antfactor[ray_sol_cnt].push_back( vmmhz1m_tmp );
 
                                            // apply filter
