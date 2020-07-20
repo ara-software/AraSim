@@ -1518,3 +1518,11 @@ Rename overloaded Settings::CheckCompatibilities functions to Settings::CheckCom
 1. Renamed ReadVgain(string filename, Settings *settings1), ReadVgainTop(string filename, Settings *settings1), ReadHgain(string filename, Settings *settings1) to ReadVgainSettings(string filename, Settings *settings1), ReadVgainTopSettings(string filename, Settings *settings1), ReadHgainSettings(string filename, Settings *settings1) to prevent confusion over overloaded function names.
 2. For calls to ReadVgainSettings and ReadHgainSettings, pass the correct "..._updated2016.txt" files as arguments to be read. Before, they were reading the wrong hard-coded filenames.
 3. In these 3 functions, stop multiplying the transmission coefficient one more time to the realized gain values as read from the .txt files.
+
+2020/07/13 Myoungchul Kim
+Added "Z_THIS_TOLERANCE" and "Z_TOLERANCE" in Setting class for controling the 'requriedAccuracy' parameter by user.
+In this case, the user can limit the amount of the distance between z position of the final ray step and the target.  
+Related documents in DocBD
+Part1:http://ara.physics.wisc.edu/docs/0021/002152/001/20200622_Arrival_Time_Delay_in_AraSim.pdf
+Part2:http://ara.physics.wisc.edu/docs/0021/002158/001/20200706_Arrival_Time_Delay_in_AraSim_part2.pdf
+Part3:http://ara.physics.wisc.edu/docs/0021/002161/001/20200713_Arrival_Time_Delay_in_AraSim_part3.pdf
