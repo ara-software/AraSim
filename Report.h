@@ -235,8 +235,10 @@ class Report {
     
 //    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger);
     
-    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt);    
-    
+    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt,double* xdata, double* ydata, double* ang_data, double* snr_data);    
+    double getAverageSNR(const vector<double> & mysignal);
+    bool isTrigger(double eff);
+    double interpolate(double *xdata,double *ydata, double xi, int numData);
     
 #ifdef ARA_UTIL_EXISTS
 
@@ -366,6 +368,9 @@ class Report {
 
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
 
+        double viewAngle;
+        double my_averageSNR;
+        double my_receive_ang;
 
         ClassDef(Report,1);
 

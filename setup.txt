@@ -1,33 +1,36 @@
 ///////////////////
 
 
+///////////////////
+
+
 NFOUR=1024
 
 
-EXPONENT=21
-NNU=100 // number of neutrino events
-NNU_PASSED=10 // number of neutrino events that are allowed to pass the trigger
-ONLY_PASSED_EVENTS=1 // 0 (default): AraSim throws NNU events whether or not they pass; 1: AraSim throws events until the number of events that pass the trigger is equal to NNU_PASSED (WARNING: may cause long run times if reasonable values are not chosen)
+EXPONENT=18
+NNU=450 // number of neutrino events
+NNU_PASSED=1 // number of neutrino events that are allowed to pass the trigger
+ONLY_PASSED_EVENTS=0 // 0 (default): AraSim throws NNU events whether or not they pass; 1: AraSim throws events until the number of events that pass the trigger is equal to NNU_PASSED (WARNING: may cause long run times if reasonable values are not chosen)
 NOISE_WAVEFORM_GENERATE_MODE=0 // generate new noise waveforms for each events
-NOISE_EVENTS=16 // number of pure noise waveforms
-TRIG_ANALYSIS_MODE=0 // 0 = signal + noise, 1 = signal only, 2 = noise only
-DETECTOR=1 // ARA stations 1 to 7
+NOISE_EVENTS=100 // number of pure noise waveforms
+TRIG_ANALYSIS_MODE=2 // 0 = signal + noise, 1 = signal only, 2 = noise only
+DETECTOR=9 // ARA stations 1 to 7 (used to be 1- kah)
 NOFZ=1
-core_x=10000
-core_y=10000
-
 
 TIMESTEP=5.E-10 // value for 2GHz actual station value
 TRIG_WINDOW=1.E-7 // 100ns which is actual testbed trig window
-POWERTHRESHOLD=-6.06 // 100Hz global trig rate for 3 out of 16 ARA stations
-//DATA_BIN_SIZE=8192
+POWERTHRESHOLD=-6.06 // 100Hz global trig rate for 3 out of 16 ARA statinonsev
 
-POSNU_RADIUS=3000
+POSNU_RADIUS=6000
 V_MIMIC_MODE=0 // 0 : global trig is located center of readout windows
 DATA_SAVE_MODE=0 // 2 : don't save any waveform informations at all
-DATA_LIKE_OUTPUT=0 // 0 : don't save any waveform information to eventTree
+WRITE_ALL_EVENTS=0 // don't save any waveform informations to eventTree
 BORE_HOLE_ANTENNA_LAYOUT=0
 SECONDARIES=0
+RAYSOL_RANGE=10000
+
+
+TRIG_SCAN_MODE=5
 
 // below settings are available for only TestBed mode (DETECTOR=3 case)
 TRIG_ONLY_BH_ON=0
@@ -38,64 +41,28 @@ NOISE_TEMP_MODE=0
 TRIG_THRES_MODE=0
 READGEOM=0 // reads geometry information from the sqlite file or not (0 : don't read)
 
-// new variables
-//INTERACTION_MODE=0 // pickunbiased mode!
-//taumodes=1
 
-//BH_ANT_SEP_DIST_ON=0 // default 0 : use constant borehole antenna distance. 1 : use separate antenna distance. use z_btw01, z_btw12, ... in ARA_N_info.txt or ARA37_info.txt
+BORE_HOLE_ANTENNA_LAYOUT=5
 
-TRIG_MODE=0 // use vpol, hpol separated trigger mode. by default N_TRIG_V=3, N_TRIG_H=3. You can change this values
-//N_TRIG_V=4
-//N_TRIG_H=4
+//number_of_stations=1
+DATA_LIKE_OUTPUT=0
 
-number_of_stations=1
-core_x=10000
-core_y=10000
+z_max=180.79 //z_max=180.0
+100:-172.635,101:-173.65,102:-174.66,103:-175.68,104:-176.70,106:-178.75,107:-180.79
+
+
+BH_ANT_SEP_DIST_ON=1 // default 0 : use constant borehole antenna distance. 1 : use separate antenna distance. use z_btw01, z_btw12, ... in ARA_N_info.txt or ARA37_info.txt
+z_btw01=2.04
+z_btw12=2.05
+z_btw23=1.02
+z_btw34=1.02
+z_btw45=1.01
+z_btw56=1.015
+TRIG_MODE=1 // use vpol, hpol separated trigger mode. by default N_TRIG_V=3, N_TRIG_H=3. You can change this values
+N_TRIG_V=5
+N_TRIG_H=5
 
 ///////////////////
 
-//DATA_SAVE_MODE=2
-
-// Settings for Arbitrary event generation
-//EVENT_TYPE=10 // arbitrary event type
-//INTERACTION_MODE=2 // pick exact location using settings below
-//POSNU_THETA=1.7 // interaction location elevation angle in radians
-//POSNU_THETA=-0.5 // interaction location elevation angle in radians
-//POSNU_PHI=0 // interaction location azimuthal angle in radians
-//POSNU_R=1000 // interaction location radius in meters
-
-//INTERACTION_MODE=4 // pick interaction location within cylindrical volume above the ice
-//PICK_ABOVE_HEIGHT=3000.
-
-// Settings for Station A2-like simulation
-DETECTOR=4
-DETECTOR_STATION=2
-DATA_LIKE_OUTPUT=1
 
 
-///////////////////////// Other Alternate Settings //////////////////
-
-
-//POSNU_RADIUS=5000
-//RAYSOL_RANGE=7000
-
-//SELECT_FLAVOR=1
-//NU_NUBAR_SELECT_MODE=1
-//SELECT_CURRENT=1 //default 2: get from ratios in Ghandi etal paper, 0: nc, 1: cc
-//NNU_THIS_THETA=1
-//NNU_THETA=0.785
-//NNU_D_THETA=0.0873
-//NNU_D_THETA=0.0
-
-//NOISE_EVENTS=16
-//NOISE_EVENTS=1
-
-NOISE_WAVEFORM_GENERATE_MODE=0 // generates new waveforms for every event
-NOISE=0 //flat thermal noise
-NOISE_CHANNEL_MODE=1 //using different noise temperature for each channel
-NOISE_EVENTS=1 // number of noise events which will be store in the
-trigger class for later use
-
-ANTENNA_MODE=1
-APPLY_NOISE_FIGURE=0
-//ALL_ANT_V_ON=0

@@ -108,7 +108,7 @@ outputdir="outputs"; // directory where outputs go
 
   ATMOSPHERE=1;         // default : 1, include atmosphere
 
-  TRIG_SCAN_MODE=0;	// default 0 (old mode) 1: new mode (faster) 2: scan all Pthresh values 3: scan also all N out of 8 
+  TRIG_SCAN_MODE=0;	// default 0 (old mode) 1: new mode (faster) 2: scan all Pthresh values 3: scan also all N out of 8 5: Phased Array
   
   POWERTHRESHOLD=-6.06; // old default : -6.15, new default: -6.06
 

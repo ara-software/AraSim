@@ -243,7 +243,295 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
     
     /////////////////////////////////////////////////////////////////////////////
     
-    
+    else if (mode == 9) { //phased array!!
+        cout << "Succesfully reading in Phased Array Geometry. " << endl;
+        //reaed in inputs file
+        ifstream ARA_N( ARA_N_file.c_str() );
+
+        params.number_of_stations = 1;
+        params.number_of_strings_station = 5;   // phased array has 1 strings
+        //params.number_of_antennas_string = 3; // 7 Vpole antennas on one strings
+        params.number_of_surfaces_station = 0;
+        
+        //double core_x = 0.; 
+        //double core_y = 0.;
+        params.core_x = 0.; 
+        params.core_y = 0.;
+        double R_string = 10.;  // all units are in meter
+        double R_surface = 60.;
+        double z_max = 200.;
+        double z_btw = 10.;
+        double z_btw_array[7]; // assume there will be less than 7 bore hole antennas at each string
+        // these z_btw array will be used when settings->BH_ANT_SEP_DIST_ON=1 case
+        for (int i=0; i<6; i++) {
+            if (i==0) z_btw_array[i] = 0.;
+            //else z_btw_array[i] = z_btw;
+            else if (i==1) z_btw_array[i] = 2.;
+            else if (i==2) z_btw_array[i] = 15.;
+            else if (i==3) z_btw_array[i] = 2.;
+            else z_btw_array[i] = z_btw;
+        }
+        double z_btw_total;
+        params.stations_per_side = 1;       // total 37 stations
+        params.station_spacing = 2000.;     // 2km spacing
+        params.antenna_orientation = 0;     // all antenna facing x
+        params.bore_hole_antenna_layout = settings1->BORE_HOLE_ANTENNA_LAYOUT;
+        // finish initialization
+        //
+        
+        
+        
+        
+        //
+        // caculate number of stations, strings, antennas 
+        params.number_of_strings = 5;//params.number_of_stations * params.number_of_strings_station;
+        params.number_of_antennas = 15;//params.number_of_strings * params.number_of_antennas_string;
+        //
+        //
+        
+        
+        
+        //
+        // prepare vectors
+        for (int i=0; i<params.number_of_stations; i++) {
+            stations.push_back(temp_station);
+            
+            for (int j=0; j<params.number_of_surfaces_station; j++) {
+                stations[i].surfaces.push_back(temp_surface);
+            }
+            
+            for (int k=0; k<params.number_of_strings_station; k++) {
+                stations[i].strings.push_back(temp_string);
+                if(k==0){
+                    for (int l=0; l<7; l++) {
+                        stations[i].strings[k].antennas.push_back(temp_antenna);
+                    }   
+                }
+                else{
+                    for (int l=0; l<2; l++) {
+                        stations[i].strings[k].antennas.push_back(temp_antenna);
+                    }
+                }
+                
+                
+            }
+            
+            
+        }
+        // end prepare vectors
+        //
+        
+        cout<<"Check 1"<<endl;
+        
+        
+        
+        //
+        // for ARA-37 (or more than 1 station case), need code for setting position for all 37 stations here!
+        //
+        int station_count = 0;
+        
+        int side_step;
+
+        double next_dir = PI*2./3;
+
+        for (int istation = 0; istation < (int)params.number_of_stations; istation++) {
+            if (station_count < (int)params.number_of_stations - 1) {
+
+                if ( station_count < 6 ) { // first layer
+                    stations[station_count].SetX( params.core_x + (double)params.station_spacing * cos( (PI/3.) * (double)station_count ) );
+                    stations[station_count].SetY( params.core_y + (double)params.station_spacing * sin( (PI/3.) * (double)station_count ) );
+                }
+                else if ( station_count < 18 ) { // second layer
+
+                    // if the first outter layer station
+                    if ( station_count == 6 ) {
+                        side_step = 2;
+                        stations[station_count].SetX( params.core_x + (double)params.station_spacing * 2. );
+                        stations[station_count].SetY( params.core_y );
+                    }
+                    // after first station
+                    else { 
+                        if ( side_step > 0 ) {
+                            stations[station_count].SetX( stations[station_count-1].GetX() + (double)params.station_spacing * cos(next_dir) );
+                            stations[station_count].SetY( stations[station_count-1].GetY() + (double)params.station_spacing * sin(next_dir) );
+                            side_step--;
+                        }
+                        else {
+                            side_step = 1;
+                            next_dir+=PI/3.; // rotate
+                            stations[station_count].SetX( stations[station_count-1].GetX() + (double)params.station_spacing * cos(next_dir) );
+                            stations[station_count].SetY( stations[station_count-1].GetY() + (double)params.station_spacing * sin(next_dir) );
+                        }
+                    }
+                }
+                else if ( station_count < 36 ) { // third layer
+
+                    // if the first outter layer station
+                    if ( station_count == 6 ) {
+                        side_step = 3;
+                        stations[station_count].SetX( params.core_x + (double)params.station_spacing * 3. );
+                        stations[station_count].SetY( params.core_y );
+                    }
+                    // after first station
+                    else { 
+                        if ( side_step > 0 ) {
+                            stations[station_count].SetX( stations[station_count-1].GetX() + (double)params.station_spacing * cos(next_dir) );
+                            stations[station_count].SetY( stations[station_count-1].GetY() + (double)params.station_spacing * sin(next_dir) );
+                            side_step--;
+                        }
+                        else {
+                            side_step = 2;
+                            next_dir+=PI/3.; // rotate
+                            stations[station_count].SetX( stations[station_count-1].GetX() + (double)params.station_spacing * cos(next_dir) );
+                            stations[station_count].SetY( stations[station_count-1].GetY() + (double)params.station_spacing * sin(next_dir) );
+                        }
+                    }
+
+                }
+
+                station_count++;
+            }
+            else if (station_count < (int)params.number_of_stations) {
+                //stations[station_count].x = core_x;
+                //stations[station_count].y = core_y;
+                stations[station_count].SetX( params.core_x );
+                stations[station_count].SetY( params.core_y );
+                station_count++;
+            }
+            else {
+                cout<<"\n\tError, too many stations !"<<endl;
+            }
+        }
+        // finished setting all stations' position
+        
+
+        
+        cout<<"total station_count : "<<station_count<<endl;
+        if (station_count != (int)params.number_of_stations) cout<<"\n\tError, station number not match !"<<endl;        
+        
+        //
+        // set antenna values from parameters
+        // set station positions
+
+        if (settings1->READGEOM == 0) {
+            //phased array
+            stations[0].strings[0].SetX( stations[0].GetX()  );
+            stations[0].strings[0].SetY( stations[0].GetY()  );
+            cout<<"Check 2"<<endl;
+            stations[0].strings[1].SetX( stations[0].GetX() + (R_string * cos(PI/4.)) );
+            stations[0].strings[1].SetY( stations[0].GetY() + (R_string * sin(PI/4.)) );
+
+            stations[0].strings[2].SetX( stations[0].GetX() - (R_string * cos(PI/4.)) );
+            stations[0].strings[2].SetY( stations[0].GetY() - (R_string * sin(PI/4.)) );
+
+            stations[0].strings[3].SetX( stations[0].GetX() + (R_string * cos(PI/4.)) );
+            stations[0].strings[3].SetY( stations[0].GetY() - (R_string * sin(PI/4.)) );
+
+            stations[0].strings[4].SetX( stations[0].GetX() - (R_string * cos(PI/4.)) );
+            stations[0].strings[4].SetY( stations[0].GetY() + (R_string * sin(PI/4.)) );
+
+
+
+            stations[0].strings[0].antennas[0].SetZ(-172.635);
+            stations[0].strings[0].antennas[1].SetZ(-173.65);
+            stations[0].strings[0].antennas[2].SetZ(-174.66);
+            stations[0].strings[0].antennas[3].SetZ(-175.68);
+            stations[0].strings[0].antennas[4].SetZ(-176.70);
+            stations[0].strings[0].antennas[5].SetZ(-178.75);
+            stations[0].strings[0].antennas[6].SetZ(-180.79);
+
+            stations[0].strings[1].antennas[0].SetZ(-193.49);
+            stations[0].strings[1].antennas[1].SetZ(-163.85);
+
+            stations[0].strings[2].antennas[0].SetZ(-194.95);
+            stations[0].strings[2].antennas[1].SetZ(-165.29);
+
+            stations[0].strings[3].antennas[0].SetZ(-189.61);
+            stations[0].strings[3].antennas[1].SetZ(-159.78);
+
+            stations[0].strings[4].antennas[0].SetZ(-176.50);
+            stations[0].strings[4].antennas[1].SetZ(-145.96);
+            cout << "check 2.1" << endl;
+
+            //all antennas are VPOL (1 for HPOL)
+            stations[0].strings[0].antennas[0].type = 0;
+            stations[0].strings[0].antennas[1].type = 0;
+            stations[0].strings[0].antennas[2].type = 0;
+            stations[0].strings[0].antennas[3].type = 0;
+            stations[0].strings[0].antennas[4].type = 0;
+            stations[0].strings[0].antennas[5].type = 0;
+            stations[0].strings[0].antennas[6].type = 0;
+
+
+            stations[0].strings[1].antennas[0].type = 0;
+            stations[0].strings[1].antennas[1].type = 0;
+
+            stations[0].strings[2].antennas[0].type = 0;
+            stations[0].strings[2].antennas[1].type = 0;
+
+            stations[0].strings[3].antennas[0].type = 0;
+            stations[0].strings[3].antennas[1].type = 0;
+
+            stations[0].strings[4].antennas[0].type = 0;
+            stations[0].strings[4].antennas[1].type = 0;
+
+            cout << "check 2.2" << endl;
+            stations[0].strings[0].antennas[0].orient = 0;
+            stations[0].strings[0].antennas[1].orient = 0;
+            stations[0].strings[0].antennas[2].orient = 0;
+            stations[0].strings[0].antennas[3].orient = 0;
+            stations[0].strings[0].antennas[4].orient = 0;
+            stations[0].strings[0].antennas[5].orient = 0;
+            stations[0].strings[0].antennas[6].orient = 0;
+
+            stations[0].strings[1].antennas[0].orient = 0;
+            stations[0].strings[1].antennas[1].orient = 0;
+
+            stations[0].strings[2].antennas[0].orient = 0;
+            stations[0].strings[2].antennas[1].orient = 0;
+
+            stations[0].strings[3].antennas[0].orient = 0;
+            stations[0].strings[3].antennas[1].orient = 0;
+
+            stations[0].strings[4].antennas[0].orient = 0;
+            stations[0].strings[4].antennas[1].orient = 0;
+
+            cout << "check 2.3" << endl;
+
+            stations[0].number_of_antennas = 15.0;//params.number_of_strings_station * params.number_of_antennas_string;
+            max_number_of_antennas_station = 15;//params.number_of_strings_station * params.number_of_antennas_string;
+
+        } // if idealized geometry
+        
+        cout << "check here " << endl;
+        // test read V-pol gain file!!
+        ReadVgain("ARA_bicone6in_output.txt");
+        // test read H-pol gain file!!
+        ReadHgain("ARA_dipoletest1_output.txt");
+        // read filter file!!
+        ReadFilter("./data/filter.csv", settings1);
+        // read preamp gain file!!
+        ReadPreamp("./data/preamp.csv", settings1);
+        // read FOAM gain file!!
+        ReadFOAM("./data/FOAM.csv", settings1);
+        // read gain offset for chs file!!
+        ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1);// only TestBed for now
+        // read threshold offset for chs file!!
+        ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1);// only TestBed for now
+        // read threshold values for chs file
+        ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
+        // read system temperature for chs file!!
+        if (settings1->NOISE_CHANNEL_MODE!=0) {
+            ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
+        }
+        // read total elec. chain response file!!
+        cout<<"start read elect chain"<<endl;
+        ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
+        //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
+        cout<<"done read elect chain"<<endl;
+        
+        
+    } // if mode == 9
     
     
     else if (mode == 1) {

@@ -313,7 +313,8 @@ void Report::clear_useless(Settings *settings1) {   // to reduce the size of out
 //void Report::Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger) {
 //void Report::Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, UsefulIcrrStationEvent *theUsefulEvent) {
 //void Report::Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, UsefulIcrrStationEvent *theUsefulEvent, int evt) {
-void Report::Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt) {
+void Report::Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt,
+    double* xdata, double* ydata, double* ang_data, double* snr_data) {
 
   //  cout << "TEST1" << endl;
 
@@ -324,6 +325,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
     Vector n_trg_pokey;         // unit pokey vector at the target
     Vector n_trg_slappy;        // unit slappy vector at the target
     vector < vector <double> > ray_output;
+    double noise_rms;
+    double all_receive_ang[2];
 
     double vmmhz1m_tmp, vmmhz1m_sum, vmmhz1m_em;    // currently not using vmmhz1m_em
     Position Pol_vector;                            // polarization vector at the source
@@ -413,7 +416,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 	  if (event->Nu_Interaction[0].pickposnu && event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) <= settings1->RAYSOL_RANGE ) {    // if posnu is selected inside the antarctic ic:"<<viewangle<<" th_em:"<<d_theta_em[l]<<" th_had:"<<d_theta_had[l]<<" emfrac:"<<emfrac<<" hadfrac:"<<hadfrac<<" vmmhz1m:"<<vmmhz1m[l]<<endl;e
 	    //if (event->Nu_Interaction[0].pickposnu && event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) <= settings1->RAYSOL_RANGE && debugmode == 0 ) {    // if posnu is selected inside the antarctic ic:"<<viewangle<<" th_em:"<<d_theta_em[l]<<" th_had:"<<d_theta_had[l]<<" emfrac:"<<emfrac<<" hadfrac:"<<hadfrac<<" vmmhz1m:"<<vmmhz1m[l]<<endl;e
 	    //cout << i << " : " << j << " : " << k << endl;
-            
+           
 	    //raysolver->Solve_Ray(event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], icemodel, ray_output, settings1);   // solve ray between source and antenna
 	    RayStep.clear(); // remove previous values
 	    raysolver->Solve_Ray(event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], icemodel, ray_output, settings1, RayStep);   // solve ray between source and antenna
@@ -2020,7 +2023,6 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 
 
-
                        // calculate the bin values for the signal
                        signal_bin.clear();
                        signal_dbin.clear();
@@ -2217,9 +2219,161 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                // save trig search bin info default (if no global trig, this value saved)
                stations[i].total_trig_search_bin = max_total_bin - trig_search_init;
 
+        if (settings1->TRIG_SCAN_MODE==5){// Trigger mode for phased array
+            cout <<"successfully made it to PA Trigger!" << endl;
+            //cout << stations[i].strings[0].antennas[0] << endl;
+            //cout << stations[i].strings[0].antennas[1] << endl;
+            //cout << stations[i].strings[0].antennas[2].GetZ() << endl;
+            //cout << "here" << endl;
+            //int BINSIZE = settings1->NFOUR/2;
+            //if (stations[i].strings[0].antennas[3].ray_sol_cnt > 0){
+            int BINSIZE = 680/(settings1->TIMESTEP*1.e9); //For phased array, waveform length is 680 ns, but for trigger
+                              // check only 20 ns around the signal bin. This is to avoid getting the second ray
+            int raySolNum = 0;
+            int dsignalBin = 0;
+            viewangle=viewangle*180.0/PI;
+            bool searchSecondRay = true;
+            if (ray_sol_cnt == 2){
+                dsignalBin = abs(signal_bin[0] - signal_bin[1]);
+                //cout << "dsignalBin is " << dsignalBin << endl;
+                //if (dsignalBin < BINSIZE/2) searchSecondRay = false;
+            }
+            bool hasTriggered = false;
+            //cout << "time to trigger " << endl;
+            while(raySolNum < ray_sol_cnt){
+                //cout<<"In the raySol Loop"<<endl;
+                //cout << "2" << endl;
 
-	       if(settings1->TRIG_SCAN_MODE==0){// ******************** old mode left as-is ********************
+                //stringstream sstr;
+                int signalbinPA = signal_bin[raySolNum];
+                //cout<<"Number of solutions : "<<ray_sol_cnt<<endl;
+                //cout<<"Signal Bin value "<<signalbinPA<<endl;
+                int bin_value;
+                //cout<<"In the desired trigger mode"<<endl;
+                noise_rms = 0.04; //The noise RMS for an ARA waveform
+                //cout << "2.2" << endl;
+                //double avgSnr;
+                //avgSnr = getAverageSNR_old(trigger, detector, noise_rms, signalBinPA, int BINSIZE);
+                //if(avgSnr>0.0)
+                //{
+                //    avgSnr = getAverageSNR(stations[i].strings[0].antennas[0].V[raySolNum]);
+                //}
+                //cout << "starting avgSNR with raysolnum " << raySolNum << endl;
+                //cout << "length of V is " << stations[i].strings[0].antennas[0].V.size() <<endl;
+                double avgSnr;
+                if(settings1->TRIG_ANALYSIS_MODE == 2)
+                {
+                    avgSnr=3.5;
+                }
+                else
+                {
+                    if(stations[i].strings[0].antennas[0].V.size()>raySolNum)
+                    {
+                        //cout << "here " << endl;
+                        avgSnr = getAverageSNR(stations[i].strings[0].antennas[0].V[raySolNum]);
+                        //avgSnr = getAverageSNR_old(trigger, detector, noise_rms, signalbinPA, BINSIZE);
+                        //cout << avgSnr << endl;
+                    }
 
+                    else
+                    {
+                        avgSnr = 0.0;
+                    }
+                }
+                
+                
+                //cout << "finished avgSnr func " << endl;
+                //cout << "2.3" << endl;
+                all_receive_ang[raySolNum] = all_receive_ang[raySolNum]*180.0/PI-90.0;
+
+                double snr_50 = interpolate(ang_data,snr_data,all_receive_ang[raySolNum],187);
+                //cout << "snr_50 is " << snr_50 << "angd avgSNr is " << avgSnr << endl;
+                //cout << raySolNum << ", " << all_receive_ang[raySolNum] << endl;
+
+                //avgSnr = avgSnr*2.0/snr_50; //scale snr to reflect the angle
+
+                //cout << "view angle is " << my_receive_ang[raySolNum]<< "or maybe it's " << my_antenna_theta*180.0/PI<< endl;
+
+                double eff = interpolate(xdata,ydata,avgSnr,59);
+                //cout << "2.4" << endl;
+                //cout<<" Efficiency = "<<eff<<endl;
+                if(avgSnr > 0.5){
+                    //cout<<" Efficiency = "<<eff<<endl;
+                    cout<<endl;
+                    cout<<"Noise RMS :"<<noise_rms<<" avgSNR :"<<avgSnr<<" Efficiency "<<eff<<" RaySol No "<<raySolNum<<endl;
+                    cout<<"************************"<<endl;
+                    //cout << "3" << endl;
+
+                    if(isTrigger(eff)){
+
+                        cout<<"This is a trigger with raySolNum as "<< raySolNum<<" ******************************"<<endl;
+                        cout<<" avgSNR For Triggered Events :"<<avgSnr<<" Event Number : "<<evt<<"efficiency : "<<eff<<endl;
+                        cout << event->Nu_Interaction[raySolNum].weight << ", " << raySolNum << endl;
+
+                        if (hasTriggered) {
+                            //stations[i].numSecondPulseTriggers ++;
+                            //stations[i].secondPulseWeight = stations[i].secondPulseWeight + event->Nu_Interaction[0].weight;
+                            //cout<<"Number of Second Pulse Triggers "<<stations[i].numSecondPulseTriggers<<endl;
+                            cout<<"Weight for Second Ray trigger is:"<<event->Nu_Interaction[0].weight<<endl;
+                            break;
+                        }
+                        //stations[i].strings[0].averageSNR = avgSnr;
+                        //stations[i].strings[0].viewAngle = viewangle;
+                        viewAngle = viewangle;
+                        my_averageSNR = avgSnr;
+                        my_receive_ang = all_receive_ang[raySolNum];
+                        last_trig_bin = signalbinPA;
+                        //cout<<"Signal Bin ****"<<signalbinPA<<"BIN SIZE "<<BINSIZE<<endl;
+                        int my_ch_id = 0;
+                        stations[i].Global_Pass = last_trig_bin;
+                        for (size_t str = 0; str < detector->stations[i].strings.size(); str++) {
+                            for (size_t ant = 0; ant < detector->stations[i].strings[str].antennas.size(); ant++) {
+                                double peakvalue = 0;
+                                //cout << str << ", " << ant << ", " << my_ch_id << endl;
+                                for (int bin=0; bin<BINSIZE; bin++) {
+                                    //if (V_mimic_mode == 0) { // Global passed bin is the center of the window
+
+                                    bin_value = signalbinPA - BINSIZE/2 + bin;
+                                    // stations[i].strings[str].antennas[ant].V_mimic.push_back( ( trigger->Full_window_V[ant][ last_trig_bin - settings1->NFOUR/4 + mimicbin ] )*1.e3 );// save in mV
+                                    // stations[i].strings[str].antennas[ant].time.push_back( last_trig_bin - settings1->NFOUR/4 + mimicbin );
+                                    // stations[i].strings[str].antennas[ant].time_mimic.push_back( ( settings1->NFOUR/4 + mimicbin) * settings1->TIMESTEP*1.e9 );// save in ns
+                                    //stations[i].strings[0].antennas[ant].V_mimic.push_back(trigger->Full_window_V[ant][bin_value]*1e3);// save in mV (original kah)
+                                    stations[i].strings[str].antennas[ant].V_mimic.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
+                                    // stations[i].strings[0].antennas[ant].time.push_back( bin_value );
+                                    // stations[i].strings[0].antennas[ant].time_mimic.push_back( ( BINSIZE/2 + bin) * settings1->TIMESTEP*1.e9 );// save in ns
+                                    //stations[i].strings[str].antennas[ant].waveformVoltage.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
+                                    stations[i].strings[str].antennas[ant].time.push_back( bin_value );
+
+                                    stations[i].strings[str].antennas[ant].time_mimic.push_back( ( bin) * settings1->TIMESTEP*1.e9 );// save in ns
+                                    //cout << "PA timestep is " << stations[i].strings[0].antennas[ant].time_mimic[bin+1]-stations[i].strings[0].antennas[ant].time_mimic[bin] << endl;
+                                    //cout << "settings timestep is " << settings1->TIMESTEP*1.e9 << endl;
+                                    if (TMath::Abs(trigger->Full_window_V[ant][bin_value]) > peakvalue) {
+                                        peakvalue = TMath::Abs(trigger->Full_window_V[my_ch_id][bin_value]);
+                                    }
+                                }//end bin
+                                my_ch_id ++;
+                            //cout<<" Peak Value for ant "<<ant<<" is "<<peakvalue<<endl;
+                            }//end ant
+                        }//end detector
+
+                    }//end efficiency if
+                    //cout << "4" << endl;
+
+                    hasTriggered = true;
+                }//end avgsnr if
+                
+                raySolNum++;
+                if(hasTriggered==true) break;
+                if(searchSecondRay == false) break;
+                //cout << "5" << endl;
+
+                //if(stations[i].Global_Pass > 0) break;
+            }//while ray solve
+        //cout << "4 " << endl;
+        }
+
+
+	       else if(settings1->TRIG_SCAN_MODE==0){// ******************** old mode left as-is ********************
                // avoid really long trig_window_bin case (change trig_window to check upto max_total_bin)
                if (max_total_bin - trig_window_bin <= trig_i) trig_window_bin = max_total_bin - trig_i -1;
 	       
@@ -2774,7 +2928,6 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 }   // end Connect_Interaction_Detector
 
 int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode ){
- 
   class CircularBuffer {
     
   public:
@@ -2980,7 +3133,6 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
                        ||
 	 (settings1->TRIG_ONLY_LOW_CH_ON==1 && settings1->DETECTOR!=3 && antenna_i<2 ) ){ // channel filter: choose if to use lower/borehole channels or not
       
-
       int channel_num = detector->GetChannelfromStringAntenna ( i, string_i, antenna_i, settings1 );
 
       // assign Pthresh a value 
@@ -3551,6 +3703,7 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
         for (int ch_loop=0; ch_loop<ch_limit; ch_loop++) {
             int string_i = detector->getStringfromArbAntID( stationIndex, ch_loop);
             int antenna_i = detector->getAntennafromArbAntID( stationIndex, ch_loop);
+
             int AraRootChannel = 0;
             AraRootChannel = detector->GetChannelfromStringAntenna (i, string_i, antenna_i, settings1);
             
@@ -3925,10 +4078,12 @@ void Report::Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *
 
 int Report::GetChNumFromArbChID( Detector *detector, int ID, int StationIndex, Settings *settings1 ) {
 
+
     int string_num = detector->getStringfromArbAntID( StationIndex, ID );
     int ant_num = detector->getAntennafromArbAntID( StationIndex, ID );
     
     int StationID = detector->stations[StationIndex].StationID;
+    cout << ID << ", " << StationIndex << ", " << string_num << ", " << ant_num << ", " << StationID << ", " << endl;
     //    cout << "Station ID: " << StationID << endl;
     //    cout << "string_num: " << string_num << endl;
     //    cout << "ant_num: " << ant_num << endl;
@@ -5417,4 +5572,63 @@ vector<double> Report::getHitTimesVectorHpol(Detector *detector, int station_i){
   
 }
 
+double Report::getAverageSNR(const vector<double> & mysignal){
+    //cout << "inside function " << endl;
+    double snr = 0.0;
+    //for (size_t ant = 0; ant<mysignal.antennas.size(), ant++){
+    double peak =0.0;
+    for (int bin; bin<mysignal.size(); bin++){
+        //cout << mysignal[bin] << endl;
+        //bin_value = signalBin - BINSIZE/2 + bin;
+        if(TMath::Abs(mysignal[bin])>peak){
+            //cout << "made it! " << TMath::Abs(mysignal[bin]) << endl;
+            peak = TMath::Abs(mysignal[bin]);
 
+        }
+    }
+    //cout << "peak is "<< peak << endl;
+    snr =peak/0.04;
+    //cout << "snr is "<< snr << endl;
+    if(snr>25)
+    {
+        snr = 25.0;
+    
+    }
+    //cout << snr << endl;
+    return snr;
+
+}
+
+bool Report::isTrigger(double eff){
+  if (eff >= 1.0) return true;
+  float randNum = gRandom->Rndm();
+  if (randNum < eff) return true;
+  return false;
+}
+
+double Report::interpolate(double *xdata,double *ydata, double xi, int numData)
+{
+    double result = 0.0; // Initialize result
+    double x1, y1, x2, y2; // Data points about which linear interpolation will take place
+    double c, m; //slope and constant in y = mx + c
+    //cout<<"Last Value "<<xdata[numData]<<endl;
+    if (xi >= xdata[numData]) return ydata[numData];
+    if (xi <= xdata[0]) return ydata[0];
+    for (int i=0; i<numData; i++)
+    {
+        if (i == numData - 1){
+          result = ydata[numData];
+        }
+        if (xi > xdata[i] && xi < xdata[i+1]){
+          x1 = xdata[i]; x2 = xdata[i+1]; y1 = ydata[i]; y2 = ydata[i+1];
+          c = (y2*x1 - x2*y1)/(x1-x2);
+          m = (y1-y2)/(x1-x2);
+          result = m*xi + c; //linear interpolation
+          break;
+        }
+        if (xdata[i] == x1) result = ydata[i];
+    }
+    //cout<<"x1 "<<x1<<" x2 "<<x2<<" xi "<<xi<<endl;
+
+    return result;
+}

@@ -385,6 +385,67 @@ int main(int argc, char **argv) {   // read setup.txt file
     int inu = 0;
     int Events_Thrown = 0;
     int Events_Passed = 0;
+
+
+     // Code to read the trigger efficiency curve for phased array
+    
+    cout << "Phased Array mode! Reading in data: " << endl;
+    double snr_PA[60];
+    double eff_PA[60];
+    ifstream infile;
+    infile.open("nuphase_trig_effc.txt",ios::in);
+    if(infile.fail()) // checks to see if file opended
+        {
+          cout << "error, file could not be opened" << endl;
+          return 1; // no point continuing if the file didn't open...
+        }
+        int num = 0;
+        while(!infile.eof()) // reads file to end of *file*, not line
+        {
+            infile >> snr_PA[num]; // read first column number
+            infile >> eff_PA[num]; // read second column number
+            ++num;
+            // you can also do it on the same line like this:
+            // infile >> exam1[num] >> exam2[num] >> exam3[num]; ++num;
+        }
+        cout<<"number of data points "<<num<<endl;
+    infile.close();
+    std::cout << "The data from Phased array" << '\n';
+    for (size_t i = 0; i < num; i++) 
+    {
+        std::cout << snr_PA[i] << " "<< eff_PA[i] <<'\n';
+    }
+
+    //load Angle vs SNR curve:
+    double angle_PA[188];
+    double aSNR_PA[188];
+    infile.clear();
+    infile.open("nuphase_SNR_angle.txt",ios::in);
+    if(infile.fail()) // checks to see if file opended
+    {
+        cout << "error, file could not be opened" << endl;
+        return 1; // no point continuing if the file didn't open...
+    }
+    num = 0;
+        while(!infile.eof()) // reads file to end of *file*, not line
+        {
+            infile >> angle_PA[num]; // read first column number
+            infile >> aSNR_PA[num]; // read second column number
+            ++num;
+            // you can also do it on the same line like this:
+            // infile >> exam1[num] >> exam2[num] >> exam3[num]; ++num;
+        }
+        cout<<"number of data points "<<num<<endl;
+    infile.close();
+    std::cout << "The secondary data from Phased array" << '\n';
+    for (size_t i = 0; i < num; i++) 
+    {
+        std::cout << angle_PA[i] << " "<< aSNR_PA[i] <<'\n';
+    }
+    
+    
+
+
     // for (int inu=0;inu<settings1->NNU;inu++) { // loop over neutrinos
     while (inu < nuLimit){
         // cout << "inu: " << inu << endl; 
@@ -436,7 +497,10 @@ int main(int argc, char **argv) {   // read setup.txt file
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger);
 
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent);
-            report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown);
+            
+            report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown,snr_PA,eff_PA,angle_PA,aSNR_PA);
+
+            
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent, Events_Thrown);
 
             #ifdef ARA_UTIL_EXISTS
