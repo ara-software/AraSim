@@ -1117,6 +1117,11 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
       ns = 1.357;
       nd = 1.78;
       nc = 0.027;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 44){
+      //phased array fit values, based on UNL 2016
+      ns = 1.326;
+      nd = 1.78;
+      nc = 0.0202;
     }
     else {
       // South Pole Values (AraSim original default, based on RICE)
@@ -1129,14 +1134,14 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 
 
 
-    //    cout << "ns, nd, nc: " << ns << ", " << nd << ", " << nc << endl;
+        //out << "ns, nd, nc: " << ns << ", " << nd << ", " << nc << endl;
 
 
     surface_reflect = true;
     bedrock_reflect = false;
     //requiredAccuracy = 0.1;
     //requiredAccuracy = 0.5;
-    //requiredAccuracy = 0.2;
+    requiredAccuracy = 0.2;
     frequency = 300;
     polarization = RayTrace::pi/2;
 
@@ -1156,7 +1161,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
         requiredAccuracy = settings1->Z_TOLERANCE;
         //cout<<"Z tolerance is "<<requiredAccuracy<<"m"<<endl;
     }
-
+    requiredAccuracy = 0.2;
 
     if (settings1->NOFZ == 1){
         

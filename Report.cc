@@ -422,7 +422,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 	    raysolver->Solve_Ray(event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], icemodel, ray_output, settings1, RayStep);   // solve ray between source and antenna
             
 	    ray_sol_cnt = 0;
-            
+        //cout << "another debug test " << j << ", " << k << ", " << raysolver->solution_toggle << endl;
 	    if (raysolver->solution_toggle) {  // if there are solution from raysolver
 	      //if (raysolver->solution_toggle && debugmode==0 ) {  // if there are solution from raysolver
               
@@ -551,7 +551,9 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                    GetAngleAnt(receive_vector, detector->stations[i].strings[j].antennas[k], antenna_theta, antenna_phi);   // get theta, phi for signal ray arrived at antenna
                                    //cout<<"antenna theta : "<<antenna_theta<<"  phi : "<<antenna_phi<<endl;  
-
+                                   if(k==0 & j == 0 & ray_sol_cnt<2){
+                                    all_receive_ang[ray_sol_cnt] = ray_output[2][ray_sol_cnt];
+                                    }
 
 
                                    // old freq domain signal mode (AVZ model)
@@ -1708,6 +1710,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                        stations[i].strings[j].antennas[k].ray_sol_cnt = ray_sol_cnt;    // save number of RaySolver solutions
            
+                        //cout << "debug test : " << i << ", " << j << ", " << k << "< " << ray_sol_cnt << endl;
                        stations[i].Total_ray_sol += ray_sol_cnt; // add ray_sol_cnt to Total_ray_sol
                        
 
@@ -2040,7 +2043,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                signal_bin.push_back( (stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time)/(settings1->TIMESTEP) + settings1->NFOUR*2 + trigger->maxt_diode_bin );
                                //signal_bin.push_back( (stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time)/(settings1->TIMESTEP) + settings1->NFOUR + trigger->maxt_diode_bin );
 
-
+                               //cout << "debug ant str : " << j << ", " << k << ", " << signal_bin[m] << endl;
                                // store signal located bin
                                stations[i].strings[j].antennas[k].SignalBin.push_back( signal_bin[m] );
 
@@ -2220,32 +2223,38 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                stations[i].total_trig_search_bin = max_total_bin - trig_search_init;
 
         if (settings1->TRIG_SCAN_MODE==5){// Trigger mode for phased array
-            cout <<"successfully made it to PA Trigger!" << endl;
+            //cout <<"successfully made it to PA Trigger!" << endl;
             //cout << stations[i].strings[0].antennas[0] << endl;
             //cout << stations[i].strings[0].antennas[1] << endl;
             //cout << stations[i].strings[0].antennas[2].GetZ() << endl;
             //cout << "here" << endl;
             //int BINSIZE = settings1->NFOUR/2;
             //if (stations[i].strings[0].antennas[3].ray_sol_cnt > 0){
-            int BINSIZE = 680/(settings1->TIMESTEP*1.e9); //For phased array, waveform length is 680 ns, but for trigger
+            int BINSIZE = 1200/(settings1->TIMESTEP*1.e9); //For phased array, waveform length is 680 ns, but for trigger
                               // check only 20 ns around the signal bin. This is to avoid getting the second ray
             int raySolNum = 0;
             int dsignalBin = 0;
             viewangle=viewangle*180.0/PI;
             bool searchSecondRay = true;
             if (ray_sol_cnt == 2){
-                dsignalBin = abs(signal_bin[0] - signal_bin[1]);
+                dsignalBin = abs(signal_bin[0] - signal_bin[1]); //original kah
+                dsignalBin = abs(stations[i].strings[0].antennas[0].SignalBin[0]-stations[i].strings[0].antennas[0].SignalBin[1]);
+
                 //cout << "dsignalBin is " << dsignalBin << endl;
                 //if (dsignalBin < BINSIZE/2) searchSecondRay = false;
             }
             bool hasTriggered = false;
             //cout << "time to trigger " << endl;
-            while(raySolNum < ray_sol_cnt){
+            while(raySolNum < stations[i].strings[0].antennas[0].SignalBin.size()){
                 //cout<<"In the raySol Loop"<<endl;
                 //cout << "2" << endl;
 
                 //stringstream sstr;
-                int signalbinPA = signal_bin[raySolNum];
+               // stations[i].strings[j].antennas[k].SignalBin.push_back( signal_bin[m] )
+                //int signalbinPA2 = signal_bin[raySolNum]; ///original kah
+                //cout <<"trying new " << raySolNum << ", "  << endl;
+                int signalbinPA = stations[i].strings[0].antennas[0].SignalBin[raySolNum]; //new kah
+                //cout << "new is " << signalbinPA << endl;
                 //cout<<"Number of solutions : "<<ray_sol_cnt<<endl;
                 //cout<<"Signal Bin value "<<signalbinPA<<endl;
                 int bin_value;
@@ -2270,7 +2279,14 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                     if(stations[i].strings[0].antennas[0].V.size()>raySolNum)
                     {
                         //cout << "here " << endl;
-                        avgSnr = getAverageSNR(stations[i].strings[0].antennas[0].V[raySolNum]);
+                        avgSnr = getAverageSNR(stations[i].strings[0].antennas[0].V[raySolNum],trigger,signalbinPA,BINSIZE);
+                        //cout << avgSnr << endl;
+                       // //avgSnr = getAverageSNR(trigger->Full_window_V[0]);
+                        //cout << "new avgSnr is " << avgSnr << endl;
+                        //avgSnr = getAverageSNR2(raySolNum);
+                        
+
+
                         //avgSnr = getAverageSNR_old(trigger, detector, noise_rms, signalbinPA, BINSIZE);
                         //cout << avgSnr << endl;
                     }
@@ -2284,13 +2300,16 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                 
                 //cout << "finished avgSnr func " << endl;
                 //cout << "2.3" << endl;
+                
+                
+                
                 all_receive_ang[raySolNum] = all_receive_ang[raySolNum]*180.0/PI-90.0;
-
+                //cout << raySolNum << ", " << all_receive_ang[raySolNum] << ", " << avgSnr << endl;
                 double snr_50 = interpolate(ang_data,snr_data,all_receive_ang[raySolNum],187);
                 //cout << "snr_50 is " << snr_50 << "angd avgSNr is " << avgSnr << endl;
                 //cout << raySolNum << ", " << all_receive_ang[raySolNum] << endl;
 
-                //avgSnr = avgSnr*2.0/snr_50; //scale snr to reflect the angle
+                avgSnr = avgSnr*2.0/snr_50; //scale snr to reflect the angle
 
                 //cout << "view angle is " << my_receive_ang[raySolNum]<< "or maybe it's " << my_antenna_theta*180.0/PI<< endl;
 
@@ -2298,17 +2317,26 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                 //cout << "2.4" << endl;
                 //cout<<" Efficiency = "<<eff<<endl;
                 if(avgSnr > 0.5){
+                    cout << "debug" << endl;
+                    for (size_t str1 = 0; str1 < detector->stations[i].strings.size(); str1++) {
+                            for (size_t ant1 = 0; ant1 < detector->stations[i].strings[str1].antennas.size(); ant1++) {
+                                cout << stations[i].strings[str1].antennas[ant1].SignalBin.size() <<endl;
+                            }
+                        }
+
+
+
                     //cout<<" Efficiency = "<<eff<<endl;
                     cout<<endl;
                     cout<<"Noise RMS :"<<noise_rms<<" avgSNR :"<<avgSnr<<" Efficiency "<<eff<<" RaySol No "<<raySolNum<<endl;
                     cout<<"************************"<<endl;
                     //cout << "3" << endl;
-
+                    
                     if(isTrigger(eff)){
 
                         cout<<"This is a trigger with raySolNum as "<< raySolNum<<" ******************************"<<endl;
                         cout<<" avgSNR For Triggered Events :"<<avgSnr<<" Event Number : "<<evt<<"efficiency : "<<eff<<endl;
-                        cout << event->Nu_Interaction[raySolNum].weight << ", " << raySolNum << endl;
+                        //cout << event->Nu_Interaction[raySolNum].weight << ", " << raySolNum << endl;
 
                         if (hasTriggered) {
                             //stations[i].numSecondPulseTriggers ++;
@@ -2321,6 +2349,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                         //stations[i].strings[0].viewAngle = viewangle;
                         viewAngle = viewangle;
                         my_averageSNR = avgSnr;
+                        my_raysol = raySolNum;
                         my_receive_ang = all_receive_ang[raySolNum];
                         last_trig_bin = signalbinPA;
                         //cout<<"Signal Bin ****"<<signalbinPA<<"BIN SIZE "<<BINSIZE<<endl;
@@ -2329,6 +2358,14 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                         for (size_t str = 0; str < detector->stations[i].strings.size(); str++) {
                             for (size_t ant = 0; ant < detector->stations[i].strings[str].antennas.size(); ant++) {
                                 double peakvalue = 0;
+                                //cout << "test signal bin is " << stations[i].strings[str].antennas[ant].SignalBin.size() << endl;
+                                if(stations[i].strings[str].antennas[ant].SignalBin.size()>raySolNum){
+                                    //cout << "here ! " << endl;
+                                    signalbinPA =stations[i].strings[str].antennas[ant].SignalBin[raySolNum];
+                                }
+
+                                //signalbinPA = stations[i].strings[str].antennas[ant].SignalBin[raySolNum];
+                                //cout << ant << ", " << signalbinPA << endl;
                                 //cout << str << ", " << ant << ", " << my_ch_id << endl;
                                 for (int bin=0; bin<BINSIZE; bin++) {
                                     //if (V_mimic_mode == 0) { // Global passed bin is the center of the window
@@ -5572,7 +5609,38 @@ vector<double> Report::getHitTimesVectorHpol(Detector *detector, int station_i){
   
 }
 
-double Report::getAverageSNR(const vector<double> & mysignal){
+double Report::getAverageSNR2(int raysolnum){
+    double total_snr = 0.0;
+    double temp_snr = 0.0;
+    double peak;
+    for (int ant_num = 0; ant_num<7; ant_num++){
+        peak = 0.0;
+        int total_bins = stations[0].strings[0].antennas[ant_num].V[raysolnum].size();
+        //cout << "size is " << total_bins << endl;
+        for (int bin=0; bin<total_bins; bin++){
+            //cout << bin << endl;
+            //cout << stations[0].strings[0].antennas[ant_num].V[raysolnum][bin] << endl;
+            //bin_value = signalBin - BINSIZE/2 + bin;
+            //cout << stations[0].strings[0].antennas[ant_num].V[raysolnum][bin] << endl;
+            if(TMath::Abs(stations[0].strings[0].antennas[ant_num].V[raysolnum][bin])>peak){
+                //cout << "made it! " << TMath::Abs(stations[0].strings[0].antennas[ant_num].V[raysolnum][bin]) << endl;
+                peak = TMath::Abs(stations[0].strings[0].antennas[ant_num].V[raysolnum][bin]);
+
+            }
+        }
+
+        temp_snr = peak/0.04;
+        if(temp_snr>25){
+            temp_snr = 25;
+        }
+        //cout <<temp_snr << endl;
+        total_snr = total_snr+temp_snr;
+    }
+    total_snr = total_snr/7.0;
+    return total_snr;
+}
+
+double Report::getAverageSNR(const vector<double> & mysignal,Trigger *trigger, const int PA_binsize, const int TOTAL_SIZE){
     //cout << "inside function " << endl;
     double snr = 0.0;
     //for (size_t ant = 0; ant<mysignal.antennas.size(), ant++){

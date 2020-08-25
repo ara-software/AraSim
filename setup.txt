@@ -8,28 +8,30 @@ NFOUR=1024
 
 
 EXPONENT=18
-NNU=450 // number of neutrino events
-NNU_PASSED=1 // number of neutrino events that are allowed to pass the trigger
-ONLY_PASSED_EVENTS=0 // 0 (default): AraSim throws NNU events whether or not they pass; 1: AraSim throws events until the number of events that pass the trigger is equal to NNU_PASSED (WARNING: may cause long run times if reasonable values are not chosen)
+NNU=4500 // number of neutrino events
+NNU_PASSED=100 // number of neutrino events that are allowed to pass the trigger
+ONLY_PASSED_EVENTS=1 // 0 (default): AraSim throws NNU events whether or not they pass; 1: AraSim throws events until the number of events that pass the trigger is equal to NNU_PASSED (WARNING: may cause long run times if reasonable values are not chosen)
 NOISE_WAVEFORM_GENERATE_MODE=0 // generate new noise waveforms for each events
 NOISE_EVENTS=100 // number of pure noise waveforms
-TRIG_ANALYSIS_MODE=2 // 0 = signal + noise, 1 = signal only, 2 = noise only
+TRIG_ANALYSIS_MODE=1 // 0 = signal + noise, 1 = signal only, 2 = noise only
 DETECTOR=9 // ARA stations 1 to 7 (used to be 1- kah)
 NOFZ=1
+FILL_TREE_MODE=2
 
 TIMESTEP=5.E-10 // value for 2GHz actual station value
 TRIG_WINDOW=1.E-7 // 100ns which is actual testbed trig window
 POWERTHRESHOLD=-6.06 // 100Hz global trig rate for 3 out of 16 ARA statinonsev
 
-POSNU_RADIUS=6000
+POSNU_RADIUS=2000
 V_MIMIC_MODE=0 // 0 : global trig is located center of readout windows
 DATA_SAVE_MODE=0 // 2 : don't save any waveform informations at all
 WRITE_ALL_EVENTS=0 // don't save any waveform informations to eventTree
 BORE_HOLE_ANTENNA_LAYOUT=0
 SECONDARIES=0
-RAYSOL_RANGE=10000
+RAYSOL_RANGE=3000
 
-
+RAY_TRACE_ICE_MODEL_PARAMS=44
+RANDOM_MODE = 1
 TRIG_SCAN_MODE=5
 
 // below settings are available for only TestBed mode (DETECTOR=3 case)

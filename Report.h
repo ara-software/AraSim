@@ -236,7 +236,8 @@ class Report {
 //    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger);
     
     void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt,double* xdata, double* ydata, double* ang_data, double* snr_data);    
-    double getAverageSNR(const vector<double> & mysignal);
+    double getAverageSNR(const vector<double> & mysignal,Trigger *trigger, const int PA_binsize, const int TOTAL_SIZE);
+    double getAverageSNR2(int raysolnum);
     bool isTrigger(double eff);
     double interpolate(double *xdata,double *ydata, double xi, int numData);
     
@@ -371,6 +372,7 @@ class Report {
         double viewAngle;
         double my_averageSNR;
         double my_receive_ang;
+        double my_raysol;
 
         ClassDef(Report,1);
 
