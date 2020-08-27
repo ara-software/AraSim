@@ -411,21 +411,24 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 	  // added one more condition to run raysolver ( direct distance is less than 3km )
 	  //
 
-	  //	  cout << event->Nu_Interaction[0].posnu.GetX() << " : " << event->Nu_Interaction[0].posnu.GetY() << " : " << event->Nu_Interaction[0].posnu.GetZ() << endl;
-	  //	  cout << event->Nu_Interaction[0].pickposnu << " : " << event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) << " : " << settings1->RAYSOL_RANGE << endl; 
+	  	  //cout << event->Nu_Interaction[0].posnu.GetX() << " : " << event->Nu_Interaction[0].posnu.GetY() << " : " << event->Nu_Interaction[0].posnu.GetZ() << endl;
+	  	  //cout << event->Nu_Interaction[0].pickposnu << " : " << event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) << " : " << settings1->RAYSOL_RANGE << endl; 
 	  if (event->Nu_Interaction[0].pickposnu && event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) <= settings1->RAYSOL_RANGE ) {    // if posnu is selected inside the antarctic ic:"<<viewangle<<" th_em:"<<d_theta_em[l]<<" th_had:"<<d_theta_had[l]<<" emfrac:"<<emfrac<<" hadfrac:"<<hadfrac<<" vmmhz1m:"<<vmmhz1m[l]<<endl;e
 	    //if (event->Nu_Interaction[0].pickposnu && event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) <= settings1->RAYSOL_RANGE && debugmode == 0 ) {    // if posnu is selected inside the antarctic ic:"<<viewangle<<" th_em:"<<d_theta_em[l]<<" th_had:"<<d_theta_had[l]<<" emfrac:"<<emfrac<<" hadfrac:"<<hadfrac<<" vmmhz1m:"<<vmmhz1m[l]<<endl;e
 	    //cout << i << " : " << j << " : " << k << endl;
            
 	    //raysolver->Solve_Ray(event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], icemodel, ray_output, settings1);   // solve ray between source and antenna
 	    RayStep.clear(); // remove previous values
+
 	    raysolver->Solve_Ray(event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], icemodel, ray_output, settings1, RayStep);   // solve ray between source and antenna
-            
+ 
 	    ray_sol_cnt = 0;
         //cout << "another debug test " << j << ", " << k << ", " << raysolver->solution_toggle << endl;
 	    if (raysolver->solution_toggle) {  // if there are solution from raysolver
 	      //if (raysolver->solution_toggle && debugmode==0 ) {  // if there are solution from raysolver
-              
+          //cout << event->Nu_Interaction[0].posnu.GetX() << " : " << event->Nu_Interaction[0].posnu.GetY() << " : " << event->Nu_Interaction[0].posnu.GetZ() << endl;
+          //cout << event->Nu_Interaction[0].pickposnu << " : " << event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) << " : " << settings1->RAYSOL_RANGE << endl; 
+    
 	      
 	      while ( ray_sol_cnt < ray_output[0].size() ) {   // for number of soultions (could be 1 or 2)
 		
@@ -2223,6 +2226,10 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                stations[i].total_trig_search_bin = max_total_bin - trig_search_init;
 
         if (settings1->TRIG_SCAN_MODE==5){// Trigger mode for phased array
+
+            //cout << event->Nu_Interaction[0].posnu.GetX() << " : " << event->Nu_Interaction[0].posnu.GetY() << " : " << event->Nu_Interaction[0].posnu.GetZ() << endl;
+             //cout << event->Nu_Interaction[0].pickposnu << " : " << event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[j].antennas[k] ) << " : " << settings1->RAYSOL_RANGE << endl; 
+    
             //cout <<"successfully made it to PA Trigger!" << endl;
             //cout << stations[i].strings[0].antennas[0] << endl;
             //cout << stations[i].strings[0].antennas[1] << endl;
@@ -2297,12 +2304,14 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                     }
                 }
                 
+
                 
                 //cout << "finished avgSnr func " << endl;
                 //cout << "2.3" << endl;
                 
                 
-                
+               //cout << raySolNum << ", " << all_receive_ang[raySolNum] << ", " << avgSnr << endl;
+
                 all_receive_ang[raySolNum] = all_receive_ang[raySolNum]*180.0/PI-90.0;
                 //cout << raySolNum << ", " << all_receive_ang[raySolNum] << ", " << avgSnr << endl;
                 double snr_50 = interpolate(ang_data,snr_data,all_receive_ang[raySolNum],187);
@@ -2314,10 +2323,17 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                 //cout << "view angle is " << my_receive_ang[raySolNum]<< "or maybe it's " << my_antenna_theta*180.0/PI<< endl;
 
                 double eff = interpolate(xdata,ydata,avgSnr,59);
+                if(event->Nu_Interaction[0].posnu.GetX() <0 & event->Nu_Interaction[0].posnu.GetY() <0){
+                    cout << avgSnr << endl;
+                    cout << eff << endl;
+                    cout << "" << endl;
+                }
                 //cout << "2.4" << endl;
                 //cout<<" Efficiency = "<<eff<<endl;
                 if(avgSnr > 0.5){
                     cout << "debug" << endl;
+                    cout << event->Nu_Interaction[0].posnu.GetX() << " : " << event->Nu_Interaction[0].posnu.GetY() << " : " << event->Nu_Interaction[0].posnu.GetZ() << endl;
+
                     for (size_t str1 = 0; str1 < detector->stations[i].strings.size(); str1++) {
                             for (size_t ant1 = 0; ant1 < detector->stations[i].strings[str1].antennas.size(); ant1++) {
                                 cout << stations[i].strings[str1].antennas[ant1].SignalBin.size() <<endl;

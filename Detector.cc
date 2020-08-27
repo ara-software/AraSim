@@ -255,8 +255,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         
         //double core_x = 0.; 
         //double core_y = 0.;
-        params.core_x = 0.; 
-        params.core_y = 0.;
+        params.core_x = 10000.; 
+        params.core_y = 10000.;
         double R_string = 10.;  // all units are in meter
         double R_surface = 60.;
         double z_max = 200.;
@@ -417,6 +417,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             //phased array
             stations[0].strings[0].SetX( stations[0].GetX()  );
             stations[0].strings[0].SetY( stations[0].GetY()  );
+            cout << stations[0].GetX() <<endl;
             cout<<"Check 2"<<endl;
             stations[0].strings[1].SetX( stations[0].GetX() + (R_string * cos(PI/4.)) );
             stations[0].strings[1].SetY( stations[0].GetY() + (R_string * sin(PI/4.)) );
@@ -430,7 +431,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             stations[0].strings[4].SetX( stations[0].GetX() - (R_string * cos(PI/4.)) );
             stations[0].strings[4].SetY( stations[0].GetY() + (R_string * sin(PI/4.)) );
 
-
+            cout << stations[0].strings[1].GetX() << endl;
 
             stations[0].strings[0].antennas[0].SetZ(-172.635);
             stations[0].strings[0].antennas[1].SetZ(-173.65);

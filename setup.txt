@@ -17,7 +17,8 @@ TRIG_ANALYSIS_MODE=1 // 0 = signal + noise, 1 = signal only, 2 = noise only
 DETECTOR=9 // ARA stations 1 to 7 (used to be 1- kah)
 NOFZ=1
 FILL_TREE_MODE=2
-
+CORE_X = 10000
+CORE_Y = 10000
 TIMESTEP=5.E-10 // value for 2GHz actual station value
 TRIG_WINDOW=1.E-7 // 100ns which is actual testbed trig window
 POWERTHRESHOLD=-6.06 // 100Hz global trig rate for 3 out of 16 ARA statinonsev
@@ -31,7 +32,7 @@ SECONDARIES=0
 RAYSOL_RANGE=3000
 
 RAY_TRACE_ICE_MODEL_PARAMS=44
-RANDOM_MODE = 1
+RANDOM_MODE = 0
 TRIG_SCAN_MODE=5
 
 // below settings are available for only TestBed mode (DETECTOR=3 case)
