@@ -176,7 +176,7 @@ int main(int argc, char **argv) {   // read setup.txt file
     else {
         AraFile=new TFile((outputdir+"/AraOut.root").c_str(),"RECREATE","ara");
     }
-
+    AraFile->SetCompressionSettings(ROOT::CompressionSettings(ROOT::kZLIB, 1) );
     TTree *AraTree=new TTree("AraTree","AraTree");    // for single entry
     TTree *AraTree2=new TTree("AraTree2","AraTree2"); //for many entries
     cout<<"assign AraFile, AraTrees"<<endl;

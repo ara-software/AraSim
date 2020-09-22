@@ -2331,14 +2331,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                 //cout << "2.4" << endl;
                 //cout<<" Efficiency = "<<eff<<endl;
                 if(avgSnr > 0.5){
-                    cout << "debug" << endl;
-                    cout << event->Nu_Interaction[0].posnu.GetX() << " : " << event->Nu_Interaction[0].posnu.GetY() << " : " << event->Nu_Interaction[0].posnu.GetZ() << endl;
-
-                    for (size_t str1 = 0; str1 < detector->stations[i].strings.size(); str1++) {
-                            for (size_t ant1 = 0; ant1 < detector->stations[i].strings[str1].antennas.size(); ant1++) {
-                                cout << stations[i].strings[str1].antennas[ant1].SignalBin.size() <<endl;
-                            }
-                        }
+                    
 
 
 
@@ -2375,10 +2368,10 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                             for (size_t ant = 0; ant < detector->stations[i].strings[str].antennas.size(); ant++) {
                                 double peakvalue = 0;
                                 //cout << "test signal bin is " << stations[i].strings[str].antennas[ant].SignalBin.size() << endl;
-                                if(stations[i].strings[str].antennas[ant].SignalBin.size()>raySolNum){
-                                    //cout << "here ! " << endl;
-                                    signalbinPA =stations[i].strings[str].antennas[ant].SignalBin[raySolNum];
-                                }
+                                //if(stations[i].strings[str].antennas[ant].SignalBin.size()>raySolNum){
+                                //    //cout << "here ! " << endl;
+                                //    signalbinPA =stations[i].strings[str].antennas[ant].SignalBin[raySolNum];
+                                //}
 
                                 //signalbinPA = stations[i].strings[str].antennas[ant].SignalBin[raySolNum];
                                 //cout << ant << ", " << signalbinPA << endl;

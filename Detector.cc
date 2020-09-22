@@ -419,17 +419,17 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             stations[0].strings[0].SetY( stations[0].GetY()  );
             cout << stations[0].GetX() <<endl;
             cout<<"Check 2"<<endl;
-            stations[0].strings[1].SetX( stations[0].GetX() + (R_string * cos(PI/4.)) );
-            stations[0].strings[1].SetY( stations[0].GetY() + (R_string * sin(PI/4.)) );
+            stations[0].strings[1].SetX( stations[0].GetX() + 29.63 );
+            stations[0].strings[1].SetY( stations[0].GetY() -3.30 );
 
-            stations[0].strings[2].SetX( stations[0].GetX() - (R_string * cos(PI/4.)) );
-            stations[0].strings[2].SetY( stations[0].GetY() - (R_string * sin(PI/4.)) );
+            stations[0].strings[2].SetX( stations[0].GetX() +1.55 );
+            stations[0].strings[2].SetY( stations[0].GetY() +15.66 );
 
-            stations[0].strings[3].SetX( stations[0].GetX() + (R_string * cos(PI/4.)) );
-            stations[0].strings[3].SetY( stations[0].GetY() - (R_string * sin(PI/4.)) );
+            stations[0].strings[3].SetX( stations[0].GetX() -12.96 );
+            stations[0].strings[3].SetY( stations[0].GetY() - 8.65);
 
-            stations[0].strings[4].SetX( stations[0].GetX() - (R_string * cos(PI/4.)) );
-            stations[0].strings[4].SetY( stations[0].GetY() + (R_string * sin(PI/4.)) );
+            stations[0].strings[4].SetX( stations[0].GetX() +12.33 );
+            stations[0].strings[4].SetY( stations[0].GetY() -31.89 );
 
             cout << stations[0].strings[1].GetX() << endl;
 
@@ -441,17 +441,17 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             stations[0].strings[0].antennas[5].SetZ(-178.75);
             stations[0].strings[0].antennas[6].SetZ(-180.79);
 
-            stations[0].strings[1].antennas[0].SetZ(-193.49);
-            stations[0].strings[1].antennas[1].SetZ(-163.85);
+            stations[0].strings[1].antennas[0].SetZ(-194.73); //ch0
+            stations[0].strings[1].antennas[1].SetZ(-165.09); //ch1
 
-            stations[0].strings[2].antennas[0].SetZ(-194.95);
-            stations[0].strings[2].antennas[1].SetZ(-165.29);
+            stations[0].strings[2].antennas[0].SetZ(-196.20); //ch8
+            stations[0].strings[2].antennas[1].SetZ(-166.53); //ch9
 
-            stations[0].strings[3].antennas[0].SetZ(-189.61);
-            stations[0].strings[3].antennas[1].SetZ(-159.78);
+            stations[0].strings[3].antennas[0].SetZ(-190.86); //ch24
+            stations[0].strings[3].antennas[1].SetZ(-161.02); //ch25
 
-            stations[0].strings[4].antennas[0].SetZ(-176.50);
-            stations[0].strings[4].antennas[1].SetZ(-145.96);
+            stations[0].strings[4].antennas[0].SetZ(-177.75); //ch16
+            stations[0].strings[4].antennas[1].SetZ(-147.21); //ch17
             cout << "check 2.1" << endl;
 
             //all antennas are VPOL (1 for HPOL)
@@ -530,6 +530,28 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
         //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
         cout<<"done read elect chain"<<endl;
+
+
+
+        if (settings1->ANTENNA_MODE == 0){
+      // test read V-pol gain file!!
+      ReadVgain("ARA_bicone6in_output.txt");
+      // test read H-pol gain file!!
+      ReadHgain("ARA_dipoletest1_output.txt");
+    }
+    else if (settings1->ANTENNA_MODE == 1) {
+      // test read V-pol gain file!!
+      ReadVgainSettings("ARA_bicone6in_output_updated2016.txt", settings1);
+      ReadVgainTopSettings("ARA_VPresult_topTrec.txt", settings1);
+      // test read H-pol gain file!!
+      ReadHgainSettings("ARA_dipoletest1_output_updated2016.txt", settings1);
+    }
+    else if (settings1->ANTENNA_MODE == 2){
+      // test read V-pol gain file!!
+      ReadVgain("Arianna_WIPLD_hpol.dat");
+      // test read H-pol gain file!!
+      ReadHgain("Arianna_WIPLD_hpol.dat");
+    }
         
         
     } // if mode == 9
@@ -6215,6 +6237,7 @@ int Detector::GetChannelfromStringAntenna ( int stationNum, int stringnum, int a
     }
     // if only ideal stations are in use and also installed ARA1a (use ARA1a ch mapping for now)
     else {
+        
       if (stringnum < int(InstalledStations[1].VHChannel.size())){
 	if (antennanum < int(InstalledStations[1].VHChannel[stringnum].size())){
 	  ChannelNum = InstalledStations[1].VHChannel[stringnum][antennanum];

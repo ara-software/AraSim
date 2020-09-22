@@ -752,7 +752,7 @@ void RaySolver::Solve_Ray_org (double source_x, double source_y, double source_z
                         solution_toggle = 1;
 		}
 		else {
-			std::cout << "No solutions" << std::endl;
+			//std::cout << "No solutions" << std::endl;
                         solution_toggle = 0;
                 }
 	}
@@ -1258,7 +1258,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
                         solution_toggle = 1;
 		}
 		else {
-			std::cout << "No solutions" << std::endl;
+			//std::cout << "No solutions" << std::endl;
                         solution_toggle = 0;
                 }
 	}

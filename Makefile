@@ -22,9 +22,9 @@ SRCSUF = ${SrcSuf}
 CXX = g++
 
 #Generic and Site Specific Flags
-CXXFLAGS     += $(SYSINCLUDES) $(INC_ARA_UTIL)
-#LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl
-LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl,--no-as-needed
+CXXFLAGS     += $(SYSINCLUDES) $(INC_ARA_UTIL) --std=c++17
+#LDFLAGS      += -L. -lsqlite3 -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl
+LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl,--no-as-needed -Wl,--rpath-link=$(ARA_UTIL_INSTALL_DIR)/lib -Wl,--rpath-link=$(ROOTSYS)/lib
 #,--no-as-needed
 #LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL)
 ARA_ROOT_FLAGS = 

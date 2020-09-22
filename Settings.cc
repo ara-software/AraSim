@@ -442,7 +442,7 @@ void Settings::ReadFile(string setupfile) {
                   cout << "Read in READGEOM" << endl;
                   READGEOM = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-              else if (label == "PICK_POSNU_DEPTH") {
+              else if (label == "PICK__DEPTH") {
                   PICK_POSNU_DEPTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "MAX_POSNU_DEPTH") {
