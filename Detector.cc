@@ -992,7 +992,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                     stations[i].surfaces[2].SetY( stations[i].GetY() );
 
                     stations[i].surfaces[3].SetX( stations[i].GetX() );
-                    stations[i].surfaces[3].SetY( stations[i].GetY() );                    
+                    stations[i].surfaces[3].SetY( stations[i].GetY() );
                 }
 
 
@@ -1027,7 +1027,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 	if (settings1->ANTENNA_MODE == 0){
 	  // test read V-pol gain file!!
-	  ReadVgain("ARA_bicone6in_output.txt");
+	  ReadVgain("ARA_bicone6in_output_updated2019.txt");
 	  // test read H-pol gain file!!
 	  ReadHgain("ARA_dipoletest1_output.txt");
 	}
@@ -1532,7 +1532,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 	if (settings1->ANTENNA_MODE == 0){
 	  // test read V-pol gain file!!
-	  ReadVgain("ARA_bicone6in_output.txt");
+	  ReadVgain("ARA_bicone6in_output_updated2019.txt");
 	  // test read H-pol gain file!!
 	  ReadHgain("ARA_dipoletest1_output.txt");
 	}
@@ -1835,7 +1835,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 	    if (settings1->ANTENNA_MODE == 0){
 	      // test read V-pol gain file!!
-	      ReadVgain("ARA_bicone6in_output.txt");
+	      ReadVgain("ARA_bicone6in_output_updated2019.txt");
 	      // test read H-pol gain file!!
 	      ReadHgain("ARA_dipoletest1_output.txt");
 	    }
@@ -2152,7 +2152,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 	    if (settings1->ANTENNA_MODE == 0){
 	      // test read V-pol gain file!!
-	      ReadVgain("ARA_bicone6in_output.txt");
+	      ReadVgain("ARA_bicone6in_output_updated2019.txt");
 	      // test read H-pol gain file!!
 	      ReadHgain("ARA_dipoletest1_output.txt");
 	    }

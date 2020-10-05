@@ -362,11 +362,11 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
     int trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);   // coincidence window bin for trigger
 
-
+    gRandom->SetSeed(1);
     RandomTshift = gRandom->Rndm();
 
     init_T = settings1->TIMESTEP*-1.e9*((double)settings1->NFOUR/4 + RandomTshift); // locate zero time at the middle and give random time shift
-
+    // printf("init_T is : %f\n", init_T);
     for (int n=0; n<settings1->NFOUR/2; n++) {
         T_forint[n] = init_T + (double)n*settings1->TIMESTEP*1.e9; // in ns
     }
@@ -475,9 +475,10 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                   // check viewangle that if ray in near Cherenkov cone
                                   //
-                                  if (viewangle*DEGRAD >55. && viewangle*DEGRAD <57.) { // if viewangle is 56 deg +- 1 deg
-                                      //cout<<"near cone! view angle : "<<viewangle*DEGRAD<<"  station["<<i<<"].string["<<j<<"].antenna["<<k<<"] with  ray_sol_cnt : "<<ray_sol_cnt<<endl;
-                                  }
+                                  // if (viewangle*DEGRAD >55. && viewangle*DEGRAD <57.) { // if viewangle is 56 deg +- 1 deg
+                                  //     //cout<<"near cone! view angle : "<<viewangle*DEGRAD<<"  station["<<i<<"].string["<<j<<"].antenna["<<k<<"] with  ray_sol_cnt : "<<ray_sol_cnt<<endl;
+                                  // }
+                                  // cout << "View angle:" << viewangle << endl;
 
                                    // store information to report
                                    stations[i].strings[j].antennas[k].view_ang.push_back(viewangle);
@@ -514,6 +515,11 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                    // calculate the polarization vector at the source
                                    Pol_vector = GetPolarization (event->Nu_Interaction[0].nnu, launch_vector);
+                                   cout << "Initial Pol" << endl;
+                                   cout << Pol_vector[0] << endl;
+                                   cout << Pol_vector[1] << endl;
+                                   cout << Pol_vector[2] << endl;
+
 
 
                                    icemodel->GetFresnel( ray_output[1][ray_sol_cnt],    // launch_angle
@@ -545,6 +551,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                    vmmhz1m_sum = 0;
 
+                                  cout << "1/R " << 1. / ray_output[0][ray_sol_cnt] << endl;
+                                  cout << "IceAttenFactor " << IceAttenFactor << endl;
 
                                    GetAngleAnt(receive_vector, detector->stations[i].strings[j].antennas[k], antenna_theta, antenna_phi);   // get theta, phi for signal ray arrived at antenna
                                    //cout<<"antenna theta : "<<antenna_theta<<"  phi : "<<antenna_phi<<endl;
@@ -786,7 +794,6 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                // later once we understand how to apply antenna phase, total electronics with phase, apply those
                                             double atten_factor = 0.;
                                             //    //double atten_factor = 1. / ray_output[0][ray_sol_cnt] * exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0)) * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
-
                                             if (settings1->USE_ARA_ICEATTENU == 1 || settings1->USE_ARA_ICEATTENU == 0){
                                               atten_factor = 1. / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel; // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
                                             }
@@ -796,19 +803,59 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                              }
 
                                                // signal before the antenna (get signal at 1m and apply atten factor)
+                                               cout << "View angle:" << viewangle << endl;
+                                               cout << "Sol num:" << ray_sol_cnt << endl;
+
                                                signal->GetVm_FarField_Tarray( event, settings1, viewangle, atten_factor, outbin, Tarray, Earray, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt] );
+                                               double efield_arr_dir[64] = {1.778282e-03, 2.251509e-03, 2.890647e-03, 3.822464e-03, 5.280515e-03, 7.727338e-03, 1.225222e-02, 2.195051e-02, 5.363842e-02, 2.220096e-01, 8.686261e-01, 2.246786e+00, 4.105966e+00, 5.766487e+00, 6.524258e+00, 6.026337e+00, 4.466765e+00, 2.303949e+00, 5.423169e-02, -1.855117e+00, -3.193000e+00, -3.926013e+00, -4.129357e+00, -3.941240e+00, -3.505823e+00, -2.958531e+00, -2.391973e+00, -1.867069e+00, -1.413802e+00, -1.044558e+00, -7.556063e-01, -5.365476e-01, -3.748902e-01, -2.590869e-01, -1.777494e-01, -1.209411e-01, -8.186286e-02, -5.511540e-02, -3.707910e-02, -2.488890e-02, -1.662466e-02, -1.106083e-02, -7.319949e-03, -4.831875e-03, -3.171559e-03, -2.066543e-03, -1.335054e-03, -8.571636e-04, -5.474717e-04, -3.469850e-04, -2.180266e-04, -1.357108e-04, -8.409776e-05, -5.182215e-05, -3.164017e-05, -1.917805e-05, -1.152230e-05, -6.915463e-06, -4.123397e-06, -2.438012e-06, -1.432449e-06, -8.368144e-07, -4.881686e-07, -2.831356e-07};
+                                               double efield_arr_ref[64] = {1.327542e-05, 4.951988e-05, 1.304865e-04, 2.770470e-04, 5.180733e-04, 9.163895e-04, 1.665339e-03, 3.785793e-03, 2.231803e-02, 1.382458e-01, 4.727586e-01, 1.031247e+00, 1.634284e+00, 2.031560e+00, 2.054590e+00, 1.690805e+00, 1.057035e+00, 3.264766e-01, -3.454525e-01, -8.594968e-01, -1.177124e+00, -1.309939e+00, -1.296593e+00, -1.185486e+00, -1.021326e+00, -8.396454e-01, -6.639649e-01, -5.082940e-01, -3.783294e-01, -2.746572e-01, -1.952066e-01, -1.360286e-01, -9.317802e-02, -6.281979e-02, -4.172536e-02, -2.735807e-02, -1.771101e-02, -1.134068e-02, -7.185204e-03, -4.505538e-03, -2.800567e-03, -1.724918e-03, -1.054310e-03, -6.398953e-04, -3.854411e-04, -2.307074e-04, -1.371352e-04, -8.105817e-05, -4.763443e-05, -2.782347e-05, -1.617479e-05, -9.350614e-06, -5.382544e-06, -3.084149e-06, -1.758391e-06, -9.988642e-07, -5.652710e-07, -3.188697e-07, -1.792081e-07, -1.003015e-07, -5.597609e-08, -3.111766e-08, -1.725312e-08, -9.536441e-09};
+                                               if(ray_sol_cnt==0){
+                                                 for(int jj=0;jj<outbin;jj++){
+                                                   Earray[jj] = efield_arr_dir[jj]*atten_factor;
+                                                 }
+                                               }
+                                               else{
+                                                 for(int jj=0;jj<outbin;jj++){
+                                                   Earray[jj] = efield_arr_ref[jj]*atten_factor;
+                                                 }
+                                               }
                                                // signal->GetVm_FarField_Tarray( event, settings1, viewangle, 1, outbin, Tarray, Earray, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt] );
                                                // cout << "IceAttenFactor is: "<< IceAttenFactor << endl;
                                                // signal->GetVm_FarField_Tarray( event, settings1, viewangle, 1, outbin, Tarray, Earray, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt] );
+                                               const char *sol_Name[2] = {"dir", "ref"};
+                                               char filenameVertex[50];
+                                               sprintf(filenameVertex, "./debug/waveformAt1m_unpropagated_%s.csv", sol_Name[ray_sol_cnt]);
+                                               FILE *fout_wf = fopen(filenameVertex, "w+");//open file
+                                               fprintf(fout_wf, "time,voltage\n");
+                                               double Earray_copy[outbin];
+                                               double Tarray_copy[outbin];
+                                               // printf("Outbin is %i", outbin);
+                                               std::copy(std::begin(Earray), std::end(Earray), std::begin(Earray_copy));
+                                               std::copy(std::begin(Tarray), std::end(Tarray), std::begin(Tarray_copy));
+                                               signal->GetVm_FarField_Tarray( event, settings1, viewangle, 1, outbin, Tarray_copy, Earray_copy, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt] );
+                                               for(int jj=0;jj<outbin;jj++){
+                                                 fprintf(fout_wf,"%0.3f,%0.3e \n",Tarray_copy[jj],Earray_copy[jj]);
+                                               }
+                                               fclose (fout_wf);
+
+                                               char filenamepropag[100];
+                                               sprintf(filenamepropag, "./debug/waveform_propagated_%s.csv", sol_Name[ray_sol_cnt]);
+                                               FILE *fout_wf_1 = fopen(filenamepropag, "w+");//open file
+                                               fprintf(fout_wf_1, "time,voltage\n");
+                                               for(int jj=0;jj<outbin;jj++){
+                                                 fprintf(fout_wf_1,"%0.3f,%0.3e \n",Tarray[jj],Earray[jj]);
+                                               }
+                                               fclose (fout_wf_1);
+
 
                                                dT_forfft = Tarray[1] - Tarray[0]; // step in ns
-
+                                              // dT_forfft = 0.557366;
                                                int Ntmp = settings1->TIMESTEP*1.e9 / dT_forfft;
                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
-                                               for(int jj=0; jj<64;jj++){
-                                                 printf("%0.3f,%0.3e\n",Tarray[jj],Earray[jj]);
-                                               }
-                                               cout << "Done" << endl;
+                                               // for(int jj=0; jj<64;jj++){
+                                               //   printf("%0.3f,%0.3e\n",Tarray[jj],Earray[jj]);
+                                               // }
+
                                                while ( Ntmp>1 ) {
                                                    Ntmp = Ntmp / 2;
                                                    stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]*2;
@@ -891,7 +938,6 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                freq_lastbin = freq_tmp;
 
 
-
                                                /*
                                                // Get ant gain with 2-D interpolation (may have bug?)
                                                //
@@ -955,12 +1001,14 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                     */
                                                    if ( settings1->ALL_ANT_V_ON==0 ) {
 						     if (settings1->ANTENNA_MODE == 0){
+
                                                        heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 													antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
 									   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
 						     }
 
 						     if (settings1->ANTENNA_MODE == 1){
+
                                                        heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
 													antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k),
 									   freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
@@ -978,6 +1026,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                        heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
                                                                    antenna_theta, antenna_phi, 0),
                                                                    freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]) );
+                                                                   // printf("freq: %f, gain: %f \n", freq_tmp*1.E-6, detector->GetElectGain_1D_OutZero( freq_tmp*1.e-6 ));
 						     }
 						     if (settings1->ANTENNA_MODE == 1){
                                                        heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp*1.E-6, // to MHz
@@ -1033,9 +1082,9 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                    }
 
 
-                                                   //
+
                                                    // apply entire elect chain gain, phase
-                                                   //
+
                                                    if ( n > 0 ) {
                                                        ApplyElect_Tdomain( freq_tmp*1.e-6, detector, V_forfft[2*n], V_forfft[2*n+1], settings1 );
                                                    }
@@ -1047,23 +1096,44 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                                }// end for freq bin
 
+                                               printf("dT_forfft: %f\n", dT_forfft);
 
                                                // now get time domain waveform back by inv fft
                                                Tools::realft(V_forfft,-1,stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);
-
-
+                                              // for(int jj=0; jj<settings1->NFOUR/2;jj++) cout << T_forfft[jj] << ',' << V_forfft[jj]* 2./(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]) << endl;
+                                              // cout << "DONE" << endl;
                                                // we need to do normal time ordering as we did zero padding(?)
                                                // If signal is located at the center, we don't need to do NormalTimeOrdering???
                                                //Tools::NormalTimeOrdering(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], V_forfft);
 
 
                                                // skip linear interpolation for now
-                                               Tools::SimpleLinearInterpolation_OutZero( stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR/2, T_forint, volts_forint );
 
+                                               char filenameAntenna[100];
+                                               sprintf(filenameAntenna, "./debug/waveform_antenna_%s.csv", sol_Name[ray_sol_cnt]);
+                                               FILE *fout_wf_2 = fopen(filenameAntenna, "w+");//open file
+                                               fprintf(fout_wf_2, "time,voltage\n");
+                                               for(int jj=0;jj<settings1->NFOUR/2;jj++){
+                                                 // cout << T_forfft[jj] << endl;
+                                                 // printf("%0.3f,%0.3e \n",T_forfft[jj],V_forfft[jj]);
+                                                 fprintf(fout_wf_2,"%0.3f,%0.3e \n",T_forfft[jj],V_forfft[jj]* 2./(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]) );
+                                               }
+                                               fclose(fout_wf_2);
+
+                                               Tools::SimpleLinearInterpolation_OutZero( stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR/2, T_forint, volts_forint );
+                                               // printf("%i, %i \n",stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], settings1->NFOUR/2);
                                                // check what we save as V[], volts_forint? or volts_forfft
 
-
-
+                                               char filenameAntenna2[100];
+                                               sprintf(filenameAntenna2, "./debug/waveform_antenna_%s_forint.csv", sol_Name[ray_sol_cnt]);
+                                               FILE *fout_wf_3 = fopen(filenameAntenna2, "w+");//open file
+                                               fprintf(fout_wf_3, "time,voltage\n");
+                                               for(int jj=0;jj<settings1->NFOUR/2;jj++){
+                                                 // cout << T_forfft[jj] << endl;
+                                                 // printf("%0.3f,%0.3e \n",T_forfft[jj],V_forfft[jj]);
+                                                 fprintf(fout_wf_3,"%0.3f,%0.3e \n",T_forint[jj],volts_forint[jj]* 2./(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]) );
+                                               }
+                                               fclose(fout_wf_3);
 
 
                                                // cout << "\033[1;31mI'm here\033[0m\n";
@@ -1193,7 +1263,6 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					 freq_tmp = dF_Nnew*((double)stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]/2.+0.5);// in Hz 0.5 to place the middle of the bin and avoid zero freq
 
 					 freq_lastbin = freq_tmp;
-
 
 
 					 /*
@@ -2877,14 +2946,14 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                     // }
 
                     double max_val=0.0;
-                    for(int sample=0; sample<32768; sample++){
+                    for(int sample=0; sample<settings1->NFOUR*4; sample++){
                         double sample_value = trigger->Full_window_V[ch_loop][sample];
                         if(abs(sample_value)>abs(max_val)){
                             max_val = sample_value;
                         }
                     }
                     // if(abs(max_val)>1e-30){
-                    //     cout<<"Max val is "<<max_val<<endl;
+                        // cout<<"Max val is "<<max_val<<endl;
                     // }
                     // max_val*=sqrt(2); // AraSim divides by sqrt(2) for SURF/TURF split, which probably won't happen in case of phasing
                     // if(abs(max_val)>1.5*0.007893285468164238){
@@ -4178,7 +4247,6 @@ void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_sla
         pol_factor = n_trg_slappy * Pol_vector;
     }
     pol_factor = abs(pol_factor);
-
     // apply 3dB spliter, d nu to prepare FFT
     // now actually vmmhz is not V/m/MHz but V/m/Hz unit
     //vmmhz = vmmhz/sqrt(2.)/(settings1->TIMESTEP*1.E6); //sqrt(2) for 3dB spliter for TURF, SURF
@@ -4209,6 +4277,7 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
     }
     pol_factor = abs(pol_factor);
 
+    // cout << "Pol_factor is " << pol_factor << endl;
 
 
     if ( settings1->PHASE_SKIP_MODE != 1 ) {
@@ -4231,6 +4300,7 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
             else if (vm_img<0.) phase_current = -PI;
             else phase_current = 0.;
         }
+        // cout << "phase_current is: " << phase_current << endl;
 
         // V amplitude
         double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
@@ -4249,7 +4319,6 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
 
         vm_img = vm_img / sqrt(2.) * 0.5 * heff * pol_factor; // only amplitude
     }
-
 
 }
 
