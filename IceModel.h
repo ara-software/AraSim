@@ -183,6 +183,8 @@ void GetFresnel (
   int ARA_IceAtten_bin;
 
   double GetARAIceAttenuLength(double depth);
+  double GetFreqDepIceAttenuLength(double depth, double freq);
+  double temperature(double z);
 
   //  void FillArraysforTree(double lon_ground[1068][869],double lat_ground[1068][869],double lon_ice[1200][1000],double lat_ice[1200][1000],double lon_water[1200][1000],double lat_water[1200][1000]);
 

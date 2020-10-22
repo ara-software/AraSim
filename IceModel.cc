@@ -265,6 +265,62 @@ double IceModel::GetARAIceAttenuLength(double depth) {
 }
 
 
+//! Get the ice temperature as a function of depth
+/*!
+    Function returns the ice temperaturea as a function of depth (a positive number)
+    This equation is a result of the fit from the Berkeley group
+    which used IceCube data to probe the temperature as a function of depth
+    And is described here: https://icecube.wisc.edu/~araproject/radio/#figure1a
+    and https://icecube.wisc.edu/~araproject/radio/temp/
+
+    \param z depth as a positive number in meters
+    \return ice temperature in Celsius
+*/
+double IceModel::temperature(double z){
+  if( depth < 0.){
+    cerr<<"depth negative! "<<depth<<endl;
+  }
+  double temp = (-51.0696) + (0.00267687 * z) + (-1.59061E-08 * pow(z,2.)) + (1.83415E-09 * pow(z,3.));
+  return temp;
+}
+
+//! Get the ice attenuation length at a depth and frequency
+/*!
+    Function returns the ice attenuation length at a given depth (in m)
+    and frequency (in GHz). This uses a fit from Besson et al.
+    described here: https://icecube.wisc.edu/~araproject/radio/atten/
+
+    \param depth depth as a positive number in meters
+    \param freq frequency as a number in GHz
+    \return ice temperature in Celsius
+*/
+double IceModel::GetFreqDepIceAttenuLength(double depth, double freq) {
+  double AttenL = 0.0;
+  if ( depth < 0. ) {
+    cerr<<"depth negative! "<<depth<<endl;
+  }
+  else {
+    double t = temperature(depth);
+    const double f0=0.0001, f2=3.16;
+    const double w0=log(f0), w1=0.0, w2=log(f2), w=log(freq);
+    const double b0=-6.74890+t*(0.026709-t*0.000884);
+    const double b1=-6.22121-t*(0.070927+t*0.001773);
+    const double b2=-4.09468-t*(0.002213+t*0.000332);
+    double a,bb;
+    if(freq<1.){
+      a=(b1*w0-b0*w1)/(w0-w1);
+      bb=(b1-b0)/(w1-w0);
+    }
+    else{
+      a=(b2*w1-b1*w2)/(w1-w2);
+      bb=(b2-b1)/(w2-w1);
+    }
+    AttenL = 1./exp(a+bb*w);
+  }
+  return AttenL;
+}
+
+
 
 
 int IceModel::Getice_model() {
