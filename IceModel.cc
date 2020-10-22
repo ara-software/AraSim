@@ -277,8 +277,8 @@ double IceModel::GetARAIceAttenuLength(double depth) {
     \return ice temperature in Celsius
 */
 double IceModel::temperature(double z){
-  if( depth < 0.){
-    cerr<<"depth negative! "<<depth<<endl;
+  if( z < 0.){
+    cerr<<"depth negative! "<<z<<endl;
   }
   double temp = (-51.0696) + (0.00267687 * z) + (-1.59061E-08 * pow(z,2.)) + (1.83415E-09 * pow(z,3.));
   return temp;

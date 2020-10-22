@@ -600,7 +600,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                           // multiply all factors for traveling ice
                                           //vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0)) * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
-                                          if (settings1->USE_ARA_ICEATTENU==1 || settings->USE_ARA_ICEATTENU==0){
+                                          if (settings1->USE_ARA_ICEATTENU==1 || settings1->USE_ARA_ICEATTENU==0){
                                             vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
                                           }
                                           else if (settings1->USE_ARA_ICEATTENU==2){
