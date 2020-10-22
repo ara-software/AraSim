@@ -443,7 +443,9 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                            dl = sqrt( (dx*dx) + (dz*dz) );
 
                                            // use new ice model
-                                           IceAttenFactor *= exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps]) );
+                                           // IceAttenFactor *= exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps]) );
+                                           // use the midpoint of the array to calculate the attenuation length, instead of the end of the ray (BAC 2020)
+                                           IceAttenFactor *= (exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps]) )+exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1])))/2;
                                        }
                                        //cout<<"new iceattenfactor : "<<IceAttenFactor<<", old way : "<<exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0))<<endl;
                                    }
@@ -608,7 +610,11 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                               dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
                                               dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
                                               dl = sqrt((dx * dx) + (dz * dz));
-                                              IceAttenFactor *= exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], detector->GetFreq(l) / 1e9));
+                                              // IceAttenFactor *=  exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], detector->GetFreq(l) / 1e9));
+                                              // use ray midpoint for attenuation calculation
+                                              IceAttenFactor *=  (   exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], detector->GetFreq(l) / 1e9)) 
+                                                                   + exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1], detector->GetFreq(l) / 1e9))
+                                                                 )/2.; // 1e9 to convert to GHz
                                             }
                                             vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel; // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
                                           }
@@ -963,7 +969,12 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                        dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
                                                        dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
                                                        dl = sqrt((dx * dx) + (dz * dz));
-                                                       IceAttenFactor *= exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9));// to GHz
+                                                       // IceAttenFactor *= exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9));// to GHz
+                                                       // use ray midpoint for attenuation calculation
+                                                       IceAttenFactor *= (    exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9))
+                                                                            + exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1], freq_tmp * 1.E-9))
+                                                                         )/2.; // 1e9 for conversion to GHz
+
                                                      }
                                                      //cout << "apply IceAttenFactor to the real part of fft. V_forfft[2 * n] = " << V_forfft[2 * n] << " * " << IceAttenFactor << endl;
                                                      V_forfft[2 * n] *= IceAttenFactor;// apply IceAttenFactor to the real part of fft
