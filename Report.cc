@@ -598,7 +598,20 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                           // multiply all factors for traveling ice
                                           //vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0)) * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
-                                          vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                                          if (settings1->USE_ARA_ICEATTENU==1 || settings->USE_ARA_ICEATTENU==0){
+                                            vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                                          }
+                                          else if (settings1->USE_ARA_ICEATTENU==2){
+                                            double IceAttenFactor = 1.;
+                                            double dx, dz, dl;
+                                            for (int steps = 1; steps < (int) RayStep[ray_sol_cnt][0].size(); steps++) {
+                                              dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
+                                              dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
+                                              dl = sqrt((dx * dx) + (dz * dz));
+                                              IceAttenFactor *= exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], detector->GetFreq(l) / 1e9));
+                                            }
+                                            vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel; // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                                          }
                                           //cout<<"AttenLength : "<<icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0)<<endl;
 
 
@@ -763,9 +776,15 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                // let's make NFOUR/2 bin of time domain pure signal part for now
                                                // later once we understand how to apply antenna phase, total electronics with phase, apply those
 
+                                               double atten_factor=0.;
                                                //double atten_factor = 1. / ray_output[0][ray_sol_cnt] * exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0)) * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
-                                               double atten_factor = 1. / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
-
+                                               // double atten_factor = 1. / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                                               if (settings1->USE_ARA_ICEATTENU==1 || settings1->USE_ARA_ICEATTENU==0){
+                                                 atten_factor = 1. / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel; // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                                               }
+                                               else if (settings1->USE_ARA_ICEATTENU == 2){
+                                                atten_factor = 1. / ray_output[0][ray_sol_cnt] * mag * fresnel; //apply freq dependent IceAttenFactor later
+                                               }
 
                                                // signal before the antenna (get signal at 1m and apply atten factor)
                                                signal->GetVm_FarField_Tarray( event, settings1, viewangle, atten_factor, outbin, Tarray, Earray, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt] );
@@ -935,6 +954,21 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 
                                                    stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back( heff );
+
+                                                   //apply freq dependent attenuation model
+                                                   if (settings1->USE_ARA_ICEATTENU == 2){
+                                                     double IceAttenFactor = 1.;
+                                                     double dx, dz, dl;
+                                                     for (int steps = 1; steps < (int) RayStep[ray_sol_cnt][0].size(); steps++) {
+                                                       dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
+                                                       dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
+                                                       dl = sqrt((dx * dx) + (dz * dz));
+                                                       IceAttenFactor *= exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9));// to GHz
+                                                     }
+                                                     //cout << "apply IceAttenFactor to the real part of fft. V_forfft[2 * n] = " << V_forfft[2 * n] << " * " << IceAttenFactor << endl;
+                                                     V_forfft[2 * n] *= IceAttenFactor;// apply IceAttenFactor to the real part of fft
+                                                     V_forfft[2 * n + 1] *= IceAttenFactor;// apply IceAttenFactor to the imag part of fft
+                                                   }
 
 
 
