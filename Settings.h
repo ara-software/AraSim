@@ -43,7 +43,7 @@ class Settings
         int CONSTANTICETHICKNESS; // set ice thickness to constant value
         int FIXEDELEVATION; // fix the elevation to the thickness of ice.
         int MOOREBAY; //1=use Moore's Bay measured ice field attenuation length for the west land, otherwise use South Pole data
-        int USE_ARA_ICEATTENU; // 0 : use old ice attenuation factor with one depth info, 1 : (default) use ARA measured ice attenuation factor with depth from ray steps
+        int USE_ARA_ICEATTENU; // 0 : use old ice attenuation factor with one depth info, 1 : (default) use ARA measured ice attenuation factor with depth from ray steps, 2: use frequency dependent model with depth from ray steps
 
 	int Z_THIS_TOLERANCE; // 0 : (default) use default 'requiredAccuracy' parameter for ray tracing, 1 : change 'requiredAccuracy' parameter by Z_TOLERANCE
 	

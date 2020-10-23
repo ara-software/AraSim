@@ -1526,3 +1526,12 @@ Related documents in DocBD
 Part1:http://ara.physics.wisc.edu/docs/0021/002152/001/20200622_Arrival_Time_Delay_in_AraSim.pdf
 Part2:http://ara.physics.wisc.edu/docs/0021/002158/001/20200706_Arrival_Time_Delay_in_AraSim_part2.pdf
 Part3:http://ara.physics.wisc.edu/docs/0021/002161/001/20200713_Arrival_Time_Delay_in_AraSim_part3.pdf
+
+2020/10/22 Brian Clark
+Add an additional ice attenuation mode (settings1->USE_ARA_ICEATTENU == 2) which 
+will use the frequency dependent icemodel from Besson et al described here: https://icecube.wisc.edu/~araproject/radio/atten/.
+This required changes to Report and IceModel. In particulart two new functions IceModel:
+1. GetFreqDepIceAttenuLength
+2. temperature
+Also, change the attenuation calculation so that it computes the attenuation using the midpoint of the ray
+instead of the end of the ray, which gives a more accurate calculation for the attenuation length.
