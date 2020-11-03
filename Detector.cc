@@ -1000,7 +1000,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	  // test read V-pol gain file!!
 	  ReadVgainSettings("ARA_bicone6in_output.txt", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgain("ARA_dipoletest1_output.txt");
+	  ReadHgainSettings("ARA_dipoletest1_output.txt", settings1);
 	}
 	else if (settings1->ANTENNA_MODE == 1) {
 	  // test read V-pol gain file!!
@@ -1013,7 +1013,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	  // test read V-pol gain file!!
 	  ReadVgainSettings("Arianna_WIPLD_hpol.dat", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgain("Arianna_WIPLD_hpol.dat");
+	  ReadHgainSettings("Arianna_WIPLD_hpol.dat", settings1);
 	}
 	
 	//	if (settings1->NOISE == 2){
@@ -1487,7 +1487,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	  // test read V-pol gain file!!
 	  ReadVgainSettings("ARA_bicone6in_output.txt", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgain("ARA_dipoletest1_output.txt");
+	  ReadHgainSettings("ARA_dipoletest1_output.txt", settings1);
 	}
 	else if (settings1->ANTENNA_MODE == 1) {
 	  // test read V-pol gain file!!
@@ -1500,7 +1500,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	  // test read V-pol gain file!!
 	  ReadVgainSettings("Arianna_WIPLD_hpol.dat", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgain("Arianna_WIPLD_hpol.dat");
+	  ReadHgainSettings("Arianna_WIPLD_hpol.dat", settings1);
 	}
 
 	//	if (settings1->NOISE==2){
@@ -1774,7 +1774,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      // test read V-pol gain file!!
 	      ReadVgainSettings("ARA_bicone6in_output.txt", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgain("ARA_dipoletest1_output.txt");
+	      ReadHgainSettings("ARA_dipoletest1_output.txt", settings1);
 	    }
 	    else if (settings1->ANTENNA_MODE == 1) {
 	      // test read V-pol gain file!!
@@ -1787,7 +1787,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      // test read V-pol gain file!!
 	      ReadVgainSettings("Arianna_WIPLD_hpol.dat", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgain("Arianna_WIPLD_hpol.dat");
+	      ReadHgainSettings("Arianna_WIPLD_hpol.dat", settings1);
 	    }
 	    
 
@@ -2077,7 +2077,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      // test read V-pol gain file!!
 	      ReadVgainSettings("ARA_bicone6in_output.txt", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgain("ARA_dipoletest1_output.txt");
+	      ReadHgainSettings("ARA_dipoletest1_output.txt", settings1);
 	    }
 	    else if (settings1->ANTENNA_MODE == 1) {
 	      // test read V-pol gain file!!
@@ -2090,7 +2090,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      // test read V-pol gain file!!
 	      ReadVgainSettings("Arianna_WIPLD_hpol.dat", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgain("Arianna_WIPLD_hpol.dat");
+	      ReadHgainSettings("Arianna_WIPLD_hpol.dat", settings1);
 	    }
 
 	    //	    if (settings1->NOISE == 2){
@@ -2268,7 +2268,6 @@ inline void Detector::ReadVgainSettings(string filename, Settings *settings1) {
                         getline (NecOut, line); //read data line
                         Vgain[i][j] = atof( line.substr( 20, 33 ).c_str() );
                         Vphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
-                        if(i==0) printf("Vgain for i %d in ReadVgainSettings is %.2f \n",j,Vgain[i][j]);
                     }// end ang_step
                 }// end check freq label
             }// end freq_step
@@ -2300,36 +2299,24 @@ inline void Detector::ReadVgainSettings(string filename, Settings *settings1) {
 inline void Detector::ReadVgainTopSettings(string filename, Settings *settings1) {
     ifstream NecOut( filename.c_str() );
     const int N = freq_step;
-
     double Transm[N]; 
     string line;
     if ( NecOut.is_open() ) {
         while (NecOut.good() ) {
-
             for (int i=0; i<freq_step; i++) {
                 getline (NecOut, line);
                 if ( line.substr(0, line.find_first_of(":")) == "freq ") {
                     Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-                    //                    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
                     getline (NecOut, line); //read SWR
-		              Transm[i] = atof( line.substr(5, 11).c_str() ); //What say "SWR" in "ARA_VPresult_topTrec.txt" is actually transmission coefficient - MYL 01/23/20
-		              //cerr << "Vpol Transm: " << Transm[i] << endl;
-
+                    Transm[i] = atof( line.substr(5, 11).c_str() ); //What say "SWR" in "ARA_VPresult_topTrec.txt" is actually transmission coefficient - MYL 01/23/20
                     getline (NecOut, line); //read names
-
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
                         VgainTop[i][j] = /*Transm[i]**/atof( line.substr( 20, 33 ).c_str() ) ; //Transm[i] commented for in the antenna gain files "realized gain" is provided and so the transmission coefficient does not need to be multiplied one more time - MLY 01/23/20
                         VphaseTop[i][j] = atof( line.substr( 34 ).c_str() );    // + 180.0/TMath::Pi()*TMath::ATan(-Freq[i]/500.0);  // read gain (not dB)
-                                                
-                        //cout<<"VGain : "<<Vgain[i][j]<<", VPhase : "<<Vphase[i][j]<<endl;
-                        
                     }// end ang_step
-                    
                 }// end check freq label
-                
             }// end freq_step
-            
         }// end while NecOut.good
         NecOut.close();
     }// end if file open
@@ -2359,82 +2346,30 @@ inline void Detector::ReadVgainTopSettings(string filename, Settings *settings1)
 
 }// end ReadVgainTop
 
-
-inline void Detector::ReadHgain(string filename) {
-  ifstream NecOut( filename.c_str() );
-    
-    string line;
-    
-    if ( NecOut.is_open() ) {
-      //  cout << "OK"  <<endl;
-        while (NecOut.good() ) {
-            
-            for (int i=0; i<freq_step; i++) {
-                getline (NecOut, line);
-                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
-                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-		    //	    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
-		    getline (NecOut, line); //read SWR
-                    getline (NecOut, line); //read names
-                    
-                    for (int j=0; j<ang_step; j++) {
-                        getline (NecOut, line); //read data line
-                        //Hgain[i][j] = atof( line.substr( 20 ).c_str() );  // read gain (not dB)
-                        //Hgain[i][j] = atof( line.substr( 18, 25 ).c_str() );  // read gain (not dB)
-			Hgain[i][j] = atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
-			Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
-
-			//      cout<<"HGain : "<<Hgain[i][j]<<", HPhase : "<<Hphase[i][j]<<endl;
-                        
-                    }// end ang_step
-                    
-                }// end check freq label
-                
-            }// end freq_step
-            
-        }// end while NecOut.good
-        NecOut.close();
-    }// end if file open
-    
-}// end ReadHgain
-
 inline void Detector::ReadHgainSettings(string filename, Settings *settings1) {
-
     ifstream NecOut( filename.c_str() );    
     string line;
-    
     const int N = freq_step;
-    //string line;
     double Transm[N]; 
     if ( NecOut.is_open() ) {
         while (NecOut.good() ) {
-            
             for (int i=0; i<freq_step; i++) {
                 getline (NecOut, line);
                 if ( line.substr(0, line.find_first_of(":")) == "freq ") {
                     Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-                    //                    cout<<"freq["<<i<<"] = "<<Freq[i]<<" MHz"<<endl;
                     getline (NecOut, line); //read SWR
-            	     Transm[i] = atof( line.substr(5, 11).c_str() ); //What says "SWR" in "ARA_dipoletest1_output_updated2016.txt" is actually transmission coefficient - MYL 01/23/20 
+                    Transm[i] = atof( line.substr(5, 11).c_str() ); //What says "SWR" in "ARA_dipoletest1_output_updated2016.txt" is actually transmission coefficient - MYL 01/23/20 
                     getline (NecOut, line); //read names
-                    
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
-                        //Hgain[i][j] = atof( line.substr( 20 ).c_str() );  // read gain (not dB)
-                        //Hgain[i][j] = atof( line.substr( 18, 25 ).c_str() );  // read gain (not dB)
-                        Hgain[i][j] = /*Transm[i]**/atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB) //Transm[i] commented for in the antenna gain files "realized gain" is provided and so the transmission coefficient does not need to be multiplied one more time - MLY 01/23/20                      
+                        Hgain[i][j] = atof( line.substr( 20, 33 ).c_str() );
                         Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
-
-                        //cout<<"HGain : "<<Hgain[i][j]<<", HPhase : "<<Hphase[i][j]<<endl;
-                        
+                        if(i==0) printf("Hgain for j %d in ReadHgainSettings is %.2f \n",j,Hgain[i][j]);
                     }// end ang_step
-                    
                 }// end check freq label
-                
             }// end freq_step
-            
         }// end while NecOut.good
-         NecOut.close();
+        NecOut.close();
     }// end if file open
     double xfreq[N];
     double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
@@ -2451,13 +2386,10 @@ inline void Detector::ReadHgainSettings(string filename, Settings *settings1) {
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
-    
-
-        Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
+    Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
         transH_databin.push_back(trans_databin[i]); // from Hz to MHz
     }
- 
 }// end ReadHgain
 
 
