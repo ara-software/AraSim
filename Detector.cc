@@ -998,22 +998,22 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 	if (settings1->ANTENNA_MODE == 0){
 	  // test read V-pol gain file!!
-	  ReadVgainSettings("ARA_bicone6in_output.txt", settings1);
+	  ReadVgain("ARA_bicone6in_output.txt", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgainSettings("ARA_dipoletest1_output.txt", settings1);
+	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
 	}
 	else if (settings1->ANTENNA_MODE == 1) {
 	  // test read V-pol gain file!!
-	  ReadVgainSettings("ARA_bicone6in_output_updated2016.txt", settings1);
-	  ReadVgainTopSettings("ARA_VPresult_topTrec.txt", settings1);
+	  ReadVgain("ARA_bicone6in_output_updated2016.txt", settings1);
+	  ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgainSettings("ARA_dipoletest1_output_updated2016.txt", settings1);
+	  ReadHgain("ARA_dipoletest1_output_updated2016.txt", settings1);
 	}
 	else if (settings1->ANTENNA_MODE == 2){
 	  // test read V-pol gain file!!
-	  ReadVgainSettings("Arianna_WIPLD_hpol.dat", settings1);
+	  ReadVgain("Arianna_WIPLD_hpol.dat", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgainSettings("Arianna_WIPLD_hpol.dat", settings1);
+	  ReadHgain("Arianna_WIPLD_hpol.dat", settings1);
 	}
 	
 	//	if (settings1->NOISE == 2){
@@ -1485,22 +1485,22 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 	if (settings1->ANTENNA_MODE == 0){
 	  // test read V-pol gain file!!
-	  ReadVgainSettings("ARA_bicone6in_output.txt", settings1);
+	  ReadVgain("ARA_bicone6in_output.txt", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgainSettings("ARA_dipoletest1_output.txt", settings1);
+	  ReadHgain("ARA_dipoletest1_output.txt", settings1);
 	}
 	else if (settings1->ANTENNA_MODE == 1) {
 	  // test read V-pol gain file!!
-	  ReadVgainSettings("ARA_bicone6in_output_updated2016.txt", settings1);
-	  ReadVgainTopSettings("ARA_VPresult_topTrec.txt", settings1);
+	  ReadVgain("ARA_bicone6in_output_updated2016.txt", settings1);
+	  ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgainSettings("ARA_dipoletest1_output_updated2016.txt", settings1);
+	  ReadHgain("ARA_dipoletest1_output_updated2016.txt", settings1);
 	}
 	else if (settings1->ANTENNA_MODE == 2){
 	  // test read V-pol gain file!!
-	  ReadVgainSettings("Arianna_WIPLD_hpol.dat", settings1);
+	  ReadVgain("Arianna_WIPLD_hpol.dat", settings1);
 	  // test read H-pol gain file!!
-	  ReadHgainSettings("Arianna_WIPLD_hpol.dat", settings1);
+	  ReadHgain("Arianna_WIPLD_hpol.dat", settings1);
 	}
 
 	//	if (settings1->NOISE==2){
@@ -1772,22 +1772,22 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 	    if (settings1->ANTENNA_MODE == 0){
 	      // test read V-pol gain file!!
-	      ReadVgainSettings("ARA_bicone6in_output.txt", settings1);
+	      ReadVgain("ARA_bicone6in_output.txt", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgainSettings("ARA_dipoletest1_output.txt", settings1);
+	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
 	    }
 	    else if (settings1->ANTENNA_MODE == 1) {
 	      // test read V-pol gain file!!
-	      ReadVgainSettings("ARA_bicone6in_output_updated2016.txt", settings1);
-	      ReadVgainTopSettings("ARA_VPresult_topTrec.txt", settings1);
+	      ReadVgain("ARA_bicone6in_output_updated2016.txt", settings1);
+	      ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgainSettings("ARA_dipoletest1_output_updated2016.txt", settings1);
+	      ReadHgain("ARA_dipoletest1_output_updated2016.txt", settings1);
 	    }
 	    else if (settings1->ANTENNA_MODE == 2) {
 	      // test read V-pol gain file!!
-	      ReadVgainSettings("Arianna_WIPLD_hpol.dat", settings1);
+	      ReadVgain("Arianna_WIPLD_hpol.dat", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgainSettings("Arianna_WIPLD_hpol.dat", settings1);
+	      ReadHgain("Arianna_WIPLD_hpol.dat", settings1);
 	    }
 	    
 
@@ -2075,22 +2075,22 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 	    if (settings1->ANTENNA_MODE == 0){
 	      // test read V-pol gain file!!
-	      ReadVgainSettings("ARA_bicone6in_output.txt", settings1);
+	      ReadVgain("ARA_bicone6in_output.txt", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgainSettings("ARA_dipoletest1_output.txt", settings1);
+	      ReadHgain("ARA_dipoletest1_output.txt", settings1);
 	    }
 	    else if (settings1->ANTENNA_MODE == 1) {
 	      // test read V-pol gain file!!
-	      ReadVgainSettings("ARA_bicone6in_output_updated2016.txt", settings1);
-	      ReadVgainTopSettings("ARA_VPresult_topTrec.txt", settings1);
+	      ReadVgain("ARA_bicone6in_output_updated2016.txt", settings1);
+	      ReadVgainTop("ARA_VPresult_topTrec.txt", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgainSettings("ARA_dipoletest1_output_updated2016.txt", settings1);
+	      ReadHgain("ARA_dipoletest1_output_updated2016.txt", settings1);
 	    }
 	    else if (settings1->ANTENNA_MODE == 2){
 	      // test read V-pol gain file!!
-	      ReadVgainSettings("Arianna_WIPLD_hpol.dat", settings1);
+	      ReadVgain("Arianna_WIPLD_hpol.dat", settings1);
 	      // test read H-pol gain file!!
-	      ReadHgainSettings("Arianna_WIPLD_hpol.dat", settings1);
+	      ReadHgain("Arianna_WIPLD_hpol.dat", settings1);
 	    }
 
 	    //	    if (settings1->NOISE == 2){
@@ -2249,8 +2249,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 }
 
 
-inline void Detector::ReadVgainSettings(string filename, Settings *settings1) {
-    cout<<"About to go into ReadVgainSettings"<<endl;
+inline void Detector::ReadVgain(string filename, Settings *settings1) {
+    cout<<"About to go into ReadVgain"<<endl;
     ifstream NecOut( filename.c_str() );
     const int N = freq_step;
     double Transm[N];
@@ -2296,7 +2296,7 @@ inline void Detector::ReadVgainSettings(string filename, Settings *settings1) {
 }// end ReadVgain
 
 
-inline void Detector::ReadVgainTopSettings(string filename, Settings *settings1) {
+inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
     ifstream NecOut( filename.c_str() );
     const int N = freq_step;
     double Transm[N]; 
@@ -2346,7 +2346,7 @@ inline void Detector::ReadVgainTopSettings(string filename, Settings *settings1)
 
 }// end ReadVgainTop
 
-inline void Detector::ReadHgainSettings(string filename, Settings *settings1) {
+inline void Detector::ReadHgain(string filename, Settings *settings1) {
     ifstream NecOut( filename.c_str() );    
     string line;
     const int N = freq_step;
@@ -2364,7 +2364,6 @@ inline void Detector::ReadHgainSettings(string filename, Settings *settings1) {
                         getline (NecOut, line); //read data line
                         Hgain[i][j] = atof( line.substr( 20, 33 ).c_str() );
                         Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
-                        if(i==0) printf("Hgain for j %d in ReadHgainSettings is %.2f \n",j,Hgain[i][j]);
                     }// end ang_step
                 }// end check freq label
             }// end freq_step
