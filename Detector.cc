@@ -2249,33 +2249,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 }
 
 
-
-
-inline void Detector::ReadVgain(string filename) {
-    cout<<"About to go into ReadVgain"<<endl;
-    ifstream NecOut( filename.c_str() );
-    string line;
-    if ( NecOut.is_open() ) {
-        while (NecOut.good() ) {
-            for (int i=0; i<freq_step; i++) {
-                getline (NecOut, line);
-                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
-                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-                    getline (NecOut, line); //read SWR
-                    getline (NecOut, line); //read names
-                    for (int j=0; j<ang_step; j++) {
-                        getline (NecOut, line); //read data line
-                        Vgain[i][j] = atof( line.substr( 20, 33 ).c_str() );  // read gain (not dB)
-                        Vphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
-                        if(i==0) printf("Vgain for i %d in ReadVgai is %.2f \n",j,Vgain[i][j]);
-                    }// end ang_step
-                }// end check freq label
-            }// end freq_step
-        }// end while NecOut.good
-        NecOut.close();
-    }// end if file open
-}// end ReadVgain
-
 inline void Detector::ReadVgainSettings(string filename, Settings *settings1) {
     cout<<"About to go into ReadVgainSettings"<<endl;
     ifstream NecOut( filename.c_str() );
