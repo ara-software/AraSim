@@ -216,11 +216,10 @@ class Detector {
     private:
         static const int freq_step_max = 60;
         static const int ang_step_max = 2664;
-        void ReadVgain(string filename);
-        void ReadVgainSettings(string filename, Settings *settings1);
-	void ReadVgainTopSettings(string filename, Settings *settings1);
-        void ReadHgain(string filename);
-	void ReadHgainSettings(string filename, Settings *settings1);
+        void ReadAllAntennaGains(Settings *settings1);
+        void ReadVgain(string filename, Settings *settings1);
+        void ReadVgainTop(string filename, Settings *settings1);
+    	void ReadHgain(string filename, Settings *settings1);
         double Vgain[freq_step_max][ang_step_max];
         double Vphase[freq_step_max][ang_step_max];
         double VgainTop[freq_step_max][ang_step_max];
