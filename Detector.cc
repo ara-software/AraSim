@@ -996,25 +996,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         
         
 
-	if (settings1->ANTENNA_MODE == 0){
-	  // test read V-pol gain file!!
-	  ReadVgain("./data/antennas/ARA_bicone6in_output.txt", settings1);
-	  // test read H-pol gain file!!
-	  ReadHgain("./data/antennas/ARA_dipoletest1_output.txt", settings1);
-	}
-	else if (settings1->ANTENNA_MODE == 1) {
-	  // test read V-pol gain file!!
-	  ReadVgain("./data/antennas/ARA_bicone6in_output_updated2016.txt", settings1);
-	  ReadVgainTop("./data/antennas/ARA_VPresult_topTrec.txt", settings1);
-	  // test read H-pol gain file!!
-	  ReadHgain("./data/antennas/ARA_dipoletest1_output_updated2016.txt", settings1);
-	}
-	else if (settings1->ANTENNA_MODE == 2){
-	  // test read V-pol gain file!!
-	  ReadVgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
-	  // test read H-pol gain file!!
-	  ReadHgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
-	}
+	ReadAllAntennaGains(settings1);
 	
 	//	if (settings1->NOISE == 2){
 	  ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
@@ -1483,25 +1465,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
         
 
-	if (settings1->ANTENNA_MODE == 0){
-	  // test read V-pol gain file!!
-	  ReadVgain("./data/antennas/ARA_bicone6in_output.txt", settings1);
-	  // test read H-pol gain file!!
-	  ReadHgain("./data/antennas/ARA_dipoletest1_output.txt", settings1);
-	}
-	else if (settings1->ANTENNA_MODE == 1) {
-	  // test read V-pol gain file!!
-	  ReadVgain("./data/antennas/ARA_bicone6in_output_updated2016.txt", settings1);
-	  ReadVgainTop("./data/antennas/ARA_VPresult_topTrec.txt", settings1);
-	  // test read H-pol gain file!!
-	  ReadHgain("./data/antennas/ARA_dipoletest1_output_updated2016.txt", settings1);
-	}
-	else if (settings1->ANTENNA_MODE == 2){
-	  // test read V-pol gain file!!
-	  ReadVgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
-	  // test read H-pol gain file!!
-	  ReadHgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
-	}
+	ReadAllAntennaGains(settings1);
 
 	//	if (settings1->NOISE==2){
 	ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
@@ -1770,25 +1734,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 
 
 
-	    if (settings1->ANTENNA_MODE == 0){
-	      // test read V-pol gain file!!
-	      ReadVgain("./data/antennas/ARA_bicone6in_output.txt", settings1);
-	      // test read H-pol gain file!!
-	      ReadHgain("./data/antennas/ARA_dipoletest1_output.txt", settings1);
-	    }
-	    else if (settings1->ANTENNA_MODE == 1) {
-	      // test read V-pol gain file!!
-	      ReadVgain("./data/antennas/ARA_bicone6in_output_updated2016.txt", settings1);
-	      ReadVgainTop("./data/antennas/ARA_VPresult_topTrec.txt", settings1);
-	      // test read H-pol gain file!!
-	      ReadHgain("./data/antennas/ARA_dipoletest1_output_updated2016.txt", settings1);
-	    }
-	    else if (settings1->ANTENNA_MODE == 2) {
-	      // test read V-pol gain file!!
-	      ReadVgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
-	      // test read H-pol gain file!!
-	      ReadHgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
-	    }
+	    ReadAllAntennaGains(settings1);
 	    
 
 	    ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
@@ -2073,25 +2019,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             
 
 
-	    if (settings1->ANTENNA_MODE == 0){
-	      // test read V-pol gain file!!
-	      ReadVgain("./data/antennas/ARA_bicone6in_output.txt", settings1);
-	      // test read H-pol gain file!!
-	      ReadHgain("./data/antennas/ARA_dipoletest1_output.txt", settings1);
-	    }
-	    else if (settings1->ANTENNA_MODE == 1) {
-	      // test read V-pol gain file!!
-	      ReadVgain("./data/antennas/ARA_bicone6in_output_updated2016.txt", settings1);
-	      ReadVgainTop("./data/antennas/ARA_VPresult_topTrec.txt", settings1);
-	      // test read H-pol gain file!!
-	      ReadHgain("./data/antennas/ARA_dipoletest1_output_updated2016.txt", settings1);
-	    }
-	    else if (settings1->ANTENNA_MODE == 2){
-	      // test read V-pol gain file!!
-	      ReadVgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
-	      // test read H-pol gain file!!
-	      ReadHgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
-	    }
+	    ReadAllAntennaGains(settings1);
 
 	    //	    if (settings1->NOISE == 2){
 	      //Read the noise figures
@@ -2246,6 +2174,27 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
     //    return 0;
     
     //cout<<"test2"<<endl;
+}
+
+inline void Detector::ReadAllAntennaGains(Settings *settings1){
+    if (settings1->ANTENNA_MODE == 0){
+        // use the orignal Vpol/Hpol gains
+        ReadVgain("./data/antennas/ARA_bicone6in_output.txt", settings1);
+        ReadHgain("./data/antennas/ARA_dipoletest1_output.txt", settings1);
+    }
+    else if (settings1->ANTENNA_MODE == 1) {
+        // use the gains as Thomas had them circa 2016
+        // which notably include different gain files for top and bottom vpol antennas
+        // but the same gain for hpol
+        ReadVgain("./data/antennas/ARA_bicone6in_output_updated2016.txt", settings1);
+        ReadVgainTop("./data/antennas/ARA_VPresult_topTrec.txt", settings1);
+        ReadHgain("./data/antennas/ARA_dipoletest1_output_updated2016.txt", settings1);
+    }
+    else if (settings1->ANTENNA_MODE == 2){
+        // pull a "trick" and substitue the ARIANNA LPDAs for the antennas
+        ReadVgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
+        ReadHgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
+    }
 }
 
 
