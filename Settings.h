@@ -286,6 +286,8 @@ class Settings
 
 	int ANTENNA_MODE; // 0: old default antenna models bicone/rotated dipole
 	                   // 1: using different antenna response for the top Vpol antennas, otherwise same as old default
+                       // 2: use the ARIANNA wipld LPDA responses instead
+                       // 3: use the chiba xfdtd models (treats top and bottom as the same)
 
 	int APPLY_NOISE_FIGURE; // 0: do not apply new noise figure from Thomas Meures 2016
 	                        // 1: apply new noise figure to data

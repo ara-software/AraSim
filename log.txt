@@ -1535,3 +1535,17 @@ This required changes to Report and IceModel. In particulart two new functions I
 2. temperature
 Also, change the attenuation calculation so that it computes the attenuation using the midpoint of the ray
 instead of the end of the ray, which gives a more accurate calculation for the attenuation length.
+
+============================================================================
+2020/11/03 Brian Clark
+This is a rather substantial overhaul of the way antennas are loaded in AraSim.
+
+First, I undid the change made on Jan 23 2020 which introduced the 
+ReadVgainSettings, ReadVgainTopSettings, and ReadHgainSettings.
+Instead, I developed a unified set of functions that always uses the settings object.
+Also, I eliminated a block functions that was repeated 4 times, and instead
+bundled them into a single ReadAllAntennaGains function. This make it much more modular.
+
+For better organization, I also moved all of the antenna gain files into a new data/antennas folder.
+
+Finally, I introduced, through ANTENNA_MODE=3, the Chiba XFDTD antenna models.
