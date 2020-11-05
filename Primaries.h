@@ -327,7 +327,7 @@ Interaction (IceModel *antarctica, Detector *detector, Settings *settings1, Prim
   double chord;  // chord in m from earth entrance to rock-ice boundary
   double logchord; // log_10 of chord length earth entrance to where it enters ice
   double weight_bestcase; // what weight1 would be if whole earth had density of crust - for quick and dirty calculation of best case scenario
-  int sigma_err;    // 0 if energy too low for the parameterization from GetSigma, otherwise 1
+  int sigma_err;    // 0 if GetSigma is un-successful (!), otherwise 1
   double sigma;
 
   // input information for Getchord
