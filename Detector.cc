@@ -2195,7 +2195,7 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         ReadVgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
         ReadHgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
     }
-    else if(settings1->ANTENA_MODE == 3){
+    else if(settings1->ANTENNA_MODE == 3){
         // load the Chiba XFDTD models
         // same gain for top and bottom
         ReadVgain("./data/antennas/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt", settings1);
