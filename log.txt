@@ -1549,3 +1549,12 @@ bundled them into a single ReadAllAntennaGains function. This make it much more 
 For better organization, I also moved all of the antenna gain files into a new data/antennas folder.
 
 Finally, I introduced, through ANTENNA_MODE=3, the Chiba XFDTD antenna models.
+
+============================================================================
+2020/11/04 Brian Clark
+
+Make a change to address an issue (see https://github.com/ara-software/AraSim/issues/28)
+where if a neutrino energy is drawn above the range where the cross-section parameterization
+is defined, the simulation just freezes. Now, the Event class will return
+an event without an interactions, and AraSim will not proceed in the absence of an interaction.
+Very verbose as well, which should hopefully reduce confusion.

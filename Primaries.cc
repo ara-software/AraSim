@@ -351,8 +351,8 @@ int Primaries::GetSigma(double pnu,double& sigma,double &len_int_kgm2,Settings *
   // calculate cross section
   if (pnu<mine[settings1->SIGMAPARAM] || pnu>maxe[settings1->SIGMAPARAM]) {
     cout <<  "Need a parameterization for this energy region.(new)\n";
-//    return 0;
-      return 1;
+    return 0;
+      // return 1;
   } //if
   else {
    
@@ -1141,6 +1141,12 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
 
     //sigma_err = primary1->GetSigma( pnu, sigma, len_int_kgm2, settings1, nu_nubar, currentint);
     sigma_err = primary1->GetSigma( pnu, sigma, len_int_kgm2, settings1, nu_nubar, currentint, len_int_kgm2_total );
+    if(sigma_err!=1){
+        // getting the cross section has not worked
+        // likely we are asking for an energy for which it does not have a parameterization
+        // so we return immediately
+        return;
+    }
 //--------------------------------------------------
 //     cout<<"len_int_kgm2 from GetSigma : "<<len_int_kgm2<<endl;
 //     cout<<"sigma from GetSigma : "<<sigma<<endl;

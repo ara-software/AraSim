@@ -398,6 +398,19 @@ int main(int argc, char **argv) {   // read setup.txt file
 
         // event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1 );
         event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1, Events_Thrown );
+        if(event->Nu_Interaction.size()<1){
+            // If for some reason no interactions were placed into the event holder, continue.
+            // This should be exceedingly rare, but could happen if something
+            // goes wrong with interaction generation.
+            // BAC added this specifically because if the neutrino is generated
+            // with a higher energy than is available in the sigma parameterization
+            // then no interaction will be added and Nu_Interaction will be empty.
+            // But also, it's bad practice to assume the size of a vector anyway
+            // so this is just better generically.
+            cout<<"Warning! The interaction vector is empty!"<<endl;
+            cout<<"Continuing on to the next event."<<endl;
+            continue;
+        }
         event->inu_passed = -1;
                 
         report = new Report(detector, settings1);
