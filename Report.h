@@ -266,7 +266,7 @@ class Report {
 
         double GaintoHeight(double gain, double freq, double n_medium);
         
-        double calculatePolFactor(Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double antenna_theta, double antenna_phi);
+        double calculatePolFactor(Vector &Pol_vector, int ant_type, double antenna_theta, double antenna_phi);
 
         void ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vmmhz, double antenna_theta, double antenna_phi);
 

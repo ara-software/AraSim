@@ -4060,7 +4060,7 @@ double Report::GaintoHeight(double gain, double freq, double n_medium) {
     return 2*sqrt(gain/4/PI*CLIGHT*CLIGHT/(freq*freq*n_medium*n_medium)*Zr/(Z0/n_medium));  // n_medium parts are changed from icemc(I believe this is correct one; E. Hong)
 }
 
-double Report::calculatePolFactor(Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double antenna_theta, double antenna_phi){
+double Report::calculatePolFactor(Vector &Pol_vector, int ant_type, double antenna_theta, double antenna_phi){
     // convert to radians
      antenna_phi*=(PI/180);
      antenna_theta*=(PI/180);
@@ -4088,7 +4088,7 @@ double Report::calculatePolFactor(Vector &n_trg_pokey, Vector &n_trg_slappy, Vec
 void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vmmhz, double antenna_theta, double antenna_phi) {  // vmmhz is input and output. output will have some antenna factors on it
 
     //double pol_factor;
-    pol_factor = calculatePolFactor(n_trg_pokey, n_trg_slappy, Pol_vector, ant_type, antenna_theta, antenna_phi);
+    pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
 
     // apply 3dB spliter, d nu to prepare FFT
     // now actually vmmhz is not V/m/MHz but V/m/Hz unit
@@ -4119,7 +4119,7 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
      if(useInTransmitterMode==true){ sign=-1.;};
 
     //double pol_factor;
-    pol_factor = calculatePolFactor(n_trg_pokey, n_trg_slappy, Pol_vector, ant_type, antenna_theta, antenna_phi);
+    pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
     if ( settings1->PHASE_SKIP_MODE != 1 ) {
         double phase_current;
         if ( vm_real != 0. ) {
@@ -4157,7 +4157,7 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
 void Report::ApplyAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi) {  // vm is input and output. output will have some antenna factors on it
 
     //double pol_factor;
-    pol_factor = calculatePolFactor(n_trg_pokey, n_trg_slappy, Pol_vector, ant_type, antenna_theta, antenna_phi);
+    pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
 
     vm_bin0 = vm_bin0 / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
     vm_bin1 = vm_bin1 / sqrt(2.) * 0.5 * heff_lastbin * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
