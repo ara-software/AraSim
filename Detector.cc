@@ -2185,10 +2185,14 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     else if (settings1->ANTENNA_MODE == 1) {
         // use the gains as Thomas had them circa 2016
         // which notably include different gain files for top and bottom vpol antennas
-        // but the same gain for hpol
-        ReadVgain("./data/antennas/ARA_bicone6in_output_updated2016.txt", settings1);
-        ReadVgainTop("./data/antennas/ARA_VPresult_topTrec.txt", settings1);
-        ReadHgain("./data/antennas/ARA_dipoletest1_output_updated2016.txt", settings1);
+        // but the same gain for hpol.
+        // These were updated in Nov 2020 by BAC so that the value stored in the 'SWR' variable
+        // is actually SWR (previously they were transmission coefficient, as identified by MYL in Jan 2020).
+        // To calculate the SWR, brian did reflection_coefficient = sqrt(1-transmission_coefficient^2)
+        // and then SWR = (1+reflection_coefficient)/(1-reflection_coefficient).
+        ReadVgain("./data/antennas/ARA_bicone6in_output_updated2020.txt", settings1);
+        ReadVgainTop("./data/antennas/ARA_VPresult_topTrec_updated2020.txt", settings1);
+        ReadHgain("./data/antennas/ARA_dipoletest1_output_updated2020.txt", settings1);
     }
     else if (settings1->ANTENNA_MODE == 2){
         // pull a "trick" and substitue the ARIANNA LPDAs for the antennas
@@ -2199,10 +2203,17 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         // load the Chiba XFDTD models
         // same gain for top and bottom
         ReadVgain("./data/antennas/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt", settings1);
+        ReadVgainTop("./data/antennas/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt", settings1);
         ReadHgain("./data/antennas/Hpol_original_150mmHole_Ice_ARASim.txt", settings1);
     }
 }
 
+// convert the swr into a transmission coefficient
+inline double Detector::SWRtoTransCoeff(double swr){
+    double reflection_coefficient = (swr-1.)/(swr+1.);
+    double transmission_coefficient = sqrt(1. - pow(reflection_coefficient, 2.));
+    return transmission_coefficient;
+}
 
 inline void Detector::ReadVgain(string filename, Settings *settings1) {
     ifstream NecOut( filename.c_str() );
@@ -2216,7 +2227,8 @@ inline void Detector::ReadVgain(string filename, Settings *settings1) {
                 if ( line.substr(0, line.find_first_of(":")) == "freq ") {
                     Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
                     getline (NecOut, line); //read SWR
-                    Transm[i] = atof(line.substr(5,11).c_str()); //What says "SWR" in "ARA_bicone6in_output_updated2016.txt" is actually trasnmission coefficient - MYL 01/23/20
+                    double swr = atof(line.substr(5,11).c_str());
+                    Transm[i] = SWRtoTransCoeff(swr);
                     getline (NecOut, line); //read names
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
@@ -2262,7 +2274,8 @@ inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
                 if ( line.substr(0, line.find_first_of(":")) == "freq ") {
                     Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
                     getline (NecOut, line); //read SWR
-                    Transm[i] = atof( line.substr(5, 11).c_str() ); //What say "SWR" in "ARA_VPresult_topTrec.txt" is actually transmission coefficient - MYL 01/23/20
+                    double swr = atof(line.substr(5,11).c_str());
+                    Transm[i] = SWRtoTransCoeff(swr);
                     getline (NecOut, line); //read names
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
@@ -2312,7 +2325,8 @@ inline void Detector::ReadHgain(string filename, Settings *settings1) {
                 if ( line.substr(0, line.find_first_of(":")) == "freq ") {
                     Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
                     getline (NecOut, line); //read SWR
-                    Transm[i] = atof( line.substr(5, 11).c_str() ); //What says "SWR" in "ARA_dipoletest1_output_updated2016.txt" is actually transmission coefficient - MYL 01/23/20 
+                    double swr = atof(line.substr(5,11).c_str());
+                    Transm[i] = SWRtoTransCoeff(swr);
                     getline (NecOut, line); //read names
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line

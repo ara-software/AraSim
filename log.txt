@@ -1558,3 +1558,17 @@ where if a neutrino energy is drawn above the range where the cross-section para
 is defined, the simulation just freezes. Now, the Event class will return
 an event without an interactions, and AraSim will not proceed in the absence of an interaction.
 Very verbose as well, which should hopefully reduce confusion.
+
+============================================================================
+2020/11/16 Brian Clark
+
+Add a new set of antenna files (_updated2020) which fix a problem where the files previously
+used by Thomas (_updated2016) labeled the transmission coefficient incorrectly as SWR.
+Using the formula reflection_coefficient = sqrt(1 - transmission_coefficient)
+and swr = (1+reflection_coefficient)/(1-reflection_coefficient),
+I converted the values in _updated2016 into *actual* SWR's in the _updated2016.
+
+I also updated the "read antenna" functions, and added a SWRtoTransCoeff helper
+function to convert between the now correct SWR values, and the transmission
+coefficients that are needed in order to do noise calculations.
+
