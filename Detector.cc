@@ -2209,7 +2209,7 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
 }
 
 // convert the swr into a transmission coefficient
-inline void Detector::SWRtoTransCoeff(double swr){
+inline double Detector::SWRtoTransCoeff(double swr){
     double reflection_coefficient = (swr-1.)/(swr+1.);
     double transmission_coefficient = sqrt(1. - pow(reflection_coefficient, 2.));
     return transmission_coefficient;
