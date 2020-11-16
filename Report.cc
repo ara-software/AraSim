@@ -1574,13 +1574,14 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					   if ( n > 0 ) {
 					     
 					     if ( settings1->ALL_ANT_V_ON==0 ) {
-					       
-					       ApplyAntFactors_Tdomain_Transmitter( detector->GetAntPhase_1D( freq_tmp*1.e-6, ant_theta_trans, antenna_phi, detector->stations[i].strings[j].antennas[k].type ),
-										    heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2*n], V_forfft[2*n+1], settings1 );
+					       // modified 2020/11/16 by BAC with the final "true" argument to use the ApplyAntFactors_Tdomain function
+					       ApplyAntFactors_Tdomain( detector->GetAntPhase_1D( freq_tmp*1.e-6, ant_theta_trans, antenna_phi, detector->stations[i].strings[j].antennas[k].type ),
+										    heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2*n], V_forfft[2*n+1], settings1, true);
 					     }
 					     else if ( settings1->ALL_ANT_V_ON==1 ) {
-					       ApplyAntFactors_Tdomain_Transmitter( detector->GetAntPhase_1D( freq_tmp*1.e-6, ant_theta_trans, antenna_phi, 0 ),
-										    heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2*n], V_forfft[2*n+1], settings1 );
+                           // modified 2020/11/16 by BAC with the final "true" argument to use the ApplyAntFactors_Tdomain function
+					       ApplyAntFactors_Tdomain( detector->GetAntPhase_1D( freq_tmp*1.e-6, ant_theta_trans, antenna_phi, 0 ),
+										    heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2*n], V_forfft[2*n+1], settings1, true );
 					     }
 					     
 					     
@@ -4006,7 +4007,13 @@ Vector Report::GetPolarization (Vector &nnu, Vector &launch_vector) {
     if (nnu*launch_vector>0 && n_pol*nnu>0)
 	cout << "error in GetPolarization.  \n";
     
-    
+     /*
+      * BAC, AC, and JT 2020/11/3
+      * 
+      * We confirmed that we think this calculation is correct up to a minus sign
+      * e.g. outward or inward on the cone depending on whether
+      * one is outside or inside of the cherenkov cone
+     */
     
     return n_pol;
 } //GetPolarization
@@ -4019,8 +4026,19 @@ void Report::GetParameters( Position &src, Position &trg, Vector &nnu, double &v
     launch_vector = (trg.Cross( trg.Cross(src) )).Rotate(viewangle, trg.Cross(src));
     launch_vector = launch_vector.Unit();
     viewangle = launch_vector.Angle(nnu);
-
-                                   //cout<<"launch_vector angle between R1 (trg) : "<<launch_vector.Angle(trg)<<"\n";
+    
+     /*
+      * BAC, AC, and JT 2020/11/3
+      * 
+      * n_trg_pokey points from the center of the earth to the antenna location
+      * so for any antenna somewhere on the earth, this points to approximately
+      * the center axis of the antenna
+      *
+      * n_trg_slappy is parallel to the surface and perpendicular to the plane
+      * defined by the vector pointing to ant and vertex
+     */
+    
+    //cout<<"launch_vector angle between R1 (trg) : "<<launch_vector.Angle(trg)<<"\n";
 
     receive_vector = trg.Rotate( receive_angle, src.Cross(trg) );
     receive_vector = receive_vector.Unit();
@@ -4076,19 +4094,24 @@ void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_sla
 
 
 
-void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1) {  // vm is input and output. output will have some antenna factors on it
+void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, bool useInTransmitterMode) {  // vm is input and output. output will have some antenna factors on it
+
+    // first, work out if we would like to use this function in "transmit" mode
+     // which means that when we apply the phase shift, we need to subtract (!!)
+     // AntPhase*RADDEG; where if in "receive" mode (useInTransmitterMode=false) we must
+     // add (!!) AntPhase*RADDEG
+     // or at least, that minus sign was the only difference between 
+     // ApplyAntFactors_Tdomain and ApplyAntFactors_Tdomain_Transmitter when
+     // Brian merged the two functions in Nov 2020
+     double sign = 1.;
+     if(useInTransmitterMode==true){ sign=-1.;};
 
     //double pol_factor;
     pol_factor = calculatePolFactor(n_trg_pokey, n_trg_slappy, Pol_vector, ant_type);
-
     if ( settings1->PHASE_SKIP_MODE != 1 ) {
-
         double phase_current;
-
         if ( vm_real != 0. ) {
-
             phase_current = atan( vm_img / vm_real );
-
             // phase in +-PI range
             if (vm_real<0.) {
                 if (vm_img>0.) phase_current += PI;
@@ -4096,109 +4119,33 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
             }
         }
         else {
-
             if ( vm_img>0. ) phase_current = PI;
             else if (vm_img<0.) phase_current = -PI;
             else phase_current = 0.;
         }
-
-
-
         // V amplitude
         double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
 
         // real, img terms with phase shift
-        vm_real = v_amp * cos( phase_current + AntPhase*RADDEG );
-        vm_img = v_amp * sin( phase_current + AntPhase*RADDEG );
+        vm_real = v_amp * cos( phase_current + (sign * AntPhase*RADDEG) );
+        vm_img =  v_amp * sin( phase_current + (sign * AntPhase*RADDEG) );
 
         //vm_real = v_amp * cos( phase_current - AntPhase*RADDEG ); // subtract AntPhase for four1 function's equation definition (inverse in img values)
         //vm_img = v_amp * sin( phase_current - AntPhase*RADDEG );
     }
 
     else { // only amplitude
-
         vm_real = vm_real / sqrt(2.) * 0.5 * heff * pol_factor; // only amplitude
-
         vm_img = vm_img / sqrt(2.) * 0.5 * heff * pol_factor; // only amplitude
     }
-
-
 }
-
-
-
-
-
-
-void Report::ApplyAntFactors_Tdomain_Transmitter (double AntPhase, double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1) {  // vm is input and output. output will have some antenna factors on it
-
-    //double pol_factor;
-    pol_factor = calculatePolFactor(n_trg_pokey, n_trg_slappy, Pol_vector, ant_type);
-
-    if ( settings1->PHASE_SKIP_MODE != 1 ) {
-
-        double phase_current;
-
-        if ( vm_real != 0. ) {
-
-            phase_current = atan( vm_img / vm_real );
-
-            // phase in +-PI range
-            if (vm_real<0.) {
-                if (vm_img>0.) phase_current += PI;
-                else if (vm_img<0.) phase_current -= PI;
-            }
-        }
-        else {
-
-            if ( vm_img>0. ) phase_current = PI;
-            else if (vm_img<0.) phase_current = -PI;
-            else phase_current = 0.;
-        }
-
-
-
-        // V amplitude
-        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
-
-        // real, img terms with phase shift
-        //vm_real = v_amp * cos( phase_current + AntPhase*RADDEG );
-        //vm_img = v_amp * sin( phase_current + AntPhase*RADDEG );
-
-        vm_real = v_amp * cos( phase_current - AntPhase*RADDEG ); // subtract AntPhase for four1 function's equation definition (inverse in img values)
-        vm_img = v_amp * sin( phase_current - AntPhase*RADDEG );
-    }
-
-    else { // only amplitude
-
-        vm_real = vm_real / sqrt(2.) * 0.5 * heff * pol_factor; // only amplitude
-
-        vm_img = vm_img / sqrt(2.) * 0.5 * heff * pol_factor; // only amplitude
-    }
-
-
-}
-
-
-
-
-
 
 
 
 void Report::ApplyAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1) {  // vm is input and output. output will have some antenna factors on it
 
-
-
     //double pol_factor;
-
-    if (ant_type == 0) {    // if v pol
-        pol_factor = n_trg_pokey * Pol_vector;
-    }
-    else if (ant_type == 1) {   // if h pol
-        pol_factor = n_trg_slappy * Pol_vector;
-    }
-    pol_factor = abs(pol_factor);
+    pol_factor = calculatePolFactor(n_trg_pokey, n_trg_slappy, Pol_vector, ant_type);
 
     vm_bin0 = vm_bin0 / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
     vm_bin1 = vm_bin1 / sqrt(2.) * 0.5 * heff_lastbin * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
