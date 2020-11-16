@@ -266,13 +266,13 @@ class Report {
 
         double GaintoHeight(double gain, double freq, double n_medium);
         
-        double calculatePolFactor(Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type);
+        double calculatePolFactor(Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double antenna_theta, double antenna_phi);
 
-        void ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vmmhz);
+        void ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vmmhz, double antenna_theta, double antenna_phi);
 
-        void ApplyAntFactors_Tdomain(double AntPhase, double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, bool useInTransmitterMode=false);
+        void ApplyAntFactors_Tdomain(double AntPhase, double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, bool useInTransmitterMode=false);
 
-        void ApplyAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1);
+        void ApplyAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi);
 
 
         void ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, Settings *settings1);
