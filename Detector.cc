@@ -2199,6 +2199,7 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         // load the Chiba XFDTD models
         // same gain for top and bottom
         ReadVgain("./data/antennas/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt", settings1);
+        ReadVgainTop("./data/antennas/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt", settings1);
         ReadHgain("./data/antennas/Hpol_original_150mmHole_Ice_ARASim.txt", settings1);
     }
 }
