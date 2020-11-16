@@ -1822,6 +1822,23 @@ void IceModel::GetFresnel (
         mag = sqrt( abs(tan (launch_angle)) / abs(tan (rec_angle)) );
     }
 
+    /*
+      * BAC, AC, JT on 2020/11/3
+      * The following calculation is a bit tricky. As best we can tell, here is the logic.
+      * 
+      * perp is tangent to the surface (because posnu is perp to the earth surface)
+      * src_parallel is then parallel to the surface at the vertex/source
+      * trg_parallel is then parallel to the surfaace at the target/receiver
+      *
+      * pol_parallel_src is the component of vector that's parallel to the surface at the vertex/source
+      * pol_perp_src is the component of the vector that's perpendicular to the surface at the vertex
+      * 
+      * But, pol_parallel_trg = pol_parallel_src and pol_perp_trg = pol_perp_src
+      * So we are unsure if the polarization is following the ray bending.
+      * Then again, Pol involves trg_parallel, which involves the receive vector.
+      * So it's not clear cut.
+     */
+
     Vector perp = launch_vector.Cross( posnu ).Unit();    // perp unit vector it should be same in both src and trg
     Vector src_parallel = perp.Cross( launch_vector ).Unit();
     Vector trg_parallel = perp.Cross( rec_vector ).Unit();
