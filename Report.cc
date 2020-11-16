@@ -4042,18 +4042,23 @@ double Report::GaintoHeight(double gain, double freq, double n_medium) {
     return 2*sqrt(gain/4/PI*CLIGHT*CLIGHT/(freq*freq*n_medium*n_medium)*Zr/(Z0/n_medium));  // n_medium parts are changed from icemc(I believe this is correct one; E. Hong)
 }
 
+double Report::calculatePolFactor(Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type){
+     double pol_factor=0.;
+     if (ant_type == 0) {    // if v pol
+         pol_factor = n_trg_pokey * Pol_vector;
+     }
+     else if (ant_type == 1) {   // if h pol
+         pol_factor = n_trg_slappy * Pol_vector;
+     }
+     pol_factor = abs(pol_factor);
+     return pol_factor;
+ }
+
 
 void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vmmhz) {  // vmmhz is input and output. output will have some antenna factors on it
 
     //double pol_factor;
-
-    if (ant_type == 0) {    // if v pol
-        pol_factor = n_trg_pokey * Pol_vector;
-    }
-    else if (ant_type == 1) {   // if h pol
-        pol_factor = n_trg_slappy * Pol_vector;
-    }
-    pol_factor = abs(pol_factor);
+    pol_factor = calculatePolFactor(n_trg_pokey, n_trg_slappy, Pol_vector, ant_type);
 
     // apply 3dB spliter, d nu to prepare FFT
     // now actually vmmhz is not V/m/MHz but V/m/Hz unit
@@ -4073,19 +4078,8 @@ void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_sla
 
 void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1) {  // vm is input and output. output will have some antenna factors on it
 
-
-
     //double pol_factor;
-
-    if (ant_type == 0) {    // if v pol
-        pol_factor = n_trg_pokey * Pol_vector;
-    }
-    else if (ant_type == 1) {   // if h pol
-        pol_factor = n_trg_slappy * Pol_vector;
-    }
-    pol_factor = abs(pol_factor);
-
-
+    pol_factor = calculatePolFactor(n_trg_pokey, n_trg_slappy, Pol_vector, ant_type);
 
     if ( settings1->PHASE_SKIP_MODE != 1 ) {
 
@@ -4138,19 +4132,8 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
 
 void Report::ApplyAntFactors_Tdomain_Transmitter (double AntPhase, double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1) {  // vm is input and output. output will have some antenna factors on it
 
-
-
     //double pol_factor;
-
-    if (ant_type == 0) {    // if v pol
-        pol_factor = n_trg_pokey * Pol_vector;
-    }
-    else if (ant_type == 1) {   // if h pol
-        pol_factor = n_trg_slappy * Pol_vector;
-    }
-    pol_factor = abs(pol_factor);
-
-
+    pol_factor = calculatePolFactor(n_trg_pokey, n_trg_slappy, Pol_vector, ant_type);
 
     if ( settings1->PHASE_SKIP_MODE != 1 ) {
 
