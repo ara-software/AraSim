@@ -330,9 +330,7 @@ class Detector {
 
         double GetGain_1D(double freq, double theta, double phi, int ant_m);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain
 
-        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
-
-        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, int ant_number);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
+        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, int ant_number=0);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
 
 	
 
