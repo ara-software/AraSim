@@ -1572,3 +1572,16 @@ I also updated the "read antenna" functions, and added a SWRtoTransCoeff helper
 function to convert between the now correct SWR values, and the transmission
 coefficients that are needed in order to do noise calculations.
 
+============================================================================
+ 2020/11/16 Brian Clark
+
+ This factorizes the calculation of the polarization factor into a calculatePolFactor function.
+ This removes a series of duplicated lines in the ApplyAntFactors* functions.
+
+ Also, this reduces the number of ApplyAntFactors_Tdomain functions. I have eliminated
+ the ApplyAntFactors_Tdomain_Transmitter function by instead passing a useInTransmitterMode
+ flag to the ApplyAntFactors_Tdomain function itself. This reduces the number of functions lying around.
+
+ Finally, it updates the way the polarization factor is calculated.
+ See this PR (https://github.com/ara-software/AraSim/issues/25)
+ and this talk from Ben Hokanson-Fasig (http://ara.physics.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=1947).
