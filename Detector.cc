@@ -2499,7 +2499,9 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
     Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
     
     //  cout<<Gout<<endl;
-    
+    if ( Gout < 0. ){ // gain can not go below 0
+    	Gout = 0.;
+    }    
     return Gout;
     
     // ant_o face x = 0, y = 1, -x = 2, -y = 3
@@ -2608,7 +2610,9 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m) {
     }
     
     Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
-    
+    if ( Gout < 0. ){ // gain can not go below 0
+    	Gout = 0.;
+    }    
     cout<<Gout<<endl;
     return Gout;
     
@@ -2803,7 +2807,9 @@ double Detector::GetGain_1D( double freq, double theta, double phi, int ant_m ) 
     
     } // Hpol case
 
-
+    if ( Gout < 0. ){ // gain can not go below 0
+    	Gout = 0.;
+    }
     return Gout;
 
 }
@@ -2888,7 +2894,9 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     
     } // Hpol case
 
-
+    if ( Gout < 0. ){ // gain can not go below 0
+    	Gout = 0.;
+    }
     return Gout;
 
 }
@@ -2994,8 +3002,9 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     } // Hpol case
 
 
-    if ( Gout < 0. ) // gain can not go below 0
-        Gout = 0.;
+    if ( Gout < 0. ){ // gain can not go below 0
+    	Gout = 0.;
+    }
 
     return Gout;
 
