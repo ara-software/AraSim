@@ -389,7 +389,7 @@ double EarthModel::GetDensity1(double altitude, const Position earth_in, const P
   
   if (chord<=1) {
     cout << "short chord " << chord << "\n";
-    return 0;
+//    return 0;
   }
   if (chord>2.*R_EARTH+1000) {
     cout << "bad chord" << " " << chord << ".  Event is " << inu << "\n";
