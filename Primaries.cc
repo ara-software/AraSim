@@ -844,6 +844,7 @@ Interaction::~Interaction() {
 void Interaction::Initialize() {
     // settings for GetSignal
     taudecay = "test_taudecay";
+    weight = -1; // let's see if that ever happens! 
 }
 
 void Interaction::clear_useless(Settings *settings1){
