@@ -1585,3 +1585,10 @@ coefficients that are needed in order to do noise calculations.
  Finally, it updates the way the polarization factor is calculated.
  See this PR (https://github.com/ara-software/AraSim/issues/25)
  and this talk from Ben Hokanson-Fasig (http://ara.physics.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=1947).
+
+============================================================================
+
+2020/11/18 Myoungchul Kim
+
+Added the Chiba in-situ antenna model as a ANTENNA_MODE=4 option.
+Related documents in DocBD: http://ara.physics.wisc.edu/docs/0018/001838/001/AntennaModel_20190227.pdf
