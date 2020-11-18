@@ -515,10 +515,10 @@ void Tools::SimpleLinearInterpolation(int n1, double *x1, double *y1, int n2, do
     int cnt = 0;
     
     for (int i=0; i<n2; i++) {
-            if (x2[i] < x1[0] ) {
+            if (x2[i] <= x1[0] ) {
                     first++;
             }
-            else if (x2[i] > x1[n1-1]) {
+            else if (x2[i] >= x1[n1-1]) {
                     last++;
             }
     }
