@@ -147,6 +147,7 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     view_ang.clear();
     launch_ang.clear();
     rec_ang.clear();
+    rec_ang_phi.clear();
     reflect_ang.clear();
     Dist.clear();
     L_att.clear();
@@ -550,7 +551,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                    GetAngleAnt(receive_vector, detector->stations[i].strings[j].antennas[k], antenna_theta, antenna_phi);   // get theta, phi for signal ray arrived at antenna
                                    //cout<<"antenna theta : "<<antenna_theta<<"  phi : "<<antenna_phi<<endl;  
-
+                                   stations[i].strings[j].antennas[k].rec_ang_phi.push_back(antenna_phi*PI/180.); // store the antenna phi in radians (!)
 
 
                                    // old freq domain signal mode (AVZ model)

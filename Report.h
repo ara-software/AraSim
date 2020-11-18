@@ -55,7 +55,8 @@ class Antenna_r {
 
         vector <double> view_ang;    //viewing angle
         vector <double> launch_ang;  //launch angle
-        vector <double> rec_ang;     //receiving angle
+        vector <double> rec_ang;     //receiving angle phi (in radians)
+        vector <double> rec_ang_phi; // receiving angle phi (in radians)
         vector <double> reflect_ang; // surface reflection angle (if 100 : no reflection case)
         vector <double> Dist;        //Distance between posnu and antenna
         vector <double> L_att;        //Attenuation factor
