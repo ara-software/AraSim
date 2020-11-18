@@ -2206,12 +2206,12 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         ReadVgainTop("./data/antennas/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt", settings1);
         ReadHgain("./data/antennas/Hpol_original_150mmHole_Ice_ARASim.txt", settings1);
     }
-    else if(settings1->ANTENNA_MODE == 4){
+    else if (settings1->ANTENNA_MODE == 4){
         // load the Chiba in-situ models
         // same gain for top and bottom
         ReadVgain("./data/antennas/In_situ_VPol_Model.txt", settings1);
         ReadHgain("./data/antennas/In_situ_HPol_Model.txt", settings1);
-   }
+    }
 }
 
 // convert the swr into a transmission coefficient
