@@ -402,8 +402,8 @@ int main(int argc, char **argv) {   // read setup.txt file
         int num = 0;
         while(!infile.eof()) // reads file to end of *file*, not line
         {
-            infile >> snr_PA[num]; // read first column number
-            infile >> eff_PA[num]; // read second column number
+            infile >> snr_PA[num] && // read first column number
+            infile >> eff_PA[num] &&// read second column number
             ++num;
             // you can also do it on the same line like this:
             // infile >> exam1[num] >> exam2[num] >> exam3[num]; ++num;
@@ -429,8 +429,8 @@ int main(int argc, char **argv) {   // read setup.txt file
     num = 0;
         while(!infile.eof()) // reads file to end of *file*, not line
         {
-            infile >> angle_PA[num]; // read first column number
-            infile >> aSNR_PA[num]; // read second column number
+            infile >> angle_PA[num] &&  // read first column number
+            infile >> aSNR_PA[num]  &&  // read second column number
             ++num;
             // you can also do it on the same line like this:
             // infile >> exam1[num] >> exam2[num] >> exam3[num]; ++num;
