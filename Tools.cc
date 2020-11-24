@@ -7,6 +7,7 @@
 #include "TSpline.h"
 #include "TH2F.h"
 #include "Constants.h"
+#include <boost/math/interpolators/whittaker_shannon.hpp>
 
 using std::cout;
 
