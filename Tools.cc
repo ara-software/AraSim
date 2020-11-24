@@ -506,6 +506,26 @@ void Tools::NormalTimeOrdering_InvT(const int n,double *volts) {
 
 }
 
+//! A function to do since interpolation from time basis of x1 to the time basis of x2
+/*!
+    
+    The function takes an input array (defined by n1, x1, y1), and interpolates
+    that data to a new time base, provided by x2, and puts the values into y2.
+    The user must therefore provide the number of input samples (n1)
+    and the x and y values of the data to be interpolated (x1, y1).
+    The user must also provide the number of points at which they would like
+    the function interpolated (n2) and the x-values where the function is to be
+    interpolation (x2). The content of y2[i] will be replaced with the interpolated values.
+
+    \param n1 number of points in the input array
+    \param x1 array of points representing the x-values of the input array
+    \param y1 array of points representing the y-values of the input array
+    \param n2 number of points in the output array
+    \param x1 array of points representing the x-values of the output array
+    \param y1 array of points representing the y-values of the output array
+    \return void
+*/
+
 void Tools::SincInterpolation(int n1, double *x1, double *y1, int n2, double *x2, double *y2){
 
     /*
