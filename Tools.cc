@@ -521,7 +521,7 @@ void Tools::SincInterpolation(int n1, double *x1, double *y1, int n2, double *x2
     size_t num_input_samps = n1;
     std::vector<double> input_y(num_input_samps);
     for(size_t samp=0; samp<num_input_samps; samp++){
-     input_y[samp] = y1[samp];
+        input_y[samp] = y1[samp];
     }
     double t0 = x1[0];
     double dT = x1[1]-x1[0];
