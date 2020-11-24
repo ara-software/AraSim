@@ -536,8 +536,8 @@ void Tools::SincInterpolation(int n1, double *x1, double *y1, int n2, double *x2
             // or after the last sample of the input array (x1[n1-1])
             // if so, then we are asking for the function to *extrapolate*, not *interpolate*
             // and the results might be surprising...
-            printf("WARNING! You have asked to evaluate the interpolation at (%.2f)\n");
-            printf("This is outside of the range of support for this function (%.2f - %.2f)\n");
+            printf("WARNING! You have asked to evaluate the interpolation at (%.2f)\n",x2[samp]);
+            printf("This is outside of the range of support for this function (%.2f - %.2f)\n",first_input_sample, last_input_sample);
             printf("Behavior may be unexpected! You have been warned...");
         }
         y2[samp] = ws_interpolator(x2[samp]);
