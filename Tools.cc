@@ -505,6 +505,44 @@ void Tools::NormalTimeOrdering_InvT(const int n,double *volts) {
 
 }
 
+void Tools::SincInterpolation(int n1, double *x1, double *y1, int n2, double *x2, double *y2){
+
+    /*
+    * The Whittaker-Shannon interpolator is useful in the case of band-limited data.
+    * Otherwise known as "sinc" interpolation, it protects the fidelity of the frequency spectrum of the signal.
+    * Unlike, say, cubic-spline interpolation--which is faster, but can leave artifacts.
+    * See https://en.wikipedia.org/wiki/Whittaker–Shannon_interpolation_formula for information,
+    * and https://www.boost.org/doc/libs/1_71_0/libs/math/doc/html/math_toolkit/whittaker_shannon.html
+    * for implementation details from the boost documentation.
+    */
+    
+    // the whittaker-shannon method likes the data to be in a vector
+    size_t num_input_samps = n1;
+    std::vector<double> input_y(num_input_samps);
+    for(size_t samp=0; samp<num_input_samps; samp++){
+     input_y[samp] = y1[samp];
+    }
+    double t0 = x1[0];
+    double dT = x1[1]-x1[0];
+    double first_input_sample = x1[0];
+    double last_input_sample = x1[n1-1];
+
+    boost::math::interpolators::whittaker_shannon<double> interpolator(input_y.data(), t0, dT);
+
+    for(int samp=0; samp<n2; samp++){
+        if(x2[samp]<first_input_sample || x2[samp]>last_input_sample){
+            // check if the sample comes before the first sample of the input array (x1[0])
+            // or after the last sample of the input array (x1[n1-1])
+            // if so, then we are asking for the function to *extrapolate*, not *interpolate*
+            // and the results might be surprising...
+            printf("WARNING! You have asked to evaluate the interpolation at (%.2f)\n");
+            printf("This is outside of the range of support for this function (%.2f - %.2f)\n");
+            printf("Behavior may be unexpected! You have been warned...");
+        }
+        y2[samp] = ws_interpolator(x2[samp]);
+    }
+}
+
 void Tools::SimpleLinearInterpolation(int n1, double *x1, double *y1, int n2, double *x2, double *y2 ) {    // reads n1 array values x1, y1 and do simple linear interpolation and return n2 array with values x2, y2.
     // if interploated array has wider range (x values) than original array, it will use the first original value
     //
