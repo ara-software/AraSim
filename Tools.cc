@@ -506,7 +506,7 @@ void Tools::NormalTimeOrdering_InvT(const int n,double *volts) {
 
 }
 
-//! A function to do since interpolation from time basis of x1 to the time basis of x2
+//! A function to do sinc interpolation from time basis of x1 to the time basis of x2
 /*!
     
     The function takes an input array (defined by n1, x1, y1), and interpolates
