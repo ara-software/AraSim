@@ -548,7 +548,7 @@ void Tools::SincInterpolation(int n1, double *x1, double *y1, int n2, double *x2
     double first_input_sample = x1[0];
     double last_input_sample = x1[n1-1];
 
-    boost::math::interpolators::whittaker_shannon<double> interpolator(input_y.data(), t0, dT);
+    auto interpolator = boost::math::interpolators::whittaker_shannon<std::vector<double>>(std::move(input_y), t0, dT);
 
     for(int samp=0; samp<n2; samp++){
         if(x2[samp]<first_input_sample || x2[samp]>last_input_sample){
@@ -560,7 +560,7 @@ void Tools::SincInterpolation(int n1, double *x1, double *y1, int n2, double *x2
             printf("This is outside of the range of support for this function (%.2f - %.2f)\n",first_input_sample, last_input_sample);
             printf("Behavior may be unexpected! You have been warned...");
         }
-        y2[samp] = ws_interpolator(x2[samp]);
+        y2[samp] = interpolator(x2[samp]);
     }
 }
 
