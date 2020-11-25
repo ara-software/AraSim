@@ -553,16 +553,23 @@ void Tools::SincInterpolation(int n1, double *x1, double *y1, int n2, double *x2
     auto interpolator = boost::math::interpolators::whittaker_shannon<std::vector<double>>(std::move(input_y), t0, dT);
 
     for(int samp=0; samp<n2; samp++){
-        if(x2[samp]<first_input_sample || x2[samp]>last_input_sample){
-            // check if the sample comes before the first sample of the input array (x1[0])
-            // or after the last sample of the input array (x1[n1-1])
-            // if so, then we are asking for the function to *extrapolate*, not *interpolate*
-            // and the results might be surprising...
-            printf("WARNING! You have asked to evaluate the interpolation at (%.2f)\n",x2[samp]);
-            printf("This is outside of the range of support for this function (%.2f - %.2f)\n",first_input_sample, last_input_sample);
-            printf("Behavior may be unexpected! You have been warned...\n");
+    	// check if the sample comes before the first sample of the input array (x1[0])
+        // or after the last sample of the input array (x1[n1-1])
+        // if so, then we are asking for the function to *extrapolate*, not *interpolate*
+        // just use the first/last sample, which replicates the behavior in SimpleLinearInterpolation_OutZero
+        
+        if(x2[samp]<first_input_sample){
+        	// before first sample, use first sample y1
+        	y2[samp] = y1[0];
         }
-        y2[samp] = interpolator(x2[samp]);
+        else if(x2[samp]>last_input_sample){
+        	// after last sample, use last sample of y1
+            y2[samp] = y1[n1-1];
+        }
+        else{
+        	// in the range of support, do interpolation
+        	y2[samp] = interpolator(x2[samp]);
+        }
     }
 }
 
