@@ -535,6 +535,8 @@ void Tools::SincInterpolation(int n1, double *x1, double *y1, int n2, double *x2
     * See https://en.wikipedia.org/wiki/Whittaker–Shannon_interpolation_formula for information,
     * and https://www.boost.org/doc/libs/1_71_0/libs/math/doc/html/math_toolkit/whittaker_shannon.html
     * for implementation details from the boost documentation.
+    * This method is slower than linear or spline interpolation--so its use is probably 
+    * probably not ideal/necessary in cases where preserving spectral shape is not important.
     */
     
     // the whittaker-shannon method likes the data to be in a vector
@@ -558,7 +560,7 @@ void Tools::SincInterpolation(int n1, double *x1, double *y1, int n2, double *x2
             // and the results might be surprising...
             printf("WARNING! You have asked to evaluate the interpolation at (%.2f)\n",x2[samp]);
             printf("This is outside of the range of support for this function (%.2f - %.2f)\n",first_input_sample, last_input_sample);
-            printf("Behavior may be unexpected! You have been warned...");
+            printf("Behavior may be unexpected! You have been warned...\n");
         }
         y2[samp] = interpolator(x2[samp]);
     }
