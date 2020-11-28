@@ -2210,6 +2210,7 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         // load the Chiba in-situ models
         // same gain for top and bottom
         ReadVgain("./data/antennas/In_situ_VPol_Model.txt", settings1);
+        ReadVgainTop("./data/antennas/In_situ_VPol_Model.txt", settings1);
         ReadHgain("./data/antennas/In_situ_HPol_Model.txt", settings1);
     }
 }
