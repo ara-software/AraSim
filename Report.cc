@@ -1033,7 +1033,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 
                                                // skip linear interpolation for now
-                                               Tools::SimpleLinearInterpolation_OutZero( stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR/2, T_forint, volts_forint );
+                                               // changed to sinc interpolation Dec 2020 by BAC
+                                               Tools::SincInterpolation( stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR/2, T_forint, volts_forint );
 
                                                // check what we save as V[], volts_forint? or volts_forfft
 
@@ -1336,7 +1337,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					 
 					 
 					 // skip linear interpolation for now
-					 Tools::SimpleLinearInterpolation_OutZero( stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR/2, T_forint, volts_forint );
+					 // changed to sinc interpolation Dec 2020 by BAC
+					 Tools::SincInterpolation( stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR/2, T_forint, volts_forint );
 					 
 					 // check what we save as V[], volts_forint? or volts_forfft
 					 
@@ -1674,7 +1676,8 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 					 
 					 
 					 // skip linear interpolation for now
-					 Tools::SimpleLinearInterpolation_OutZero( stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR/2, T_forint, volts_forint );
+					 // changed to sinc interpolation Dec 2020 by BAC
+					 Tools::SincInterpolation( stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR/2, T_forint, volts_forint );
 					 
 					 // check what we save as V[], volts_forint? or volts_forfft
 					 
