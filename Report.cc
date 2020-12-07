@@ -4372,9 +4372,9 @@ void Report::GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_thet
      * calculate the polarization factors and the gain.
     */
 
-    Vector flip_receive_vector = -1. * receive_vector;
-    antenna_theta = flip_receive_vector.Theta() * TMath::RadToDeg(); // return in degrees
-    antenna_phi = flip_receive_vector.Phi() * TMath::RadToDeg();
+    Vector flip_receive_vector = -1. * rec_vector;
+    ant_theta = flip_receive_vector.Theta() * TMath::RadToDeg(); // return in degrees
+    ant_phi = flip_receive_vector.Phi() * TMath::RadToDeg();
 
 }
 
