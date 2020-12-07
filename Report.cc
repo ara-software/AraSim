@@ -4361,25 +4361,20 @@ void Report::ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double
 
 void Report::GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_theta, double &ant_phi) {   //ant_theta and ant_phi is in degree 
 
-    // need to fix some parts.
-    // currently phi is not correct.
-    // I think we have to actually rotate (0,-1,0) to antenna location and get phi from rotated (0,-1,0)
-    ant_theta = rec_vector.Angle(antenna)*DEGRAD;
+    /*
+     * 2020-12-07 BAC
+     * We take the receive vector, which currently specificies where the signal is *going*
+     * And flip it to specify where the signal is *coming from*
+     * And then get the theta and phi, and return them in *degrees*.
+     *
+     * This is necessary because AraSim requires antenna_theta and antenna_phi
+     * to indicate "where the signal came from" in order to correctly
+     * calculate the polarization factors and the gain.
+    */
 
-    Vector unit0_10;
-    Vector unit100;
-    unit0_10.SetXYZ(0,-1,0);
-    unit100.SetXYZ(1,0,0);
-    Vector proj;
-
-    proj = antenna.Cross( rec_vector.Cross(antenna) );
-
-    if (proj * unit100 > 0.) {  // rec_vector is pointing to positive x direction
-        ant_phi = 360. - ( proj.Angle(unit0_10) )*DEGRAD;
-    }
-    else {
-        ant_phi = proj.Angle(unit0_10) * DEGRAD;
-    }
+    Vector flip_receive_vector = -1. * receive_vector;
+    antenna_theta = flip_receive_vector.Theta() * TMath::RadToDeg(); // return in degrees
+    antenna_phi = flip_receive_vector.Phi() * TMath::RadToDeg();
 
 }
 

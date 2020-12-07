@@ -1604,3 +1604,16 @@ Boost is chosen to do the interpolation (instead of GSL, ROOT, etc.)
 because AraSim already has boost as a dependency, and boost has a nice interface
 to the sinc/Whittaker-Shannon method.
 as a dependency 
+
+============================================================================
+2020/12/07 Brian Clark
+
+Update the GetAngleAnt function for a correct calculation of antenna_theta
+and antenna_phi. This fixes two things. 
+First, GetAngleAnt was not calculating antenna_phi correctly.
+Second, GetAngleAnt was calculating antenna_theta so that it indicated
+where the signal was  *going*. But antenna_theta needs to indicate where the signal
+*came from* in order to be used correctly in the new pol factor calculation (see above)
+and in the antenna gain calculation. This bug would so far have not impacted
+AraSim sensitivity estimates because the antennas are approximately
+azimuthally and zenithally symmetric.
