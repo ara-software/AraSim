@@ -147,7 +147,6 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     view_ang.clear();
     launch_ang.clear();
     rec_ang.clear();
-    rec_ang_phi.clear();
     reflect_ang.clear();
     Dist.clear();
     L_att.clear();
@@ -159,6 +158,10 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     Mag.clear();
     Fresnel.clear();
     Pol_factor.clear();
+    Pol_factorH.clear();
+    Pol_factorV.clear();
+    phi_rec.clear();
+    theta_rec.clear();
     //VHz_antfactor.clear();
     //VHz_filter.clear();
     Vfft.clear();
@@ -332,6 +335,10 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
     double fresnel;                                 // fresnel factor
     double Pol_factor;                              // polarization factor
     double tmp; // for non use return values
+    double Pol_factorV;
+    double Pol_factorH;
+    double phi_rec;
+    double theta_rec;
 
     double freq_tmp, heff, antenna_theta, antenna_phi;  // values needed for apply antenna gain factor and prepare fft, trigger
     double volts_forfft[settings1->NFOUR/2];       // array for fft
@@ -551,8 +558,6 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                    GetAngleAnt(receive_vector, detector->stations[i].strings[j].antennas[k], antenna_theta, antenna_phi);   // get theta, phi for signal ray arrived at antenna
                                    //cout<<"antenna theta : "<<antenna_theta<<"  phi : "<<antenna_phi<<endl;  
-                                   stations[i].strings[j].antennas[k].rec_ang_phi.push_back(antenna_phi*PI/180.); // store the antenna phi in radians (!)
-
 
                                    // old freq domain signal mode (AVZ model)
                                    if ( settings1->SIMULATION_MODE == 0 ) {
@@ -1043,6 +1048,17 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 
 					       stations[i].strings[j].antennas[k].Pol_factor.push_back(Pol_factor);
+                 Vector thetaHat = Vector(cos(antenna_theta*(PI/180))*cos(antenna_phi*(PI/180)),
+                                          cos(antenna_theta*(PI/180))*sin(antenna_phi*(PI/180)),
+                                          -sin(antenna_theta*(PI/180)));
+
+                 Vector phiHat = Vector(-sin(antenna_phi*(PI/180)),
+                                        cos(antenna_phi*(PI/180)),
+                                        0);
+					       stations[i].strings[j].antennas[k].Pol_factorH.push_back(abs(phiHat * Pol_vector));
+					       stations[i].strings[j].antennas[k].Pol_factorV.push_back(abs(thetaHat * Pol_vector));
+                 stations[i].strings[j].antennas[k].phi_rec.push_back(antenna_phi*(PI/180));
+                 stations[i].strings[j].antennas[k].theta_rec.push_back(antenna_theta*(PI/180));
                                                for (int n=0; n<settings1->NFOUR/2; n++) {
 
                                                    if (settings1->TRIG_ANALYSIS_MODE != 2) { // not pure noise mode (we need signal)
@@ -5402,5 +5418,3 @@ vector<double> Report::getHitTimesVectorHpol(Detector *detector, int station_i){
   return getHitTimesVector(detector, station_i, 1);
   
 }
-
-
