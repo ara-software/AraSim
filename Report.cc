@@ -4100,7 +4100,7 @@ double Report::calculatePolFactor(Vector &Pol_vector, int ant_type, double anten
      else if (ant_type == 1) {   // if h pol
          pol_factor = Pol_vector *phiHat;
      }
-     pol_factor = abs(pol_factor);
+     pol_factor = pol_factor;
      return pol_factor;
  }
 
