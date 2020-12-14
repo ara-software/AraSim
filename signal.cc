@@ -1480,11 +1480,6 @@ void GetVm_FarField_Tarray_Alvarez20009(
   else if(shower_type==1){
     k_E_bar = 4.65e-16; // V/cm/MHz^2
   }
-  // std::vector<double> A;
-  // for(int samp=0; samp<N; samp++){
-  //  double this_freq = freqs[samp];
-  //  A.push_back(k_E_bar * energy / E_C * X_0 / rho * TMath::Sin(theta) * this_freq);
-  // }
 
   // calculate nu_L
   double nu_L = rho / k_L / X_0;
@@ -1500,11 +1495,6 @@ void GetVm_FarField_Tarray_Alvarez20009(
   double beta;
   if(shower_type==0){ beta = 2.57;}
   else if(shower_type==1){ beta=2.74;}
-  // std::vector<double> d_L;
-  // for(int samp=0; samp<N; samp++){
-  //  double this_freq = freqs[samp];
-  //  d_L.push_back( 1. / (1. + TMath::Power(this_freq / nu_L, beta)));
-  // }
 
   // calculate d_R
   double k_R_bar;
@@ -1519,11 +1509,6 @@ void GetVm_FarField_Tarray_Alvarez20009(
   }
   double nu_R = rho / k_R_bar / R_M * CLIGHT / TMath::Sqrt(TMath::Power(n_index, 2.) - 1.);
   double alpha = 1.27;
-  // std::vector<double> d_R;
-  // for(int samp=0; samp<N; samp++){
-  //  double this_freq = freqs[samp];
-  //  d_R.push_back( 1. / (1. + TMath::Power(this_freq / nu_R, alpha)));
-  // }
 
   std::vector<double> spectrum;
   std::vector<double> phases;
