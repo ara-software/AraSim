@@ -158,7 +158,12 @@ double GetELPM();  // elpm
   double Param_RE_Tterm(double Tterm, double *par);
   double Param_RE_Tterm_approx(double Tterm, double *par); // use approx expansion if possible
 
-
+  // Alvarez2009
+  // parameterization based on ZHS from J. Alvarez-Muniz, W. R. Carvalho, M. Tueros, and E. Zas, Coherent cherenkov radio pulses fromhadronic showers up to eev energies,Astroparticle Physics35(2012), no. 6 287 – 299 
+  // and J. Alvarez-Muniz, C. James, R. Protheroe, and E. Zas, Thinned simulations of extremely energeticshowers in dense media for radio applications, Astroparticle Physics 32 (2009), no. 2 100 – 111
+  // see https://github.com/nu-radio/NuRadioMC/blob/master/NuRadioMC/SignalGen/parametrizations.py#L111
+  // void GetVm_FarField_Tarray_Alvarez20009(Event *event, Settings *settings1, double viewangle, double R, double k_L, double *Tarray, double *Earray);
+  void get_k_L(double energy, int shower_type, bool average_shower);
 
 
 double X0MEDIUM; // radiation length of medium

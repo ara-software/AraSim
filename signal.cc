@@ -1360,6 +1360,73 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 }
 
 
+//! A function to get the k_L for an Alvarez2009 parameterization
+/*!
+    
+    \param energy energy of the shower in eV
+    \param shower_type shower type, where 0 = hadronic, 1 = EM
+    \param average_shower wheter or not to use an average shower, or a random fluctuation
+    \return k_L
+*/
+double get_k_L(double energy, int shower_type, bool average_shower){
+
+  // energy in eV
+  // whether to use the average shower or not
+
+  double k_L;
+  if (shower_type==0){
+    // if it's a hadronic shower, then life is easy
+    double k_L_0 = 31.25;
+    double gamma = 3.01e-2;
+    double E_L = 1.e15; // eV
+    k_L = k_L_0 * TMath::Power((energy/E_L), gamma);
+  }
+  else if(shower_type==1){
+    // if it's a electromagnetic shower, then we have some calculations to do
+    double log10_E_0 = TMath::Log10(energy);
+
+    // calculate the average log10_k_L_bar
+    double log10_k_0 = 1.52;
+    double log10_E_LPM = 16.61;
+    double gamma_0 = 5.59e-2;
+    double gamma_1 = 0.39;
+    double log10_k_L_bar;
+    if (log10_E_0 < log10_E_LPM){
+      log10_k_L_bar = log10_k_0 + gamma_0 * (log10_E_0 - log10_E_LPM);
+    }
+    else{
+      log10_k_L_bar = log10_k_0 + gamma_1 * (log10_E_0 - log10_E_LPM);
+    }
+
+    if(average_shower){
+      // if average shower is requested, use the average value
+      k_L = TMath::Power(10., log10_k_L_bar);
+    }
+    else{
+      // if a shower-to-shower fluctuation was requested
+      // then we have to calculate the width of the k_L distribution
+      // so we can fluctuate around it
+      double sigma_0 = 3.39e-2;
+      double log10_E_sigma = 14.99;
+      double delta_0 = 0;
+      double delta_1 = 2.25e-2;
+      double sigma_k_L;
+      if (log10_E_0 < log10_E_sigma){
+        sigma_k_L = sigma_0 + delta_0 * (log10_E_0 - log10_E_sigma);
+      }
+      else{
+        sigma_k_L = sigma_0 + delta_1 * (log10_E_0 - log10_E_sigma);
+      }
+
+      // and then draw a k_L from a distribution center on the average value
+      // the gRandom object is over-written in AraSim.cc
+      // so this will be a proper TRandom3 norma/Gaussian generator
+      k_L = TMath::Power(10., gRandom->Gaus(log10_k_L_bar, sigma_k_L));
+    }
+  }
+  return k_L;
+}
+
 
 // old code (for the reference)
 /*
