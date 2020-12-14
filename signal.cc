@@ -1427,6 +1427,131 @@ double get_k_L(double energy, int shower_type, bool average_shower){
   return k_L;
 }
 
+//! A function to get the Askaryan field for Alvarez 2009
+/*!
+    
+    \param event AraSim Event class object
+    \param settings1 AraSim Settings class object
+    \param energy shower energy in eV
+    \param shower_type shower type, where 0 = hadronic, 1 = EM
+    \param viewangle viewing angle in radians
+    \param n_index index of refraction at the vertex
+    \param R distance to the shower in meters
+    \param k_L k_L parameter
+    \param Tarray array of times that will be filled in by the function
+    \param Earray array of e-field values that will be filled in by the function
+    \return void
+*/
+void GetVm_FarField_Tarray_Alvarez20009(
+  Event *event, 
+  Settings *settings1,
+  double energy,
+  int shower_type,
+  double viewangle, 
+  double n_index,
+  double R, 
+  double k_L, 
+  double *Tarray, 
+  double *Earray){
+
+  double dT = 0.1e-9; // seconds (1/10 of a nanosecond)
+  double N = 1024; // number of time domain samples
+  double dF = 1.0/(N*dT); // frequency bin width in Hz
+  dF/=1e6; // convert Hz to MHz
+  std::vector<double> freqs;
+  for(int samp=0; samp<N; samp++){
+    freqs.push_back(double(samp)*dF);
+  }
+
+  // constants
+  double E_C = 73.1; // MeV
+  double rho = 0.924; // g/cm^3
+  double X_0 = 36.08; // g/cm^2
+  double R_M = 10.57; // g/cm^2
+
+  // calculate A
+  double k_E_bar;
+  if (shower_type==0){
+    double k_E_0 = 4.13e-16; // V/cm/MHz^2
+    double k_E_1 = 2.54;
+    double log10_E_E = 10.60;
+    k_E_bar = k_E_0 * TMath::TanH((TMath::Log10(energy) - log10_E_E)/k_E_1);
+  }
+  else if(shower_type==1){
+    k_E_bar = 4.65e-16; // V/cm/MHz^2
+  }
+  // std::vector<double> A;
+  // for(int samp=0; samp<N; samp++){
+  //  double this_freq = freqs[samp];
+  //  A.push_back(k_E_bar * energy / E_C * X_0 / rho * TMath::Sin(theta) * this_freq);
+  // }
+
+  // calculate nu_L
+  double nu_L = rho / k_L / X_0;
+  double cher_cut = 1.e-8;
+  if (TMath::Abs(1 - n_index * TMath::Cos(viewangle)) < cher_cut){
+    nu_L *= CLIGHT / cher_cut;
+  }
+  else{
+    nu_L *= CLIGHT / TMath::Abs(1 - n_index * TMath::Cos(viewangle));
+  }
+
+  // calculate d_L
+  double beta;
+  if(shower_type==0){ beta = 2.57;}
+  else if(shower_type==1){ beta=2.74;}
+  // std::vector<double> d_L;
+  // for(int samp=0; samp<N; samp++){
+  //  double this_freq = freqs[samp];
+  //  d_L.push_back( 1. / (1. + TMath::Power(this_freq / nu_L, beta)));
+  // }
+
+  // calculate d_R
+  double k_R_bar;
+  if(shower_type==0){
+    double k_R_0 = 2.73;
+    double k_R_1 = 1.72;
+    double log10_E_R = 12.92;
+    k_R_bar = k_R_0 + TMath::TanH((log10_E_R - TMath::Log10(energy))/k_R_1);
+  }
+  else if (shower_type==1){
+    k_R_bar = 1.54;
+  }
+  double nu_R = rho / k_R_bar / R_M * CLIGHT / TMath::Sqrt(TMath::Power(n_index, 2.) - 1.);
+  double alpha = 1.27;
+  // std::vector<double> d_R;
+  // for(int samp=0; samp<N; samp++){
+  //  double this_freq = freqs[samp];
+  //  d_R.push_back( 1. / (1. + TMath::Power(this_freq / nu_R, alpha)));
+  // }
+
+  std::vector<double> spectrum;
+  std::vector<double> phases;
+
+  // put in the zero frequency nin content
+  spectrum.push_back(0.);
+  phases.push_back(0.);
+
+  for(int samp=1; samp<N; samp++){
+    // skip the first bin, which is the DC bin (freq=0)
+
+    double this_freq = freqs[samp];
+    double A = k_E_bar * energy / E_C * X_0 / rho * TMath::Sin(viewangle) * this_freq;
+    double d_L = 1. / (1. + TMath::Power(this_freq / nu_L, beta));
+    double d_R = 1. / (1. + TMath::Power(this_freq / nu_R, alpha));
+    double the_spectrum = A * d_L * d_R;
+
+    // double the_spectrum = A[samp] * d_L[samp] * d_R[samp];
+
+    the_spectrum *= 0.5; // the ZHS Fourier transform normalization
+    the_spectrum /= R; // 1/R attenuation
+    spectrum.push_back(the_spectrum);
+
+    // set all phases to 90 degrees
+    phases.push_back(0.5 * PI);
+  } 
+
+}
 
 // old code (for the reference)
 /*
