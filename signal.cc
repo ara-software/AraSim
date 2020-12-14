@@ -865,7 +865,7 @@ double Signal::Greisen(double x_in, double *par) {
 
 
 // depending on the shower_mode, make Vm array for em shower/had shower or both
-void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins ) {
+void Signal::Hong_Alvarez2011Model( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins ) {
 
 
 
@@ -1368,7 +1368,7 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
     \param average_shower wheter or not to use an average shower, or a random fluctuation
     \return k_L
 */
-double get_k_L(double energy, int shower_type, bool average_shower){
+double Signal::get_k_L(double energy, int shower_type, bool average_shower){
 
   // energy in eV
   // whether to use the average shower or not
@@ -1438,11 +1438,12 @@ double get_k_L(double energy, int shower_type, bool average_shower){
     \param n_index index of refraction at the vertex
     \param R distance to the shower in meters
     \param k_L k_L parameter
+    \param nsamps number of samples in the output array
     \param Tarray array of times that will be filled in by the function
     \param Earray array of e-field values that will be filled in by the function
     \return void
 */
-void GetVm_FarField_Tarray_Alvarez20009(
+void Signal::Alvarez2009Model(
   Event *event, 
   Settings *settings1,
   double energy,
@@ -1450,7 +1451,8 @@ void GetVm_FarField_Tarray_Alvarez20009(
   double viewangle, 
   double n_index,
   double R, 
-  double k_L, 
+  double k_L,
+  int nsamps, 
   double *Tarray, 
   double *Earray){
 
@@ -1537,6 +1539,40 @@ void GetVm_FarField_Tarray_Alvarez20009(
   } 
 
 }
+
+// wrapper function to call the AraSim time domain models
+void Signal::GetVm_FarField_Tarray(
+  Event *event, 
+  Settings *settings1, 
+  double viewangle, 
+  double atten_factor, 
+  int outbin, 
+  double *Tarray, 
+  double *Earray, 
+  int &skip_bins){
+
+  int simulation_mode = settings1->SIMULATION_MODE;
+
+  if (simulation_mode==1){
+    // Eugene's implementation of the Alvarez 2011 model
+
+    Hong_Alvarez2011Model( event, settings1, viewangle, atten_factor, outbin, Tarray, Earray, skip_bins);
+  }
+
+  else if(simulation_mode==2){
+    // Brian's implementation of the Alvarez 2009 model
+
+    double energy = 0.0; // FIXME
+    int shower_type = 1; // FIXME
+    double n_index=1.78; // FIXME
+    double R=1.; // FIXME
+    double k_L=1.; // FIXME
+    int nsamps = 1024; //FIXME
+
+    Alvarez2009Model(event, settings1, energy, shower_type, viewangle, n_index, R, k_L, nsamps, Tarray, Earray);
+  }
+}
+
 
 // old code (for the reference)
 /*

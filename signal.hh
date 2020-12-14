@@ -153,7 +153,7 @@ double GetELPM();  // elpm
 
 
   //void GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray );
-  void GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins );
+  void Hong_Alvarez2011Model( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins );
 
   double Param_RE_Tterm(double Tterm, double *par);
   double Param_RE_Tterm_approx(double Tterm, double *par); // use approx expansion if possible
@@ -162,9 +162,11 @@ double GetELPM();  // elpm
   // parameterization based on ZHS from J. Alvarez-Muniz, W. R. Carvalho, M. Tueros, and E. Zas, Coherent cherenkov radio pulses fromhadronic showers up to eev energies,Astroparticle Physics35(2012), no. 6 287 – 299 
   // and J. Alvarez-Muniz, C. James, R. Protheroe, and E. Zas, Thinned simulations of extremely energeticshowers in dense media for radio applications, Astroparticle Physics 32 (2009), no. 2 100 – 111
   // see https://github.com/nu-radio/NuRadioMC/blob/master/NuRadioMC/SignalGen/parametrizations.py#L111
-  void get_k_L(double energy, int shower_type, bool average_shower);
-  void GetVm_FarField_Tarray_Alvarez20009(Event *event, Settings *settings1, double viewangle, double R, double k_L, double *Tarray, double *Earray);
+  double get_k_L(double energy, int shower_type, bool average_shower);
+  void Alvarez2009Model(  Event *event, Settings *settings1, double energy, int shower_type, double viewangle, double n_index, double R, double k_L, int nsamps, double *Tarray, double *Earray);
 
+  // a wrapper function 
+  void GetVm_FarField_Tarray(Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins);
 
 double X0MEDIUM; // radiation length of medium
 double KELVINS;  // temperature of medium + system
