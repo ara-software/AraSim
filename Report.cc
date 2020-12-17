@@ -2843,6 +2843,14 @@ void Report::rerun_event(Event *event, Detector *detector,
     RaySolver *raysolver, Signal *signal, 
     IceModel *icemodel, Settings *settings){
 
+    // we create T_forint, which is the final time sampling of the traces before they are combined
+    double RandomTshift = 0. ; // for replication, we have no choice by to set this
+    double init_T = settings->TIMESTEP*-1.e9*((double)settings->NFOUR/4 + RandomTshift);
+    double T_forint[settings->NFOUR/2];
+    for(int n=0; n<settings->NFOUR/2; n++){
+        T_forint[n] = init_T + (double)n*settings->TIMESTEP*1.e9;
+    }
+
     int num_strings = detector->stations[0].strings.size();
     int num_antennas = detector->stations[0].strings[0].antennas.size();
 
@@ -3016,16 +3024,17 @@ void Report::rerun_event(Event *event, Detector *detector,
                     // back to time domain
                     Tools::realft(V_forfft, -1, Nnew);
 
-                    // double volts_forint[settings->NFOUR/2];
-                    // double T_forint[settings->NFOUR/2];
-                    // Tools::SincInterpolation(Nnew, T_forfft, V_forfft,
-                    //     settings->NFOUR/2, T_forint, volts_forint
-                    //     );
 
-                    // // we have to fix the normalization on the inverse fft (2/N)
-                    // for(int n=0; n<settings->NFOUR/2; n++){
-                    //     volts_forint[n] *= 2./Nnew;
-                    // }
+                    // interpolate to final time sampling
+                    double volts_forint[settings->NFOUR/2];
+                    Tools::SincInterpolation(Nnew, T_forfft, V_forfft,
+                        settings->NFOUR/2, T_forint, volts_forint
+                    );
+
+                    // fix the normalization on the inverse fft (2/N)
+                    for(int n=0; n<settings->NFOUR/2; n++){
+                        volts_forint[n] *= 2./Nnew;
+                    }
 
                     ray_sol_cnt++;
                 }
