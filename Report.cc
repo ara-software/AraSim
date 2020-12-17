@@ -2856,9 +2856,7 @@ void Report::rerun_event(Event *event, Detector *detector,
 
     for(int j=0; j<num_strings; j++){
         for(int k=0; k<num_antennas; k++){
-
-            printf("On string %i, antenna %i\n",j,k);
-
+            
             // redo the ray tracing
             vector<vector<double> > ray_output;
             vector<vector<vector<double> > > Ray_Step;
