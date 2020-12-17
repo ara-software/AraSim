@@ -2841,7 +2841,10 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 void Report::rerun_event(Event *event, Detector *detector, 
     RaySolver *raysolver, Signal *signal, 
-    IceModel *icemodel, Settings *settings){
+    IceModel *icemodel, Settings *settings,
+    vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes,
+    vector<vector<vector<double> > > &traceVoltages
+    ){
 
     // we create T_forint, which is the final time sampling of the traces before they are combined
     double RandomTshift = 0. ; // for replication, we have no choice by to set this
@@ -2856,7 +2859,9 @@ void Report::rerun_event(Event *event, Detector *detector,
 
     for(int j=0; j<num_strings; j++){
         for(int k=0; k<num_antennas; k++){
-            
+
+            int idx = ((j*4)+k);
+
             // redo the ray tracing
             vector<vector<double> > ray_output;
             vector<vector<vector<double> > > Ray_Step;
@@ -2866,6 +2871,9 @@ void Report::rerun_event(Event *event, Detector *detector,
 
             // if there is a solution
             if (raysolver->solution_toggle){
+
+                // numSolutions[idx]=ray_output[0].size();
+                numSolutions[idx]=ray_output[0].size();
 
                 int ray_sol_cnt=0;
                 while (ray_sol_cnt < ray_output[0].size()){
@@ -3041,6 +3049,12 @@ void Report::rerun_event(Event *event, Detector *detector,
                     // fix the normalization on the inverse fft (2/N)
                     for(int n=0; n<settings->NFOUR/2; n++){
                         volts_forint[n] *= 2./Nnew;
+                    }
+
+                    // store the result
+                    for(int n=0; n<settings->NFOUR/2; n++){
+                        traceTimes[idx][ray_sol_cnt][n] = T_forint[n];
+                        traceVoltages[idx][ray_sol_cnt][n] = volts_forint[n];
                     }
 
                     ray_sol_cnt++;
