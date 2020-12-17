@@ -2951,6 +2951,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                     double freq_tmp = dF_Nnew*((double)Nnew/2.+0.5);// in Hz 0.5 to place the middle of the bin and avoid zero freq
                     double freq_lastbin = freq_tmp;
 
+                    // save the gain and heff of the last bin, which must be treated specially
                     double gain_lastbin = detector->GetGain_1D_OutZero(
                         freq_tmp*1.E-6, // Hz
                         antenna_theta, antenna_phi,
@@ -2960,10 +2961,34 @@ void Report::rerun_event(Event *event, Detector *detector,
                         icemodel->GetN(detector->stations[0].strings[j].antennas[k])
                         );
 
+                    // integrate along the path and save the frequency dependent attenuation
+                    double attenuations[Nnew/2];
+                    std::fill_n(attenuations, Nnew/2, 1.); // all of the attenuations initially start at 1
+
+                    for (int steps = 1; steps < (int) RayStep[ray_sol_cnt][0].size(); steps++) {
+                        double dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
+                        double dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
+                        double dl = sqrt((dx * dx) + (dz * dz));
+                        for(int n=0; n<Nnew/2; n++){
+                            freq_tmp = dF_Nnew*((double)n+0.5);
+                            // use ray midpoint for attenuation calculation
+                            double IceAttenFactor = (  exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9))
+                                                        + exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1], freq_tmp * 1.E-9))
+                                                    )/2.; // 1e9 for conversion to GHz
+                            // increase the attenuation
+                            attenuations[n]*=IceAttenFactor;
+                        }
+                    }
+
                     // loop over frequency bins
                     for(int n=0; n<Nnew/2; n++){
                         freq_tmp = dF_Nnew*((double)n+0.5);
 
+                        // apply the attenuation for this frequency bin
+                        V_forfft[2*n]*=attenuations[n];
+                        V_forfft[2*n + 1]*=attenuations[n];
+
+                        // get the antenna gain (and then heff) and phase
                         double gain = detector->GetGain_1D_OutZero(
                             freq_tmp*1.E-6, // Hz
                             antenna_theta, antenna_phi,
@@ -2978,23 +3003,8 @@ void Report::rerun_event(Event *event, Detector *detector,
                             detector->stations[0].strings[j].antennas[k].type
                             );
 
-                        // get the attenuation
-                        double IceAttenFactor = 1.;
-                        double dx, dz, dl;
-                        for (int steps = 1; steps < (int) RayStep[ray_sol_cnt][0].size(); steps++) {
-                            dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
-                            dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
-                            dl = sqrt((dx * dx) + (dz * dz));
-                            // use ray midpoint for attenuation calculation
-                            IceAttenFactor *= (   exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9))
-                                                + exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1], freq_tmp * 1.E-9))
-                                                )/2.; // 1e9 for conversion to GHz
-                        }
-                        // apply the attenuation
-                        V_forfft[2*n]*=IceAttenFactor;
-                        V_forfft[2*n + 1]*=IceAttenFactor;
-
-                        // apply the antenna factors
+                        // apply the antenna factors (this will also apply the polarization)
+                        // and the electronics response
                         double Pol_factor;
                         if(n>0){
                             ApplyAntFactors_Tdomain(
@@ -3021,9 +3031,8 @@ void Report::rerun_event(Event *event, Detector *detector,
                         }
                     }
 
-                    // back to time domain
+                    // fft back to time domain
                     Tools::realft(V_forfft, -1, Nnew);
-
 
                     // interpolate to final time sampling
                     double volts_forint[settings->NFOUR/2];
