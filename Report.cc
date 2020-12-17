@@ -2911,7 +2911,8 @@ void Report::rerun_event(Event *event, Detector *detector,
                     double local_Tarray[local_outbin];
                     int local_skipbins;
                     signal->GetVm_FarField_Tarray(event, settings, viewangle,
-                        atten_factor, local_outbin, local_Tarray, local_Earray, local_skipbins);
+                        atten_factor, local_outbin, local_Tarray, local_Earray, local_skipbins
+                        );
 
                     double dT_forfft = local_Tarray[1] - local_Tarray[0];
                     int Ntmp = settings->TIMESTEP*1.e9 / dT_forfft;
@@ -2963,7 +2964,8 @@ void Report::rerun_event(Event *event, Detector *detector,
                         double heff = GaintoHeight(gain, freq_tmp,
                             icemodel->GetN(detector->stations[0].strings[j].antennas[k])
                             );
-                        double phase = detector->GetAntPhase_1D(freq_tmp*1.e-6,
+                        double phase = detector->GetAntPhase_1D(
+                            freq_tmp*1.E-6, // Hz
                             antenna_theta, antenna_phi, 
                             detector->stations[0].strings[j].antennas[k].type
                             );
@@ -3009,21 +3011,22 @@ void Report::rerun_event(Event *event, Detector *detector,
                                 V_forfft[2*n], V_forfft[2*n + 1]
                                 );
                         }
-
-                        // back to time domain
-                        Tools::realft(V_forfft, -1, Nnew);
-
-                        double volts_forint[settings->NFOUR/2];
-                        double T_forint[settings->NFOUR/2];
-                        Tools::SincInterpolation(Nnew, T_forfft, V_forfft,
-                            settings->NFOUR/2, T_forint, volts_forint
-                            );
-
-                        // // we have to fix the normalization on the inverse fft (2/N)
-                        // for(int n=0; n<settings->NFOUR/2; n++){
-                        //     volts_forint[n] *= 2./Nnew;
-                        // }
                     }
+
+                    // back to time domain
+                    Tools::realft(V_forfft, -1, Nnew);
+
+                    // double volts_forint[settings->NFOUR/2];
+                    // double T_forint[settings->NFOUR/2];
+                    // Tools::SincInterpolation(Nnew, T_forfft, V_forfft,
+                    //     settings->NFOUR/2, T_forint, volts_forint
+                    //     );
+
+                    // // we have to fix the normalization on the inverse fft (2/N)
+                    // for(int n=0; n<settings->NFOUR/2; n++){
+                    //     volts_forint[n] *= 2./Nnew;
+                    // }
+
                     ray_sol_cnt++;
                 }
             }
