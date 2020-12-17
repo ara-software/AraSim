@@ -2839,6 +2839,198 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 }   // end Connect_Interaction_Detector
 
+void Report::rerun_event(Event *event, Detector *detector, 
+    RaySolver *raysolver, Signal *signal, 
+    IceModel *icemodel, Settings *settings){
+
+    int num_strings = detector->stations[0].strings.size();
+    int num_antennas = detector->stations[0].strings[0].antennas.size();
+
+    for(int j=0; j<num_strings; j++){
+        for(int k=0; k<num_antennas; k++){
+
+            printf("On string %i, antenna %i\n",j,k);
+
+            // redo the ray tracing
+            vector<vector<double> > ray_output;
+            vector<vector<vector<double> > > Ray_Step;
+            raysolver->Solve_Ray(event->Nu_Interaction[0].posnu,
+                detector->stations[0].strings[j].antennas[k],
+                icemodel, ray_output, settings, Ray_Step);
+
+            // if there is a solution
+            if (raysolver->solution_toggle){
+
+                int ray_sol_cnt=0;
+                while (ray_sol_cnt < ray_output[0].size()){
+
+                    double viewangle = ray_output[1][ray_sol_cnt];
+                    Position launch_vector;
+                    Position receive_vector;
+                    Vector n_trg_pokey;
+                    Vector n_trg_slappy;
+
+                    GetParameters(
+                        event->Nu_Interaction[0].posnu,
+                        detector->stations[0].strings[j].antennas[k],
+                        event->Nu_Interaction[0].nnu,
+                        viewangle,
+                        ray_output[2][ray_sol_cnt],
+                        launch_vector, receive_vector,
+                        n_trg_slappy, n_trg_pokey
+                        );
+
+                    // get polarization
+                    Vector Pol_vector = GetPolarization(
+                        event->Nu_Interaction[0].nnu, launch_vector);
+
+                    double fresnel, mag;
+                    icemodel->GetFresnel(
+                        ray_output[1][ray_sol_cnt],
+                        ray_output[2][ray_sol_cnt],
+                        ray_output[3][ray_sol_cnt],
+                        event->Nu_Interaction[0].posnu,
+                        launch_vector, receive_vector,
+                        settings, fresnel, mag, Pol_vector
+                        );
+
+                    // get arrival angle at the antenna
+                    double antenna_theta, antenna_phi;
+                    GetAngleAnt(
+                        receive_vector, 
+                        detector->stations[0].strings[j].antennas[k],
+                        antenna_theta, antenna_phi
+                        );
+
+                    // this is the 1/R and fresnel and focusing effect
+                    double atten_factor = 1. / ray_output[0][ray_sol_cnt] * mag * fresnel;
+
+                    // get the electric field
+                    int local_outbin=64;
+                    double local_Earray[local_outbin];
+                    double local_Tarray[local_outbin];
+                    int local_skipbins;
+                    signal->GetVm_FarField_Tarray(event, settings, viewangle,
+                        atten_factor, local_outbin, local_Tarray, local_Earray, local_skipbins);
+
+                    double dT_forfft = local_Tarray[1] - local_Tarray[0];
+                    int Ntmp = settings->TIMESTEP*1.e9 / dT_forfft;
+                    int Nnew=1;
+                    while(Ntmp > 1){
+                        Ntmp = Ntmp/2;
+                        Nnew = Nnew*2;
+                    }
+                    Nnew = Nnew * settings->NFOUR/2;
+
+                    double V_forfft[Nnew];
+                    double T_forfft[Nnew];
+
+                    for(int n=0; n<Nnew; n++){
+                        T_forfft[n] = Tarray[local_outbin/2] - (dT_forfft*(double)(Nnew/2 - n));
+                        if ( (n >= Nnew/2 - outbin/2) && (n < Nnew/2 + outbin/2) ) {
+                                V_forfft[n] = Earray[ n - (Nnew/2 - outbin/2) ];
+                        }
+                        else{
+                            V_forfft[n] = 0.;
+                        }
+                    }
+
+                    // transform to the frequency domain
+                    Tools::realft(V_forfft, 1, Nnew);
+
+                    double dF_Nnew = 1./( (double)(Nnew) * (dT_forfft)*1.e-9 ); // in Hz
+                    double freq_tmp = dF_Nnew*((double)Nnew/2.+0.5);// in Hz 0.5 to place the middle of the bin and avoid zero freq
+                    double freq_lastbin = freq_tmp;
+
+                    double gain_lastbin = detector->GetGain_1D_OutZero(
+                        freq_tmp*1.E-6, // Hz
+                        antenna_theta, antenna_phi,
+                        detector->stations[0].strings[j].antennas[k].type
+                        );
+                    double heff_lastbin = GaintoHeight(gain_lastbin, freq_tmp,
+                        icemodel->GetN(detector->stations[0].strings[j].antennas[k])
+                        );
+
+                    // loop over frequency bins
+                    for(int n=0; n<Nnew/2; n++){
+                        freq_tmp = dF_Nnew*((double)n+0.5);
+
+                        double gain = detector->GetGain_1D_OutZero(
+                            freq_tmp*1.E-6, // Hz
+                            antenna_theta, antenna_phi,
+                            detector->stations[0].strings[j].antennas[k].type
+                            );
+                        double heff = GaintoHeight(gain, freq_tmp,
+                            icemodel->GetN(detector->stations[0].strings[j].antennas[k])
+                            );
+                        double phase = detector->GetAntPhase_1D(freq_tmp*1.e-6,
+                            antenna_theta, antenna_phi, 
+                            detector->stations[0].strings[j].antennas[k].type
+                            );
+
+                        // get the attenuation
+                        double IceAttenFactor = 1.;
+                        double dx, dz, dl;
+                        for (int steps = 1; steps < (int) RayStep[ray_sol_cnt][0].size(); steps++) {
+                            dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
+                            dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
+                            dl = sqrt((dx * dx) + (dz * dz));
+                            // use ray midpoint for attenuation calculation
+                            IceAttenFactor *= (   exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9))
+                                                + exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1], freq_tmp * 1.E-9))
+                                                )/2.; // 1e9 for conversion to GHz
+                        }
+                        // apply the attenuation
+                        V_forfft[2*n]*=IceAttenFactor;
+                        V_forfft[2*n + 1]*=IceAttenFactor;
+
+                        // apply the antenna factors
+                        double Pol_factor;
+                        if(n>0){
+                            ApplyAntFactors_Tdomain(
+                                phase, heff, n_trg_pokey, n_trg_slappy, Pol_vector, 
+                                detector->stations[0].strings[j].antennas[k].type,
+                                Pol_factor, V_forfft[2*n], V_forfft[2*n + 1],
+                                settings, antenna_theta, antenna_phi
+                                );
+                            ApplyElect_Tdomain(freq_tmp*1.e-6, detector,
+                                V_forfft[2*n], V_forfft[2*n + 1], settings
+                                );
+                        }
+                        else{
+                            ApplyAntFactors_Tdomain_FirstTwo(
+                                heff, heff_lastbin, n_trg_pokey, n_trg_slappy, Pol_vector, 
+                                detector->stations[0].strings[j].antennas[k].type,
+                                Pol_factor, V_forfft[2*n], V_forfft[2*n + 1],
+                                antenna_theta, antenna_phi
+                                );
+                            ApplyElect_Tdomain_FirstTwo(freq_tmp*1.e-6,
+                                freq_lastbin*1.e-6, detector,
+                                V_forfft[2*n], V_forfft[2*n + 1]
+                                );
+                        }
+
+                        // back to time domain
+                        Tools::realft(V_forfft, -1, Nnew);
+
+                        double volts_forint[settings->NFOUR/2];
+                        double T_forint[settings->NFOUR/2];
+                        Tools::SincInterpolation(Nnew, T_forfft, V_forfft,
+                            settings->NFOUR/2, T_forint, volts_forint
+                            );
+
+                        // // we have to fix the normalization on the inverse fft (2/N)
+                        // for(int n=0; n<settings->NFOUR/2; n++){
+                        //     volts_forint[n] *= 2./Nnew;
+                        // }
+                    }
+                    ray_sol_cnt++;
+                }
+            }
+        }
+    }
+}
+
 int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode ){
  
   class CircularBuffer {
