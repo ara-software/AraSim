@@ -2893,7 +2893,6 @@ void Report::rerun_event(Event *event, Detector *detector,
                         launch_vector, receive_vector,
                         n_trg_slappy, n_trg_pokey
                         );
-
                     // get polarization
                     Vector Pol_vector = GetPolarization(
                         event->Nu_Interaction[0].nnu, launch_vector);
@@ -2907,7 +2906,6 @@ void Report::rerun_event(Event *event, Detector *detector,
                         launch_vector, receive_vector,
                         settings, fresnel, mag, Pol_vector
                         );
-
                     // get arrival angle at the antenna
                     double antenna_theta, antenna_phi;
                     GetAngleAnt(
@@ -2915,7 +2913,6 @@ void Report::rerun_event(Event *event, Detector *detector,
                         detector->stations[0].strings[j].antennas[k],
                         antenna_theta, antenna_phi
                         );
-
                     // this is the 1/R and fresnel and focusing effect
                     double atten_factor = 1. / ray_output[0][ray_sol_cnt] * mag * fresnel;
 
@@ -2941,9 +2938,9 @@ void Report::rerun_event(Event *event, Detector *detector,
                     double T_forfft[Nnew];
 
                     for(int n=0; n<Nnew; n++){
-                        T_forfft[n] = Tarray[local_outbin/2] - (dT_forfft*(double)(Nnew/2 - n));
-                        if ( (n >= Nnew/2 - outbin/2) && (n < Nnew/2 + outbin/2) ) {
-                                V_forfft[n] = Earray[ n - (Nnew/2 - outbin/2) ];
+                        T_forfft[n] = local_Tarray[local_outbin/2] - (dT_forfft*(double)(Nnew/2 - n));
+                        if ( (n >= Nnew/2 - local_outbin/2) && (n < Nnew/2 + local_outbin/2) ) {
+                            V_forfft[n] = local_Earray[ n - (Nnew/2 - local_outbin/2) ];
                         }
                         else{
                             V_forfft[n] = 0.;
@@ -2971,15 +2968,15 @@ void Report::rerun_event(Event *event, Detector *detector,
                     double attenuations[Nnew/2];
                     std::fill_n(attenuations, Nnew/2, 1.); // all of the attenuations initially start at 1
 
-                    for (int steps = 1; steps < (int) RayStep[ray_sol_cnt][0].size(); steps++) {
-                        double dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
-                        double dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
+                    for (int steps = 1; steps < (int) Ray_Step[ray_sol_cnt][0].size(); steps++) {
+                        double dx = Ray_Step[ray_sol_cnt][0][steps - 1] - Ray_Step[ray_sol_cnt][0][steps];
+                        double dz = Ray_Step[ray_sol_cnt][1][steps - 1] - Ray_Step[ray_sol_cnt][1][steps];
                         double dl = sqrt((dx * dx) + (dz * dz));
                         for(int n=0; n<Nnew/2; n++){
                             freq_tmp = dF_Nnew*((double)n+0.5);
                             // use ray midpoint for attenuation calculation
-                            double IceAttenFactor = (  exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9))
-                                                        + exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1], freq_tmp * 1.E-9))
+                            double IceAttenFactor = (  exp(-dl / icemodel->GetFreqDepIceAttenuLength(-Ray_Step[ray_sol_cnt][1][steps], freq_tmp * 1.E-9))
+                                                        + exp(-dl / icemodel->GetFreqDepIceAttenuLength(-Ray_Step[ray_sol_cnt][1][steps-1], freq_tmp * 1.E-9))
                                                     )/2.; // 1e9 for conversion to GHz
                             // increase the attenuation
                             attenuations[n]*=IceAttenFactor;
