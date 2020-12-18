@@ -2906,6 +2906,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                         launch_vector, receive_vector,
                         settings, fresnel, mag, Pol_vector
                         );
+
                     // get arrival angle at the antenna
                     double antenna_theta, antenna_phi;
                     GetAngleAnt(
@@ -2913,6 +2914,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                         detector->stations[0].strings[j].antennas[k],
                         antenna_theta, antenna_phi
                         );
+                    
                     // this is the 1/R and fresnel and focusing effect
                     double atten_factor = 1. / ray_output[0][ray_sol_cnt] * mag * fresnel;
 
