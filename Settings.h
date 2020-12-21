@@ -288,6 +288,8 @@ class Settings
 	                   // 1: using different antenna response for the top Vpol antennas, otherwise same as old default
                        // 2: use the ARIANNA wipld LPDA responses instead
                        // 3: use the chiba xfdtd models (treats top and bottom as the same)
+                       // 4: use the chiba in-situ models (treats top and bottom as the same)
+                       // The related wiki page for antenna models description:http://ara.icecube.wisc.edu/wiki/index.php/Antenna_model
 
 	int APPLY_NOISE_FIGURE; // 0: do not apply new noise figure from Thomas Meures 2016
 	                        // 1: apply new noise figure to data
