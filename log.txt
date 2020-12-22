@@ -1592,3 +1592,11 @@ coefficients that are needed in order to do noise calculations.
 
 Added the Chiba in-situ antenna model as a ANTENNA_MODE=4 option.
 Related documents in DocBD: http://ara.physics.wisc.edu/docs/0018/001838/001/AntennaModel_20190227.pdf
+
+============================================================================
+
+2020/12/22 Myoungchul Kim
+
+Added the wiki page link for antenna models near ANTENNA_MODE option in Settings.h.
+Added the script that makes the Chiba in-situ antenna model in AraSim/data/antennas/ path.
+The related wiki page: http://ara.icecube.wisc.edu/wiki/index.php/Antenna_model
