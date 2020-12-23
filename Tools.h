@@ -66,6 +66,7 @@ class Tools {
     static void GetNext2NumbersAsString(ifstream& fin,ofstream& fout,string& number1,string& number2, string& stherest);
     static void GetNextNumberAsString(ifstream& fin,ofstream& fout,string& number);
 
+    static void SincInterpolation(int n1, double *x1, double *y1, int n2, double *x2, double *y2 );
     static void SimpleLinearInterpolation(int n1, double *x1, double *y1, int n2, double *x2, double *y2 );
     static void SimpleLinearInterpolation_OutZero(int n1, double *x1, double *y1, int n2, double *x2, double *y2 );
     static double SimpleLinearInterpolation_extend_Single(int n1, double *x1, double *y1, double x2 );

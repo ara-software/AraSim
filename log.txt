@@ -1333,7 +1333,6 @@ removed useless/problematic option in makefile
 added namespace definition in Tools.h
 
 ============================================================================
-<<<<<<< .working
 
 04/07/2017 Carl Pfendner:
 
@@ -1612,3 +1611,4 @@ as a dependency
 Added the wiki page link for antenna models near ANTENNA_MODE option in Settings.h.
 Added the script that makes the Chiba in-situ antenna model in AraSim/data/antennas/ path.
 The related wiki page: http://ara.icecube.wisc.edu/wiki/index.php/Antenna_model
+
