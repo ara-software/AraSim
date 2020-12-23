@@ -1594,6 +1594,18 @@ Added the Chiba in-situ antenna model as a ANTENNA_MODE=4 option.
 Related documents in DocBD: http://ara.physics.wisc.edu/docs/0018/001838/001/AntennaModel_20190227.pdf
 
 ============================================================================
+ 2020/11/24 Brian Clark
+
+Add a new interpolation function (SincInterpolation) to the Tools class.
+This method of interpolation is useful for preserving relative spectral power.
+Linear interpolation (the default currently used in AraSim) can artifact
+the spectrum of a signal at high frequencies. This requires Boost > 1.71.00 though!
+Boost is chosen to do the interpolation (instead of GSL, ROOT, etc.)
+because AraSim already has boost as a dependency, and boost has a nice interface
+to the sinc/Whittaker-Shannon method.
+as a dependency 
+
+============================================================================
 
 2020/12/22 Myoungchul Kim
 
