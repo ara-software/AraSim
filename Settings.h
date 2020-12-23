@@ -268,6 +268,11 @@ class Settings
 	//11 : Moore's Bay Model 2
 	//20 : Byrd (Ebimuna (1983))
 	//30 : Mizuho (Ebimuna (1983))
+	
+        int SAVE_RAY_PATH; // save the final ray path for examination after the function runs.
+        // 0 : default, not save any ray path
+        // 1 : save any ray path for triggered event. It should be working with DATA_SAVE_MODE=1 or 0
+        // 2 : save any ray path for all event. It should be working with DATA_SAVE_MODE=0
 
 	int WAVEFORM_LENGTH; // the number of samples in the waveform length for V_mimic and UsefulAtriStationEvent, default: 64/2*20 = 640
 

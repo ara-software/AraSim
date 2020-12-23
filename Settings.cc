@@ -271,6 +271,8 @@ outputdir="outputs"; // directory where outputs go
 
     RAY_TRACE_ICE_MODEL_PARAMS=0; // Default: South Pole values fitted from RICE data
 
+    SAVE_RAY_PATH=0; // 0: Default, save no ray path, 1: save ray path for the triggered event(should working with DATA_SAVE_MODE=1 or 0), 2: save ray path for all event(should working with DATA_SAVE_MODE=0)
+
     WAVEFORM_LENGTH = 64/2*20; // Default: 64 digitization samples per block / 2 samples per waveform value * 20 blocks (value used for 2013-2016)
     
     WAVEFORM_CENTER = 0; // Default: 0, no offset in waveform centering
@@ -630,6 +632,9 @@ void Settings::ReadFile(string setupfile) {
 	      else if (label == "RAY_TRACE_ICE_MODEL_PARAMS") {
 		RAY_TRACE_ICE_MODEL_PARAMS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
 	      }
+              else if (label == "SAVE_RAY_PATH") {
+                SAVE_RAY_PATH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
 	      else if (label == "WAVEFORM_LENGTH") {
 		WAVEFORM_LENGTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
 	      }
@@ -818,6 +823,16 @@ int Settings::CheckCompatibilitiesSettings() {
         }
     }
     */
+
+    if (DATA_SAVE_MODE == 1 && SAVE_RAY_PATH == 2){
+        cerr<<"DATA_SAVE_MODE=1 doesn't work with SAVE_RAY_PATH=2!"<<endl;
+        num_err++;
+    }
+
+    if (DATA_SAVE_MODE == 2 && SAVE_RAY_PATH != 0){
+        cerr<<"DATA_SAVE_MODE=2 doesn't work with SAVE_RAY_PATH>0!"<<endl;
+        num_err++;
+    }
 
     // if BH_ANT_SEP_DIST_ON=1, we can't use READGEOM=1 (actual installed geom)
     if (BH_ANT_SEP_DIST_ON==1 && READGEOM==1) {
