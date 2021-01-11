@@ -927,8 +927,8 @@ void Signal::Build_Param_RE_Tterm_tables(){
 
   for(int i=0; i<table_num_bins; i++){
     double time = (i*tables_dt) + tables_t_min;
-    tterm_table_em.push_back(Param_RE_Tterm_approx(time, param_RA_em));
-    tterm_table_had.push_back(Param_RE_Tterm_approx(time, param_RA_had));
+    tterm_table_em.push_back(Param_RE_Tterm(time, param_RA_em));
+    tterm_table_had.push_back(Param_RE_Tterm(time, param_RA_had));
   }
   cout<<"Finished building the Param RE Tterm tables."<<endl;
 }
