@@ -1617,3 +1617,12 @@ where the signal was  *going*. But antenna_theta needs to indicate where the sig
 and in the antenna gain calculation. This bug would so far have not impacted
 AraSim sensitivity estimates because the antennas are approximately
 azimuthally and zenithally symmetric.
+
+
+============================================================================
+2020/12/10 Brian Clark
+
+Add a new mode (USE_PARAM_RE_TTERM_TABLE=1) which allows the user to evaluate
+the Param_RE_TTerm using a lookup table w/ interpolation instead of computing
+it on the fly. This increases the speed of the shower integral by more than an order
+of magnitude.

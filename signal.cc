@@ -913,9 +913,9 @@ std::vector<double> Signal::pick_table(int em_or_had){
 
 void Signal::Build_Param_RE_Tterm_tables(){
   cout<<"Building the Param RE Tterm tables..."<<endl;
-  tables_dt = 0.001;
+  tables_dt = 0.0001;
   tables_inv_dt = 1./tables_dt;
-  tables_max_t = 100.;
+  tables_max_t = 75.;
   tables_t_min = (-tables_max_t) + tables_dt/2.; // start it 1/2 sample "in" so that it "hops" time = 0
   tables_t_max = (tables_max_t) - tables_dt/2.; 
   int table_num_bins = int((tables_max_t/tables_dt)*2);
@@ -927,8 +927,8 @@ void Signal::Build_Param_RE_Tterm_tables(){
 
   for(int i=0; i<table_num_bins; i++){
     double time = (i*tables_dt) + tables_t_min;
-    tterm_table_em.push_back(Param_RE_Tterm(time, param_RA_em));
-    tterm_table_had.push_back(Param_RE_Tterm(time, param_RA_had));
+    tterm_table_em.push_back(Param_RE_Tterm_approx(time, param_RA_em));
+    tterm_table_had.push_back(Param_RE_Tterm_approx(time, param_RA_had));
   }
   cout<<"Finished building the Param RE Tterm tables."<<endl;
 }
@@ -1145,8 +1145,12 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 
                     //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[bin]) * Param_RE_Tterm(Tterm, param_RA);
                     //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
-                    // Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
-                    Integrate += -1 *(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, the_table_to_use);
+                    if(settings1->USE_PARAM_RE_TTERM_TABLE==1){
+                    	Integrate += -1 *(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, the_table_to_use);
+                    }
+                    else{
+                    	Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
+                    }
                 }
 
             }
@@ -1260,8 +1264,13 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[bin]) * Param_RE_Tterm(Tterm, param_RA);
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
-                        // Integrate += -1.*(event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
-                        Integrate += -1 *(event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_em);
+                        if(settings1->USE_PARAM_RE_TTERM_TABLE==1){
+                    		Integrate += -1 *(event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_em);
+                        }
+                        else{
+                        	Integrate += -1.*(event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);                        		
+                        }
+
                     }
 
                 }
@@ -1382,8 +1391,12 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[bin]) * Param_RE_Tterm(Tterm, param_RA);
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
-                        // Integrate += -1.*(event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
-                        Integrate += -1 *(event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_had);
+                        if(settings1->USE_PARAM_RE_TTERM_TABLE==1){
+                        	Integrate += -1 *(event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_had);
+                        }
+                        else{
+                       		Integrate += -1.*(event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);                        	
+                        }
                     }
 
                 }
