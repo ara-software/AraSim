@@ -2841,10 +2841,23 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 void Report::rerun_event(Event *event, Detector *detector, 
     RaySolver *raysolver, Signal *signal, 
-    IceModel *icemodel, Settings *settings,
+    IceModel *icemodel, Settings *settings, int which_solution,
     vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes,
     vector<vector<vector<double> > > &traceVoltages
     ){
+
+    // which solution = 0 (direct only), 1 (refracted/reflected only), 2 (both)
+    std::vector<int> which_sols_to_search;
+    if (which_solution==0){
+        which_sols_to_search.push_back(0);
+    }
+    else if(which_solution==1){
+        which_sols_to_search.push_back(1);
+    }
+    else if(which_solution==2){
+        which_sols_to_search.push_back(0);
+        which_sols_to_search.push_back(1);
+    }
 
     // we create T_forint, which is the final time sampling of the traces before they are combined
     double RandomTshift = 0. ; // for replication, we have no choice by to set this
@@ -2877,6 +2890,12 @@ void Report::rerun_event(Event *event, Detector *detector,
 
                 int ray_sol_cnt=0;
                 while (ray_sol_cnt < ray_output[0].size()){
+
+                    if(std::find(which_sols_to_search.begin(), which_sols_to_search.end(), ray_sol_cnt) == which_sols_to_search.end()){
+                        // if this solution is not meant to be searched, skip it
+                        ray_sol_cnt++;
+                        continue;
+                    }
 
                     double viewangle = ray_output[1][ray_sol_cnt];
                     Position launch_vector;
