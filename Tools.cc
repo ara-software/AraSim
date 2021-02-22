@@ -121,7 +121,6 @@ void Tools::realft(double *data, const int isign, int nsize){
     /*
     * This function was specifically engineered by Yuchieh Ku
     * to emulate the interface of the numerical recipes "realft" function
-    * <YUCHIEH WILL ADD MORE DOCUMENTATION HERE>
     * This function has exactly the same input and output formats as the "realft" function in the numerical recipes. 
     * Input array {f1,f2,f3....f_nsize}, after this fcn, it will become {F_0, F_N/2, F_1_r, F_1_c, F_2_r, F_2_c,...} (Forward). 
     * isign: 1/-1 Forward/Inverse FFT.
