@@ -1604,3 +1604,8 @@ Boost is chosen to do the interpolation (instead of GSL, ROOT, etc.)
 because AraSim already has boost as a dependency, and boost has a nice interface
 to the sinc/Whittaker-Shannon method.
 as a dependency 
+=============================================================================
+2021/02/21 Yuchieh Ku
+Replaced the FFT function realft() in the Tools class. The previous realft() was from numerical recipes, it is replaced by a new function that uses FFTtools.h and fftw3.h. 
+Related documents in DocBD: http://ara.physics.wisc.edu/docs/0022/002291/001/FFT.pdf, 
+and http://ara.physics.wisc.edu/docs/0023/002313/001/FFTupdate.pdf

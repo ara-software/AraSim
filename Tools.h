@@ -8,6 +8,7 @@
 #include "TRandom3.h" 
 #include <iostream>
 #include <fstream>
+#include <fftw3.h>
 
 using namespace std;
 using std::string;
@@ -35,7 +36,7 @@ class Tools {
     static int Getifreq(double freq,double freq_low,double freq_high,int n);
     static void InterpolateComplex(double *array, const int n);
 
-    static void four1(double *data, const int isign,int nsize);
+    static void format_transform(int nsize, int trdr, fftw_complex *out, double *data);
     static void realft(double *data, const int isign, int nsize);
 
     static void SWAP(double &a, double &b) // swaps two numbers

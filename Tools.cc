@@ -9,6 +9,10 @@
 #include "Constants.h"
 #include <boost/math/interpolators/whittaker_shannon.hpp>
 
+// fft related
+#include "FFTtools.h"
+#include <fftw3.h>
+
 using std::cout;
 
 void  Tools::MakeGraph(const int n,double *time,double *volts,TGraph *&mygraph,TH2F *&h2, double scalex,double scaley,string xaxistitle,string yaxistitle) {
@@ -101,94 +105,71 @@ void Tools::ShiftRight(double *x,const int n,int ishift) {
 
 }
 
+//! A function to do FFT
+/*!
+    
+    The function performs the FFT on an array data of size nsize
+
+    \param data the data to be transformed
+    \param isign whether you want a forward (1) or reverse (-1) transform
+    \param nsize size of the array to be transformed (must be a factor 2!)
+    \return void
+*/
+
 void Tools::realft(double *data, const int isign, int nsize){
-    int i, i1, i2, i3, i4;
-    double c1=0.5,c2,h1r,h1i,h2r,h2i,wr,wi,wpr,wpi,wtemp,theta;
-    //theta=3.141592653589793238/(nsize>>1);
-    theta=3.141592653589793238/(double)(nsize>>1);
-    if (isign == 1) {
-        c2 = -0.5;
-        four1(data,1,nsize);
-    } else {
-        c2=0.5;
-        theta = -theta;
+
+    /*
+    * This function was specifically engineered by Yuchieh Ku
+    * to emulate the interface of the numerical recipes "realft" function
+    * This function has exactly the same input and output formats as the "realft" function in the numerical recipes. 
+    * Input array {f1,f2,f3....f_nsize}, after this fcn, it will become {F_0, F_N/2, F_1_r, F_1_c, F_2_r, F_2_c,...} (Forward). 
+    * isign: 1/-1 Forward/Inverse FFT.
+    * For forward FFT, complex conjugate is taken since isign convention is opposite in numerical recipes.
+    * Inverse FFT has a N/2 normalization factor.
+    */
+
+
+    if(isign==1){
+        FFTWComplex *fftarray;
+        fftarray=FFTtools::doFFT(nsize,data);
+        format_transform(nsize, 1, (fftw_complex*)fftarray, data);
     }
-    wtemp=sin(0.5*theta);
-    wpr = -2.0*wtemp*wtemp;
-    wpi=sin(theta);
-    wr=1.0+wpr;
-    wi=wpi;
-    for (i=1;i<(nsize>>2);i++) {
-        i2=1+(i1=i+i);
-        i4=1+(i3=nsize-i1);
-        h1r=c1*(data[i1]+data[i3]);
-        h1i=c1*(data[i2]-data[i4]);
-        h2r= -c2*(data[i2]+data[i4]);
-        h2i=c2*(data[i1]-data[i3]);
-        data[i1]=h1r+wr*h2r-wi*h2i;
-        data[i2]=h1i+wr*h2i+wi*h2r;
-        data[i3]=h1r-wr*h2r+wi*h2i;
-        data[i4]= -h1i+wr*h2i+wi*h2r;
-        wr=(wtemp=wr)*wpr-wi*wpi+wr;
-        wi=wi*wpr+wtemp*wpi+wi;
-    }
-    if (isign == 1) {
-        data[0] = (h1r=data[0])+data[1];
-        data[1] = h1r-data[1];
-    } else {
-        data[0]=c1*((h1r=data[0])+data[1]);
-        data[1]=c1*(h1r-data[1]);
-        four1(data,-1,nsize);
+    else if(isign==-1){
+        fftw_complex *fftarray;
+        fftarray=(fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nsize/2+1));
+        format_transform(nsize,-1,fftarray, data);
+        double* invfft;
+        invfft=FFTtools::doInvFFT(nsize, (FFTWComplex*)fftarray);
+        for(int i=0;i<nsize;i++)
+            data[i]=invfft[i]*nsize/2;
+        free(fftarray);
     }
 }
 
-void Tools::four1(double *data, const int isign,int nsize) {
-    //int n,mmax,m,j,istep,i;
-    int nn,mmax,m,j,istep,i;
-    double wtemp,wr,wpr,wpi,wi,theta,tempr,tempi;
-
-    //int nn=nsize/2;
-    int n=nsize/2;
-
-    nn=n << 1;
-    j=1;
-    for (i=1;i<nn;i+=2) {
-        if (j > i) {
-            //SWAP(data[j-1],data[i-1]);
-            //SWAP(data[j],data[i]);
-            Exchange(data[j-1],data[i-1]);
-            Exchange(data[j],data[i]);
-        }
-        m=n;
-        while (m >= 2 && j > m) {
-            j -= m;
-            m >>= 1;
-        }
-        j += m;
-    }
-    mmax=2;
-    while (nn > mmax) {
-        istep=mmax << 1;
-        theta=isign*(6.28318530717959/mmax);
-        wtemp=sin(0.5*theta);
-        wpr = -2.0*wtemp*wtemp;
-        wpi=sin(theta);
-        wr=1.0;
-        wi=0.0;
-        for (m=1;m<mmax;m+=2) {
-            for (i=m;i<=nn;i+=istep) {
-                j=i+mmax;
-                tempr=wr*data[j-1]-wi*data[j];
-                tempi=wr*data[j]+wi*data[j-1];
-                data[j-1]=data[i-1]-tempr;
-                data[j]=data[i]-tempi;
-                data[i-1] += tempr;
-                data[i] += tempi;
+void Tools::format_transform(int nsize, int trdir, fftw_complex *out, double *data){
+    if(trdir==1){
+        for(int i=0;i<nsize;i++){
+            if(i%2){
+                data[i]=(-1)*out[i/2][i%2];
             }
-            wr=(wtemp=wr)*wpr-wi*wpi+wr;
-            wi=wi*wpr+wtemp*wpi+wi;
+            else{
+                data[i]=out[i/2][i%2];
+            }
         }
-        mmax=istep;
+        data[1]=out[nsize/2][0];
+    }else if(trdir==-1){
+        for(int i=2;i<nsize;i++){
+            if(i%2){
+                out[i/2][i%2]=(-1)*data[i];
+            }
+            else {
+                out[i/2][i%2]=data[i];
+            }
+        }
+        out[0][0]=data[0];
+        out[0][1]=0;
+        out[nsize/2][0]=data[1];
+        out[nsize/2][1]=0;
     }
 }
 
