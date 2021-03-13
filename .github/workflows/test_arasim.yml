@@ -5,6 +5,8 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
 
+      - uses: actions/checkout@v2
+
       - name: Install dependencies
         run: |
           sudo apt-get install dpkg-dev cmake g++ gcc binutils libx11-dev \
@@ -39,7 +41,6 @@ jobs:
           make configure
           make
           sudo make install
-
 
       - name: Build AraSim
         run : |
