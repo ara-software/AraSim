@@ -66,6 +66,8 @@ class Settings
 
         int SIMULATION_MODE;    // 0 : old freq domain mode, 1: new time domain mode
 
+        int USE_PARAM_RE_TTERM_TABLE; // 1 (default): use the table, 0: do not use the table (takes ~10x longer)
+
         int EVENT_TYPE;         // 0 : neutrino only events,  1 : blackhole evnet? ... etc
 
         int WAVE_TYPE;          // 0 : plane wave,  1 : spherical wave

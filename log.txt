@@ -1333,7 +1333,6 @@ removed useless/problematic option in makefile
 added namespace definition in Tools.h
 
 ============================================================================
-<<<<<<< .working
 
 04/07/2017 Carl Pfendner:
 
@@ -1604,6 +1603,39 @@ Boost is chosen to do the interpolation (instead of GSL, ROOT, etc.)
 because AraSim already has boost as a dependency, and boost has a nice interface
 to the sinc/Whittaker-Shannon method.
 as a dependency 
+
+============================================================================
+2020/12/07 Brian Clark
+
+Update the GetAngleAnt function for a correct calculation of antenna_theta
+and antenna_phi. This fixes two things. 
+First, GetAngleAnt was not calculating antenna_phi correctly.
+Second, GetAngleAnt was calculating antenna_theta so that it indicated
+where the signal was  *going*. But antenna_theta needs to indicate where the signal
+*came from* in order to be used correctly in the new pol factor calculation (see above)
+and in the antenna gain calculation. This bug would so far have not impacted
+AraSim sensitivity estimates because the antennas are approximately
+azimuthally and zenithally symmetric.
+
+
+============================================================================
+2020/12/10 Brian Clark
+
+Add a new mode (USE_PARAM_RE_TTERM_TABLE=1) which allows the user to evaluate
+the Param_RE_TTerm using a lookup table w/ interpolation instead of computing
+it on the fly. This increases the speed of the shower integral by more than an order
+of magnitude.
+
+============================================================================
+2021/01/23 Brian Clark
+
+Make a slight modification to the Solve_Ray function in RaySolver.cc.
+This ensures that the ray output results are always returned with the direct
+solution first and the refracted/reflected solutions second.
+Testing (on a few hundred events) suggested that direct solutions
+are always returned first anyway, but this guarantees it, which can be useful
+for debugging.
+
 =============================================================================
 2021/02/21 Yuchieh Ku
 Replaced the FFT function realft() in the Tools class. The previous realft() was from numerical recipes, it is replaced by a new function that uses FFTtools.h and fftw3.h. 

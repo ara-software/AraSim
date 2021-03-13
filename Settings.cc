@@ -88,6 +88,8 @@ outputdir="outputs"; // directory where outputs go
 
   SIMULATION_MODE=1;    // default freq domain simulation
 
+  USE_PARAM_RE_TTERM_TABLE=1; // default: use the interpolation table to get Param_RE_TTerm
+
   EVENT_TYPE=0;         // default neutrino only events
 
   WAVE_TYPE=0;          // default wave type : plane wave (inside the ice)
@@ -359,6 +361,9 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "SIMULATION_MODE") {
                   SIMULATION_MODE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "USE_PARAM_RE_TTERM_TABLE") {
+                  USE_PARAM_RE_TTERM_TABLE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "EVENT_TYPE") {
                   EVENT_TYPE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
@@ -971,6 +976,12 @@ int Settings::CheckCompatibilitiesSettings() {
    if (DETECTOR_STATION==0 && DETECTOR!=3){
       cerr << " DETECTOR_STATION=0 doesn't work with DETECTOR!=3. If you want to work with TestBed, use DETECTOR=3 & DETECTOR_STATION=0" << endl;
       num_err++;
+   }
+
+   // check that USE_PARAM_RE_TTERM_TABLE is only used with SIMULATION_MODE==1
+   if (USE_PARAM_RE_TTERM_TABLE==1 && SIMULATION_MODE!=1){
+    cerr << "USE_PARAM_RE_TTERM_TABLE=0 doesn't work with SIMULATION_MODE!=1"<<endl;
+    num_err++;
    }
 
 

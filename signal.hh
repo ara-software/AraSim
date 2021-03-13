@@ -182,6 +182,20 @@ double changle; // cherenkov angle
   std::vector<double> ArbitraryWaveform_T;
   void ReadArbitraryWaveform(std::string target);
 
+  // variables needed to precompute the Param_RE_Tterm tables
+  std::vector<double> tterm_table_em;
+  std::vector<double> tterm_table_had;
+  double tables_dt; // time sampling for the tables
+  double tables_inv_dt; // 1/time sampling for the tables
+  double tables_max_t; // half the table window, e.g. = 50 means tables go from -50 to 50
+  double tables_t_min; // start of the table support window
+  double tables_t_max; // end of table support window
+
+  void get_Param_RA(int em_or_had, double (&the_params)[8]);
+  void Build_Param_RE_Tterm_tables();
+  double evaluate_param_re_table(double time, std::vector<double> &table);
+  std::vector<double> pick_table(int em_or_had);
+
 
   void SetMedium(int medium) {
     MEDIUM=medium;
