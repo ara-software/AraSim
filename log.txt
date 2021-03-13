@@ -1333,7 +1333,6 @@ removed useless/problematic option in makefile
 added namespace definition in Tools.h
 
 ============================================================================
-<<<<<<< .working
 
 04/07/2017 Carl Pfendner:
 
@@ -1636,3 +1635,9 @@ solution first and the refracted/reflected solutions second.
 Testing (on a few hundred events) suggested that direct solutions
 are always returned first anyway, but this guarantees it, which can be useful
 for debugging.
+
+=============================================================================
+2021/02/21 Yuchieh Ku
+Replaced the FFT function realft() in the Tools class. The previous realft() was from numerical recipes, it is replaced by a new function that uses FFTtools.h and fftw3.h. 
+Related documents in DocBD: http://ara.physics.wisc.edu/docs/0022/002291/001/FFT.pdf, 
+and http://ara.physics.wisc.edu/docs/0023/002313/001/FFTupdate.pdf
