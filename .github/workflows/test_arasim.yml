@@ -7,6 +7,12 @@ jobs:
 
       - uses: actions/checkout@v2
 
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+
       - name: Install dependencies
         run: |
           
@@ -45,12 +51,19 @@ jobs:
           sudo make install
 
       - name: Build AraSim
-        run : |
+        run: |
 
           source root/bin/thisroot.sh
           
           make
           
+      - name: Veff test
+        run: |
+          
+          source root/bin/thisroot.sh
+
+          bash test/veff/test_veff.sh
+
 
 
 
