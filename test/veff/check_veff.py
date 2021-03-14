@@ -59,6 +59,8 @@ except:
 '''
 if pass_file_exists_test:
 	internal_test = search_file(fin, 'test is')
+	if internal_test is None:
+		print('AraSim output file is incomplete. Test will fail.')		
 	internal_test = int(internal_test.split(' ')[2])
 	if internal_test == 0:
 		print('AraSim reports a successful run.')
@@ -78,6 +80,8 @@ if pass_file_exists_test:
 
 if pass_arasim_finished_test:
 	global_pass_string = search_file(fin, 'Total_Global_Pass')
+	if global_pass_string is None:
+		print('Total_Global_Pass is missing from AraSim output file. Test will fail.')
 	has_nan = contains_nan(global_pass_string)
 	if has_nan:
 		print('Global pass string contains a NAN. Test will fail.')
@@ -101,6 +105,8 @@ if pass_arasim_finished_test:
 '''
 if pass_arasim_finished_test:
 	total_weight_string = search_file(fin, 'Total_Weight')
+	if total_weight_string is None:
+		print('Total_Weight is missing from AraSim output file. Test will fail.')
 	has_nan = contains_nan(total_weight_string)
 	if has_nan:
 		print('Total weight string contains a NAN. Test will fail.')
