@@ -44,7 +44,12 @@ jobs:
 
       - name: see directory
         run: |
+          pwd
           cd ..
+          pwd
+          ls -alh
+          cd ..
+          pwd
           ls -alh
 
       # - name: Build AraSim
