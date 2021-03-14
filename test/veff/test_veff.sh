@@ -4,4 +4,6 @@
 
 # then, do a comparison to check for consistency
 
+tail test/veff/veff_test_output.txt -n50
+
 python3 test/veff/check_veff.py test/veff/veff_test_output.txt
