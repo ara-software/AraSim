@@ -5,12 +5,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
 
-      - uses: actions/checkout@v2
-
-      - name: see directory
-        run: |
-          ls -alh
-
       - name: Install dependencies
         run: |
           sudo apt-get install dpkg-dev cmake g++ gcc binutils libx11-dev \
@@ -46,9 +40,10 @@ jobs:
           make
           sudo make install
 
+      - uses: actions/checkout@v2
+
       - name: see directory
         run: |
-          ls -alh
           cd ..
           ls -alh
 
