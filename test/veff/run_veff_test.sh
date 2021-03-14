@@ -1,6 +1,6 @@
 # run AraSim with the veff setup file
 
-./AraSim test/veff/setup_veff_test.txt 0 outputs/. &> test/veff/veff_test_output.txt 
+./AraSim test/veff/setup_veff_test.txt 0 outputs/. 2>&1 | tee test/veff/veff_test_output.txt 
 
 # then, do a comparison to check for consistency
 
