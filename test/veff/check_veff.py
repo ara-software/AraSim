@@ -45,10 +45,10 @@ fin = sys.argv[1]
 try:
 	with open(fin, 'r') as read_obj:
 		read_obj.close()
-	print('Output log file exists.')
+	print('Output log file exists. File exists test will pass.')
 	pass_file_exists_test = True
 except:
-	print('Output log file does not exist. Test will fail')
+	print('Output log file does not exist. File exists test will fail.')
 
 
 
@@ -60,14 +60,14 @@ except:
 if pass_file_exists_test:
 	internal_test = search_file(fin, 'test is')
 	if internal_test is None:
-		print('AraSim output file is incomplete. Test will fail.')
+		print('AraSim output file is incomplete. AraSim finished test will fail.')
 	else:
 		internal_test = int(internal_test.split(' ')[2])
 		if internal_test == 0:
-			print('AraSim reports a successful run.')
+			print('AraSim reports a successful run. AraSim finished test will pass.')
 			pass_arasim_finished_test = True
 		else:
-			print('AraSim output file is incomplete. Test will fail.')
+			print('AraSim output file is incomplete. AraSim finished test will fail.')
 
 
 
@@ -90,11 +90,11 @@ if pass_arasim_finished_test:
 		else:
 			global_pass = int(global_pass_string.split(":")[1])
 			if global_pass == expected_global_pass:
-				print("Global pass: {}. Expected {}. Test will pass.".format(
+				print("Global pass: {}. Expected {}. Total_Global_Pass test will pass.".format(
 					global_pass, expected_global_pass))
 				pass_global_count_test = True
 			elif global_pass != expected_global_pass:
-				print('Global pass: {}. Expected {}. Test will fail.'.format(
+				print('Global pass: {}. Expected {}. Total_Global_Pass test will fail.'.format(
 				global_pass, expected_global_pass))
 
 
@@ -116,10 +116,10 @@ if pass_arasim_finished_test:
 		else:
 			total_weight = float(total_weight_string.split(":")[1])
 			if abs(total_weight - expected_total_weight) > expected_total_weight_sigma:
-				print("Total weight: {:.4f}. Expected {:.4f} +- {:.4f}. Test will fail.".format(
+				print("Total weight: {:.4f}. Expected {:.4f} +- {:.4f}. Total_Weight test will fail.".format(
 					total_weight, expected_total_weight, expected_total_weight_sigma))
 			else:
-				print("Total weight: {:.4f}. Expected {:.4f} +- {:.4f}. Test will pass.".format(
+				print("Total weight: {:.4f}. Expected {:.4f} +- {:.4f}. Total_Weight test will pass.".format(
 					total_weight, expected_total_weight, expected_total_weight_sigma))
 				pass_total_weight_test = True
 
