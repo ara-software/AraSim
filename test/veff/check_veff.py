@@ -1,4 +1,3 @@
-import numpy as np
 import sys
 
 
@@ -107,7 +106,7 @@ if pass_arasim_finished_test:
 		print('Total weight string contains a NAN. Test will fail.')
 	else:
 		total_weight = float(total_weight_string.split(":")[1])
-		if np.abs(total_weight - expected_total_weight) > expected_total_weight_sigma:
+		if abs(total_weight - expected_total_weight) > expected_total_weight_sigma:
 			print("Total weight: {:.4f}. Expected {:.4f} +- {:.4f}. Test will fail.".format(
 				total_weight, expected_total_weight, expected_total_weight_sigma))
 		else:
