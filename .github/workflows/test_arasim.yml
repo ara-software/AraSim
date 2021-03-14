@@ -47,7 +47,7 @@ jobs:
 
           # now build
           make configure
-          make
+          make -j2
           sudo make install
 
       - name: Build AraSim
@@ -55,7 +55,7 @@ jobs:
 
           source root/bin/thisroot.sh
           
-          make
+          make -j2
           
       - name: Veff test
         run: |
