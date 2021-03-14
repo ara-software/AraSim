@@ -83,7 +83,7 @@ else:
 		if global_pass == expected_global_pass:
 			print('Global pass: {}. Expected {}. Total_Global_Pass test will pass.'.format(
 				global_pass, expected_global_pass))
-		elif:
+		else:
 			print('Global pass: {}. Expected {}. Total_Global_Pass test will fail.'.format(
 			global_pass, expected_global_pass))
 			sys.exit(-1)
