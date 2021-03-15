@@ -1432,6 +1432,62 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
                     }
 
 		}
+
+		// reorder the solutions (BAC Jan 2021)
+		// it is useful at this point to re-order the solutions so that the direct solution 
+		// (if it exists) is reported first
+		// this copying method is rather inefficient in terms of memory allocation
+		// but also, it's not obvious that it ever gets called 
+		// (Brian couldn't find a case in testing on a few hundred events)
+		// so probably it doesn't matter
+		if (outputs.size()>0){
+			int num_solutions = outputs[0].size();
+			if(num_solutions>1){
+				// we only need to do something in the case of two solutions
+				double path_len_first_sol = outputs[0][0];
+				double path_len_second_sol = outputs[0][1];
+				if(path_len_second_sol < path_len_first_sol){
+					printf("The second path length (%.2f) is shorter than the first (%.2f)\n",path_len_second_sol, path_len_first_sol);
+					printf("Flipping the order in the output vectors...");
+
+					// if the shorter path length (which must be the direct solution)
+					// has ended up second, then we need to make a swap
+					// so that it's first in the output
+
+					// for the outputs vector, we flip the first and second columns
+					// that is, the direct and refracted/reflected solution
+					// first, make a copy of the original
+					vector< vector <double> > tmp_outputs(outputs);
+					// then make the flip
+					for(int item=0; item<outputs.size(); item++){
+						outputs[item][0] = tmp_outputs[item][1];
+						outputs[item][1] = tmp_outputs[item][0];
+					}
+
+					// for the RayStep, it's [solution][dimension (x or z)][step]
+					// so we need to be a little smarter
+					// first make a copy of the original
+					vector< vector< vector <double> > > tmp_RayStep(RayStep);
+
+					// now, totally empty the older vector (the one we need to return to the user at the end)
+					RayStep.clear();
+					RayStep.resize(2); // the RayStep needs a direct and refr/refl solution
+
+					// first, the direct solution (which is currently in tmp_RayStep[1])
+					RayStep[0].resize(2); // x and z for the direct
+					for(int step=0; step<tmp_RayStep[1][0].size(); step++){
+						RayStep[0][0].push_back(tmp_RayStep[1][0][step]); // x component
+						RayStep[0][1].push_back(tmp_RayStep[1][1][step]); // z component
+					}
+					// next, the reflected/refracted solution (which is currently in tmp_RayStep[0])
+					RayStep[1].resize(2); // x and z for the refracted/reflected
+					for(int step=0; step<tmp_RayStep[0][0].size(); step++){
+						RayStep[1][0].push_back(tmp_RayStep[0][0][step]); // x component
+						RayStep[1][1].push_back(tmp_RayStep[0][1][step]); // y component
+					}
+				}
+			}		
+		}
 	}
 	else{ //do write out path data
             // I didn't fix this part yet!

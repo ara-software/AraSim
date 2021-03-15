@@ -56,7 +56,8 @@ class Antenna_r {
         vector <double> view_ang;    //viewing angle
         vector <double> launch_ang;  //launch angle
         vector <double> rec_ang;     //receiving angle phi (in radians)
-        vector <double> rec_ang_phi; // receiving angle phi (in radians)
+        vector <double> phi_rec;     // receiving phi angle,in antenna's coord system.
+        vector <double> theta_rec;     // receiving theta angle, in antenna's coord system.
         vector <double> reflect_ang; // surface reflection angle (if 100 : no reflection case)
         vector <double> Dist;        //Distance between posnu and antenna
         vector <double> L_att;        //Attenuation factor
@@ -73,6 +74,8 @@ class Antenna_r {
         vector <double> Mag;  // magnification factor
         vector <double> Fresnel;  // Fresnel factor
         vector <double> Pol_factor;  // Polarization factor
+        vector <double> Pol_factorH;  //Hpol Polarization factor
+        vector <double> Pol_factorV;  //Vpol Polarization factor
         
         vector < vector <double> > Vm_zoom;  // E field before ant T-domain
         vector < vector <double> > Vm_zoom_T;  // E field before ant T-domain time
@@ -237,7 +240,9 @@ class Report {
 //    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger);
     
     void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt);    
-    
+    void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings, int which_solution,
+        vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
+        );
     
 #ifdef ARA_UTIL_EXISTS
 
