@@ -80,6 +80,8 @@ outputdir="outputs"; // directory where outputs go
 
   DETECTOR=1;   //ARA layout with small number of stations
 
+  DETECTOR_STATION=-1; // initiate this to negative -1, so it does nothing by default
+
   INTERACTION_MODE=1;   //PickNear mode (0: Aeff mode using sphere surface around station, 1: Veff mode using cylinder volume around station)
 
   POSNU_RADIUS=3000;    //radius for PickNear method
@@ -976,6 +978,14 @@ int Settings::CheckCompatibilitiesSettings() {
    if (DETECTOR_STATION==0 && DETECTOR!=3){
       cerr << " DETECTOR_STATION=0 doesn't work with DETECTOR!=3. If you want to work with TestBed, use DETECTOR=3 & DETECTOR_STATION=0" << endl;
       num_err++;
+   }
+   if (DETECTOR==0){
+    cerr << "DETECTOR=0 is un-used in AraSim."<<endl;
+    num_err++;
+   }
+   if (DETECTOR_STATION>=0 && (DETECTOR!=3 || DETECTOR!=4)){
+    cerr << "DETECTOR_STATION>=0 is only compatible with DETECTOR=3 (Testbed) or DETECTOR=4 (deep stations)"<<endl;
+    num_err++;
    }
 
    // check that USE_PARAM_RE_TTERM_TABLE is only used with SIMULATION_MODE==1
