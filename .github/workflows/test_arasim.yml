@@ -48,12 +48,8 @@ jobs:
           rm libRootFftwWrapper.tar.gz
           
 
-          # prepare to build
+          # build
           cd libRootFftwWrapper
-          sed -i 's:@ccmake:@cmake:' Makefile
-
-          # now build
-          make configure
           make -j2
           sudo make install
 
