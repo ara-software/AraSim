@@ -983,7 +983,7 @@ int Settings::CheckCompatibilitiesSettings() {
     cerr << "DETECTOR=0 is un-used in AraSim."<<endl;
     num_err++;
    }
-   if (DETECTOR_STATION>=0 && (DETECTOR!=3 || DETECTOR!=4)){
+   if (DETECTOR_STATION>=0 && DETECTOR<3){
     cerr << "DETECTOR_STATION>=0 is only compatible with DETECTOR=3 (Testbed) or DETECTOR=4 (deep stations)"<<endl;
     num_err++;
    }
