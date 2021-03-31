@@ -1648,3 +1648,9 @@ for debugging.
 Replaced the FFT function realft() in the Tools class. The previous realft() was from numerical recipes, it is replaced by a new function that uses FFTtools.h and fftw3.h. 
 Related documents in DocBD: http://ara.physics.wisc.edu/docs/0022/002291/001/FFT.pdf, 
 and http://ara.physics.wisc.edu/docs/0023/002313/001/FFTupdate.pdf
+
+=============================================================================
+2021/03/31 Myoungchul Kim
+
+Skipping attenuation calculation when the distance between two RaySteps is 0.
+It prevents adding '-nan' into the IceAttenFactor and deleting the E-field array by '-nan'.
