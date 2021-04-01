@@ -133,6 +133,7 @@ void Tools::realft(double *data, const int isign, int nsize){
         FFTWComplex *fftarray;
         fftarray=FFTtools::doFFT(nsize,data);
         format_transform(nsize, 1, (fftw_complex*)fftarray, data);
+        delete [] fftarray;
     }
     else if(isign==-1){
         fftw_complex *fftarray;
@@ -143,6 +144,7 @@ void Tools::realft(double *data, const int isign, int nsize){
         for(int i=0;i<nsize;i++)
             data[i]=invfft[i]*nsize/2;
         free(fftarray);
+        delete [] invfft;
     }
 }
 
