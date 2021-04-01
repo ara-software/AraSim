@@ -1654,3 +1654,9 @@ and http://ara.physics.wisc.edu/docs/0023/002313/001/FFTupdate.pdf
 
 Skipping attenuation calculation when the distance between two RaySteps is 0.
 It prevents adding '-nan' into the IceAttenFactor and deleting the E-field array by '-nan'.
+
+=============================================================================
+2021/04/01 Brian Clark
+
+Fix memory leak in the new FFT routines where the result of doFFT was not
+cleaned up correctly.
