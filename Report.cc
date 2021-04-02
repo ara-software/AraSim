@@ -451,7 +451,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                            dl = sqrt( (dx*dx) + (dz*dz) );
 
                                            // Skipping attenuation calculation when the distance between two RaySteps is 0. Prevening adds -nan into the IceAttenFactor. (MK 2021)
-                                           if (dl != 0){
+                                           if (dl > 0){
                                                // use new ice model
                                                // IceAttenFactor *= exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps]) );
                                                // use the midpoint of the array to calculate the attenuation length, instead of the end of the ray (BAC 2020)
@@ -621,7 +621,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                               dl = sqrt((dx * dx) + (dz * dz));
 
                                               // Skipping attenuation calculation when the distance between two RaySteps is 0. Prevening adds -nan into the IceAttenFactor. (MK 2021)
-                                              if (dl != 0){
+                                              if (dl > 0){
                                                   // IceAttenFactor *=  exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], detector->GetFreq(l) / 1e9));
                                                   // use ray midpoint for attenuation calculation
                                                   IceAttenFactor *=  (   exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], detector->GetFreq(l) / 1e9)) 
@@ -984,7 +984,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                        dl = sqrt((dx * dx) + (dz * dz));
 
                                                        // Skipping attenuation calculation when the distance between two RaySteps is 0. Prevening adds -nan into the IceAttenFactor. (MK 2021)
-                                                       if (dl != 0){
+                                                       if (dl > 0){
                                                            // IceAttenFactor *= exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9));// to GHz
                                                            // use ray midpoint for attenuation calculation
                                                            IceAttenFactor *= (    exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9))
@@ -3006,7 +3006,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                         double dl = sqrt((dx * dx) + (dz * dz));
 
                         // Skipping attenuation calculation when the distance between two RaySteps is 0. Prevening adds -nan into the IceAttenFactor. (MK 2021)
-                        if (dl != 0){
+                        if (dl > 0){
                             for(int n=0; n<Nnew/2; n++){
                                 freq_tmp = dF_Nnew*((double)n+0.5);
                                 // use ray midpoint for attenuation calculation
