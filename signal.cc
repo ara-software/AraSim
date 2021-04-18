@@ -273,7 +273,7 @@ Signal::~Signal() {
             count++;
         }
     } else {
-        std::cerr << "No calpulser spectrum file!" << std::endl;
+      //std::cerr << "No calpulser spectrum file!" << std::endl;
     }
 }
 
