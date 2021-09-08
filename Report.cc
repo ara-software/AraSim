@@ -1065,6 +1065,7 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                                // check what we save as V[], volts_forint? or volts_forfft
 
+                                               stations[i].strings[j].antennas[k].Pol_factor.push_back(Pol_factor);
                                                for (int n=0; n<settings1->NFOUR/2; n++) {
 
                                                    if (settings1->TRIG_ANALYSIS_MODE != 2) { // not pure noise mode (we need signal)
