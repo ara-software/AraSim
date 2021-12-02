@@ -440,8 +440,13 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 		stations[i].strings[j].antennas[k].arrival_time.push_back(ray_output[4][ray_sol_cnt]);
 	
 		//! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
-		//! These xyz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
-		stations[i].strings[j].antennas[k].ray_step.push_back(RayStep);	
+		//! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
+		stations[i].strings[j].antennas[k].ray_step.resize(ray_sol_cnt+1); ///< resize by number of ray solutions
+                stations[i].strings[j].antennas[k].ray_step[ray_sol_cnt].resize(2); ///< resize by xz values
+                for (int steps=0; steps<(int)RayStep[ray_sol_cnt][0].size(); steps++) { ///< push back each ray step coordinates
+                    stations[i].strings[j].antennas[k].ray_step[ray_sol_cnt][0].push_back(RayStep[ray_sol_cnt][0][steps]);
+                    stations[i].strings[j].antennas[k].ray_step[ray_sol_cnt][1].push_back(RayStep[ray_sol_cnt][1][steps]);
+                }
 		
 		// get ice attenuation factor
 		//

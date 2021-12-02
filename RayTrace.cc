@@ -1454,7 +1454,7 @@ namespace RayTrace{
                     		the finPaths function will return the '0 ray solution'.
                     		If the closet result(refine_result.second) is smaller than the missing_z from the 1st doTrace or requiredAccuracy,
                     		2nd direct ray tracing will try to find the solution with it (est.angle).
-                    		The related talk: http://ara.physics.wisc.edu/docs/0022/002263/001/20201221_Raytracing_Bug.pd
+                    		The related talk: http://ara.physics.wisc.edu/docs/0022/002263/001/20201221_Raytracing_Bug.pdf
 			    */
 			    //! for debug
                             //std::cout << "Fast Solution not close enough (" << results.front().miss << "), pathLen: "<<results.front().pathLen<<"; attempt refining" << std::endl;
