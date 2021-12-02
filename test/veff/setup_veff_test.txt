@@ -1,0 +1,41 @@
+// random number control
+// for this test, we want to always be able to reproduce the same run
+// to eliminate statistical noise, and make the test stable
+RANDOM_MODE=0
+SEED=100
+
+//the neutrinos
+NNU=500 //allow this many neutrinos
+ONLY_PASSED_EVENTS=0 //throw only NNU events
+EVENT_GENERATION_MODE=0 //read in an event list
+EXPONENT=18// Energy of the neutrino thrown
+INTERACTION_MODE=1 //veff mode
+
+//the askaryan signal and interactions
+SIMULATION_MODE=1 //time domain askaryan radiation
+SECONDARIES=0 //no secondary interactions
+taumodes=0 //no fancy tau decays
+
+//the detector
+DETECTOR=1 //1 station
+DETECTOR_STATION=-1
+ANTENNA_MODE=1
+
+//the electronics and noise
+NFOUR=1024 // NFOUR/2 is number of samps in time domain
+NOISE_WAVEFORM_GENERATE_MODE=0 // new noise waveforms for each event
+NOISE_EVENTS=100 // number of pure noise waveforms
+DATA_BIN_SIZE=4096 //length of pregenerated noise waveforms
+V_MIMIC_MODE=0 // 0 : global trig is in center of readout windows
+
+//the trigger
+TRIG_ANALYSIS_MODE=1 //0: S+N, 1: S only, 2: N only
+
+//the ice and ray tracing
+NOFZ=1 //use ice with n(z)
+POSNU_RADIUS=5000 // radius of the cylinder the event is thrown in
+RAYSOL_RANGE=9000 // radius of the cylinder in ray tracer will look for solutions
+
+//the output
+DATA_SAVE_MODE=2 // 2: save only physics data
+DATA_LIKE_OUTPUT=0 //don't try to save anything to event tree

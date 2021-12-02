@@ -57,5 +57,6 @@ and from the second line, first column : energy in log, second column : flux E^2
 
 224. Kotera2010_max.dat-----Kotera flux max from ARA paper arXiv:1105.2854v1, Fig.27 Kotera et al. '10 max
 
+225. CenA_Kachelriess.dat-----Cen A core flux Fig 1, bottom left panel (red line). Emission near core, alpha = 1.2
 
 

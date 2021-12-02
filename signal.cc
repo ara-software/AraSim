@@ -251,11 +251,14 @@ Signal::~Signal() {
       //cout<<"whichparameterization : "<<WHICHPARAMETERIZATION<<"\n";
   }
 
+  if (settings1->SIMULATION_MODE==1){
+    Build_Param_RE_Tterm_tables();
+  }
+
   
 
 
 }
-
 
  void Signal::ReadCalPulserSpectrum(){
     int frequency;
@@ -270,7 +273,7 @@ Signal::~Signal() {
             count++;
         }
     } else {
-        std::cerr << "No calpulser spectrum file!" << std::endl;
+      //std::cerr << "No calpulser spectrum file!" << std::endl;
     }
 }
 
@@ -861,13 +864,78 @@ double Signal::Greisen(double x_in, double *par) {
 
 }
 
+void Signal::get_Param_RA(int em_or_had, double (&the_params)[8]){
+  /*
+  Depending on if em_or_had = 0 or 1 (0 = EM, 1 = HAD)
+  Assing the parameters
+  */
 
+  if(em_or_had==0){
+    the_params[0] = 0.057;
+    the_params[1] = 2.87;
+    the_params[2] = -3.;
+
+    the_params[3] = -0.03;
+    the_params[4] = -3.05;
+    the_params[5] = -3.5;
+  }
+  else if(em_or_had==1){
+    the_params[0] = 0.043;
+    the_params[1] = 2.92;
+    the_params[2] = -3.21;
+
+    the_params[3] = -0.065;
+    the_params[4] = -3.00;
+    the_params[5] = -2.65;    
+  }
+
+}
+
+double Signal::evaluate_param_re_table(double time, std::vector<double> &table){
+  double ans = 0;
+  if( time > tables_t_min && time < tables_t_max){
+    int low_bin = (time - tables_t_min)*tables_inv_dt; // low bin
+    int hi_bin = low_bin+1; // hi bin
+    double frac = (time - (low_bin*tables_dt + tables_t_min))*tables_inv_dt; // which bin is it closer to
+    ans = table[low_bin]*(frac) + table[hi_bin]*(1.-frac); // evaluate
+  }
+  return ans;
+}
+
+std::vector<double> Signal::pick_table(int em_or_had){
+  if(em_or_had==0){
+    return tterm_table_em;
+  }
+  else{
+    return tterm_table_had;
+  }
+}
+
+void Signal::Build_Param_RE_Tterm_tables(){
+  cout<<"Building the Param RE Tterm tables..."<<endl;
+  tables_dt = 0.0001;
+  tables_inv_dt = 1./tables_dt;
+  tables_max_t = 75.;
+  tables_t_min = (-tables_max_t) + tables_dt/2.; // start it 1/2 sample "in" so that it "hops" time = 0
+  tables_t_max = (tables_max_t) - tables_dt/2.; 
+  int table_num_bins = int((tables_max_t/tables_dt)*2);
+
+  double param_RA_em[8];
+  double param_RA_had[8];
+  get_Param_RA(0, param_RA_em);
+  get_Param_RA(1, param_RA_had);
+
+  for(int i=0; i<table_num_bins; i++){
+    double time = (i*tables_dt) + tables_t_min;
+    tterm_table_em.push_back(Param_RE_Tterm(time, param_RA_em));
+    tterm_table_had.push_back(Param_RE_Tterm(time, param_RA_had));
+  }
+  cout<<"Finished building the Param RE Tterm tables."<<endl;
+}
 
 
 // depending on the shower_mode, make Vm array for em shower/had shower or both
 void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins ) {
-
-
 
     double sin_view = sin(viewangle);
     double cos_view = cos(viewangle);
@@ -899,6 +967,7 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
         Tarray[tbin] = 0.;
         Earray[tbin] = 0.;
     }
+    std::vector<double> the_table_to_use;
 
 
     // if we drive Askaryan signal from only one shower
@@ -911,13 +980,8 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
         //if ( event->Nu_Interaction[0].primary_shower == 0 ) {
 
             V_s = -4.5e-14;
-            param_RA[0] = 0.057;
-            param_RA[1] = 2.87;
-            param_RA[2] = -3.;
-
-            param_RA[3] = -0.03;
-            param_RA[4] = -3.05;
-            param_RA[5] = -3.5;
+            get_Param_RA(0, param_RA);
+            the_table_to_use = pick_table(0);
 
             E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
 
@@ -937,13 +1001,10 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
         //else if ( event->Nu_Interaction[0].primary_shower == 1 ) {
 
             V_s = -3.2e-14;
-            param_RA[0] = 0.043;
-            param_RA[1] = 2.92;
-            param_RA[2] = -3.21;
+            get_Param_RA(1, param_RA);
+            the_table_to_use = pick_table(1);
 
-            param_RA[3] = -0.065;
-            param_RA[4] = -3.00;
-            param_RA[5] = -2.65;
+
 
             //E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
             E_shower = event->pnu*event->Nu_Interaction[0].hadfrac;
@@ -969,13 +1030,9 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             if ( event->Nu_Interaction[0].primary_shower == 0 ) {
 
                 V_s = -4.5e-14;
-                param_RA[0] = 0.057;
-                param_RA[1] = 2.87;
-                param_RA[2] = -3.;
+                get_Param_RA(0, param_RA);
+                the_table_to_use = pick_table(0);
 
-                param_RA[3] = -0.03;
-                param_RA[4] = -3.05;
-                param_RA[5] = -3.5;
 
                 E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
 
@@ -991,13 +1048,9 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             else if ( event->Nu_Interaction[0].primary_shower == 1 ) {
 
                 V_s = -3.2e-14;
-                param_RA[0] = 0.043;
-                param_RA[1] = 2.92;
-                param_RA[2] = -3.21;
+                get_Param_RA(1, param_RA);
+                the_table_to_use = pick_table(1);
 
-                param_RA[3] = -0.065;
-                param_RA[4] = -3.00;
-                param_RA[5] = -2.65;
 
                 //E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
                 E_shower = event->pnu*event->Nu_Interaction[0].hadfrac;
@@ -1092,7 +1145,12 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 
                     //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[bin]) * Param_RE_Tterm(Tterm, param_RA);
                     //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
-                    Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
+                    if(settings1->USE_PARAM_RE_TTERM_TABLE==1){
+                    	Integrate += -1 *(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, the_table_to_use);
+                    }
+                    else{
+                    	Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
+                    }
                 }
 
             }
@@ -1118,13 +1176,9 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             EM_shower_on = 1;
 
             V_s = -4.5e-14;
-            param_RA[0] = 0.057;
-            param_RA[1] = 2.87;
-            param_RA[2] = -3.;
+            get_Param_RA(0, param_RA);
+            the_table_to_use = pick_table(0);
 
-            param_RA[3] = -0.03;
-            param_RA[4] = -3.05;
-            param_RA[5] = -3.5;
 
             E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
 
@@ -1210,7 +1264,13 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[bin]) * Param_RE_Tterm(Tterm, param_RA);
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
-                        Integrate += -1.*(event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
+                        if(settings1->USE_PARAM_RE_TTERM_TABLE==1){
+                    		  Integrate += -1 *(event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_em);
+                        }
+                        else{
+                        	Integrate += -1.*(event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);                        		
+                        }
+
                     }
 
                 }
@@ -1231,13 +1291,8 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
         if ( event->Nu_Interaction[0].HAD_LQ > 0 ) {
 
             V_s = -3.2e-14;
-            param_RA[0] = 0.043;
-            param_RA[1] = 2.92;
-            param_RA[2] = -3.21;
-
-            param_RA[3] = -0.065;
-            param_RA[4] = -3.00;
-            param_RA[5] = -2.65;
+            get_Param_RA(1, param_RA);
+            the_table_to_use = pick_table(1);
 
             //E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
             E_shower = event->pnu*event->Nu_Interaction[0].hadfrac;
@@ -1336,7 +1391,12 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[bin]) * Param_RE_Tterm(Tterm, param_RA);
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
-                        Integrate += -1.*(event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
+                        if(settings1->USE_PARAM_RE_TTERM_TABLE==1){
+                        	Integrate += -1 *(event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_had);
+                        }
+                        else{
+                       		Integrate += -1.*(event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);                        	
+                        }
                     }
 
                 }

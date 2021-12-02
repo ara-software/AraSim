@@ -66,6 +66,8 @@ class Settings
 
         int SIMULATION_MODE;    // 0 : old freq domain mode, 1: new time domain mode
 
+        int USE_PARAM_RE_TTERM_TABLE; // 1 (default): use the table, 0: do not use the table (takes ~10x longer)
+
         int EVENT_TYPE;         // 0 : neutrino only events,  1 : blackhole evnet? ... etc
 
         int WAVE_TYPE;          // 0 : plane wave,  1 : spherical wave
@@ -288,6 +290,8 @@ class Settings
 	                   // 1: using different antenna response for the top Vpol antennas, otherwise same as old default
                        // 2: use the ARIANNA wipld LPDA responses instead
                        // 3: use the chiba xfdtd models (treats top and bottom as the same)
+                       // 4: use the chiba in-situ models (treats top and bottom as the same)
+                       // The related wiki page for antenna models description:http://ara.icecube.wisc.edu/wiki/index.php/Antenna_model
 
 	int APPLY_NOISE_FIGURE; // 0: do not apply new noise figure from Thomas Meures 2016
 	                        // 1: apply new noise figure to data

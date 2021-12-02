@@ -314,7 +314,10 @@ Spectra::Spectra(double EXPONENT) {
       GetFlux("Kotera2010_max.dat");
   }
 
-
+  else if (EXPONENT==225.)
+  {
+      GetFlux("CenA_Kachelriess.dat");
+  }
 
 
 
