@@ -66,6 +66,10 @@ class Antenna_r {
         //vector <Position> n_H;  // normalized vector for H pol
         //vector <Position> n_V;  // normalized vector for V pol
 
+	//! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
+	//! These xyz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
+	vector < vector < vector <double> > > ray_step;
+
         // below freq domain simulation output
         vector < vector <double> > vmmhz;  // signal V/m/MHz for each freq bin
         //

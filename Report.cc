@@ -159,6 +159,7 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     Mag.clear();
     Fresnel.clear();
     Pol_factor.clear();
+    ray_step.clear();
     //VHz_antfactor.clear();
     //VHz_filter.clear();
     Vfft.clear();
@@ -238,7 +239,8 @@ void Antenna_r::clear_useless(Settings *settings1) {   // to reduce the size of 
 
     }
     else if (settings1->DATA_SAVE_MODE == 2) {
-      
+    
+    ray_step.clear(); ///<clear the ray step to reduce the size of output AraOut.root  
     
     Heff.clear();
     //VHz_antfactor.clear();
@@ -429,7 +431,10 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 		
 		
 		stations[i].strings[j].antennas[k].arrival_time.push_back(ray_output[4][ray_sol_cnt]);
-		
+	
+		//! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
+		//! These xyz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
+		stations[i].strings[j].antennas[k].ray_step.push_back(RayStep);	
 		
 		// get ice attenuation factor
 		//
