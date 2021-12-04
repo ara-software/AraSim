@@ -1002,8 +1002,15 @@ namespace RayTrace{
 			//std::cout << "\ttesting theta=" << a << std::endl;
 			aTrace=doTrace<minimalRayPosition>(emit_depth,a,target,allowedReflections,0.0,0.0, sol_error );
 
-                        if ( min_miss > std::abs(aTrace.miss) ) {
-                            min_miss = std::abs(aTrace.miss);
+			/*!
+			    02-12-2021 -MK-
+                	    'min_miss = std::(aTrace.miss);' is changed to 'min_miss = aTrace.miss;'
+                	    to check whether the closet 'min_miss' is smaller than the requiredAccuracy or not.
+                	    'min_miss' and 'min_angle' will return the values instead of exiecuting the 'throw' command in 'if(i==maxTests){'
+                	    The related talk: http://ara.physics.wisc.edu/docs/0022/002263/001/20201221_Raytracing_Bug.pdf
+			*/
+                        if ( std::abs(min_miss) > std::abs(aTrace.miss) ) {
+                            min_miss = aTrace.miss;
                             min_angle = a;
                         }
 
@@ -1032,7 +1039,27 @@ namespace RayTrace{
 
 			//std::cerr << "Last attempt at bracketing was: [" << seed.launchAngle << "->" << seed.miss << ',' << a << "->" << aTrace.miss << ']' << std::endl;
 			//std::cerr << "\trising edge = " << std::boolalpha << rising << std::endl;
-			throw std::runtime_error("TraceFinder::refineRoot: exceeded maximum allowed number of steps for bracketing.");
+			//throw std::runtime_error("TraceFinder::refineRoot: exceeded maximum allowed number of steps for bracketing.");
+
+			/*!
+			    02-12-2021 -MK-
+                	    In case, the vertex is generated very far from antennas (~12km), the evenmore_refineRoot function
+                            can't find the optimal launch angle that satisfying the requiredAccuracy.
+                	    In this case, the function executes the 'throw' command, and the simulation is aborted.
+                	    In order to avoid the aborting simulation, I decided to command out the 'throw' and return the closet
+                	    results for 2nd direct ray tracing.
+                	    If the closet result is bigger than the initial missing_z (seed.miss) from
+                	    the fast solution (estimateRayAngle), the finPaths function will return '0 ray solution'.
+                	    If the closet result is smaller than the initial missing_z (seed.miss) but not bigger than
+                	    requiredAccuracy, 2nd direct ray tracing will try to find the solution with it.
+                	    The related talk: http://ara.physics.wisc.edu/docs/0022/002263/001/20201221_Raytracing_Bug.pdf
+			*/
+                	//! for debug
+		        //std::cout<<"Couldn' refine it at the evenmore_refineRoot."<<std::endl;
+                        //std::cout<<"Returning the closet results for 2nd direct ray tracing"<<std::endl;
+                        //std::cout<<"min_angle:"<< min_angle <<", min_miss:"<< min_miss <<std::endl;
+                        return(std::make_pair(min_angle,min_miss));
+
 		}
 		if((seed.miss>0.0)==rising){
 			c=seed.launchAngle;
@@ -1088,8 +1115,15 @@ namespace RayTrace{
 			//std::cout << "\ttesting theta=" << a << std::endl;
 			aTrace=doTrace<minimalRayPosition>(emit_depth,a,target,allowedReflections,0.0,0.0, sol_error );
 
-                        if ( min_miss > std::abs(aTrace.miss) ) {
-                            min_miss = std::abs(aTrace.miss);
+                        /*!
+			    02-12-2021 -MK-
+                	    'min_miss = std::(aTrace.miss);' is changed to 'min_miss = aTrace.miss;'
+                	    to check whether the closet 'min_miss' is smaller than the requiredAccuracy or not.
+                	    'min_miss' and 'min_angle' will return the values instead of exiecuting the 'throw' command in 'if(i==maxTests){'
+                	    The related talk: http://ara.physics.wisc.edu/docs/0022/002263/001/20201221_Raytracing_Bug.pdf
+			*/
+			if ( std::abs(min_miss) > std::abs(aTrace.miss) ) {
+                            min_miss = aTrace.miss;
                             min_angle = a;
                             minmissTrace = aTrace;
 		
@@ -1123,8 +1157,28 @@ namespace RayTrace{
 
 			//std::cerr << "Last attempt at bracketing was: [" << seed.launchAngle << "->" << seed.miss << ',' << a << "->" << aTrace.miss << ']' << std::endl;
 			//std::cerr << "\trising edge = " << std::boolalpha << rising << std::endl;
-			throw std::runtime_error("TraceFinder::refineRoot: exceeded maximum allowed number of steps for bracketing.");
-		}
+			//throw std::runtime_error("TraceFinder::refineRoot: exceeded maximum allowed number of steps for bracketing.");
+		
+			/*!
+			    02-12-2021 -MK-
+                	    In case, the vertex is generated very far from antennas (~12km), the refineRoot function
+                	    can't find the optimal launch angle that satisfying the requiredAccuracy.
+                	    In this case, the function executes the 'throw' command, and the simulation is aborted.
+                	    In order to avoid the aborting simulation, I decided to command out the 'throw' and return the closet
+                	    results for 2nd direct ray tracing.
+                	    If the closet result is bigger than the initial missing_z (seed.miss) from
+                	    the fast solution (estimateRayAngle), the finPaths function will return '0 ray solution'.
+                	    If the closet result is smaller than the initial missing_z (seed.miss) but not bigger than
+                	    requiredAccuracy, 2nd direct ray tracing will try to find the solution with it.
+                	    The related talk: http://ara.physics.wisc.edu/docs/0022/002263/001/20201221_Raytracing_Bug.pdf
+			*/
+                        //! for debug
+			// std::cout<<"Couldn' refine it at the evenmore_refineRoot."<<std::endl;
+                        // std::cout<<"Returning the closet results for 2nd direct ray tracing"<<std::endl;
+                        // std::cout<<"min_angle:"<< min_angle <<", min_miss:"<< min_miss <<std::endl;
+                        return(std::make_pair(min_angle,min_miss));
+
+                }
 		if((seed.miss>0.0)==rising){
 			c=seed.launchAngle;
 			cTrace=seed;
@@ -1383,11 +1437,42 @@ namespace RayTrace{
 			}
 			if(std::abs(results.front().miss) > requiredAccuracy){
                             // changed
-                            //std::cout << "Fast Solution not close enough (" << results.front().miss << "), pathLen: "<<results.front().pathLen<<"; refining" << std::endl;
-
-				est.angle=refineRoot(sourcePos.GetZ(), target, results.front(), false, NoReflection, requiredAccuracy, sol_error ).first;
+                            // std::cout << "Fast Solution not close enough (" << results.front().miss << "), pathLen: "<<results.front().pathLen<<"; refining" << std::endl;
+                            
+                                 //est.angle=refineRoot(sourcePos.GetZ(), target, results.front(), false, NoReflection, requiredAccuracy, sol_error ).first;
                             // changed
-                            //std::cout << "done refining" << std::endl;
+                            // std::cout << "done refining" << std::endl;
+ 
+			    /*!
+				02-12-2021 -MK-
+                    		In case, the vertex is generated very far from antennas (~12km), the refineRoot function
+                    		can't find the optimal launch angle that satisfying the requiredAccuracy.
+                    		In this case, the function executes the 'throw' command, and the simulation is aborted.
+                    		In order to avoid the aborting simulation, I decided to command out the 'throw' and return the closet
+                    		results (refine_result) for 2nd direct ray tracing.
+                    		If the closet result(refine_result.second) is bigger than the missing_z from the 1st doTrace (results.front().miss),
+                    		the finPaths function will return the '0 ray solution'.
+                    		If the closet result(refine_result.second) is smaller than the missing_z from the 1st doTrace or requiredAccuracy,
+                    		2nd direct ray tracing will try to find the solution with it (est.angle).
+                    		The related talk: http://ara.physics.wisc.edu/docs/0022/002263/001/20201221_Raytracing_Bug.pdf
+			    */
+			    //! for debug
+                            //std::cout << "Fast Solution not close enough (" << results.front().miss << "), pathLen: "<<results.front().pathLen<<"; attempt refining" << std::endl;
+                            std::pair <double,double> refine_result;
+                            refine_result=refineRoot(sourcePos.GetZ(), target, results.front(), false, NoReflection, requiredAccuracy, sol_error );
+
+                            if (std::abs(refine_result.second) > std::abs(results.front().miss)){
+
+                                //std::cout << "even more missed too much, pop back!" << std::endl;
+                                results.pop_back();
+                                sol_cnt--;
+                                //std::cout << "refining failed. return 0 solution." << std::endl;
+
+                            }
+                            else {
+
+                                est.angle=refine_result.first;
+                                //std::cout << "done refining. At least better than results.front().miss" << std::endl;
 
 				if(replayBuffer==NULL)
                                         {
@@ -1446,6 +1531,9 @@ namespace RayTrace{
                                         }
                                         //std::cout<<"\n\tSOL_CNT ADDED!  12\n"<<std::endl;
 				}
+
+                            }
+
 			}
 			//if(allowedReflections & SurfaceReflection){
 			if((allowedReflections & SurfaceReflection) && (sol_cnt>0) ){ // try reflect solution if there was 1st solution existing

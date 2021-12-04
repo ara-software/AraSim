@@ -1660,3 +1660,17 @@ It prevents adding '-nan' into the IceAttenFactor and deleting the E-field array
 
 Fix memory leak in the new FFT routines where the result of doFFT was not
 cleaned up correctly.
+
+============================================================================
+  2021/12/02 Myoungchul Kim
+
+In case, the vertex is generated very far from antennas (~12km), the refineRoot and evenmore_refineRoot
+function can't find the optimal launch angle that satisfying requiredAccuracy.
+In this case, the function executes the 'throw' command, and the simulation is aborted.
+In order to avoid the aborting simulation, I decided to command out the 'throw' and return the closet
+results (refine_result) for 2nd direct ray tracing.
+If the closet result(refine_result.second) is bigger than the missing_z from the 1st doTrace (results.front().miss),
+the finPaths function will return the '0 ray solution'.
+If the closet result(refine_result.second) is smaller than the missing_z from the 1st doTrace or requiredAccuracy,
+2nd direct ray tracing will try to find the solution with it (est.angle).
+The related talk: http://ara.physics.wisc.edu/docs/0022/002263/001/20201221_Raytracing_Bug.pdf

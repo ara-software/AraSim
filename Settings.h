@@ -270,7 +270,7 @@ class Settings
 	//11 : Moore's Bay Model 2
 	//20 : Byrd (Ebimuna (1983))
 	//30 : Mizuho (Ebimuna (1983))
-
+	
 	int WAVEFORM_LENGTH; // the number of samples in the waveform length for V_mimic and UsefulAtriStationEvent, default: 64/2*20 = 640
 
 	int WAVEFORM_CENTER; // the relative location of the center of the write-out window with respect to the last triggered bin (which is laced at the center of the window by default), this effectively provides a global delay in the write-out window across all channels: positive values shift the write-out window to later times in the waveform, negative values shift the window to earlier times, default: 0
