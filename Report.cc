@@ -147,6 +147,7 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     view_ang.clear();
     launch_ang.clear();
     rec_ang.clear();
+    rec_ang_phi.clear();
     reflect_ang.clear();
     Dist.clear();
     L_att.clear();
@@ -158,10 +159,6 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     Mag.clear();
     Fresnel.clear();
     Pol_factor.clear();
-    Pol_factorH.clear();
-    Pol_factorV.clear();
-    phi_rec.clear();
-    theta_rec.clear();
     ray_step.clear();
     //VHz_antfactor.clear();
     //VHz_filter.clear();
@@ -243,7 +240,8 @@ void Antenna_r::clear_useless(Settings *settings1) {   // to reduce the size of 
     }
     else if (settings1->DATA_SAVE_MODE == 2) {
     
-    ray_step.clear(); ///<clear the ray step to reduce the size of output AraOut.root  
+    //! clear the ray step to reduce the size of output AraOut.root
+    ray_step.clear();  
     
     Heff.clear();
     //VHz_antfactor.clear();
@@ -337,10 +335,6 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
     double fresnel;                                 // fresnel factor
     double Pol_factor;                              // polarization factor
     double tmp; // for non use return values
-    double Pol_factorV;
-    double Pol_factorH;
-    double phi_rec;
-    double theta_rec;
 
     double freq_tmp, heff, antenna_theta, antenna_phi;  // values needed for apply antenna gain factor and prepare fft, trigger
     double volts_forfft[settings1->NFOUR/2];       // array for fft
@@ -438,16 +432,16 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 		
 		
 		stations[i].strings[j].antennas[k].arrival_time.push_back(ray_output[4][ray_sol_cnt]);
+        
+        //! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
+        //! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
+        stations[i].strings[j].antennas[k].ray_step.resize(ray_sol_cnt+1); ///< resize by number of ray solutions
+        stations[i].strings[j].antennas[k].ray_step[ray_sol_cnt].resize(2); ///< resize by xz values
+        for (int steps=0; steps<(int)RayStep[ray_sol_cnt][0].size(); steps++) { ///< push back each ray step coordinates
+            stations[i].strings[j].antennas[k].ray_step[ray_sol_cnt][0].push_back(RayStep[ray_sol_cnt][0][steps]);
+            stations[i].strings[j].antennas[k].ray_step[ray_sol_cnt][1].push_back(RayStep[ray_sol_cnt][1][steps]);
+        }       
 	
-		//! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
-		//! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
-		stations[i].strings[j].antennas[k].ray_step.resize(ray_sol_cnt+1); ///< resize by number of ray solutions
-                stations[i].strings[j].antennas[k].ray_step[ray_sol_cnt].resize(2); ///< resize by xz values
-                for (int steps=0; steps<(int)RayStep[ray_sol_cnt][0].size(); steps++) { ///< push back each ray step coordinates
-                    stations[i].strings[j].antennas[k].ray_step[ray_sol_cnt][0].push_back(RayStep[ray_sol_cnt][0][steps]);
-                    stations[i].strings[j].antennas[k].ray_step[ray_sol_cnt][1].push_back(RayStep[ray_sol_cnt][1][steps]);
-                }
-		
 		// get ice attenuation factor
 		//
                                    double IceAttenFactor = 1.; 
@@ -460,13 +454,10 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                            dz = RayStep[ray_sol_cnt][1][steps-1] - RayStep[ray_sol_cnt][1][steps];
                                            dl = sqrt( (dx*dx) + (dz*dz) );
 
-                                           // Skipping attenuation calculation when the distance between two RaySteps is 0. Prevening adds -nan into the IceAttenFactor. (MK 2021)
-                                           if (dl > 0){
-                                               // use new ice model
-                                               // IceAttenFactor *= exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps]) );
-                                               // use the midpoint of the array to calculate the attenuation length, instead of the end of the ray (BAC 2020)
-                                               IceAttenFactor *= (exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps]) )+exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1])))/2;
-                                           }
+                                           // use new ice model
+                                           // IceAttenFactor *= exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps]) );
+                                           // use the midpoint of the array to calculate the attenuation length, instead of the end of the ray (BAC 2020)
+                                           IceAttenFactor *= (exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps]) )+exp(-dl/icemodel->GetARAIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1])))/2;
                                        }
                                        //cout<<"new iceattenfactor : "<<IceAttenFactor<<", old way : "<<exp(-ray_output[0][ray_sol_cnt]/icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0))<<endl;
                                    }
@@ -568,20 +559,11 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                    vmmhz1m_sum = 0;
 
-                                    // get the arrival angle at the antenna, and store the relevant polarization factors
+
                                    GetAngleAnt(receive_vector, detector->stations[i].strings[j].antennas[k], antenna_theta, antenna_phi);   // get theta, phi for signal ray arrived at antenna
-                                   
-                                   Vector thetaHat = Vector(cos(antenna_theta*(PI/180))*cos(antenna_phi*(PI/180)),
-                                          cos(antenna_theta*(PI/180))*sin(antenna_phi*(PI/180)),
-                                          -sin(antenna_theta*(PI/180)));
-                                    
-                                    Vector phiHat = Vector(-sin(antenna_phi*(PI/180)),
-                                        cos(antenna_phi*(PI/180)),
-                                        0);
-                                    stations[i].strings[j].antennas[k].Pol_factorH.push_back(abs(phiHat * Pol_vector));
-                                    stations[i].strings[j].antennas[k].Pol_factorV.push_back(abs(thetaHat * Pol_vector));
-                                    stations[i].strings[j].antennas[k].phi_rec.push_back(antenna_phi*(PI/180));
-                                    stations[i].strings[j].antennas[k].theta_rec.push_back(antenna_theta*(PI/180));
+                                   //cout<<"antenna theta : "<<antenna_theta<<"  phi : "<<antenna_phi<<endl;  
+                                   stations[i].strings[j].antennas[k].rec_ang_phi.push_back(antenna_phi*PI/180.); // store the antenna phi in radians (!)
+
 
                                    // old freq domain signal mode (AVZ model)
                                    if ( settings1->SIMULATION_MODE == 0 ) {
@@ -640,15 +622,11 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                               dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
                                               dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
                                               dl = sqrt((dx * dx) + (dz * dz));
-
-                                              // Skipping attenuation calculation when the distance between two RaySteps is 0. Prevening adds -nan into the IceAttenFactor. (MK 2021)
-                                              if (dl > 0){
-                                                  // IceAttenFactor *=  exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], detector->GetFreq(l) / 1e9));
-                                                  // use ray midpoint for attenuation calculation
-                                                  IceAttenFactor *=  (   exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], detector->GetFreq(l) / 1e9)) 
-                                                                       + exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1], detector->GetFreq(l) / 1e9))
-                                                                     )/2.; // 1e9 to convert to GHz
-                                              }
+                                              // IceAttenFactor *=  exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], detector->GetFreq(l) / 1e9));
+                                              // use ray midpoint for attenuation calculation
+                                              IceAttenFactor *=  (   exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], detector->GetFreq(l) / 1e9)) 
+                                                                   + exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1], detector->GetFreq(l) / 1e9))
+                                                                 )/2.; // 1e9 to convert to GHz
                                             }
                                             vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_sol_cnt] * IceAttenFactor * mag * fresnel; // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
                                           }
@@ -1003,15 +981,11 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
                                                        dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
                                                        dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
                                                        dl = sqrt((dx * dx) + (dz * dz));
-
-                                                       // Skipping attenuation calculation when the distance between two RaySteps is 0. Prevening adds -nan into the IceAttenFactor. (MK 2021)
-                                                       if (dl > 0){
-                                                           // IceAttenFactor *= exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9));// to GHz
-                                                           // use ray midpoint for attenuation calculation
-                                                           IceAttenFactor *= (    exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9))
-                                                                                + exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1], freq_tmp * 1.E-9))
-                                                                             )/2.; // 1e9 for conversion to GHz
-                                                       }
+                                                       // IceAttenFactor *= exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9));// to GHz
+                                                       // use ray midpoint for attenuation calculation
+                                                       IceAttenFactor *= (    exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp * 1.E-9))
+                                                                            + exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps-1], freq_tmp * 1.E-9))
+                                                                         )/2.; // 1e9 for conversion to GHz
 
                                                      }
                                                      //cout << "apply IceAttenFactor to the real part of fft. V_forfft[2 * n] = " << V_forfft[2 * n] << " * " << IceAttenFactor << endl;
@@ -1075,7 +1049,11 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
                                                // check what we save as V[], volts_forint? or volts_forfft
 
-                                               stations[i].strings[j].antennas[k].Pol_factor.push_back(Pol_factor);
+
+
+
+
+					       stations[i].strings[j].antennas[k].Pol_factor.push_back(Pol_factor);
                                                for (int n=0; n<settings1->NFOUR/2; n++) {
 
                                                    if (settings1->TRIG_ANALYSIS_MODE != 2) { // not pure noise mode (we need signal)
@@ -2856,253 +2834,6 @@ void Report::Connect_Interaction_Detector (Event *event, Detector *detector, Ray
 
 }   // end Connect_Interaction_Detector
 
-void Report::rerun_event(Event *event, Detector *detector, 
-    RaySolver *raysolver, Signal *signal, 
-    IceModel *icemodel, Settings *settings, int which_solution,
-    vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes,
-    vector<vector<vector<double> > > &traceVoltages
-    ){
-
-    // which solution = 0 (direct only), 1 (refracted/reflected only), 2 (both)
-    std::vector<int> which_sols_to_search;
-    if (which_solution==0){
-        which_sols_to_search.push_back(0);
-    }
-    else if(which_solution==1){
-        which_sols_to_search.push_back(1);
-    }
-    else if(which_solution==2){
-        which_sols_to_search.push_back(0);
-        which_sols_to_search.push_back(1);
-    }
-
-    // we create T_forint, which is the final time sampling of the traces before they are combined
-    double RandomTshift = 0. ; // for replication, we have no choice by to set this
-    double init_T = settings->TIMESTEP*-1.e9*((double)settings->NFOUR/4 + RandomTshift);
-    double T_forint[settings->NFOUR/2];
-    for(int n=0; n<settings->NFOUR/2; n++){
-        T_forint[n] = init_T + (double)n*settings->TIMESTEP*1.e9;
-    }
-
-    int num_strings = detector->stations[0].strings.size();
-    int num_antennas = detector->stations[0].strings[0].antennas.size();
-
-    for(int j=0; j<num_strings; j++){
-        for(int k=0; k<num_antennas; k++){
-
-            int idx = ((j*4)+k);
-
-            // redo the ray tracing
-            vector<vector<double> > ray_output;
-            vector<vector<vector<double> > > Ray_Step;
-            raysolver->Solve_Ray(event->Nu_Interaction[0].posnu,
-                detector->stations[0].strings[j].antennas[k],
-                icemodel, ray_output, settings, Ray_Step);
-
-            // if there is a solution
-            if (raysolver->solution_toggle){
-
-                // numSolutions[idx]=ray_output[0].size();
-                numSolutions[idx]=ray_output[0].size();
-
-                int ray_sol_cnt=0;
-                while (ray_sol_cnt < ray_output[0].size()){
-
-                    if(std::find(which_sols_to_search.begin(), which_sols_to_search.end(), ray_sol_cnt) == which_sols_to_search.end()){
-                        // if this solution is not meant to be searched, skip it
-                        ray_sol_cnt++;
-                        continue;
-                    }
-
-                    double viewangle = ray_output[1][ray_sol_cnt];
-                    Position launch_vector;
-                    Position receive_vector;
-                    Vector n_trg_pokey;
-                    Vector n_trg_slappy;
-
-                    GetParameters(
-                        event->Nu_Interaction[0].posnu,
-                        detector->stations[0].strings[j].antennas[k],
-                        event->Nu_Interaction[0].nnu,
-                        viewangle,
-                        ray_output[2][ray_sol_cnt],
-                        launch_vector, receive_vector,
-                        n_trg_slappy, n_trg_pokey
-                        );
-                    // get polarization
-                    Vector Pol_vector = GetPolarization(
-                        event->Nu_Interaction[0].nnu, launch_vector);
-
-                    double fresnel, mag;
-                    icemodel->GetFresnel(
-                        ray_output[1][ray_sol_cnt],
-                        ray_output[2][ray_sol_cnt],
-                        ray_output[3][ray_sol_cnt],
-                        event->Nu_Interaction[0].posnu,
-                        launch_vector, receive_vector,
-                        settings, fresnel, mag, Pol_vector
-                        );
-
-                    // get arrival angle at the antenna
-                    double antenna_theta, antenna_phi;
-                    GetAngleAnt(
-                        receive_vector, 
-                        detector->stations[0].strings[j].antennas[k],
-                        antenna_theta, antenna_phi
-                        );
-                    
-                    // this is the 1/R and fresnel and focusing effect
-                    double atten_factor = 1. / ray_output[0][ray_sol_cnt] * mag * fresnel;
-
-                    // get the electric field
-                    int local_outbin=64;
-                    double local_Earray[local_outbin];
-                    double local_Tarray[local_outbin];
-                    int local_skipbins;
-                    signal->GetVm_FarField_Tarray(event, settings, viewangle,
-                        atten_factor, local_outbin, local_Tarray, local_Earray, local_skipbins
-                        );
-
-                    double dT_forfft = local_Tarray[1] - local_Tarray[0];
-                    int Ntmp = settings->TIMESTEP*1.e9 / dT_forfft;
-                    int Nnew=1;
-                    while(Ntmp > 1){
-                        Ntmp = Ntmp/2;
-                        Nnew = Nnew*2;
-                    }
-                    Nnew = Nnew * settings->NFOUR/2;
-
-                    double V_forfft[Nnew];
-                    double T_forfft[Nnew];
-
-                    for(int n=0; n<Nnew; n++){
-                        T_forfft[n] = local_Tarray[local_outbin/2] - (dT_forfft*(double)(Nnew/2 - n));
-                        if ( (n >= Nnew/2 - local_outbin/2) && (n < Nnew/2 + local_outbin/2) ) {
-                            V_forfft[n] = local_Earray[ n - (Nnew/2 - local_outbin/2) ];
-                        }
-                        else{
-                            V_forfft[n] = 0.;
-                        }
-                    }
-
-                    // transform to the frequency domain
-                    Tools::realft(V_forfft, 1, Nnew);
-
-                    double dF_Nnew = 1./( (double)(Nnew) * (dT_forfft)*1.e-9 ); // in Hz
-                    double freq_tmp = dF_Nnew*((double)Nnew/2.+0.5);// in Hz 0.5 to place the middle of the bin and avoid zero freq
-                    double freq_lastbin = freq_tmp;
-
-                    // save the gain and heff of the last bin, which must be treated specially
-                    double gain_lastbin = detector->GetGain_1D_OutZero(
-                        freq_tmp*1.E-6, // Hz
-                        antenna_theta, antenna_phi,
-                        detector->stations[0].strings[j].antennas[k].type
-                        );
-                    double heff_lastbin = GaintoHeight(gain_lastbin, freq_tmp,
-                        icemodel->GetN(detector->stations[0].strings[j].antennas[k])
-                        );
-
-                    // integrate along the path and save the frequency dependent attenuation
-                    double attenuations[Nnew/2];
-                    std::fill_n(attenuations, Nnew/2, 1.); // all of the attenuations initially start at 1
-
-                    for (int steps = 1; steps < (int) Ray_Step[ray_sol_cnt][0].size(); steps++) {
-                        double dx = Ray_Step[ray_sol_cnt][0][steps - 1] - Ray_Step[ray_sol_cnt][0][steps];
-                        double dz = Ray_Step[ray_sol_cnt][1][steps - 1] - Ray_Step[ray_sol_cnt][1][steps];
-                        double dl = sqrt((dx * dx) + (dz * dz));
-
-                        // Skipping attenuation calculation when the distance between two RaySteps is 0. Prevening adds -nan into the IceAttenFactor. (MK 2021)
-                        if (dl > 0){
-                            for(int n=0; n<Nnew/2; n++){
-                                freq_tmp = dF_Nnew*((double)n+0.5);
-                                // use ray midpoint for attenuation calculation
-                                double IceAttenFactor = (  exp(-dl / icemodel->GetFreqDepIceAttenuLength(-Ray_Step[ray_sol_cnt][1][steps], freq_tmp * 1.E-9))
-                                                         + exp(-dl / icemodel->GetFreqDepIceAttenuLength(-Ray_Step[ray_sol_cnt][1][steps-1], freq_tmp * 1.E-9))
-                                                        )/2.; // 1e9 for conversion to GHz
-                                // increase the attenuation
-                                attenuations[n]*=IceAttenFactor;
-                            }
-                        }
-                    }
-
-                    // loop over frequency bins
-                    for(int n=0; n<Nnew/2; n++){
-                        freq_tmp = dF_Nnew*((double)n+0.5);
-
-                        // apply the attenuation for this frequency bin
-                        V_forfft[2*n]*=attenuations[n];
-                        V_forfft[2*n + 1]*=attenuations[n];
-
-                        // get the antenna gain (and then heff) and phase
-                        double gain = detector->GetGain_1D_OutZero(
-                            freq_tmp*1.E-6, // Hz
-                            antenna_theta, antenna_phi,
-                            detector->stations[0].strings[j].antennas[k].type
-                            );
-                        double heff = GaintoHeight(gain, freq_tmp,
-                            icemodel->GetN(detector->stations[0].strings[j].antennas[k])
-                            );
-                        double phase = detector->GetAntPhase_1D(
-                            freq_tmp*1.E-6, // Hz
-                            antenna_theta, antenna_phi, 
-                            detector->stations[0].strings[j].antennas[k].type
-                            );
-
-                        // apply the antenna factors (this will also apply the polarization)
-                        // and the electronics response
-                        double Pol_factor;
-                        if(n>0){
-                            ApplyAntFactors_Tdomain(
-                                phase, heff, n_trg_pokey, n_trg_slappy, Pol_vector, 
-                                detector->stations[0].strings[j].antennas[k].type,
-                                Pol_factor, V_forfft[2*n], V_forfft[2*n + 1],
-                                settings, antenna_theta, antenna_phi
-                                );
-                            ApplyElect_Tdomain(freq_tmp*1.e-6, detector,
-                                V_forfft[2*n], V_forfft[2*n + 1], settings
-                                );
-                        }
-                        else{
-                            ApplyAntFactors_Tdomain_FirstTwo(
-                                heff, heff_lastbin, n_trg_pokey, n_trg_slappy, Pol_vector, 
-                                detector->stations[0].strings[j].antennas[k].type,
-                                Pol_factor, V_forfft[2*n], V_forfft[2*n + 1],
-                                antenna_theta, antenna_phi
-                                );
-                            ApplyElect_Tdomain_FirstTwo(freq_tmp*1.e-6,
-                                freq_lastbin*1.e-6, detector,
-                                V_forfft[2*n], V_forfft[2*n + 1]
-                                );
-                        }
-                    }
-
-                    // fft back to time domain
-                    Tools::realft(V_forfft, -1, Nnew);
-
-                    // interpolate to final time sampling
-                    double volts_forint[settings->NFOUR/2];
-                    Tools::SincInterpolation(Nnew, T_forfft, V_forfft,
-                        settings->NFOUR/2, T_forint, volts_forint
-                    );
-
-                    // fix the normalization on the inverse fft (2/N)
-                    for(int n=0; n<settings->NFOUR/2; n++){
-                        volts_forint[n] *= 2./Nnew;
-                    }
-
-                    // store the result
-                    for(int n=0; n<settings->NFOUR/2; n++){
-                        traceTimes[idx][ray_sol_cnt][n] = T_forint[n];
-                        traceVoltages[idx][ray_sol_cnt][n] = volts_forint[n];
-                    }
-
-                    ray_sol_cnt++;
-                }
-            }
-        }
-    }
-}
-
 int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode ){
  
   class CircularBuffer {
@@ -4364,7 +4095,7 @@ double Report::calculatePolFactor(Vector &Pol_vector, int ant_type, double anten
      else if (ant_type == 1) {   // if h pol
          pol_factor = Pol_vector *phiHat;
      }
-     pol_factor = pol_factor;
+     pol_factor = abs(pol_factor);
      return pol_factor;
  }
 
@@ -4641,20 +4372,25 @@ void Report::ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double
 
 void Report::GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_theta, double &ant_phi) {   //ant_theta and ant_phi is in degree 
 
-    /*
-     * 2020-12-07 BAC
-     * We take the receive vector, which currently specificies where the signal is *going*
-     * And flip it to specify where the signal is *coming from*
-     * And then get the theta and phi, and return them in *degrees*.
-     *
-     * This is necessary because AraSim requires antenna_theta and antenna_phi
-     * to indicate "where the signal came from" in order to correctly
-     * calculate the polarization factors and the gain.
-    */
+    // need to fix some parts.
+    // currently phi is not correct.
+    // I think we have to actually rotate (0,-1,0) to antenna location and get phi from rotated (0,-1,0)
+    ant_theta = rec_vector.Angle(antenna)*DEGRAD;
 
-    Vector flip_receive_vector = -1. * rec_vector;
-    ant_theta = flip_receive_vector.Theta() * TMath::RadToDeg(); // return in degrees
-    ant_phi = flip_receive_vector.Phi() * TMath::RadToDeg();
+    Vector unit0_10;
+    Vector unit100;
+    unit0_10.SetXYZ(0,-1,0);
+    unit100.SetXYZ(1,0,0);
+    Vector proj;
+
+    proj = antenna.Cross( rec_vector.Cross(antenna) );
+
+    if (proj * unit100 > 0.) {  // rec_vector is pointing to positive x direction
+        ant_phi = 360. - ( proj.Angle(unit0_10) )*DEGRAD;
+    }
+    else {
+        ant_phi = proj.Angle(unit0_10) * DEGRAD;
+    }
 
 }
 
@@ -5682,3 +5418,5 @@ vector<double> Report::getHitTimesVectorHpol(Detector *detector, int station_i){
   return getHitTimesVector(detector, station_i, 1);
   
 }
+
+
