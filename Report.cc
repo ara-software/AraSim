@@ -3432,7 +3432,6 @@ void Report::Connect_Interaction_Detector_V2(Event * event, Detector * detector,
                                                                     antenna_theta, antenna_phi, detector -> stations[i].strings[j].antennas[k].type),
                                                                 freq_tmp, icemodel -> GetN(detector -> stations[i].strings[j].antennas[k]));
                                                         }
-
                                                         if (settings1 -> ANTENNA_MODE == 1) {
                                                             heff = GaintoHeight(detector -> GetGain_1D_OutZero(freq_tmp * 1.E-6, // to MHz
                                                                     antenna_theta, antenna_phi, detector -> stations[i].strings[j].antennas[k].type, k),
