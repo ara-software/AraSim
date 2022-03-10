@@ -145,7 +145,7 @@ class Antenna_r {
         void clear ();  // clear all vector format information for next event
         void clear_useless ( Settings *settings1 );  // clear all vector information which are useless
 
-        ClassDef(Antenna_r,1);
+        ClassDef(Antenna_r,2);
 };
 
 class String_r {
