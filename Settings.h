@@ -299,6 +299,8 @@ class Settings
 	int CUSTOM_ELECTRONICS; //0 (default): use the regular "ARA_Electronics_TotalGain_TwoFilter.txt" file
 							//1 : load a custom electronics file, stored as "custom_electronics.txt" in the `data` directory
 
+  int ANALYTIC_RAYTRACE_MODE; //default: 0 -- use numerical RayTracing for AraSim, 1 -- use analytical raytracing 
+
 
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
         vector<int> EVID;

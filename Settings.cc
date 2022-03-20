@@ -293,6 +293,7 @@ outputdir="outputs"; // directory where outputs go
 
     CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.tst"
 
+    ANALYTIC_RAYTRACE_MODE=0; //default: 0 -- use numerical RayTracing for AraSim, 1 -- use analytical raytracing 
 
     /*
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
@@ -673,9 +674,9 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "CUSTOM_ELECTRONICS"){
               	   CUSTOM_ELECTRONICS = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
-
-
-
+	      else if (label == "ANALYTIC_RAYTRACE_MODE"){
+        	   ANALYTIC_RAYTRACE_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
 
           }
       }
@@ -734,7 +735,6 @@ void Settings::ReadEvtFile(string evtfile){
                 IND_NNU_THETA.push_back(i);
                 IND_NNU_PHI.push_back(j);
                 ELAST.push_back(k);
-
 
                 l++;
             }
