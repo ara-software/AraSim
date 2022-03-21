@@ -1232,7 +1232,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
       
     solution_toggle = 0;
     for(int iray=0;iray<2;iray++){
-      if(IgnoreCh[iray]!=-1000){
+      if(IgnoreCh[iray]==1){
 	outputs.resize(5);
 
 	outputs[0].push_back(PathRay[iray]);
