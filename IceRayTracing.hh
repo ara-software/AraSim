@@ -1,17 +1,9 @@
-
 /*
 This is the IceRayTracing namespace. Author: Uzair Latif 
 released under GPL3.
 */
 #ifndef IRT_HEAD
 #define IRT_HEAD
-
-#include "TGraph.h"
-#include "TMultiGraph.h"
-#include "TCanvas.h"
-#include "TString.h"
-#include "TAxis.h"
-#include "TMath.h"
 
 #include <stdio.h>
 #include <math.h>
@@ -159,13 +151,13 @@ namespace IceRayTracing{
   double *GetRefractedRayPar(double z0, double x1 ,double z1, double LangR, double RangR, double checkzeroD, double checkzeroR);
 
   
-  /* This function returns the x and z values for the full Direct ray path in a TGraph and also prints out the ray path in a text file */
+  /* This function returns the x and z values for the full Direct ray path and prints out the ray path in a text file */
   void GetFullDirectRayPath(double z0, double x1, double z1,double lvalueD, vector <double> &x, vector <double> &z);
 
-  /* This function returns the x and z values for the full Reflected ray path in a TGraph and also prints out the ray path in a text file */
+  /* This function returns the x and z values for the full Reflected ray path and prints out the ray path in a text file */
   void GetFullReflectedRayPath(double z0, double x1, double z1,double lvalueR, vector <double> &x, vector <double> &z);
   
-  /* This function returns the x and z values for the full Refracted ray path in a TGraph and also prints out the ray path in a text file */
+  /* This function returns the x and z values for the full Refracted ray path and prints out the ray path in a text file */
   void GetFullRefractedRayPath(double z0, double x1, double z1, double zmax, double lvalueRa, vector <double> &x, vector <double> &z,int raynumber);
 
   /* function for plotting and storing all the rays */
@@ -192,11 +184,11 @@ namespace IceRayTracing{
   /* This functions works for the Reflected ray and gives you back the launch angle, receive angle and propagation times (of the whole ray and the two direct rays that make it up) together with values of the L parameter. This is for constant refractive index*/
   double *GetReflectedRayPar_Cnz(double z0, double x1 , double z1, double A_ice_Cnz);
 
-  /* This function returns the x and z values for the full Direct ray path in a TGraph and also prints out the ray path in a text file. This is for a constant refractive index. */
-  TGraph* GetFullDirectRayPath_Cnz(double z0, double x1, double z1, double lvalueD, double A_ice_Cnz);
+  /* This function returns the x and z values for the full Direct ray path and prints out the ray path in a text file. This is for a constant refractive index. */
+  void GetFullDirectRayPath_Cnz(double z0, double x1, double z1, double lvalueD, double A_ice_Cnz,vector <double> &x, vector <double> &z);
 
-  /* This function returns the x and z values for the full Reflected ray path in a TGraph and also prints out the ray path in a text file. This is for a constant refractive index. */
-  TGraph* GetFullReflectedRayPath_Cnz(double z0, double x1, double z1, double lvalueR, double A_ice_Cnz);
+  /* This function returns the x and z values for the full Reflected ray path and prints out the ray path in a text file. This is for a constant refractive index. */
+  void GetFullReflectedRayPath_Cnz(double z0, double x1, double z1, double lvalueR, double A_ice_Cnz,vector <double> &x, vector <double> &z);
 
   /* function for plotting and storing all the rays. This is for constant refractive index. */
   void PlotAndStoreRays_Cnz(double x0,double z0, double z1, double x1, double lvalues[2], double A_ice_Cnz);
