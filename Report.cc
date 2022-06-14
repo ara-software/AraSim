@@ -1688,27 +1688,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
         stations[i].Global_Pass = 0;
         int check_passed_global_trigger = 0;    // this switch determines if station globally triggers (in all TRIG_SCAN_MODEs)
 
-        //            int nfour_station = settings1->NFOUR;
-        //            double timestep_station = settings1->TIMESTEP;
-        //            double trig_window_station = settings1->TRIG_WINDOW;
-        //            int trig_window_bin = int(trig_window_station/timestep_station);
-        //cout << nfour_station << " : " << timestep_station << " : " << trig_window_station << " : " << trig_window_bin << endl;
-
-        //            int nfour_station = detector->stations[i].NFOUR;
-        //            double timestep_station = detector->stations[i].TIMESTEP;
-        //            double trig_window_station = detector->stations[i].TRIG_WINDOW;
-        //            int trig_window_bin = int(trig_window_station/timestep_station);
-
         if (stations[i].Total_ray_sol)
         {
             // if there is any ray_sol (don't check trigger if there is no ray_sol at all)
-            //if (stations[i].Total_ray_sol && settings1->TRIG_ANALYSIS_MODE != 2) {    // if there is any ray_sol (don't check trigger if there is no ray_sol at all) and TRIG_ANALYSIS_MODE is 0 (signal + noise mode)
-
-            //cout<<"3"<<endl;
 
             // calculate total number of bins we need to do trigger check
-            //max_total_bin = (stations[i].max_arrival_time - stations[i].min_arrival_time)/settings1->TIMESTEP + settings1->NFOUR/2 + trigger->maxt_diode_bin;
-            //max_total_bin = (stations[i].max_arrival_time - stations[i].min_arrival_time)/settings1->TIMESTEP + settings1->NFOUR*2 + trigger->maxt_diode_bin; // make more time
             max_total_bin = (stations[i].max_arrival_time - stations[i].min_arrival_time) / settings1->TIMESTEP + settings1->NFOUR *3 + trigger->maxt_diode_bin;    // make more time
 
             //stations[i].max_total_bin = max_total_bin;
@@ -1720,28 +1704,20 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                 // redefine DATA_BIN_SIZE
                 int DATA_BIN_SIZE_tmp;
-                //                   long DATA_BIN_SIZE_tmp;
-                //for (int DBS=10; DBS < 15; DBS++) {
                 for (int DBS = 10; DBS < 16; DBS++)
                 {
-                    //                   for (int DBS=10; DBS < 17; DBS++) {
                     DATA_BIN_SIZE_tmp = (int) pow(2., (double) DBS);
-                    //if (DATA_BIN_SIZE_tmp > max_total_bin) DBS = 15;  // come out
                     if (DATA_BIN_SIZE_tmp > max_total_bin) DBS = 16;    // come out
-                    //                       if (DATA_BIN_SIZE_tmp > max_total_bin) DBS = 17;   // come out
-                    //                       if (DATA_BIN_SIZE_tmp > max_total_bin) DATA_BIN_SIZE_tmp = (long)pow(2., 17.0);
-                    //if (DATA_BIN_SIZE_tmp > max_total_bin+settings1->NFOUR/2) DBS = 15;   // come out
                 }
                 settings1->DATA_BIN_SIZE = DATA_BIN_SIZE_tmp;
-                //                   cout<<"new DATA_BIN_SIZE : "<<DATA_BIN_SIZE_tmp<<endl;
-                //                   cout<<"max_total_bin : "<<max_total_bin<<endl;
+                // cout<<"new DATA_BIN_SIZE : "<<DATA_BIN_SIZE_tmp<<endl;
+                // cout<<"max_total_bin : "<<max_total_bin<<endl;
 
                 // reset all filter values in Detector class
                 detector->get_NewDiodeModel(settings1);
                 detector->ReadFilter_New(settings1);
                 detector->ReadPreamp_New(settings1);
                 detector->ReadFOAM_New(settings1);
-
                 detector->ReadElectChain_New(settings1);
 
                 if (settings1->USE_TESTBED_RFCM_ON == 1)
@@ -1752,16 +1728,18 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 {
                     detector->ReadRayleigh_New(settings1);
                 }
-                //                   if (settings1->NOISE==1 && settings1->DETECTOR==4) {
-                //                       detector->ReadRayleigh_Station(settings1);
-                //                   }
+
+                // TODO: I think this is where the Rayleigh reading will go for this next version of the code
+                // if (settings1->NOISE==1 && settings1->DETECTOR==4) {
+                //     detector->ReadRayleigh_Station(settings1);
+                // }
 
                 // reset Trigger class noise temp values
                 trigger->Reset_V_noise_freqbin(settings1, detector);
 
                 // now call new noise waveforms with new DATA_BIN_SIZE
                 trigger->GetNewNoiseWaveforms(settings1, detector, this);
-                //          cout << "New noise waveforms gotten" << endl;
+                // cout << "New noise waveforms gotten" << endl;
             }
 
             // do only if it's not in debugmode
@@ -1769,22 +1747,20 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
             // now, check if DATA_BIN_SIZE is enough for total time delay between antennas
             else
             {
-
                 N_noise = (int)(max_total_bin / settings1->DATA_BIN_SIZE) + 1;
             }
-            //cout<<"N_noise : "<<N_noise<<endl;
+            // cout<<"N_noise : "<<N_noise<<endl;
 
             if (N_noise > 1) cout << "N_noise : " << N_noise << " max_total_bin : " << max_total_bin << " might cause error!!" << endl;
             // mostly N_noise should be "1"
 
             // now, check the number of bins we need for portion of noise waveforms
             remain_bin = max_total_bin % settings1->DATA_BIN_SIZE;
-
             ch_ID = 0;
 
             for (int j = 0; j < detector->stations[i].strings.size(); j++)
             {
-                //cout << j << endl;
+                // cout << j << endl;
                 for (int k = 0; k < detector->stations[i].strings[j].antennas.size(); k++)
                 {
 
@@ -1838,45 +1814,44 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         else if (settings1->NOISE_CHANNEL_MODE == 1)
                         {
                             noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
-                            //      cout << "picking noise waveform" << endl;
-                            //cout << noise_ID[l]<< endl;
+                            // cout << "picking noise waveform" << endl;
+                            // cout << noise_ID[l]<< endl;
                         }   // if NOISE_CHANNEL_MODE = 1
 
                         // if we are using diff noise waveform for diff chs, just pick any noise waveform
                         else if (settings1->NOISE_CHANNEL_MODE == 2)
                         {
                             noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
-                        }   // if NOISE_CHANNEL_MODE = 1
+                        }   // if NOISE_CHANNEL_MODE = 2
 
                         // save noise ID
                         stations[i].strings[j].antennas[k].noise_ID.push_back(noise_ID[l]);
 
-                        //                           cout<<"noise_ID for "<<l<<"th noisewaveform is : "<<noise_ID[l]<<"  N_noise : "<<N_noise<<" ray_sol_cnt : "<<stations[i].strings[j].antennas[k].ray_sol_cnt<<endl;
+                        // cout<<"noise_ID for "<<l<<"th noisewaveform is : "<<noise_ID[l]<<"  N_noise : "<<N_noise<<" ray_sol_cnt : "<<stations[i].strings[j].antennas[k].ray_sol_cnt<<endl;
 
                         // do only if it's not in debugmode
                         if (debugmode == 0)
                         {
 
-                            //                cout << l << " : " << N_noise-1 << " : " << ch_ID << endl;
+                            // cout << l << " : " << N_noise-1 << " : " << ch_ID << endl;
                             // if we are sharing same noise waveform for all chs, make sure diff chs use diff noise waveforms
                             if (settings1->NOISE_CHANNEL_MODE == 0)
                             {
                                 if (l == N_noise - 1)
                                 {
                                     // when it's final noise waveform
-                                    //for (int bin=0; bin < remain_bin; bin++) {
                                     for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
                                     {
                                         // test for full window
                                         trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode[noise_ID[l]][bin]);
                                         trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain[noise_ID[l]][bin]);
                                     }
-                                    //cout<<"last noise filled in Full_window!"<<endl;
+                                    // cout<<"last noise filled in Full_window!"<<endl;
                                 }
                                 else
                                 {
                                     // when it's not final noise waveform
-                                    //cout<<"full noise will fill in Full_window!"<<endl;
+                                    // cout<<"full noise will fill in Full_window!"<<endl;
                                     for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
                                     {
                                         trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode[noise_ID[l]][bin]);
@@ -1925,19 +1900,18 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     if (l == N_noise - 1)
                                     {
                                         // when it's final noise waveform
-                                        //for (int bin=0; bin < remain_bin; bin++) {
                                         for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
                                         {
                                             // test for full window
                                             trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
                                             trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
                                         }
-                                        //cout<<"last noise filled in Full_window!"<<endl;
+                                        // cout<<"last noise filled in Full_window!"<<endl;
                                     }
                                     else
                                     {
                                         // when it's not final noise waveform
-                                        //cout<<"full noise will fill in Full_window!"<<endl;
+                                        // cout<<"full noise will fill in Full_window!"<<endl;
                                         for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
                                         {
                                             trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
@@ -1951,19 +1925,18 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     if (l == N_noise - 1)
                                     {
                                         // when it's final noise waveform
-                                        //for (int bin=0; bin < remain_bin; bin++) {
                                         for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
                                         {
                                             // test for full window
                                             trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[8][noise_ID[l]][bin]);
                                             trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[8][noise_ID[l]][bin]);
                                         }
-                                        //cout<<"last noise filled in Full_window!"<<endl;
+                                        // cout<<"last noise filled in Full_window!"<<endl;
                                     }
                                     else
                                     {
                                         // when it's not final noise waveform
-                                        //cout<<"full noise will fill in Full_window!"<<endl;
+                                        // cout<<"full noise will fill in Full_window!"<<endl;
                                         for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
                                         {
                                             trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[8][noise_ID[l]][bin]);
@@ -1978,12 +1951,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                     // currently there is a initial spoiled bins (maxt_diode_bin) at the initial Full_window "AND" at the initial of connected noisewaveform (we can fix this by adding values but not accomplished yet)
 
-                    //cout<<"done filling noise diode arrays for trigger!"<<endl;
+                    // cout<<"done filling noise diode arrays for trigger!"<<endl;
 
                     // now we need to calculate bin values for the signal
                     // with the bin values, grap noise voltage waveform (NFOUR/2) and do myconvlv
                     // and replace by init : bin + maxt_diode_bin, fin : bin + NFOUR/2
-                    //
                     // after we do this for all channels, do trigger check
 
                     // calculate the bin values for the signal
@@ -1998,10 +1970,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         for (int m = 0; m < stations[i].strings[j].antennas[k].ray_sol_cnt; m++)
                         {
                             // loop over raysol numbers
-                            //signal_bin.push_back((stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time)/(settings1->TIMESTEP) + settings1->NFOUR/4);
-                            //signal_bin.push_back((stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time)/(settings1->TIMESTEP) + settings1->NFOUR/2 + trigger->maxt_diode_bin);
                             signal_bin.push_back((stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time) / (settings1->TIMESTEP) + settings1->NFOUR *2 + trigger->maxt_diode_bin);
-                            //signal_bin.push_back((stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time)/(settings1->TIMESTEP) + settings1->NFOUR + trigger->maxt_diode_bin);
 
                             // store signal located bin
                             stations[i].strings[j].antennas[k].SignalBin.push_back(signal_bin[m]);
@@ -2009,12 +1978,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             if (m > 0)
                             {
                                 signal_dbin.push_back(signal_bin[m] - signal_bin[m - 1]);
-                                //cout<<"  signal_dbin["<<m-1<<"] : "<<signal_dbin[m-1];
+                                // cout<<"  signal_dbin["<<m-1<<"] : "<<signal_dbin[m-1];
                                 if (signal_dbin[m - 1] < settings1->NFOUR / 2)
                                 {
                                     // if two ray_sol time delay is smaller than time window
                                     connect_signals.push_back(1);
-                                    //cout<<"need two signal connection!!"<<endl;
+                                    // cout<<"need two signal connection!!"<<endl;
                                 }
                                 else
                                 {
@@ -2026,13 +1995,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 // if only one solution
                                 connect_signals.push_back(0);
                             }
-                            //cout<<"\n";
+                            // cout<<"\n";
                         }
-                        //
 
-                        //cout<<"done calculating signal bins / connect or not"<<endl;
+                        // cout<<"done calculating signal bins / connect or not"<<endl;
 
-                        // grap noise waveform (NFOUR/2 bins or NFOUR) for diode convlv
+                        // grab noise waveform (NFOUR/2 bins or NFOUR) for diode convlv
                         for (int m = 0; m < stations[i].strings[j].antennas[k].ray_sol_cnt; m++)
                         {
                             // loop over raysol numbers
@@ -2046,7 +2014,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 {
 
                                     // do two convlv with double array m, m+1
-                                    //
 
                                     Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i);
                                 }
@@ -2054,7 +2021,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 {
                                     // cout << noise_ID << " : " << ch_ID << " : " << i << " : " << endl;
                                     // do NFOUR/2 size array convlv (m)
-                                    //
                                     Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i);
                                 }
                             }
@@ -2134,11 +2100,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                         }   // end loop over raysols
 
-                        //cout<<"done convlv for signal + noise"<<endl;
-                        //
-                        //
+                        // cout<<"done convlv for signal + noise"<<endl;
                         // I think I have to apply gain difference factors in here...
-                        //
                         if (settings1->USE_MANUAL_GAINOFFSET == 1)
                             Apply_Gain_Offset(settings1, trigger, detector, ch_ID, i);  // last i for stationID
 
@@ -2154,9 +2117,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
             if (debugmode == 0)
             {
 
-                //
                 // before we move to next station, do trigger check here!!!
-                //
 
                 int trig_i, trig_j, trig_bin;
                 int trig_search_init;
@@ -2168,8 +2129,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 // 0 for orginal style (save the middle of trig_window)
                 // 1 for saving waveform starting from last_trig_bin
                 // 2 for saving waveform where last_trig_bin located on the middle of the waveform
-                //
-                //
 
                 int trig_mode = settings1->TRIG_MODE;
                 // global trigger mode
@@ -2178,8 +2137,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                 int check_ch;
 
-                //trig_i = trigger->maxt_diode_bin;
-                //trig_i = trigger->maxt_diode_bin + settings1->NFOUR;  // give some time shift for mimicing force trig events
                 trig_search_init = trigger->maxt_diode_bin + settings1->NFOUR;  // give some time shift for mimicing force trig events
                 trig_i = trig_search_init;
 
@@ -2801,19 +2758,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 trigger->ClearNoiseWaveforms();
             }
         }   // if there is any ray_sol in the station
-        /*
-                        // now remove all information which are useless
-                       for (int c_j=0; c_j< detector->stations[i].strings.size(); c_j++) {
 
-                           for (int c_k=0; c_k< detector->stations[i].strings[c_j].antennas.size(); c_k++) {
-
-                               stations[i].strings[c_j].antennas[c_k].clear_useless(settings1);     // clear data in antenna which stored in previous event
-                                //stations[i].strings[c_j].antennas[c_k].clear();   // clear data in antenna which stored in previous event
-
-                           }
-                       }
-                        // clear useless done
-        */
     }   // for stations
 
     // also clear all vector info to reduce output root file size
