@@ -366,7 +366,6 @@ class Detector {
         double GetRFCMGain_databin(int ch, int bin) { return RFCM_TB_databin_ch[ch][bin]; }   // bin for FFT
 
 
-        double GetRayleighFit(int ch, int bin) { return Rayleigh_TB_ch[ch][bin]; }   // same bin with Vgain, Hgain
         double GetRayleighFit_databin(int ch, int bin) { return Rayleigh_TB_databin_ch[ch][bin]; }   // bin for FFT
 
 
