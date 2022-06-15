@@ -4664,174 +4664,147 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
 
 
 // generate DATA_BIN_SIZE sized noise waveform array in time domain
-void Report::GetNoiseWaveforms_ch(Settings *settings1, Detector *detector, double v_noise, double *vnoise, int ch) {
-  //  cout << "channel: " << ch << endl;
-    if (settings1->NOISE == 0) {    // NOISE == 0 : flat thermal noise with Johnson-Nyquist noise
+void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, double v_noise, double * vnoise, int ch) {
+    //  cout << "channel: " << ch << endl;
+    if (settings1 -> NOISE == 0) { // NOISE == 0 : flat thermal noise with Johnson-Nyquist noise
 
-        Vfft_noise_after.clear();  // remove previous Vfft_noise values
-       Vfft_noise_before.clear();  // remove previous Vfft_noise values
+        Vfft_noise_after.clear(); // remove previous Vfft_noise values
+        Vfft_noise_before.clear(); // remove previous Vfft_noise values
         //V_noise_timedomain.clear(); // remove previous V_noise_timedomain values
-
 
         double V_tmp; // copy original flat H_n [V] value
         double current_amplitude, current_phase;
 
         GetNoisePhase(settings1); // get random phase for noise
 
+        for (int k = 0; k < settings1 -> DATA_BIN_SIZE / 2; k++) {
 
-        for (int k=0; k<settings1->DATA_BIN_SIZE/2; k++) {
+            V_tmp = v_noise / sqrt(2.); // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
 
-            V_tmp = v_noise / sqrt(2.) ; // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
-
-            if (settings1->USE_TESTBED_RFCM_ON == 0) {
+            if (settings1 -> USE_TESTBED_RFCM_ON == 0) {
                 ApplyFilter_databin(k, detector, V_tmp);
                 ApplyPreamp_databin(k, detector, V_tmp);
                 ApplyFOAM_databin(k, detector, V_tmp);
-		if (settings1->APPLY_NOISE_FIGURE==1){
-		  ApplyNoiseFig_databin(ch%16, k, detector, V_tmp, settings1);
-		}
-            }
-            else if (settings1->USE_TESTBED_RFCM_ON == 1) {
+                if (settings1 -> APPLY_NOISE_FIGURE == 1) {
+                    ApplyNoiseFig_databin(ch % 16, k, detector, V_tmp, settings1);
+                }
+            } else if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
                 // apply RFCM gain
-                ApplyRFCM_databin(ch, k, detector, V_tmp, settings1->RFCM_OFFSET);
+                ApplyRFCM_databin(ch, k, detector, V_tmp, settings1 -> RFCM_OFFSET);
             }
 
-
-
-            Vfft_noise_before.push_back( V_tmp );
-	    
+            Vfft_noise_before.push_back(V_tmp);
 
             current_phase = noise_phase[k];
 
             //Tools::get_random_rician( 0., 0., sqrt(2./ M_PI) * V_tmp, current_amplitude, current_phase);    // use real value array value
-            Tools::get_random_rician( 0., 0., sqrt(2./M_PI)/1.177 * V_tmp, current_amplitude, current_phase);    // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
+            Tools::get_random_rician(0., 0., sqrt(2. / M_PI) / 1.177 * V_tmp, current_amplitude, current_phase); // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
 
             // vnoise is currently noise spectrum (before fft, unit : V)
-           //vnoise[2 * k] = sqrt(current_amplitude) * cos(noise_phase[k]);
-           //vnoise[2 * k + 1] = sqrt(current_amplitude) * sin(noise_phase[k]);
-           vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
-           vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
+            //vnoise[2 * k] = sqrt(current_amplitude) * cos(noise_phase[k]);
+            //vnoise[2 * k + 1] = sqrt(current_amplitude) * sin(noise_phase[k]);
+            vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
+            vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
 
-
-            Vfft_noise_after.push_back( vnoise[2*k] );
-            Vfft_noise_after.push_back( vnoise[2*k+1] );
+            Vfft_noise_after.push_back(vnoise[2 * k]);
+            Vfft_noise_after.push_back(vnoise[2 * k + 1]);
 
             // inverse FFT normalization factor!
-            vnoise[2 * k] *= 2./((double)settings1->DATA_BIN_SIZE);
-            vnoise[2 * k + 1] *= 2./((double)settings1->DATA_BIN_SIZE);
-
+            vnoise[2 * k] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
+            vnoise[2 * k + 1] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
 
         }
 
-	//	cout << "After applying noise figure" << endl;
+        //	cout << "After applying noise figure" << endl;
 
         // now vnoise is time domain waveform
-        Tools::realft( vnoise, -1, settings1->DATA_BIN_SIZE);
+        Tools::realft(vnoise, -1, settings1 -> DATA_BIN_SIZE);
 
-        
         // save timedomain noise to Report class
         /*
         for (int k=0; k<settings1->DATA_BIN_SIZE; k++) {
             V_noise_timedomain.push_back( vnoise[k] );
         }
         */
-	//	cout << "After fft" << endl;
+        //	cout << "After fft" << endl;
 
-    }
+    } else if (settings1 -> NOISE == 1) { // NOISE == 1 : use Rayleigh dist. fit from TestBed data
 
-    else if (settings1->NOISE == 1) {    // NOISE == 1 : use Rayleigh dist. fit from TestBed data
-
-        Vfft_noise_after.clear();  // remove previous Vfft_noise values
-        Vfft_noise_before.clear();  // remove previous Vfft_noise values
+        Vfft_noise_after.clear(); // remove previous Vfft_noise values
+        Vfft_noise_before.clear(); // remove previous Vfft_noise values
         //V_noise_timedomain.clear(); // remove previous V_noise_timedomain values
-
 
         double V_tmp; // copy original flat H_n [V] value
         double current_amplitude, current_phase;
 
         GetNoisePhase(settings1); // get random phase for noise
 
+        for (int k = 0; k < settings1 -> DATA_BIN_SIZE / 2; k++) {
 
-        for (int k=0; k<settings1->DATA_BIN_SIZE/2; k++) {
+            if (ch < detector -> RayleighFit_ch) {
 
-            if ( ch < detector->RayleighFit_ch ) {
-
-                Vfft_noise_before.push_back( detector->GetRayleighFit_databin(ch, k) );
+                Vfft_noise_before.push_back(detector -> GetRayleighFit_databin(ch, k));
 
                 current_phase = noise_phase[k];
 
-                V_tmp = detector->GetRayleighFit_databin(ch, k) * sqrt( (double)settings1->DATA_BIN_SIZE / (double)(settings1->NFOUR/2.) );
+                V_tmp = detector -> GetRayleighFit_databin(ch, k) * sqrt((double) settings1 -> DATA_BIN_SIZE / (double)(settings1 -> NFOUR / 2.));
 
                 //Tools::get_random_rician( 0., 0., sqrt(2./ M_PI) * V_tmp, current_amplitude, current_phase);    // use real value array value
                 //Tools::get_random_rician( 0., 0., sqrt(2./M_PI)/1.177 * V_tmp, current_amplitude, current_phase);    // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
-                Tools::get_random_rician( 0., 0., V_tmp, current_amplitude, current_phase);    // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
+                Tools::get_random_rician(0., 0., V_tmp, current_amplitude, current_phase); // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
 
-            }
+            } else {
 
-            else {
+                V_tmp = v_noise / sqrt(2.); // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
 
-                V_tmp = v_noise / sqrt(2.) ; // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
-
-                if (settings1->USE_TESTBED_RFCM_ON == 0) {
+                if (settings1 -> USE_TESTBED_RFCM_ON == 0) {
                     ApplyFilter_databin(k, detector, V_tmp);
                     ApplyPreamp_databin(k, detector, V_tmp);
                     ApplyFOAM_databin(k, detector, V_tmp);
 
-                }
-                else if (settings1->USE_TESTBED_RFCM_ON == 1) {
+                } else if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
                     // apply RFCM gain
-                    ApplyRFCM_databin(ch, k, detector, V_tmp, settings1->RFCM_OFFSET);
+                    ApplyRFCM_databin(ch, k, detector, V_tmp, settings1 -> RFCM_OFFSET);
                 }
 
-                Vfft_noise_before.push_back( V_tmp );
-
+                Vfft_noise_before.push_back(V_tmp);
 
                 current_phase = noise_phase[k];
 
                 //Tools::get_random_rician( 0., 0., sqrt(2./ M_PI) * V_tmp, current_amplitude, current_phase);    // use real value array value
-                Tools::get_random_rician( 0., 0., sqrt(2./M_PI)/1.177 * V_tmp, current_amplitude, current_phase);    // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
+                Tools::get_random_rician(0., 0., sqrt(2. / M_PI) / 1.177 * V_tmp, current_amplitude, current_phase); // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
 
             }
 
-
             // vnoise is currently noise spectrum (before fft, unit : V)
-           //vnoise[2 * k] = sqrt(current_amplitude) * cos(noise_phase[k]);
-           //vnoise[2 * k + 1] = sqrt(current_amplitude) * sin(noise_phase[k]);
-           vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
-           vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
+            //vnoise[2 * k] = sqrt(current_amplitude) * cos(noise_phase[k]);
+            //vnoise[2 * k + 1] = sqrt(current_amplitude) * sin(noise_phase[k]);
+            vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
+            vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
 
-
-            Vfft_noise_after.push_back( vnoise[2*k] );
-            Vfft_noise_after.push_back( vnoise[2*k+1] );
+            Vfft_noise_after.push_back(vnoise[2 * k]);
+            Vfft_noise_after.push_back(vnoise[2 * k + 1]);
 
             // inverse FFT normalization factor!
-            vnoise[2 * k] *= 2./((double)settings1->DATA_BIN_SIZE);
-            vnoise[2 * k + 1] *= 2./((double)settings1->DATA_BIN_SIZE);
-
+            vnoise[2 * k] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
+            vnoise[2 * k + 1] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
 
         }
 
-
-
         // now vnoise is time domain waveform
-        Tools::realft( vnoise, -1, settings1->DATA_BIN_SIZE);
+        Tools::realft(vnoise, -1, settings1 -> DATA_BIN_SIZE);
 
-        
         // save timedomain noise to Report class
         /*
         for (int k=0; k<settings1->DATA_BIN_SIZE; k++) {
             V_noise_timedomain.push_back( vnoise[k] );
         }
         */
+    } else { // currently there are no more options!
+        cout << "no noise option for NOISE = " << settings1 -> NOISE << endl;
     }
-
-    else {  // currently there are no more options!
-        cout<<"no noise option for NOISE = "<<settings1->NOISE<<endl;
-    }
-
 
 }
-
 
 
 
