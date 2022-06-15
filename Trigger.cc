@@ -512,223 +512,203 @@ for (int ch=0; ch<num_chs; ch++) {
 }
     
 
-
-void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Report *report) {
-//void Trigger::SetMeanRmsDiode(Detector *detector, vector <double> &v_noise_timedomain, vector <double> &v_noise_timedomain_diode) {
-
-    // set meandiode
-    //
-    // same with icemc -> anita -> Initialize
-
+void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Report *report)
+{
+    // get some new noise waveforms
     // if using default noise temp setting (same temp for all chs)
-if (settings1->NOISE_CHANNEL_MODE == 0) {
+    if (settings1->NOISE_CHANNEL_MODE == 0)
+    {
 
-    int ngeneratedevents=settings1->NOISE_EVENTS;  // should this value read at Settings class
-    double v_noise[settings1->DATA_BIN_SIZE];    // noise voltage time domain (with filter applied)
+        int ngeneratedevents = settings1->NOISE_EVENTS;  // should this value read at Settings class
+        double v_noise[settings1->DATA_BIN_SIZE];  // noise voltage time domain (with filter applied)
 
-    v_noise_timedomain.resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
-    v_noise_timedomain_diode.resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+        v_noise_timedomain.resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+        v_noise_timedomain_diode.resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
 
+        if (settings1->TRIG_ANALYSIS_MODE != 1)
+        {
 
-if (settings1->TRIG_ANALYSIS_MODE != 1 ) {
+            for (int i = 0; i < ngeneratedevents; i++)
+            {
 
-    for (int i=0; i<ngeneratedevents; i++) {
+                // get v_noise array (noise voltage in time domain)
+                report->GetNoiseWaveforms(settings1, detector, V_noise_freqbin, v_noise);
 
+                // do normal time ordering (not sure if this is necessary)
+                Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise);
 
-        // get v_noise array (noise voltage in time domain)
-        report->GetNoiseWaveforms(settings1, detector, V_noise_freqbin, v_noise);
+                myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin, v_noise_timedomain_diode[i]);
+                //myconvlv_new(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real,v_noise_timedomain_diode[i]);
 
-        // do normal time ordering (not sure if this is necessary)
-        Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise);
+                for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
+                {
 
+                    v_noise_timedomain[i].push_back(v_noise[m]);  // save pure noise (not diode convlved) waveforms
 
-	myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin,v_noise_timedomain_diode[i]);
-	//myconvlv_new(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real,v_noise_timedomain_diode[i]);
-
-	for (int m=0; m<settings1->DATA_BIN_SIZE; m++) {
-
-            v_noise_timedomain[i].push_back(v_noise[m]);    // save pure noise (not diode convlved) waveforms
-
+                }
+            }  // get meandiode with 1000 noisewaveforms
         }
 
-    }   // get meandiode with 1000 noisewaveforms
-}
-    
+        // if we are doing pure signal trigger analysis, set all noise waveform values to 0
+        else if (settings1->TRIG_ANALYSIS_MODE == 1)
+        {
 
+            for (int i = 0; i < ngeneratedevents; i++)
+            {
 
-// if we are doing pure signal trigger analysis, set all noise waveform values to 0
-else if (settings1->TRIG_ANALYSIS_MODE == 1 ) {
+                for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
+                {
 
-    for (int i=0; i<ngeneratedevents; i++) {
-
-        for (int m=0; m<settings1->DATA_BIN_SIZE; m++) {
-
-            v_noise_timedomain[i].push_back(0.);
-            v_noise_timedomain_diode[i].push_back(0.);
-        }
-    }
-}
-
-
-}// if NOISE_CHANNEL_MODE = 0
-
-
-
-    // if using mode 1 noise temp setting (different temp for each chs)
-else if (settings1->NOISE_CHANNEL_MODE == 1) {
-
-    int ngeneratedevents=settings1->NOISE_EVENTS;  // should this value read at Settings class
-    double v_noise[settings1->DATA_BIN_SIZE];    // noise voltage time domain (with filter applied)
-
-
-    int num_chs = detector->params.number_of_antennas;
-
-
-
-    v_noise_timedomain_ch.resize(num_chs);  // make the size of v_noise_timedomain_diode as number of chs
-    v_noise_timedomain_diode_ch.resize(num_chs);  // make the size of v_noise_timedomain_diode as number of chs
-
-
-    for (int i=0; i<num_chs; i++) {
-        v_noise_timedomain_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
-        v_noise_timedomain_diode_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
-
-    }
-
-
-if (settings1->TRIG_ANALYSIS_MODE != 1 ) {
-
-    for (int ch=0; ch<num_chs; ch++) {
-
-        for (int i=0; i<ngeneratedevents; i++) {
-
-            // get v_noise array (noise voltage in time domain)
-            report->GetNoiseWaveforms_ch(settings1, detector, V_noise_freqbin_ch[ch], v_noise, ch);
-
-	    //	    cout << "After getting noise waveforms" << endl;
-
-            // do normal time ordering (not sure if this is necessary)
-            Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise);
-
-
-            myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin,v_noise_timedomain_diode_ch[ch][i]);
-            //
-	    //	    cout << "After convolve" << endl;
-
-            for (int m=0; m<settings1->DATA_BIN_SIZE; m++) {
-
-                v_noise_timedomain_ch[ch][i].push_back(v_noise[m]);    // save pure noise (not diode convlved) waveforms
-
-            }
-
-	    //	    cout << "after push back " << endl;
-
-        }   // get meandiode with 1000 noisewaveforms
-
-    } // loop over chs
-
-}
-    
-
-    // if we are doing pure signal trigger analysis, set all noise waveform values to 0
-else if (settings1->TRIG_ANALYSIS_MODE == 1 ) {
-
-        for (int ch=0; ch<num_chs; ch++) {
-
-            for (int i=0; i<ngeneratedevents; i++) {
-
-                for (int m=0; m<settings1->DATA_BIN_SIZE; m++) {
-
-                    v_noise_timedomain_ch[ch][i].push_back(0.);
-                    v_noise_timedomain_diode_ch[ch][i].push_back(0.);
+                    v_noise_timedomain[i].push_back(0.);
+                    v_noise_timedomain_diode[i].push_back(0.);
                 }
             }
         }
-}
+    }  // if NOISE_CHANNEL_MODE = 0
+    
+    // if using mode 1 noise temp setting (different temp for each chs)
+    else if (settings1->NOISE_CHANNEL_MODE == 1)
+    {
+        int ngeneratedevents = settings1->NOISE_EVENTS;  // should this value read at Settings class
+        double v_noise[settings1->DATA_BIN_SIZE];  // noise voltage time domain (with filter applied)
 
+        int num_chs = detector->params.number_of_antennas;
 
-}// else if NOISE_CHANNEL_MODE = 1
+        v_noise_timedomain_ch.resize(num_chs);  // make the size of v_noise_timedomain_diode as number of chs
+        v_noise_timedomain_diode_ch.resize(num_chs);  // make the size of v_noise_timedomain_diode as number of chs
 
+        for (int i = 0; i < num_chs; i++)
+        {
+            v_noise_timedomain_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+            v_noise_timedomain_diode_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
 
+        }
 
-    // if using mode 2 noise temp setting (different temp for first 8 chs)
-else if (settings1->NOISE_CHANNEL_MODE == 2) {
+        if (settings1->TRIG_ANALYSIS_MODE != 1)
+        {
 
-    int ngeneratedevents=settings1->NOISE_EVENTS;  // should this value read at Settings class
-    double v_noise[settings1->DATA_BIN_SIZE];    // noise voltage time domain (with filter applied)
+            for (int ch = 0; ch < num_chs; ch++)
+            {
 
+                for (int i = 0; i < ngeneratedevents; i++)
+                {
 
-    //int num_chs = detector->params.number_of_antennas;
-    int num_chs = 8+1;// 8 chs for separated systemp temp and one more for sharing temp
+                    // get v_noise array (noise voltage in time domain)
+                    report->GetNoiseWaveforms_ch(settings1, detector, V_noise_freqbin_ch[ch], v_noise, ch);
 
+                    // cout << "After getting noise waveforms" << endl;
 
+                    // do normal time ordering (not sure if this is necessary)
+                    Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise);
 
-    v_noise_timedomain_ch.resize(num_chs);  // make the size of v_noise_timedomain_diode as number of chs
-    v_noise_timedomain_diode_ch.resize(num_chs);  // make the size of v_noise_timedomain_diode as number of chs
+                    myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin, v_noise_timedomain_diode_ch[ch][i]);
 
+                    // cout << "After convolve" << endl;
 
-    for (int i=0; i<num_chs; i++) {
-        v_noise_timedomain_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
-        v_noise_timedomain_diode_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+                    for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
+                    {
 
-    }
+                        v_noise_timedomain_ch[ch][i].push_back(v_noise[m]);  // save pure noise (not diode convlved) waveforms
 
+                    }
 
-if (settings1->TRIG_ANALYSIS_MODE != 1 ) {
+                    // cout << "after push back " << endl;
+                }  // get meandiode with 1000 noisewaveforms
 
-    for (int ch=0; ch<num_chs; ch++) {
+            }  // loop over chs
 
-        for (int i=0; i<ngeneratedevents; i++) {
+        }
 
-            // get v_noise array (noise voltage in time domain)
-            report->GetNoiseWaveforms_ch(settings1, detector, V_noise_freqbin_ch[ch], v_noise, ch);
+        // if we are doing pure signal trigger analysis, set all noise waveform values to 0
+        else if (settings1->TRIG_ANALYSIS_MODE == 1)
+        {
 
+            for (int ch = 0; ch < num_chs; ch++)
+            {
 
+                for (int i = 0; i < ngeneratedevents; i++)
+                {
 
-            // do normal time ordering (not sure if this is necessary)
-            Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise);
+                    for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
+                    {
 
-
-            myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin,v_noise_timedomain_diode_ch[ch][i]);
-            //
-
-
-
-            for (int m=0; m<settings1->DATA_BIN_SIZE; m++) {
-
-                v_noise_timedomain_ch[ch][i].push_back(v_noise[m]);    // save pure noise (not diode convlved) waveforms
-
-            }
-
-
-        }   // get meandiode with 1000 noisewaveforms
-
-    } // loop over chs
-
-}
-
-// if we are doing pure signal trigger analysis, set all noise waveform values to 0
-else if (settings1->TRIG_ANALYSIS_MODE == 1 ) {
-
-    for (int ch=0; ch<num_chs; ch++) {
-
-        for (int i=0; i<ngeneratedevents; i++) {
-
-            for (int m=0; m<settings1->DATA_BIN_SIZE; m++) {
-
-                v_noise_timedomain_ch[ch][i].push_back(0.);
-                v_noise_timedomain_diode_ch[ch][i].push_back(0.);
+                        v_noise_timedomain_ch[ch][i].push_back(0.);
+                        v_noise_timedomain_diode_ch[ch][i].push_back(0.);
+                    }
+                }
             }
         }
-    }
-}
+    }  // else if NOISE_CHANNEL_MODE = 1
 
+    // if using mode 2 noise temp setting (different temp for first 8 chs)
+    else if (settings1->NOISE_CHANNEL_MODE == 2)
+    {
 
+        int ngeneratedevents = settings1->NOISE_EVENTS;  // should this value read at Settings class
+        double v_noise[settings1->DATA_BIN_SIZE];  // noise voltage time domain (with filter applied)
 
-}// else if NOISE_CHANNEL_MODE = 2
+        // int num_chs = detector->params.number_of_antennas;
+        int num_chs = 8 + 1; // 8 chs for separated systemp temp and one more for sharing temp
 
+        v_noise_timedomain_ch.resize(num_chs);  // make the size of v_noise_timedomain_diode as number of chs
+        v_noise_timedomain_diode_ch.resize(num_chs);  // make the size of v_noise_timedomain_diode as number of chs
 
+        for (int i = 0; i < num_chs; i++)
+        {
+            v_noise_timedomain_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+            v_noise_timedomain_diode_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
 
+        }
+
+        if (settings1->TRIG_ANALYSIS_MODE != 1)
+        {
+
+            for (int ch = 0; ch < num_chs; ch++)
+            {
+
+                for (int i = 0; i < ngeneratedevents; i++)
+                {
+
+                    // get v_noise array (noise voltage in time domain)
+                    report->GetNoiseWaveforms_ch(settings1, detector, V_noise_freqbin_ch[ch], v_noise, ch);
+
+                    // do normal time ordering (not sure if this is necessary)
+                    Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise);
+
+                    myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin, v_noise_timedomain_diode_ch[ch][i]);
+
+                    for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
+                    {
+
+                        v_noise_timedomain_ch[ch][i].push_back(v_noise[m]); // save pure noise (not diode convlved) waveforms
+
+                    }
+                }  // get meandiode with 1000 noisewaveforms
+
+            }  // loop over chs
+
+        }
+
+        // if we are doing pure signal trigger analysis, set all noise waveform values to 0
+        else if (settings1->TRIG_ANALYSIS_MODE == 1)
+        {
+
+            for (int ch = 0; ch < num_chs; ch++)
+            {
+
+                for (int i = 0; i < ngeneratedevents; i++)
+                {
+
+                    for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
+                    {
+
+                        v_noise_timedomain_ch[ch][i].push_back(0.);
+                        v_noise_timedomain_diode_ch[ch][i].push_back(0.);
+                    }
+                }
+            }
+        }
+    }  // else if NOISE_CHANNEL_MODE = 2
 
 }
 
