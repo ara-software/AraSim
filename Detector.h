@@ -285,7 +285,6 @@ class Detector {
         double Rayleigh_TB_ch[16][freq_step_max];   // Filter gain (dB) for Detector freq bin array
         vector < vector <double> > Rayleigh_TB_databin_ch;   // RFCM gain measured value for the TestBed (for each ch)
 
-        void ReadRayleighFit(string filename, Settings *settings1); // will read Rayleigh fit result from the file
         vector < vector <double> > Rayleigh_databin_ch;   // RFCM gain measured value for the TestBed (for each ch)
 
 	void ReadNoiseFigure(string filename, Settings *settings1); 
