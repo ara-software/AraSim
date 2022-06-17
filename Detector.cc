@@ -2016,9 +2016,12 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             }
 
 
-            
-            
-
+        // std::cout<<"\033[1;31m I'm gonna do it anyway... "<<__LINE__<<"\033[0m"<<std::endl;
+        // char the_rayleigh_filename[500];
+        // sprintf(the_rayleigh_filename, "./data/noise/sigmavsfreq_A_%d_config_%d.csv", 
+        //     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+        // std::cout<<"\033[1;31m I'm gonna do it anyway... "<<__LINE__<<"\033[0m"<<std::endl;
+        // ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
 
 	    ReadAllAntennaGains(settings1);
 
@@ -2038,7 +2041,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	      ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
 	    }
 	    
-
 
 	    if (settings1->DETECTOR_STATION == 0){
 	      if ( settings1->NOISE==1) {
@@ -2078,47 +2080,20 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 		ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
 	      }
 	    }
-	    /*
-        if (settings1->DETECTOR_STATION == 2){
-            if ( settings1->NOISE==1) {
-                // read Rayleigh fit for freq range, bh channels
-                ReadRayleighFit_TestBed("data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
-            }
+        if(settings1->DETECTOR_STATION>0){
+            std::cout<<"\033[1;31m THINGS ARE HAPPENING INSIDE DETECTOR_STATION=4 "<<__LINE__<<"\033[0m"<<std::endl;
             
-            /*
-            // read gain offset for chs file!!
-            ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1);// only TestBed for now
-            // read threshold offset for chs file!!
-            ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1);// only TestBed for now
-            // read threshold values for chs file
-            ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
-            // read system temperature for chs file!!
+            // simulating a deep station (not testbed, DETECTOR_STATION==0)
             
-            if (settings1->NOISE_CHANNEL_MODE!=0) {
-                ("./data/system_temperature.csv", settings1);// only TestBed for now
+            // if simuating detector specific noise, need to load those files
+            if(settings1->NOISE==1){
+                char the_rayleigh_filename[500];
+                sprintf(the_rayleigh_filename, "./data/noise/sigmavsfreq_A_%d_config_%d.csv", 
+                    settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+                std::cout<<"\033[1;31m I AM READING THE RAYLEIGHT FIT. BUT ACTUALLY. "<<__LINE__<<"\033[0m"<<std::endl;
+                ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
             }
-             */
-	    //        }
-	    /*
-        if (settings1->DETECTOR_STATION == 3){
-            if ( settings1->NOISE==1) {
-                // read Rayleigh fit for freq range, bh channels
-                ReadRayleighFit_TestBed("data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
-            }
-            /*
-            // read gain offset for chs file!!
-            ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1);// only TestBed for now
-            // read threshold offset for chs file!!
-            ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1);// only TestBed for now
-            // read threshold values for chs file
-            ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
-            // read system temperature for chs file!!
-            if (settings1->NOISE_CHANNEL_MODE!=0) {
-                ("./data/system_temperature.csv", settings1);// only TestBed for now
-            }
-             */
-	    //        }
-        
+        }
         
             // read total elec. chain response file!!
 	    cout<<"start read elect chain"<<endl;
@@ -4724,8 +4699,7 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
     the channel in the detector, the second dimension representing a frequency bin.
     (See below for more details.)
     */
-
-    int numChans = 16; // FIXME: don't assume the number of channels
+    std::cout<<"\033[1;31m Got here "<<__LINE__<<"\033[0m"<<std::endl;
 
     // first, check if the file exists
     char errorMessage[400];
@@ -4754,6 +4728,7 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
                     expected_first_column_header.c_str());
                 throw std::runtime_error(errorMessage);
             }
+
             else{
                 // otherwise, the first header of the file is correct, and we can proceed
                 break;
@@ -4788,8 +4763,36 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
     std::vector<double> frequencies;
     frequencies.resize(numFreqBins); // resize to account for the number of frequency bins
 
+    // Third, figure out how many columns we have.
+    // This tells us how many channels we are reading in.
+    // We expect 1 column for frequency, and N columns for channels.
+    // So there should be (N channels + 1 Frequency) - 1 = N channels worth of commas.
+    int numCommas = 0;
+    int theLineNo = 0;
+    if(rayleighFile.is_open()){
+        while(rayleighFile.good()){
+            if(theLineNo==0){
+                getline(rayleighFile, line, '\n');
+                std::string first_line = line.c_str();
+                std::cout<<"The first line says "<<first_line<<std::endl;
+                numCommas = int(std::count(first_line.begin(), first_line.end(), ','));
+                theLineNo++;
+            }
+            else{
+                break;
+            }
+        }
+    }
+    rayleighFile.clear(); // back to the beginning of the file again
+    rayleighFile.seekg(0, ios::beg);
+    int numChans = numCommas; // set the number of commas/channels we found in the file
+
+
     /*
-    Then a vector of vectors to hold the fit values.
+    Fourth, we loop over the rows of the file again,
+    and get the frequency values out, as well as the fit values.
+
+    First, setup a vector of vectors to hold the fit values we stream in.
     The first dimension is for the number of channels (so this is "number of channels" long).
     The second dimension is for the number of frequency bins (so this is "number of frequency bins" long).
     (which goes first and which goes second is arbitrary; 
@@ -4800,11 +4803,7 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
     for(int iCh=0; iCh<numChans; iCh++) fits[iCh].resize(numFreqBins); // resize to account for number of freq bins
 
 
-    /*
-    Now, we loop over the rows of the file again,
-    and get the frequency values out, as well as the fit values
-    */
-    int theLineNo = 0; // an indicator so we know if we are on the first line of the file
+    theLineNo = 0; // reset this counter
     if (rayleighFile.is_open()){
         while(rayleighFile.good()){
 
