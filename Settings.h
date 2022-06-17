@@ -56,6 +56,8 @@ class Settings
 	int DETECTOR_STATION; // for DETECTOR=4, indicates the single station to be simulated
 	                      // 0 = testbed, 1 = A1, 2 = A2, 3 = A3
 
+        int DETECTOR_STATION_LIVETIME_CONFIG; // for real deep station, what livetime configuration are we using?
+
 	int number_of_stations; // the number of stations to be used in the simulation
 
         int INTERACTION_MODE;   // method to choose interaction point posnu. 0 : PickUnbiased, 1 : PickNear, 2 : PickExact, 3 : PickAboveIce
