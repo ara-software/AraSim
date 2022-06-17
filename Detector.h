@@ -287,7 +287,7 @@ class Detector {
         vector < vector <double> > Rayleigh_TB_databin_ch;   // RFCM gain measured value for the TestBed (for each ch)
 
         // for deep stations, we have a (unordered) map of station numbers to their Rayleigh fits
-        std::unordered_map<int, std::vector< std::vector< double> > > rayleighfits_databin_ch;
+        std::unordered_map<int, std::vector< std::vector< double> > > rayleighFits_DeepStation;
 
         // and a function to read values into them
         void ReadRayleighFit_DeepStation(string filename, Settings *settings1);
