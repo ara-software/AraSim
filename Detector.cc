@@ -2016,12 +2016,13 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             }
 
 
-        // std::cout<<"\033[1;31m I'm gonna do it anyway... "<<__LINE__<<"\033[0m"<<std::endl;
-        // char the_rayleigh_filename[500];
-        // sprintf(the_rayleigh_filename, "./data/noise/sigmavsfreq_A_%d_config_%d.csv", 
-        //     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
-        // std::cout<<"\033[1;31m I'm gonna do it anyway... "<<__LINE__<<"\033[0m"<<std::endl;
-        // ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
+        std::cout<<"\033[1;31m I'm gonna do it anyway... "<<__LINE__<<"\033[0m"<<std::endl;
+        char the_rayleigh_filename[500];
+        sprintf(the_rayleigh_filename, "./data/noise/sigmavsfreq_A_%d_config_%d.csv", 
+            settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+        std::cout<<"\033[1;31m Size of the rayleigh fit container before read is "<<rayleighfits_databin_ch.size()<<"\033[0m"<<std::endl;
+        ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
+        std::cout<<"\033[1;31m Size of the rayleigh fit container after read is "<<rayleighfits_databin_ch.size()<<"\033[0m"<<std::endl;
 
 	    ReadAllAntennaGains(settings1);
 
@@ -4922,7 +4923,7 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
     }
 
     // store the result in the map
-    rayleighFits_DeepStation[settings->DETECTOR_STATION] = fits_databin_ch;
+    rayleighfits_databin_ch[settings->DETECTOR_STATION] = fits_databin_ch;
 
     // done
 }
