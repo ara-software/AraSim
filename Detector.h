@@ -7,6 +7,7 @@
 
 //#include "TObject.h"
 #include <vector>
+#include <unordered_map>
 #include "Trigger.h"
 #include "Position.h"
 #include "Vector.h"
@@ -284,6 +285,12 @@ class Detector {
         void ReadRayleighFit_TestBed(string filename, Settings *settings1); // will read Rayleigh fit result from the file
         double Rayleigh_TB_ch[16][freq_step_max];   // Filter gain (dB) for Detector freq bin array
         vector < vector <double> > Rayleigh_TB_databin_ch;   // RFCM gain measured value for the TestBed (for each ch)
+
+        // for deep stations, we have a (unordered) map of station numbers to their Rayleigh fits
+        std::unordered_map<int, std::vector< std::vector< double> > > rayleighFits_DeepStation;
+
+        // and a function to read values into them
+        void ReadRayleighFit_DeepStation(string filename, Settings *settings1);
 
 
 	void ReadNoiseFigure(string filename, Settings *settings1); 
