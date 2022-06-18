@@ -2015,14 +2015,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                 if (max_number_of_antennas_station < antenna_count) max_number_of_antennas_station = antenna_count;
             }
 
-
-        // std::cout<<"\033[1;31m I'm gonna do it anyway... "<<__LINE__<<"\033[0m"<<std::endl;
-        // char the_rayleigh_filename[500];
-        // sprintf(the_rayleigh_filename, "./data/noise/sigmavsfreq_A_%d_config_%d.csv", 
-        //     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
-        // std::cout<<"\033[1;31m I'm gonna do it anyway... "<<__LINE__<<"\033[0m"<<std::endl;
-        // ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
-
 	    ReadAllAntennaGains(settings1);
 
 	    //	    if (settings1->NOISE == 2){
@@ -2080,9 +2072,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 		ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
 	      }
 	    }
-        if(settings1->DETECTOR_STATION>0){
-            std::cout<<"\033[1;31m THINGS ARE HAPPENING INSIDE DETECTOR_STATION=4 "<<__LINE__<<"\033[0m"<<std::endl;
-            
+        if(settings1->DETECTOR_STATION>0){            
             // simulating a deep station (not testbed, DETECTOR_STATION==0)
             
             // if simuating detector specific noise, need to load those files
@@ -2090,7 +2080,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                 char the_rayleigh_filename[500];
                 sprintf(the_rayleigh_filename, "./data/noise/sigmavsfreq_A_%d_config_%d.csv", 
                     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
-                std::cout<<"\033[1;31m I AM READING THE RAYLEIGHT FIT. BUT ACTUALLY. "<<__LINE__<<"\033[0m"<<std::endl;
                 ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
             }
         }
@@ -4699,7 +4688,6 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
     the channel in the detector, the second dimension representing a frequency bin.
     (See below for more details.)
     */
-    std::cout<<"\033[1;31m Got here "<<__LINE__<<"\033[0m"<<std::endl;
 
     // first, check if the file exists
     char errorMessage[400];
@@ -4785,8 +4773,8 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
     }
     rayleighFile.clear(); // back to the beginning of the file again
     rayleighFile.seekg(0, ios::beg);
-    int numChans = numCommas; // set the number of commas/channels we found in the file
-
+    RayleighFit_ch = numCommas; // also need to set this detector wide variable, 
+                                // which specifies how many channels for which we have rayleigh data
 
     /*
     Fourth, we loop over the rows of the file again,
@@ -4799,9 +4787,8 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
     the TestBed version does it in this order, so replicate here)
     */
     std::vector< std::vector <double> > fits; 
-    fits.resize(numChans); // resize to account for number of channels
-    for(int iCh=0; iCh<numChans; iCh++) fits[iCh].resize(numFreqBins); // resize to account for number of freq bins
-
+    fits.resize(RayleighFit_ch); // resize to account for number of channels
+    for(int iCh=0; iCh<RayleighFit_ch; iCh++) fits[iCh].resize(numFreqBins); // resize to account for number of freq bins
 
     theLineNo = 0; // reset this counter
     if (rayleighFile.is_open()){
@@ -4841,7 +4828,7 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
                 (see below).
                 */
                 int numCols = 0;
-                while(numCols < numChans-1){
+                while(numCols < RayleighFit_ch-1){
                     getline(rayleighFile, line, ',');
                     double temp_fit_val = atof(line.c_str());
                     if(std::isnan(temp_fit_val) || temp_fit_val < 0 || temp_fit_val > 20){
@@ -4869,7 +4856,13 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
             }
         }
     }
-    rayleighFile.close(); 
+    rayleighFile.close();
+
+    // stash the rayleigh sigma and the frequencies for this station
+    rayleighFits_DeepStation_frequencies[settings->DETECTOR_STATION] = frequencies;
+    rayleighFits_DeepStation_values[settings->DETECTOR_STATION] = fits;
+
+    // done
 
     // can be useful for debugging (leave commented out for now)
     // for(int iCh=0; iCh<fits.size(); iCh++){
@@ -4879,52 +4872,85 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
     //     }
     // }
 
-    /*
-    Now, we have loaded the frequencies with the sampling a user inputs.
-    We need to interpolate them onto the frequency space needed by AraSim.
-    */
+}
 
+//! A function to return the rayleigh fit vector with freq spacing set by DATA_BIN_SIZE
+/*!
+
+    The function searches over our map of stations -> rayleigh fit values,
+    and identifies the right values.
+    It has an important second job, which is to interpolate the fit values
+    to the frequency base needed for THIS specific event.
+    TODO: There's no great reason you couldn't cache these interpolated values.
+
+    \param station the station we want returned
+    \param setting a Settings object for the simulation in question
+    \return the vector of interest
+*/
+std::vector< std::vector< double> > Detector::GetRayleighFitVector_databin(int station, Settings *settings){
+
+    // try to find the vector of fits
+    auto fits_iter = rayleighFits_DeepStation_values.find(station);
+    if(fits_iter == rayleighFits_DeepStation_values.end()){
+        char errorMessage[400];
+        sprintf(errorMessage,
+            "Could not find the fits for station %d in the pre-loaded rayleigh fit vectors. \n Are you sure you called the ReadRayleigh_DeepStation function for this station?",
+            station
+        );
+    }
+    auto this_station_original_fits = fits_iter->second;
+
+    // ditto for frequencies
+    auto freqs_iter = rayleighFits_DeepStation_frequencies.find(station);
+    if(freqs_iter == rayleighFits_DeepStation_frequencies.end()){
+        char errorMessage[400];
+        sprintf(errorMessage,
+            "Could not find the frequencies for station %d in the pre-loaded rayleigh fit vectors. \n Are you sure you called the ReadRayleigh_DeepStation function for this station?",
+            station
+        );
+    }
+    auto this_station_original_freqs = freqs_iter->second;
+
+    // this stores the response vector interpolated for THIS SPECIFIC DATA_BIN_SIZE
+    std::vector< std::vector< double > > rayleighFits_DeepStation_values_databin;
+    rayleighFits_DeepStation_values_databin.resize(this_station_original_fits.size()); // resize to match channel count
+    
+    // set up the output frequency spacing for this event's specific DATA_BIN_SIZE
     double df_fft = 1./ ( (double)(settings->DATA_BIN_SIZE) * settings->TIMESTEP ); // the frequency step
-
     double interp_frequencies_databin[settings->DATA_BIN_SIZE/2];   // array for interpolated FFT frequencies
     for(int i=0; i<settings->DATA_BIN_SIZE/2.; i++){
         // set the frequencies
         interp_frequencies_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
-    std::vector< std::vector< double > > fits_databin_ch; // same structure as fits, but this time interpolated
-    fits_databin_ch.resize(fits.size()); // resize to number of channels
+    // the content of the vectors needs to be stuffed into arrays for the interpolator
+    // dumb, but oh well...
+    // so, copy over the vector of frequencies into an array
+    int numFreqBins = int(this_station_original_freqs.size());
+    double this_station_original_frequencies_asarray[numFreqBins];
+    std::copy(this_station_original_freqs.begin(), this_station_original_freqs.end(), this_station_original_frequencies_asarray);
 
     // loop over channel, and do the interpolation
-    for(int iCh=0; iCh<fits.size(); iCh++){
+    for(int iCh=0; iCh<this_station_original_fits.size(); iCh++){
 
-        // the content of the vectors needs to be stuffed into arrays for the interpolator
-        // dumb, but oh well...
-        double original_frequencies_asarray[numFreqBins];
-        std::copy(frequencies.begin(), frequencies.end(), original_frequencies_asarray);
-
-        double original_fits_asarray[numFreqBins];
-        std::copy(fits[iCh].begin(), fits[iCh].end(), original_fits_asarray);
+        // same issue as with the frequencies; we need to copy the results for this station and channel to an array
+        double this_channel_original_fits_asarray[numFreqBins];
+        std::copy(this_station_original_fits[iCh].begin(), this_station_original_fits[iCh].end(), this_channel_original_fits_asarray);
 
         // output value
         double interp_fits_databin[settings->DATA_BIN_SIZE/2];   // array for interpolated rayleigh fit values
 
         // now, do interpolation
         Tools::SimpleLinearInterpolation(
-            numFreqBins, original_frequencies_asarray, original_fits_asarray, // from the original binning
+            numFreqBins, this_station_original_frequencies_asarray, this_channel_original_fits_asarray, // from the original binning
             settings->DATA_BIN_SIZE/2, interp_frequencies_databin, interp_fits_databin // to the new binning
             );
 
         // copy the interpolated values out
         for(int iFreqBin=0; iFreqBin<settings->DATA_BIN_SIZE/2; iFreqBin++){
-            fits_databin_ch[iCh].push_back( interp_fits_databin[iFreqBin] );
+            rayleighFits_DeepStation_values_databin[iCh].push_back( interp_fits_databin[iFreqBin] );
         }
-
     }
-
-    // store the result in the map
-    rayleighFits_DeepStation[settings->DETECTOR_STATION] = fits_databin_ch;
-
-    // done
+    return rayleighFits_DeepStation_values_databin;
 }
 
 

@@ -914,11 +914,10 @@ int Settings::CheckCompatibilitiesSettings() {
         num_err++;
     }
 
-    //if (NOISE==1 && DETECTOR!=3) {
-    if (NOISE==1 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
-        cerr<<"NOISE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
-        num_err++;
-    }
+    // if (NOISE==1 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
+    //     cerr<<"NOISE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
+    //     num_err++;
+    // }
 
     if (NOISE==1 && USE_TESTBED_RFCM_ON==1) {
         cerr<<"NOISE=1 only works with USE_TESTBED_RFCM_ON=0!"<<endl;
