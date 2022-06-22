@@ -4810,7 +4810,7 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
             }
 
             // get the fits for this specific station
-            // this function with throw exceptions if the station doesn't exist
+            // this function will throw exceptions if the station doesn't exist
             // so we can call this safely
             auto fits_for_this_station = detector->GetRayleighFitVector_databin(settings1->DETECTOR_STATION, settings1);
 
