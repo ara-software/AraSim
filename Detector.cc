@@ -4762,7 +4762,6 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
             if(theLineNo==0){
                 getline(rayleighFile, line, '\n');
                 std::string first_line = line.c_str();
-                std::cout<<"The first line says "<<first_line<<std::endl;
                 numCommas = int(std::count(first_line.begin(), first_line.end(), ','));
                 theLineNo++;
             }
@@ -4831,9 +4830,9 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
                 while(numCols < RayleighFit_ch-1){
                     getline(rayleighFile, line, ',');
                     double temp_fit_val = atof(line.c_str());
-                    if(std::isnan(temp_fit_val) || temp_fit_val < 0 || temp_fit_val > 20){
+                    if(std::isnan(temp_fit_val) || temp_fit_val < 0 || temp_fit_val > 1E-5){
                         sprintf(errorMessage, 
-                            "A rayleigh fit value (freq bin %d, ch %d) is a nan or negative or very large. Stop!", 
+                            "A rayleigh fit value (freq bin %d, ch %d) is a nan or negative or very large (%e). Stop!", 
                             theFreqBin, numCols, temp_fit_val);
                         throw std::runtime_error(errorMessage);
                     }
