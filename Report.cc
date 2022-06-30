@@ -4814,14 +4814,20 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
             // so we can call this safely
             auto fits_for_this_station = detector->GetRayleighFitVector_databin(settings1->DETECTOR_STATION, settings1);
 
+            // to normalize the bin content, we also need to keep delta f
+            double this_delta_f = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP);
+
             // loop over frequency bins
             for(int k=0; k<settings1->DATA_BIN_SIZE/2; k++){
 
-                // std::cout<<"\033[1;31m IN GET NOISE WAVEFORMS, ch is "<<ch<<" K "<<k<<" LINE "<<__LINE__<<"\033[0m"<<std::endl;
-
                 Vfft_noise_before.push_back(fits_for_this_station[ch][k]);
                 current_phase = noise_phase[k];
-                V_tmp = fits_for_this_station[ch][k] * sqrt((double) settings1 -> DATA_BIN_SIZE / (double)(settings1 -> NFOUR / 2.));
+                V_tmp = fits_for_this_station[ch][k];
+                
+                // the right normalization factor is N * sqrt(deltaF)
+                V_tmp *= double(settings1->DATA_BIN_SIZE);
+                V_tmp *= sqrt(this_delta_f);
+
                 Tools::get_random_rician(0., 0., V_tmp, current_amplitude, current_phase); // draw a random number from the distribution with this rayleigh fit parameter
 
                 // set the real and imaginary components of the FFT
