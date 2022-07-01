@@ -1674,3 +1674,22 @@ the finPaths function will return the '0 ray solution'.
 If the closet result(refine_result.second) is smaller than the missing_z from the 1st doTrace or requiredAccuracy,
 2nd direct ray tracing will try to find the solution with it (est.angle).
 The related talk: http://ara.physics.wisc.edu/docs/0022/002263/001/20201221_Raytracing_Bug.pdf
+
+============================================================================
+2022/07/01 Brian Clark
+
+This is a substantial cleanup and implementation of noise in the deep stations.
+In particular, it overhauls the process of loading the Rayleigh parameters
+(needed for noise generation), into AraSim for the deep station.
+It also introduces new and cleaned up versions of the code that interpolates
+the Rayleigh fits, and the code that generates noise waveforms.
+
+So, there is substantial updates and cleanup to the Detector and Report classes.
+In particular, there is an introduction of the Detector::ReadRayleighFit_DeepStation function and
+the Detector::GetRayleighFitVector_databin function.
+The Report::GetNoiseWaveforms_ch has been updated to support deep stations.
+
+I left the Testbed mode completely alone.
+
+A detailed summary of how the new and updated version works is available
+on DocDB: https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2620
