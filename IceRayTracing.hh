@@ -25,12 +25,12 @@ using namespace std;
 namespace IceRayTracing{
 
   /********Stuff for Interpolation**********/
-  static vector <double> GridPositionX;
-  static vector <double> GridPositionZ;
-  static vector <double> GridZValue[4];
+  static vector<vector <double>> GridPositionXb;
+  static vector<vector <double>> GridPositionZb;
+  static vector<vector<vector <double>>> GridZValueb;
 
-  static double GridStepSizeX_O=0.2;
-  static double GridStepSizeZ_O=0.2;
+  static double GridStepSizeX_O=0.1;
+  static double GridStepSizeZ_O=0.1;
   static double GridWidthX=20;
   static double GridWidthZ=20;
 
@@ -47,11 +47,28 @@ namespace IceRayTracing{
   /* Set the value of the speed of light in m/s */ 
   static constexpr double c_light_ms=299792458;
   /* Set the value of the asymptotic parameter of the refractive index model */
-  static constexpr double A_ice=1.78;
+
+  static const double A_ice_def=1.78;
+  static const double B_ice_def=-0.43;
+  static const double C_ice_def=0.0132;
+
+  static double A_ice=A_ice_def;
+  static double B_ice=B_ice_def;
+  static double C_ice=C_ice_def;
   static constexpr double TransitionBoundary=0;
   // const double A_ice=1.775;
   // const double TransitionBoundary=14.9;
- 
+
+  
+ /* Get the value of the B parameter for the refractive index model */
+  void SetA(double &A);
+
+  /* Get the value of the B parameter for the refractive index model */
+  void SetB(double &B);
+  
+  /* Get the value of the C parameter for the refractive index model */
+  void SetC(double &C);
+  
   /* Get the value of the B parameter for the refractive index model */
   double GetB(double z);
   
@@ -202,16 +219,15 @@ namespace IceRayTracing{
   /* This functions works for the Direct ray and gives you back the launch angle, receive angle and propagation time of the ray together with values of the L parameter and checkzero variable. checkzero variable checks how close the minimiser came to 0. 0 is perfect and less than 0.5 is pretty good. more than that should not be acceptable. */
   double* GetDirectRayPar_Air(double z0, double x1, double z1);
 
-  double *GeantRayTracer(double xT, double yT, double zT, double xR, double yR, double zR);
+  double *DirectRayTracer(double xT, double yT, double zT, double xR, double yR, double zR);
   
   /* Function that makes interpolation tables for raytracing */
-  void MakeTable(double ShowerHitDistance,double zT);
-
-  /* Function that calculates the interpolated value for raytracing. The rt parameter: 0 is for launch angle, 1 is for recieve angle, 2 is for propagation time, 3 is for distance */
+  void MakeTable(double ShowerHitDistance, double zT, int AntNum);
   
-  double GetInterpolatedValue(double xR, double zR, int rtParameter);
+  /* Function that calculates the interpolated value for raytracing. The rt parameter: 0 is for D ray optical time, 1 is for D ray geometric path length,  2 is for D launch angle, 3 is for D recieve angle, 4 is D for ray attenuation, 5 is for R ray optical time, 6 is for R ray geometric path length,  7 is for R launch angle, 8 is for R recieve angle, 9 is R for ray attenuation */
+  double GetInterpolatedValue(double xR, double zR, int rtParameter,int AntNum);
 			      
-  void GetRayTracingSolutions(double RxDepth, double Distance, double TxDepth, double TimeRay[2], double PathRay[2], double LaunchAngle[2], double RecieveAngle[2], int IgnoreCh[2], double IncidenceAngleInIce[2],vector <double> xRay[2], vector <double> zRay[2]);
-  
+  //void GetRayTracingSolutions(double RxDepth, double Distance, double TxDepth, double TimeRay[2], double PathRay[2], double LaunchAngle[2], double RecieveAngle[2], int IgnoreCh[2], double IncidenceAngleInIce[2],vector <double> xRay[2], vector <double> zRay[2]);
+  void GetRayTracingSolutions(double RxDepth, double Distance, double TxDepth, double TimeRay[2], double PathRay[2], double LaunchAngle[2], double RecieveAngle[2], int IgnoreCh[2], double IncidenceAngleInIce[2], double A0, double frequency, double AttRay[2],vector <double> xRay[2],vector <double> zRay[2]);
 }
 #endif

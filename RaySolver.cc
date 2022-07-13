@@ -1071,7 +1071,15 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
     }
 
   */
-
+    
+  // source_tmp.SetX(-90.0583);
+  // source_tmp.SetY(-968.198);
+  // source_tmp.SetZ(-252.944-180);    
+    
+  // source_tmp.SetX(-1326.29);
+  // source_tmp.SetY(1370.82);
+  //source_tmp.SetZ(source_tmp.GetZ()-180);
+  
 
   // Defaults!!!!
   src = source_tmp;
@@ -1194,7 +1202,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 
   int sol_cnt_exc;
   int sol_error_exc;
-	
+  
   if(settings1->ANALYTIC_RAYTRACE_MODE==1){
 
     double TimeRay[2];
@@ -1205,15 +1213,18 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
     double IncidenceAngleInIce[2];
     vector <double> xRay[2];
     vector <double> zRay[2];
-      
+    double AttRay[2];
+    
     double Distance= sqrt( (source_tmp.GetX()-target_tmp.GetX())*(source_tmp.GetX()-target_tmp.GetX()) + (source_tmp.GetY()-target_tmp.GetY())*(source_tmp.GetY()-target_tmp.GetY()) ) ;
       
-    IceRayTracing::GetRayTracingSolutions(source_tmp.GetZ(), Distance, target_tmp.GetZ(), TimeRay, PathRay, LaunchAngle, RecieveAngle, IgnoreCh, IncidenceAngleInIce,xRay,zRay);
+    //IceRayTracing::GetRayTracingSolutions(source_tmp.GetZ(), Distance, target_tmp.GetZ(), TimeRay, PathRay, LaunchAngle, RecieveAngle, IgnoreCh, IncidenceAngleInIce,xRay,zRay);
 
+    IceRayTracing::GetRayTracingSolutions(source_tmp.GetZ(), Distance, target_tmp.GetZ(), TimeRay, PathRay, LaunchAngle, RecieveAngle, IgnoreCh, IncidenceAngleInIce, 1, 0.2,AttRay,xRay,zRay);
+    
     swap(LaunchAngle[0],RecieveAngle[0]);
 
-    TimeRay[0]=TimeRay[0]*pow(10,-9);
-    TimeRay[1]=TimeRay[1]*pow(10,-9);
+    TimeRay[0]=TimeRay[0];//*pow(10,-9);
+    TimeRay[1]=TimeRay[1];//*pow(10,-9);
 
     LaunchAngle[0]=(180-LaunchAngle[0])*(PI/180);
     RecieveAngle[0]=(180-RecieveAngle[0])*(PI/180);
@@ -1229,7 +1240,13 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
     }
     // PathRay[0]=TimeRay[0]*IceRayTracing::c_light_ms;
     // PathRay[1]=TimeRay[1]*IceRayTracing::c_light_ms;
-      
+
+    //cout<<"source(x:"<<source_tmp.GetX()<<" y:"<<source_tmp.GetY()<<" z:"<<source_tmp.GetZ()<<"), target(x:"<<target_tmp.GetX()<<" y:"<<target_tmp.GetY()<<" z:"<<target_tmp.GetZ()<<endl;
+
+    // for(int iray=0;iray<2;iray++){
+    //   cout<<"Ray "<<iray<<" "<<PathRay[iray]<<" "<<TimeRay[iray]*pow(10,9)<<" "<<LaunchAngle[iray]<<" "<<RecieveAngle[iray]<<" "<<IncidenceAngleInIce[iray]<<" "<<IgnoreCh[iray]<<endl;
+    // }
+    
     solution_toggle = 0;
     for(int iray=0;iray<2;iray++){
       if(IgnoreCh[iray]==1){
@@ -1249,7 +1266,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 	  pathfilename = "./pathfile_1.txt";
 	}
 
-	//cout<<"Ray "<<iray<<" "<<PathRay[iray]<<" "<<TimeRay[iray]<<" "<<LaunchAngle[iray]<<" "<<RecieveAngle[iray]<<" "<<IncidenceAngleInIce[iray]<<" "<<IgnoreCh[iray]<<endl;
+	//cout<<"Ray "<<iray<<" "<<PathRay[iray]<<" "<<TimeRay[iray]*pow(10,9)<<" "<<LaunchAngle[iray]<<" "<<RecieveAngle[iray]<<" "<<IncidenceAngleInIce[iray]<<" "<<IgnoreCh[iray]<<endl;
 
 	solution_toggle = 1;
 	RayStep.resize(sol_no+1);
@@ -1355,14 +1372,14 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 	    outputs[3].push_back(it->reflectionAngle);
 	    outputs[4].push_back( it->pathTime );   // time in s (not ns)
 	    //std::cout<<"outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<"pathLen : "<<it->pathLen<<"\n";
-	    //std::cout<<"here outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<" pathLen : "<<it->pathLen<<" "<<it->launchAngle<<" "<<it->receiptAngle<<" "<<it->reflectionAngle<<" "<<it->pathTime<<endl;
+	    std::cout<<"here outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<" pathLen : "<<it->pathLen<<" "<<it->launchAngle<<" "<<it->receiptAngle<<" "<<it->reflectionAngle<<" "<<it->pathTime<<endl;
 
 	    // test if raysol dist is shorter than physical distance
 	    if ( distance_flat - it->pathLen >= 10. ) // if more than 10m difference
 	      {
 		//cout<<"source, target physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
 		//cout<<"source(z:"<<src.GetZ()<<"), target(z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
-		cout<<"source(x:"<<src.GetX()<<" y:"<<src.GetY()<<" z:"<<src.GetZ()<<"), target(x:"<<trg.GetX()<<" y:"<<trg.GetY()<<" z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
+		//cout<<"source(x:"<<src.GetX()<<" y:"<<src.GetY()<<" z:"<<src.GetZ()<<"), target(x:"<<trg.GetX()<<" y:"<<trg.GetY()<<" z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
 	      }
 
 
@@ -1435,7 +1452,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 	      {
 		//cout<<"source, target physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", excsol"<<endl;
 		//cout<<"source(z:"<<src.GetZ()<<"), target(z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
-		cout<<"source(x:"<<src.GetX()<<" y:"<<src.GetY()<<" z:"<<src.GetZ()<<"), target(x:"<<trg.GetX()<<" y:"<<trg.GetY()<<" z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
+		//cout<<"source(x:"<<src.GetX()<<" y:"<<src.GetY()<<" z:"<<src.GetZ()<<"), target(x:"<<trg.GetX()<<" y:"<<trg.GetY()<<" z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
 	      }
 
 
