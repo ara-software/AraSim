@@ -1340,7 +1340,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 	solution_toggle = 1;
       }
       else {
-	std::cout << "No solutions" << std::endl;
+	//std::cout << "No solutions" << std::endl;
 	solution_toggle = 0;
       }
     }
@@ -1372,7 +1372,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 	    outputs[3].push_back(it->reflectionAngle);
 	    outputs[4].push_back( it->pathTime );   // time in s (not ns)
 	    //std::cout<<"outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<"pathLen : "<<it->pathLen<<"\n";
-	    std::cout<<"here outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<" pathLen : "<<it->pathLen<<" "<<it->launchAngle<<" "<<it->receiptAngle<<" "<<it->reflectionAngle<<" "<<it->pathTime<<endl;
+	    //std::cout<<"here outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<" pathLen : "<<it->pathLen<<" "<<it->launchAngle<<" "<<it->receiptAngle<<" "<<it->reflectionAngle<<" "<<it->pathTime<<endl;
 
 	    // test if raysol dist is shorter than physical distance
 	    if ( distance_flat - it->pathLen >= 10. ) // if more than 10m difference
