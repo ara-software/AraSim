@@ -81,6 +81,7 @@ outputdir="outputs"; // directory where outputs go
   DETECTOR=1;   //ARA layout with small number of stations
 
   DETECTOR_STATION=-1; // initiate this to negative -1, so it does nothing by default
+  DETECTOR_STATION_LIVETIME_CONFIG=-1; // intiative this to negative -1, so it does nothing by default
 
   INTERACTION_MODE=1;   //PickNear mode (0: Aeff mode using sphere surface around station, 1: Veff mode using cylinder volume around station)
 
@@ -351,6 +352,9 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "DETECTOR_STATION") {
                   DETECTOR_STATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "DETECTOR_STATION_LIVETIME_CONFIG") {
+                  DETECTOR_STATION_LIVETIME_CONFIG = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "INTERACTION_MODE") {
                   INTERACTION_MODE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
@@ -910,11 +914,10 @@ int Settings::CheckCompatibilitiesSettings() {
         num_err++;
     }
 
-    //if (NOISE==1 && DETECTOR!=3) {
-    if (NOISE==1 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
-        cerr<<"NOISE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
-        num_err++;
-    }
+    // if (NOISE==1 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
+    //     cerr<<"NOISE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
+    //     num_err++;
+    // }
 
     if (NOISE==1 && USE_TESTBED_RFCM_ON==1) {
         cerr<<"NOISE=1 only works with USE_TESTBED_RFCM_ON=0!"<<endl;
@@ -955,21 +958,35 @@ int Settings::CheckCompatibilitiesSettings() {
     // This is for installed stations
     if (DETECTOR == 4 ) {
       if (ARAUTIL_EXISTS == false){
-	cerr << "DETECTOR=4 only works with an installation of AraRoot" << endl;
-	num_err++;
+	    cerr << "DETECTOR=4 only works with an installation of AraRoot" << endl;
+	    num_err++;
       } else {
 	
-	cerr << "DETECTOR is set to 4" << endl; 
-	cerr << "Setting READGEOM to 1" << endl;
-	READGEOM=1;
+	    cerr << "DETECTOR is set to 4" << endl; 
+	    cerr << "Setting READGEOM to 1" << endl;
+	    READGEOM=1;
 
-	cerr << "Setting number_of_stations to 1" << endl;
-	number_of_stations = 1;
+	    cerr << "Setting number_of_stations to 1" << endl;
+	    number_of_stations = 1;
 
-	if (DETECTOR_STATION <0 || DETECTOR_STATION >= NUM_INSTALLED_STATIONS){
-	  cerr << "DETECTOR_STATION is not set to a valid station number" << endl;
-	  num_err++;
-	}
+	    if (DETECTOR_STATION <0 || DETECTOR_STATION >= NUM_INSTALLED_STATIONS){
+	        cerr << "DETECTOR_STATION is not set to a valid station number" << endl;
+	        num_err++;
+	    }
+        if(DETECTOR_STATION_LIVETIME_CONFIG>-1){
+            if((int)DETECTOR_STATION==2 || (int)DETECTOR_STATION==3){
+                cerr<<"DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<endl;
+                if(DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1){
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only five expected configurations"<<endl;
+                    num_err++;
+                }
+            }
+            else{
+                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but DETECTOR_STATION is "<<DETECTOR_STATION<<endl;
+                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is only valid for A2 and A3 "<<endl;
+                num_err++;
+            }
+        }
 		
       }
     }

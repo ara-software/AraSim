@@ -114,15 +114,6 @@ class Antenna_r {
 
         vector <int> noise_ID;      // information about which pure noise waveform is used for trigger analysis
 
-        //vector < vector <double> > V_noise; // volt noise signal (with all factors applied as far as we can) (from thermal noise + fft)
-
-        //vector < vector <double> > V_total; // volt signal + noise with all factors applied as far as we can
-
-        //vector < vector <double> > V_total_diode;   // volt signal + noise with all factors (as far as we can) and convlution with diode (time domain)
-
-        //vector < vector <double> > V_total_timedelay;   // volt signal + noise with all factors applied and time delay between antennas
-        //
-        //
         vector <double> PeakV;  // peak voltage in time domain
         vector <int> Rank;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
 
@@ -243,7 +234,7 @@ class Report {
     
 //    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger);
     
-    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt);    
+    void Connect_Interaction_Detector_V2 (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt);    
     void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings, int which_solution,
         vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
         );
