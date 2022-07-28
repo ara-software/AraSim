@@ -1693,3 +1693,12 @@ I left the Testbed mode completely alone.
 
 A detailed summary of how the new and updated version works is available
 on DocDB: https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2620
+
+==============================================================================
+2022/07/28 Myoungchul Kim
+
+When simulation sets the vertex position of each event, It needs to be added 10km in each XY coordinate to avoid the intersection of bins of the earth model.
+In Interaction::PickNear_Sphere, which is setting vertex positions, the 'adding 10 km' is only happening if DETECTOR setting is 1~3. 
+So, if we use DETECTOR=4, It will do nothing
+I added 'detector->Get_mode() == 4' option in the Interaction::PickNear_Sphere. 
+So that user can use effective area (INTERACTION_MODE=0) mode with deployed station mode (DETECTOR=4)
