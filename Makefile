@@ -91,7 +91,7 @@ endif
 eventSimDict.C: $(CLASS_HEADERS)
 	@echo "Generating dictionary ..."
 	@ rm -f *Dict* 
-	rootcint -f $@ -c $(DICT_FLAGS) -I./ $(INC_ARA_UTIL) $(CLASS_HEADERS) ${ARA_ROOT_HEADERS} LinkDef.h
+	rootcint -f $@ -c $(DICT_FLAGS) -I./ $(INC_ARA_UTIL) $(SYSINCLUDES) $(CLASS_HEADERS) ${ARA_ROOT_HEADERS} LinkDef.h
 
 clean:
 	@rm -f *Dict*
