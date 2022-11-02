@@ -2344,23 +2344,22 @@ void Interaction::PickNear_Cylinder_AboveIce (IceModel *antarctica, Detector *de
 }
 
 
-
-
-
-
 //! A function to set the exact neutrino interaction position
 /*!
 
-		PickExact will take in the specified theta (zenith) and phi (azimuth) angles and radial distance
-		from the setup file (POSNU_THETA, POSNU_PHI, POSNU_R). This requires INTERACTION_MODE=2.
-
-		The convention is to measure phi in [0, 2*pi) from the positive x-hat direction and theta
-		in [0,pi] from the positive z-hat direction. The conversion to cartiesian coordinates is then
+	PickExact will take in the specified theta (zenith) and phi (azimuth) angles and radial 
+		distance from the setup file (POSNU_THETA, POSNU_PHI, POSNU_R). This requires 
+		INTERACTION_MODE=2.
+	The convention is to measure phi in [0, 2*pi) from the positive x-hat direction and theta
+		in [0,pi] from the positive z-hat direction. The conversion to cartiesian 
+		coordinates is then
 
 		x = R * cos(phi) * sin(theta)
 		y = R * sin(phi) * sin(theta)
 		z = R * cos(theta)
 
+	These positions are measured relative to the center of the station, which is given by the 
+		variables avgX, avgY, and avgZ below (which may include the offset by core_x and core_y). 
  */
 
 void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings *settings1, double thisR, double thisTheta, double thisPhi) {
