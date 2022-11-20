@@ -171,6 +171,31 @@ void IceModel::setUpIceModel(int model) {
       i++;
     }
   westlanddown.close();
+    
+    //Add Greenland attenuation lengths
+  ifstream greenlandUpper("data/greenland_attenlength_bogorodsky_upper.txt");
+  if(greenlandUpper.fail())
+    {cerr << "Failed to open greenland_attenlength_bogorodsky_upper.txt";
+      exit(1);
+    }
+  i=0;
+  while(greenlandUpper>>d_greenlandUpper[i]>>l_greenlandUpper[i])
+    {
+      i++;
+    }
+  greenlandUpper.close();
+    
+  ifstream greenlandLower("data/greenland_attenlength_bogorodsky_lower.txt");
+  if(greenlandLower.fail())
+    {cerr << "Failed to open greenland_attenlength_bogorodsky_lower.txt";
+      exit(1);
+    }
+  i=0;
+  while(greenlandLower>>d_greenlandLower[i]>>l_greenlandLower[i])
+    {
+      i++;
+    }
+  greenlandLower.close();
 
 
   // new ARA ice attenuation measurement values (at 300 MHz)
@@ -1378,6 +1403,7 @@ double IceModel::EffectiveAttenuationLength(const Position &pos,const int &which
 	    cerr << " wrong attenuation length " <<endl;
       	}
 
+
       if(mooreBayFlag)//if use Moore's Bay measured data for the west land
 	attenuation_length*=1.717557; //about 450 m (field attenuation length) for one whole way when assuming -3dB for the power loss at the bottom
     }
@@ -1398,6 +1424,7 @@ double IceModel::EffectiveAttenuationLength(const Position &pos,const int &which
        else
 	 cerr << " wrong attenuation length " <<endl;
      } //else
+
 
   return attenuation_length;
 } //EffectiveAttenuationLengthUp
@@ -1441,6 +1468,13 @@ double IceModel::EffectiveAttenuationLength(Settings *settings1, const Position 
 	  else
 	    cerr << " wrong attenuation length " <<endl;
       	}
+      //Adding Greenland Ice attenuation lengths
+      if(settings1->GREENLAND_ATTEN == 1) {
+        attenuation_length=l_greenlandUpper[depth_index]; 
+      }
+      else if(settings1->GREENLAND_ATTEN == 2) {
+        attenuation_length=l_greenlandLower[depth_index]; 
+      }
 
       //if(mooreBayFlag)//if use Moore's Bay measured data for the west land
       if(settings1->MOOREBAY)//if use Moore's Bay measured data for the west land
@@ -1463,6 +1497,13 @@ double IceModel::EffectiveAttenuationLength(Settings *settings1, const Position 
        else
 	 cerr << " wrong attenuation length " <<endl;
      } //else
+      //Adding Greenland Ice attenuation lengths
+      if(settings1->GREENLAND_ATTEN == 1) {
+        attenuation_length=l_greenlandUpper[depth_index]; 
+      }
+      else if(settings1->GREENLAND_ATTEN == 2) {
+        attenuation_length=l_greenlandLower[depth_index]; 
+      }
 
   return attenuation_length;
 } //EffectiveAttenuationLengthUp
