@@ -3247,7 +3247,6 @@ double Detector::GetFOAMGain_1D_OutZero( double freq ) {
 // set outside value as 0
 double Detector::GetElectGain_1D_OutZero( double freq ) {
 
-
     double slope_1; // slope of init part
 
     double Gout;
