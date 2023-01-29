@@ -1029,8 +1029,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         if(settings1->CUSTOM_ELECTRONICS==0){
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
-            //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
+            // ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+            ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
         }
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
@@ -1495,8 +1495,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         if(settings1->CUSTOM_ELECTRONICS==0){
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
-            //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
+             //ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
+            ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
         }
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
@@ -1792,8 +1792,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         if(settings1->CUSTOM_ELECTRONICS==0){
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
-            //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
+             //ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
+            ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
         }
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
@@ -2089,8 +2089,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         if(settings1->CUSTOM_ELECTRONICS==0){
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
-            //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
+             //ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
+            ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
         }
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
@@ -3245,7 +3245,7 @@ double Detector::GetFOAMGain_1D_OutZero( double freq ) {
 
 
 // set outside value as 0
-double Detector::GetElectGain_1D_OutZero( double freq ) {
+double Detector::GetElectGain_1D_OutZero( double freq, int gain_ch_no) {
 
     double slope_1; // slope of init part
 
@@ -3254,7 +3254,7 @@ double Detector::GetElectGain_1D_OutZero( double freq ) {
     int bin = (int)( (freq - freq_init) / freq_width )+1;
 
 
-    slope_1 = (ElectGain[1] - ElectGain[0]) / (Freq[1] - Freq[0]);
+    slope_1 = (ElectGain[gain_ch_no][1] - ElectGain[gain_ch_no][0]) / (Freq[1] - Freq[0]);
 
 
     // if freq is lower than freq_init
@@ -3272,7 +3272,7 @@ double Detector::GetElectGain_1D_OutZero( double freq ) {
 
     else {
 
-        Gout = ElectGain[bin-1] + (freq-Freq[bin-1])*(ElectGain[bin]-ElectGain[bin-1])/(Freq[bin]-Freq[bin-1]);
+        Gout = ElectGain[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectGain[gain_ch_no][bin]-ElectGain[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
     } // not outside the Freq[] range
     
 
@@ -3284,7 +3284,7 @@ double Detector::GetElectGain_1D_OutZero( double freq ) {
 
 
 // set outside value as 0
-double Detector::GetElectPhase_1D( double freq ) {
+double Detector::GetElectPhase_1D( double freq, int gain_ch_no ) {
 
 
     double slope_1, slope_2; // slope of init, final part
@@ -3296,14 +3296,14 @@ double Detector::GetElectPhase_1D( double freq ) {
 
     // ElectPhase are in rad (not deg)
 
-    slope_1 = (ElectPhase[1] - ElectPhase[0]) / (Freq[1] - Freq[0]);
-    slope_2 = (ElectPhase[freq_step-1] - ElectPhase[freq_step-2]) / (Freq[freq_step-1] - Freq[freq_step-2]);
+    slope_1 = (ElectPhase[gain_ch_no][1] - ElectPhase[gain_ch_no][0]) / (Freq[1] - Freq[0]);
+    slope_2 = (ElectPhase[gain_ch_no][freq_step-1] - ElectPhase[gain_ch_no][freq_step-2]) / (Freq[freq_step-1] - Freq[freq_step-2]);
 
 
     // if freq is lower than freq_init
     if ( freq < freq_init ) {
 
-        phase = slope_1 * (freq - Freq[0]) + ElectPhase[0];
+        phase = slope_1 * (freq - Freq[0]) + ElectPhase[gain_ch_no][0];
 
         if ( phase > PI ) {
             while ( phase > PI ) {
@@ -3319,7 +3319,7 @@ double Detector::GetElectPhase_1D( double freq ) {
     // if freq is higher than last freq
     else if ( freq > Freq[freq_step-1] ) {
 
-        phase = slope_2 * (freq - Freq[freq_step-1]) + ElectPhase[freq_step-1];
+        phase = slope_2 * (freq - Freq[freq_step-1]) + ElectPhase[gain_ch_no][freq_step-1];
 
         if ( phase > PI ) {
             while ( phase > PI ) {
@@ -3338,23 +3338,23 @@ double Detector::GetElectPhase_1D( double freq ) {
         // not at the first two bins
         if ( bin<freq_step-1 && bin>1 ) {
 
-            slope_t1 = (ElectPhase[bin-1] - ElectPhase[bin-2]) / (Freq[bin-1] - Freq[bin-2]);
-            slope_t2 = (ElectPhase[bin+1] - ElectPhase[bin]) / (Freq[bin+1] - Freq[bin]);
+            slope_t1 = (ElectPhase[gain_ch_no][bin-1] - ElectPhase[gain_ch_no][bin-2]) / (Freq[bin-1] - Freq[bin-2]);
+            slope_t2 = (ElectPhase[gain_ch_no][bin+1] - ElectPhase[gain_ch_no][bin]) / (Freq[bin+1] - Freq[bin]);
 
             // down going case
-            if ( slope_t1 * slope_t2 > 0. && ElectPhase[bin] - ElectPhase[bin-1] > PI ) {
+            if ( slope_t1 * slope_t2 > 0. && ElectPhase[gain_ch_no][bin] - ElectPhase[gain_ch_no][bin-1] > PI ) {
 
-                phase = ElectPhase[bin-1] + (freq-Freq[bin-1])*(ElectPhase[bin]-2*PI-ElectPhase[bin-1])/(Freq[bin]-Freq[bin-1]);
+                phase = ElectPhase[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectPhase[gain_ch_no][bin]-2*PI-ElectPhase[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
             }
 
             // up going case
-            else if ( slope_t1 * slope_t2 > 0. && ElectPhase[bin] - ElectPhase[bin-1] < -PI ) {
-                phase = ElectPhase[bin-1] + (freq-Freq[bin-1])*(ElectPhase[bin]+2*PI-ElectPhase[bin-1])/(Freq[bin]-Freq[bin-1]);
+            else if ( slope_t1 * slope_t2 > 0. && ElectPhase[gain_ch_no][bin] - ElectPhase[gain_ch_no][bin-1] < -PI ) {
+                phase = ElectPhase[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectPhase[gain_ch_no][bin]+2*PI-ElectPhase[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
             }
 
             // neither case
             else {
-                phase = ElectPhase[bin-1] + (freq-Freq[bin-1])*(ElectPhase[bin]-ElectPhase[bin-1])/(Freq[bin]-Freq[bin-1]);
+                phase = ElectPhase[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectPhase[gain_ch_no][bin]-ElectPhase[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
             }
 
             // if outside the range, put inside
@@ -3372,7 +3372,7 @@ double Detector::GetElectPhase_1D( double freq ) {
         }// not first two bins
 
         else {
-            phase = ElectPhase[bin-1] + (freq-Freq[bin-1])*(ElectPhase[bin]-ElectPhase[bin-1])/(Freq[bin]-Freq[bin-1]);
+            phase = ElectPhase[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectPhase[gain_ch_no][bin]-ElectPhase[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
         }
 
         // if outside the range, put inside
@@ -4114,18 +4114,14 @@ inline void Detector::ReadCalPulserWF(string filename, Settings *settings1 ) {  
 
 
 
+/*
+ 
+  Commented out this function, Alan is going to rebuild it
+  as part of the per-channel gain implementation
 
+*/
 
-
-
-
-
-
-
-
-
-
-inline void Detector::ReadElectChain(string filename, Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
+/* inline void Detector::ReadElectChain(string filename, Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
     
     ifstream Elect( filename.c_str() );
     
@@ -4170,7 +4166,7 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
 
             phase_tmp.push_back( atof( line3.substr(0).c_str() ) );
             // cout<<"phase : "<<phase_tmp[N]<<" N : "<<N<<endl;
-
+*/
             /*
             xfreq_tmp.push_back( atof( line.substr(0, 10).c_str() ) );
             cout<<"freq : "<<xfreq_tmp[N]<<"\t";
@@ -4181,7 +4177,7 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
             phase_tmp.push_back( atof( line.substr(31).c_str() ) );
             cout<<"phase : "<<phase_tmp[N]<<" N : "<<N<<endl;
             */
-            
+/*            
         }
         Elect.close();
     }
@@ -4251,44 +4247,413 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
     }
 
     
+} */
+
+
+
+
+inline void Detector::ReadElectChain(string filename, Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
+
+	/*
+ 	This function loads per-channel gain models.
+	KEEP COMMENTING ONCE FINISHED 
+	*/
+
+	// first, check if the file exists
+	char errorMessage[400];
+	struct stat buffer;
+
+	bool gainFileExists = (stat(filename.c_str(), &buffer)==0);
+	if (!gainFileExists){
+		sprintf(errorMessage, "Gain model file is not found (gain file exists %d) ", gainFileExists);
+		throw std::runtime_error(errorMessage);
+	}
+
+	ifstream gainFile(filename.c_str()); // open the file
+	string line; // a dummy variable we can stream over
+
+	// first, make sure our user has formatted the file correctly
+	// in particular, it means we really need to see the word "Frequency" as the first word in the header file
+	string expected_first_column_header = "Frequency";
+	if(gainFile.is_open()){
+		while(gainFile.good()){
+			getline(gainFile, line, ',');
+			string first_header_entry = line.c_str();
+			if (! (first_header_entry == expected_first_column_header)){
+				sprintf(errorMessage, 
+					"The first word of the header line is '%s'. It was expected to be '%s'. Please double check file format!!", 
+					first_header_entry.c_str(),
+					expected_first_column_header.c_str());
+				throw std::runtime_error(errorMessage);
+			}
+
+            		else{
+                		// otherwise, the first header of the file is correct, and we can proceed
+                		break;
+			}
+		
+		}
+	 
+	}
+
+	else{
+        	sprintf(errorMessage, "Gain model file did not open correctly.");
+        	throw std::runtime_error(errorMessage);
+
+    	}
+
+	// go back to the beginning of the file
+	// we have already verified that the file exists, so no need to check again...
+	gainFile.clear();
+	gainFile.seekg(0, ios::beg);
+
+
+	// second, figure out how many frequency bins are available
+	int lineCount = 0;
+	if(gainFile.is_open()){
+		while(gainFile.peek()!=EOF){
+			getline(gainFile, line);
+			lineCount++;
+		}
+	}
+
+	
+	
+	gainFile.clear(); // back to the beginning of the file again
+	gainFile.seekg(0, ios::beg);
+	int numFreqBins = lineCount - 1; // one row is dedicated to headers; number of freq bins is therefore # rows - 1
+
+	//Set up containers to stream the csv file into.
+	// vector of the frequencies
+	std::vector<double> frequencies;
+	frequencies.resize(numFreqBins); // resize to account for the number of frequency bins
+
+	// Third, figure out how many columns we have.
+	// This tells us how many channels we are reading in.
+	// We expect 1 column for frequency, N/2 columns for channels, and N/2 columns for phases.
+	// So there should be (N/2 channels + 1 Frequency) - 1 = N/2 channels worth of commas.
+	int numCommas = 0;
+	int theLineNo = 0;
+	if(gainFile.is_open()){
+		while(gainFile.good()){
+			if(theLineNo==0){
+				getline(gainFile, line, '\n');
+				std::string first_line = line.c_str();
+				numCommas = int(std::count(first_line.begin(), first_line.end(), ','));
+				theLineNo++;
+			}
+			else{
+				break;
+			}
+		}
+	}
+
+	
+	gainFile.clear(); // back to the beginning of the file again
+	gainFile.seekg(0, ios::beg);
+
+	// make sure the number of commas is even since we have gain+phase pairs per channel 
+	if ( numCommas%2 == 1){
+                                sprintf(errorMessage,
+                                        "The number of columns in the gain file (disregarding the one for frequency) is not even. We need gain and phase per channel.");
+                                throw std::runtime_error(errorMessage);
+                        }
+
+//THIS I MODIFIED - ALAN
+	else { //we can continue
+	gain_ch = numCommas/2; // also need to set this detector wide variable, 
+                                // which specifies how many channels for which we have separate gain models
+        }
+	
+        
+	/*
+    	Fourth, we loop over the rows of the file again,
+    	and get the frequency values out, as well as the gain and phase values.
+    	First, setup two vector of vectors to hold the gain and phase values we stream in.
+   	The first dimension is for the number of channels (so this is "number of channels" long).
+    	The second dimension is for the number of frequency bins (so this is "number of frequency bins" long).
+    	(which goes first and which goes second is arbitrary; 
+    	the TestBed version does it in this order, so replicate here)
+	*/
+
+	std::vector< std::vector <double> > gains;
+	std::vector< std::vector <double> > phases; 
+    	gains.resize(gain_ch); // resize to account for number of channels
+    	phases.resize(gain_ch); // resize to account for number of channels
+    	for(int iCh=0; iCh<gain_ch; iCh++){
+		gains[iCh].resize(numFreqBins); // resize to account for number of freq bins
+		phases[iCh].resize(numFreqBins);
+	}
+
+	theLineNo = 0; // reset this counter
+	if (gainFile.is_open()){
+		while(gainFile.good()){
+
+			if(theLineNo == 0 ){
+				// skip the first line (the header file)
+				getline (gainFile, line);
+				theLineNo++;
+			}
+			else{
+				/*
+ 				from the second line forward, read in the values
+				the first column is the frequency
+				the second, fourth, sixth, etc. column should be the gain values for all channels.
+				the third, fifth, seventh, etc. column should be the phase values for the corresponding channel.
+				so we need to loop over all the comma separated entries in the single line
+				*/
+
+				// first, peel off the frequency
+				int theFreqBin = theLineNo -1 ;
+				getline(gainFile, line, ',');
+				double temp_freq_val = atof(line.c_str()); // the frequency in MHz
+				if(std::isnan(temp_freq_val) || temp_freq_val < 0 || temp_freq_val > 1200){
+					sprintf(errorMessage, 
+						"The frequency value (freq bin %d) is a nan or negative or very large (%e). Stop!", 
+						temp_freq_val);
+					throw std::runtime_error(errorMessage);
+				}
+				
+				frequencies[theFreqBin] = temp_freq_val;
+
+				/*
+				then loop over the channels, splitting most on the comma ","
+				Because the "separating" character for the very last channel is a newline (\n),
+				we have to loop over n_channels - 1 here,
+				and then change to the newline character for the final channel
+				(see below).
+				*/
+				int numColsPair = 0;
+				while(numColsPair < gain_ch-1){	//numColsPair is the number of column pairs e.g. columns
+								//2 and 3 correspond to gain and phase of channel 0.
+								
+					
+					//get and store the gain values
+					getline(gainFile, line, ',');
+					double temp_gain_val = atof(line.c_str());
+
+					if(std::isnan(temp_gain_val) || temp_gain_val < 0 || temp_gain_val > 1E6){
+						sprintf(errorMessage, 
+ 							"A gain value (freq bin %d, ch %d) is a nan or negative or very large (%e). Stop!", 
+ 							 theFreqBin, numColsPair, temp_gain_val);
+						throw std::runtime_error(errorMessage);
+					}
+                    
+					gains[numColsPair][theFreqBin] = temp_gain_val;
+				
+					//get and store the phase values
+					getline(gainFile, line, ',');
+					double temp_phase_val = atof(line.c_str()); 
+
+                          		if(std::isnan(temp_phase_val)){
+                                              	sprintf(errorMessage, 
+							"A phase value (freq bin %d, ch %d) is a nan. Stop!", 
+							theFreqBin, numColsPair);
+						throw std::runtime_error(errorMessage);
+                                      }
+
+					phases[numColsPair][theFreqBin] = temp_phase_val;
+				
+					numColsPair++; // advance number of column pair
+				}
+                 
+
+				// once more to get the final channel, this time we need to detect the newline character after getting the last gain
+				// NB: at this point, numColsPair == final channel number, so we can just use it
+				// (no need to increment numColsPair again)
+				
+				getline(gainFile, line, ','); //getting last gain
+				double temp_gain_val = atof(line.c_str());
+
+				gains[numColsPair][theFreqBin] = temp_gain_val;
+//DO WE CHECK THIS LAST VALUE?
+			
+				getline(gainFile, line, '\n'); //getting last phase
+				double temp_phase_val = atof(line.c_str());
+//DO WE CHECK THIS LAST VALUE?
+				phases[numColsPair][theFreqBin] = temp_phase_val;
+
+				// now we're done!
+				theLineNo++; //advance the line number
+
+
+			}
+		}
+	}
+	gainFile.close();
+	
+	
+	// done getting data from the gain-phase file
+
+
+//THIS IS now the SECOND big part. I want to do a set of interpolations. COMMENT MORE WHEN FINISHED.
+	
+//THESE WERE DEFINED OUTSIDE BUT AS ARRAYS!! PROBLEM WITH ".push_back"	
+//	
+//	//These store the interpolated gain and phase vectors for each channel
+//	std::vector< std::vector< double > > ElectGain; //store gains 
+//	ElectGain.resize(gain_ch); // resize to match channel count
+//	std::vector< std::vector< double > > ElectPhase;
+//	ElectPhase.resize(gain_ch); // resize to match channel count
+
+	//These store  the gain and phase vectors interpolated for the specific DATA_BIN_SIZE
+//	std::vector< std::vector< double > > ElectGain_databin; //store gains 
+//	ElectGain_databin.resize(gain_ch); // resize to match channel count
+//	std::vector< std::vector< double > > ElectPhase_databin;
+//	ElectPhase_databin.resize(gain_ch); // resize to match channel count
+
+	//These store the gain and phase vectors interpolated for the NFOUR/2 t domain array
+//	std::vector< std::vector< double > > ElectGain_NFOUR; //store gains 
+//	ElectGain_NFOUR.resize(gain_ch); // resize to match channel count
+//	std::vector< std::vector< double > > ElectPhase_NFOUR;
+//	ElectPhase_NFOUR.resize(gain_ch); // resize to match channel count
+
+
+	// set up the output frequency spacing for this event's specific DATA_BIN_SIZE
+//	double df_fft = 1./ ( (double)(settings->DATA_BIN_SIZE) * settings->TIMESTEP ); // the frequency step
+//	double interp_frequencies_databin[settings->DATA_BIN_SIZE/2];   // array for interpolated FFT frequencies
+	
+//	for(int i=0; i<settings->DATA_BIN_SIZE/2.; i++){
+		// set the frequencies
+//		interp_frequencies_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+//	}
+
+	// the content of the vectors needs to be stuffed into arrays for the interpolator
+	// so, copy over the vector of frequencies into an array
+	// 
+	double frequencies_asarray[numFreqBins];
+	std::copy(frequencies.begin(), frequencies.end(), frequencies_asarray);
+
+	ElectGain.resize(gain_ch); //resize ElectGain to have the size of number of channels
+	ElectPhase.resize(gain_ch); //resize ElectPhase to have the size of number of channels
+
+	// loop over channel, and do the interpolation
+	for(int iCh=0; iCh<gain_ch; iCh++){
+	   
+		// same issue as with the frequencies; we need to copy the results for this station and channel to an array
+		double gains_asarray[numFreqBins];
+	        std::copy(gains[iCh].begin(), gains[iCh].end(), gains_asarray);
+		double phases_asarray[numFreqBins];
+	        std::copy(phases[iCh].begin(), phases[iCh].end(), phases_asarray);
+	
+		// output value
+		double interp_gains[freq_step];   // array for interpolated gain values
+		double interp_phases[freq_step];   // array for interpolated phases values
+		
+//		double interp_gains_databin[settings->DATA_BIN_SIZE/2];   // array for interpolated gain values
+//		double interp_phases_databin[settings->DATA_BIN_SIZE/2];   // array for interpolated phases values
+
+		// now, do interpolation
+		Tools::SimpleLinearInterpolation(
+			numFreqBins, frequencies_asarray, gains_asarray, //From original binning
+			freq_step, Freq, interp_gains	//To the new binning
+			);
+		       
+		Tools::SimpleLinearInterpolation(
+			numFreqBins, frequencies_asarray, phases_asarray,
+			freq_step, Freq, interp_phases
+			);
+		       
+//		Tools::SimpleLinearInterpolation(
+//			numFreqBins, frequencies_asarray, gains_asarray,
+//			settings->DATA_BIN_SIZE/2, interp_frequencies_databin, interp_gains_databin
+//			);
+
+//		Tools::SimpleLinearInterpolation(
+//			numFreqBins, frequencies_asarray, phases_asarray,
+//			settings->DATA_BIN_SIZE/2, interp_frequencies_databin, interp_phases_databin
+//			);
+	
+		// copy the interpolated values out
+		for(int iFreqBin=0; iFreqBin<freq_step; iFreqBin++){
+			ElectGain[iCh].push_back( interp_gains[iFreqBin] );
+			//ElectGain[iCh][iFreqBin] = interp_gains[iFreqBin];
+			ElectPhase[iCh].push_back( interp_phases[iFreqBin] );
+			//ElectPhase[iCh][iFreqBin] = interp_phases[iFreqBin];
+                             }
+		
+		// copy the interpolated values out
+//		for(int iFreqBin=0; iFreqBin<settings->DATA_BIN_SIZE/2; iFreqBin++){
+//			ElectGain_databin[iCh].push_back( interp_gains_databin[iFreqBin] );
+//			ElectPhase_databin[iCh].push_back( interp_phases_databin[iFreqBin] );
+//		}
+		
+	}
+		
+//NEED TO DO SOMETHING SIMILAR FOR NFOUR/2 t DOMAIN ARRAY. No need because it's not used ever, nor the "..._databin" arrays. Possible problem is that
+//ElectGain and ElectPhase are declared as arrays. Function ".push_back" works only on vectors
+
 }
-
-
 
 void Detector::ReadElectChain_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
 
     // We can use FilterGain array as a original array
 
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-    double phase_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+//    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+//    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+//    double phase_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
 
-    double df_fft;
+//    double df_fft;
     
-    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
+//    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
 
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
+//    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+//        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+//    }
 
-    Tools::SimpleLinearInterpolation( freq_step, Freq, ElectGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+//    Tools::SimpleLinearInterpolation( freq_step, Freq, ElectGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
         
-    ElectGain_databin.clear();
+//    ElectGain_databin.clear();
     
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
-        ElectGain_databin.push_back( ygain_databin[i] );
-    }
+//    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
+//        ElectGain_databin.push_back( ygain_databin[i] );
+//   }
 
-    Tools::SimpleLinearInterpolation( freq_step, Freq, ElectPhase, settings1->DATA_BIN_SIZE/2, xfreq_databin, phase_databin );
+//    Tools::SimpleLinearInterpolation( freq_step, Freq, ElectPhase, settings1->DATA_BIN_SIZE/2, xfreq_databin, phase_databin );
         
-    ElectPhase_databin.clear();
+//    ElectPhase_databin.clear();
     
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
-        ElectPhase_databin.push_back( phase_databin[i] );
-    }
+//    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
+//        ElectPhase_databin.push_back( phase_databin[i] );
+//    }
 
 
 }
+
+//void Detector::ReadElectChain_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
+
+    // We can use FilterGain array as a original array
+
+//    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+//    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+//    double phase_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+
+//    double df_fft;
+    
+//    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
+
+//    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+//        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+//    }
+
+//    Tools::SimpleLinearInterpolation( freq_step, Freq, ElectGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+        
+//    ElectGain_databin.clear();
+    
+//    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
+//        ElectGain_databin.push_back( ygain_databin[i] );
+//    }
+
+//    Tools::SimpleLinearInterpolation( freq_step, Freq, ElectPhase, settings1->DATA_BIN_SIZE/2, xfreq_databin, phase_databin );
+        
+//    ElectPhase_databin.clear();
+    
+//    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
+//        ElectPhase_databin.push_back( phase_databin[i] );
+//    }
+
+
+//}
 
 
 
