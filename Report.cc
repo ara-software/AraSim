@@ -387,7 +387,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                 stations[i].strings[j].antennas[k].clear(); // clear data in antenna which stored in previous event
 
-                // run ray solver, see if solution exist
+		// This is used for per-channel gain implementation. 
+		// It is used in all instances of ApplyElect_Tdomain() and ApplyElect_Tdomain_FirstTwo
+		// To indicate the channel number 
+		int gain_ch_no = detector->GetChannelfromStringAntenna (i, j, k, settings1) - 1;
+               
+		 // run ray solver, see if solution exist
                 // if not, skip (set something like Sol_No = 0;
                 // if solution exist, calculate view angle and calculate TaperVmMHz
 
@@ -955,11 +960,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     // apply entire elect chain gain, phase
                                                     if (n > 0)
                                                     {
-                                                        ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], settings1);
+                                                        ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
                                                     }
                                                     else
                                                     {
-                                                        ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1]);
+                                                        ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
                                                     }
                                                 }   // end for freq bin
 
@@ -1234,11 +1239,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 //
                                                 if (n > 0)
                                                 {
-                                                    ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], settings1);
+                                                    ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
                                                 }
                                                 else
                                                 {
-                                                    ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1]);
+                                                    ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
                                                 }
                                             }   // end for freq bin
 
@@ -1571,11 +1576,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             //
                                             if (n > 0)
                                             {
-                                                ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], settings1);
+                                                ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
                                             }
                                             else
                                             {
-                                                ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1]);
+                                                ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
                                             }
                                         }   // end for freq bin
 
@@ -2800,6 +2805,11 @@ void Report::rerun_event(Event *event, Detector *detector,
 
     for(int j=0; j<num_strings; j++){
         for(int k=0; k<num_antennas; k++){
+	    
+	    // This is used for per-channel gain implementation 
+	    // This is passed in instances of ApplyElect_Tdomain() and ApplyElect_Tdomain_FirstTwo()
+	    // It is used indicate the channel number
+	    int gain_ch_no = detector->GetChannelfromStringAntenna (0, j, k, settings) - 1;
 
             int idx = ((j*4)+k);
 
@@ -2970,7 +2980,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                                 settings, antenna_theta, antenna_phi
                                 );
                             ApplyElect_Tdomain(freq_tmp*1.e-6, detector,
-                                V_forfft[2*n], V_forfft[2*n + 1], settings
+                                V_forfft[2*n], V_forfft[2*n + 1], gain_ch_no, settings
                                 );
                         }
                         else{
@@ -2982,7 +2992,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                                 );
                             ApplyElect_Tdomain_FirstTwo(freq_tmp*1.e-6,
                                 freq_lastbin*1.e-6, detector,
-                                V_forfft[2*n], V_forfft[2*n + 1]
+                                V_forfft[2*n], V_forfft[2*n + 1], gain_ch_no
                                 );
                         }
                     }
@@ -4398,7 +4408,7 @@ void Report::ApplyFilter_OutZero (double freq, Detector *detector, double &vmmhz
 }
 
 
-void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, Settings *settings1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
+void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, int gain_ch_no, Settings *settings1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
 
     if ( settings1->PHASE_SKIP_MODE == 0 ) {
 
@@ -4422,21 +4432,21 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
         }
 
         // V amplitude
-        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) * detector->GetElectGain_1D_OutZero( freq ); // apply gain (unitless) to amplitude
+        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) * detector->GetElectGain_1D_OutZero( freq, gain_ch_no ); // apply gain (unitless) to amplitude
 
         // real, img terms with phase shift
         //vm_real = v_amp * cos( phase_current + detector->GetElectPhase_1D(freq) );
         //vm_img = v_amp * sin( phase_current + detector->GetElectPhase_1D(freq) );
 
-        vm_real = v_amp * cos( phase_current - detector->GetElectPhase_1D(freq) );
-        vm_img = v_amp * sin( phase_current - detector->GetElectPhase_1D(freq) );
+        vm_real = v_amp * cos( phase_current - detector->GetElectPhase_1D(freq, gain_ch_no) );
+        vm_img = v_amp * sin( phase_current - detector->GetElectPhase_1D(freq, gain_ch_no ) );
     }
 
     else {
 
-        vm_real = vm_real * detector->GetElectGain_1D_OutZero( freq ); // only amplitude
+        vm_real = vm_real * detector->GetElectGain_1D_OutZero( freq, gain_ch_no); // only amplitude
 
-        vm_img = vm_img * detector->GetElectGain_1D_OutZero( freq ); // only amplitude
+        vm_img = vm_img * detector->GetElectGain_1D_OutZero( freq, gain_ch_no); // only amplitude
     }
 
 }
@@ -4444,10 +4454,10 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
 
 
 
-void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
+void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, int gain_ch_no) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
 
-    vm_bin0 = vm_bin0 * detector->GetElectGain_1D_OutZero( freq0 );
-    vm_bin1 = vm_bin1 * detector->GetElectGain_1D_OutZero( freq1 );
+    vm_bin0 = vm_bin0 * detector->GetElectGain_1D_OutZero( freq0 , gain_ch_no);
+    vm_bin1 = vm_bin1 * detector->GetElectGain_1D_OutZero( freq1 , gain_ch_no);
 
 }
 
