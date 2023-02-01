@@ -4117,12 +4117,20 @@ inline void Detector::ReadCalPulserWF(string filename, Settings *settings1 ) {  
 
 inline void Detector::ReadElectChain(string filename, Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
 
-	/*
- 	This function loads per-channel gain models.
-	KEEP COMMENTING ONCE FINISHED 
-	*/
+/*
+The main goal of this function is to store gain and phase values to be used. 
+This is update stores values for each channel in vectors.
+The first dimension is the number of channels (this is "number of channels")
+The second dimension is for the number of frequency bins (this is "number of frequency bins" long).
+	
 
-	// first, check if the file exists
+This function has two main parts: (1) loading of gain/phase values from gainFile containing the gain model and 
+(2) interpolating these values to the frequency binning of "Freq" array having frequencies used in the simulation.  
+*/
+
+//This is the beginning of PART 1: getting gain/phase and frequency values out of the gain model file
+
+	// check if the gain file exists
 	char errorMessage[400];
 	struct stat buffer;
 
@@ -4135,7 +4143,7 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
 	ifstream gainFile(filename.c_str()); // open the file
 	string line; // a dummy variable we can stream over
 
-	// first, make sure our user has formatted the file correctly
+	// if the gain file exists, then make sure our user has formatted the file correctly
 	// in particular, it means we really need to see the word "Frequency" as the first word in the header file
 	string expected_first_column_header = "Frequency";
 	if(gainFile.is_open()){
@@ -4193,8 +4201,8 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
 
 	// Third, figure out how many columns we have.
 	// This tells us how many channels we are reading in.
-	// We expect 1 column for frequency, N/2 columns for channels, and N/2 columns for phases.
-	// So there should be (N/2 channels + 1 Frequency) - 1 = N/2 channels worth of commas.
+	// We expect 1 column for frequency, (N-1)/2 columns for gains, and (N-1)/2 columns for phases.
+	// So there should be (((N-1)/2 + (N-1)/2 channels + 1 Frequency) - 1)/2= (N-1)/2 channels worth of commas.
 	int numCommas = 0;
 	int theLineNo = 0;
 	if(gainFile.is_open()){
@@ -4218,7 +4226,7 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
 	// make sure the number of commas is even since we have gain+phase pairs per channel 
 	if ( numCommas%2 == 1){
                                 sprintf(errorMessage,
-                                        "The number of columns in the gain file (disregarding the one for frequency) is not even. We need gain and phase per channel.");
+                                        "The number of columns in the gain file (disregarding the one for frequency) is not even. We need gain AND phase pairs per channel.");
                                 throw std::runtime_error(errorMessage);
                         }
 
@@ -4244,7 +4252,7 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
     	phases.resize(gain_ch); // resize to account for number of channels
     	for(int iCh=0; iCh<gain_ch; iCh++){
 		gains[iCh].resize(numFreqBins); // resize to account for number of freq bins
-		phases[iCh].resize(numFreqBins);
+		phases[iCh].resize(numFreqBins); //resize to account for number of freq bins
 	}
 
 	theLineNo = 0; // reset this counter
@@ -4260,7 +4268,7 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
 				/*
  				from the second line forward, read in the values
 				the first column is the frequency
-				the second, fourth, sixth, etc. column should be the gain values for all channels.
+				the second, fourth, sixth, etc. column should be the gain values for the channels.
 				the third, fifth, seventh, etc. column should be the phase values for the corresponding channel.
 				so we need to loop over all the comma separated entries in the single line
 				*/
@@ -4328,11 +4336,10 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
 				double temp_gain_val = atof(line.c_str());
 
 				gains[numColsPair][theFreqBin] = temp_gain_val;
-//DO WE CHECK THIS LAST VALUE?
 			
 				getline(gainFile, line, '\n'); //getting last phase
 				double temp_phase_val = atof(line.c_str());
-//DO WE CHECK THIS LAST VALUE?
+
 				phases[numColsPair][theFreqBin] = temp_phase_val;
 
 				// now we're done!
@@ -4345,15 +4352,15 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
 	gainFile.close();
 	
 	
-	// done getting data from the gain-phase file
+//This is the end of PART 1. Done getting data from the gain-phase file
 
 
-//THIS IS now the SECOND big part. I want to do a set of interpolations. COMMENT MORE WHEN FINISHED.
+//This is the beginning of PART 2: Interpolate gain and phase values to the frequency binning used by AraSim (given "Freq" array)
 	
 
 	// the content of the vectors needs to be stuffed into arrays for the interpolator
 	// so, copy over the vector of frequencies into an array
-	// 
+	
 	double frequencies_asarray[numFreqBins];
 	std::copy(frequencies.begin(), frequencies.end(), frequencies_asarray);
 
@@ -4381,8 +4388,8 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
 			);
 		       
 		Tools::SimpleLinearInterpolation(
-			numFreqBins, frequencies_asarray, phases_asarray,
-			freq_step, Freq, interp_phases
+			numFreqBins, frequencies_asarray, phases_asarray, //From original binning
+			freq_step, Freq, interp_phases //To the new binning
 			);
 		       
 	
@@ -4394,6 +4401,7 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
 		
 	}
 		
+//This is the end of PART 2. Done interpolating gain and phase values to the binning of "Freq" array. 
 
 }
 

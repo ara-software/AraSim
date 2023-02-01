@@ -392,7 +392,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 		// To indicate the channel number 
 		int gain_ch_no = detector->GetChannelfromStringAntenna (i, j, k, settings1) - 1;
                
-		 // run ray solver, see if solution exist
+		// run ray solver, see if solution exist
                 // if not, skip (set something like Sol_No = 0;
                 // if solution exist, calculate view angle and calculate TaperVmMHz
 

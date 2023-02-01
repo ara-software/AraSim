@@ -256,7 +256,7 @@ class Detector {
 
 
         void ReadElectChain(string filename, Settings *settings1);
-        int gain_ch; // Number of channels used for gain model array population in ReadElectChain
+        int gain_ch; // Number of channels used for gain model array population in ReadElectChain()
 	std::vector< std::vector <double> > ElectGain; //Elect chain gain (unitless) for Detector freq bin array
 	std::vector< std::vector <double> > ElectPhase; // Elect chain phase (rad) for Detector freq bin array 
 
