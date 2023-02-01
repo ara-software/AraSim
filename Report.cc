@@ -1246,7 +1246,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 if (n > 0)
                                                 {
                                                     ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
-                                               	    cout << "Got to second ApplyElect_Tdomain" << endl;
 						}
                                                 else
                                                 {
@@ -1584,7 +1583,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             if (n > 0)
                                             {
                                                 ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
-						cout << "Got to third ApplyElect_Tdomain" << endl;
                                             }
                                             else
                                             {
