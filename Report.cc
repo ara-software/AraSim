@@ -387,11 +387,17 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                 stations[i].strings[j].antennas[k].clear(); // clear data in antenna which stored in previous event
 
-		// This is used for per-channel gain implementation. 
-		// It is used in all instances of ApplyElect_Tdomain() and ApplyElect_Tdomain_FirstTwo
-		// To indicate the channel number 
-		int gain_ch_no = detector->GetChannelfromStringAntenna (i, j, k, settings1) - 1;
-               
+		// This (gain_ch_no) is used for per-channel gain implementation. 
+		// It is used in all instances of ApplyElect_Tdomain() and ApplyElect_Tdomain_FirstTwo(), to indicate channel number
+		// Note that channel numbering is different for DETECTOR==4 than for the other modes (1-3). See that in the definition of GetChannelfromStringAntenna() 
+		int gain_ch_no;
+		if (settings1->DETECTOR==4){
+			gain_ch_no = detector->GetChannelfromStringAntenna (i, j, k, settings1)-1;
+		}
+		else{
+			gain_ch_no = detector->GetChannelfromStringAntenna (i, j, k, settings1);
+		}
+		
 		// run ray solver, see if solution exist
                 // if not, skip (set something like Sol_No = 0;
                 // if solution exist, calculate view angle and calculate TaperVmMHz
@@ -961,7 +967,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     if (n > 0)
                                                     {
                                                         ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
-                                                    }
+						    }
                                                     else
                                                     {
                                                         ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
@@ -1240,7 +1246,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 if (n > 0)
                                                 {
                                                     ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
-                                                }
+                                               	    cout << "Got to second ApplyElect_Tdomain" << endl;
+						}
                                                 else
                                                 {
                                                     ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
@@ -1577,6 +1584,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             if (n > 0)
                                             {
                                                 ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
+						cout << "Got to third ApplyElect_Tdomain" << endl;
                                             }
                                             else
                                             {
@@ -2804,11 +2812,18 @@ void Report::rerun_event(Event *event, Detector *detector,
 
     for(int j=0; j<num_strings; j++){
         for(int k=0; k<num_antennas; k++){
-	    
-	    // This is used for per-channel gain implementation 
-	    // This is passed in instances of ApplyElect_Tdomain() and ApplyElect_Tdomain_FirstTwo()
-	    // It is used indicate the channel number
-	    int gain_ch_no = detector->GetChannelfromStringAntenna (0, j, k, settings) - 1;
+	   
+            // This (gain_ch_no) is used for per-channel gain implementation. 
+            // It is used in all instances of ApplyElect_Tdomain() and ApplyElect_Tdomain_FirstTwo(), to indicate channel number
+            // Note that channel numbering is different for DETECTOR==4 than for the rest (1-3). See that in the definition of GetChannelfromStringAntenna()  
+            int gain_ch_no;
+            if (settings->DETECTOR==4){
+                    gain_ch_no = detector->GetChannelfromStringAntenna (0, j, k, settings)-1;
+            }       
+            else{
+                    gain_ch_no = detector->GetChannelfromStringAntenna (0, j, k, settings);
+            }
+  
 
             int idx = ((j*4)+k);
 

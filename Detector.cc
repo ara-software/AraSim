@@ -1031,7 +1031,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             cout<<"     Reading standard ARA electronics response"<<endl;
             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
           //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
-        }
+	}
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
@@ -1497,7 +1497,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             cout<<"     Reading standard ARA electronics response"<<endl;
             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
           //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
-        }
+	}
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
@@ -1794,7 +1794,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             cout<<"     Reading standard ARA electronics response"<<endl;
             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
           //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
-        }
+	}
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
@@ -2091,7 +2091,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             cout<<"     Reading standard ARA electronics response"<<endl;
             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
           //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
-        }
+	}
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
@@ -3246,7 +3246,7 @@ double Detector::GetFOAMGain_1D_OutZero( double freq ) {
 
 // set outside value as 0
 double Detector::GetElectGain_1D_OutZero( double freq, int gain_ch_no) {
-
+    
     double slope_1; // slope of init part
 
     double Gout;
@@ -3285,7 +3285,6 @@ double Detector::GetElectGain_1D_OutZero( double freq, int gain_ch_no) {
 
 // set outside value as 0
 double Detector::GetElectPhase_1D( double freq, int gain_ch_no ) {
-
 
     double slope_1, slope_2; // slope of init, final part
     double slope_t1, slope_t2; // slope of pre, after the freq bin
