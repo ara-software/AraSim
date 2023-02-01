@@ -1029,8 +1029,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         if(settings1->CUSTOM_ELECTRONICS==0){
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-            // ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
-            ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
+            ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+          //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
         }
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
@@ -1495,8 +1495,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         if(settings1->CUSTOM_ELECTRONICS==0){
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-             //ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
-            ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
+            ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
+          //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
         }
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
@@ -1792,8 +1792,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         if(settings1->CUSTOM_ELECTRONICS==0){
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-             //ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
-            ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
+            ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
+          //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
         }
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
@@ -2089,8 +2089,8 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         if(settings1->CUSTOM_ELECTRONICS==0){
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-             //ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
-            ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
+            ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
+          //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
         }
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
@@ -4114,143 +4114,6 @@ inline void Detector::ReadCalPulserWF(string filename, Settings *settings1 ) {  
 
 
 
-/*
- 
-  Commented out this function, Alan is going to rebuild it
-  as part of the per-channel gain implementation
-
-*/
-
-/* inline void Detector::ReadElectChain(string filename, Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
-    
-    ifstream Elect( filename.c_str() );
-    
-    string line;
-    string line2;
-    string line3;
-    
-    int N=-1;
-    
-    vector <double> xfreq_tmp;
-    vector <double> ygain_tmp;
-    vector <double> phase_tmp;
-
-    int skipline = 3;
-    int first_time = 1;
-
-    
-    if ( Elect.is_open() ) {
-        while (Elect.good() ) {
-            
-            if ( first_time == 1 ) {
-                for (int sl=0; sl<skipline; sl++) {
-                    getline (Elect, line);
-                }
-                first_time = 0;
-            }
-                    
-
-            getline (Elect, line);
-
-            N++;
-
-            xfreq_tmp.push_back( atof( line.substr(0, line.find_first_of(",")).c_str() ) );
-            // cout<<"freq : "<<xfreq_tmp[N]<<"\t";
-
-            line2 = line.substr( line.find_first_of(",")+1);
-
-            ygain_tmp.push_back( atof( line2.substr(0, line2.find_first_of(",")).c_str() ) );
-            // cout<<"gain : "<<ygain_tmp[N]<<"\t";
-
-            line3 = line2.substr( line2.find_first_of(",")+1);
-
-            phase_tmp.push_back( atof( line3.substr(0).c_str() ) );
-            // cout<<"phase : "<<phase_tmp[N]<<" N : "<<N<<endl;
-*/
-            /*
-            xfreq_tmp.push_back( atof( line.substr(0, 10).c_str() ) );
-            cout<<"freq : "<<xfreq_tmp[N]<<"\t";
-            
-            ygain_tmp.push_back( atof( line.substr(11, 19).c_str() ) );
-            cout<<"gain : "<<ygain_tmp[N]<<"\t";
-
-            phase_tmp.push_back( atof( line.substr(31).c_str() ) );
-            cout<<"phase : "<<phase_tmp[N]<<" N : "<<N<<endl;
-            */
-/*            
-        }
-        Elect.close();
-    }
-    
-    else cout<<"Elect file can not opened!!"<<endl;
-
-    // cout<<"N : "<<N<<endl;
-    
-    double xfreq[N], ygain[N], phase[N];  // need array for Tools::SimpleLinearInterpolation
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-    double phase_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-    double df_fft;
-    
-    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
-    
-    for (int i=0;i<N;i++) { // copy values
-        xfreq[i] = xfreq_tmp[i];
-        ygain[i] = ygain_tmp[i];
-        phase[i] = phase_tmp[i];
-    }
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-    
-    
-    // Tools::SimpleLinearInterpolation will return Filter array (in dB)
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, Freq, ElectGain );
-    
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
-    
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
-        ElectGain_databin.push_back( ygain_databin[i] );
-    }
-
-    Tools::SimpleLinearInterpolation( N, xfreq, phase, freq_step, Freq, ElectPhase );
-    
-    Tools::SimpleLinearInterpolation( N, xfreq, phase, settings1->DATA_BIN_SIZE/2, xfreq_databin, phase_databin );
-    
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
-        ElectPhase_databin.push_back( phase_databin[i] );
-    }
-
-    
-    
-    // for NFOUR/2 t domain array
-    double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
-    double ygain_NFOUR[settings1->NFOUR/4+1];   // array for gain in FFT bin
-    double phase_NFOUR[settings1->NFOUR/4+1];   // array for gain in FFT bin
-    
-    df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
-
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
-    
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {
-        ElectGain_NFOUR.push_back( ygain_NFOUR[i] );
-    }
-
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, phase_NFOUR );
-    
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {
-        ElectPhase_NFOUR.push_back( phase_NFOUR[i] );
-    }
-
-    
-} */
-
-
-
 
 inline void Detector::ReadElectChain(string filename, Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
 
@@ -4359,7 +4222,6 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
                                 throw std::runtime_error(errorMessage);
                         }
 
-//THIS I MODIFIED - ALAN
 	else { //we can continue
 	gain_ch = numCommas/2; // also need to set this detector wide variable, 
                                 // which specifies how many channels for which we have separate gain models
@@ -4488,35 +4350,6 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
 
 //THIS IS now the SECOND big part. I want to do a set of interpolations. COMMENT MORE WHEN FINISHED.
 	
-//THESE WERE DEFINED OUTSIDE BUT AS ARRAYS!! PROBLEM WITH ".push_back"	
-//	
-//	//These store the interpolated gain and phase vectors for each channel
-//	std::vector< std::vector< double > > ElectGain; //store gains 
-//	ElectGain.resize(gain_ch); // resize to match channel count
-//	std::vector< std::vector< double > > ElectPhase;
-//	ElectPhase.resize(gain_ch); // resize to match channel count
-
-	//These store  the gain and phase vectors interpolated for the specific DATA_BIN_SIZE
-//	std::vector< std::vector< double > > ElectGain_databin; //store gains 
-//	ElectGain_databin.resize(gain_ch); // resize to match channel count
-//	std::vector< std::vector< double > > ElectPhase_databin;
-//	ElectPhase_databin.resize(gain_ch); // resize to match channel count
-
-	//These store the gain and phase vectors interpolated for the NFOUR/2 t domain array
-//	std::vector< std::vector< double > > ElectGain_NFOUR; //store gains 
-//	ElectGain_NFOUR.resize(gain_ch); // resize to match channel count
-//	std::vector< std::vector< double > > ElectPhase_NFOUR;
-//	ElectPhase_NFOUR.resize(gain_ch); // resize to match channel count
-
-
-	// set up the output frequency spacing for this event's specific DATA_BIN_SIZE
-//	double df_fft = 1./ ( (double)(settings->DATA_BIN_SIZE) * settings->TIMESTEP ); // the frequency step
-//	double interp_frequencies_databin[settings->DATA_BIN_SIZE/2];   // array for interpolated FFT frequencies
-	
-//	for(int i=0; i<settings->DATA_BIN_SIZE/2.; i++){
-		// set the frequencies
-//		interp_frequencies_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-//	}
 
 	// the content of the vectors needs to be stuffed into arrays for the interpolator
 	// so, copy over the vector of frequencies into an array
@@ -4540,8 +4373,6 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
 		double interp_gains[freq_step];   // array for interpolated gain values
 		double interp_phases[freq_step];   // array for interpolated phases values
 		
-//		double interp_gains_databin[settings->DATA_BIN_SIZE/2];   // array for interpolated gain values
-//		double interp_phases_databin[settings->DATA_BIN_SIZE/2];   // array for interpolated phases values
 
 		// now, do interpolation
 		Tools::SimpleLinearInterpolation(
@@ -4554,107 +4385,17 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
 			freq_step, Freq, interp_phases
 			);
 		       
-//		Tools::SimpleLinearInterpolation(
-//			numFreqBins, frequencies_asarray, gains_asarray,
-//			settings->DATA_BIN_SIZE/2, interp_frequencies_databin, interp_gains_databin
-//			);
-
-//		Tools::SimpleLinearInterpolation(
-//			numFreqBins, frequencies_asarray, phases_asarray,
-//			settings->DATA_BIN_SIZE/2, interp_frequencies_databin, interp_phases_databin
-//			);
 	
 		// copy the interpolated values out
 		for(int iFreqBin=0; iFreqBin<freq_step; iFreqBin++){
 			ElectGain[iCh].push_back( interp_gains[iFreqBin] );
-			//ElectGain[iCh][iFreqBin] = interp_gains[iFreqBin];
 			ElectPhase[iCh].push_back( interp_phases[iFreqBin] );
-			//ElectPhase[iCh][iFreqBin] = interp_phases[iFreqBin];
                              }
-		
-		// copy the interpolated values out
-//		for(int iFreqBin=0; iFreqBin<settings->DATA_BIN_SIZE/2; iFreqBin++){
-//			ElectGain_databin[iCh].push_back( interp_gains_databin[iFreqBin] );
-//			ElectPhase_databin[iCh].push_back( interp_phases_databin[iFreqBin] );
-//		}
 		
 	}
 		
-//NEED TO DO SOMETHING SIMILAR FOR NFOUR/2 t DOMAIN ARRAY. No need because it's not used ever, nor the "..._databin" arrays. Possible problem is that
-//ElectGain and ElectPhase are declared as arrays. Function ".push_back" works only on vectors
 
 }
-
-void Detector::ReadElectChain_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
-
-    // We can use FilterGain array as a original array
-
-//    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-//    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-//    double phase_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-
-//    double df_fft;
-    
-//    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
-
-//    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-//        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-//    }
-
-//    Tools::SimpleLinearInterpolation( freq_step, Freq, ElectGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
-        
-//    ElectGain_databin.clear();
-    
-//    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
-//        ElectGain_databin.push_back( ygain_databin[i] );
-//   }
-
-//    Tools::SimpleLinearInterpolation( freq_step, Freq, ElectPhase, settings1->DATA_BIN_SIZE/2, xfreq_databin, phase_databin );
-        
-//    ElectPhase_databin.clear();
-    
-//    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
-//        ElectPhase_databin.push_back( phase_databin[i] );
-//    }
-
-
-}
-
-//void Detector::ReadElectChain_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
-
-    // We can use FilterGain array as a original array
-
-//    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-//    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-//    double phase_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-
-//    double df_fft;
-    
-//    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
-
-//    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-//        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-//    }
-
-//    Tools::SimpleLinearInterpolation( freq_step, Freq, ElectGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
-        
-//    ElectGain_databin.clear();
-    
-//    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
-//        ElectGain_databin.push_back( ygain_databin[i] );
-//    }
-
-//    Tools::SimpleLinearInterpolation( freq_step, Freq, ElectPhase, settings1->DATA_BIN_SIZE/2, xfreq_databin, phase_databin );
-        
-//    ElectPhase_databin.clear();
-    
-//    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
-//        ElectPhase_databin.push_back( phase_databin[i] );
-//    }
-
-
-//}
-
 
 
 

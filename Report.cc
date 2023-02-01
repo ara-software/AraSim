@@ -1723,7 +1723,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 detector->ReadFilter_New(settings1);
                 detector->ReadPreamp_New(settings1);
                 detector->ReadFOAM_New(settings1);
-                detector->ReadElectChain_New(settings1);
 
                 if (settings1->USE_TESTBED_RFCM_ON == 1)
                 {
