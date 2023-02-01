@@ -1,3 +1,0 @@
-Testing GitHub
-
-This is a second change, how does this show on my pull request?
