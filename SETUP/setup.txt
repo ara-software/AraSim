@@ -170,7 +170,7 @@ V_MIMIC_MODE=0 // (DEFAULT=0) 0: save wavforms using standard time window. 1: us
  
 RANDOM_MODE=1 // (DEFAULT=1) 0: same random seed (debugging). 1: new random seed for simulations 
  
-SIMULATION_MODE=1 // (DEFAULT=0) 0: frequency domain. 1: time domain simulation 
+SIMULATION_MODE=0 // (DEFAULT=0) 0: frequency domain. 1: time domain simulation 
  
 EVENT_TYPE=0 // (DEFAULT=0) 0: neutrinos. other modes in future release. 
  
