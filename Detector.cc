@@ -1029,7 +1029,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         if(settings1->CUSTOM_ELECTRONICS==0){
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-            ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+	    ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
           //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
 	}
         else if (settings1->CUSTOM_ELECTRONICS==1){
@@ -2088,9 +2088,25 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	    cout<<"start read elect chain"<<endl;
         if(settings1->CUSTOM_ELECTRONICS==0){
             //read the standard ARA electronics
-            cout<<"     Reading standard ARA electronics response"<<endl;
-            ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
-          //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
+            if(settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3){
+	  	cout <<" Reading in situ ARA electronics response for this station and configuration:"<<endl;	
+		char the_gain_filename[500];
+		sprintf(the_gain_filename, "./data/In_situ_Electronics_A%d_C%d.csv", 	
+		     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+		cout << the_gain_filename <<endl;
+			if (settings1->DETECTOR_STATION_LIVETIME_CONFIG<0){ 
+				cerr << "DETECTOR_STATION_LIVETIME_CONFIG = -1, did you forget to specify a configuration livetime in the setup file? "<<endl; 
+			}
+		ReadElectChain(std::string(the_gain_filename), settings1);
+		 //ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+         	 //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
+            }
+	    else{
+		cout <<"    In situ gain model does not exist for this station"<<endl;
+            	cout<<"     Reading standard ARA electronics response"<<endl;
+		ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+		//ReadElectChain("./data/ARA_Electronics_TotalGainPhase.csv", settings1);
+	    }
 	}
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
