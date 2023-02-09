@@ -3262,7 +3262,8 @@ double Detector::GetFOAMGain_1D_OutZero( double freq ) {
 
 // set outside value as 0
 double Detector::GetElectGain_1D_OutZero( double freq, int gain_ch_no) {
-    
+   
+ 
     double slope_1; // slope of init part
 
     double Gout;
@@ -3274,13 +3275,13 @@ double Detector::GetElectGain_1D_OutZero( double freq, int gain_ch_no) {
 
 
     // if freq is lower than freq_init
-    if ( freq < freq_init ) {
+    if ( bin < 1) {
 
         //Gout = slope_1 * (freq - Freq[0]) + ElectGain[0];
         Gout = 0.;
     }
     // if freq is higher than last freq
-    else if ( freq > Freq[freq_step-1] ) {
+    else if ( bin > freq_step -1 ){
 
         //Gout = slope_2 * (freq - Freq[freq_step-1]) + FOAMGain[freq_step-1];
         Gout = 0.;
@@ -3302,6 +3303,7 @@ double Detector::GetElectGain_1D_OutZero( double freq, int gain_ch_no) {
 // set outside value as 0
 double Detector::GetElectPhase_1D( double freq, int gain_ch_no ) {
 
+
     double slope_1, slope_2; // slope of init, final part
     double slope_t1, slope_t2; // slope of pre, after the freq bin
 
@@ -3316,7 +3318,7 @@ double Detector::GetElectPhase_1D( double freq, int gain_ch_no ) {
 
 
     // if freq is lower than freq_init
-    if ( freq < freq_init ) {
+      if ( bin < 1 ){
 
         phase = slope_1 * (freq - Freq[0]) + ElectPhase[gain_ch_no][0];
 
@@ -3332,7 +3334,7 @@ double Detector::GetElectPhase_1D( double freq, int gain_ch_no ) {
         }
     }
     // if freq is higher than last freq
-    else if ( freq > Freq[freq_step-1] ) {
+      else if ( bin > freq_step-1){
 
         phase = slope_2 * (freq - Freq[freq_step-1]) + ElectPhase[gain_ch_no][freq_step-1];
 
@@ -3403,8 +3405,8 @@ double Detector::GetElectPhase_1D( double freq, int gain_ch_no ) {
         }
 
     } // not outside the Freq[] range
-    
-
+   
+ 
 
     return phase;
 
@@ -4213,7 +4215,6 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 	// vector of the frequencies
 	std::vector<double> frequencies;
 	frequencies.resize(numFreqBins); // resize to account for the number of frequency bins
-
 	// Third, figure out how many columns we have.
 	// This tells us how many channels we are reading in.
 	// We expect 1 column for frequency, (N-1)/2 columns for gains, and (N-1)/2 columns for phases.
@@ -4250,7 +4251,6 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
                                 // which specifies how many channels for which we have separate gain models
         }
 	
-        
 	/*
     	Fourth, we loop over the rows of the file again,
     	and get the frequency values out, as well as the gain and phase values.
@@ -4260,9 +4260,8 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
     	(which goes first and which goes second is arbitrary; 
     	the TestBed version does it in this order, so replicate here)
 	*/
-
 	std::vector< std::vector <double> > gains;
-	std::vector< std::vector <double> > phases; 
+	std::vector< std::vector <double> > phases;
     	gains.resize(gain_ch); // resize to account for number of channels
     	phases.resize(gain_ch); // resize to account for number of channels
     	for(int iCh=0; iCh<gain_ch; iCh++){
@@ -4272,7 +4271,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 
 	theLineNo = 0; // reset this counter
 	if (gainFile.is_open()){
-		while(gainFile.good()){
+		while(gainFile.peek()!=EOF){
 
 			if(theLineNo == 0 ){
 				// skip the first line (the header file)
@@ -4298,7 +4297,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 						temp_freq_val);
 					throw std::runtime_error(errorMessage);
 				}
-				
+
 				frequencies[theFreqBin] = temp_freq_val;
 
 				/*
@@ -4323,9 +4322,9 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
  							 theFreqBin, numColsPair, temp_gain_val);
 						throw std::runtime_error(errorMessage);
 					}
-                    
+
 					gains[numColsPair][theFreqBin] = temp_gain_val;
-				
+
 					//get and store the phase values
 					getline(gainFile, line, ',');
 					double temp_phase_val = atof(line.c_str()); 
@@ -4338,8 +4337,9 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
                                       }
 
 					phases[numColsPair][theFreqBin] = temp_phase_val;
-				
+
 					numColsPair++; // advance number of column pair
+
 				}
                  
 
@@ -4366,12 +4366,11 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 	}
 	gainFile.close();
 	
-	
+
 //This is the end of PART 1. Done getting data from the gain-phase file
 
 
 //This is the beginning of PART 2: Interpolate gain and phase values to the frequency binning used by AraSim (given "Freq" array)
-	
 
 	// the content of the vectors needs to be stuffed into arrays for the interpolator
 	// so, copy over the vector of frequencies into an array
