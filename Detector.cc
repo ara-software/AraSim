@@ -1035,7 +1035,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/custom_electronics.txt", settings1);
+             ReadElectChain("./data/custom_electronics.csv", settings1);
         }
         cout<<"done read elect chain"<<endl;
         
@@ -1501,7 +1501,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/custom_electronics.txt", settings1);
+             ReadElectChain("./data/custom_electronics.csv", settings1);
         }
         
         
@@ -1798,7 +1798,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/custom_electronics.txt", settings1);
+             ReadElectChain("./data/custom_electronics.csv", settings1);
         }
 	    cout<<"done read elect chain"<<endl;
 	    
@@ -2111,7 +2111,7 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/custom_electronics.txt", settings1);
+             ReadElectChain("./data/custom_electronics.csv", settings1);
         }
 	    cout<<"done read elect chain"<<endl;
     
