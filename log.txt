@@ -1717,3 +1717,5 @@ SetupInstalledStations to have the A4 and A5 geometry information.
 I also linted the main Detector function to fix a bunch of tabbing issues.
 This improved readability.
 
+There's also a minor update to the Deep Station rayleigh reader
+to make it more robust against the presence of blank lines.
