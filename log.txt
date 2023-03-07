@@ -1702,3 +1702,20 @@ In Interaction::PickNear_Sphere, which is setting vertex positions, the 'adding 
 So, if we use DETECTOR=4, It will do nothing
 I added 'detector->Get_mode() == 4' option in the Interaction::PickNear_Sphere. 
 So that user can use effective area (INTERACTION_MODE=0) mode with deployed station mode (DETECTOR=4)
+
+==============================================================================
+2023/02/15 Alan Salcedo G
+
+This upgrade allows to use per-channel gain modeling. 
+For this, I restructured how gain/phase model files are read and loaded. 
+These changes happen primarily in Detector::ReadElectChain. 
+
+I rewrote the previous gain files, ARA_Electronics_TotalGainPhase.txt, ARA_Electronics_TotalGain_TwoFilters.txt, 
+and custom_electronics.txt, in the required .csv formats using the same names.
+
+Note: I found and fixed a preexisting bug in AraSim occurring in Detector::GetElectGain_1D_OutZero and
+Detector::GetElectPhase_1D dealing gain and phase interpolations. See changes in the if-else conditions on
+there functions here:   
+
+Full documentation of this work is available on DocDB: https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2757 
+ 
