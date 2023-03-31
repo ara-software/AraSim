@@ -2077,10 +2077,12 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             
             // if simuating detector specific noise, need to load those files
             if(settings1->NOISE==1){
-                char the_rayleigh_filename[500];
+                cout <<"Reading in situ ARA noise for this station and configuration from file: " <<endl;
+		char the_rayleigh_filename[500];
                 sprintf(the_rayleigh_filename, "./data/noise/sigmavsfreq_A_%d_config_%d.csv", 
                     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
-                ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
+                cout << the_rayleigh_filename << endl;
+		ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
             }
         }
         
@@ -2088,14 +2090,14 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 	    cout<<"start read elect chain"<<endl;
         if(settings1->CUSTOM_ELECTRONICS==0){
             //read the standard ARA electronics
-            if(settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3){
-	  	cout <<" Reading in situ ARA electronics response for this station and configuration:"<<endl;	
+            if(settings1->DETECTOR_STATION > 0){
+	  	cout <<" Reading in situ ARA electronics response for this station and configuration from file:"<<endl;	
 		char the_gain_filename[500];
 		sprintf(the_gain_filename, "./data/gain/In_situ_Electronics_A%d_C%d.csv", 	
 		     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
 		cout << the_gain_filename <<endl;
 			if (settings1->DETECTOR_STATION_LIVETIME_CONFIG<0){ 
-				cerr << "DETECTOR_STATION_LIVETIME_CONFIG = -1, did you forget to specify a configuration livetime in the setup file? "<<endl; 
+				cerr << "DETECTOR_STATION_LIVETIME_CONFIG not valid, did you forget to specify a configuration livetime in the setup file? "<<endl; 
 			}
 		ReadElectChain(std::string(the_gain_filename), settings1);
 		 //ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
@@ -4154,6 +4156,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 	bool gainFileExists = (stat(filename.c_str(), &buffer)==0);
 	if (!gainFileExists){
 		sprintf(errorMessage, "Gain model file is not found (gain file exists %d) ", gainFileExists);
+		cout << "The gain filename is: " << filename << endl; 
 		throw std::runtime_error(errorMessage);
 	}
 
@@ -4172,6 +4175,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 					"The first word of the header line is '%s'. It was expected to be '%s'. Please double check file format!!", 
 					first_header_entry.c_str(),
 					expected_first_column_header.c_str());
+				cout << "The gain filename is: " << gainFile << endl; 
 				throw std::runtime_error(errorMessage);
 			}
 
@@ -4186,8 +4190,8 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 
 	else{
         	sprintf(errorMessage, "Gain model file did not open correctly.");
-        	throw std::runtime_error(errorMessage);
-
+		cout << "The gain filename is: " << gainFile << endl; 
+        	throw std::runtime_error(errorMessage);	
     	}
 
 	// go back to the beginning of the file
@@ -4243,6 +4247,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 	if ( numCommas%2 == 1){
                                 sprintf(errorMessage,
                                         "The number of columns in the gain file (disregarding the one for frequency) is not even. We need gain AND phase pairs per channel.");
+				cout << "The gain filename is: " << gainFile << endl; 
                                 throw std::runtime_error(errorMessage);
                         }
 
@@ -4295,6 +4300,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 					sprintf(errorMessage, 
 						"The frequency value (freq bin %d) is a nan or negative or very large (%e). Stop!", 
 						temp_freq_val);
+					cout << "The gain filename is: " << gainFile << endl; 
 					throw std::runtime_error(errorMessage);
 				}
 
@@ -4320,6 +4326,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 						sprintf(errorMessage, 
  							"A gain value (freq bin %d, ch %d) is a nan or negative or very large (%e). Stop!", 
  							 theFreqBin, numColsPair, temp_gain_val);
+						cout << "The gain filename is: " << gainFile << endl; 
 						throw std::runtime_error(errorMessage);
 					}
 
@@ -4333,6 +4340,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
                                               	sprintf(errorMessage, 
 							"A phase value (freq bin %d, ch %d) is a nan. Stop!", 
 							theFreqBin, numColsPair);
+						cout << "The gain filename is: " << gainFile << endl; 
 						throw std::runtime_error(errorMessage);
                                       }
 
