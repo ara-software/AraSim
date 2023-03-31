@@ -481,7 +481,7 @@ int main(int argc, char **argv) {   // read setup.txt file
                 }
                 // cout << "weight: " << weight <<endl;    
             #endif
-                     
+
             report->ClearUselessfromConnect(detector, settings1, trigger);
             for(int i=0;i<event->Nu_Interaction.size(); i++)
                 event->Nu_Interaction[i].clear_useless(settings1);
