@@ -1702,3 +1702,13 @@ In Interaction::PickNear_Sphere, which is setting vertex positions, the 'adding 
 So, if we use DETECTOR=4, It will do nothing
 I added 'detector->Get_mode() == 4' option in the Interaction::PickNear_Sphere. 
 So that user can use effective area (INTERACTION_MODE=0) mode with deployed station mode (DETECTOR=4)
+
+==============================================================================
+2023/04/03 Myoungchul Kim
+
+In continuous energy mode (EXPENONT < 5), the energy spectrum range is fixed to 16 ~21.5 eV (Based on the code, I believe the true intention was 16 ~22 eV...).
+But the calculation limit of the cross-section in GetSigma() in the Primary class is 16 ~21 eV based on Connolly et al. 2011
+Because of this, the simulation skips the event if Nu energy happens to be above 21 eV
+This PR allows users to freely customize (avoid the skip or focus certain energy range) the energy spectrum range by EXPONENT_MAX and EXPONENT_MIN options.
+EXPONENT_MIN: lower limit for energy spectrum range. The default is 16 [eV]
+EXPONENT_MAX: upper limit for energy spectrum range. The default is 22 [eV]
