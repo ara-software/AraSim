@@ -1,5 +1,6 @@
 #include "Spectra.h"
 #include "Tools.h"
+#include "Settings.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -24,18 +25,21 @@ Spectra::~Spectra() {
 //Spectra::Spectra(int EXPONENT) {
 Spectra::Spectra(double EXPONENT) {
 
+    Settings *settings1 = new Settings();
 
     EXPONENT_model = EXPONENT;
 
   // initialize parameters!!
 
     E_bin = 12;
+    dE_bin = ((double)settings1->EXPONENT_MAX - (double)settings1->EXPONENT_MIN) / (double)(E_bin - 1);
+    delete settings1;
 
   double Emuons[E_bin]; // E dN/dE/dA/dt for neutrinos that are produced as muon neutrinos or muon antineutrinos.
   double Eelectrons[E_bin];// E dN/dE/dA/dt for neutrinos that are produced as electron neutrinos or muon antineutrinos.
   
   for (int i=0;i<E_bin;i++) {
-    energy[i]=16.+((double)i)*0.12; // initial E_bin = 50. energy = 16 ~ 22 eV
+    energy[i]=16.+((double)i) * dE_bin;
     Emuons[i]=-30.;
     Eelectrons[i]=-30.;
   } //for
@@ -45,9 +49,8 @@ Spectra::Spectra(double EXPONENT) {
 
   if (EXPONENT==1.)  // dNdEdAdt ~ E^-1
   {
-      E_bin = 12;
       for (int i=0;i<E_bin;i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
-          energy[i] = 16.+((double)i)/2.;   // in log, in eV
+          energy[i] = 16.+((double)i) * dE_bin;   // in log, in eV
           EdNdEdAdt[i] = 0.;    // in log
           E2dNdEdAdt[i] = EdNdEdAdt[i] + (energy[i] - 9.);    // in log, in GeV
       }
@@ -55,9 +58,8 @@ Spectra::Spectra(double EXPONENT) {
 
   else if (EXPONENT==2.) // dNdEdAdt ~ E^-2
   {
-      E_bin = 12;
       for (int i=0;i<E_bin;i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
-          energy[i] = 16.+((double)i)/2.;   // in log, in eV
+          energy[i] = 16.+((double)i) * dE_bin;   // in log, in eV
           E2dNdEdAdt[i] = 0.;    // in log, in GeV
           EdNdEdAdt[i] = E2dNdEdAdt[i] - (energy[i] - 9.);    // in log
       }
@@ -65,9 +67,8 @@ Spectra::Spectra(double EXPONENT) {
 
   else if (EXPONENT==3.) // dNdEdAdt ~ E^-3
   {
-      E_bin = 12;
       for (int i=0;i<E_bin;i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
-          energy[i] = 16.+((double)i)/2.;   // in log, in eV
+          energy[i] = 16.+((double)i) * dE_bin;   // in log, in eV
           E2dNdEdAdt[i] = -(energy[i] - 9.);    // in log, in GeV
           EdNdEdAdt[i] = E2dNdEdAdt[i] - (energy[i] - 9.);    // in log
       }
@@ -75,9 +76,8 @@ Spectra::Spectra(double EXPONENT) {
 
   else if (EXPONENT==4.) // dNdEdAdt ~ E^-4
   {
-      E_bin = 12;
       for (int i=0;i<E_bin;i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
-          energy[i] = 16.+((double)i)/2.;   // in log, in eV
+          energy[i] = 16.+((double)i) * dE_bin;   // in log, in eV
           E2dNdEdAdt[i] = -2. * (energy[i] - 9.);    // in log, in GeV
           EdNdEdAdt[i] = E2dNdEdAdt[i] - (energy[i] - 9.);    // in log
       }
