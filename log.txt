@@ -1704,6 +1704,26 @@ I added 'detector->Get_mode() == 4' option in the Interaction::PickNear_Sphere.
 So that user can use effective area (INTERACTION_MODE=0) mode with deployed station mode (DETECTOR=4)
 
 ==============================================================================
+
+2022/11/01 Alex Machtay (machtay.1@osu.edu)
+
+The PickExact mode used in Primaries.cc used a different convention from the rest of AraSim. 
+Instead of the neutrino trajectory being determined by an azimuthal angle measured from the positive x-axis and a theta angle measured from the positive z-axis, the azimuthal angle was measured from the positive x-axis (consistent with the rest of AraSim) and the zenith angle was measured from the x-y plane (inconsistent with the rest of AraSim). So the zenith angle went from [-pi/2, pi/2], with negative values below the x-y plane and positive values above. AraSim's convention is to measure the zenith angle from the positive z-axis, in the range [0, pi]. 
+
+Here is the old way of setting the trajectory in PickExact (line 2406 in Primaries.cc):
+
+X = avgX + thisR*cos(thisPhi)*cos(thisTheta);
+Y = avgY + thisR*sin(thisPhi)*cos(thisTheta);
+Z = avgZ + thisR*sin(thisTheta);
+
+Here is the updated method:
+
+X = avgX + thisR*cos(thisPhi)*sin(thisTheta);
+Y = avgY + thisR*sin(thisPhi)*sin(thisTheta);
+Z = avgZ + thisR*cos(thisTheta);
+
+==============================================================================
+
 2023/02/28 Brian Clark
 
 Changes were made to the Detector and Settings classes to enable
@@ -1719,3 +1739,4 @@ This improved readability.
 
 There's also a minor update to the Deep Station rayleigh reader
 to make it more robust against the presence of blank lines.
+
