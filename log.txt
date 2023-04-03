@@ -1702,3 +1702,20 @@ In Interaction::PickNear_Sphere, which is setting vertex positions, the 'adding 
 So, if we use DETECTOR=4, It will do nothing
 I added 'detector->Get_mode() == 4' option in the Interaction::PickNear_Sphere. 
 So that user can use effective area (INTERACTION_MODE=0) mode with deployed station mode (DETECTOR=4)
+
+==============================================================================
+2023/02/28 Brian Clark
+
+Changes were made to the Detector and Settings classes to enable
+AraSim to simulate A4 and A5, the fourth and fifth ARA stations.
+
+In Settings, this required altering CheckCompatibilitiesSettings
+to allow for detector livetime configs to work for stations larger than A2 an A3.
+
+In Detector.cc, the really important change was updating the function
+SetupInstalledStations to have the A4 and A5 geometry information.
+I also linted the main Detector function to fix a bunch of tabbing issues.
+This improved readability.
+
+There's also a minor update to the Deep Station rayleigh reader
+to make it more robust against the presence of blank lines.
