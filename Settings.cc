@@ -78,6 +78,10 @@ outputdir="outputs"; // directory where outputs go
   
   EXPONENT=19.; // 10^19 eV neutrinos only
 
+  EXPONENT_MIN = 16.; // minimum log10(eV) of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino 
+
+  EXPONENT_MAX = 22.; // maximum log10(eV) of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino
+
   DETECTOR=1;   //ARA layout with small number of stations
 
   DETECTOR_STATION=-1; // initiate this to negative -1, so it does nothing by default
@@ -346,6 +350,12 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "EXPONENT") {
                   EXPONENT = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "EXPONENT_MIN") {
+                  EXPONENT_MIN = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "EXPONENT_MAX") {
+                  EXPONENT_MAX = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "DETECTOR") {
                   DETECTOR = atof( line.substr(line.find_first_of("=") + 1).c_str() );

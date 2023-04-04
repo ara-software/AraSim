@@ -1703,7 +1703,7 @@ So, if we use DETECTOR=4, It will do nothing
 I added 'detector->Get_mode() == 4' option in the Interaction::PickNear_Sphere. 
 So that user can use effective area (INTERACTION_MODE=0) mode with deployed station mode (DETECTOR=4)
 
-==============================================================================
+=======
 
 2022/11/01 Alex Machtay (machtay.1@osu.edu)
 
@@ -1749,3 +1749,12 @@ This improved readability.
 There's also a minor update to the Deep Station rayleigh reader
 to make it more robust against the presence of blank lines.
 
+=============================================================================
+2023/04/03 Myoungchul Kim
+
+In continuous energy mode (EXPENONT < 5), the energy spectrum range is fixed to 10^16 ~ 21.5 eV (Based on the code, I believe the true intention was 10^16 ~ 22 eV...).
+But the calculation limit of the cross-section in GetSigma() in the Primary class is 10^16 ~ 21 eV based on Connolly et al. 2011
+Because of this, the simulation skips the event if Nu energy happens to be above 10^21 eV
+This PR allows users to freely customize (avoid the skip or focus certain energy range) the energy spectrum range by EXPONENT_MAX and EXPONENT_MIN options.
+EXPONENT_MIN: lower limit for energy spectrum range. The default is 10^16 [eV]
+EXPONENT_MAX: upper limit for energy spectrum range. The default is 10^22 [eV]
