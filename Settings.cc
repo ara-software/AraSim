@@ -78,9 +78,9 @@ outputdir="outputs"; // directory where outputs go
   
   EXPONENT=19.; // 10^19 eV neutrinos only
 
-  EXPONENT_MIN = 16.; // minimum eV of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino 
+  EXPONENT_MIN = 16.; // minimum log10(eV) of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino 
 
-  EXPONENT_MAX = 22.; // maximum eV of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino
+  EXPONENT_MAX = 22.; // maximum log10(eV) of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino
 
   DETECTOR=1;   //ARA layout with small number of stations
 

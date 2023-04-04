@@ -51,9 +51,9 @@ class Settings
 
         double EXPONENT; // 10^19 eV neutrinos only
 
-        double EXPONENT_MIN; // minimum eV of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino
+        double EXPONENT_MIN; // minimum log10(eV) of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino
 
-        double EXPONENT_MAX; // maximum eV of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino
+        double EXPONENT_MAX; // maximum log10(eV) of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino
 
         int DETECTOR;   // choose detector layout
 
