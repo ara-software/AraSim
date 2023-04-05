@@ -3,4 +3,6 @@
 eventSimDict.C
 eventSimDict.h
 AraSim
-*.ipynb
+*.ipynb*
+jobfiles/
+outputs/
