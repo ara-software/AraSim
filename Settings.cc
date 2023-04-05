@@ -694,7 +694,16 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "CUSTOM_ELECTRONICS"){
               	   CUSTOM_ELECTRONICS = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
-
+          //Adding source easting, northing, and depth for INTERACTION_MODE=5.
+          else if (label == "SOURCE_LATITUDE"){
+              SOURCE_LATITUDE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          else if (label == "SOURCE_LONGITUDE"){
+              SOURCE_LONGITUDE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          else if (label == "SOURCE_DEPTH"){
+               SOURCE_DEPTH = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+          }
 
 
 
