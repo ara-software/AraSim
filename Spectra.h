@@ -18,6 +18,8 @@ private:
   static const int E_bin_max = 50;
   int E_bin;   // initialize # of energy bins (max = 50)
 
+  double dE_bin;
+
   void GetFlux(string filename);    // read neutrino flux EdNdEdAdt (in GeV) from filename file
 
 //--------------------------------------------------
