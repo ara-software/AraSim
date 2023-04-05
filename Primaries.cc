@@ -971,7 +971,33 @@ Interaction::Interaction(IceModel *antarctica, Detector *detector, Settings *set
       PickNear_Cylinder_AboveIce (antarctica, detector, settings1);
       
     }
-
+    //Adding interaction mode where user can define source at lattitude, longitude, and altitude.  Useful for pulser simulations or coincidence analysis. - JCF 3/28/2023
+    else if (settings1->INTERACTION_MODE == 5) {
+        //Import latitude and longitude of source. Defaults to SpiceCore 2023 lat/long of (-89.97953, -100.78595) at depth of 1000 meters.
+        double sourceLatitude = settings1->SOURCE_LATITUDE;
+        double sourceLongitude = settings1->SOURCE_LONGITUDE;
+        double sourceDepth = settings1->SOURCE_DEPTH;
+        Int_t stationId = settings1->DETECTOR_STATION;
+        //Calculate array coordinates of source
+        double sourceEasting = AraGeomTool::getArrayEastingFromLatLong(sourceLatitude, sourceLongitude);
+        double sourceNorthing = AraGeomTool::getArrayNorthingFromLatLong(sourceLatitude, sourceLongitude);
+        //Construct vector of source in array coordinates
+        TVector3 sourceArrayVector;
+        sourceArrayVector[0] = sourceEasting;
+        sourceArrayVector[1] = sourceNorthing;
+        sourceArrayVector[2] = sourceDepth;
+        //Convert source vector into array coordinates
+        TVector3 sourceStationVector = AraGeomTool::Instance()->convertArrayToStationCoords(stationId, sourceArrayVector);
+        //Calculate posnu
+        double R = sqrt(pow(sourceStationVector[0],2) + pow(sourceStationVector[1],2) + pow(sourceStationVector[2],2));
+        double phi = (360+(atan2(sourceStationVector[1], sourceStationVector[0]))*180/PI)*PI/180;
+        double theta = acos((sourceStationVector[2])/R);
+        settings1->POSNU_THETA = theta;
+        settings1->POSNU_PHI = phi;
+        settings1->POSNU_R = R;
+        //Set source location using posnu.
+        PickExact(antarctica, detector, settings1, settings1->POSNU_R, settings1->POSNU_THETA, settings1->POSNU_PHI);
+    }
     
     
   }
@@ -1126,7 +1152,33 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
       
     }
 
-
+    //Adding interaction mode where user can define source at lattitude, longitude, and altitude.  Useful for pulser simulations or coincidence analysis. - JCF 3/28/2023
+    else if (settings1->INTERACTION_MODE == 5) {
+        //Import latitude and longitude of source. Defaults to SpiceCore 2023 lat/long of (-89.97953, -100.78595) at depth of 1000 meters.
+        double sourceLatitude = settings1->SOURCE_LATITUDE;
+        double sourceLongitude = settings1->SOURCE_LONGITUDE;
+        double sourceDepth = settings1->SOURCE_DEPTH;
+        Int_t stationId = settings1->DETECTOR_STATION;
+        //Calculate array coordinates of source
+        double sourceEasting = AraGeomTool::getArrayEastingFromLatLong(sourceLatitude, sourceLongitude);
+        double sourceNorthing = AraGeomTool::getArrayNorthingFromLatLong(sourceLatitude, sourceLongitude);
+        //Construct vector of source in array coordinates
+        TVector3 sourceArrayVector;
+        sourceArrayVector[0] = sourceEasting;
+        sourceArrayVector[1] = sourceNorthing;
+        sourceArrayVector[2] = sourceDepth;
+        //Convert source vector into array coordinates
+        TVector3 sourceStationVector = AraGeomTool::Instance()->convertArrayToStationCoords(stationId, sourceArrayVector);
+        //Calculate posnu
+        double R = sqrt(pow(sourceStationVector[0],2) + pow(sourceStationVector[1],2) + pow(sourceStationVector[2],2));
+        double phi = (360+(atan2(sourceStationVector[1], sourceStationVector[0]))*180/PI)*PI/180;
+        double theta = acos((sourceStationVector[2])/R);
+        settings1->POSNU_THETA = theta;
+        settings1->POSNU_PHI = phi;
+        settings1->POSNU_R = R;
+        //Set source location using posnu.
+        PickExact(antarctica, detector, settings1, settings1->POSNU_R, settings1->POSNU_THETA, settings1->POSNU_PHI);
+    }
 
     }
     //cout<<" Finished Pick posnu, r_in, r_enterice, nuexitice!!"<<endl;
@@ -1513,7 +1565,33 @@ Interaction::Interaction (Settings *settings1, Detector *detector, IceModel *ant
 	}
     }
 	
-	
+    //Adding interaction mode where user can define source at lattitude, longitude, and altitude.  Useful for pulser simulations or coincidence analysis. - JCF 3/28/2023
+    else if (settings1->INTERACTION_MODE == 5) {
+        //Import latitude and longitude of source. Defaults to SpiceCore 2023 lat/long of (-89.97953, -100.78595) at depth of 1000 meters.
+        double sourceLatitude = settings1->SOURCE_LATITUDE;
+        double sourceLongitude = settings1->SOURCE_LONGITUDE;
+        double sourceDepth = settings1->SOURCE_DEPTH;
+        Int_t stationId = settings1->DETECTOR_STATION;
+        //Calculate array coordinates of source
+        double sourceEasting = AraGeomTool::getArrayEastingFromLatLong(sourceLatitude, sourceLongitude);
+        double sourceNorthing = AraGeomTool::getArrayNorthingFromLatLong(sourceLatitude, sourceLongitude);
+        //Construct vector of source in array coordinates
+        TVector3 sourceArrayVector;
+        sourceArrayVector[0] = sourceEasting;
+        sourceArrayVector[1] = sourceNorthing;
+        sourceArrayVector[2] = sourceDepth;
+        //Convert source vector into array coordinates
+        TVector3 sourceStationVector = AraGeomTool::Instance()->convertArrayToStationCoords(stationId, sourceArrayVector);
+        //Calculate posnu
+        double R = sqrt(pow(sourceStationVector[0],2) + pow(sourceStationVector[1],2) + pow(sourceStationVector[2],2));
+        double phi = (360+(atan2(sourceStationVector[1], sourceStationVector[0]))*180/PI)*PI/180;
+        double theta = acos((sourceStationVector[2])/R);
+        settings1->POSNU_THETA = theta;
+        settings1->POSNU_PHI = phi;
+        settings1->POSNU_R = R;
+        //Set source location using posnu.
+        PickExact(antarctica, detector, settings1, settings1->POSNU_R, settings1->POSNU_THETA, settings1->POSNU_PHI);
+    }	
 
     
     double tmp; // for useless information

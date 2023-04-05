@@ -230,6 +230,13 @@ outputdir="outputs"; // directory where outputs go
 
     ONLY_PASSED_EVENTS = 0;
     NNU_PASSED = 0;
+    
+    //Defining source for INTERACTION_MODE == 5.
+    SOURCE_LATITUDE = -89.97953; //Latitude of SpiceCore (from 2023 survey data)
+
+    SOURCE_LONGITUDE = -100.78595; //Longitude of SpiceCore (from 2023 survey data)
+
+    SOURCE_DEPTH = -1000.0; //Default depth of 1000 meters below ice surface.
 
 
 
