@@ -1720,7 +1720,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 detector->ReadFilter_New(settings1);
                 detector->ReadPreamp_New(settings1);
                 detector->ReadFOAM_New(settings1);
-                detector->ReadElectChain_New(settings1);
+                if (settings1->CUSTOM_ELECTRONICS==0 or settings1->CUSTOM_ELECTRONICS==1){ 
+                    detector->ReadElectChain_New(settings1);
+                }
 
                 if (settings1->USE_TESTBED_RFCM_ON == 1)
                 {
@@ -1729,6 +1731,10 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 if (settings1->NOISE == 1 && settings1->DETECTOR == 3)
                 {
                     detector->ReadRayleigh_New(settings1);
+                }
+                //! reset rayleigh values from actual deployed station, 2022-06-17 -MK-           
+                if ( settings1->NOISE==2) {
+                        detector->ReadRayleigh_New(settings1);
                 }
 
                 // TODO: I think this is where the Rayleigh reading will go for this next version of the code
