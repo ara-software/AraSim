@@ -4959,7 +4959,63 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
 
         }
 
-    } else { // currently there are no more options!
+    } 
+
+    /*!
+        Use Rayleigh dist. Imported from https://github.com/toej93/AraSim_noise_calib, 2022-06-17 -MK-
+        The Rayleigh sigam table value should be H/(N*sqrt(df))
+        H is numpy rfft or realft outputs
+        N is number of bins in time-domain
+        df is frequency bin width
+        Since individual WFs that we used for fitting can have a different length, we need to normalize them with 1/(N*sqrt(df)) before performing Rayleigh fitting
+        We could use H for a unit of the Rayleigh table. 
+        But eventually, we need to use a number of bins (N) and frequency bin width (df) to make a noise pad, in which the length of WF is different from than data, to have the same amplitude
+        previous procedure: H * sqrt(noise_pad/(NFOUR/2)) * 2/noise_pad 
+            1) Number of bins of H must be same with NFOUR/2
+            2) df of H must be same with TIMESTEP
+        new procedure: H/(N*sqrt(df)) * noise_pad*sqrt_df * 2/noise_pad
+            1) Input table is now normalized
+            2) Table is free from NFOUR/2 and TIMESTEP
+    */
+    else if (settings1->NOISE == 2) { 
+        
+        Vfft_noise_after.clear();  ///< remove previous Vfft_noise values
+        Vfft_noise_before.clear();  ///< remove previous Vfft_noise values
+
+        double V_tmp; ///< copy original flat H_n [V] value
+        double current_amplitude, current_phase;
+        double noise_pad = settings1->DATA_BIN_SIZE; ///< number of bins for long noise WF
+        double sqrt_df = 1. / sqrt(settings1->TIMESTEP * noise_pad);
+
+        GetNoisePhase(settings1); ///< get random phase for noise
+        for (int k = 0; k < noise_pad/2; k++) {
+            current_phase = noise_phase[k];
+            V_tmp = detector->GetRayleighFit_databin(ch, k); 
+
+            V_tmp *= noise_pad * sqrt_df; ///< correction factor for long noise WF. so that long noise WF also can have a same amplitude with data when arasim do inverse fft
+            //! at this point, amplitude of each bin must be H/(N*sqrt(df))*(noise_pad*sqrt_df)
+            Vfft_noise_before.push_back( V_tmp );
+
+            Tools::get_random_rician( 0., 0., V_tmp, current_amplitude, current_phase);
+
+            //! vnoise is currently noise spectrum (before fft, unit : V)
+            vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
+            vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
+
+            Vfft_noise_after.push_back( vnoise[2 * k] );
+            Vfft_noise_after.push_back( vnoise[2 * k + 1] );
+
+            // inverse FFT normalization factor!
+            vnoise[2 * k] *= 2. / noise_pad;
+            vnoise[2 * k + 1] *= 2. / noise_pad;    
+
+        }
+
+        //! now vnoise is time domain waveform
+        Tools::realft( vnoise, -1, noise_pad);
+
+    }
+    else { // currently there are no more options!
         cout << "no noise option for NOISE = " << settings1 -> NOISE << endl;
     }
 

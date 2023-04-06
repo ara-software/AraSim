@@ -1754,6 +1754,26 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             }
         }
 
+        /*!
+            load rayleigh fit and use it for noise generation, 2022-06-17 -MK-
+            barrowing testbed function
+            It needs to specify DETECTOR_STATION and DETECTOR_STATION_LIVETIME_CONFIG options
+        */
+        string st = to_string(settings1->DETECTOR_STATION);
+        string run = to_string(settings1->DETECTOR_RUN);
+        string config = to_string(settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+        if (settings1->NOISE==2){
+            string rayl_filepath;
+            if (settings1->CUSTOM_ELECTRONICS==3){
+                rayl_filepath = "/home/mkim/analysis/MF_filters/sim/ARA0"+st+"/sim_table_full/rayl_full_A"+st+"_R"+run+".csv";
+            } else {
+                rayl_filepath = "data/rayleigh_fits/Rayleigh_A"+st+"_C"+config+".csv";
+            }
+            cout<<"     Reading rayleigh distribution : "<< rayl_filepath <<endl;
+            ReadRayleighFit_TestBed(rayl_filepath, settings1);
+        }
+
+
         // read total elec. chain response file!!
         cout << "start read elect chain" << endl;
         if (settings1 -> CUSTOM_ELECTRONICS == 0) {
@@ -1765,6 +1785,19 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             //read a custom user defined electronics gain
             cout << "     Reading custom electronics response" << endl;
             ReadElectChain("./data/custom_electronics.txt", settings1);
+        }
+        /*!
+            electric chain from actual deployed station
+        */
+        else if (settings1->CUSTOM_ELECTRONICS==2){ ///< electric chain for individual channels, 2022-06-17 -MK-
+            string ele_filepath = "./data/electronics_gains/In_situ_Electronics_A"+st+"_C"+config+".txt";
+            cout<<"     Reading in-situ based electronics response : "<< ele_filepath <<endl;       
+            ReadElectChain_ch(ele_filepath, settings1);
+        }
+        else if (settings1->CUSTOM_ELECTRONICS==3){
+            string ele_filepath = "/home/mkim/analysis/MF_filters/sim/ARA0"+st+"/sim_table_full/sc_full_A"+st+"_R"+run+".txt";
+            cout<<"     Reading in-situ based electronics response : "<< ele_filepath <<endl;
+            ReadElectChain_ch(ele_filepath, settings1);
         }
         cout << "done read elect chain" << endl;
 
@@ -2891,70 +2924,71 @@ double Detector::GetFOAMGain_1D_OutZero( double freq ) {
 
 }
 
-
-
-
 // set outside value as 0
-double Detector::GetElectGain_1D_OutZero( double freq ) {
-
-
-    double slope_1; // slope of init part
+double Detector::GetElectGain_1D_OutZero( double freq, int ch ) {
 
     double Gout;
-
-    int bin = (int)( (freq - freq_init) / freq_width )+1;
-
-
-    slope_1 = (ElectGain[1] - ElectGain[0]) / (Freq[1] - Freq[0]);
-
 
     // if freq is lower than freq_init
     if ( freq < freq_init ) {
 
-        //Gout = slope_1 * (freq - Freq[0]) + ElectGain[0];
         Gout = 0.;
     }
     // if freq is higher than last freq
     else if ( freq > Freq[freq_step-1] ) {
 
-        //Gout = slope_2 * (freq - Freq[freq_step-1]) + FOAMGain[freq_step-1];
         Gout = 0.;
     }
 
     else {
 
-        Gout = ElectGain[bin-1] + (freq-Freq[bin-1])*(ElectGain[bin]-ElectGain[bin-1])/(Freq[bin]-Freq[bin-1]);
-    } // not outside the Freq[] range
-    
+        int bin = (int)( (freq - freq_init) / freq_width )+1;
+        double EleGain_1, EleGain_0;
 
+        if (ch == -1){
+            EleGain_0 = ElectGain[bin-1];
+            EleGain_1 = ElectGain[bin];
+        } else {
+            EleGain_0 = ElectGain_ch[ch][bin-1];
+            EleGain_1 = ElectGain_ch[ch][bin];
+        }
+        Gout = EleGain_0 + (freq-Freq[bin-1])*(EleGain_1-EleGain_0)/(Freq[bin]-Freq[bin-1]);
+
+    } // not outside the Freq[] range
 
     return Gout;
 
 }
 
-
-
 // set outside value as 0
-double Detector::GetElectPhase_1D( double freq ) {
-
+double Detector::GetElectPhase_1D( double freq, int ch ) {
 
     double slope_1, slope_2; // slope of init, final part
-    double slope_t1, slope_t2; // slope of pre, after the freq bin
+    double ElePhase_0, ElePhase_1, ElePhase_f0, ElePhase_f1;
 
     double phase;
 
     int bin = (int)( (freq - freq_init) / freq_width )+1;
 
     // ElectPhase are in rad (not deg)
-
-    slope_1 = (ElectPhase[1] - ElectPhase[0]) / (Freq[1] - Freq[0]);
-    slope_2 = (ElectPhase[freq_step-1] - ElectPhase[freq_step-2]) / (Freq[freq_step-1] - Freq[freq_step-2]);
-
+    if (ch == -1){   
+        ElePhase_0 = ElectPhase[0];
+        ElePhase_1 = ElectPhase[1];
+        ElePhase_f0 = ElectPhase[freq_step-2];
+        ElePhase_f1 = ElectPhase[freq_step-1];
+    } else {
+        ElePhase_0 = ElectPhase_ch[ch][0];
+        ElePhase_1 = ElectPhase_ch[ch][1];
+        ElePhase_f0 = ElectPhase_ch[ch][freq_step-2];
+        ElePhase_f1 = ElectPhase_ch[ch][freq_step-1];
+    }
+    slope_1 = (ElePhase_1 - ElePhase_0) / (Freq[1] - Freq[0]);
+    slope_2 = (ElePhase_f1 - ElePhase_f0) / (Freq[freq_step-1] - Freq[freq_step-2]);
 
     // if freq is lower than freq_init
     if ( freq < freq_init ) {
 
-        phase = slope_1 * (freq - Freq[0]) + ElectPhase[0];
+        phase = slope_1 * (freq - Freq[0]) + ElePhase_0;
 
         if ( phase > PI ) {
             while ( phase > PI ) {
@@ -2970,7 +3004,7 @@ double Detector::GetElectPhase_1D( double freq ) {
     // if freq is higher than last freq
     else if ( freq > Freq[freq_step-1] ) {
 
-        phase = slope_2 * (freq - Freq[freq_step-1]) + ElectPhase[freq_step-1];
+        phase = slope_2 * (freq - Freq[freq_step-1]) + ElePhase_f1;
 
         if ( phase > PI ) {
             while ( phase > PI ) {
@@ -2986,26 +3020,40 @@ double Detector::GetElectPhase_1D( double freq ) {
 
     else {
 
+        double ElePhase_b0, ElePhase_b1, ElePhase_b2, ElePhase_b3;
+        if (ch == -1){
+            ElePhase_b0 = ElectPhase[bin-2];
+            ElePhase_b1 = ElectPhase[bin-1];
+            ElePhase_b2 = ElectPhase[bin];
+            ElePhase_b3 = ElectPhase[bin+1];
+        } else {
+            ElePhase_b0 = ElectPhase_ch[ch][bin-2];
+            ElePhase_b1 = ElectPhase_ch[ch][bin-1];
+            ElePhase_b2 = ElectPhase_ch[ch][bin];
+            ElePhase_b3 = ElectPhase_ch[ch][bin+1];
+        }
+
         // not at the first two bins
         if ( bin<freq_step-1 && bin>1 ) {
 
-            slope_t1 = (ElectPhase[bin-1] - ElectPhase[bin-2]) / (Freq[bin-1] - Freq[bin-2]);
-            slope_t2 = (ElectPhase[bin+1] - ElectPhase[bin]) / (Freq[bin+1] - Freq[bin]);
+            double slope_t1, slope_t2; // slope of pre, after the freq bin
+            slope_t1 = (ElePhase_b1 - ElePhase_b0) / (Freq[bin-1] - Freq[bin-2]);
+            slope_t2 = (ElePhase_b3 - ElePhase_b2) / (Freq[bin+1] - Freq[bin]);
 
             // down going case
-            if ( slope_t1 * slope_t2 > 0. && ElectPhase[bin] - ElectPhase[bin-1] > PI ) {
+            if ( slope_t1 * slope_t2 > 0. && ElePhase_b2 - ElePhase_b1 > PI ) {
 
-                phase = ElectPhase[bin-1] + (freq-Freq[bin-1])*(ElectPhase[bin]-2*PI-ElectPhase[bin-1])/(Freq[bin]-Freq[bin-1]);
+                phase = ElePhase_b1 + (freq-Freq[bin-1])*(ElePhase_b2-2*PI-ElePhase_b1)/(Freq[bin]-Freq[bin-1]);
             }
 
             // up going case
-            else if ( slope_t1 * slope_t2 > 0. && ElectPhase[bin] - ElectPhase[bin-1] < -PI ) {
-                phase = ElectPhase[bin-1] + (freq-Freq[bin-1])*(ElectPhase[bin]+2*PI-ElectPhase[bin-1])/(Freq[bin]-Freq[bin-1]);
+            else if ( slope_t1 * slope_t2 > 0. && ElePhase_b2 - ElePhase_b1 < -PI ) {
+                phase = ElePhase_b1 + (freq-Freq[bin-1])*(ElePhase_b2+2*PI-ElePhase_b1)/(Freq[bin]-Freq[bin-1]);
             }
 
             // neither case
             else {
-                phase = ElectPhase[bin-1] + (freq-Freq[bin-1])*(ElectPhase[bin]-ElectPhase[bin-1])/(Freq[bin]-Freq[bin-1]);
+                phase = ElePhase_b1 + (freq-Freq[bin-1])*(ElePhase_b2-ElePhase_b1)/(Freq[bin]-Freq[bin-1]);
             }
 
             // if outside the range, put inside
@@ -3023,7 +3071,7 @@ double Detector::GetElectPhase_1D( double freq ) {
         }// not first two bins
 
         else {
-            phase = ElectPhase[bin-1] + (freq-Freq[bin-1])*(ElectPhase[bin]-ElectPhase[bin-1])/(Freq[bin]-Freq[bin-1]);
+            phase = ElePhase_b1 + (freq-Freq[bin-1])*(ElePhase_b2-ElePhase_b1)/(Freq[bin]-Freq[bin-1]);
         }
 
         // if outside the range, put inside
@@ -3039,17 +3087,10 @@ double Detector::GetElectPhase_1D( double freq ) {
         }
 
     } // not outside the Freq[] range
-    
-
 
     return phase;
 
-
 }
-
-
-
-
 
 double Antenna::GetG(Detector *D, double freq, double theta, double phi) {
     
@@ -3942,8 +3983,74 @@ void Detector::ReadElectChain_New(Settings *settings1) {    // will return gain 
 }
 
 
+/*!
+    new loading function for an electric gain and phase table that includes multiple channels, 2022-06-17 -MK-
+    table shape should be 2 dimension (cols : number of frequencies, rows : frequency + number of gain and pahse for each channels -> 1 + 16 * 2 = 33)
+    The gain and phase will be stored in ElectGain_ch and ElectPhase_ch
+    function structure is from Detector::ReadFOAM() function
+*/
+/*!
+    \param string electric gain table name
+    \param settings1 setting class
+    \return void
+*/
+inline void Detector::ReadElectChain_ch(string filename, Settings *settings1) {
 
+    ifstream Elect( filename.c_str() );
 
+    string line;
+
+    int N=0;
+
+    vector <double> col_val;
+    vector< vector<double> > all_chElect;
+
+    if ( Elect.is_open() ) {
+        while (Elect.good() ) {
+
+            getline (Elect, line);
+
+            istringstream iss(line);
+
+            while( iss )
+            {
+                string sub;
+                iss >> sub;
+                col_val.push_back( atof(sub.c_str()) );
+            }
+
+            all_chElect.push_back( col_val );
+            col_val.clear();
+
+            N++;
+
+        }
+        Elect.close();
+
+    }
+    else cout<<"Elect file can not opened!!"<<endl;
+
+    double xfreq[N], ygain[N], yphase[N];  // need array for Tools::SimpleLinearInterpolation
+
+    int ch_no = 16;
+    cerr << "The number of channels: " << ch_no << endl;
+
+    for (int i=0;i<N;i++) { // copy values
+        xfreq[i] = all_chElect[i][0];
+    }
+
+    // now loop over channels and do interpolation
+    for (int ch=0; ch<ch_no; ch++) {
+        for (int i=0;i<N;i++) {
+            ygain[i] = (all_chElect[i][2*ch+1]);
+            yphase[i] = (all_chElect[i][2*ch+2]);
+        }
+
+        Tools::SimpleLinearInterpolation( N-1, xfreq, ygain, freq_step, Freq, ElectGain_ch[ch] );
+        Tools::SimpleLinearInterpolation( N-1, xfreq, yphase, freq_step, Freq, ElectPhase_ch[ch] );
+
+    }
+}
 
 
 inline void Detector::ReadGainOffset_TestBed(string filename, Settings *settings1) {    // will return gain offset (unit in voltage) for different chs
