@@ -2258,7 +2258,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     if(trig_j==14 || trig_j==12 || trig_j==15 || trig_j==13){
                                         trig_j++;
                                         //cout<<"A3 RF st1 is excluded from trigger!!"<<endl;
-                                        ontinue;
+                                        continue;
                                     }
                                 }
                             }
@@ -4556,7 +4556,7 @@ void Report::ApplyElect_Tdomain(int ch, double freq, Detector *detector, double 
 
 
 
-void Report::ApplyElect_Tdomain_FirstTwo(int ch, double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
+void Report::ApplyElect_Tdomain_FirstTwo(int ch, double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, Settings *settings1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
 
     if ( settings1-> NO_ELECTRONICS == 0){
         vm_bin0 = vm_bin0 * detector->GetElectGain_1D_OutZero(freq0, ch);

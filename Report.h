@@ -275,8 +275,6 @@ class Report {
         void ApplyAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi);
 
 
-        //void ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, Settings *settings1);
-        //void ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1);
         //! added 'int ch' option to use electric chain for individual channels, 2022-06-17 -MK-
         void ApplyElect_Tdomain(int ch, double freq, Detector *detector, double &vm_real, double &vm_img, Settings *settings1);
         void ApplyElect_Tdomain_FirstTwo(int ch, double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, Settings *settings1);
