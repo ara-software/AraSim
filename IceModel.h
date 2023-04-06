@@ -94,7 +94,11 @@ private:
   const static int N_westlanddown=420;
   double d_westlanddown[N_westlanddown],l_westlanddown[N_westlanddown];
 
-
+  // Attenuation lengths of Greenland Ice using the Bogorodsky model from Figure 7 of doi.org/10.1017/jog.2022.40
+  const static int N_greenlandUpper=2810;
+  double d_greenlandUpper[N_greenlandUpper], l_greenlandUpper[N_greenlandUpper];
+  const static int N_greenlandLower=2810;
+  double d_greenlandLower[N_greenlandLower], l_greenlandLower[N_greenlandLower];
 
 public:
 

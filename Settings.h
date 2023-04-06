@@ -304,6 +304,10 @@ class Settings
 
 	int CUSTOM_ELECTRONICS; //0 (default): use the regular "ARA_Electronics_TotalGain_TwoFilter.txt" file
 							//1 : load a custom electronics file, stored as "custom_electronics.txt" in the `data` directory
+                            
+    int GREENLAND_ATTEN; // 0 (default): Use regular Ara attenuation lengths
+                         // 1:  Use upper limit of bogorodsky curve fron RNO-G
+                         // 2:  Use lower limit of bogorodsky curve fron RNO-G
 
 
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1

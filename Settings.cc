@@ -297,6 +297,8 @@ outputdir="outputs"; // directory where outputs go
     APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
 
     CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.tst"
+    
+    GREENLAND_ATTEN=0; //default:0 -- Uses South Pole attenuation length.  1 & 2 use Greenland attenuation lengths via RNO-G.
 
 
     /*
