@@ -19,7 +19,7 @@
 #include "signal.hh"
 #include "RaySolver.h"
 #include "Report.h"
-#include "AraGeomTool.h"
+
 
 //#include "vector.hh"
 //#include "position.hh"
