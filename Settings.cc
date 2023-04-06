@@ -87,6 +87,10 @@ outputdir="outputs"; // directory where outputs go
   DETECTOR_STATION=-1; // initiate this to negative -1, so it does nothing by default
   DETECTOR_STATION_LIVETIME_CONFIG=-1; // intiative this to negative -1, so it does nothing by default
 
+  DETECTOR_RUN=0; ///< if you want to compare with each run~
+  DETECTOR_CH_MASK=0; ///< whether use channel mask or not. defalut 1: use, 0: not use
+  DETECTOR_TRIG_DELAY=0; ///< whether use trigger delay or not. defalut 1: use, 0: not use
+
   INTERACTION_MODE=1;   //PickNear mode (0: Aeff mode using sphere surface around station, 1: Veff mode using cylinder volume around station)
 
   POSNU_RADIUS=3000;    //radius for PickNear method
@@ -298,6 +302,8 @@ outputdir="outputs"; // directory where outputs go
 
     CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.tst"
 
+    NO_ELECTRONICS=0; ///< if user dont want sc boost
+
 
     /*
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
@@ -366,6 +372,15 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "DETECTOR_STATION_LIVETIME_CONFIG") {
                   DETECTOR_STATION_LIVETIME_CONFIG = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
+              else if (label == "DETECTOR_RUN") {
+                  DETECTOR_RUN = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "DETECTOR_CH_MASK") {
+                  DETECTOR_CH_MASK = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "DETECTOR_TRIG_DELAY") {
+                  DETECTOR_TRIG_DELAY = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
               else if (label == "INTERACTION_MODE") {
                   INTERACTION_MODE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -413,7 +428,7 @@ void Settings::ReadFile(string setupfile) {
               }
               else if(label == "TRIG_SCAN_MODE"){
                   TRIG_SCAN_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
+	          }
               else if (label == "POWERTHRESHOLD") {
                   POWERTHRESHOLD = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -487,14 +502,12 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "NNU_D_PHI") {
                   NNU_D_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-
-	      else if (label == "Z_THIS_TOLERANCE") {
+	          else if (label == "Z_THIS_TOLERANCE") {
                   Z_THIS_TOLERANCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-	      else if (label == "Z_TOLERANCE") {
+	          else if (label == "Z_TOLERANCE") {
                   Z_TOLERANCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-
               else if (label == "DATA_LIKE_OUTPUT") {
                   DATA_LIKE_OUTPUT = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -645,39 +658,39 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "AVZ_NORM_FACTOR_MODE") {
                   AVZ_NORM_FACTOR_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }              
-	      else if (label == "number_of_stations") {
-		number_of_stations = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "RAY_TRACE_ICE_MODEL_PARAMS") {
-		RAY_TRACE_ICE_MODEL_PARAMS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "WAVEFORM_LENGTH") {
-		WAVEFORM_LENGTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "WAVEFORM_CENTER") {
-		WAVEFORM_CENTER = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "POSNU_R") {
-		POSNU_R = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "POSNU_THETA") {
-		POSNU_THETA = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "POSNU_PHI") {
-		POSNU_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "ARBITRARY_EVENT_ATTENUATION") {
-		ARBITRARY_EVENT_ATTENUATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "PICK_ABOVE_HEIGHT") {
-		PICK_ABOVE_HEIGHT = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
+	          else if (label == "number_of_stations") {
+		          number_of_stations = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "RAY_TRACE_ICE_MODEL_PARAMS") {
+		          RAY_TRACE_ICE_MODEL_PARAMS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "WAVEFORM_LENGTH") {
+		          WAVEFORM_LENGTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "WAVEFORM_CENTER") {
+		          WAVEFORM_CENTER = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "POSNU_R") {
+		          POSNU_R = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "POSNU_THETA") {
+		          POSNU_THETA = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "POSNU_PHI") {
+		          POSNU_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "ARBITRARY_EVENT_ATTENUATION") {
+		          ARBITRARY_EVENT_ATTENUATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "PICK_ABOVE_HEIGHT") {
+		          PICK_ABOVE_HEIGHT = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
               else if (label == "EVENT_GENERATION_MODE"){
                   EVENT_GENERATION_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
-	      //              else if (label == "EVENT_NUM"){
-	      //                  EVENT_NUM = atoi(line.substr(line.find_first_of("=") + 1).c_str());
-	      //              }
+	          //else if (label == "EVENT_NUM"){
+	          //    EVENT_NUM = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+	          //}
               else if (label == "ANTENNA_MODE"){
                   ANTENNA_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
@@ -687,7 +700,9 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "CUSTOM_ELECTRONICS"){
               	   CUSTOM_ELECTRONICS = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
-
+              else if (label == "NO_ELECTRONICS"){
+                   NO_ELECTRONICS = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
 
 
 

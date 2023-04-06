@@ -67,9 +67,9 @@ class Antenna_r {
         //vector <Position> n_H;  // normalized vector for H pol
         //vector <Position> n_V;  // normalized vector for V pol
 
-	//! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
-	//! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
-	vector < vector < vector <double> > > ray_step;
+	    //! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
+	    //! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
+	    vector < vector < vector <double> > > ray_step;
 
         // below freq domain simulation output
         vector < vector <double> > vmmhz;  // signal V/m/MHz for each freq bin
@@ -117,8 +117,8 @@ class Antenna_r {
         vector <double> PeakV;  // peak voltage in time domain
         vector <int> Rank;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
 
-	//	vector <double> PeakV_fromFullWaveform; // peak voltage in time domain taken from full waveform, including noise at the time of signal insertion
-	//	vector <int> Rank_fromFullWaveform;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
+	    //	vector <double> PeakV_fromFullWaveform; // peak voltage in time domain taken from full waveform, including noise at the time of signal insertion
+	    //	vector <int> Rank_fromFullWaveform;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
 
         int Trig_Pass; // 0 if not passed the trigger, 1 if passed the trigger
         //vector <int> Trig_Pass; // 0 if not passed the trigger, 1 if passed the trigger
@@ -128,7 +128,7 @@ class Antenna_r {
         int SingleChannelTriggers; // how many bins passed the threshold in this channel (should be equal to size of SCT_threshold_pass).
         vector <double> SCT_threshold_pass; // for each bin that passed, what was the threshold value at which it passed (for TRIG_SCAN_MODE only). 
 	
-	long TotalBinsScannedPerChannel;
+	    long TotalBinsScannedPerChannel;
 	
         vector <int> TooMuch_Tdelay;    // 0 is PeakV is located inside the DATA_BIN_SIZE array,  1 is when PeakV is located outside the DATA_BIN_SIZE so that we can't correctly check if it is triggered or not
 
@@ -164,15 +164,15 @@ class Station_r {
 
         int total_trig_search_bin;  // total number of bins for searching trigger. 
 
-//         int numChan;
-// 	int numChanVpol;
-// 	int numChanHpol;
+        //         int numChan;
+        // 	int numChanVpol;
+        // 	int numChanHpol;
         
         // TDR is for Tunnel Diode Response i.e. the value on which the trigger happened
         vector <double> TDR_all;
-	vector <double> TDR_all_sorted;
-	vector <double> TDR_Hpol_sorted;
-	vector <double> TDR_Vpol_sorted;
+	    vector <double> TDR_all_sorted;
+	    vector <double> TDR_Hpol_sorted;
+	    vector <double> TDR_Vpol_sorted;
         
         ClassDef(Station_r,3);
 };
@@ -185,43 +185,43 @@ class Report {
 
 
         // variables we need for trigger
-           // test selecting noise waveform
+        // test selecting noise waveform
 
-           int noise_pass_nogo; // index for checking if any same noise_ID is used in different chs.
-           int N_noise;     // needed number of noise waveforms (most cases, we will need only 1)
-           int noise_ID[5];    // selected noise waveform ID (we should not need 5 noise waveforms, but just in case)
-           int ch_ID;   // channel ID
-           //double Full_window[detector->params.number_of_strings_station * detector->params.number_of_antennas_string][settings1->DATA_BIN_SIZE];    // entire window for trigger check (diode convlv results for all antennas in a station)
-           //vector < vector <double> > Full_window;  // entire window for trigger check (diode convlv results for all antennas in a station)
-           int max_total_bin;   // to save time, use only necessary number of bins
-           int remain_bin;      // the bin number for not using entire DATA_BIN_SIZE array
-           vector <int> signal_bin;      // the center of bin where signal should locate
-           vector <int> signal_dbin;     // the bin difference between signal bins
-           vector <int> connect_signals;    // if ray_sol time delay is small enough to connect each other
+        int noise_pass_nogo; // index for checking if any same noise_ID is used in different chs.
+        int N_noise;     // needed number of noise waveforms (most cases, we will need only 1)
+        int noise_ID[5];    // selected noise waveform ID (we should not need 5 noise waveforms, but just in case)
+        int ch_ID;   // channel ID
+        //double Full_window[detector->params.number_of_strings_station * detector->params.number_of_antennas_string][settings1->DATA_BIN_SIZE];    // entire window for trigger check (diode convlv results for all antennas in a station)
+        //vector < vector <double> > Full_window;  // entire window for trigger check (diode convlv results for all antennas in a station)
+        int max_total_bin;   // to save time, use only necessary number of bins
+        int remain_bin;      // the bin number for not using entire DATA_BIN_SIZE array
+        vector <int> signal_bin;      // the center of bin where signal should locate
+        vector <int> signal_dbin;     // the bin difference between signal bins
+        vector <int> connect_signals;    // if ray_sol time delay is small enough to connect each other
 
-           int triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode=1);
-// 	   int triggerCheckLoopScan();
-// 	   int triggerCheckLoopScanNumbers();
+        int triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode=1);
+        // 	   int triggerCheckLoopScan();
+        // 	   int triggerCheckLoopScanNumbers();
 	   
-           int saveTriggeredEvent(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int last_trig_bin);
+        int saveTriggeredEvent(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int last_trig_bin);
 
-           vector < vector < vector <double> > > RayStep;
+        vector < vector < vector <double> > > RayStep;
 
 
     public:
-           /*
-           double Full_window[16][16384];  // test with array, not vector, diode response
-           double Full_window_V[16][16384];  // test with array, not vector, voltage waveform
-           */
-           vector <int> Passed_chs;
+        /*
+        double Full_window[16][16384];  // test with array, not vector, diode response
+        double Full_window_V[16][16384];  // test with array, not vector, voltage waveform
+        */
+        vector <int> Passed_chs;
         //int trg;    // if any antenna in entire detectors trg. 0 : no antenna trg
                     //                                         1 : 1 or more antenna trg
 
         Report ();
         Report (Detector *detector, Settings *settings1);
         ~Report ();
-    //make the UsefulIcrrStationEvent for use with AraRoot
-    //UsefulIcrrStationEvent theUsefulEvent;
+        //make the UsefulIcrrStationEvent for use with AraRoot
+        //UsefulIcrrStationEvent theUsefulEvent;
 
     
         void Initialize (Detector *detector, Settings *settings1);
@@ -230,22 +230,21 @@ class Report {
         //void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, UsefulIcrrStationEvent *theUsefulEvent);
 
 
-//        void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, UsefulIcrrStationEvent *theUsefulEvent);
+        //        void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, UsefulIcrrStationEvent *theUsefulEvent);
     
-//    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger);
+        //    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger);
     
-    void Connect_Interaction_Detector_V2 (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt);    
-    void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings, int which_solution,
-        vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
-        );
+        void Connect_Interaction_Detector_V2 (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt);    
+        void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings, int which_solution,
+        vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages);
     
 #ifdef ARA_UTIL_EXISTS
 
-    void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulIcrrStationEvent *theUsefulEvent);
-    void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulAtriStationEvent *theUsefulEvent);
+        void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulIcrrStationEvent *theUsefulEvent);
+        void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulAtriStationEvent *theUsefulEvent);
 #endif
     
-    void ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger);
+        void ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger);
 
     
         void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
@@ -276,10 +275,11 @@ class Report {
         void ApplyAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi);
 
 
-        void ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, Settings *settings1);
-
-        void ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1);
-
+        //void ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, Settings *settings1);
+        //void ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1);
+        //! added 'int ch' option to use electric chain for individual channels, 2022-06-17 -MK-
+        void ApplyElect_Tdomain(int ch, double freq, Detector *detector, double &vm_real, double &vm_img, Settings *settings1);
+        void ApplyElect_Tdomain_FirstTwo(int ch, double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, Settings *settings1);
 
 
         void ApplyFilter(int bin_n, Detector *detector, double &vmmhz);
@@ -294,7 +294,7 @@ class Report {
         void ApplyPreamp_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyPreamp_OutZero (double freq, Detector *detector, double &vmmhz);
 
-	void ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double &vmmhz, Settings *settings1);
+	    void ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double &vmmhz, Settings *settings1);
 
         // apply gain in FOAM
         void ApplyFOAM(int bin_n, Detector *detector, double &vmmhz);
@@ -330,15 +330,15 @@ class Report {
         int GetChannelNum8_LowAnt(int string_num, int antenna_num); // just return ch numbers 1-8 for antenna 0-1 (bottom antennas) and higher ch numbers for antenna 2-3 (top antennas) this is used for only TRIG_ONLY_LOW_CH_ON=1 mode with 
 
 
-	TGraph *getWaveform(Detector *detector, int ch, int station_i=0, int event_num=0, int run_num=0);
+	    TGraph *getWaveform(Detector *detector, int ch, int station_i=0, int event_num=0, int run_num=0);
 
-	vector<TGraph*> getWaveformVector(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
-	vector<TGraph*> getWaveformVectorVpol(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
-	vector<TGraph*> getWaveformVectorHpol(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
+	    vector<TGraph*> getWaveformVector(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
+	    vector<TGraph*> getWaveformVectorVpol(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
+	    vector<TGraph*> getWaveformVectorHpol(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
 	
-	vector<double> getHitTimesVector(Detector *detector, int station_i=0, int polarization=-1);// -1 for all pol, 0 for Vpol, 1: for Hpol
-	vector<double> getHitTimesVectorVpol(Detector *detector, int station_i=0);
-	vector<double> getHitTimesVectorHpol(Detector *detector, int station_i=0);
+	    vector<double> getHitTimesVector(Detector *detector, int station_i=0, int polarization=-1);// -1 for all pol, 0 for Vpol, 1: for Hpol
+	    vector<double> getHitTimesVectorVpol(Detector *detector, int station_i=0);
+	    vector<double> getHitTimesVectorHpol(Detector *detector, int station_i=0);
 
 	
         vector <double> Vfft_noise_after;   // noise Vfft after get_random_rician
@@ -367,6 +367,10 @@ class Report {
 
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
 
+        // two parameters for controlling the trigger delay for each channel (only use in real station emulation mode)
+        // and a variable for setting which has the "most" delay
+        double triggerDelay[16];
+        double mostDelay;    
 
         ClassDef(Report,1);
 
