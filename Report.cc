@@ -952,15 +952,17 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                         ApplyAntFactors_Tdomain_FirstTwo(heff, heff_lastbin, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi);
                                                     }
 
-                                                    // apply entire elect chain gain, phase
-                                                    if (n > 0)
-                                                    {
-                                                        ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], settings1);
+                                                    /*!
+                                                        apply entire elect chain gain, phase
+                                                        added option for the custom electric grain, which has a difference in each channel, 2022-06-17 -MK-
+                                                    */
+                                                    int ch = settings1->CUSTOM_ELECTRONICS==0 || settings1->CUSTOM_ELECTRONICS==1 ? -1 : j*4+k;
+                                                    if ( n > 0 ) {
+                                                        ApplyElect_Tdomain( ch, freq_tmp*1.e-6, detector, V_forfft[2*n], V_forfft[2*n+1], settings1 );
+                                                    } else {
+                                                        ApplyElect_Tdomain_FirstTwo( ch, freq_tmp*1.e-6, freq_lastbin*1.e-6, detector, V_forfft[2*n], V_forfft[2*n+1], settings1 );
                                                     }
-                                                    else
-                                                    {
-                                                        ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1]);
-                                                    }
+
                                                 }   // end for freq bin
 
                                                 // now get time domain waveform back by inv fft
@@ -1229,17 +1231,17 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     ApplyAntFactors_Tdomain_FirstTwo(heff, heff_lastbin, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi);
                                                 }
 
-                                                //
-                                                // apply entire elect chain gain, phase
-                                                //
-                                                if (n > 0)
-                                                {
-                                                    ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], settings1);
-                                                }
-                                                else
-                                                {
-                                                    ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1]);
-                                                }
+                                                /*!
+                                                    apply entire elect chain gain, phase
+                                                    added option for the custom electric grain, which has a difference in each channel, 2022-06-17 -MK-
+                                                */  
+                                                int ch = settings1->CUSTOM_ELECTRONICS==0 || settings1->CUSTOM_ELECTRONICS==1 ? -1 : j*4+k;
+                                                if ( n > 0 ) {
+                                                    ApplyElect_Tdomain( ch, freq_tmp*1.e-6, detector, V_forfft[2*n], V_forfft[2*n+1], settings1 );
+                                                } else {
+                                                    ApplyElect_Tdomain_FirstTwo( ch, freq_tmp*1.e-6, freq_lastbin*1.e-6, detector, V_forfft[2*n], V_forfft[2*n+1], settings1 );
+                                                }                                                
+
                                             }   // end for freq bin
 
                                             // now get time domain waveform back by inv fft
@@ -1566,17 +1568,17 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 ApplyAntFactors_Tdomain_FirstTwo(heff, heff_lastbin, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi);
                                             }
 
-                                            //
-                                            // apply entire elect chain gain, phase
-                                            //
-                                            if (n > 0)
-                                            {
-                                                ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], settings1);
-                                            }
-                                            else
-                                            {
-                                                ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1]);
-                                            }
+                                            /*!
+                                                apply entire elect chain gain, phase
+                                                added option for the custom electric grain, which has a difference in each channel, 2022-06-17 -MK-
+                                            */
+                                            int ch = settings1->CUSTOM_ELECTRONICS==0 || settings1->CUSTOM_ELECTRONICS==1 ? -1 : j*4+k;
+                                            if ( n > 0 ) {
+                                                ApplyElect_Tdomain( ch, freq_tmp*1.e-6, detector, V_forfft[2*n], V_forfft[2*n+1], settings1 );
+                                            } else {
+                                                ApplyElect_Tdomain_FirstTwo( ch, freq_tmp*1.e-6, freq_lastbin*1.e-6, detector, V_forfft[2*n], V_forfft[2*n+1], settings1 );
+                                            } 
+
                                         }   // end for freq bin
 
                                         // now get time domain waveform back by inv fft
@@ -2147,6 +2149,60 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 {
                     // ********************old mode left as-is ********************
 
+                    /*
+                        We need to add some logic to deal with what happens when we are running in A2 and A3 mode
+                        with config specific trigger delay settings
+                    */
+                    // these must always be set
+                    for(int localchan=0; localchan<16; localchan++){
+                        triggerDelay[localchan]=0;
+                        mostDelay=0;
+                    }
+
+                    if(settings1->DETECTOR==4 && settings1->DETECTOR_STATION_LIVETIME_CONFIG>0 && settings1->DETECTOR_TRIG_DELAY==1){ // if emulating a real station, and we want config selection power
+
+                        if(settings1->DETECTOR_STATION==2){ // if station 2
+
+                            if(settings1->DETECTOR_STATION_LIVETIME_CONFIG==2 || settings1->DETECTOR_STATION_LIVETIME_CONFIG>4){ // if config 2 or 5,6,7 in A2
+                                triggerDelay[4] = 81.4 + 100;
+                                triggerDelay[5] = 73.2 + 100;
+                                triggerDelay[6] = 15.4 + 100;
+                                triggerDelay[7] = 7.2  + 100;
+
+                                // string 0 = D2, string 2 = D4, string3 = D1
+                                triggerDelay[0] = triggerDelay[8] = triggerDelay[12]  = 81.4;
+                                triggerDelay[1] = triggerDelay[9] = triggerDelay[13]  = 73.2;
+                                triggerDelay[2] = triggerDelay[10] = triggerDelay[14] = 15.4;
+                                triggerDelay[3] = triggerDelay[11] = triggerDelay[15] = 7.2;
+
+                                mostDelay = triggerDelay[4];
+
+                            }
+                        }
+
+                        if(settings1->DETECTOR_STATION==3){
+    
+                            if(settings1->DETECTOR_STATION_LIVETIME_CONFIG==2 || settings1->DETECTOR_STATION_LIVETIME_CONFIG==4){ // if config 2 or 4 in A3
+
+                                // string 0 = D2, order 0-3 BV-BH-TV-TH
+                                triggerDelay[0] = 81.4 + 100;
+                                triggerDelay[1] = 73.2 + 100;
+                                triggerDelay[2] = 15.4 + 100;
+                                triggerDelay[3] = 7.2  + 100;
+
+                                // string 1 = D3, string 2 = D4, string3 = D1
+                                triggerDelay[4] = triggerDelay[8] = triggerDelay[12]  = 81.4;
+                                triggerDelay[5] = triggerDelay[9] = triggerDelay[13]  = 73.2;
+                                triggerDelay[6] = triggerDelay[10] = triggerDelay[14] = 15.4;
+                                triggerDelay[7] = triggerDelay[11] = triggerDelay[15] = 7.2;
+
+                                mostDelay = triggerDelay[0];
+
+                            }
+                        }
+                    }
+    
+
                     // avoid really long trig_window_bin case (change trig_window to check upto max_total_bin)
                     if (max_total_bin - trig_window_bin <= trig_i) trig_window_bin = max_total_bin - trig_i - 1;
 
@@ -2164,6 +2220,50 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         trig_j = 0;
                         while (trig_j < ch_ID)
                         {
+
+                            // need to mask out a trigger channel when necessary
+                            // which is when emulating real station 2 in config 3-5 only
+                            if(settings1->DETECTOR==4 && settings1->DETECTOR_STATION==2 && settings1->DETECTOR_CH_MASK==1){
+                                if(settings1->DETECTOR_STATION_LIVETIME_CONFIG>2){
+                                    if(trig_j==9){
+                                        trig_j++;
+                                        //cout<<"A2 RF ch15 is excluded from trigger!!"<<endl;
+                                        continue;
+                                    }
+                                }
+                                if(settings1->DETECTOR_STATION_LIVETIME_CONFIG>6){
+                                    if(trig_j==14 || trig_j==12 || trig_j==15 || trig_j==13){
+                                        trig_j++;
+                                        //cout<<"A2 RF st1 is excluded from trigger!!"<<endl;
+                                        continue;
+                                    }
+                                }
+                            }
+
+                            if(settings1->DETECTOR==4 && settings1->DETECTOR_STATION==3 && settings1->DETECTOR_CH_MASK==1){
+                                if(settings1->DETECTOR_STATION_LIVETIME_CONFIG>5){
+                                    if(trig_j==8){
+                                        trig_j++;
+                                        //cout<<"A3 RF ch 7 is excluded from trigger!!"<<endl;
+                                        continue;
+                                    }
+                                }
+                                if(settings1->DETECTOR_STATION_LIVETIME_CONFIG>7){
+                                    if(trig_j==14 || trig_j==12 || trig_j==15 || trig_j==13){
+                                        trig_j++;
+                                        //cout<<"A3 RF st1 is excluded from trigger!!"<<endl;
+                                        ontinue;
+                                    }
+                                }
+                            }
+
+                            int offset=0;
+                            if(settings1->DETECTOR==4 && settings1->DETECTOR_TRIG_DELAY==1){
+                                // only try to calculate the offset of DETECTOR=4, and we can guarantee that there will be an entry for triggerDelay[trig_j]
+                                // otherwise, if someone simulates an ideal station and changes the number of channels, this will segfault in a very hard to debug way
+
+                                offset = int((mostDelay -  triggerDelay[trig_j]) / (settings1->TIMESTEP * 1e9));
+                            }
 
                             int string_i = detector->getStringfromArbAntID(i, trig_j);
                             int antenna_i = detector->getAntennafromArbAntID(i, trig_j);
@@ -2400,12 +2500,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     if (settings1->NOISE_CHANNEL_MODE == 0)
                                     {
                                         // with threshold offset by chs
-                                        if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) *trigger->rmsdiode *detector->GetThresOffset(i, channel_num - 1, settings1)))
-                                        {
+                                        if( trig_i+offset+trig_bin >= settings1->DATA_BIN_SIZE ) break; //if trigger window hits wf end, cannot scan this channel further with this trig_i
+                                        if ( trigger->Full_window[trig_j][trig_i+trig_bin+offset] < (detector->GetThres(i, channel_num-1, settings1) * trigger->rmsdiode * detector->GetThresOffset( i, channel_num-1,settings1) ) ) {   // if this channel passed the trigger!
                                             // if this channel passed the trigger!
                                             //cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
                                             //stations[i].strings[(int)((trig_j)/4)].antennas[(int)((trig_j)%4)].Trig_Pass = trig_i+trig_bin;
-                                            stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
+                                            stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin + offset;
                                             N_pass++;
                                             if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
                                             {
@@ -2425,10 +2525,10 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     else if (settings1->NOISE_CHANNEL_MODE == 1)
                                     {
                                         // with threshold offset by chs
-                                        if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) *trigger->rmsdiode_ch[channel_num - 1] *detector->GetThresOffset(i, channel_num - 1, settings1)))
-                                        {
+                                        if( trig_i+offset+trig_bin >= settings1->DATA_BIN_SIZE ) break; //if trigger window hits wf end, cannot scan this channel further with this trig_i
+                                         if ( trigger->Full_window[trig_j][trig_i+trig_bin+offset] < (detector->GetThres(i, channel_num-1, settings1) * trigger->rmsdiode_ch[channel_num-1] * detector->GetThresOffset( i, channel_num-1,settings1) ) ) {   // if this channel passed the trigger!
                                             // if this channel passed the trigger!
-                                            stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
+                                            stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin + offset;
                                             N_pass++;
                                             if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
                                             {
@@ -2962,6 +3062,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                         // apply the antenna factors (this will also apply the polarization)
                         // and the electronics response
                         double Pol_factor;
+                        int ch = settings->CUSTOM_ELECTRONICS==0 || settings->CUSTOM_ELECTRONICS==1 ? -1 : idx;
                         if(n>0){
                             ApplyAntFactors_Tdomain(
                                 phase, heff, n_trg_pokey, n_trg_slappy, Pol_vector, 
@@ -2969,7 +3070,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                                 Pol_factor, V_forfft[2*n], V_forfft[2*n + 1],
                                 settings, antenna_theta, antenna_phi
                                 );
-                            ApplyElect_Tdomain(freq_tmp*1.e-6, detector,
+                            ApplyElect_Tdomain(ch, freq_tmp*1.e-6, detector,
                                 V_forfft[2*n], V_forfft[2*n + 1], settings
                                 );
                         }
@@ -2980,10 +3081,10 @@ void Report::rerun_event(Event *event, Detector *detector,
                                 Pol_factor, V_forfft[2*n], V_forfft[2*n + 1],
                                 antenna_theta, antenna_phi
                                 );
-                            ApplyElect_Tdomain_FirstTwo(freq_tmp*1.e-6,
+                            ApplyElect_Tdomain_FirstTwo(ch, freq_tmp*1.e-6,
                                 freq_lastbin*1.e-6, detector,
-                                V_forfft[2*n], V_forfft[2*n + 1]
-                                );
+                                V_forfft[2*n], V_forfft[2*n + 1],
+                                settings);
                         }
                     }
 
@@ -4398,7 +4499,7 @@ void Report::ApplyFilter_OutZero (double freq, Detector *detector, double &vmmhz
 }
 
 
-void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, Settings *settings1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
+void Report::ApplyElect_Tdomain(int ch, double freq, Detector *detector, double &vm_real, double &vm_img, Settings *settings1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
 
     if ( settings1->PHASE_SKIP_MODE == 0 ) {
 
@@ -4422,21 +4523,26 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
         }
 
         // V amplitude
-        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) * detector->GetElectGain_1D_OutZero( freq ); // apply gain (unitless) to amplitude
+        double v_amp;
+        if ( settings1-> NO_ELECTRONICS == 0){
+            v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) * detector->GetElectGain_1D_OutZero(freq, ch); // apply gain (unitless) to amplitude
+        } else {
+            v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img);
+        }
 
         // real, img terms with phase shift
-        //vm_real = v_amp * cos( phase_current + detector->GetElectPhase_1D(freq) );
-        //vm_img = v_amp * sin( phase_current + detector->GetElectPhase_1D(freq) );
-
-        vm_real = v_amp * cos( phase_current - detector->GetElectPhase_1D(freq) );
-        vm_img = v_amp * sin( phase_current - detector->GetElectPhase_1D(freq) );
+        vm_real = v_amp * cos( phase_current - detector->GetElectPhase_1D(freq, ch) );
+        vm_img = v_amp * sin( phase_current - detector->GetElectPhase_1D(freq, ch) );
     }
 
     else {
-
-        vm_real = vm_real * detector->GetElectGain_1D_OutZero( freq ); // only amplitude
-
-        vm_img = vm_img * detector->GetElectGain_1D_OutZero( freq ); // only amplitude
+        if ( settings1-> NO_ELECTRONICS == 0){
+            vm_real = vm_real * detector->GetElectGain_1D_OutZero(freq, ch); // only amplitude
+            vm_img = vm_img * detector->GetElectGain_1D_OutZero(freq, ch); // only amplitude
+        } else {
+            vm_real = vm_real;
+            vm_img = vm_img;
+        }
     }
 
 }
@@ -4444,11 +4550,15 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
 
 
 
-void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
+void Report::ApplyElect_Tdomain_FirstTwo(int ch, double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
 
-    vm_bin0 = vm_bin0 * detector->GetElectGain_1D_OutZero( freq0 );
-    vm_bin1 = vm_bin1 * detector->GetElectGain_1D_OutZero( freq1 );
-
+    if ( settings1-> NO_ELECTRONICS == 0){
+        vm_bin0 = vm_bin0 * detector->GetElectGain_1D_OutZero(freq0, ch);
+        vm_bin1 = vm_bin1 * detector->GetElectGain_1D_OutZero(freq1, ch);
+    } else {
+        vm_bin0 = vm_bin0;
+        vm_bin1 = vm_bin1;
+    }
 }
 
 
