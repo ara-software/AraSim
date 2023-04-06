@@ -696,13 +696,13 @@ void Settings::ReadFile(string setupfile) {
               }
           //Adding source easting, northing, and depth for INTERACTION_MODE=5.
           else if (label == "SOURCE_LATITUDE"){
-              SOURCE_LATITUDE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              SOURCE_LATITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
           }
           else if (label == "SOURCE_LONGITUDE"){
-              SOURCE_LONGITUDE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              SOURCE_LONGITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
           }
           else if (label == "SOURCE_DEPTH"){
-               SOURCE_DEPTH = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+               SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
           }
 
 
