@@ -41,7 +41,8 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         if (settings1->EVENT_GENERATION_MODE == 1){
             // pnu = pow(10., settings1->PNU[inu_thrown]);
             settings1->EXPONENT = settings1->PNU[inu_thrown];
-            spectra1 = new Spectra(settings1->EXPONENT);
+            //spectra1 = new Spectra(settings1->EXPONENT, settings1->EXPONENT_MAX, settings1->EXPONENT_MIN);
+            spectra1 = new Spectra(settings1);
             settings1->SELECT_FLAVOR = settings1->NUFLAVORINT[inu_thrown];
             settings1->NU_NUBAR_SELECT_MODE = settings1->NUBAR[inu_thrown];
             settings1->SELECT_CURRENT = settings1->CURRENTINT[inu_thrown];

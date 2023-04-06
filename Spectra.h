@@ -8,7 +8,7 @@
 
 
 using namespace std;
-
+class Settings;
 class Spectra {
 
 private:
@@ -44,7 +44,8 @@ public:
   
   Spectra();    // default constructor
   //Spectra(int EXPONENT); // constructor  
-  Spectra(double EXPONENT); // constructor  
+  //Spectra(double EXPONENT, double EXPONENT_MAX, double EXPONENT_MIN); // constructor  
+  Spectra(Settings *settings1);
   ~Spectra();   // destructor
   
   double GetNuEnergy_bin(); // get the neutrino energy which follows neutrino flux. (bin step)

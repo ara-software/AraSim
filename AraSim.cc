@@ -142,7 +142,8 @@ int main(int argc, char **argv) {   // read setup.txt file
     Efficiencies *efficiencies=new Efficiencies(100,outputdir); // keeps track of efficiencies at each stage of the simulation
     cout<<"called Efficiencies"<<endl;
     
-    Spectra *spectra=new Spectra(settings1->EXPONENT); // gets library (or whatever) of neutrino spectra
+    //Spectra *spectra=new Spectra(settings1->EXPONENT, settings1->EXPONENT_MAX, settings1->EXPONENT_MIN); // gets library (or whatever) of neutrino spectra
+    Spectra *spectra=new Spectra(settings1); // gets library (or whatever) of neutrino spectra
     cout<<"called Spectra"<<endl;
 
     Ray *ray = new Ray(); // construct Ray class

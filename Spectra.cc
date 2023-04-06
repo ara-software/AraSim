@@ -23,17 +23,18 @@ Spectra::~Spectra() {
 }
 
 //Spectra::Spectra(int EXPONENT) {
-Spectra::Spectra(double EXPONENT) {
+//Spectra::Spectra(double EXPONENT, double EXPONENT_MAX, double EXPONENT_MIN) {
+Spectra::Spectra(Settings *settings1) {
 
-    Settings *settings1 = new Settings();
+    //Settings *settings1 = new Settings();
 
-    EXPONENT_model = EXPONENT;
+    EXPONENT_model = settings1->EXPONENT;
 
   // initialize parameters!!
 
     E_bin = 12;
-    dE_bin = ((double)settings1->EXPONENT_MAX - (double)settings1->EXPONENT_MIN) / (double)(E_bin - 1);
-    delete settings1;
+    dE_bin = (settings1->EXPONENT_MAX - settings1->EXPONENT_MIN) / (double)(E_bin - 1);
+    //delete settings1;
 
   double Emuons[E_bin]; // E dN/dE/dA/dt for neutrinos that are produced as muon neutrinos or muon antineutrinos.
   double Eelectrons[E_bin];// E dN/dE/dA/dt for neutrinos that are produced as electron neutrinos or muon antineutrinos.
@@ -47,16 +48,17 @@ Spectra::Spectra(double EXPONENT) {
   // end of initialization!!
 
 
-  if (EXPONENT==1.)  // dNdEdAdt ~ E^-1
+  if (settings1->EXPONENT==1.)  // dNdEdAdt ~ E^-1
   {
       for (int i=0;i<E_bin;i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
           energy[i] = 16.+((double)i) * dE_bin;   // in log, in eV
           EdNdEdAdt[i] = 0.;    // in log
           E2dNdEdAdt[i] = EdNdEdAdt[i] + (energy[i] - 9.);    // in log, in GeV
+          std::cout<<"!!!!"<<energy[i]<<std::endl;
       }
   }
 
-  else if (EXPONENT==2.) // dNdEdAdt ~ E^-2
+  else if (settings1->EXPONENT==2.) // dNdEdAdt ~ E^-2
   {
       for (int i=0;i<E_bin;i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
           energy[i] = 16.+((double)i) * dE_bin;   // in log, in eV
@@ -65,7 +67,7 @@ Spectra::Spectra(double EXPONENT) {
       }
   }
 
-  else if (EXPONENT==3.) // dNdEdAdt ~ E^-3
+  else if (settings1->EXPONENT==3.) // dNdEdAdt ~ E^-3
   {
       for (int i=0;i<E_bin;i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
           energy[i] = 16.+((double)i) * dE_bin;   // in log, in eV
@@ -74,7 +76,7 @@ Spectra::Spectra(double EXPONENT) {
       }
   }
 
-  else if (EXPONENT==4.) // dNdEdAdt ~ E^-4
+  else if (settings1->EXPONENT==4.) // dNdEdAdt ~ E^-4
   {
       for (int i=0;i<E_bin;i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
           energy[i] = 16.+((double)i) * dE_bin;   // in log, in eV
@@ -83,9 +85,9 @@ Spectra::Spectra(double EXPONENT) {
       }
   }
 
-  else if (EXPONENT>=10. && EXPONENT<30.)
+  else if (settings1->EXPONENT>=10. && settings1->EXPONENT<30.)
   {
-      pnu_EXPONENT = EXPONENT;
+      pnu_EXPONENT = settings1->EXPONENT;
   }
   
   else if (EXPONENT_model>=510. && EXPONENT_model<=650.) // g.n. added so we can have simulations at E^2=17.8 not just whole numbers
@@ -94,7 +96,7 @@ Spectra::Spectra(double EXPONENT) {
 	cout<<"**************** energy is "<<pnu_EXPONENT<<" *******************"<<endl;
   }
   
-  else if (EXPONENT==30.) // ESS baseline model. Used to be EXPONENT "0"
+  else if (settings1->EXPONENT==30.) // ESS baseline model. Used to be EXPONENT "0"
   {
       E_bin = 9;
 
@@ -136,7 +138,7 @@ Spectra::Spectra(double EXPONENT) {
     }
   }
 
-  else if (EXPONENT==31.) // ESS-cosmological constant. Use Nu_el : Nu_mu ratio. used to be EXPONENT "5"
+  else if (settings1->EXPONENT==31.) // ESS-cosmological constant. Use Nu_el : Nu_mu ratio. used to be EXPONENT "5"
   {
       E_bin = 9;
       double emuratio[E_bin];
@@ -205,9 +207,9 @@ Spectra::Spectra(double EXPONENT) {
   } // end if ESS-cosmological constant
 
 
-  else if (EXPONENT>31. && EXPONENT<200.)  // use digitized flux from different models
+  else if (settings1->EXPONENT>31. && settings1->EXPONENT<200.)  // use digitized flux from different models
   {
-      switch ( (int)EXPONENT )
+      switch ( (int)settings1->EXPONENT )
       {
           case 32:  // ESS3
               GetFlux("essfig9.dat");
@@ -259,62 +261,62 @@ Spectra::Spectra(double EXPONENT) {
       }
   }
 
-  else if (EXPONENT==200.)   // Iron model
+  else if (settings1->EXPONENT==200.)   // Iron model
   {
       GetFlux("Ave2005_Fe_Emax21.0.dat");
   }
 
-  else if (EXPONENT==201.)
+  else if (settings1->EXPONENT==201.)
   {
       GetFlux("Ave2005_Fe_Emax21.5.dat");
   }
   
-  else if (EXPONENT==202.)
+  else if (settings1->EXPONENT==202.)
   {
       GetFlux("Ave2005_Fe_Emax22.0.dat");
   }
 
-  else if (EXPONENT==203.)
+  else if (settings1->EXPONENT==203.)
   {
       GetFlux("Ave2005_Fe_hi_evo.dat");
   }
 
-  else if (EXPONENT==204.)
+  else if (settings1->EXPONENT==204.)
   {
       GetFlux("Ave2005_Fe_low_evo.dat");
   }
 
-  else if (EXPONENT==210.)
+  else if (settings1->EXPONENT==210.)
   {
       GetFlux("Stanev2008_heavy.dat");
   }
 
-  else if (EXPONENT==220.)
+  else if (settings1->EXPONENT==220.)
   {
       GetFlux("Kotera2010_Fe_only.dat");
   }
 
-  else if (EXPONENT==221.)
+  else if (settings1->EXPONENT==221.)
   {
       GetFlux("Kotera2010_Fe_rich.dat");
   }
 
-  else if (EXPONENT==222.)
+  else if (settings1->EXPONENT==222.)
   {
       GetFlux("Kotera2010_mix_max.dat");
   }
 
-  else if (EXPONENT==223.)
+  else if (settings1->EXPONENT==223.)
   {
       GetFlux("Kotera2010_mix_min.dat");
   }
 
-  else if (EXPONENT==224.)
+  else if (settings1->EXPONENT==224.)
   {
       GetFlux("Kotera2010_max.dat");
   }
 
-  else if (EXPONENT==225.)
+  else if (settings1->EXPONENT==225.)
   {
       GetFlux("CenA_Kachelriess.dat");
   }
@@ -326,9 +328,9 @@ Spectra::Spectra(double EXPONENT) {
     //
 
 /*
-  if (EXPONENT<=10. || EXPONENT>=100.) {
-    gspectrum[(int)EXPONENT]=new TGraph(12,energy,EdNdEdAdt);
-    //    maxflux=gspectrum[(int)EXPONENT]->GetMaximum();
+  if (settings1->EXPONENT<=10. || settings1->EXPONENT>=100.) {
+    gspectrum[(int)settings1->EXPONENT]=new TGraph(12,energy,EdNdEdAdt);
+    //    maxflux=gspectrum[(int)settings1->EXPONENT]->GetMaximum();
     maxflux=Tools::dMax(EdNdEdAdt,12);
 
     for (int i=0;i<12;i++) {
@@ -391,7 +393,7 @@ double  Spectra::GetNuEnergy_bin() {
     // and thisenergy starts from 0 so it has an offset
     
     energybin=Tools::Getifreq(thisenergy,minenergy,maxenergy,E_bin);
-    //max=gspectrum[(int)EXPONENT]->Eval(thisenergy,0,"S")/maxflux; // this is the maximum the normalized flux can be in this bin, always less than 1
+    //max=gspectrum[(int)settings1->EXPONENT]->Eval(thisenergy,0,"S")/maxflux; // this is the maximum the normalized flux can be in this bin, always less than 1
     max=EdNdEdAdt[energybin]/maxflux;
     thisflux=Rand3.Rndm(); // pick the flux at random between 0 and 1, if it's less than max it's a winner
   } //while
@@ -432,7 +434,7 @@ double  Spectra::GetNuEnergy() {
     //cout<<"interpolated max : "<<max<<", thisenergy : "<<thisenergy<<endl;
     /*
     energybin=Tools::Getifreq(thisenergy,minenergy,maxenergy,E_bin);
-    //max=gspectrum[(int)EXPONENT]->Eval(thisenergy,0,"S")/maxflux; // this is the maximum the normalized flux can be in this bin, always less than 1
+    //max=gspectrum[(int)settings1->EXPONENT]->Eval(thisenergy,0,"S")/maxflux; // this is the maximum the normalized flux can be in this bin, always less than 1
     max=EdNdEdAdt[energybin]/maxflux;
     */
     thisflux=Rand3.Rndm(); // pick the flux at random between 0 and 1, if it's less than max it's a winner
