@@ -33,6 +33,8 @@ private:
 
   //int EXPONENT_model; // set flux model
   double EXPONENT_model; // set flux model
+  double EXPONENT_min;
+  double EXPONENT_max;
 
   double pnu_EXPONENT;  // if mono energy from EXPONENT, pnu_EXPONENT = log10(pnu), constant pnu for all events.
 
