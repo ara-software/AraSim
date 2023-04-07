@@ -179,6 +179,11 @@ class Settings
     
         double CONST_RMSDIODE;  // in case NOISE_CHANNEL_MODE = 1, just using this CONST_RMSDIODE value for threshold
 
+        double SOURCE_LATITUDE;  //Latitude, Longitude, and depth of simulating source in global coordinates for use in INTERACTION_MODE=5.
+
+        double SOURCE_LONGITUDE;
+
+        double SOURCE_DEPTH;
 
         int USE_TESTBED_RFCM_ON;    // use RFCM measurement for testbed or not (default 0)
     
