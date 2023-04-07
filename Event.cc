@@ -170,6 +170,55 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         */
 
     }
+    //Creating pulser event type that will be modelled after arbitrary event type (EVENT_TYPE=10). - JCF 4/6/2023
+    if (Event_type == 11) { // if only arbitrary events exist
+        
+  
+        pnu = 0;
+        // cout << pnu << endl;
+        /*
+        double hereTheta = 10.;
+        Vector output;
+        output.SetX(-1.*TMath::Sin(hereTheta*3.1415926535/180.));
+        output.SetY(0.);
+        output.SetZ(TMath::Cos(hereTheta*3.1415926535/180.));
+        nnu = output;
+        */
+        // nuflavor = primary1->GetNuFlavor();
+        nuflavor = "";
+        nuflavorint = 0;
+        nu_nubar = 0;
+
+
+        /*
+        if (settings1->NNU_THIS_THETA==1) {    // set specific theta angle for nnu
+            nnu = primary1->GetThatDirection(settings1->NNU_THETA, settings1->NNU_D_THETA);
+        }
+        else { // nnu angle random
+            nnu = primary1->GetAnyDirection();
+        }
+        */
+        
+        Interaction *Nu_temp;
+        // Report *report_tmp;
+
+        Nu_temp = new Interaction (settings1, detector, icemodel, primary1, signal );
+        // report_tmp = new Report(detector ,settings1);
+        
+        Nu_Interaction.push_back(*Nu_temp);  // for the first interaction
+        // test_report.push_back(*report_tmp);
+
+        delete Nu_temp;
+
+        // for multiple interactions...
+        /*
+        while (interaction_count < n_interactions) {    // not sure if this will work???
+            Nu_tmp = new Interaction (...., n_interactions );
+            Nu_Interaction.push_back( Nu_tmp );
+        }
+        */
+
+    }
 
     IsCalpulser = primary1->IsCalpulser;
 
@@ -196,8 +245,11 @@ void Event::Choose_Evt_Type (Settings *settings1) {
         //            cout<<"Change Evt_type from "<<settings1->EVENT_TYPE<<" to 0"<<endl;
         Event_type = 10;
     }
+    else if (settings1->EVENT_TYPE == 11){
+        Event_type = 11;
+    }
     else {
-        cout<<"Currently, only neutrino (EVET_TYPE=0) and arbitrary (EVENT_TYPE=10) events possible!"<<endl;
+        cout<<"Currently, only neutrino (EVET_TYPE=0), arbitrary (EVENT_TYPE=10), and pulser (EVENT_TYPE=11) events possible!"<<endl;
         cout<<"Change Evt_type from "<<settings1->EVENT_TYPE<<" to 0"<<endl;
         Event_type = 0;
     }

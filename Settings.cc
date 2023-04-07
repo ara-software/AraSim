@@ -297,6 +297,8 @@ outputdir="outputs"; // directory where outputs go
     APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
 
     CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.tst"
+    
+    CLOCK_ANGLE=0; //Default: 0 -- Angle of polarization "on the clock".  Angle of zero is pure thetaPol, whereas 90º is pure phiPol.
 
 
     /*
@@ -687,6 +689,9 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "CUSTOM_ELECTRONICS"){
               	   CUSTOM_ELECTRONICS = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
+          else if (label == "CLOCK_ANGLE"){
+               CLOCK_ANGLE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
 
 
 
