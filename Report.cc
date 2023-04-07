@@ -1349,26 +1349,27 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             freq_lastbin = freq_tmp;
                                             
                                             // @Justin:  Make this dynamic for user to set polarization and check if it does ray-tracing.
-                                            // cout <<Pol_vector << endl;
-                                            // Pol_vector = n_trg_slappy;
-                                            // cout <<Pol_vector << endl;
-                                            // Pol_vector = n_trg_pokey;
+                                            //Justin's method
                                             double psi = TMath::DegToRad()*settings1->CLOCK_ANGLE;
                                             double theta = acos(receive_vector[2]); //receive_vector is a unit vector
                                             double phi = atan2(receive_vector[1],receive_vector[0]);
-                                            
-                                            // cout <<Pol_vector << endl;                                            
-                                            
-                                            
-                                            // cout << -cos(psi)*cos(theta)*cos(phi) + sin(psi)*sin(phi) << endl;
-                                            // cout << -cos(psi)*cos(theta)*sin(phi) - sin(psi)*cos(phi) << endl;
-                                            // cout << cos(psi)*sin(theta) << endl;                                    
+                                                                             
                                             
                                             double newPol_vectorX = -cos(psi)*cos(theta)*cos(phi) + sin(psi)*sin(phi);
                                             double newPol_vectorY = -cos(psi)*cos(theta)*sin(phi) - sin(psi)*cos(phi);
                                             double newPol_vectorZ = cos(psi)*sin(theta);
                                             
                                             Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
+                                            //Justin's Method
+                                            
+                                            //Trying a method Brian shared, as this vector holds both the D and R solutions.  I want to just redefine the D for now.
+                                            // Brian's method
+                                            // Vector tmp;
+                                            // tmp.SetX(-cos(psi)*cos(theta)*cos(phi) + sin(psi)*sin(phi));
+                                            // tmp.SetY(-cos(psi)*cos(theta)*sin(phi) - sin(psi)*cos(phi));
+                                            // tmp.SetZ(cos(psi)*sin(theta));
+                                            // Pol_vector[0] = tmp;
+                                            // Brian's method
                                             
                                             // cout << Pol_vector << endl;
                                             
