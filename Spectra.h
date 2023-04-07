@@ -19,6 +19,8 @@ private:
   int E_bin;   // initialize # of energy bins (max = 50)
 
   double dE_bin;
+  double EXPONENT_min;
+  double EXPONENT_max;
 
   void GetFlux(string filename);    // read neutrino flux EdNdEdAdt (in GeV) from filename file
 
