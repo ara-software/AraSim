@@ -51,7 +51,6 @@ Spectra::Spectra(Settings *settings1) {
           energy[i] = EXPONENT_min + ((double)i) * dE_bin;   // in log, in eV
           EdNdEdAdt[i] = 0.;    // in log
           E2dNdEdAdt[i] = EdNdEdAdt[i] + (energy[i] - 9.);    // in log, in GeV
-          std::cout<<"!!!!!!!!!!!!!!!!!!!!!"<<energy[i]<<std::endl;
       }
   }
 
