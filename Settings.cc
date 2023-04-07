@@ -231,6 +231,12 @@ outputdir="outputs"; // directory where outputs go
     ONLY_PASSED_EVENTS = 0;
     NNU_PASSED = 0;
 
+    //Defining source for INTERACTION_MODE == 5.
+    SOURCE_LATITUDE = -89.97953; //Latitude of SpiceCore (from 2023 survey data)
+
+    SOURCE_LONGITUDE = -100.78595; //Longitude of SpiceCore (from 2023 survey data)
+
+    SOURCE_DEPTH = -1000.0; //Default depth of 1000 meters below ice surface.    
 
 
     SHOWER_MODE = 2; // EM (0) or HAD (1) shower in t-domain signal. or either one which is bigger (3) or both EM and HAD (2)  default : 2, both EM and HAD showers
@@ -691,6 +697,16 @@ void Settings::ReadFile(string setupfile) {
               }
           else if (label == "CLOCK_ANGLE"){
                CLOCK_ANGLE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          //Adding source easting, northing, and depth for INTERACTION_MODE=5.
+          else if (label == "SOURCE_LATITUDE"){
+              SOURCE_LATITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          else if (label == "SOURCE_LONGITUDE"){
+              SOURCE_LONGITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          else if (label == "SOURCE_DEPTH"){
+               SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
           }
 
 

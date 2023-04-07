@@ -311,6 +311,7 @@ Interaction (IceModel *antarctica, Detector *detector, Settings *settings1, Prim
     // end move from IceModel
   //
 
+  void PickExactGlobal(IceModel *antarctica, Detector *detector, Settings *settings1, double thisLat, double thisLong, double thisDepth);
 
   double pathlength_inice;
 
