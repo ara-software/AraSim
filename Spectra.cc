@@ -25,72 +25,75 @@ Spectra::~Spectra() {
 Spectra::Spectra(Settings *settings1) {
 
     EXPONENT_model = settings1->EXPONENT;
+    EXPONENT_min = settings1->EXPONENT_MIN;
+    EXPONENT_max = settings1->EXPONENT_MAX;
 
   // initialize parameters!!
 
     E_bin = 12;
-    dE_bin = (settings1->EXPONENT_MAX - settings1->EXPONENT_MIN) / (double)(E_bin - 1);
+    dE_bin = (EXPONENT_max - EXPONENT_min) / (double)(E_bin - 1);
 
   double Emuons[E_bin]; // E dN/dE/dA/dt for neutrinos that are produced as muon neutrinos or muon antineutrinos.
   double Eelectrons[E_bin];// E dN/dE/dA/dt for neutrinos that are produced as electron neutrinos or muon antineutrinos.
   
-  for (int i=0;i<E_bin;i++) {
-    energy[i]=16.+((double)i) * dE_bin;
-    Emuons[i]=-30.;
-    Eelectrons[i]=-30.;
+  for (int i = 0; i < E_bin; i++) {
+    energy[i] = EXPONENT_min + ((double)i) * dE_bin;
+    Emuons[i] = -30.;
+    Eelectrons[i] = -30.;
   } //for
 
   // end of initialization!!
 
 
-  if (settings1->EXPONENT==1.)  // dNdEdAdt ~ E^-1
+  if (EXPONENT_model == 1.)  // dNdEdAdt ~ E^-1
   {
-      for (int i=0;i<E_bin;i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
-          energy[i] = 16.+((double)i) * dE_bin;   // in log, in eV
+      for (int i = 0; i < E_bin; i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
+          energy[i] = EXPONENT_min + ((double)i) * dE_bin;   // in log, in eV
           EdNdEdAdt[i] = 0.;    // in log
           E2dNdEdAdt[i] = EdNdEdAdt[i] + (energy[i] - 9.);    // in log, in GeV
+          std::cout<<"!!!!!!!!!!!!!!!!!!!!!"<<energy[i]<<std::endl;
       }
   }
 
-  else if (settings1->EXPONENT==2.) // dNdEdAdt ~ E^-2
+  else if (EXPONENT_model == 2.) // dNdEdAdt ~ E^-2
   {
-      for (int i=0;i<E_bin;i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
-          energy[i] = 16.+((double)i) * dE_bin;   // in log, in eV
+      for (int i = 0; i < E_bin; i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
+          energy[i] = EXPONENT_min + ((double)i) * dE_bin;   // in log, in eV
           E2dNdEdAdt[i] = 0.;    // in log, in GeV
           EdNdEdAdt[i] = E2dNdEdAdt[i] - (energy[i] - 9.);    // in log
       }
   }
-
-  else if (settings1->EXPONENT==3.) // dNdEdAdt ~ E^-3
+  
+  else if (EXPONENT_model == 3.) // dNdEdAdt ~ E^-3
   {
-      for (int i=0;i<E_bin;i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
-          energy[i] = 16.+((double)i) * dE_bin;   // in log, in eV
+      for (int i = 0; i < E_bin; i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
+          energy[i] = EXPONENT_min + ((double)i) * dE_bin;   // in log, in eV
           E2dNdEdAdt[i] = -(energy[i] - 9.);    // in log, in GeV
           EdNdEdAdt[i] = E2dNdEdAdt[i] - (energy[i] - 9.);    // in log
       }
   }
 
-  else if (settings1->EXPONENT==4.) // dNdEdAdt ~ E^-4
+  else if (EXPONENT_model == 4.) // dNdEdAdt ~ E^-4
   {
-      for (int i=0;i<E_bin;i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
-          energy[i] = 16.+((double)i) * dE_bin;   // in log, in eV
+      for (int i = 0; i < E_bin; i++) {   // set energy, EdNdEdAdt and E2dNdEdAdt
+          energy[i] = EXPONENT_min + ((double)i) * dE_bin;   // in log, in eV
           E2dNdEdAdt[i] = -2. * (energy[i] - 9.);    // in log, in GeV
           EdNdEdAdt[i] = E2dNdEdAdt[i] - (energy[i] - 9.);    // in log
       }
   }
 
-  else if (settings1->EXPONENT>=10. && settings1->EXPONENT<30.)
+  else if (EXPONENT_model >= 10. && EXPONENT_model < 30.)
   {
-      pnu_EXPONENT = settings1->EXPONENT;
+      pnu_EXPONENT = EXPONENT_model;
   }
   
-  else if (EXPONENT_model>=510. && EXPONENT_model<=650.) // g.n. added so we can have simulations at E^2=17.8 not just whole numbers
+  else if (EXPONENT_model >= 510. && EXPONENT_model <= 650.) // g.n. added so we can have simulations at E^2=17.8 not just whole numbers
   {
-      pnu_EXPONENT = (EXPONENT_model - 400)/10;
+      pnu_EXPONENT = (EXPONENT_model - 400) / 10;
 	cout<<"**************** energy is "<<pnu_EXPONENT<<" *******************"<<endl;
   }
   
-  else if (settings1->EXPONENT==30.) // ESS baseline model. Used to be EXPONENT "0"
+  else if (EXPONENT_model == 30.) // ESS baseline model. Used to be EXPONENT "0"
   {
       E_bin = 9;
 
@@ -132,7 +135,7 @@ Spectra::Spectra(Settings *settings1) {
     }
   }
 
-  else if (settings1->EXPONENT==31.) // ESS-cosmological constant. Use Nu_el : Nu_mu ratio. used to be EXPONENT "5"
+  else if (EXPONENT_model == 31.) // ESS-cosmological constant. Use Nu_el : Nu_mu ratio. used to be EXPONENT "5"
   {
       E_bin = 9;
       double emuratio[E_bin];
@@ -201,9 +204,9 @@ Spectra::Spectra(Settings *settings1) {
   } // end if ESS-cosmological constant
 
 
-  else if (settings1->EXPONENT>31. && settings1->EXPONENT<200.)  // use digitized flux from different models
+  else if (EXPONENT_model > 31. && EXPONENT_model < 200.)  // use digitized flux from different models
   {
-      switch ( (int)settings1->EXPONENT )
+      switch ( (int)EXPONENT_model )
       {
           case 32:  // ESS3
               GetFlux("essfig9.dat");
@@ -255,66 +258,65 @@ Spectra::Spectra(Settings *settings1) {
       }
   }
 
-  else if (settings1->EXPONENT==200.)   // Iron model
+  else if (EXPONENT_model == 200.)   // Iron model
   {
       GetFlux("Ave2005_Fe_Emax21.0.dat");
   }
 
-  else if (settings1->EXPONENT==201.)
+  else if (EXPONENT_model == 201.)
   {
       GetFlux("Ave2005_Fe_Emax21.5.dat");
   }
-  
-  else if (settings1->EXPONENT==202.)
+
+  else if (EXPONENT_model == 202.)
   {
       GetFlux("Ave2005_Fe_Emax22.0.dat");
   }
 
-  else if (settings1->EXPONENT==203.)
+  else if (EXPONENT_model == 203.)
   {
       GetFlux("Ave2005_Fe_hi_evo.dat");
   }
 
-  else if (settings1->EXPONENT==204.)
+  else if (EXPONENT_model == 204.)
   {
       GetFlux("Ave2005_Fe_low_evo.dat");
   }
 
-  else if (settings1->EXPONENT==210.)
+  else if (EXPONENT_model == 210.)
   {
       GetFlux("Stanev2008_heavy.dat");
   }
 
-  else if (settings1->EXPONENT==220.)
+  else if (EXPONENT_model == 220.)
   {
       GetFlux("Kotera2010_Fe_only.dat");
   }
 
-  else if (settings1->EXPONENT==221.)
+  else if (EXPONENT_model == 221.)
   {
       GetFlux("Kotera2010_Fe_rich.dat");
   }
 
-  else if (settings1->EXPONENT==222.)
+  else if (EXPONENT_model == 222.)
   {
       GetFlux("Kotera2010_mix_max.dat");
   }
 
-  else if (settings1->EXPONENT==223.)
+  else if (EXPONENT_model == 223.)
   {
       GetFlux("Kotera2010_mix_min.dat");
   }
 
-  else if (settings1->EXPONENT==224.)
+  else if (EXPONENT_model == 224.)
   {
       GetFlux("Kotera2010_max.dat");
   }
 
-  else if (settings1->EXPONENT==225.)
+  else if (EXPONENT_model == 225.)
   {
       GetFlux("CenA_Kachelriess.dat");
   }
-
 
 
     //
@@ -327,7 +329,7 @@ Spectra::Spectra(Settings *settings1) {
     //    maxflux=gspectrum[(int)settings1->EXPONENT]->GetMaximum();
     maxflux=Tools::dMax(EdNdEdAdt,12);
 
-    for (int i=0;i<12;i++) {
+    for (int i = 0; i < 12; i++) {
       E2dNdEdAdt[i]=log10(EdNdEdAdt[i])+energy[i]-9.;
     }
     
@@ -341,7 +343,7 @@ Spectra::Spectra(Settings *settings1) {
 
 
   // From log to linear!!  
-  for (int i=0;i<E_bin;i++) {
+  for (int i = 0; i < E_bin; i++) {
       EdNdEdAdt[i] = pow(10, EdNdEdAdt[i]);     //to linear 
       E2dNdEdAdt[i] = pow(10, E2dNdEdAdt[i]);   //to linear
 //      E2dNdEdAdt[i]=log10(EdNdEdAdt[i])+energy[i]-9.;
@@ -357,7 +359,7 @@ Spectra::Spectra(Settings *settings1) {
 //   sE2dNdEdAdt = new TSpline3("sE2dNdEdAdt", gE2dNdEdAdt);
 //-------------------------------------------------- 
 
-  maxflux=Tools::dMax(EdNdEdAdt,E_bin);
+  maxflux = Tools::dMax(EdNdEdAdt, E_bin);
 
 
  
@@ -365,33 +367,33 @@ Spectra::Spectra(Settings *settings1) {
 
 double  Spectra::GetNuEnergy_bin() {
   
-  double thisenergy=16.; // arbitrary initialisation
-  double thisflux=2.; // initialise higher than max
-  double max=1.;
-  int energybin=0; // arbitrary initialisation
-  double maxenergy=Tools::dMax(energy,E_bin);
-  double minenergy=Tools::dMin(energy,E_bin);
+  double thisenergy = EXPONENT_min; // arbitrary initialisation
+  double thisflux = 2.; // initialise higher than max
+  double max = 1.;
+  int energybin = 0; // arbitrary initialisation
+  double maxenergy = Tools::dMax(energy, E_bin);
+  double minenergy = Tools::dMin(energy, E_bin);
   // this uses the dartboard approach
   //cout << "minenergy, maxenergy are " << minenergy << " " << maxenergy << "\n";
   
-  if (EXPONENT_model>=10. && EXPONENT_model<30.) {
-      return pow(10.,pnu_EXPONENT);
+  if (EXPONENT_model >= 10. && EXPONENT_model < 30.) {
+      return pow(10., pnu_EXPONENT);
   }
 
   else {
   
-  while(thisflux>max) {
+  while(thisflux > max) {
     // pick an energy  
-    thisenergy=Rand3.Rndm()*(maxenergy-minenergy)+minenergy; // pick energy at random between the highest and lowest
+    thisenergy = Rand3.Rndm() * (maxenergy - minenergy) + minenergy; // pick energy at random between the highest and lowest
     // the energy array is actually filled with energy exponents 
     // and thisenergy starts from 0 so it has an offset
     
-    energybin=Tools::Getifreq(thisenergy,minenergy,maxenergy,E_bin);
-    //max=gspectrum[(int)settings1->EXPONENT]->Eval(thisenergy,0,"S")/maxflux; // this is the maximum the normalized flux can be in this bin, always less than 1
-    max=EdNdEdAdt[energybin]/maxflux;
-    thisflux=Rand3.Rndm(); // pick the flux at random between 0 and 1, if it's less than max it's a winner
+    energybin = Tools::Getifreq(thisenergy, minenergy, maxenergy, E_bin);
+    //max=gspectrum[(int)EXPONENT_model]->Eval(thisenergy,0,"S")/maxflux; // this is the maximum the normalized flux can be in this bin, always less than 1
+    max = EdNdEdAdt[energybin] / maxflux;
+    thisflux = Rand3.Rndm(); // pick the flux at random between 0 and 1, if it's less than max it's a winner
   } //while
-  return pow(10.,thisenergy);
+  return pow(10., thisenergy);
   }
 	
 } //Pick Neutrino Energy
@@ -401,39 +403,39 @@ double  Spectra::GetNuEnergy_bin() {
 
 
 double  Spectra::GetNuEnergy() {
-  
-  double thisenergy=16.; // arbitrary initialisation
-  double thisflux=2.; // initialise higher than max
-  double max=1.;
-  int energybin=0; // arbitrary initialisation
-  double maxenergy=Tools::dMax(energy,E_bin);
-  double minenergy=Tools::dMin(energy,E_bin);
+ 
+  double thisenergy = EXPONENT_min; // arbitrary initialisation
+  double thisflux = 2.; // initialise higher than max
+  double max = 1.;
+  int energybin = 0; // arbitrary initialisation
+  double maxenergy = Tools::dMax(energy, E_bin);
+  double minenergy = Tools::dMin(energy, E_bin); 
   // this uses the dartboard approach
   //cout << "minenergy, maxenergy are " << minenergy << " " << maxenergy << "\n";
   
-  if ((EXPONENT_model>=10. && EXPONENT_model<30.) || (EXPONENT_model>=510. && EXPONENT_model<=650.)) {
-      return pow(10.,pnu_EXPONENT);
+  if ((EXPONENT_model >= 10. && EXPONENT_model < 30.) || (EXPONENT_model >= 510. && EXPONENT_model <= 650.)) {
+      return pow(10., pnu_EXPONENT);
   }
 
   else {
   
-  while(thisflux>max) {
+  while(thisflux > max) {
     // pick an energy  
-    thisenergy=Rand3.Rndm()*(maxenergy-minenergy)+minenergy; // pick energy at random between the highest and lowest
+    thisenergy = Rand3.Rndm() * (maxenergy - minenergy) + minenergy; // pick energy at random between the highest and lowest
     // the energy array is actually filled with energy exponents 
     // and thisenergy starts from 0 so it has an offset
     
     // get interpolated flux at "thisenergy"
-    max=SimpleLinearInterpolation_value(E_bin, energy, EdNdEdAdt, thisenergy ) / maxflux; // normalize to 1
+    max = SimpleLinearInterpolation_value(E_bin, energy, EdNdEdAdt, thisenergy ) / maxflux; // normalize to 1
     //cout<<"interpolated max : "<<max<<", thisenergy : "<<thisenergy<<endl;
     /*
-    energybin=Tools::Getifreq(thisenergy,minenergy,maxenergy,E_bin);
-    //max=gspectrum[(int)settings1->EXPONENT]->Eval(thisenergy,0,"S")/maxflux; // this is the maximum the normalized flux can be in this bin, always less than 1
-    max=EdNdEdAdt[energybin]/maxflux;
+    energybin = Tools::Getifreq(thisenergy, minenergy, maxenergy, E_bin);
+    //max=gspectrum[(int)EXPONENT_model]->Eval(thisenergy, 0, "S") / maxflux; // this is the maximum the normalized flux can be in this bin, always less than 1
+    max = EdNdEdAdt[energybin] / maxflux;
     */
-    thisflux=Rand3.Rndm(); // pick the flux at random between 0 and 1, if it's less than max it's a winner
+    thisflux = Rand3.Rndm(); // pick the flux at random between 0 and 1, if it's less than max it's a winner
   } //while
-  return pow(10.,thisenergy);
+  return pow(10., thisenergy);
   }
 	
 } //Pick Neutrino Energy
