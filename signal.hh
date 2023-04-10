@@ -181,6 +181,10 @@ double changle; // cherenkov angle
   std::vector<double> ArbitraryWaveform_V;
   std::vector<double> ArbitraryWaveform_T;
   void ReadArbitraryWaveform(std::string target);
+    
+  std::vector<double> PulserWaveform_V;
+  std::vector<double> PulserWaveform_T;
+  void ReadPulserWaveform(std::string target);
 
   // variables needed to precompute the Param_RE_Tterm tables
   std::vector<double> tterm_table_em;

@@ -192,8 +192,11 @@ Signal::~Signal() {
 
      ReadCalPulserSpectrum();
 
-     std::string arbitraryWaveform = "arbitrary_waveform.txt";
+     std::string arbitraryWaveform = "arbitrary_waveform.txt";  //Testing out IDL pulser - JCF 4/9/2023
      ReadArbitraryWaveform(arbitraryWaveform);
+     
+     std::string pulserWaveform = "IDL1_waveform.txt";
+     ReadPulserWaveform(pulserWaveform);
      
   SetParameterization(settings1->WHICHPARAMETERIZATION);
 
@@ -293,6 +296,24 @@ Signal::~Signal() {
      }
     } else {
         std::cerr << "No arbitrary waveform file!" << std::endl;
+    }
+}
+
+ void Signal::ReadPulserWaveform(string target){
+   double e_field;
+   double time_tmp;
+
+   ifstream infile(target.c_str());
+   if (infile){
+     while (1){
+       infile >> time_tmp >> e_field;
+       if (!infile.good()) break;
+//       cout << time_tmp << " : " << e_field <<endl;
+       PulserWaveform_T.push_back(time_tmp);
+       PulserWaveform_V.push_back(e_field);
+     }
+    } else {
+        std::cerr << "No pulser waveform file!" << std::endl;
     }
 }
 
