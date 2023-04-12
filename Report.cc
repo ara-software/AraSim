@@ -5787,12 +5787,12 @@ void Report::checkPATrigger(
         //cout<<" Efficiency = "<<eff<<endl;
         if(avgSnr > 0.5){
             cout<<endl;
-            cout<<"Noise RMS : "<<noise_rms<<" avgSNR : "<<avgSnr<<" Efficiency "<<eff<<" RaySol No "<<raySolNum<<endl;
-            cout<<"~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
+            // cout<<"PA Noise RMS : "<<noise_rms<<" PA avgSNR : "<<avgSnr<<" PA Efficiency "<<eff<<" RaySol No "<<raySolNum<<endl;
                    
             if(isTrigger(eff)){
-                cout<<"This is a trigger with raySolNum as "<< raySolNum<<" ~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
-                cout<<" avgSNR For Triggered Events : "<<avgSnr<<" Event Number : "<<evt<<" efficiency : "<<eff<<endl;
+                cout<<"PA trigger ~~~ raySolNum: "<< raySolNum;
+                cout<<"  avgSNR: "<<avgSnr<<"  Event Number : "<<evt;
+                cout<<"  PA efficiency : "<<eff<<endl;
 
                 if (hasTriggered) {
                     cout<<"Weight for Second Ray trigger is: "<<event->Nu_Interaction[0].weight<<endl;
