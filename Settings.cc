@@ -852,6 +852,21 @@ int Settings::CheckCompatibilitiesSettings() {
         num_err++;
     }
 
+    if (TRIG_SCAN_MODE==5 && ( DETECTOR!=5 && DETECTOR!=9 ) ){
+        cerr<<"TRIG_SCAN_MODE=5 only compatible for Phased Array (DETECTOR= 5 or 9)"<<endl;
+        num_err++;
+    }
+
+    if ( ( DETECTOR==5 || DETECTOR==9 ) && TRIG_SCAN_MODE!=5){
+        cout<<"Warning: PA trigger only checked on its own if TRIG_SCAN_MODE=5 (for DETECTOR = 5 or 9)"<<endl;
+        // cerr<<"PA trigger only checked if TRIG_SCAN_MODE=5 (for DETECTOR = 5 or 9)"<<endl;
+        // num_err++;
+    }
+
+    if ( ( DETECTOR==5 || DETECTOR==9 ) && ( DETECTOR_STATION<1 || DETECTOR_STATION>3 ) ) {
+        cerr<<"DETECTOR_STATION must be 1,2,3 for PA Station (DETECTOR = 5 or 9) "<<endl;
+        num_err++;
+    }
 
 
     // check modes which will only work for actual installed TestBed case
