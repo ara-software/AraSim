@@ -507,7 +507,7 @@ class Detector {
     vector < IdealStation > IdealStations;
     
 
-    void SetupInstalledStations();
+    void SetupInstalledStations(Settings *settings1);
     void PrepareVectorsInstalled();
     void PrepareVectorsInstalled(int importedStation);
 

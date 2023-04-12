@@ -67,9 +67,9 @@ class Antenna_r {
         //vector <Position> n_H;  // normalized vector for H pol
         //vector <Position> n_V;  // normalized vector for V pol
 
-	//! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
-	//! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
-	vector < vector < vector <double> > > ray_step;
+        //! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
+        //! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
+        vector < vector < vector <double> > > ray_step;
 
         // below freq domain simulation output
         vector < vector <double> > vmmhz;  // signal V/m/MHz for each freq bin
@@ -117,8 +117,8 @@ class Antenna_r {
         vector <double> PeakV;  // peak voltage in time domain
         vector <int> Rank;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
 
-	//	vector <double> PeakV_fromFullWaveform; // peak voltage in time domain taken from full waveform, including noise at the time of signal insertion
-	//	vector <int> Rank_fromFullWaveform;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
+        //	vector <double> PeakV_fromFullWaveform; // peak voltage in time domain taken from full waveform, including noise at the time of signal insertion
+        //	vector <int> Rank_fromFullWaveform;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
 
         int Trig_Pass; // 0 if not passed the trigger, 1 if passed the trigger
         //vector <int> Trig_Pass; // 0 if not passed the trigger, 1 if passed the trigger
@@ -128,7 +128,7 @@ class Antenna_r {
         int SingleChannelTriggers; // how many bins passed the threshold in this channel (should be equal to size of SCT_threshold_pass).
         vector <double> SCT_threshold_pass; // for each bin that passed, what was the threshold value at which it passed (for TRIG_SCAN_MODE only). 
 	
-	long TotalBinsScannedPerChannel;
+        long TotalBinsScannedPerChannel;
 	
         vector <int> TooMuch_Tdelay;    // 0 is PeakV is located inside the DATA_BIN_SIZE array,  1 is when PeakV is located outside the DATA_BIN_SIZE so that we can't correctly check if it is triggered or not
 
@@ -234,10 +234,20 @@ class Report {
     
 //    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger);
     
-    void Connect_Interaction_Detector_V2 (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt);    
+    void Connect_Interaction_Detector_V2 (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt, double* xdata, double* ydata, double* ang_data, double* snr_data);     
     void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings, int which_solution,
         vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
         );
+    
+    // Phased Array functions    
+    double getAverageSNR(const vector<double> & mysignal,Trigger *trigger, const int PA_binsize, const int TOTAL_SIZE);
+    double getAverageSNR2(int raysolnum);
+    bool isTrigger(double eff);
+    void checkPATrigger(
+        int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,
+        Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
+        double* xdata, double* ydata, double* ang_data, double* snr_data);    
+    double interpolate(double *xdata,double *ydata, double xi, int numData);
     
 #ifdef ARA_UTIL_EXISTS
 
@@ -367,6 +377,12 @@ class Report {
 
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
 
+        // Phased Array variables
+        double viewAngle;
+        double my_averageSNR;
+        double my_receive_ang;
+        double my_raysol;
+        int A5PA_trig = -1 ; // -1->Not TRIG_SCAN_MODE=5; 0,1,2,3: TRIG_SCAN_MODE=5; 0=Not trig, 1=PA trig, 2=A5 trig, 3=A5+PA trig
 
         ClassDef(Report,1);
 

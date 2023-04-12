@@ -304,8 +304,8 @@ void Report::clear_useless(Settings *settings1) {   // to reduce the size of out
 
 }
 
-void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt)
-{
+void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt,
+                                             double* xdata, double* ydata, double* ang_data, double* snr_data) {
 
     int ray_sol_cnt;
     double viewangle;
@@ -314,6 +314,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
     Vector n_trg_pokey; // unit pokey vector at the target
     Vector n_trg_slappy;    // unit slappy vector at the target
     vector<vector < double>> ray_output;
+    double noise_rms;
+    double all_receive_ang[2];
 
     double vmmhz1m_tmp, vmmhz1m_sum, vmmhz1m_em;    // currently not using vmmhz1m_em
     Position Pol_vector;    // polarization vector at the source
@@ -2143,7 +2145,20 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 // save trig search bin info default (if no global trig, this value saved)
                 stations[i].total_trig_search_bin = max_total_bin - trig_search_init;
 
-                if (settings1->TRIG_SCAN_MODE == 0)
+                if (settings1->TRIG_SCAN_MODE==5){ // Trigger mode for phased array
+                    A5PA_trig = 0;
+                    checkPATrigger(
+                        i, all_receive_ang, viewangle, ray_sol_cnt, 
+                        detector, event, evt, trigger, settings1, 
+                        xdata, ydata, ang_data, snr_data
+                    );
+                    triggerCheckLoop(
+                        settings1, detector, event, trigger, i, 
+                        trig_search_init, max_total_bin, trig_window_bin, 
+                        settings1->TRIG_SCAN_MODE
+                    );
+                }
+                else if (settings1->TRIG_SCAN_MODE == 0)
                 {
                     // ********************old mode left as-is ********************
 
@@ -3195,7 +3210,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
           
   }// if scan_mode>1
 
-  int global_pass_bit=0;
+  int global_pass_bit=0; // whether this event passes (in all windows)
   int check_TDR_configuration=0; // check if we need to reorder our TDR arrays
   int SCTR_cluster_bit[numChan];   
   
@@ -3207,6 +3222,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
     int N_pass = 0;
     int N_pass_V = 0;
     int N_pass_H = 0;
+    int window_pass_bit = 0; // Whether this trig_i window passes
 
     check_TDR_configuration=0;
       
@@ -3214,6 +3230,21 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       
       int string_i = detector->getStringfromArbAntID( i, trig_j);
       int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+      // Phased array antennas don't contribute to this traditional trigger if TRIG_SCAN_MODE==5
+      if (settings1->TRIG_SCAN_MODE==5 && string_i==0) {
+            Pthresh_value[trig_j] = 0;
+
+            // stations[i].strings[string_i].antennas[antenna_i].TotalBinsScannedPerChannel++;
+            SCTR_cluster_bit[trig_j]=0;
+
+            // fill the buffers (if any changes occur mark check_TDR_configuration as non-zero)
+            if(trig_i<trig_search_init+trig_window_bin) {
+                check_TDR_configuration+=buffer[trig_j]->fill(Pthresh_value[trig_j]);
+            }
+            else check_TDR_configuration+=buffer[trig_j]->add(Pthresh_value[trig_j]);
+
+            continue;
+      }
       
       if (settings1->TRIG_ONLY_BH_ON==0
 	               || 
@@ -3221,8 +3252,13 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
                        ||
 	 (settings1->TRIG_ONLY_LOW_CH_ON==1 && settings1->DETECTOR!=3 && antenna_i<2 ) ){ // channel filter: choose if to use lower/borehole channels or not
       
-
-      int channel_num = detector->GetChannelfromStringAntenna ( i, string_i, antenna_i, settings1 );
+      int channel_num;
+      if (detector->Get_mode()==5 || detector->Get_mode()==9){
+          channel_num = detector->GetChannelfromStringAntenna ( 5, string_i, antenna_i, settings1 );
+      }
+      else {
+          channel_num = detector->GetChannelfromStringAntenna ( i, string_i, antenna_i, settings1 );
+      }
 
       // assign Pthresh a value 
       if(settings1->NOISE_CHANNEL_MODE==0) Pthresh_value[trig_j]=trigger->Full_window[trig_j][trig_i]/(trigger->rmsdiode * detector->GetThresOffset( i, channel_num-1,settings1) );
@@ -3297,6 +3333,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       
 
       global_pass_bit=1;  
+      window_pass_bit=1;
       if(first_trigger==0){ // if this is the first trigger, mark this position and save event
 
 	first_trigger=1;
@@ -3312,6 +3349,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	}// for trig_j
 	
 	saveTriggeredEvent(settings1, detector, event, trigger, stationID, trig_search_init, max_total_bin, trig_window_bin, trig_i);
+    if (settings1->TRIG_SCAN_MODE==5) A5PA_trig+=2;
 // 	cout<<"\nPthresh value=";
 // 	if(scan_mode==1) for(int trig_j=0;trig_j<numChan; trig_j++) cout<<" "<<Pthresh_value[trig_j];
 // 	if(scan_mode>1)  for(int trig_j=0;trig_j<numChan; trig_j++) cout<<" "<<buffer[trig_j]->best_value;
@@ -3322,9 +3360,8 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 //       if(scan_mode==1) return last_trig_bin; //  if we aren't going to scan all the Pthresh values, just return
       if(scan_mode==1) return trig_i; //  if we aren't going to scan all the Pthresh values, just return
     }
-    else global_pass_bit=0;// no trigger
     
-    if(scan_mode>1&&check_TDR_configuration&&global_pass_bit){// if there's a trigger and anything changes in the buffers, restock the TDR arrays
+    if(scan_mode>1&&check_TDR_configuration&&window_pass_bit){// if there's a trigger and anything changes in the buffers, restock the TDR arrays
       	    
       for(int trig_j=0;trig_j<numChan;trig_j++) TDR_all_sorted_temp[trig_j]=0;
       for(int trig_j=0;trig_j<numChanVpol;trig_j++) TDR_Vpol_sorted_temp[trig_j]=0;
@@ -3534,7 +3571,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
     
   }// while trig_i
   
-  if(scan_mode>1&&stations[i].Global_Pass){
+  if(scan_mode>1&&global_pass_bit){
     
     if(settings1->TRIG_MODE==0){
      
@@ -3560,7 +3597,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
     if(settings1->TRIG_MODE==1){
       cout<<"\nPthresh best: ";
       cout<<"  Vpol: "; for(int ii=0;ii<stations[i].TDR_Vpol_sorted.size();ii++) cout<<" "<<stations[i].TDR_Vpol_sorted[ii];
-      cout<<"  Hpol: "; for(int ii=0;ii<stations[i].TDR_Hpol_sorted.size();ii++) cout<<" "<<stations[i].TDR_Hpol_sorted[ii];
+      if (stations[i].TDR_Hpol_sorted.size() > 0) cout<<"  Hpol: "; for(int ii=0;ii<stations[i].TDR_Hpol_sorted.size();ii++) cout<<" "<<stations[i].TDR_Hpol_sorted[ii];
       cout<<"\n";
       
         
@@ -3574,7 +3611,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	cout<<"\n";
 	
       }// ordering problem
-	  
+      if (stations[i].TDR_Hpol_sorted.size() > 0) {
       // debug output:
       if(stations[i].TDR_Hpol_sorted[0]>stations[i].TDR_Hpol_sorted[1]||stations[i].TDR_Hpol_sorted[1]>stations[i].TDR_Hpol_sorted[2]){
 	   
@@ -3585,6 +3622,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	cout<<"\n";
 		
       }// ordering problem
+    }
          
     }// trig mode 1
     
@@ -5615,3 +5653,223 @@ vector<double> Report::getHitTimesVectorHpol(Detector *detector, int station_i){
   return getHitTimesVector(detector, station_i, 1);
   
 }
+
+double Report::getAverageSNR2(int raysolnum){
+    double total_snr = 0.0;
+    double temp_snr = 0.0;
+    double peak;
+    for (int ant_num = 0; ant_num<7; ant_num++){
+        peak = 0.0;
+        int total_bins = stations[0].strings[0].antennas[ant_num].V[raysolnum].size();
+        //cout << "size is " << total_bins << endl;
+        for (int bin=0; bin<total_bins; bin++){
+            //cout << bin << endl;
+            //cout << stations[0].strings[0].antennas[ant_num].V[raysolnum][bin] << endl;
+            //bin_value = signalBin - BINSIZE/2 + bin;
+            //cout << stations[0].strings[0].antennas[ant_num].V[raysolnum][bin] << endl;
+            if(TMath::Abs(stations[0].strings[0].antennas[ant_num].V[raysolnum][bin])>peak){
+                //cout << "made it! " << TMath::Abs(stations[0].strings[0].antennas[ant_num].V[raysolnum][bin]) << endl;
+                peak = TMath::Abs(stations[0].strings[0].antennas[ant_num].V[raysolnum][bin]);
+
+            }
+        }
+
+        temp_snr = peak/0.04;
+        if(temp_snr>25){
+            temp_snr = 25;
+        }
+        //cout <<temp_snr << endl;
+        total_snr = total_snr+temp_snr;
+    }
+    total_snr = total_snr/7.0;
+    return total_snr;
+}
+
+double Report::getAverageSNR(const vector<double> & mysignal,Trigger *trigger, const int PA_binsize, const int TOTAL_SIZE){
+    //cout << "inside function " << endl;
+    double snr = 0.0;
+    //for (size_t ant = 0; ant<mysignal.antennas.size(), ant++){
+    double peak =0.0;
+    for (int bin; bin<mysignal.size(); bin++){
+        //cout << mysignal[bin] << endl;
+        //bin_value = signalBin - BINSIZE/2 + bin;
+        if(TMath::Abs(mysignal[bin])>peak){
+            //cout << "made it! " << TMath::Abs(mysignal[bin]) << endl;
+            peak = TMath::Abs(mysignal[bin]);
+
+        }
+    }
+    //cout << "peak is "<< peak << endl;
+    snr =peak/0.04;
+    //cout << "snr is "<< snr << endl;
+    if(snr>25)
+    {
+        snr = 25.0;
+    
+    }
+    //cout << snr << endl;
+    return snr;
+
+}
+
+bool Report::isTrigger(double eff){
+  if (eff >= 1.0) return true;
+  float randNum = gRandom->Rndm();
+  if (randNum < eff) return true;
+  return false;
+}
+
+void Report::checkPATrigger(
+    int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,
+    Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
+    double* xdata, double* ydata, double* ang_data, double* snr_data
+){
+    // Calculates max SNR in first PA Vpol 
+    //   and multplies it by viewing angle factors. 
+    // Then determines signal efficiency by interpolating oberved SNR from 
+    //   efficiency vs SNR data.
+    // Triggers if signal efficiency is above certain treshold.
+    // If triggered, saves relevant information.
+
+    //cout <<"successfully made it to PA Trigger!" << endl;
+    int BINSIZE = 1200/(settings1->TIMESTEP*1.e9); 
+    
+    // For phased array, waveform length is 680 ns, but for trigger
+    // check only 20 ns around the signal bin.
+    // This is to avoid getting the second ray
+
+    int raySolNum = 0;
+    int dsignalBin = 0;
+    viewangle=viewangle*180.0/PI;
+    bool searchSecondRay = true;
+    if (ray_sol_cnt == 2){
+        dsignalBin = abs(signal_bin[0] - signal_bin[1]); //original kah
+        dsignalBin = abs(stations[i].strings[0].antennas[0].SignalBin[0]-stations[i].strings[0].antennas[0].SignalBin[1]);
+    }
+    bool hasTriggered = false;
+
+    //cout << "time to trigger " << endl;
+    while(raySolNum < stations[i].strings[0].antennas[0].SignalBin.size()){
+
+        int signalbinPA = stations[i].strings[0].antennas[0].SignalBin[raySolNum]; //new kah
+        int bin_value;
+        double noise_rms = 0.04; //The noise RMS for an ARA waveform
+        double avgSnr;
+        if(settings1->TRIG_ANALYSIS_MODE == 2) {
+            avgSnr=3.5;
+        }
+        else {
+            if(stations[i].strings[0].antennas[0].V.size()>raySolNum) {
+                avgSnr = getAverageSNR(stations[i].strings[0].antennas[0].V[raySolNum],trigger,signalbinPA,BINSIZE);
+            }
+            else {
+                avgSnr = 0.0;
+            }
+        }
+
+        all_receive_ang[raySolNum] = all_receive_ang[raySolNum]*180.0/PI-90.0;
+        double snr_50 = interpolate(ang_data,snr_data,all_receive_ang[raySolNum],187);
+
+        avgSnr = avgSnr*2.0/snr_50; //scale snr to reflect the angle
+
+        double eff = interpolate(xdata,ydata,avgSnr,59);
+
+        if(event->Nu_Interaction[0].posnu.GetX() <0 & event->Nu_Interaction[0].posnu.GetY() <0){
+            cout << avgSnr << endl;
+            cout << eff << endl;
+            cout << "" << endl;
+        }
+        
+        //cout<<" Efficiency = "<<eff<<endl;
+        if(avgSnr > 0.5){
+            cout<<endl;
+            cout<<"Noise RMS : "<<noise_rms<<" avgSNR : "<<avgSnr<<" Efficiency "<<eff<<" RaySol No "<<raySolNum<<endl;
+            cout<<"~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
+                   
+            if(isTrigger(eff)){
+                cout<<"This is a trigger with raySolNum as "<< raySolNum<<" ~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
+                cout<<" avgSNR For Triggered Events : "<<avgSnr<<" Event Number : "<<evt<<" efficiency : "<<eff<<endl;
+
+                if (hasTriggered) {
+                    cout<<"Weight for Second Ray trigger is: "<<event->Nu_Interaction[0].weight<<endl;
+                    break;
+                }
+                //stations[i].strings[0].averageSNR = avgSnr;
+                //stations[i].strings[0].viewAngle = viewangle;
+                viewAngle = viewangle;
+                my_averageSNR = avgSnr;
+                my_raysol = raySolNum;
+                my_receive_ang = all_receive_ang[raySolNum];
+                A5PA_trig += 1;
+                int last_trig_bin = signalbinPA;
+                //cout<<"Signal Bin ****"<<signalbinPA<<"BIN SIZE "<<BINSIZE<<endl;
+                int my_ch_id = 0;
+                stations[i].Global_Pass = last_trig_bin;
+                for (size_t str = 0; str < detector->stations[i].strings.size(); str++) {
+                    for (size_t ant = 0; ant < detector->stations[i].strings[str].antennas.size(); ant++) {
+                        double peakvalue = 0;
+                        for (int bin=0; bin<BINSIZE; bin++) {
+
+                            bin_value = signalbinPA - BINSIZE/2 + bin;
+                            // stations[i].strings[str].antennas[ant].V_mimic.push_back( ( trigger->Full_window_V[ant][ last_trig_bin - settings1->NFOUR/4 + mimicbin ] )*1.e3 );// save in mV
+                            // stations[i].strings[str].antennas[ant].time.push_back( last_trig_bin - settings1->NFOUR/4 + mimicbin );
+                            // stations[i].strings[str].antennas[ant].time_mimic.push_back( ( settings1->NFOUR/4 + mimicbin) * settings1->TIMESTEP*1.e9 );// save in ns
+                            //stations[i].strings[0].antennas[ant].V_mimic.push_back(trigger->Full_window_V[ant][bin_value]*1e3);// save in mV (original kah)
+                            stations[i].strings[str].antennas[ant].V_mimic.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
+                            // stations[i].strings[0].antennas[ant].time.push_back( bin_value );
+                            // stations[i].strings[0].antennas[ant].time_mimic.push_back( ( BINSIZE/2 + bin) * settings1->TIMESTEP*1.e9 );// save in ns
+                            //stations[i].strings[str].antennas[ant].waveformVoltage.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
+                            stations[i].strings[str].antennas[ant].time.push_back( bin_value );
+
+                            stations[i].strings[str].antennas[ant].time_mimic.push_back( ( bin) * settings1->TIMESTEP*1.e9 );// save in ns
+                            if (TMath::Abs(trigger->Full_window_V[ant][bin_value]) > peakvalue) {
+                                peakvalue = TMath::Abs(trigger->Full_window_V[my_ch_id][bin_value]);
+                            }
+                        }//end bin
+                        my_ch_id ++;
+                        //cout<<" Peak Value for ant "<<ant<<" is "<<peakvalue<<endl;
+                    }//end ant
+                }//end detector
+
+            }//end efficiency if
+
+            hasTriggered = true;
+
+        }//end avgsnr if
+        
+        raySolNum++;
+        if(hasTriggered==true) break;
+        if(searchSecondRay == false) break;
+
+        //if(stations[i].Global_Pass > 0) break;
+    }//while ray solve
+
+}
+
+double Report::interpolate(double *xdata,double *ydata, double xi, int numData)
+{
+    double result = 0.0; // Initialize result
+    double x1, y1, x2, y2; // Data points about which linear interpolation will take place
+    double c, m; //slope and constant in y = mx + c
+    //cout<<"Last Value "<<xdata[numData]<<endl;
+    if (xi >= xdata[numData]) return ydata[numData];
+    if (xi <= xdata[0]) return ydata[0];
+    for (int i=0; i<numData; i++)
+    {
+        if (i == numData - 1){
+          result = ydata[numData];
+        }
+        if (xi > xdata[i] && xi < xdata[i+1]){
+          x1 = xdata[i]; x2 = xdata[i+1]; y1 = ydata[i]; y2 = ydata[i+1];
+          c = (y2*x1 - x2*y1)/(x1-x2);
+          m = (y1-y2)/(x1-x2);
+          result = m*xi + c; //linear interpolation
+          break;
+        }
+        if (xdata[i] == x1) result = ydata[i];
+    }
+    //cout<<"x1 "<<x1<<" x2 "<<x2<<" xi "<<xi<<endl;
+
+    return result;
+}
+
