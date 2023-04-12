@@ -195,7 +195,8 @@ Signal::~Signal() {
      std::string arbitraryWaveform = "arbitrary_waveform.txt";  //Testing out IDL pulser - JCF 4/9/2023
      ReadArbitraryWaveform(arbitraryWaveform);
      
-     std::string pulserWaveform = "IDL1_waveform.txt";
+     // std::string pulserWaveform = "IDL1_waveform.txt";
+     std::string pulserWaveform = "IDL1_waveformNoiseless.txt";
      ReadPulserWaveform(pulserWaveform);
      
   SetParameterization(settings1->WHICHPARAMETERIZATION);

@@ -249,7 +249,7 @@ void Event::Choose_Evt_Type (Settings *settings1) {
         Event_type = 11;
     }
     else {
-        cout<<"Currently, only neutrino (EVET_TYPE=0), arbitrary (EVENT_TYPE=10), and pulser (EVENT_TYPE=11) events possible!"<<endl;
+        cout<<"Currently, only neutrino (EVENT_TYPE=0), arbitrary (EVENT_TYPE=10), and pulser (EVENT_TYPE=11) events possible!"<<endl;
         cout<<"Change Evt_type from "<<settings1->EVENT_TYPE<<" to 0"<<endl;
         Event_type = 0;
     }
