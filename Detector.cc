@@ -2112,17 +2112,17 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
         // Initialize parameters that have changed over time
         if (settings1->DETECTOR_STATION==1){ // Using all vanilla VPols
-            params.number_of_antennas = 15;
+            params.number_of_antennas = 25;
             params.number_of_strings = 5;
             params.number_of_strings_station = 5;
         }
         else if (settings1->DETECTOR_STATION==2){ // Using 1 vanilla VPol
-            params.number_of_antennas = 8;
+            params.number_of_antennas = 10;
             params.number_of_strings = 2;
             params.number_of_strings_station = 2;
         }
         else if (settings1->DETECTOR_STATION==3){ // Using 7 vanilla VPols
-            params.number_of_antennas = 14;
+            params.number_of_antennas = 16;
             params.number_of_strings = 5;
             params.number_of_strings_station = 5;
         }
@@ -2133,14 +2133,15 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         // Build Station/String/Antenna Vectors       
         stations.push_back(temp_station);
         stations[0].strings.push_back(temp_string);
-        for (int l=0; l<7; l++) {
+        for (int l=0; l<9; l++) {
             stations[0].strings[0].antennas.push_back(temp_antenna);
         }   
-        if (settings1->DETECTOR_STATION==1){ // Using all vanilla VPols
-            for (int l=1; l<5; l++) {
+        if (settings1->DETECTOR_STATION==1){ // Using all vanilla antennas
+            for (int k=1; k<5; k++) { 
                 stations[0].strings.push_back(temp_string);
-                stations[0].strings[l].antennas.push_back(temp_antenna);
-                stations[0].strings[l].antennas.push_back(temp_antenna);
+                for (int l=0; l<4; l++) { 
+                    stations[0].strings[k].antennas.push_back(temp_antenna);
+                }
             }
         }
         else if (settings1->DETECTOR_STATION == 2){ // Using 1 vanilla VPol
@@ -2179,6 +2180,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             stations[0].strings[0].antennas[4].SetZ(-174.66);
             stations[0].strings[0].antennas[5].SetZ(-173.65);
             stations[0].strings[0].antennas[6].SetZ(-172.635);
+            stations[0].strings[0].antennas[7].SetZ(-171.635); // adb, double check later
+            stations[0].strings[0].antennas[8].SetZ(-170.635); // adb, double check later
             cout<<"Check 2"<<endl;
 
             // Set ARA5 string locations
@@ -2211,13 +2214,21 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             if (settings1->DETECTOR_STATION==1){ 
                 cout << "Using all ARA05 vanilla vpols" << endl;
                 stations[0].strings[1].antennas[0].SetZ(-194.73); // ARA ch0
-                stations[0].strings[1].antennas[1].SetZ(-165.09); // ARA ch1
+                stations[0].strings[1].antennas[1].SetZ(-193.73); // ARA ch
+                stations[0].strings[1].antennas[2].SetZ(-165.09); // ARA ch1
+                stations[0].strings[1].antennas[3].SetZ(-164.09); // ARA ch
                 stations[0].strings[2].antennas[0].SetZ(-196.20); // ARA ch8
-                stations[0].strings[2].antennas[1].SetZ(-166.53); // ARA ch9
+                stations[0].strings[2].antennas[1].SetZ(-195.20); // ARA ch
+                stations[0].strings[2].antennas[2].SetZ(-166.53); // ARA ch9
+                stations[0].strings[2].antennas[3].SetZ(-165.53); // ARA ch
                 stations[0].strings[3].antennas[0].SetZ(-190.86); // ARA ch24
-                stations[0].strings[3].antennas[1].SetZ(-161.02); // ARA ch25
+                stations[0].strings[3].antennas[1].SetZ(-189.86); // ARA ch
+                stations[0].strings[3].antennas[2].SetZ(-161.02); // ARA ch25
+                stations[0].strings[3].antennas[3].SetZ(-160.02); // ARA ch
                 stations[0].strings[4].antennas[0].SetZ(-177.75); // ARA ch16
-                stations[0].strings[4].antennas[1].SetZ(-147.21); // ARA ch17
+                stations[0].strings[4].antennas[1].SetZ(-176.75); // ARA ch
+                stations[0].strings[4].antennas[2].SetZ(-147.21); // ARA ch17
+                stations[0].strings[4].antennas[3].SetZ(-146.21); // ARA ch
             }
             else if (settings1->DETECTOR_STATION == 2){
                 // Dont actually remember if it was ch16 that was not plugged in or not
@@ -2238,11 +2249,32 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             cout << "check 2.1" << endl;
 
             // Set all antennas to VPOL (1 for HPOL)
-            for (int k=0; k<stations[0].strings.size(); k++) {
-                for (int l=0; l<stations[0].strings[k].antennas.size(); l++) {
-                    stations[0].strings[k].antennas[l].type = 0;
-                }
+            // for (int k=0; k<stations[0].strings.size(); k++) {
+            //     for (int l=0; l<stations[0].strings[k].antennas.size(); l++) {
+            //         stations[0].strings[k].antennas[l].type = 0;
+            //     }
+            // } 
+            for (int l=0; l<7; l++) {
+                stations[0].strings[0].antennas[l].type = 0;
             } 
+            stations[0].strings[0].antennas[7].type = 1;
+            stations[0].strings[0].antennas[8].type = 1;
+            if (settings1->DETECTOR_STATION == 1){ // Set vanilla H and Vpols
+                for (int k=1; k<5; k++) {
+                    stations[0].strings[k].antennas[0].type = 0;
+                    stations[0].strings[k].antennas[1].type = 1;
+                    stations[0].strings[k].antennas[2].type = 0;
+                    stations[0].strings[k].antennas[3].type = 1;
+                }
+            }
+            else{ // Set all vanilla antennas to VPol
+                for (int k=1; k<4; k++) {
+                    for (int l=0; l<stations[0].strings[k].antennas.size(); l++) {
+                        stations[0].strings[k].antennas[l].type = 0;
+                    }
+            } 
+
+            }
             cout << "check 2.2" << endl;
 
             // Orient all antennas in x direction
@@ -2260,6 +2292,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 stations[0].number_of_antennas += stations[0].strings[k].antennas.size();
                 max_number_of_antennas_station += stations[0].strings[k].antennas.size();
             } 
+            cout<<"adb number of antennas: "<<max_number_of_antennas_station<<endl;
 
         } // if idealized geometry
         
@@ -5792,6 +5825,8 @@ void Detector::SetupInstalledStations(Settings *settings1) {
         Antennas.push_back(104);
         Antennas.push_back(106);
         Antennas.push_back(107);
+        Antennas.push_back(108); // adb check this later
+        Antennas.push_back(109); // adb check this later
         InstalledStations[5].VHChannel.push_back(Antennas); 
         Antennas.clear();
 
@@ -5799,31 +5834,31 @@ void Detector::SetupInstalledStations(Settings *settings1) {
             // ARA05 DAQ on, all antennas available
 
             // Make string 0
-            Antennas.push_back(5);// Antennas.push_back(13);
-            Antennas.push_back(1);// Antennas.push_back(9);
+            Antennas.push_back(5); Antennas.push_back(13);
+            Antennas.push_back(1); Antennas.push_back(9);
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
             
             // Make string 1
-            Antennas.push_back(6);// Antennas.push_back(14);
-            Antennas.push_back(2);// Antennas.push_back(10);
+            Antennas.push_back(6); Antennas.push_back(14);
+            Antennas.push_back(2); Antennas.push_back(10);
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
             // Make string 2
-            Antennas.push_back(7);// Antennas.push_back(15);
-            Antennas.push_back(3);// Antennas.push_back(11);
+            Antennas.push_back(7); Antennas.push_back(15);
+            Antennas.push_back(3); Antennas.push_back(11);
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
             
             // Make string 3
-            Antennas.push_back(4);// Antennas.push_back(12);
-            Antennas.push_back(0);// Antennas.push_back(8);
+            Antennas.push_back(4); Antennas.push_back(12);
+            Antennas.push_back(0); Antennas.push_back(8);
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
-            InstalledStations[5].nChannels = 15;
-            InstalledStations[5].nChannelsVH = 15;
+            InstalledStations[5].nChannels = 25;
+            InstalledStations[5].nChannelsVH = 25;
 
         }
         else if (settings1->DETECTOR_STATION==1) {
@@ -5853,8 +5888,8 @@ void Detector::SetupInstalledStations(Settings *settings1) {
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
-            InstalledStations[5].nChannels = 8;
-            InstalledStations[5].nChannelsVH = 8;
+            InstalledStations[5].nChannels = 10;
+            InstalledStations[5].nChannelsVH = 10;
         }
         else if (settings1->DETECTOR_STATION==3) {
             // ARA05 DAQ off, only 7 vpols available
@@ -5883,8 +5918,8 @@ void Detector::SetupInstalledStations(Settings *settings1) {
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
-            InstalledStations[5].nChannels = 14;
-            InstalledStations[5].nChannelsVH = 14;
+            InstalledStations[5].nChannels = 16;
+            InstalledStations[5].nChannelsVH = 16;
         }
 
         InstalledStations[5].nStrings = InstalledStations[5].VHChannel.size();
