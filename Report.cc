@@ -2134,7 +2134,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                 int trig_mode = settings1->TRIG_MODE;
                 // global trigger mode
-                // 0 for orginal N_TRIG out of 16 channels
+                // 0 for orginal N_TRIG out of all channels
                 // 1 for new stations, N_TRIG_V out of Vpol channels or N_TRIG_H out of Hpol channels
 
                 int check_ch;
@@ -3375,7 +3375,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 
       }// for trig_j
 
-      if(settings1->TRIG_MODE==0){ // for N out of 16 mode
+      if(settings1->TRIG_MODE==0){ // for N out of all mode
       
 	if(N_pass>=settings1->N_TRIG) for(int ii=0;ii<N_pass; ii++){// find the N_pass best channel's TDR and store them.
 	 
@@ -3828,7 +3828,7 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 	if (stationID == 0){
 	  ch_limit = 14;
 	} else {
-	  ch_limit = 16;
+	  ch_limit = 28;
 	}
 
         for (int ch_loop=0; ch_loop<ch_limit; ch_loop++) {
@@ -3874,7 +3874,7 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 	if (stationID == 0){
 	  ch_limit = 14;
 	} else {
-	  ch_limit = 16;
+	  ch_limit = 28;
 	}
 
 	int maxElecChans = 32;
@@ -4728,7 +4728,7 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 ApplyPreamp_databin(k, detector, V_tmp);
                 ApplyFOAM_databin(k, detector, V_tmp);
                 if (settings1 -> APPLY_NOISE_FIGURE == 1) {
-                    ApplyNoiseFig_databin(ch % 16, k, detector, V_tmp, settings1);
+                    ApplyNoiseFig_databin(ch % 28, k, detector, V_tmp, settings1);
                 }
             } else if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
                 // apply RFCM gain
