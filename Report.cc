@@ -2152,11 +2152,13 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         detector, event, evt, trigger, settings1, 
                         xdata, ydata, ang_data, snr_data
                     );
-                    triggerCheckLoop(
-                        settings1, detector, event, trigger, i, 
-                        trig_search_init, max_total_bin, trig_window_bin, 
-                        settings1->TRIG_SCAN_MODE
-                    );
+                    if (settings1->DETECTOR_STATION==1){ // if A5 DAQ still online
+                        triggerCheckLoop(
+                            settings1, detector, event, trigger, i, 
+                            trig_search_init, max_total_bin, trig_window_bin, 
+                            settings1->TRIG_SCAN_MODE
+                        );
+                    }
                 }
                 else if (settings1->TRIG_SCAN_MODE == 0)
                 {
