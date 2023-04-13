@@ -2277,7 +2277,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             else if (settings1->DETECTOR_STATION == 2){
                 // Dont actually remember if it was ch16 that was not plugged in or not
                 cout << "Using 1 ARA05 vanilla Vpol" << endl;
-                stations[0].strings[1].antennas[0].SetZ(-190.86); // ARA ch24
+                stations[0].strings[4].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
             }
             else if (settings1->DETECTOR_STATION == 3){
                 cout << "Using 7 ARA05 vanilla Vpols" << endl;
@@ -2286,9 +2286,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 stations[0].strings[2].antennas[0].SetZ(-196.20); // A5E  8, A5RF  4, PA 14
                 stations[0].strings[2].antennas[1].SetZ(-166.53); // A5E  9, A5RF  0, PA 15
                 stations[0].strings[3].antennas[0].SetZ(-177.75); // A5E 16, A5RF  6, PA 10
+                // stations[0].strings[4].antennas[1].SetZ(-147.21); // ARA ch17
                 stations[0].strings[4].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
                 stations[0].strings[4].antennas[1].SetZ(-161.02); // A5E 25, A5RF  3, PA 11
-                // stations[0].strings[4].antennas[1].SetZ(-147.21); // ARA ch17
             }
             cout << "check 2.1" << endl;
 
@@ -5862,42 +5862,42 @@ void Detector::SetupInstalledStations(Settings *settings1) {
     if (InstalledStations.size() > 5) { // Station 5
         
         // Make Phased Array
-        Antennas.push_back(100);
-        Antennas.push_back(101);
-        Antennas.push_back(102);
-        Antennas.push_back(103);
-        Antennas.push_back(104);
-        Antennas.push_back(106);
-        Antennas.push_back(107);
-        Antennas.push_back(108); // adb check this later
-        Antennas.push_back(109); // adb check this later
+        Antennas.push_back(109); // PAHpol at Z=-183.8
+        Antennas.push_back(108); // PAHpol at Z=-182.8
+        Antennas.push_back(107); // PAVpol at Z=-180.8
+        Antennas.push_back(106); // PAVpol at Z=-178.8
+        Antennas.push_back(104); // PAVpol at Z=-176.7
+        Antennas.push_back(103); // PAVpol at Z=-175.7
+        Antennas.push_back(102); // PAVpol at Z=-174.7
+        Antennas.push_back(101); // PAVpol at Z=-173.7
+        Antennas.push_back(100); // PAVpol at Z=-172.7
         InstalledStations[5].VHChannel.push_back(Antennas); 
         Antennas.clear();
 
         if (settings1->DETECTOR_STATION==1) {
             // ARA05 DAQ on, all antennas available
+            
+            // Make string 1
+            Antennas.push_back(4); Antennas.push_back(12);
+            Antennas.push_back(0); Antennas.push_back(8);
+            InstalledStations[5].VHChannel.push_back(Antennas); 
+            Antennas.clear();
 
-            // Make string 0
+            // Make string 2
             Antennas.push_back(5); Antennas.push_back(13);
             Antennas.push_back(1); Antennas.push_back(9);
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
             
-            // Make string 1
+            // Make string 3
             Antennas.push_back(6); Antennas.push_back(14);
             Antennas.push_back(2); Antennas.push_back(10);
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
-            // Make string 2
+            // Make string 4
             Antennas.push_back(7); Antennas.push_back(15);
             Antennas.push_back(3); Antennas.push_back(11);
-            InstalledStations[5].VHChannel.push_back(Antennas); 
-            Antennas.clear();
-            
-            // Make string 3
-            Antennas.push_back(4); Antennas.push_back(12);
-            Antennas.push_back(0); Antennas.push_back(8);
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
@@ -5907,28 +5907,28 @@ void Detector::SetupInstalledStations(Settings *settings1) {
         }
         else if (settings1->DETECTOR_STATION==1) {
             // ARA05 DAQ off, not connected to PA, only split A5 channel connected
+            
+            // Make string 1
+            // Antennas.push_back(4);// Antennas.push_back(12);
+            // Antennas.push_back(0);// Antennas.push_back(8);
+            InstalledStations[5].VHChannel.push_back(Antennas); 
+            Antennas.clear();
 
-            // Make string 0
+            // Make string 2
             // Antennas.push_back(5);// Antennas.push_back(13);
             // Antennas.push_back(1);// Antennas.push_back(9);
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
             
-            // Make string 1
+            // Make string 3
             // Antennas.push_back(6);// Antennas.push_back(14);
             // Antennas.push_back(2);// Antennas.push_back(10);
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
-            // Make string 2
+            // Make string 4
             Antennas.push_back(7);// Antennas.push_back(15);
             // Antennas.push_back(3);// Antennas.push_back(11);
-            InstalledStations[5].VHChannel.push_back(Antennas); 
-            Antennas.clear();
-            
-            // Make string 3
-            // Antennas.push_back(4);// Antennas.push_back(12);
-            // Antennas.push_back(0);// Antennas.push_back(8);
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
@@ -5937,6 +5937,12 @@ void Detector::SetupInstalledStations(Settings *settings1) {
         }
         else if (settings1->DETECTOR_STATION==3) {
             // ARA05 DAQ off, only 7 vpols available
+            
+            // Make string 3
+            Antennas.push_back(4);// Antennas.push_back(12);
+            Antennas.push_back(0);// Antennas.push_back(8);
+            InstalledStations[5].VHChannel.push_back(Antennas); 
+            Antennas.clear();
 
             // Make string 0
             Antennas.push_back(5);// Antennas.push_back(13);
@@ -5946,19 +5952,13 @@ void Detector::SetupInstalledStations(Settings *settings1) {
             
             // Make string 1
             Antennas.push_back(6);// Antennas.push_back(14);
-            Antennas.push_back(2);// Antennas.push_back(10);
+            // Antennas.push_back(2);// Antennas.push_back(10);
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
             // Make string 2
             Antennas.push_back(7);// Antennas.push_back(15);
             Antennas.push_back(3);// Antennas.push_back(11);
-            InstalledStations[5].VHChannel.push_back(Antennas); 
-            Antennas.clear();
-            
-            // Make string 3
-            Antennas.push_back(4);// Antennas.push_back(12);
-            // Antennas.push_back(0);// Antennas.push_back(8);
             InstalledStations[5].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
