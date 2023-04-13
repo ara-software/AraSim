@@ -2173,15 +2173,15 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             // Set Phased Array locations (load bottom to top)
             stations[0].strings[0].SetX( stations[0].GetX()  );
             stations[0].strings[0].SetY( stations[0].GetY()  );
-            stations[0].strings[0].antennas[0].SetZ(-180.79);
-            stations[0].strings[0].antennas[1].SetZ(-178.75);
-            stations[0].strings[0].antennas[2].SetZ(-176.70);
-            stations[0].strings[0].antennas[3].SetZ(-175.68);
-            stations[0].strings[0].antennas[4].SetZ(-174.66);
-            stations[0].strings[0].antennas[5].SetZ(-173.65);
-            stations[0].strings[0].antennas[6].SetZ(-172.635);
-            stations[0].strings[0].antennas[7].SetZ(-171.635); // adb, double check later
-            stations[0].strings[0].antennas[8].SetZ(-170.635); // adb, double check later
+            stations[0].strings[0].antennas[0].SetZ(-183.79); // adb, double check later
+            stations[0].strings[0].antennas[1].SetZ(-182.79 ); // adb, double check later
+            stations[0].strings[0].antennas[2].SetZ(-180.79);
+            stations[0].strings[0].antennas[3].SetZ(-178.75);
+            stations[0].strings[0].antennas[4].SetZ(-176.70);
+            stations[0].strings[0].antennas[5].SetZ(-175.68);
+            stations[0].strings[0].antennas[6].SetZ(-174.66);
+            stations[0].strings[0].antennas[7].SetZ(-173.65);
+            stations[0].strings[0].antennas[8].SetZ(-172.635);
             cout<<"Check 2"<<endl;
 
             // Set ARA5 string locations
@@ -2254,11 +2254,11 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             //         stations[0].strings[k].antennas[l].type = 0;
             //     }
             // } 
-            for (int l=0; l<7; l++) {
+            stations[0].strings[0].antennas[0].type = 1;
+            stations[0].strings[0].antennas[1].type = 1;
+            for (int l=2; l<9; l++) {
                 stations[0].strings[0].antennas[l].type = 0;
             } 
-            stations[0].strings[0].antennas[7].type = 1;
-            stations[0].strings[0].antennas[8].type = 1;
             if (settings1->DETECTOR_STATION == 1){ // Set vanilla H and Vpols
                 for (int k=1; k<5; k++) {
                     stations[0].strings[k].antennas[0].type = 0;

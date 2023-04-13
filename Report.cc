@@ -5748,14 +5748,14 @@ void Report::checkPATrigger(
     bool searchSecondRay = true;
     if (ray_sol_cnt == 2){
         dsignalBin = abs(signal_bin[0] - signal_bin[1]); //original kah
-        dsignalBin = abs(stations[i].strings[0].antennas[0].SignalBin[0]-stations[i].strings[0].antennas[0].SignalBin[1]);
+        dsignalBin = abs(stations[i].strings[0].antennas[8].SignalBin[0]-stations[i].strings[0].antennas[8].SignalBin[1]);
     }
     bool hasTriggered = false;
 
     //cout << "time to trigger " << endl;
-    while(raySolNum < stations[i].strings[0].antennas[0].SignalBin.size()){
+    while(raySolNum < stations[i].strings[0].antennas[8].SignalBin.size()){
 
-        int signalbinPA = stations[i].strings[0].antennas[0].SignalBin[raySolNum]; //new kah
+        int signalbinPA = stations[i].strings[0].antennas[8].SignalBin[raySolNum]; //new kah
         int bin_value;
         double noise_rms = 0.04; //The noise RMS for an ARA waveform
         double avgSnr;
@@ -5764,8 +5764,8 @@ void Report::checkPATrigger(
         }
         else {
             // Estimate average SNR from topmost vpol
-            if(stations[i].strings[0].antennas[6].V.size()>raySolNum) {
-                avgSnr = getAverageSNR(stations[i].strings[0].antennas[0].V[raySolNum],trigger,signalbinPA,BINSIZE);
+            if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
+                avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V[raySolNum],trigger,signalbinPA,BINSIZE);
             }
             else {
                 avgSnr = 0.0;
