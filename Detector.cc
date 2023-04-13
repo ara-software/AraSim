@@ -2220,14 +2220,14 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 stations[0].strings[2].antennas[1].SetZ(-195.20); // A5E  2, A5RF 13
                 stations[0].strings[2].antennas[2].SetZ(-166.53); // A5E  1, A5RF  1, PA 13 
                 stations[0].strings[2].antennas[3].SetZ(-165.53); // A5E  3, A5RF  9
-                stations[0].strings[3].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
-                stations[0].strings[3].antennas[1].SetZ(-189.86); // A5E 26, A5RF 15
-                stations[0].strings[3].antennas[2].SetZ(-161.02); // A5E 25, A5RF  3, PA 11
-                stations[0].strings[3].antennas[3].SetZ(-160.02); // A5E 27, A5RF 11
-                stations[0].strings[4].antennas[0].SetZ(-177.75); // A5E 16, A5RF  6, PA 10
-                stations[0].strings[4].antennas[1].SetZ(-176.75); // A5E 18, A5RF 14
-                stations[0].strings[4].antennas[2].SetZ(-147.21); // A5E 17, A5RF  2
-                stations[0].strings[4].antennas[3].SetZ(-146.21); // A5E 19, A5RF 10
+                stations[0].strings[3].antennas[0].SetZ(-177.75); // A5E 16, A5RF  6, PA 10
+                stations[0].strings[3].antennas[1].SetZ(-176.75); // A5E 18, A5RF 14
+                stations[0].strings[3].antennas[2].SetZ(-147.21); // A5E 17, A5RF  2
+                stations[0].strings[3].antennas[3].SetZ(-146.21); // A5E 19, A5RF 10
+                stations[0].strings[4].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
+                stations[0].strings[4].antennas[1].SetZ(-189.86); // A5E 26, A5RF 15
+                stations[0].strings[4].antennas[2].SetZ(-161.02); // A5E 25, A5RF  3, PA 11
+                stations[0].strings[4].antennas[3].SetZ(-160.02); // A5E 27, A5RF 11
             }
             else if (settings1->DETECTOR_STATION == 2){
                 // Dont actually remember if it was ch16 that was not plugged in or not
@@ -2240,9 +2240,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 stations[0].strings[1].antennas[1].SetZ(-165.09); // A5E  1, A5RF  1, PA 13
                 stations[0].strings[2].antennas[0].SetZ(-196.20); // A5E  8, A5RF  4, PA 14
                 stations[0].strings[2].antennas[1].SetZ(-166.53); // A5E  9, A5RF  0, PA 15
-                stations[0].strings[3].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
-                stations[0].strings[3].antennas[1].SetZ(-161.02); // A5E 25, A5RF  3, PA 11
-                stations[0].strings[4].antennas[0].SetZ(-177.75); // A5E 16, A5RF  6, PA 10
+                stations[0].strings[3].antennas[0].SetZ(-177.75); // A5E 16, A5RF  6, PA 10
+                stations[0].strings[4].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
+                stations[0].strings[4].antennas[1].SetZ(-161.02); // A5E 25, A5RF  3, PA 11
                 // stations[0].strings[4].antennas[1].SetZ(-147.21); // ARA ch17
             }
             cout << "check 2.1" << endl;
