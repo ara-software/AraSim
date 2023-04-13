@@ -2146,21 +2146,20 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         }
         else if (settings1->DETECTOR_STATION == 2){ // Using 1 vanilla VPol
             stations[0].strings.push_back(temp_string);
-            stations[0].strings[1].antennas.push_back(temp_antenna); // ARA ch24
+            stations[0].strings[1].antennas.push_back(temp_antenna); // A5E 24, A5RF  7, PA  5
         }
         else if (settings1->DETECTOR_STATION == 3){ // Using 7 vanilla VPols
             stations[0].strings.push_back(temp_string);
-            stations[0].strings[1].antennas.push_back(temp_antenna); // ARA ch0
-            stations[0].strings[1].antennas.push_back(temp_antenna); // ARA ch1
+            stations[0].strings[1].antennas.push_back(temp_antenna); // A5E  0, A5RF  5, PA 12
+            stations[0].strings[1].antennas.push_back(temp_antenna); // A5E  1, A5RF  1, PA 13
             stations[0].strings.push_back(temp_string);
-            stations[0].strings[2].antennas.push_back(temp_antenna); // ARA ch8
-            stations[0].strings[2].antennas.push_back(temp_antenna); // ARA ch9
+            stations[0].strings[2].antennas.push_back(temp_antenna); // A5E  8, A5RF  4, PA 14
+            stations[0].strings[2].antennas.push_back(temp_antenna); // A5E  9, A5RF  0, PA 15
             stations[0].strings.push_back(temp_string);
-            stations[0].strings[3].antennas.push_back(temp_antenna); // ARA ch24
-            stations[0].strings[3].antennas.push_back(temp_antenna); // ARA ch25
+            stations[0].strings[3].antennas.push_back(temp_antenna); // A5E 24, A5RF  7, PA  5
+            stations[0].strings[3].antennas.push_back(temp_antenna); // A5E 25, A5RF  3, PA 11
             stations[0].strings.push_back(temp_string);
-            stations[0].strings[4].antennas.push_back(temp_antenna); // ARA ch16
-            // stations[0].strings[4].antennas.push_back(temp_antenna); // ARA ch17
+            stations[0].strings[4].antennas.push_back(temp_antenna); // A5E 16, A5RF  6, PA 10
         }
         cout<<"Check 1"<<endl;
 
@@ -2173,8 +2172,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             // Set Phased Array locations (load bottom to top)
             stations[0].strings[0].SetX( stations[0].GetX()  );
             stations[0].strings[0].SetY( stations[0].GetY()  );
-            stations[0].strings[0].antennas[0].SetZ(-183.79); // adb, double check later
-            stations[0].strings[0].antennas[1].SetZ(-182.79 ); // adb, double check later
+            stations[0].strings[0].antennas[0].SetZ(-183.79);
+            stations[0].strings[0].antennas[1].SetZ(-182.79 );
             stations[0].strings[0].antennas[2].SetZ(-180.79);
             stations[0].strings[0].antennas[3].SetZ(-178.75);
             stations[0].strings[0].antennas[4].SetZ(-176.70);
@@ -2186,13 +2185,13 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
             // Set ARA5 string locations
             if (settings1->DETECTOR_STATION==1){ 
-                stations[0].strings[1].SetX( stations[0].GetX() + 29.63 );
+                stations[0].strings[1].SetX( stations[0].GetX() + 29.63 ); // A5E 8-11
                 stations[0].strings[1].SetY( stations[0].GetY() -3.30 );
-                stations[0].strings[2].SetX( stations[0].GetX() +1.55 );
+                stations[0].strings[2].SetX( stations[0].GetX() +1.55 );   // A5E 0-3	
                 stations[0].strings[2].SetY( stations[0].GetY() +15.66 );
-                stations[0].strings[3].SetX( stations[0].GetX() -12.96 );
+                stations[0].strings[3].SetX( stations[0].GetX() -12.96 );  // A5E 16-19
                 stations[0].strings[3].SetY( stations[0].GetY() - 8.65);
-                stations[0].strings[4].SetX( stations[0].GetX() +12.33 );
+                stations[0].strings[4].SetX( stations[0].GetX() +12.33 );  // A5E 24-27
                 stations[0].strings[4].SetY( stations[0].GetY() -31.89 );
             }
             else if (settings1->DETECTOR_STATION == 2){
@@ -2200,35 +2199,35 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 stations[0].strings[1].SetY( stations[0].GetY() - 8.65);
             }
             else if (settings1->DETECTOR_STATION == 3){
-                stations[0].strings[1].SetX( stations[0].GetX() + 29.63 );
+                stations[0].strings[1].SetX( stations[0].GetX() + 29.63 ); // A5E 8-11
                 stations[0].strings[1].SetY( stations[0].GetY() -3.30 );
-                stations[0].strings[2].SetX( stations[0].GetX() +1.55 );
+                stations[0].strings[2].SetX( stations[0].GetX() +1.55 );   // A5E 0-3	
                 stations[0].strings[2].SetY( stations[0].GetY() +15.66 );
-                stations[0].strings[3].SetX( stations[0].GetX() -12.96 );
+                stations[0].strings[3].SetX( stations[0].GetX() -12.96 );  // A5E 16-19
                 stations[0].strings[3].SetY( stations[0].GetY() - 8.65);
-                stations[0].strings[4].SetX( stations[0].GetX() +12.33 );
+                stations[0].strings[4].SetX( stations[0].GetX() +12.33 );  // A5E 24-27
                 stations[0].strings[4].SetY( stations[0].GetY() -31.89 );
             }
 
             // Set ARA5 antenna depths
             if (settings1->DETECTOR_STATION==1){ 
                 cout << "Using all ARA05 vanilla vpols" << endl;
-                stations[0].strings[1].antennas[0].SetZ(-194.73); // ARA ch0
-                stations[0].strings[1].antennas[1].SetZ(-193.73); // ARA ch
-                stations[0].strings[1].antennas[2].SetZ(-165.09); // ARA ch1
-                stations[0].strings[1].antennas[3].SetZ(-164.09); // ARA ch
-                stations[0].strings[2].antennas[0].SetZ(-196.20); // ARA ch8
-                stations[0].strings[2].antennas[1].SetZ(-195.20); // ARA ch
-                stations[0].strings[2].antennas[2].SetZ(-166.53); // ARA ch9
-                stations[0].strings[2].antennas[3].SetZ(-165.53); // ARA ch
-                stations[0].strings[3].antennas[0].SetZ(-190.86); // ARA ch24
-                stations[0].strings[3].antennas[1].SetZ(-189.86); // ARA ch
-                stations[0].strings[3].antennas[2].SetZ(-161.02); // ARA ch25
-                stations[0].strings[3].antennas[3].SetZ(-160.02); // ARA ch
-                stations[0].strings[4].antennas[0].SetZ(-177.75); // ARA ch16
-                stations[0].strings[4].antennas[1].SetZ(-176.75); // ARA ch
-                stations[0].strings[4].antennas[2].SetZ(-147.21); // ARA ch17
-                stations[0].strings[4].antennas[3].SetZ(-146.21); // ARA ch
+                stations[0].strings[1].antennas[0].SetZ(-194.73); // A5E  8, A5RF  4, PA 14 
+                stations[0].strings[1].antennas[1].SetZ(-193.73); // A5E 10, A5RF 12
+                stations[0].strings[1].antennas[2].SetZ(-165.09); // A5E  9, A5RF  0, PA 15 
+                stations[0].strings[1].antennas[3].SetZ(-164.09); // A5E 11, A5RF  8
+                stations[0].strings[2].antennas[0].SetZ(-196.20); // A5E  0, A5RF  5, PA 12 
+                stations[0].strings[2].antennas[1].SetZ(-195.20); // A5E  2, A5RF 13
+                stations[0].strings[2].antennas[2].SetZ(-166.53); // A5E  1, A5RF  1, PA 13 
+                stations[0].strings[2].antennas[3].SetZ(-165.53); // A5E  3, A5RF  9
+                stations[0].strings[3].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
+                stations[0].strings[3].antennas[1].SetZ(-189.86); // A5E 26, A5RF 15
+                stations[0].strings[3].antennas[2].SetZ(-161.02); // A5E 25, A5RF  3, PA 11
+                stations[0].strings[3].antennas[3].SetZ(-160.02); // A5E 27, A5RF 11
+                stations[0].strings[4].antennas[0].SetZ(-177.75); // A5E 16, A5RF  6, PA 10
+                stations[0].strings[4].antennas[1].SetZ(-176.75); // A5E 18, A5RF 14
+                stations[0].strings[4].antennas[2].SetZ(-147.21); // A5E 17, A5RF  2
+                stations[0].strings[4].antennas[3].SetZ(-146.21); // A5E 19, A5RF 10
             }
             else if (settings1->DETECTOR_STATION == 2){
                 // Dont actually remember if it was ch16 that was not plugged in or not
@@ -2237,13 +2236,13 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             }
             else if (settings1->DETECTOR_STATION == 3){
                 cout << "Using 7 ARA05 vanilla Vpols" << endl;
-                stations[0].strings[1].antennas[0].SetZ(-194.73); // ARA ch0
-                stations[0].strings[1].antennas[1].SetZ(-165.09); // ARA ch1
-                stations[0].strings[2].antennas[0].SetZ(-196.20); // ARA ch8
-                stations[0].strings[2].antennas[1].SetZ(-166.53); // ARA ch9
-                stations[0].strings[3].antennas[0].SetZ(-190.86); // ARA ch24
-                stations[0].strings[3].antennas[1].SetZ(-161.02); // ARA ch25
-                stations[0].strings[4].antennas[0].SetZ(-177.75); // ARA ch16
+                stations[0].strings[1].antennas[0].SetZ(-194.73); // A5E  0, A5RF  5, PA 12
+                stations[0].strings[1].antennas[1].SetZ(-165.09); // A5E  1, A5RF  1, PA 13
+                stations[0].strings[2].antennas[0].SetZ(-196.20); // A5E  8, A5RF  4, PA 14
+                stations[0].strings[2].antennas[1].SetZ(-166.53); // A5E  9, A5RF  0, PA 15
+                stations[0].strings[3].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
+                stations[0].strings[3].antennas[1].SetZ(-161.02); // A5E 25, A5RF  3, PA 11
+                stations[0].strings[4].antennas[0].SetZ(-177.75); // A5E 16, A5RF  6, PA 10
                 // stations[0].strings[4].antennas[1].SetZ(-147.21); // ARA ch17
             }
             cout << "check 2.1" << endl;
@@ -2254,17 +2253,17 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             //         stations[0].strings[k].antennas[l].type = 0;
             //     }
             // } 
-            stations[0].strings[0].antennas[0].type = 1;
-            stations[0].strings[0].antennas[1].type = 1;
-            for (int l=2; l<9; l++) {
+            stations[0].strings[0].antennas[0].type = 1; // PA Hpol
+            stations[0].strings[0].antennas[1].type = 1; // PA Hpol 
+            for (int l=2; l<9; l++) { // PA Vpols
                 stations[0].strings[0].antennas[l].type = 0;
             } 
             if (settings1->DETECTOR_STATION == 1){ // Set vanilla H and Vpols
                 for (int k=1; k<5; k++) {
-                    stations[0].strings[k].antennas[0].type = 0;
-                    stations[0].strings[k].antennas[1].type = 1;
-                    stations[0].strings[k].antennas[2].type = 0;
-                    stations[0].strings[k].antennas[3].type = 1;
+                    stations[0].strings[k].antennas[0].type = 0; // BVpol
+                    stations[0].strings[k].antennas[1].type = 1; // BHpol
+                    stations[0].strings[k].antennas[2].type = 0; // TVpol
+                    stations[0].strings[k].antennas[3].type = 1; // THpol
                 }
             }
             else{ // Set all vanilla antennas to VPol
