@@ -2096,9 +2096,6 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
 		sprintf(the_gain_filename, "./data/gain/In_situ_Electronics_A%d_C%d.csv", 	
 		     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
 		cout << the_gain_filename <<endl;
-			if (settings1->DETECTOR_STATION_LIVETIME_CONFIG<0){ 
-				cerr << "DETECTOR_STATION_LIVETIME_CONFIG not valid, did you forget to specify a configuration livetime in the setup file? "<<endl; 
-			}
 		ReadElectChain(std::string(the_gain_filename), settings1);
 		 //ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
          	 //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
@@ -4156,8 +4153,11 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 	bool gainFileExists = (stat(filename.c_str(), &buffer)==0);
 	if (!gainFileExists){
 		sprintf(errorMessage, "Gain model file is not found (gain file exists %d) ", gainFileExists);
-		cout << "The gain filename is: " << filename << endl; 
-		throw std::runtime_error(errorMessage);
+		cout << "The not found gain filename is: " << filename << endl; 		
+		cerr << errorMessage << endl;
+		cerr << "Defaulting to standard response" << endl;
+		filename = "./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv";
+		cout << "Defaulted to standard response from file: " << filename << endl;
 	}
 
 	ifstream gainFile(filename.c_str()); // open the file
