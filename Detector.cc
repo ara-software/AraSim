@@ -2286,7 +2286,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 stations[0].strings[2].antennas[0].SetZ(-196.20); // A5E  8, A5RF  4, PA 14
                 stations[0].strings[2].antennas[1].SetZ(-166.53); // A5E  9, A5RF  0, PA 15
                 stations[0].strings[3].antennas[0].SetZ(-177.75); // A5E 16, A5RF  6, PA 10
-                // stations[0].strings[4].antennas[1].SetZ(-147.21); // ARA ch17
+                // stations[0].strings[3].antennas[1].SetZ(-147.21); // ARA ch17
                 stations[0].strings[4].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
                 stations[0].strings[4].antennas[1].SetZ(-161.02); // A5E 25, A5RF  3, PA 11
             }
