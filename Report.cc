@@ -5763,7 +5763,8 @@ void Report::checkPATrigger(
             avgSnr=3.5;
         }
         else {
-            if(stations[i].strings[0].antennas[0].V.size()>raySolNum) {
+            // Estimate average SNR from topmost vpol
+            if(stations[i].strings[0].antennas[6].V.size()>raySolNum) {
                 avgSnr = getAverageSNR(stations[i].strings[0].antennas[0].V[raySolNum],trigger,signalbinPA,BINSIZE);
             }
             else {
