@@ -398,7 +398,7 @@ int main(int argc, char **argv) {   // read setup.txt file
         infile.open("nuphase_trig_effc.txt",ios::in);
         if(infile.fail()) // checks to see if file opended
             {
-            cout << "error, file could not be opened" << endl;
+            cout << "   error, file could not be opened" << endl;
             return 1; // no point continuing if the file didn't open...
             }
             int num = 0;
@@ -410,20 +410,20 @@ int main(int argc, char **argv) {   // read setup.txt file
                 // you can also do it on the same line like this:
                 // infile >> exam1[num] >> exam2[num] >> exam3[num]; ++num;
             }
-            cout<<"number of data points "<<num<<endl;
+            cout<<"   number of triggering efficiency data points: "<<num<<endl;
         infile.close();
-        std::cout << "The data from Phased array" << '\n';
-        for (size_t i = 0; i < num; i++) 
-        {
-            std::cout << snr_PA[i] << " "<< eff_PA[i] <<'\n';
-        }
+        // std::cout << "The data from Phased array" << '\n';
+        // for (size_t i = 0; i < num; i++) 
+        // {
+        //     std::cout << snr_PA[i] << " "<< eff_PA[i] <<'\n';
+        // }
 
         //load Angle vs SNR curve:
         infile.clear();
         infile.open("nuphase_SNR_angle.txt",ios::in);
         if(infile.fail()) // checks to see if file opended
         {
-            cout << "error, file could not be opened" << endl;
+            cout << "   error, file could not be opened" << endl;
             return 1; // no point continuing if the file didn't open...
         }
         num = 0;
@@ -435,13 +435,13 @@ int main(int argc, char **argv) {   // read setup.txt file
                 // you can also do it on the same line like this:
                 // infile >> exam1[num] >> exam2[num] >> exam3[num]; ++num;
             }
-            cout<<"number of data points "<<num<<endl;
+            cout<<"   number of SNR vs angle data points: "<<num<<endl;
         infile.close();
-        std::cout << "The secondary data from Phased array" << '\n';
-        for (size_t i = 0; i < num; i++) 
-        {
-            std::cout << angle_PA[i] << " "<< aSNR_PA[i] <<'\n';
-        }
+        // std::cout << "The secondary data from Phased array" << '\n';
+        // for (size_t i = 0; i < num; i++) 
+        // {
+        //     std::cout << angle_PA[i] << " "<< aSNR_PA[i] <<'\n';
+        // }
 
     } // End if DETECTOR=5 or 9 (Phased Array sim)
 

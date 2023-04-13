@@ -284,8 +284,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         // end prepare vectors
         //
         
-        cout<<"Check 1"<<endl;
-        
         
         
         //
@@ -391,7 +389,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 stations[i].strings[0].antennas[6].SetZ(-174.66);
                 stations[i].strings[0].antennas[7].SetZ(-173.65);
                 stations[i].strings[0].antennas[8].SetZ(-172.635);
-                cout<<"Check 2"<<endl;
 
                 // Set ARA5 string locations
                 if (settings1->DETECTOR_STATION==1){ 
@@ -2206,7 +2203,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             stations[0].strings.push_back(temp_string);
             stations[0].strings[4].antennas.push_back(temp_antenna); // A5E 16, A5RF  6, PA 10
         }
-        cout<<"Check 1"<<endl;
 
         // Set station location
         stations[0].SetX( params.core_x );
@@ -2226,7 +2222,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             stations[0].strings[0].antennas[6].SetZ(-174.66);
             stations[0].strings[0].antennas[7].SetZ(-173.65);
             stations[0].strings[0].antennas[8].SetZ(-172.635);
-            cout<<"Check 2"<<endl;
 
             // Set ARA5 string locations
             if (settings1->DETECTOR_STATION==1){ 
@@ -2290,7 +2285,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 stations[0].strings[4].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
                 stations[0].strings[4].antennas[1].SetZ(-161.02); // A5E 25, A5RF  3, PA 11
             }
-            cout << "check 2.1" << endl;
 
             // Set all antennas to VPOL (1 for HPOL)
             // for (int k=0; k<stations[0].strings.size(); k++) {
@@ -2319,7 +2313,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             } 
 
             }
-            cout << "check 2.2" << endl;
 
             // Orient all antennas in x direction
             for (int k=0; k<stations[0].strings.size(); k++) {
@@ -2327,7 +2320,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                     stations[0].strings[k].antennas[l].orient = 0;
                 }
             } 
-            cout << "check 2.3" << endl;
 
             // Calculate the number of antennas created
             stations[0].number_of_antennas = 0;
@@ -2336,11 +2328,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 stations[0].number_of_antennas += stations[0].strings[k].antennas.size();
                 max_number_of_antennas_station += stations[0].strings[k].antennas.size();
             } 
-            cout<<"adb number of antennas: "<<max_number_of_antennas_station<<endl;
 
         } // if idealized geometry
-        
-        cout << "check here " << endl; 
         
         ReadAllAntennaGains(settings1);
 
