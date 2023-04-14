@@ -5913,7 +5913,7 @@ void Report::checkPATrigger(
             // cout<<"PA Noise RMS : "<<noise_rms<<" PA avgSNR : "<<avgSnr<<" PA Efficiency "<<eff<<" RaySol No "<<raySolNum<<endl;
                    
             if(isTrigger(eff)){
-                cout<<"PA trigger ~~~ raySolNum: "<< raySolNum;
+                cout<<endl<<"PA trigger ~~~ raySolNum: "<< raySolNum;
                 cout<<"  avgSNR: "<<avgSnr<<"  Event Number : "<<evt;
                 cout<<"  PA efficiency : "<<eff<<endl;
 
