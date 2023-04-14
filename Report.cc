@@ -5728,7 +5728,7 @@ void Report::checkPATrigger(
     Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
     double* xdata, double* ydata, double* ang_data, double* snr_data
 ){
-    // Calculates max SNR in first PA Vpol 
+    // Calculates max SNR in topmost PA Vpol 
     //   and multplies it by viewing angle factors. 
     // Then determines signal efficiency by interpolating oberved SNR from 
     //   efficiency vs SNR data.
