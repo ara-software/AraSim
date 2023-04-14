@@ -5909,7 +5909,7 @@ void Report::checkPATrigger(
         
         //cout<<" Efficiency = "<<eff<<endl;
         if(avgSnr > 0.5){
-            cout<<endl;
+            // cout<<endl;
             // cout<<"PA Noise RMS : "<<noise_rms<<" PA avgSNR : "<<avgSnr<<" PA Efficiency "<<eff<<" RaySol No "<<raySolNum<<endl;
                    
             if(isTrigger(eff)){
