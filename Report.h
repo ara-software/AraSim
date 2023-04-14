@@ -376,6 +376,7 @@ class Report {
         double Earray[outbin];
 
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
+        double PATIMESTEP = (0.3125)*1.E-9; // inverse of sampling rate from section 4.1 of Kaeli's thesis
 
         // Phased Array variables
         double viewAngle;
