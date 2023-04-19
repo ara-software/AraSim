@@ -78,6 +78,10 @@ outputdir="outputs"; // directory where outputs go
   
   EXPONENT=19.; // 10^19 eV neutrinos only
 
+  EXPONENT_MIN = 16.; // minimum log10(eV) of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino 
+
+  EXPONENT_MAX = 22.; // maximum log10(eV) of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino
+
   DETECTOR=1;   //ARA layout with small number of stations
 
   DETECTOR_STATION=-1; // initiate this to negative -1, so it does nothing by default
@@ -181,7 +185,7 @@ outputdir="outputs"; // directory where outputs go
     
     USE_INSTALLED_TRIGGER_SETTINGS = 0; // default : 0 - use idealized settings for the trigger
     
-    NUM_INSTALLED_STATIONS = 4;
+    NUM_INSTALLED_STATIONS = 6;
 
     CALPUL_OFFCONE_ANGLE = 35.;
 
@@ -346,6 +350,12 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "EXPONENT") {
                   EXPONENT = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "EXPONENT_MIN") {
+                  EXPONENT_MIN = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "EXPONENT_MAX") {
+                  EXPONENT_MAX = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "DETECTOR") {
                   DETECTOR = atof( line.substr(line.find_first_of("=") + 1).c_str() );
@@ -935,14 +945,13 @@ int Settings::CheckCompatibilitiesSettings() {
         cerr<<"TRIG_ONLY_LOW_CH_ON=1 doesn't work with DETECTOR=3!"<<endl;
         num_err++;
     }
-
     if (DATA_LIKE_OUTPUT != 0 && (DETECTOR==0 || DETECTOR==1 || DETECTOR==2)) {
         cerr<<"DATA_LIKE_OUTPUT=1,2 doesn't work with DETECTOR=0,1,2"<<endl;
         cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format; without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
         num_err++;
     }
 
-    if (DATA_LIKE_OUTPUT != 0 && (DETECTOR_STATION>3)) {
+    if (DATA_LIKE_OUTPUT != 0 && (DETECTOR_STATION>5)) {
         cerr<<"DATA_LIKE_OUTPUT=1,2 doesn't work with DETECTOR_STATION>3"<<endl;
         cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format; without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
         num_err++;
