@@ -1754,11 +1754,11 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
             if(settings1->NOISE==1){
                 cout <<"Reading in situ ARA noise for this station and configuration from file: " <<endl;
-		            char the_rayleigh_filename[500];
+		char the_rayleigh_filename[500];
                 sprintf(the_rayleigh_filename, "./data/noise/sigmavsfreq_A_%d_config_%d.csv", 
                     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
                 cout << the_rayleigh_filename << endl;
-		            ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
+		ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
             }
         }
 
