@@ -3956,7 +3956,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 				if(std::isnan(temp_freq_val) || temp_freq_val < 0 || temp_freq_val > 1200){
 					sprintf(errorMessage, 
 						"The frequency value (freq bin %d) is a nan or negative or very large (%e). Stop!", 
-						temp_freq_val);
+						theFreqBin, temp_freq_val);
 					cout << "The gain filename is: " << filename << endl; 
 					throw std::runtime_error(errorMessage);
 				}
@@ -4628,7 +4628,7 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
                 if(std::isnan(temp_freq_val) || temp_freq_val < 0 || temp_freq_val > 1200){
                     sprintf(errorMessage, 
                             "A rayleigh frequency value (freq bin %d) is a nan or negative or very large (%e). Stop!", 
-                            temp_freq_val);
+                            theFreqBin, temp_freq_val);
                     throw std::runtime_error(errorMessage);
                 }
                 // printf("Frequency bin %d value is %f \n", theFreqBin, temp_freq_val);
