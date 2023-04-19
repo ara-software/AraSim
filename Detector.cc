@@ -4175,7 +4175,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 					"The first word of the header line is '%s'. It was expected to be '%s'. Please double check file format!!", 
 					first_header_entry.c_str(),
 					expected_first_column_header.c_str());
-				cout << "The gain filename is: " << gainFile << endl; 
+				cout << "The gain filename is: " << filename << endl; 
 				throw std::runtime_error(errorMessage);
 			}
 
@@ -4190,7 +4190,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 
 	else{
         	sprintf(errorMessage, "Gain model file did not open correctly.");
-		cout << "The gain filename is: " << gainFile << endl; 
+		cout << "The gain filename is: " << filename << endl; 
         	throw std::runtime_error(errorMessage);	
     	}
 
@@ -4247,7 +4247,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 	if ( numCommas%2 == 1){
                                 sprintf(errorMessage,
                                         "The number of columns in the gain file (disregarding the one for frequency) is not even. We need gain AND phase pairs per channel.");
-				cout << "The gain filename is: " << gainFile << endl; 
+				cout << "The gain filename is: " << filename << endl; 
                                 throw std::runtime_error(errorMessage);
                         }
 
@@ -4300,7 +4300,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 					sprintf(errorMessage, 
 						"The frequency value (freq bin %d) is a nan or negative or very large (%e). Stop!", 
 						temp_freq_val);
-					cout << "The gain filename is: " << gainFile << endl; 
+					cout << "The gain filename is: " << filename << endl; 
 					throw std::runtime_error(errorMessage);
 				}
 
@@ -4326,7 +4326,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 						sprintf(errorMessage, 
  							"A gain value (freq bin %d, ch %d) is a nan or negative or very large (%e). Stop!", 
  							 theFreqBin, numColsPair, temp_gain_val);
-						cout << "The gain filename is: " << gainFile << endl; 
+						cout << "The gain filename is: " << filename << endl; 
 						throw std::runtime_error(errorMessage);
 					}
 
@@ -4340,7 +4340,7 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
                                               	sprintf(errorMessage, 
 							"A phase value (freq bin %d, ch %d) is a nan. Stop!", 
 							theFreqBin, numColsPair);
-						cout << "The gain filename is: " << gainFile << endl; 
+						cout << "The gain filename is: " << filename << endl; 
 						throw std::runtime_error(errorMessage);
                                       }
 
