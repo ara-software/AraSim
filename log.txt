@@ -1703,7 +1703,7 @@ So, if we use DETECTOR=4, It will do nothing
 I added 'detector->Get_mode() == 4' option in the Interaction::PickNear_Sphere. 
 So that user can use effective area (INTERACTION_MODE=0) mode with deployed station mode (DETECTOR=4)
 
-=======
+==============================================================================
 
 2022/11/01 Alex Machtay (machtay.1@osu.edu)
 
@@ -1758,3 +1758,21 @@ Because of this, the simulation skips the event if Nu energy happens to be above
 This PR allows users to freely customize (avoid the skip or focus certain energy range) the energy spectrum range by EXPONENT_MAX and EXPONENT_MIN options.
 EXPONENT_MIN: lower limit for energy spectrum range. The default is 10^16 [eV]
 EXPONENT_MAX: upper limit for energy spectrum range. The default is 10^22 [eV]
+
+==============================================================================
+2023/04/19 Alan Salcedo G
+
+This upgrade allows to use per-channel gain modeling. 
+For this, I restructured how gain/phase model files are read and loaded. 
+These changes happen primarily in Detector::ReadElectChain. 
+
+I rewrote the previous gain files, ARA_Electronics_TotalGainPhase.txt, ARA_Electronics_TotalGain_TwoFilters.txt, 
+and custom_electronics.txt, in the required .csv formats using the same names.
+
+Note: I found and fixed a preexisting bug in AraSim occurring in Detector::GetElectGain_1D_OutZero and
+Detector::GetElectPhase_1D dealing gain and phase interpolations. See changes in the if-else conditions on
+there functions here:   
+
+Full documentation of this work is available on DocDB: https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2757 
+ 
+ ==============================================================================

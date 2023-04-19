@@ -296,7 +296,7 @@ outputdir="outputs"; // directory where outputs go
     ANTENNA_MODE=0; //default: 0 - old antenna model information
     APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
 
-    CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.tst"
+    CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.csv"
 
 
     /*
@@ -981,7 +981,29 @@ int Settings::CheckCompatibilitiesSettings() {
 	    if (DETECTOR_STATION <0 || DETECTOR_STATION >= NUM_INSTALLED_STATIONS){
 	        cerr << "DETECTOR_STATION is not set to a valid station number" << endl;
 	        num_err++;
-	    }	
+	    }
+        if(DETECTOR_STATION_LIVETIME_CONFIG>-1){
+            if((int)DETECTOR_STATION==2){
+                if(DETECTOR_STATION_LIVETIME_CONFIG>6 || DETECTOR_STATION_LIVETIME_CONFIG<1){
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only six expected configurations for A2"<<endl;
+                    num_err++;
+                }
+            }
+            else if((int)DETECTOR_STATION==3){
+                if(DETECTOR_STATION_LIVETIME_CONFIG>7 || DETECTOR_STATION_LIVETIME_CONFIG<1){
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only seven expected configurations for A3"<<endl;
+                    num_err++;
+                }
+            }
+	
+	
+            else{
+                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but DETECTOR_STATION is "<<DETECTOR_STATION<<endl;
+                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is only valid for A2 and A3 "<<endl;
+                num_err++;
+            }
+        }
+		
       }
     }
 
