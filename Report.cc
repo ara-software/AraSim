@@ -1723,7 +1723,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
         N_pass_V = 0;
         N_pass_H = 0;
 
-        stations[i].Global_Pass = 0;
+        stations[i].Global_Pass  = 0;
+        stations[i].ARA_DAQ_Pass = 0;
+        stations[i].PA_DAQ_Pass  = 0;
         int check_passed_global_trigger = 0;    // this switch determines if station globally triggers (in all TRIG_SCAN_MODEs)
 
         if (stations[i].Total_ray_sol)
@@ -2182,7 +2184,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 stations[i].total_trig_search_bin = max_total_bin - trig_search_init;
 
                 if (settings1->TRIG_SCAN_MODE==5){ // Trigger mode for phased array
-                    A5PA_trig = 0;
                     checkPATrigger(
                         i, all_receive_ang, viewangle, ray_sol_cnt, 
                         detector, event, evt, trigger, settings1, 
@@ -2811,6 +2812,23 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 trigger->ClearNoiseWaveforms();
             }
         }   // if there is any ray_sol in the station
+
+        // Save Global_Pass variable to station if triggered
+        if ( stations[i].ARA_DAQ_Pass==0 && stations[i].PA_DAQ_Pass==0 ){ // not triggered
+            continue;
+        }
+        else if ( stations[i].ARA_DAQ_Pass!=0 && stations[i].PA_DAQ_Pass==0 ){ // only ARA triggered
+            stations[i].Global_Pass = stations[i].ARA_DAQ_Pass;
+        }
+        else if ( stations[i].ARA_DAQ_Pass==0 && stations[i].PA_DAQ_Pass!=0 ){ // only PA triggered
+            stations[i].Global_Pass = stations[i].PA_DAQ_Pass;
+        }
+        else{ // both PA and ARA triggered, save smaller bin
+            if ( stations[i].ARA_DAQ_Pass <= stations[i].PA_DAQ_Pass){
+                stations[i].Global_Pass = stations[i].ARA_DAQ_Pass;
+            }
+            else stations[i].Global_Pass = stations[i].PA_DAQ_Pass;
+        }
 
     }   // for stations
 
@@ -3473,7 +3491,6 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	}// for trig_j
 	
 	saveTriggeredEvent(settings1, detector, event, trigger, stationID, trig_search_init, max_total_bin, trig_window_bin, trig_i);
-    if (settings1->TRIG_SCAN_MODE==5) A5PA_trig+=2;
 // 	cout<<"\nPthresh value=";
 // 	if(scan_mode==1) for(int trig_j=0;trig_j<numChan; trig_j++) cout<<" "<<Pthresh_value[trig_j];
 // 	if(scan_mode>1)  for(int trig_j=0;trig_j<numChan; trig_j++) cout<<" "<<buffer[trig_j]->best_value;
@@ -3766,7 +3783,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
   }
   
   
-  return stations[i].Global_Pass;
+  return stations[i].ARA_DAQ_Pass;
   
 }
 
@@ -3775,7 +3792,7 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
   int i=stationID;
   int numChan=stations[i].TDR_all.size();
   cout<<"saving event"<<endl;
-  stations[i].Global_Pass = last_trig_bin;
+  stations[i].ARA_DAQ_Pass = last_trig_bin;
 
   int waveformLength = settings1->WAVEFORM_LENGTH;
   int waveformCenter = settings1->WAVEFORM_CENTER;
@@ -3888,7 +3905,7 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
       double Z = detector->stations[i].strings[string_i].antennas[antenna_i].GetZ();
       
       
-      stations[i].total_trig_search_bin = stations[i].Global_Pass + trig_window_bin - trig_search_init;
+      stations[i].total_trig_search_bin = stations[i].ARA_DAQ_Pass + trig_window_bin - trig_search_init;
       
       
       
@@ -5927,11 +5944,10 @@ void Report::checkPATrigger(
                 my_averageSNR = avgSnr;
                 my_raysol = raySolNum;
                 my_receive_ang = all_receive_ang[raySolNum];
-                A5PA_trig += 1;
                 int last_trig_bin = signalbinPA;
                 //cout<<"Signal Bin ****"<<signalbinPA<<"BIN SIZE "<<BINSIZE<<endl;
                 int my_ch_id = 0;
-                stations[i].Global_Pass = last_trig_bin;
+                stations[i].PA_DAQ_Pass = last_trig_bin;
                 for (size_t str = 0; str < detector->stations[i].strings.size(); str++) {
                     for (size_t ant = 0; ant < detector->stations[i].strings[str].antennas.size(); ant++) {
                         double peakvalue = 0;
@@ -5968,7 +5984,7 @@ void Report::checkPATrigger(
         if(hasTriggered==true) break;
         if(searchSecondRay == false) break;
 
-        //if(stations[i].Global_Pass > 0) break;
+        //if(stations[i].ARA_DAQ_Pass > 0) break;
     }//while ray solve
 
 }

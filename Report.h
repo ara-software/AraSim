@@ -161,6 +161,8 @@ class Station_r {
         double max_PeakV;           // for each station, maximum PeakV value (include all ray_solves). this will also be used for time delay plot (to set same vertical scale)
         int Total_ray_sol;          // total number of ray_sols in the stations. If there is 0 Total_ray_sol, we don't need to do trigger check while there is any Total_ray_sol, we do trigger check.
         int Global_Pass;    // if global trigger passed or not: 0 = not passed, >0 passed, number indicates the first bin in the triggered window of the waveform at which the global trigger passed
+        int ARA_DAQ_Pass;    // if ARA trigger passed or not: 0 = not passed, >0 passed, number indicates the first bin in the triggered window of the waveform at which the global trigger passed
+        int PA_DAQ_Pass;    // if PA trigger passed or not: 0 = not passed, >0 passed, number indicates the first bin in the triggered window of the waveform at which the global trigger passed
 
         int total_trig_search_bin;  // total number of bins for searching trigger. 
 
@@ -383,7 +385,6 @@ class Report {
         double my_averageSNR;
         double my_receive_ang;
         double my_raysol;
-        int A5PA_trig = -1 ; // -1->Not TRIG_SCAN_MODE=5; 0,1,2,3: TRIG_SCAN_MODE=5; 0=Not trig, 1=PA trig, 2=A5 trig, 3=A5+PA trig
 
         ClassDef(Report,1);
 
