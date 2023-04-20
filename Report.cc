@@ -1839,6 +1839,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                         else
                                         {
                                             // if we are checking previous string, check upto entire antennas
+                                            if (settings1->DETECTOR==5 && settings1->DETECTOR_STATION==3 && j_sub==3 && k_sub==1) continue;
                                             if (noise_ID[l] == stations[i].strings[j_sub].antennas[k_sub].noise_ID[0])
                                             {
                                                 // check only first one for now;;;
