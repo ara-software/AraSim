@@ -3739,7 +3739,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
     if(settings1->TRIG_MODE==1){
       cout<<"\nPthresh best: ";
       cout<<"  Vpol: "; for(int ii=0;ii<stations[i].TDR_Vpol_sorted.size();ii++) cout<<" "<<stations[i].TDR_Vpol_sorted[ii];
-      if (stations[i].TDR_Hpol_sorted.size() > 0) cout<<"  Hpol: "; for(int ii=0;ii<stations[i].TDR_Hpol_sorted.size();ii++) cout<<" "<<stations[i].TDR_Hpol_sorted[ii];
+      cout<<"  Hpol: "; for(int ii=0;ii<stations[i].TDR_Hpol_sorted.size();ii++) cout<<" "<<stations[i].TDR_Hpol_sorted[ii];
       if (settings1->TRIG_SCAN_MODE==5) cout<<endl<<"[Phased Array Pthresh values set to 0 for above calcualtion]";
       cout<<"\n";
       
@@ -3754,7 +3754,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	cout<<"\n";
 	
       }// ordering problem
-      if (stations[i].TDR_Hpol_sorted.size() > 0) {
+
       // debug output:
       if(stations[i].TDR_Hpol_sorted[0]>stations[i].TDR_Hpol_sorted[1]||stations[i].TDR_Hpol_sorted[1]>stations[i].TDR_Hpol_sorted[2]){
 	   
@@ -3765,7 +3765,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	cout<<"\n";
 		
       }// ordering problem
-    }
+
          
     }// trig mode 1
     
