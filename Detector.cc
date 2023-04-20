@@ -1853,10 +1853,10 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 stations[i].strings[2].antennas.push_back(temp_antenna); // A5E  8, A5RF  4, PA 14
                 stations[i].strings[2].antennas.push_back(temp_antenna); // A5E  9, A5RF  0, PA 15
                 stations[i].strings.push_back(temp_string);
-                stations[i].strings[3].antennas.push_back(temp_antenna); // A5E 24, A5RF  7, PA  5
-                stations[i].strings[3].antennas.push_back(temp_antenna); // A5E 25, A5RF  3, PA 11
+                stations[i].strings[3].antennas.push_back(temp_antenna); // A5E 16, A5RF  6, PA 10
                 stations[i].strings.push_back(temp_string);
-                stations[i].strings[4].antennas.push_back(temp_antenna); // A5E 16, A5RF  6, PA 10
+                stations[i].strings[4].antennas.push_back(temp_antenna); // A5E 24, A5RF  7, PA  5
+                stations[i].strings[4].antennas.push_back(temp_antenna); // A5E 25, A5RF  3, PA 11
             }
         } // for i in number_of_stations (building vectors)
 
@@ -2001,7 +2001,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 else if (settings1->DETECTOR_STATION == 2){
                     // Dont actually remember if it was ch16 that was not plugged in or not
                     cout << "Using 1 ARA05 vanilla Vpol" << endl;
-                    stations[i].strings[4].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
+                    stations[i].strings[1].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
                 }
                 else if (settings1->DETECTOR_STATION == 3){
                     cout << "Using 7 ARA05 vanilla Vpols" << endl;
@@ -2010,7 +2010,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                     stations[i].strings[2].antennas[0].SetZ(-196.20); // A5E  8, A5RF  4, PA 14
                     stations[i].strings[2].antennas[1].SetZ(-166.53); // A5E  9, A5RF  0, PA 15
                     stations[i].strings[3].antennas[0].SetZ(-177.75); // A5E 16, A5RF  6, PA 10
-                    // stations[i].strings[3].antennas[1].SetZ(-147.21); // ARA ch17
+                    // stations[i].strings[3].antennas[1].SetZ(-147.21); // A5E 17, A5RF  2
                     stations[i].strings[4].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
                     stations[i].strings[4].antennas[1].SetZ(-161.02); // A5E 25, A5RF  3, PA 11
                 }
@@ -2035,7 +2035,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                     }
                 }
                 else{ // Set all vanilla antennas to VPol
-                    for (int k=1; k<4; k++) {
+                    for (int k=1; k<stations[i].strings.size(); k++) {
                         for (int l=0; l<stations[i].strings[k].antennas.size(); l++) {
                             stations[i].strings[k].antennas[l].type = 0;
                         }
