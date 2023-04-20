@@ -2039,8 +2039,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                         for (int l=0; l<stations[i].strings[k].antennas.size(); l++) {
                             stations[i].strings[k].antennas[l].type = 0;
                         }
-                } 
-
+                    } 
                 }
 
                 // Orient all antennas in x direction
