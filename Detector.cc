@@ -380,15 +380,15 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 // Set Phased Array locations (load bottom to top)
                 stations[i].strings[0].SetX( stations[i].GetX()  );
                 stations[i].strings[0].SetY( stations[i].GetY()  );
-                stations[i].strings[0].antennas[0].SetZ(-183.79);
-                stations[i].strings[0].antennas[1].SetZ(-182.79 );
-                stations[i].strings[0].antennas[2].SetZ(-180.79);
-                stations[i].strings[0].antennas[3].SetZ(-178.75);
-                stations[i].strings[0].antennas[4].SetZ(-176.70);
-                stations[i].strings[0].antennas[5].SetZ(-175.68);
-                stations[i].strings[0].antennas[6].SetZ(-174.66);
-                stations[i].strings[0].antennas[7].SetZ(-173.65);
-                stations[i].strings[0].antennas[8].SetZ(-172.635);
+                stations[i].strings[0].antennas[0].SetZ(-183.79); // PA 9
+                stations[i].strings[0].antennas[1].SetZ(-182.79); // PA 8
+                stations[i].strings[0].antennas[2].SetZ(-180.79); // PA 7
+                stations[i].strings[0].antennas[3].SetZ(-178.75); // PA 6
+                stations[i].strings[0].antennas[4].SetZ(-176.70); // PA 4
+                stations[i].strings[0].antennas[5].SetZ(-175.68); // PA 3
+                stations[i].strings[0].antennas[6].SetZ(-174.66); // PA 2
+                stations[i].strings[0].antennas[7].SetZ(-173.65); // PA 1
+                stations[i].strings[0].antennas[8].SetZ(-172.635); // PA 0
 
                 // Set ARA5 string locations
                 if (settings1->DETECTOR_STATION==1){ 
@@ -2213,15 +2213,15 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             // Set Phased Array locations (load bottom to top)
             stations[0].strings[0].SetX( stations[0].GetX()  );
             stations[0].strings[0].SetY( stations[0].GetY()  );
-            stations[0].strings[0].antennas[0].SetZ(-183.79);
-            stations[0].strings[0].antennas[1].SetZ(-182.79 );
-            stations[0].strings[0].antennas[2].SetZ(-180.79);
-            stations[0].strings[0].antennas[3].SetZ(-178.75);
-            stations[0].strings[0].antennas[4].SetZ(-176.70);
-            stations[0].strings[0].antennas[5].SetZ(-175.68);
-            stations[0].strings[0].antennas[6].SetZ(-174.66);
-            stations[0].strings[0].antennas[7].SetZ(-173.65);
-            stations[0].strings[0].antennas[8].SetZ(-172.635);
+                stations[i].strings[0].antennas[0].SetZ(-183.79); // PA 9
+                stations[i].strings[0].antennas[1].SetZ(-182.79); // PA 8
+                stations[i].strings[0].antennas[2].SetZ(-180.79); // PA 7
+                stations[i].strings[0].antennas[3].SetZ(-178.75); // PA 6
+                stations[i].strings[0].antennas[4].SetZ(-176.70); // PA 4
+                stations[i].strings[0].antennas[5].SetZ(-175.68); // PA 3
+                stations[i].strings[0].antennas[6].SetZ(-174.66); // PA 2
+                stations[i].strings[0].antennas[7].SetZ(-173.65); // PA 1
+                stations[i].strings[0].antennas[8].SetZ(-172.635); // PA 0
 
             // Set ARA5 string locations
             if (settings1->DETECTOR_STATION==1){ 
