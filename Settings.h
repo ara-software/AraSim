@@ -59,7 +59,7 @@ class Settings
 
 	int DETECTOR_STATION; // for DETECTOR=4, indicates the single station to be simulated
 	                      // 0 = testbed, 1 = A1, 2 = A2, 3 = A3
-                              // Detector=5,9 indicates Phased array. Detector Station determines setup to use
+                              // Detector=5 indicates Phased array. Detector Station determines setup to use
                               // 1 = A5 and PA DAQ working, 2 = Only PA DAQ working + 1 nontriggering A5 Vpol, 3 = Only PA DAQ working + 7 nontriggering A5 Vpols
 
         int DETECTOR_STATION_LIVETIME_CONFIG; // for real deep station, what livetime configuration are we using?
@@ -96,7 +96,7 @@ class Settings
 
         int ATMOSPHERE;         // include atmosphere 1, no 0
 
-        int TRIG_SCAN_MODE;     // 5: PA trigger is separate from 4 vanilla strings, only valid for DETECTOR=5 or 9
+        int TRIG_SCAN_MODE;     // 5: PA trigger is separate from 4 vanilla strings, only valid for DETECTOR=5
         
         double POWERTHRESHOLD;  // power threshold value. default -4.41 (same with icemc powerthreshold)
 

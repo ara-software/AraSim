@@ -5850,7 +5850,7 @@ int Detector::GetChannelfromStringAntenna ( int stationNum, int stringnum, int a
 
     }
     // for Phased Array detector modes
-    else if (settings1->DETECTOR==5 || settings1->DETECTOR==9) {
+    else if (settings1->DETECTOR==5) {
         int stationId=5;
         //      cout << settings1->DETECTOR << endl;
         //      int stationId=stationNum;

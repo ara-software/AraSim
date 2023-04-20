@@ -391,7 +391,7 @@ int main(int argc, char **argv) {   // read setup.txt file
     double eff_PA[60];
     double angle_PA[188];
     double aSNR_PA[188];
-    if (settings1->DETECTOR==5 || settings1->DETECTOR==9){
+    if (settings1->DETECTOR==5){
     
         cout << "Phased Array mode! Reading in data: " << endl;
         ifstream infile;
@@ -443,7 +443,7 @@ int main(int argc, char **argv) {   // read setup.txt file
         //     std::cout << angle_PA[i] << " "<< aSNR_PA[i] <<'\n';
         // }
 
-    } // End if DETECTOR=5 or 9 (Phased Array sim)
+    } // End if DETECTOR=5 (Phased Array sim)
 
     // for (int inu=0;inu<settings1->NNU;inu++) { // loop over neutrinos
     while (inu < nuLimit){

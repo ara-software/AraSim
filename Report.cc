@@ -383,7 +383,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
             // The PA DAQ has a different sampling/digitizing rate than ARA DAQs
             // Handling sampling/digitizing rate related variables based on connection to PA DAQ or ARA DAQ
             // Could be improved with the use of pointers and references
-            if ( settings1->TRIG_SCAN_MODE==5 && (settings1->DETECTOR==5 || settings1->DETECTOR==9) ){ // PA Triggering mode AND PA detector in use
+            if ( settings1->TRIG_SCAN_MODE==5 && (settings1->DETECTOR==5) ){ // PA Triggering mode AND PA detector in use
                 if (j==0) use_PA_DAQ=1; // string 0 is PA, always use PA DAQ 
                 else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) use_PA_DAQ=1; // All ants connected to PA in these modes
                 else use_PA_DAQ=0;
@@ -400,7 +400,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
             }
             else{ // Not (PA detector AND PA triggering mode)
 
-                if ( ( settings1->TRIG_SCAN_MODE==5 || settings1->DETECTOR==5 || settings1->DETECTOR==9 ) && // User requested PA-related sim
+                if ( ( settings1->TRIG_SCAN_MODE==5 || settings1->DETECTOR==5 ) && // User requested PA-related sim
                         ( j==0 || settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) // We're in a situation where PA DAQ would be used
                 ) { // Warn that we arent using the PA sampling/digitizing rate
                     cout<<"Warning: Not using Phased Array sampling rate for PA-associated scenario."<<endl;
@@ -2872,7 +2872,7 @@ void Report::rerun_event(Event *event, Detector *detector,
         // The PA DAQ has a different sampling/digitizing rate than ARA DAQs
         // Handling sampling/digitizing rate related variables based on connection to PA DAQ or ARA DAQ
         // Could be improved with the use of pointers and references
-        if ( settings->TRIG_SCAN_MODE==5 && (settings->DETECTOR==5 || settings->DETECTOR==9) ){ // PA Triggering mode AND PA detector in use
+        if ( settings->TRIG_SCAN_MODE==5 && settings->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
             if (j==0) use_PA_DAQ=1; // string 0 is PA, always use PA DAQ 
             else if ( settings->DETECTOR_STATION==2 || settings->DETECTOR_STATION==3 ) use_PA_DAQ=1; // All ants connected to PA in these modes
             else use_PA_DAQ=0;
@@ -2889,7 +2889,7 @@ void Report::rerun_event(Event *event, Detector *detector,
         }
         else{ // Not (PA detector AND PA triggering mode)
 
-            if ( ( settings->TRIG_SCAN_MODE==5 || settings->DETECTOR==5 || settings->DETECTOR==9 ) && // User requested PA-related sim
+            if ( ( settings->TRIG_SCAN_MODE==5 || settings->DETECTOR==5 ) && // User requested PA-related sim
                     ( j==0 || settings->DETECTOR_STATION==2 || settings->DETECTOR_STATION==3 ) // We're in a situation where PA DAQ would be used
             ) { // Warn that we arent using the PA sampling/digitizing rate
                 cout<<"Warning: Not using Phased Array sampling rate for PA-associated scenario."<<endl;
@@ -3278,7 +3278,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 
     // Handling sampling/digitizing rate related variables based on connection to PA DAQ or ARA DAQ
     // Could be improved with the use of pointers and references
-    if ( settings1->TRIG_SCAN_MODE==5 && (settings1->DETECTOR==5 || settings1->DETECTOR==9) ){ // PA Triggering mode AND PA detector in use
+    if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
         if (string_i==0) use_PA_DAQ=1; // string 0 is PA, always use PA DAQ 
         else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) use_PA_DAQ=1; // All ants connected to PA in these modes
         else use_PA_DAQ=0;
@@ -3287,7 +3287,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
         trig_window_bin = (int)(settings1->TRIG_WINDOW / PATIMESTEP);  // coincidence window bin for trigger
     }
     else{
-        if ( ( settings1->TRIG_SCAN_MODE==5 || settings1->DETECTOR==5 || settings1->DETECTOR==9 ) && // User requested PA-related sim
+        if ( ( settings1->TRIG_SCAN_MODE==5 || settings1->DETECTOR==5 ) && // User requested PA-related sim
                 ( string_i==0 || settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) // We're in a situation where PA DAQ would be used
         ) { // Warn that we arent using the PA sampling/digitizing rate
             cout<<"Warning: Not using Phased Array sampling rate for PA-associated scenario."<<endl;
@@ -3351,7 +3351,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 
         // Handling sampling/digitizing rate related variables based on connection to PA DAQ or ARA DAQ
         // Could be improved with the use of pointers and references
-        if ( settings1->TRIG_SCAN_MODE==5 && (settings1->DETECTOR==5 || settings1->DETECTOR==9) ){ // PA Triggering mode AND PA detector in use
+        if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
             if (string_i==0) use_PA_DAQ=1; // string 0 is PA, always use PA DAQ 
             else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) use_PA_DAQ=1; // All ants connected to PA in these modes
             else use_PA_DAQ=0;
@@ -3360,7 +3360,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
             trig_window_bin = (int)(settings1->TRIG_WINDOW / PATIMESTEP);  // coincidence window bin for trigger
         }
         else{
-            if ( ( settings1->TRIG_SCAN_MODE==5 || settings1->DETECTOR==5 || settings1->DETECTOR==9 ) && // User requested PA-related sim
+            if ( ( settings1->TRIG_SCAN_MODE==5 || settings1->DETECTOR==5 ) && // User requested PA-related sim
                     ( string_i==0 || settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) // We're in a situation where PA DAQ would be used
             ) { // Warn that we arent using the PA sampling/digitizing rate
                 cout<<"Warning: Not using Phased Array sampling rate for PA-associated scenario."<<endl;
@@ -3395,7 +3395,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	 (settings1->TRIG_ONLY_LOW_CH_ON==1 && settings1->DETECTOR!=3 && antenna_i<2 ) ){ // channel filter: choose if to use lower/borehole channels or not
       
       int channel_num;
-      if (detector->Get_mode()==5 || detector->Get_mode()==9){
+      if (detector->Get_mode()==5){
           channel_num = detector->GetChannelfromStringAntenna ( 5, string_i, antenna_i, settings1 );
       }
       else {

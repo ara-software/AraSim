@@ -1958,7 +1958,7 @@ void Interaction::PickNear_Cylinder (IceModel *antarctica, Detector *detector, S
     double X, Y, D;    // X,Y wrt detector core, and it's distance D
     
     //calculate posnu's X, Y wrt detector core
-    if (detector->Get_mode() == 1 || detector->Get_mode() == 2 || detector->Get_mode() == 3 || detector->Get_mode() == 4 || detector->Get_mode() == 5 || detector->Get_mode() == 9) {   // detector mode is for ARA stations;
+    if (detector->Get_mode() == 1 || detector->Get_mode() == 2 || detector->Get_mode() == 3 || detector->Get_mode() == 4 || detector->Get_mode() == 5 ) {   // detector mode is for ARA stations;
         X = detector->params.core_x + thisR*cos(thisPhi);
         Y = detector->params.core_y + thisR*sin(thisPhi);
         D = pow(X*X + Y*Y, 0.5);
@@ -2109,7 +2109,7 @@ double Interaction::PickNear_Sphere (IceModel *antarctica, Detector *detector, S
 
     double X, Y, Z;    // X,Y wrt detector core
     //calculate posnu's X, Y wrt detector core
-    if (detector->Get_mode() == 1 || detector->Get_mode() == 2 || detector->Get_mode() == 3 || detector->Get_mode() == 4 || detector->Get_mode() == 5 || detector->Get_mode() == 9) {   // detector mode is for ARA stations;
+    if (detector->Get_mode() == 1 || detector->Get_mode() == 2 || detector->Get_mode() == 3 || detector->Get_mode() == 4 || detector->Get_mode() == 5 ) {   // detector mode is for ARA stations;
       X = detector->params.core_x + transX;
       Y = detector->params.core_y + transY;
       Z = transZ;
@@ -2243,7 +2243,7 @@ void Interaction::PickNear_Cylinder_AboveIce (IceModel *antarctica, Detector *de
     double X, Y, D;    // X,Y wrt detector core, and it's distance D
     
     //calculate posnu's X, Y wrt detector core
-    if (detector->Get_mode() == 1 || detector->Get_mode() == 2 || detector->Get_mode() == 3 || detector->Get_mode() == 4 || detector->Get_mode() == 5 || detector->Get_mode() == 9) {   // detector mode is for ARA stations;
+    if (detector->Get_mode() == 1 || detector->Get_mode() == 2 || detector->Get_mode() == 3 || detector->Get_mode() == 4 || detector->Get_mode() == 5 ) {   // detector mode is for ARA stations;
         X = detector->params.core_x + thisR*cos(thisPhi);
         Y = detector->params.core_y + thisR*sin(thisPhi);
         D = pow(X*X + Y*Y, 0.5);
@@ -2399,7 +2399,7 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
     
 
     //calculate posnu's X, Y wrt detector core
-    if (detector->Get_mode() == 1 || detector->Get_mode() == 2 ||detector->Get_mode() == 3 ||detector->Get_mode() == 4 ||detector->Get_mode() == 5 ||detector->Get_mode() == 9) {   // detector mode is for ARA stations;
+    if (detector->Get_mode() == 1 || detector->Get_mode() == 2 ||detector->Get_mode() == 3 ||detector->Get_mode() == 4 ||detector->Get_mode() == 5 ) {   // detector mode is for ARA stations;
 //        X = detector->params.core_x + thisR*cos(thisPhi)*cos(thisTheta);
 //        Y = detector->params.core_y + thisR*sin(thisPhi)*cos(thisTheta);
         X = avgX + thisR*cos(thisPhi)*sin(thisTheta);
