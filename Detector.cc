@@ -1942,7 +1942,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 // Set Phased Array locations (load bottom to top)
                 stations[i].strings[0].SetX( stations[i].GetX()  );
                 stations[i].strings[0].SetY( stations[i].GetY()  );
-                stations[i].strings[0].antennas[0].SetZ(-183.79); // PA 9
+                stations[i].strings[0].antennas[0].SetZ(-184.79); // PA 9
                 stations[i].strings[0].antennas[1].SetZ(-182.79); // PA 8
                 stations[i].strings[0].antennas[2].SetZ(-180.79); // PA 7
                 stations[i].strings[0].antennas[3].SetZ(-178.75); // PA 6
@@ -5581,7 +5581,7 @@ void Detector::SetupInstalledStations(Settings *settings1) {
     if (InstalledStations.size() > 5) { // Station 5
         
         // Make Phased Array
-        Antennas.push_back(109); // PAHpol at Z=-183.8
+        Antennas.push_back(109); // PAHpol at Z=-184.8
         Antennas.push_back(108); // PAHpol at Z=-182.8
         Antennas.push_back(107); // PAVpol at Z=-180.8
         Antennas.push_back(106); // PAVpol at Z=-178.8
