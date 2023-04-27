@@ -3372,22 +3372,6 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
             }
             trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
         }
-
-      // Phased array antennas don't contribute to this traditional trigger if TRIG_SCAN_MODE==5
-      if (settings1->TRIG_SCAN_MODE==5 && string_i==0) {
-            Pthresh_value[trig_j] = 0;
-
-            // stations[i].strings[string_i].antennas[antenna_i].TotalBinsScannedPerChannel++;
-            SCTR_cluster_bit[trig_j]=0;
-
-            // fill the buffers (if any changes occur mark check_TDR_configuration as non-zero)
-            if(trig_i<trig_search_init+trig_window_bin) {
-                check_TDR_configuration+=buffer[trig_j]->fill(Pthresh_value[trig_j]);
-            }
-            else check_TDR_configuration+=buffer[trig_j]->add(Pthresh_value[trig_j]);
-
-            continue;
-      }
       
       if (settings1->TRIG_ONLY_BH_ON==0
 	               || 
@@ -3449,6 +3433,9 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       // fill the buffers (if any changes occur mark check_TDR_configuration as non-zero)
       if(trig_i<trig_search_init+trig_window_bin) check_TDR_configuration+=buffer[trig_j]->fill(Pthresh_value[trig_j]);
       else check_TDR_configuration+=buffer[trig_j]->add(Pthresh_value[trig_j]);
+
+      // Phased array antennas don't contribute to NPass so end this iteration now if we're analyzing a PA string
+      if (settings1->TRIG_SCAN_MODE==5 && string_i==0) continue;
 	
       if(buffer[trig_j]->addToNPass>0){// if there is at least one value above threshold in the buffer, this is ++
 	  
@@ -3719,7 +3706,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
      
       cout<<"\nPthresh best: ";
       for(int ii=0;ii<3;ii++) cout<<" "<<stations[i].TDR_all_sorted[ii];
-      if (settings1->TRIG_SCAN_MODE==5) cout<<endl<<"[Phased Array Pthresh values set to 0 for above calcualtion]";
+      if (settings1->TRIG_SCAN_MODE==5) cout<<endl<<"[Phased Array Pthresh values ignored for above calcualtion]";
       cout<<"\n";
         
       // debug output:
