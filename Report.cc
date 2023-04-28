@@ -5840,7 +5840,7 @@ void Report::checkPATrigger(
     // If triggered, saves relevant information.
 
     //cout <<"successfully made it to PA Trigger!" << endl;
-    int BINSIZE = 1200/(settings1->TIMESTEP*1.e9); 
+    int BINSIZE = 1200/(PATIMESTEP*1.e9); 
     
     // For phased array, waveform length is 680 ns, but for trigger
     // check only 20 ns around the signal bin.
@@ -5921,15 +5921,15 @@ void Report::checkPATrigger(
                             bin_value = signalbinPA - BINSIZE/2 + bin;
                             // stations[i].strings[str].antennas[ant].V_mimic.push_back( ( trigger->Full_window_V[ant][ last_trig_bin - settings1->NFOUR/4 + mimicbin ] )*1.e3 );// save in mV
                             // stations[i].strings[str].antennas[ant].time.push_back( last_trig_bin - settings1->NFOUR/4 + mimicbin );
-                            // stations[i].strings[str].antennas[ant].time_mimic.push_back( ( settings1->NFOUR/4 + mimicbin) * settings1->TIMESTEP*1.e9 );// save in ns
+                            // stations[i].strings[str].antennas[ant].time_mimic.push_back( ( settings1->NFOUR/4 + mimicbin) * PATIMESTEP*1.e9 );// save in ns
                             //stations[i].strings[0].antennas[ant].V_mimic.push_back(trigger->Full_window_V[ant][bin_value]*1e3);// save in mV (original kah)
                             stations[i].strings[str].antennas[ant].V_mimic.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
                             // stations[i].strings[0].antennas[ant].time.push_back( bin_value );
-                            // stations[i].strings[0].antennas[ant].time_mimic.push_back( ( BINSIZE/2 + bin) * settings1->TIMESTEP*1.e9 );// save in ns
+                            // stations[i].strings[0].antennas[ant].time_mimic.push_back( ( BINSIZE/2 + bin) * PATIMESTEP*1.e9 );// save in ns
                             //stations[i].strings[str].antennas[ant].waveformVoltage.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
                             stations[i].strings[str].antennas[ant].time.push_back( bin_value );
 
-                            stations[i].strings[str].antennas[ant].time_mimic.push_back( ( bin) * settings1->TIMESTEP*1.e9 );// save in ns
+                            stations[i].strings[str].antennas[ant].time_mimic.push_back( ( bin) * PATIMESTEP*1.e9 );// save in ns
                             if (TMath::Abs(trigger->Full_window_V[ant][bin_value]) > peakvalue) {
                                 peakvalue = TMath::Abs(trigger->Full_window_V[my_ch_id][bin_value]);
                             }
