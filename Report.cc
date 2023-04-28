@@ -26,6 +26,7 @@ ClassImp(Antenna_r);
 ClassImp(Surface_antenna_r);
 ClassImp(String_r);
 ClassImp(Station_r);
+ClassImp(CircularBuffer);
 
 Report::Report() {
 }
@@ -276,6 +277,113 @@ void Antenna_r::clear_useless(Settings *settings1) {   // to reduce the size of 
 
 
 }
+
+    
+int CircularBuffer::add(double input_value){
+
+    changelog=0;
+    temp_value=best_value;
+    
+    if(buffer[i]<pthresh) addToNPass--; // if the value leaving the buffer is over threshold, we reduce the counter.
+    if(mode>1) last_value=buffer[i];// in mode 1 we don't care about the values, just about the addToNPass
+        
+    if(input_value<pthresh){
+        addToNPass++; // if value entering buffer is over threshold we increase the counter.
+        buffer[i]=input_value;
+    }
+    else buffer[i]=0; // if under threshold just insert zero
+      
+    // improve best threshold value in the buffer
+    if(mode>1&&buffer[i]<best_value){ best_value=buffer[i]; temp_value=best_value; changelog=1;}
+
+    if(mode>1&&std::fabs(last_value-best_value)<epsilon){ // i.e. if last_value==best_value. this happens when the best value leaves buffer
+        best_value=findBestValue(); // rescan whole buffer. this should be rather rare...
+        temp_value=best_value;
+        changelog=1;
+    }
+       
+    i++;
+    if(i==N) i=0;
+        
+    return changelog; 
+    // in mode>1: return value is zero if no changes, 
+    // and non-zero if there are changes to best_value (for mode==1 it's always zero);
+      
+}// add 
+
+int CircularBuffer::fill(double input_value){// buffer is just filling, don't use last_value
+    
+    changelog=0;
+    temp_value=best_value;
+    
+    if(input_value<pthresh){
+        addToNPass++; // if value entering buffer is over threshold we increase the counter.
+        buffer[i]=input_value;
+        // cout<<"addToNPass++\n";
+    }
+    else buffer[i]=0; // if under threshold add just zero
+    
+    if(mode>1&&buffer[i]<best_value){ // improve best threshold value in the buffer
+        best_value=buffer[i]; 
+        temp_value=best_value; changelog=1;
+    }
+
+    i++;
+    if(i==N) i=0;
+
+    return changelog;
+
+}// fill
+    
+double CircularBuffer::findBestValue(){
+    double temp_best=0;
+    for(int ii=0;ii<N;ii++) if(buffer[ii]<temp_best) {
+        temp_best=buffer[ii];
+    }
+    return temp_best;
+}
+    
+int CircularBuffer::numBinsToOldestTrigger(){
+    
+    if(addToNPass<1){ 
+        cerr<<"ERROR: there are no triggers in this buffer right now!\n"; 
+        return -1;
+    }
+
+    int j; // the number of bins after "i" where the first trigger is found 
+    for(j=1; j<N; j++){
+        // if(i==0&&buffer[N-1]<0) return 1;
+        // i-1 is b/c we did i++ in the last call to add/fill.
+        if(buffer[(i-1+j)%N]<0) break;// if there's any value here, its because it passed the threshold, so take it
+    }// for j
+
+    // if(j==0) return 0;
+    return N-j; // the backward count of how many bins between i and the earliest trigger... 
+    
+}// numBinsToOldestTrigger
+    
+int CircularBuffer::numBinsToLatestTrigger(){
+    
+    if(addToNPass<1){ 
+        cerr<<"ERROR: there are no triggers in this buffer right now!\n"; 
+        return -1;
+    }
+
+    int j; // the number of bins after "i" where the first trigger is found 
+    for(j=0; j<N; j++){
+
+        int bin=i-1-j;
+
+        if(bin<0) bin=N+(i-j);
+
+        if(buffer[bin]<0){// if there's any value here, its because it passed the threshold, so take it
+            break;
+        }
+    }// for j
+    
+    return j; // the count of how many bins between i and the latest trigger... 
+    
+}// numBinsToLatestTrigger
 
 
 
@@ -3126,137 +3234,6 @@ void Report::rerun_event(Event *event, Detector *detector,
 
 int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode ){
  
-  class CircularBuffer {
-    
-  public:
-    int i;
-    int mode; // in mode 1 only check number of values above threshold, in >1 check what the best value is too
-    int changelog;// if the best value changed, this is returned by add and fill
-    int N;// size of buffer
-    double *buffer;
-    double pthresh; // general run's pthresh
-    double best_value;// best value
-    double temp_value;// copy of best value, updates each call (so we can zero it when sorting)
-    double epsilon; // best value needs to be this close to current last value
-    double last_value; // value leaving buffer
-    int addToNPass; // number of values above pthresh inside buffer
-    
-    
-    
-    CircularBuffer(int size, double threshold, int scan_mode) : N(size), pthresh(threshold), mode(scan_mode) {i=0; best_value=0; temp_value=0; last_value=0; addToNPass=0; epsilon=1e-6; buffer=new double[N]; for(int j=0;j<N;j++) buffer[j]=0;}
-    
-    ~CircularBuffer(){ delete [] buffer; }
-    
-    int add(double input_value){
-
-      changelog=0;
-      temp_value=best_value;
-      
-      if(buffer[i]<pthresh) addToNPass--; // if the value leaving the buffer is over threshold, we reduce the counter.
-      if(mode>1) last_value=buffer[i];// in mode 1 we don't care about the values, just about the addToNPass
-	      
-      if(input_value<pthresh){
-	
-	addToNPass++; // if value entering buffer is over threshold we increase the counter.
-        buffer[i]=input_value;
-	
-      }
-      else buffer[i]=0; // if under threshold just insert zero
-      
-      if(mode>1&&buffer[i]<best_value){ best_value=buffer[i]; temp_value=best_value; changelog=1;}// improve best threshold value in the buffer
-
-      if(mode>1&&std::fabs(last_value-best_value)<epsilon){ // i.e. if last_value==best_value. this happens when the best value leaves buffer
-      
-	best_value=findBestValue(); // rescan whole buffer. this should be rather rare...
-	temp_value=best_value;
-	changelog=1;
-      }
-      
-           
-      i++;
-      if(i==N) i=0;
-            
-      return changelog; // in mode>1: return value is zero if no changes, and non-zero if there are changes to best_value (for mode==1 it's always zero);
-      
-    }// add 
-    int fill(double input_value){// buffer is just filling, don't use last_value
-      
-      changelog=0;
-      temp_value=best_value;
-      
-      if(input_value<pthresh){
-	
-	addToNPass++; // if value entering buffer is over threshold we increase the counter.
-        buffer[i]=input_value;
-// 	cout<<"addToNPass++\n";
-	
-      }
-      else buffer[i]=0; // if under threshold add just zero
-      
-      if(mode>1&&buffer[i]<best_value){ best_value=buffer[i]; temp_value=best_value; changelog=1;}// improve best threshold value in the buffer
-
-      i++;
-      if(i==N) i=0;
-
-      return changelog;
-
-    }// fill
-    
-    double findBestValue(){
-      
-      double temp_best=0;
-      
-      for(int ii=0;ii<N;ii++) if(buffer[ii]<temp_best) {
-	
-	temp_best=buffer[ii];
-	
-      }
-     
-      return temp_best;
-      
-    }// find best value
-    
-    int numBinsToOldestTrigger(){
-     
-      if(addToNPass<1){ cerr<<"ERROR: there are no triggers in this buffer right now!\n"; return -1;}
-      int j; // the number of bins after "i" where the first trigger is found 
-      
-      for(j=1; j<N; j++){
-	
-// 	if(i==0&&buffer[N-1]<0) return 1;
-	// i-1 is b/c we did i++ in the last call to add/fill.
-	if(buffer[(i-1+j)%N]<0) break;// if there's any value here, its because it passed the threshold, so take it
-
-      }// for j
-
-//       if(j==0) return 0;
-      return N-j; // the backward count of how many bins between i and the earliest trigger... 
-      
-    }// numBinsToOldestTrigger
-    
-    int numBinsToLatestTrigger(){
-     
-      if(addToNPass<1){ cerr<<"ERROR: there are no triggers in this buffer right now!\n"; return -1;}
-      int j; // the number of bins after "i" where the first trigger is found 
-      
-      for(j=0; j<N; j++){
-	
-	int bin=i-1-j;
-	if(bin<0) bin=N+(i-j);
-	
-	if(buffer[bin]<0){// if there's any value here, its because it passed the threshold, so take it
-
-	    break;
-
-	}
-	
-      }// for j
-      
-      return j; // the count of how many bins between i and the latest trigger... 
-      
-    }// numBinsToLatestTrigger
-    
-  };
   int i=stationID;
   
   int numChan=stations[i].TDR_all.size();

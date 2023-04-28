@@ -179,6 +179,31 @@ class Station_r {
         ClassDef(Station_r,3);
 };
 
+class CircularBuffer{
+
+    public:
+        int i;
+        int mode; // in mode 1 only check number of values above threshold, in >1 check what the best value is too
+        int changelog;// if the best value changed, this is returned by add and fill
+        int N;// size of buffer
+        double *buffer;
+        double pthresh; // general run's pthresh
+        double best_value;// best value
+        double temp_value;// copy of best value, updates each call (so we can zero it when sorting)
+        double epsilon; // best value needs to be this close to current last value
+        double last_value; // value leaving buffer
+        int addToNPass; // number of values above pthresh inside buffer
+
+        CircularBuffer(int size, double threshold, int scan_mode) : N(size), pthresh(threshold), mode(scan_mode) {i=0; best_value=0; temp_value=0; last_value=0; addToNPass=0; epsilon=1e-6; buffer=new double[N]; for(int j=0;j<N;j++) buffer[j]=0;}
+        ~CircularBuffer(){ delete [] buffer; }
+
+        int add(double input_value);
+        int fill(double input_value);
+        double findBestValue();
+        int numBinsToOldestTrigger();
+        int numBinsToLatestTrigger();
+
+};
 
 
 class Report {
