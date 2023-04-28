@@ -3349,6 +3349,15 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
             }
             trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
         }
+
+        // If this antenna is connected to PA but PA already triggered, pull out already stored PThresh and continue (don't recalculate it)
+        // This also prevents PA antennas from adding to N_Pass, N_Pass_V, and N_Pass_H
+        if ( use_PA_DAQ==1 && stations[i].PA_DAQ_Pass!=0 ){ 
+            Pthresh_value[trig_j] = -1;
+            // Need to comment out line below until I get PThresh calculaters in CheckPATrigger()
+            // Pthresh_value[trig_j] = stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back();
+            continue;
+        }
       
       if (settings1->TRIG_ONLY_BH_ON==0
 	               || 
@@ -3449,6 +3458,13 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	 
 	  int string_i = detector->getStringfromArbAntID( i, trig_j);
 	  int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+
+        // If this is a PA simulation and PA antenna and the PA already triggered, skip this antenna
+        if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 && stations[i].PA_DAQ_Pass!=0 ){ // PA Triggering mode AND PA detector in use
+            if (string_i==0) continue; // string 0 is PA, always use PA DAQ 
+            else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) continue; // All ants connected to PA in these modes
+        }  
+
 // 	  if(buffer[trig_j]->addToNPass>0) stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i-buffer[trig_j]->numBinsToLatestTrigger(); // mark the bin on which we triggered...
 	  if(buffer[trig_j]->addToNPass>0) stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i-buffer[trig_j]->numBinsToOldestTrigger(); // mark the bin on which we triggered...
 	  else stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 0.;
@@ -3518,7 +3534,14 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	  for(int trig_j=0;trig_j<numChan;trig_j++){
 	    
 	    int string_i = detector->getStringfromArbAntID( i, trig_j);
-	    int antenna_i = detector->getAntennafromArbAntID( i, trig_j);	 
+	    int antenna_i = detector->getAntennafromArbAntID( i, trig_j);  
+
+        // Don't consider PA Antennas
+
+        if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
+            if (string_i==0) continue; // string 0 is PA, always use PA DAQ 
+            else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) continue; // All ants connected to PA in these modes
+        }  
 
 	    if(detector->stations[i].strings[string_i].antennas[antenna_i].type == 0&&buffer[trig_j]->temp_value<best_thresh){ 
 	      
@@ -3553,6 +3576,12 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	    
 	    int string_i = detector->getStringfromArbAntID( i, trig_j);
 	    int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+
+        // Don't consider PA Antennas
+        if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
+            if (string_i==0) continue; // string 0 is PA, always use PA DAQ 
+            else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) continue; // All ants connected to PA in these modes
+        }  
 	 
 	    if(detector->stations[i].strings[string_i].antennas[antenna_i].type==1&&buffer[trig_j]->temp_value<best_thresh){ 
 	      
@@ -3768,6 +3797,12 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
     
     int string_i = detector->getStringfromArbAntID( i, trig_j);
     int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+
+    // If this antenna is connected to PA and PA already triggered, skip this antenna
+    if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 && stations[i].PA_DAQ_Pass!=0 ){ // PA Triggering mode AND PA detector in use
+        if (string_i==0) continue; // string 0 is PA
+        else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) continue; // All ants connected to PA in these modes
+    }  
     
     if(stations[i].strings[string_i].antennas[antenna_i].Trig_Pass){// if this channel triggered
     
