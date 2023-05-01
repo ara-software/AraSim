@@ -3421,7 +3421,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       else check_TDR_configuration+=buffer[trig_j]->add(Pthresh_value[trig_j]);
 
       // Phased array antennas don't contribute to NPass so end this iteration now if we're analyzing a PA string
-      if (settings1->TRIG_SCAN_MODE==5 && string_i==0) continue;
+      if (use_PA_DAQ==1) continue;
 	
       if(buffer[trig_j]->addToNPass>0){// if there is at least one value above threshold in the buffer, this is ++
 	  
@@ -5974,9 +5974,9 @@ void Report::checkPATrigger(
                     }//end ant
                 }//end detector
 
-            }//end efficiency if
+                hasTriggered = true;
 
-            hasTriggered = true;
+            }//end efficiency if
 
         }//end avgsnr if
         
