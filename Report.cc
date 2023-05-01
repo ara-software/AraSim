@@ -2296,6 +2296,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                     checkPATrigger(
                         i, all_receive_ang, viewangle, ray_sol_cnt, 
                         detector, event, evt, trigger, settings1, 
+                        trig_search_init, max_total_bin, trig_window_bin, 
                         xdata, ydata, ang_data, snr_data
                     );
                     if (settings1->DETECTOR_STATION==1){ // if A5 DAQ still online
@@ -3353,9 +3354,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
         // If this antenna is connected to PA but PA already triggered, pull out already stored PThresh and continue (don't recalculate it)
         // This also prevents PA antennas from adding to N_Pass, N_Pass_V, and N_Pass_H
         if ( use_PA_DAQ==1 && stations[i].PA_DAQ_Pass!=0 ){ 
-            Pthresh_value[trig_j] = -1;
-            // Need to comment out line below until I get PThresh calculaters in CheckPATrigger()
-            // Pthresh_value[trig_j] = stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back();
+            Pthresh_value[trig_j] = stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back();
             continue;
         }
       
@@ -5865,6 +5864,7 @@ bool Report::isTrigger(double eff){
 void Report::checkPATrigger(
     int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,
     Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
+    int trig_search_init, int max_total_bin, int trig_window_bin, 
     double* xdata, double* ydata, double* ang_data, double* snr_data
 ){
     // Calculates max SNR in topmost PA Vpol 
@@ -5876,6 +5876,8 @@ void Report::checkPATrigger(
 
     //cout <<"successfully made it to PA Trigger!" << endl;
     int BINSIZE = 1200/(PATIMESTEP*1.e9); 
+    int waveformLength = settings1->WAVEFORM_LENGTH;
+    int waveformCenter = settings1->WAVEFORM_CENTER;
     
     // For phased array, waveform length is 680 ns, but for trigger
     // check only 20 ns around the signal bin.
@@ -5979,6 +5981,352 @@ void Report::checkPATrigger(
             }//end efficiency if
 
         }//end avgsnr if
+
+        // Save information like in triggerCheckLoop() and saveTriggeredEvent()
+        if (hasTriggered==true){
+
+            int numChan=stations[i].TDR_all.size();
+            int numChanVpol=stations[i].TDR_Vpol_sorted.size();
+            int numChanHpol=stations[i].TDR_Hpol_sorted.size();
+
+            double powerthreshold = 2.0;
+            double Pthresh_value[numChan];
+            CircularBuffer **buffer=new CircularBuffer*[numChan];
+
+            int SCTR_cluster_bit[numChan];
+            for(int trig_j=0;trig_j<numChan;trig_j++) SCTR_cluster_bit[trig_j]=0;
+
+            double *TDR_all_sorted_temp;
+            double *TDR_Vpol_sorted_temp;
+            double *TDR_Hpol_sorted_temp;
+            
+            if(settings1->TRIG_SCAN_MODE>1){ // prepare TDR storage arrays 
+                TDR_all_sorted_temp=new double[numChan];
+                TDR_Vpol_sorted_temp=new double[numChanVpol];
+                TDR_Hpol_sorted_temp=new double[numChanHpol];
+                for(int trig_j=0;trig_j<numChan;    trig_j++) TDR_all_sorted_temp[trig_j] =0;
+                for(int trig_j=0;trig_j<numChanVpol;trig_j++) TDR_Vpol_sorted_temp[trig_j]=0;
+                for(int trig_j=0;trig_j<numChanHpol;trig_j++) TDR_Hpol_sorted_temp[trig_j]=0;  
+            } // if scan_mode>1
+
+            int check_TDR_configuration=0; // check if we need to reorder our TDR arrays
+            int first_trigger=0;
+
+            // Calculate PThresh information (taken from triggerCheckLoop)
+            int use_PA_DAQ = 0;
+            for(int trig_j=0;trig_j<numChan; trig_j++){// initialize Trig_Pass and buffers for each channel
+                int string_i = detector->getStringfromArbAntID( i, trig_j);
+                int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+
+                // Handling sampling/digitizing rate related variables based on connection to PA DAQ or ARA DAQ
+                // Could be improved with the use of pointers and references
+                if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
+                    if (string_i==0) use_PA_DAQ=1; // string 0 is PA, always use PA DAQ 
+                    else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) use_PA_DAQ=1; // All ants connected to PA in these modes
+                    else use_PA_DAQ=0;
+                }    
+                if (use_PA_DAQ==1) {
+                    trig_window_bin = (int)(settings1->TRIG_WINDOW / PATIMESTEP);  // coincidence window bin for trigger
+                }
+                else{
+                    if ( ( settings1->TRIG_SCAN_MODE==5 || settings1->DETECTOR==5 ) && // User requested PA-related sim
+                            ( string_i==0 || settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) // We're in a situation where PA DAQ would be used
+                    ) { // Warn that we arent using the PA sampling/digitizing rate
+                        cout<<"Warning: Not using Phased Array sampling rate for PA-associated scenario."<<endl;
+                        cout<<"  TRIG_SCAN_MODE: "<<settings1->TRIG_SCAN_MODE;
+                        cout<<"  DETECTOR: "<<settings1->DETECTOR;
+                        cout<<"  DETECTOR_MODE: "<<settings1->DETECTOR_STATION;
+                        cout<<"  string index: "<<string_i<<endl;
+                    }
+                    trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
+                }
+
+                Pthresh_value[trig_j]=0;
+                buffer[trig_j]=new CircularBuffer(trig_window_bin, powerthreshold, settings1->TRIG_SCAN_MODE);
+
+                stations[i].strings[string_i].antennas[antenna_i].SingleChannelTriggers=0;
+                stations[i].strings[string_i].antennas[antenna_i].TotalBinsScannedPerChannel=0;
+
+            } // end channel loop 
+
+            // Loop over window bins, get PThresh and decide if we need to update sorted arrays
+            int N_pass_V = 0;
+            int window_pass_bit = 0; // Whether this trig_i window passes
+            int bin_to_save_on = -1; 
+            for(int trig_i = trig_search_init; trig_i < max_total_bin; trig_i++) { // scan the different window positions
+                
+                // FOR EACH CHANNEL
+                for (int trig_j=0; trig_j<numChan; trig_j++){
+                
+                    int string_i = detector->getStringfromArbAntID( i, trig_j);
+                    int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+
+                    // Handling sampling/digitizing rate related variables based on connection to PA DAQ or ARA DAQ
+                    // Could be improved with the use of pointers and references
+                    if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
+                        if (string_i==0) use_PA_DAQ=1; // string 0 is PA, always use PA DAQ 
+                        else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) use_PA_DAQ=1; // All ants connected to PA in these modes
+                        else use_PA_DAQ=0;
+                    }    
+                    if (use_PA_DAQ==1) {
+                        trig_window_bin = (int)(settings1->TRIG_WINDOW / PATIMESTEP);  // coincidence window bin for trigger
+                    }
+                    else{
+                        if ( ( settings1->TRIG_SCAN_MODE==5 || settings1->DETECTOR==5 ) && // User requested PA-related sim
+                                ( string_i==0 || settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) // We're in a situation where PA DAQ would be used
+                        ) { // Warn that we arent using the PA sampling/digitizing rate
+                            cout<<"Warning: Not using Phased Array sampling rate for PA-associated scenario."<<endl;
+                            cout<<"  TRIG_SCAN_MODE: "<<settings1->TRIG_SCAN_MODE;
+                            cout<<"  DETECTOR: "<<settings1->DETECTOR;
+                            cout<<"  DETECTOR_MODE: "<<settings1->DETECTOR_STATION;
+                            cout<<"  string index: "<<string_i<<endl;
+                        }
+                        trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
+                    }
+
+                    int channel_num = detector->GetChannelfromStringAntenna( 5, string_i, antenna_i, settings1 );
+
+                    // assign Pthresh a value 
+                    if(settings1->NOISE_CHANNEL_MODE==0) Pthresh_value[trig_j] = trigger->Full_window[trig_j][trig_i] / ( trigger->rmsdiode                   * detector->GetThresOffset( i, channel_num-1,settings1) );
+                    if(settings1->NOISE_CHANNEL_MODE==1) Pthresh_value[trig_j] = trigger->Full_window[trig_j][trig_i] / ( trigger->rmsdiode_ch[channel_num-1] * detector->GetThresOffset( i, channel_num-1,settings1) );
+                    if(settings1->NOISE_CHANNEL_MODE==2){
+                        if(channel_num-1 < 8)            Pthresh_value[trig_j] = trigger->Full_window[trig_j][trig_i] / ( trigger->rmsdiode_ch[channel_num-1] * detector->GetThresOffset( i, channel_num-1,settings1) );
+                        else                             Pthresh_value[trig_j] = trigger->Full_window[trig_j][trig_i] / ( trigger->rmsdiode_ch[8]             * detector->GetThresOffset( i, channel_num-1,settings1) );
+                    }
+
+                    // this is to count how many local trigger clusters there are 
+                    if(Pthresh_value[trig_j]<powerthreshold){
+            
+                        if(SCTR_cluster_bit[trig_j]==0) stations[i].strings[string_i].antennas[antenna_i].SingleChannelTriggers++;
+                    
+                        // records all the different Pthresh values that caused local trigger.
+                        if(settings1->TRIG_SCAN_MODE>2){  // save PThresh to ant SCT_threshold_pass if its the best or first
+                            if(SCTR_cluster_bit[trig_j]==0){// if first trigger in cluster
+                                stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.push_back(Pthresh_value[trig_j]);
+                            }
+                            else{// choose the highest trigger value (most negative) in cluster
+                                if(Pthresh_value[trig_j]<stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back()) stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back()=Pthresh_value[trig_j];
+                            }
+                        }// trig scan mode > 2
+                        
+                        SCTR_cluster_bit[trig_j]=1;
+            
+                    }// if local trigger
+                    else SCTR_cluster_bit[trig_j]=0;// if no local trigger, set zero to start a new cluster at next local trigger
+                    
+                    // and how many bins scanned
+                    stations[i].strings[string_i].antennas[antenna_i].TotalBinsScannedPerChannel++;
+
+                    // fill the buffers (if any changes occur mark check_TDR_configuration as non-zero)
+                    if(trig_i<trig_search_init+trig_window_bin) check_TDR_configuration+=buffer[trig_j]->fill(Pthresh_value[trig_j]);
+                    else check_TDR_configuration+=buffer[trig_j]->add(Pthresh_value[trig_j]);
+
+                    // if there is at least one value above threshold in the buffer, this is ++
+                    if( buffer[trig_j]->addToNPass>0 && 
+                        string_i == 0 && 
+                        detector->stations[i].strings[string_i].antennas[antenna_i].type == 0
+                    ) N_pass_V++;
+                
+                }// end iteration over channels to calculate PThresh
+
+                // Add in PThresh calculators inspired by triggerCheckLoop()
+                if ( N_pass_V > 3 ) {
+
+                    window_pass_bit=1;
+
+                    // if this is the first trigger, mark this position and save event
+                    if(first_trigger==0){ 
+                        first_trigger=1;
+                        // FOR EACH CHANNEL
+                        for(int trig_j=0;trig_j<numChan;trig_j++){ // Set Trig_Pass for each ant
+                            int string_i = detector->getStringfromArbAntID( i, trig_j);
+                            int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+                            if(buffer[trig_j]->addToNPass>0) stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i-buffer[trig_j]->numBinsToOldestTrigger(); // mark the bin on which we triggered...
+                            else stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 0.;
+                        }// for trig_j
+                        bin_to_save_on = trig_i;
+                    }// first trigger
+
+                } // end if N_Pass_Vpol > some value
+
+                if(settings1->TRIG_SCAN_MODE>1&&check_TDR_configuration&&window_pass_bit){// if there's a trigger and anything changes in the buffers, restock the TDR arrays
+                        
+                    for(int trig_j=0;trig_j<numChan;trig_j++) TDR_all_sorted_temp[trig_j]=0;
+                    for(int trig_j=0;trig_j<numChanVpol;trig_j++) TDR_Vpol_sorted_temp[trig_j]=0;
+                    for(int trig_j=0;trig_j<numChanHpol;trig_j++) TDR_Hpol_sorted_temp[trig_j]=0;
+
+                    for(int trig_j=0;trig_j<numChan;trig_j++){// fill the TDR (unsorted) arrays if they improved... 
+                        if(buffer[trig_j]->best_value<stations[i].TDR_all[trig_j]) stations[i].TDR_all[trig_j]=buffer[trig_j]->best_value;
+                    }// for trig_j
+
+                    // Changes TDR sorting and buffer[best_chan] for Vpol only:
+                    for(int ii=0;ii<numChanVpol; ii++){// find the best channel's TDR and store them.
+
+                        double best_thresh=0;
+                        int best_chan=0;
+                        
+                        // Pick a new best_thresh and best_chan
+                        for(int trig_j=0;trig_j<numChan;trig_j++){
+                            int string_i = detector->getStringfromArbAntID( i, trig_j);
+                            int antenna_i = detector->getAntennafromArbAntID( i, trig_j);  
+                            if(detector->stations[i].strings[string_i].antennas[antenna_i].type == 0&&buffer[trig_j]->temp_value<best_thresh){ 
+                                best_thresh=buffer[trig_j]->temp_value; 
+                                best_chan=trig_j;
+                            }// if best
+                        }// for trig_j
+
+                        buffer[best_chan]->temp_value=0;
+                        TDR_Vpol_sorted_temp[ii]=best_thresh;
+                    
+                    }// end sort Vpol tdr values
+                    
+                    // Changes TDR sorting and buffer[best_chan] for Hpol only
+                    for(int ii=0;ii<numChanHpol; ii++){// find the best channel's TDR and store them.
+
+                        double best_thresh=0;
+                        int best_chan=0;
+                        
+                        // Pick a new best_chan and best_thresh
+                        for(int trig_j=0;trig_j<numChan;trig_j++){ 
+                            int string_i = detector->getStringfromArbAntID( i, trig_j);
+                            int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+                            if(detector->stations[i].strings[string_i].antennas[antenna_i].type==1&&buffer[trig_j]->temp_value<best_thresh){ 
+                                best_thresh=buffer[trig_j]->temp_value; 
+                                best_chan=trig_j;
+                            }// if best
+                        }// for trig_j
+                        
+                        buffer[best_chan]->temp_value=0;
+                        TDR_Hpol_sorted_temp[ii]=best_thresh;
+                
+                    }// end sort Hpol tdr values
+
+                    // Update TDR arrays (no matter what)
+                    if(settings1->TRIG_MODE==0){
+                        for(int ii=0;ii<stations[i].TDR_all_sorted.size();ii++) {
+                            if(TDR_all_sorted_temp[ii]<stations[i].TDR_all_sorted[ii]) {
+                                stations[i].TDR_all_sorted[ii]=TDR_all_sorted_temp[ii];
+                        } }  
+                    }
+                    if(settings1->TRIG_MODE==1){
+                        for(int ii=0;ii<stations[i].TDR_Vpol_sorted.size();ii++) {
+                            if(TDR_Vpol_sorted_temp[ii]<stations[i].TDR_Vpol_sorted[ii]) {
+                                stations[i].TDR_Vpol_sorted[ii]=TDR_Vpol_sorted_temp[ii];
+                        } } 
+                        for(int ii=0;ii<stations[i].TDR_Hpol_sorted.size();ii++) {
+                            if(TDR_Hpol_sorted_temp[ii]<stations[i].TDR_Hpol_sorted[ii]) {
+                                stations[i].TDR_Hpol_sorted[ii]=TDR_Hpol_sorted_temp[ii];
+                        } } 
+                    }
+
+                }// if trigger and buffer changed
+
+            } // end iteration over windows/bins
+
+            if ( bin_to_save_on == -1 ) bin_to_save_on = signalbinPA;
+            
+            // Do what saveTriggeredEvent() does
+            for(int trig_j=0; trig_j<numChan;trig_j++){
+
+                int string_i = detector->getStringfromArbAntID( i, trig_j);
+                int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+                    
+                stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = -1; // no likely init
+                    
+                int mindBin = 1.e9; // init big values
+                int dBin = 0;
+                    
+                for (int m=0; m<stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) {   // loop over raysol numbers
+                    if ( stations[i].strings[string_i].antennas[antenna_i].SignalExt[m] ) {
+                        dBin = abs( 
+                            stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] 
+                            - stations[i].strings[string_i].antennas[antenna_i].Trig_Pass 
+                        );
+                        if ( dBin < mindBin ) {
+                            stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = m; // store the ray sol number which is minimum difference between Trig_Pass bin
+                            mindBin = dBin;    
+                        }
+                    }     
+                } // for m (ray sol numbers)
+                
+                // now save the voltage waveform to V_mimic
+                for (int mimicbin=0; mimicbin < waveformLength/2; mimicbin++) {
+                // new DAQ waveform writing mechanism test
+
+                if (settings1->V_MIMIC_MODE == 0) { // Global passed bin is the center of the window
+                    
+                    stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( 
+                    ( trigger->Full_window_V[trig_j][ bin_to_save_on - waveformLength/2 + waveformCenter + mimicbin ] )*1.e3 
+                    );// save in mV
+                    stations[i].strings[string_i].antennas[antenna_i].time.push_back(  
+                    bin_to_save_on - waveformLength/2 + waveformCenter + mimicbin 
+                    );
+                    stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( 
+                    ( waveformLength/2 + waveformCenter + mimicbin) * settings1->TIMESTEP*1.e9  
+                    );// save in ns
+
+                }
+                else if (settings1->V_MIMIC_MODE == 1) { // Global passed bin is the center of the window + delay to each chs from araGeom
+                    
+                    stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( 
+                    ( trigger->Full_window_V[trig_j][  bin_to_save_on - (detector->params.TestBed_Ch_delay_bin[trig_j] 
+                    - detector->params.TestBed_BH_Mean_delay_bin) - waveformLength/2 + waveformCenter + mimicbin ] )*1.e3 
+                    );// save in mV
+                    stations[i].strings[string_i].antennas[antenna_i].time.push_back( 
+                    bin_to_save_on - (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) 
+                    - waveformLength/2 + waveformCenter + mimicbin 
+                    );
+                    stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( 
+                    ( -(detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) 
+                        - waveformLength/2 + waveformCenter + mimicbin) * settings1->TIMESTEP*1.e9  
+                    );// save in ns      
+
+                }
+                else if (settings1->V_MIMIC_MODE == 2) { // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
+                    
+                    stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( 
+                    ( trigger->Full_window_V[trig_j][  bin_to_save_on - (detector->params.TestBed_Ch_delay_bin[trig_j] 
+                    - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) 
+                    - waveformLength/2 + waveformCenter + mimicbin ] )*1.e3 
+                    );// save in mV
+                    stations[i].strings[string_i].antennas[antenna_i].time.push_back(  
+                    bin_to_save_on - (detector->params.TestBed_Ch_delay_bin[trig_j] 
+                    - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) 
+                    - waveformLength/2 + waveformCenter + mimicbin 
+                    );
+                    stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( 
+                    ( -(detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin 
+                    + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) 
+                    - waveformLength/2 + waveformCenter + mimicbin) * settings1->TIMESTEP*1.e9 
+                    + detector->params.TestBed_WFtime_offset_ns 
+                    );// save in ns
+
+                }
+
+                } // end save the voltage to V_Mimic
+                        
+                // set global_trig_bin values
+                if (settings1->V_MIMIC_MODE == 0) { // Global passed bin is the center of the window
+                stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = waveformLength/2 + waveformCenter ;
+                }
+                else if (settings1->V_MIMIC_MODE == 1) { // Global passed bin is the center of the window + delay to each chs from araGeom
+                stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) + waveformLength/2 + waveformCenter ;
+                }
+                else if (settings1->V_MIMIC_MODE == 2) { // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
+                    stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformLength/2 + waveformCenter ;
+                }
+                
+                double arrivtime = stations[i].strings[string_i].antennas[antenna_i].arrival_time[0];
+                double X = detector->stations[i].strings[string_i].antennas[antenna_i].GetX();
+                double Y = detector->stations[i].strings[string_i].antennas[antenna_i].GetY();
+                double Z = detector->stations[i].strings[string_i].antennas[antenna_i].GetZ();
+                
+                stations[i].total_trig_search_bin = stations[i].ARA_DAQ_Pass + trig_window_bin - trig_search_init;
+
+
+            } // end for trig_j in numchans
+
+        } // end if hasTriggered==true
         
         raySolNum++;
         if(hasTriggered==true) break;

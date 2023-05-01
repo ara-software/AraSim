@@ -273,6 +273,7 @@ class Report {
     void checkPATrigger(
         int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,
         Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
+        int trig_search_init, int max_total_bin, int trig_window_bin, 
         double* xdata, double* ydata, double* ang_data, double* snr_data);    
     double interpolate(double *xdata,double *ydata, double xi, int numData);
     
@@ -403,7 +404,7 @@ class Report {
         double Earray[outbin];
 
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
-        double PATIMESTEP = (0.3125)*1.E-9; // inverse of sampling rate from section 4.1 of Kaeli's thesis
+        double PATIMESTEP = (.1667)*1.E-9; // inverse of sampling rate from section 4.1 of Kaeli's thesis
 
         // Phased Array variables
         double viewAngle;
