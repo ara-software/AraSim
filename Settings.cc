@@ -169,7 +169,7 @@ outputdir="outputs"; // directory where outputs go
 
   NNU_D_PHI=0.0873;// default : nnu_d_phi : 5 deg
 
-  Z_THIS_TOLERANCE=0; // 0 : (default) use default 'requiredAccuracy' parameter for ray tracing, 1 : change 'requiredAccuracy' parameter by Z_TOLERANCE
+  Z_THIS_TOLERANCE=1; // 0 : use default 'requiredAccuracy' metod for ray tracing, 1 (default) : change 'requiredAccuracy' parameter by Z_TOLERANCE
 
   Z_TOLERANCE=0.2; // 0.2 : (default)   
  
