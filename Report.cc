@@ -1947,7 +1947,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                         else
                                         {
                                             // if we are checking previous string, check upto entire antennas
-                                            if (settings1->DETECTOR==5 && settings1->DETECTOR_STATION==3 && j_sub==3 && k_sub==1) continue;
+                                            if (settings1->DETECTOR==5 && settings1->DETECTOR_STATION==3 && j_sub==3 && k_sub==1) continue; // Avoids segfault from string 3 having 1 antenna for PA DETECTOR_STATION 3
                                             if (noise_ID[l] == stations[i].strings[j_sub].antennas[k_sub].noise_ID[0])
                                             {
                                                 // check only first one for now;;;
@@ -3351,8 +3351,8 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
             trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
         }
 
-        // If this antenna is connected to PA but PA already triggered, pull out already stored PThresh and continue (don't recalculate it)
-        // This also prevents PA antennas from adding to N_Pass, N_Pass_V, and N_Pass_H
+        // If this antenna is connected to PA but PA already triggered, pull out already stored PThresh and continue to next iteration (don't recalculate PThresh)
+        // PA antennas are allowed to continue if PA DAQ didn't trigger, but we'll still escape before changing N_Pass, N_Pass_V, and N_Pass_H
         if ( use_PA_DAQ==1 && stations[i].PA_DAQ_Pass!=0 ){ 
             Pthresh_value[trig_j] = stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back();
             continue;
@@ -3419,7 +3419,8 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       if(trig_i<trig_search_init+trig_window_bin) check_TDR_configuration+=buffer[trig_j]->fill(Pthresh_value[trig_j]);
       else check_TDR_configuration+=buffer[trig_j]->add(Pthresh_value[trig_j]);
 
-      // Phased array antennas don't contribute to NPass so end this iteration now if we're analyzing a PA string
+      // End this iteration now if we're analyzing an antenna connected to the PA DAQ
+      // This prevents PA antennas from adding to N_Pass, N_Pass_V, and N_Pass_H
       if (use_PA_DAQ==1) continue;
 	
       if(buffer[trig_j]->addToNPass>0){// if there is at least one value above threshold in the buffer, this is ++
@@ -3747,7 +3748,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	cout<<"\n";
 	
       }// ordering problem
-
+	  
       // debug output:
       if(stations[i].TDR_Hpol_sorted[0]>stations[i].TDR_Hpol_sorted[1]||stations[i].TDR_Hpol_sorted[1]>stations[i].TDR_Hpol_sorted[2]){
 	   
@@ -3758,7 +3759,6 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	cout<<"\n";
 		
       }// ordering problem
-
          
     }// trig mode 1
     
@@ -5802,54 +5802,39 @@ double Report::getAverageSNR2(int raysolnum){
     double peak;
     for (int ant_num = 0; ant_num<7; ant_num++){
         peak = 0.0;
+
         int total_bins = stations[0].strings[0].antennas[ant_num].V[raysolnum].size();
-        //cout << "size is " << total_bins << endl;
         for (int bin=0; bin<total_bins; bin++){
-            //cout << bin << endl;
-            //cout << stations[0].strings[0].antennas[ant_num].V[raysolnum][bin] << endl;
-            //bin_value = signalBin - BINSIZE/2 + bin;
-            //cout << stations[0].strings[0].antennas[ant_num].V[raysolnum][bin] << endl;
             if(TMath::Abs(stations[0].strings[0].antennas[ant_num].V[raysolnum][bin])>peak){
-                //cout << "made it! " << TMath::Abs(stations[0].strings[0].antennas[ant_num].V[raysolnum][bin]) << endl;
                 peak = TMath::Abs(stations[0].strings[0].antennas[ant_num].V[raysolnum][bin]);
 
             }
         }
 
         temp_snr = peak/0.04;
-        if(temp_snr>25){
-            temp_snr = 25;
-        }
-        //cout <<temp_snr << endl;
+        if(temp_snr>25) temp_snr = 25; // Cap SNR at 25
         total_snr = total_snr+temp_snr;
+
     }
+
     total_snr = total_snr/7.0;
+
     return total_snr;
 }
 
-double Report::getAverageSNR(const vector<double> & mysignal,Trigger *trigger, const int PA_binsize, const int TOTAL_SIZE){
-    //cout << "inside function " << endl;
-    double snr = 0.0;
-    //for (size_t ant = 0; ant<mysignal.antennas.size(), ant++){
+double Report::getAverageSNR(const vector<double> & mysignal){
     double peak =0.0;
-    for (int bin; bin<mysignal.size(); bin++){
-        //cout << mysignal[bin] << endl;
-        //bin_value = signalBin - BINSIZE/2 + bin;
-        if(TMath::Abs(mysignal[bin])>peak){
-            //cout << "made it! " << TMath::Abs(mysignal[bin]) << endl;
-            peak = TMath::Abs(mysignal[bin]);
 
+    for (int bin; bin<mysignal.size(); bin++){
+        if(TMath::Abs(mysignal[bin])>peak){
+            peak = TMath::Abs(mysignal[bin]);
         }
     }
-    //cout << "peak is "<< peak << endl;
-    snr =peak/0.04;
-    //cout << "snr is "<< snr << endl;
-    if(snr>25)
-    {
-        snr = 25.0;
     
-    }
-    //cout << snr << endl;
+    double snr = peak/0.04;
+
+    if(snr>25) snr = 25.0; // Cap SNR at 25
+    
     return snr;
 
 }
@@ -5904,34 +5889,26 @@ void Report::checkPATrigger(
             avgSnr=3.5;
         }
         else {
-            // Estimate average SNR from topmost vpol
+            // Estimate average SNR in topmost vpol
             if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
-                avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V[raySolNum],trigger,signalbinPA,BINSIZE);
+                avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V[raySolNum]);
             }
             else {
                 avgSnr = 0.0;
             }
         }
 
+        //scale snr to reflect the angle
         all_receive_ang[raySolNum] = all_receive_ang[raySolNum]*180.0/PI-90.0;
         double snr_50 = interpolate(ang_data,snr_data,all_receive_ang[raySolNum],187);
+        avgSnr = avgSnr*2.0/snr_50;
 
-        avgSnr = avgSnr*2.0/snr_50; //scale snr to reflect the angle
-
+        // Estimate the PA signal efficiency of for this SNR from curve of efficiency vs data
         double eff = interpolate(xdata,ydata,avgSnr,59);
-
-        if(event->Nu_Interaction[0].posnu.GetX() <0 & event->Nu_Interaction[0].posnu.GetY() <0){
-            cout << avgSnr << endl;
-            cout << eff << endl;
-            cout << "" << endl;
-        }
         
-        //cout<<" Efficiency = "<<eff<<endl;
         if(avgSnr > 0.5){
-            // cout<<endl;
-            // cout<<"PA Noise RMS : "<<noise_rms<<" PA avgSNR : "<<avgSnr<<" PA Efficiency "<<eff<<" RaySol No "<<raySolNum<<endl;
                    
-            if(isTrigger(eff)){
+            if(isTrigger(eff)){ // if a randomly selected value is greater than the PA efficiency we calculated, this event triggers
                 cout<<endl<<"PA trigger ~~~ raySolNum: "<< raySolNum;
                 cout<<"  avgSNR: "<<avgSnr<<"  Event Number : "<<evt;
                 cout<<"  PA efficiency : "<<eff<<endl;
@@ -5940,14 +5917,11 @@ void Report::checkPATrigger(
                     cout<<"Weight for Second Ray trigger is: "<<event->Nu_Interaction[0].weight<<endl;
                     break;
                 }
-                //stations[i].strings[0].averageSNR = avgSnr;
-                //stations[i].strings[0].viewAngle = viewangle;
                 viewAngle = viewangle;
                 my_averageSNR = avgSnr;
                 my_raysol = raySolNum;
                 my_receive_ang = all_receive_ang[raySolNum];
                 int last_trig_bin = signalbinPA;
-                //cout<<"Signal Bin ****"<<signalbinPA<<"BIN SIZE "<<BINSIZE<<endl;
                 int my_ch_id = 0;
                 stations[i].PA_DAQ_Pass = last_trig_bin;
                 for (size_t str = 0; str < detector->stations[i].strings.size(); str++) {
@@ -5970,6 +5944,7 @@ void Report::checkPATrigger(
                             if (TMath::Abs(trigger->Full_window_V[ant][bin_value]) > peakvalue) {
                                 peakvalue = TMath::Abs(trigger->Full_window_V[my_ch_id][bin_value]);
                             }
+                            
                         }//end bin
                         my_ch_id ++;
                         //cout<<" Peak Value for ant "<<ant<<" is "<<peakvalue<<endl;

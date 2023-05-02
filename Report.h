@@ -267,7 +267,7 @@ class Report {
         );
     
     // Phased Array functions    
-    double getAverageSNR(const vector<double> & mysignal,Trigger *trigger, const int PA_binsize, const int TOTAL_SIZE);
+    double getAverageSNR(const vector<double> & mysignal);
     double getAverageSNR2(int raysolnum);
     bool isTrigger(double eff);
     void checkPATrigger(
@@ -404,7 +404,7 @@ class Report {
         double Earray[outbin];
 
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
-        double PATIMESTEP = (.1667)*1.E-9; // 0.1667 is from Kaeli's sim, 0.32 is inverse of sampling rate from section 4.1 of Kaeli's thesis
+        double PATIMESTEP = (.1667)*1.E-9; // 0.1667 is from Kaeli's sim, 0.3125 is inverse of sampling rate from section 4.1 of Kaeli's thesis
 
         // Phased Array variables
         double viewAngle;
