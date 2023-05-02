@@ -1775,4 +1775,17 @@ there functions here:
 
 Full documentation of this work is available on DocDB: https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2757 
  
- ==============================================================================
+==============================================================================
+
+2023/05/02 Myoungchul Kim
+
+Default value of Z_THIS_TOLERANCE is now 1
+Unless user changes Z_THIS_TOLERANCE to 0 which is dynamic requiredAccuracy setting, 
+requiredAccuracy is always follow Z_TOLERANCE parameter which is 0.2 as a default
+
+Added PA ice model in RaySolver.cc
+If user set RAY_TRACE_ICE_MODEL_PARAMS = 40, AraSim will use UNL Modified (PA model).
+Related slide: https://aradocs.wipac.wisc.edu/docs/0022/002222/001/inIceMC_Hughes_A5locations_10222020.pdf
+
+==============================================================================
+

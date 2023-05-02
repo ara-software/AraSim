@@ -1117,6 +1117,11 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
       ns = 1.357;
       nd = 1.78;
       nc = 0.027;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 40){ //! MK added -2023-05-02-
+      // UNL Modified (PA model). Related slide: https://aradocs.wipac.wisc.edu/docs/0022/002222/001/inIceMC_Hughes_A5locations_10222020.pdf
+      ns = 1.326;
+      nd = 1.78;
+      nc = 0.0202;
     }
     else {
       // South Pole Values (AraSim original default, based on RICE)
