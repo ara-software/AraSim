@@ -3733,7 +3733,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       cout<<"\nPthresh best: ";
       cout<<"  Vpol: "; for(int ii=0;ii<stations[i].TDR_Vpol_sorted.size();ii++) cout<<" "<<stations[i].TDR_Vpol_sorted[ii];
       cout<<"  Hpol: "; for(int ii=0;ii<stations[i].TDR_Hpol_sorted.size();ii++) cout<<" "<<stations[i].TDR_Hpol_sorted[ii];
-      if (settings1->TRIG_SCAN_MODE==5) cout<<endl<<"[Phased Array Pthresh values set to 0 for above calcualtion]";
+      if (settings1->TRIG_SCAN_MODE==5) cout<<endl<<"[Phased Array Pthresh values ignored for combinatoric trigger]";
       cout<<"\n";
       
         
