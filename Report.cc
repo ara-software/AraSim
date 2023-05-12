@@ -2668,6 +2668,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     if (settings1->TRIG_ONLY_LOW_CH_ON == 0)
                                     {
                                         cout << endl << "trigger passed at bin " << stations[i].strings[string_i].antennas[antenna_i].Trig_Pass << "  passed ch : " << ch_loop << " (" << detector->stations[i].strings[string_i].antennas[antenna_i].type << "type) Direct dist btw posnu : " << event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i]) << " noiseID : " << stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
+                                        cout << endl << "posnu theta: " << event->Nu_Interaction[0].posnu.Theta() * DEGRAD << ", posnu phi: " << event->Nu_Interaction[0].posnu.Phi() * DEGRAD << endl;
                                         if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol != -1)
                                         {
                                             cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[0] *DEGRAD << " LikelyTrigSignal : " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol;

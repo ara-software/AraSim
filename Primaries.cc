@@ -2419,7 +2419,8 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
     //    std::cout << "CenterPosition:X:Y:Z:: "  << avgX << " : " << avgY << " : " << avgZ <<  std::endl;
 
     //std::cout << "Central position: " << centerZ << " : " << Z << " : " << X << " : " << Y << std::endl;
-
+    std::cout << "Central position (XYZ): " << X << " : " << Y << " : " << Z << std::endl;
+    std::cout << "Central position (R,Theta,Phi): " << thisR << " : " << thisTheta * DEGRAD << " : " << thisPhi * DEGRAD << std::endl;
     
     posnu.SetXYZ(X,Y,Z);
     //    std::cout << "Posnu:X:Y:Z:: "  << posnu.GetX() << " : " << posnu.GetY() << " : " << posnu.GetZ() <<  std::endl;
