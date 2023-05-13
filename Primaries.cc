@@ -2382,7 +2382,7 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
 
     for (int i = 0; i < detector->stations[0].strings.size(); i++){
         for (int j = 0; j < detector->stations[0].strings[i].antennas.size(); j++){
-//            std::cout << "AntennaPos:X:Y:Z:: " << detector->stations[0].strings[i].antennas[j].GetX() <<  " : " << detector->stations[0].strings[i].antennas[j].GetY() << " : " << detector->stations[0].strings[i].antennas[j].GetZ() <<std::endl;
+            std::cout << "AntennaPos:X:Y:Z:: " << detector->stations[0].strings[i].antennas[j].GetX() <<  " : " << detector->stations[0].strings[i].antennas[j].GetY() << " : " << detector->stations[0].strings[i].antennas[j].GetZ() <<std::endl;
             sumX = sumX + detector->stations[0].strings[i].antennas[j].GetX();
             sumY = sumY + detector->stations[0].strings[i].antennas[j].GetY();
             sumZ = sumZ + detector->stations[0].strings[i].antennas[j].GetZ();

@@ -329,7 +329,8 @@ class Detector {
 
         void AddAdditional_Depth(Settings *settings1); // each station share the lowest surface
 
-
+        double posnu_final[16][6];
+        int sim_rf_ch_map[16][3]; 
 
         int freq_step;
         int ang_step;

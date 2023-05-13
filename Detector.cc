@@ -111,6 +111,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
     // setup actual installed staion information regardless of what DETECTOR mode is in use
     SetupInstalledStations();
 
+    int ID_temp;
 
     if (mode == 0) {
         cout << "\n\tDector mode 0 : testbed" << endl;
@@ -1604,8 +1605,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         std::cout << "Imported Station info" << std::endl;
 
         int stationID = settings1 -> DETECTOR_STATION;
-
-
+        ID_temp = stationID;
+        
         for (int i = 0; i < (int) params.number_of_stations; i++) {
             stations[i].StationID = settings1 -> DETECTOR_STATION;
             if (settings1 -> USE_INSTALLED_TRIGGER_SETTINGS == 0) {
@@ -1632,7 +1633,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         params.number_of_antennas = 0;
 
         cout << "DETECTOR=4 imported station geom info" << endl;
-
         for (int j = 0; j < stations[0].strings.size(); j++) {
             for (int k = 0; k < stations[0].strings[j].antennas.size(); k++) {
 
@@ -1645,7 +1645,10 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                     stations[0].strings[j].antennas[k].GetZ() << " : \t" <<
                     GetChannelfromStringAntenna(stationID, j, k, settings1) <<
                     endl;
-
+                int rf_ch = GetChannelfromStringAntenna(stationID, j, k, settings1) - 1;
+                sim_rf_ch_map[rf_ch][0] = rf_ch;
+                sim_rf_ch_map[rf_ch][1] = j;
+                sim_rf_ch_map[rf_ch][2] = k;
                 params.number_of_antennas++;
             }
         }
@@ -1815,6 +1818,33 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
     // change coordinate from flat surface to curved Earth surface
     //FlattoEarth_ARA(icesurface);
     FlattoEarth_ARA_sharesurface(icesurface); // this one will share the lowest surface at each station.
+
+    for (int j = 0; j < stations[0].strings.size(); j++) {
+        for (int k = 0; k < stations[0].strings[j].antennas.size(); k++) {
+
+            cout <<
+                    "Final!!!! Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: " <<
+                    "0" << " : " <<
+                    j << " : " <<
+                    k << " : " <<
+                    stations[0].strings[j].antennas[k].GetX() << " : " <<
+                    stations[0].strings[j].antennas[k].GetY() << " : " <<
+                    stations[0].strings[j].antennas[k].GetZ() << " : " <<
+                    stations[0].strings[j].antennas[k].R() << " : " <<
+                    stations[0].strings[j].antennas[k].Theta() << " : " <<
+                    stations[0].strings[j].antennas[k].Phi() << " : " <<
+            endl;
+            cout<<"ID temp:"<<ID_temp<<endl;
+            int rf_ch = GetChannelfromStringAntenna(ID_temp, j, k, settings1) - 1;
+            cout<<"RF Ch:"<<rf_ch<<endl;
+            posnu_final[rf_ch][0] = stations[0].strings[j].antennas[k].GetX();
+            posnu_final[rf_ch][1] = stations[0].strings[j].antennas[k].GetY();
+            posnu_final[rf_ch][2] = stations[0].strings[j].antennas[k].GetZ();
+            posnu_final[rf_ch][3] = stations[0].strings[j].antennas[k].R();
+            posnu_final[rf_ch][4] = stations[0].strings[j].antennas[k].Theta();
+            posnu_final[rf_ch][5] = stations[0].strings[j].antennas[k].Phi();
+        }
+    }
 
     getDiodeModel(settings1); // set diode_real and fdiode_real values.
 
