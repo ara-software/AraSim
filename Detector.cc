@@ -1829,23 +1829,20 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         // Build Station/String/Antenna Vectors 
         for (int i=0; i<params.number_of_stations; i++) {
             stations.push_back(temp_station);
+
+            // Build Phased Array string
             stations[i].strings.push_back(temp_string);
             for (int l=0; l<9; l++) {
                 stations[i].strings[0].antennas.push_back(temp_antenna);
             }   
-            if (settings1->DETECTOR_STATION==1){ // Using all vanilla antennas
-                for (int k=1; k<5; k++) { 
-                    stations[i].strings.push_back(temp_string);
-                    for (int l=0; l<4; l++) { 
-                        stations[i].strings[k].antennas.push_back(temp_antenna);
-                    }
-                }
-            }
-            else if (settings1->DETECTOR_STATION == 2){ // Using 1 vanilla VPol
+
+            // Build additional strings attached to PA
+            // Only PA Attached to PA DAQ in DETECTOR_STATION == 1
+            if (settings1->DETECTOR_STATION == 2){ // 1 Vanilla VPol from 1 string attached to PA DAQ
                 stations[i].strings.push_back(temp_string);
                 stations[i].strings[1].antennas.push_back(temp_antenna); // A5E 24, A5RF  7, PA  5
             }
-            else if (settings1->DETECTOR_STATION == 3){ // Using 7 vanilla VPols
+            else if (settings1->DETECTOR_STATION == 3){ // 7 Vanilla VPols from 4 strings attached to PA DAQ
                 stations[i].strings.push_back(temp_string);
                 stations[i].strings[1].antennas.push_back(temp_antenna); // A5E  0, A5RF  5, PA 12
                 stations[i].strings[1].antennas.push_back(temp_antenna); // A5E  1, A5RF  1, PA 13
@@ -1953,17 +1950,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 stations[i].strings[0].antennas[8].SetZ(-172.635); // PA 0
 
                 // Set ARA5 string locations
-                if (settings1->DETECTOR_STATION==1){ 
-                    stations[i].strings[1].SetX( stations[i].GetX() + 29.63 ); // A5E 8-11
-                    stations[i].strings[1].SetY( stations[i].GetY() -3.30 );
-                    stations[i].strings[2].SetX( stations[i].GetX() +1.55 );   // A5E 0-3	
-                    stations[i].strings[2].SetY( stations[i].GetY() +15.66 );
-                    stations[i].strings[3].SetX( stations[i].GetX() -12.96 );  // A5E 16-19
-                    stations[i].strings[3].SetY( stations[i].GetY() - 8.65);
-                    stations[i].strings[4].SetX( stations[i].GetX() +12.33 );  // A5E 24-27
-                    stations[i].strings[4].SetY( stations[i].GetY() -31.89 );
-                }
-                else if (settings1->DETECTOR_STATION == 2){
+                // DETECTOR_STATION == 1 has no ARA5 strings attached to PA DAQ
+                if (settings1->DETECTOR_STATION == 2){
                     stations[i].strings[1].SetX( stations[i].GetX() -12.96 );
                     stations[i].strings[1].SetY( stations[i].GetY() - 8.65);
                 }
@@ -1979,26 +1967,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 }
 
                 // Set ARA5 antenna depths
-                if (settings1->DETECTOR_STATION==1){ 
-                    cout << "Using all ARA05 vanilla vpols" << endl;
-                    stations[i].strings[1].antennas[0].SetZ(-194.73); // A5E  8, A5RF  4, PA 14 
-                    stations[i].strings[1].antennas[1].SetZ(-193.73); // A5E 10, A5RF 12
-                    stations[i].strings[1].antennas[2].SetZ(-165.09); // A5E  9, A5RF  0, PA 15 
-                    stations[i].strings[1].antennas[3].SetZ(-164.09); // A5E 11, A5RF  8
-                    stations[i].strings[2].antennas[0].SetZ(-196.20); // A5E  0, A5RF  5, PA 12 
-                    stations[i].strings[2].antennas[1].SetZ(-195.20); // A5E  2, A5RF 13
-                    stations[i].strings[2].antennas[2].SetZ(-166.53); // A5E  1, A5RF  1, PA 13 
-                    stations[i].strings[2].antennas[3].SetZ(-165.53); // A5E  3, A5RF  9
-                    stations[i].strings[3].antennas[0].SetZ(-177.75); // A5E 16, A5RF  6, PA 10
-                    stations[i].strings[3].antennas[1].SetZ(-176.75); // A5E 18, A5RF 14
-                    stations[i].strings[3].antennas[2].SetZ(-147.21); // A5E 17, A5RF  2
-                    stations[i].strings[3].antennas[3].SetZ(-146.21); // A5E 19, A5RF 10
-                    stations[i].strings[4].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
-                    stations[i].strings[4].antennas[1].SetZ(-189.86); // A5E 26, A5RF 15
-                    stations[i].strings[4].antennas[2].SetZ(-161.02); // A5E 25, A5RF  3, PA 11
-                    stations[i].strings[4].antennas[3].SetZ(-160.02); // A5E 27, A5RF 11
-                }
-                else if (settings1->DETECTOR_STATION == 2){
+                // DETECTOR_STATION == 1 has no ARA5 antennas attached to PA DAQ
+                if (settings1->DETECTOR_STATION == 2){
                     // Dont actually remember if it was ch16 that was not plugged in or not
                     cout << "Using 1 ARA05 vanilla Vpol" << endl;
                     stations[i].strings[1].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
@@ -2016,25 +1986,12 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 }
 
                 // Set all antennas to VPOL (1 for HPOL)
-                // for (int k=0; k<stations[i].strings.size(); k++) {
-                //     for (int l=0; l<stations[i].strings[k].antennas.size(); l++) {
-                //         stations[i].strings[k].antennas[l].type = 0;
-                //     }
-                // } 
                 stations[i].strings[0].antennas[0].type = 1; // PA Hpol
                 stations[i].strings[0].antennas[1].type = 1; // PA Hpol 
                 for (int l=2; l<9; l++) { // PA Vpols
                     stations[i].strings[0].antennas[l].type = 0;
                 } 
-                if (settings1->DETECTOR_STATION == 1){ // Set vanilla H and Vpols
-                    for (int k=1; k<5; k++) {
-                        stations[i].strings[k].antennas[0].type = 0; // BVpol
-                        stations[i].strings[k].antennas[1].type = 1; // BHpol
-                        stations[i].strings[k].antennas[2].type = 0; // TVpol
-                        stations[i].strings[k].antennas[3].type = 1; // THpol
-                    }
-                }
-                else{ // Set all vanilla antennas to VPol
+                if (settings1->DETECTOR_STATION > 1){ // Set all vanilla antennas to VPol
                     for (int k=1; k<stations[i].strings.size(); k++) {
                         for (int l=0; l<stations[i].strings[k].antennas.size(); l++) {
                             stations[i].strings[k].antennas[l].type = 0;

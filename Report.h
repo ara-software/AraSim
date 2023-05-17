@@ -161,8 +161,6 @@ class Station_r {
         double max_PeakV;           // for each station, maximum PeakV value (include all ray_solves). this will also be used for time delay plot (to set same vertical scale)
         int Total_ray_sol;          // total number of ray_sols in the stations. If there is 0 Total_ray_sol, we don't need to do trigger check while there is any Total_ray_sol, we do trigger check.
         int Global_Pass;    // if global trigger passed or not: 0 = not passed, >0 passed, number indicates the first bin in the triggered window of the waveform at which the global trigger passed
-        int ARA_DAQ_Pass;    // if ARA trigger passed or not: 0 = not passed, >0 passed, number indicates the first bin in the triggered window of the waveform at which the global trigger passed
-        int PA_DAQ_Pass;    // if PA trigger passed or not: 0 = not passed, >0 passed, number indicates the first bin in the triggered window of the waveform at which the global trigger passed
 
         int total_trig_search_bin;  // total number of bins for searching trigger. 
 
@@ -404,7 +402,6 @@ class Report {
         double Earray[outbin];
 
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
-        double PATIMESTEP = (.1667)*1.E-9; // 0.1667 is from Kaeli's sim, 0.3125 is inverse of sampling rate from section 4.1 of Kaeli's thesis
 
         // Phased Array variables
         double viewAngle;

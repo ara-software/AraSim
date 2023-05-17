@@ -488,43 +488,10 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
         for (int j = 0; j < detector->stations[i].strings.size(); j++)
         {
             
-            // The PA DAQ has a different sampling/digitizing rate than ARA DAQs
-            // Handling sampling/digitizing rate related variables based on connection to PA DAQ or ARA DAQ
-            // Could be improved with the use of pointers and references
-            if ( settings1->TRIG_SCAN_MODE==5 && (settings1->DETECTOR==5) ){ // PA Triggering mode AND PA detector in use
-                if (j==0) use_PA_DAQ=1; // string 0 is PA, always use PA DAQ 
-                else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) use_PA_DAQ=1; // All ants connected to PA in these modes
-                else use_PA_DAQ=0;
-            }            
-
-            if (use_PA_DAQ==1){ // Use PA timestep (not settings1->TIMESTEP) to calculate related timing variables
-
-                init_T = PATIMESTEP *-1.e9 *((double) settings1->NFOUR / 4 + RandomTshift);    // locate zero time at the middle and give random time shift
-                for (int n = 0; n < settings1->NFOUR / 2; n++)
-                {
-                    T_forint[n] = init_T + (double) n * PATIMESTEP * 1.e9;   // in ns
-                }
-
-            }
-            else{ // Not (PA detector AND PA triggering mode)
-
-                if ( ( settings1->TRIG_SCAN_MODE==5 || settings1->DETECTOR==5 ) && // User requested PA-related sim
-                        ( j==0 || settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) // We're in a situation where PA DAQ would be used
-                ) { // Warn that we arent using the PA sampling/digitizing rate
-                    cout<<"Warning: Not using Phased Array sampling rate for PA-associated scenario."<<endl;
-                    cout<<"  TRIG_SCAN_MODE: "<<settings1->TRIG_SCAN_MODE;
-                    cout<<"  DETECTOR: "<<settings1->DETECTOR;
-                    cout<<"  DETECTOR_MODE: "<<settings1->DETECTOR_STATION;
-                    cout<<"  string index: "<<j<<endl;
-                }
-
-                // Normal way of calculating init_T and T_forint - Using user defined TIMESTEP in settings1
-                init_T = settings1->TIMESTEP *-1.e9 *((double) settings1->NFOUR / 4 + RandomTshift);    // locate zero time at the middle and give random time shift
-                for (int n = 0; n < settings1->NFOUR / 2; n++)
-                {
-                    T_forint[n] = init_T + (double) n *settings1->TIMESTEP *1.e9;   // in ns
-                }
-
+            init_T = settings1->TIMESTEP *-1.e9 *((double) settings1->NFOUR / 4 + RandomTshift);    // locate zero time at the middle and give random time shift
+            for (int n = 0; n < settings1->NFOUR / 2; n++)
+            {
+                T_forint[n] = init_T + (double) n *settings1->TIMESTEP *1.e9;   // in ns
             }
 
             for (int k = 0; k < detector->stations[i].strings[j].antennas.size(); k++)
@@ -1832,8 +1799,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
         N_pass_H = 0;
 
         stations[i].Global_Pass  = 0;
-        stations[i].ARA_DAQ_Pass = 0;
-        stations[i].PA_DAQ_Pass  = 0;
         int check_passed_global_trigger = 0;    // this switch determines if station globally triggers (in all TRIG_SCAN_MODEs)
 
         if (stations[i].Total_ray_sol)
@@ -2299,13 +2264,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         trig_search_init, max_total_bin, trig_window_bin, 
                         xdata, ydata, ang_data, snr_data
                     );
-                    if (settings1->DETECTOR_STATION==1){ // if A5 DAQ still online
-                        triggerCheckLoop(
-                            settings1, detector, event, trigger, i, 
-                            trig_search_init, max_total_bin, trig_window_bin, 
-                            settings1->TRIG_SCAN_MODE
-                        );
-                    }
                 }
                 else if (settings1->TRIG_SCAN_MODE == 0)
                 {
@@ -2923,23 +2881,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
             }
         }   // if there is any ray_sol in the station
 
-        // Save Global_Pass variable to station if triggered
-        if ( stations[i].ARA_DAQ_Pass==0 && stations[i].PA_DAQ_Pass==0 ){ // not triggered
-            continue;
-        }
-        else if ( stations[i].ARA_DAQ_Pass!=0 && stations[i].PA_DAQ_Pass==0 ){ // only ARA triggered
-            stations[i].Global_Pass = stations[i].ARA_DAQ_Pass;
-        }
-        else if ( stations[i].ARA_DAQ_Pass==0 && stations[i].PA_DAQ_Pass!=0 ){ // only PA triggered
-            stations[i].Global_Pass = stations[i].PA_DAQ_Pass;
-        }
-        else{ // both PA and ARA triggered, save smaller bin
-            if ( stations[i].ARA_DAQ_Pass <= stations[i].PA_DAQ_Pass){
-                stations[i].Global_Pass = stations[i].ARA_DAQ_Pass;
-            }
-            else stations[i].Global_Pass = stations[i].PA_DAQ_Pass;
-        }
-
     }   // for stations
 
     // also clear all vector info to reduce output root file size
@@ -2979,44 +2920,12 @@ void Report::rerun_event(Event *event, Detector *detector,
 
     for(int j=0; j<num_strings; j++){
 
-        // The PA DAQ has a different sampling/digitizing rate than ARA DAQs
-        // Handling sampling/digitizing rate related variables based on connection to PA DAQ or ARA DAQ
-        // Could be improved with the use of pointers and references
-        if ( settings->TRIG_SCAN_MODE==5 && settings->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
-            if (j==0) use_PA_DAQ=1; // string 0 is PA, always use PA DAQ 
-            else if ( settings->DETECTOR_STATION==2 || settings->DETECTOR_STATION==3 ) use_PA_DAQ=1; // All ants connected to PA in these modes
-            else use_PA_DAQ=0;
-        }            
-
-        if (use_PA_DAQ==1){ // Use PA timestep (not settings->TIMESTEP) to calculate related timing variables
-
-            init_T = PATIMESTEP *-1.e9 *((double) settings->NFOUR / 4 + RandomTshift);    // locate zero time at the middle and give random time shift
-            for (int n = 0; n < settings->NFOUR / 2; n++)
-            {
-                T_forint[n] = init_T + (double) n * PATIMESTEP * 1.e9;   // in ns
-            }
-
+        // Normal way of calculating init_T and T_forint - Using user defined TIMESTEP in settings
+        init_T = settings->TIMESTEP *-1.e9 *((double) settings->NFOUR / 4 + RandomTshift);    // locate zero time at the middle and give random time shift
+        for (int n = 0; n < settings->NFOUR / 2; n++)
+        {
+            T_forint[n] = init_T + (double) n *settings->TIMESTEP *1.e9;   // in ns
         }
-        else{ // Not (PA detector AND PA triggering mode)
-
-            if ( ( settings->TRIG_SCAN_MODE==5 || settings->DETECTOR==5 ) && // User requested PA-related sim
-                    ( j==0 || settings->DETECTOR_STATION==2 || settings->DETECTOR_STATION==3 ) // We're in a situation where PA DAQ would be used
-            ) { // Warn that we arent using the PA sampling/digitizing rate
-                cout<<"Warning: Not using Phased Array sampling rate for PA-associated scenario."<<endl;
-                cout<<"  TRIG_SCAN_MODE: "<<settings->TRIG_SCAN_MODE;
-                cout<<"  DETECTOR: "<<settings->DETECTOR;
-                cout<<"  DETECTOR_MODE: "<<settings->DETECTOR_STATION;
-                cout<<"  string index: "<<j<<endl;
-            }
-
-            // Normal way of calculating init_T and T_forint - Using user defined TIMESTEP in settings
-            init_T = settings->TIMESTEP *-1.e9 *((double) settings->NFOUR / 4 + RandomTshift);    // locate zero time at the middle and give random time shift
-            for (int n = 0; n < settings->NFOUR / 2; n++)
-            {
-                T_forint[n] = init_T + (double) n *settings->TIMESTEP *1.e9;   // in ns
-            }
-
-        }    
 
         for(int k=0; k<num_antennas; k++){
 
@@ -3255,28 +3164,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
     int string_i = detector->getStringfromArbAntID( i, trig_j);
     int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
 
-    // Handling sampling/digitizing rate related variables based on connection to PA DAQ or ARA DAQ
-    // Could be improved with the use of pointers and references
-    if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
-        if (string_i==0) use_PA_DAQ=1; // string 0 is PA, always use PA DAQ 
-        else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) use_PA_DAQ=1; // All ants connected to PA in these modes
-        else use_PA_DAQ=0;
-    }    
-    if (use_PA_DAQ==1) {
-        trig_window_bin = (int)(settings1->TRIG_WINDOW / PATIMESTEP);  // coincidence window bin for trigger
-    }
-    else{
-        if ( ( settings1->TRIG_SCAN_MODE==5 || settings1->DETECTOR==5 ) && // User requested PA-related sim
-                ( string_i==0 || settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) // We're in a situation where PA DAQ would be used
-        ) { // Warn that we arent using the PA sampling/digitizing rate
-            cout<<"Warning: Not using Phased Array sampling rate for PA-associated scenario."<<endl;
-            cout<<"  TRIG_SCAN_MODE: "<<settings1->TRIG_SCAN_MODE;
-            cout<<"  DETECTOR: "<<settings1->DETECTOR;
-            cout<<"  DETECTOR_MODE: "<<settings1->DETECTOR_STATION;
-            cout<<"  string index: "<<string_i<<endl;
-        }
-        trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
-    }
+    trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
     
     Pthresh_value[trig_j]=0;
     buffer[trig_j]=new CircularBuffer( trig_window_bin, powerthreshold, scan_mode);
@@ -3328,35 +3216,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       int string_i = detector->getStringfromArbAntID( i, trig_j);
       int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
 
-        // Handling sampling/digitizing rate related variables based on connection to PA DAQ or ARA DAQ
-        // Could be improved with the use of pointers and references
-        if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
-            if (string_i==0) use_PA_DAQ=1; // string 0 is PA, always use PA DAQ 
-            else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) use_PA_DAQ=1; // All ants connected to PA in these modes
-            else use_PA_DAQ=0;
-        }    
-        if (use_PA_DAQ==1) {
-            trig_window_bin = (int)(settings1->TRIG_WINDOW / PATIMESTEP);  // coincidence window bin for trigger
-        }
-        else{
-            if ( ( settings1->TRIG_SCAN_MODE==5 || settings1->DETECTOR==5 ) && // User requested PA-related sim
-                    ( string_i==0 || settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) // We're in a situation where PA DAQ would be used
-            ) { // Warn that we arent using the PA sampling/digitizing rate
-                cout<<"Warning: Not using Phased Array sampling rate for PA-associated scenario."<<endl;
-                cout<<"  TRIG_SCAN_MODE: "<<settings1->TRIG_SCAN_MODE;
-                cout<<"  DETECTOR: "<<settings1->DETECTOR;
-                cout<<"  DETECTOR_MODE: "<<settings1->DETECTOR_STATION;
-                cout<<"  string index: "<<string_i<<endl;
-            }
-            trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
-        }
-
-        // If this antenna is connected to PA but PA already triggered, pull out already stored PThresh and continue to next iteration (don't recalculate PThresh)
-        // PA antennas are allowed to continue if PA DAQ didn't trigger, but we'll still escape before changing N_Pass, N_Pass_V, and N_Pass_H
-        if ( use_PA_DAQ==1 && stations[i].PA_DAQ_Pass!=0 ){ 
-            Pthresh_value[trig_j] = stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back();
-            continue;
-        }
+        trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
       
       if (settings1->TRIG_ONLY_BH_ON==0
 	               || 
@@ -3459,12 +3319,6 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	  int string_i = detector->getStringfromArbAntID( i, trig_j);
 	  int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
 
-        // If this is a PA simulation and PA antenna and the PA already triggered, skip this antenna
-        if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 && stations[i].PA_DAQ_Pass!=0 ){ // PA Triggering mode AND PA detector in use
-            if (string_i==0) continue; // string 0 is PA, always use PA DAQ 
-            else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) continue; // All ants connected to PA in these modes
-        }  
-
 // 	  if(buffer[trig_j]->addToNPass>0) stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i-buffer[trig_j]->numBinsToLatestTrigger(); // mark the bin on which we triggered...
 	  if(buffer[trig_j]->addToNPass>0) stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i-buffer[trig_j]->numBinsToOldestTrigger(); // mark the bin on which we triggered...
 	  else stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 0.;
@@ -3536,13 +3390,6 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	    int string_i = detector->getStringfromArbAntID( i, trig_j);
 	    int antenna_i = detector->getAntennafromArbAntID( i, trig_j);  
 
-        // Don't consider PA Antennas
-
-        if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
-            if (string_i==0) continue; // string 0 is PA, always use PA DAQ 
-            else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) continue; // All ants connected to PA in these modes
-        }  
-
 	    if(detector->stations[i].strings[string_i].antennas[antenna_i].type == 0&&buffer[trig_j]->temp_value<best_thresh){ 
 	      
 	      best_thresh=buffer[trig_j]->temp_value; 
@@ -3576,12 +3423,6 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
 	    
 	    int string_i = detector->getStringfromArbAntID( i, trig_j);
 	    int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
-
-        // Don't consider PA Antennas
-        if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
-            if (string_i==0) continue; // string 0 is PA, always use PA DAQ 
-            else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) continue; // All ants connected to PA in these modes
-        }  
 	 
 	    if(detector->stations[i].strings[string_i].antennas[antenna_i].type==1&&buffer[trig_j]->temp_value<best_thresh){ 
 	      
@@ -3712,7 +3553,6 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
      
       cout<<"\nPthresh best: ";
       for(int ii=0;ii<3;ii++) cout<<" "<<stations[i].TDR_all_sorted[ii];
-      if (settings1->TRIG_SCAN_MODE==5) cout<<endl<<"[Phased Array Pthresh values ignored for above calcualtion]";
       cout<<"\n";
         
       // debug output:
@@ -3734,7 +3574,6 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       cout<<"\nPthresh best: ";
       cout<<"  Vpol: "; for(int ii=0;ii<stations[i].TDR_Vpol_sorted.size();ii++) cout<<" "<<stations[i].TDR_Vpol_sorted[ii];
       cout<<"  Hpol: "; for(int ii=0;ii<stations[i].TDR_Hpol_sorted.size();ii++) cout<<" "<<stations[i].TDR_Hpol_sorted[ii];
-      if (settings1->TRIG_SCAN_MODE==5) cout<<endl<<"[Phased Array Pthresh values ignored for combinatoric trigger]";
       cout<<"\n";
       
         
@@ -3776,7 +3615,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
   }
   
   
-  return stations[i].ARA_DAQ_Pass;
+  return stations[i].Global_Pass;
   
 }
 
@@ -3785,7 +3624,7 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
   int i=stationID;
   int numChan=stations[i].TDR_all.size();
   cout<<"saving event"<<endl;
-  stations[i].ARA_DAQ_Pass = last_trig_bin;
+  stations[i].Global_Pass = last_trig_bin;
 
   int waveformLength = settings1->WAVEFORM_LENGTH;
   int waveformCenter = settings1->WAVEFORM_CENTER;
@@ -3796,12 +3635,6 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
     
     int string_i = detector->getStringfromArbAntID( i, trig_j);
     int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
-
-    // If this antenna is connected to PA and PA already triggered, skip this antenna
-    if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 && stations[i].PA_DAQ_Pass!=0 ){ // PA Triggering mode AND PA detector in use
-        if (string_i==0) continue; // string 0 is PA
-        else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) continue; // All ants connected to PA in these modes
-    }  
     
     if(stations[i].strings[string_i].antennas[antenna_i].Trig_Pass){// if this channel triggered
     
@@ -3904,7 +3737,7 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
       double Z = detector->stations[i].strings[string_i].antennas[antenna_i].GetZ();
       
       
-      stations[i].total_trig_search_bin = stations[i].ARA_DAQ_Pass + trig_window_bin - trig_search_init;
+      stations[i].total_trig_search_bin = stations[i].Global_Pass + trig_window_bin - trig_search_init;
       
       
       
@@ -5860,7 +5693,7 @@ void Report::checkPATrigger(
     // If triggered, saves relevant information.
 
     //cout <<"successfully made it to PA Trigger!" << endl;
-    int BINSIZE = 1200/(PATIMESTEP*1.e9); 
+    int BINSIZE = 1200/(settings1->TIMESTEP*1.e9); 
     int waveformLength = settings1->WAVEFORM_LENGTH;
     int waveformCenter = settings1->WAVEFORM_CENTER;
     
@@ -5923,7 +5756,7 @@ void Report::checkPATrigger(
                 my_receive_ang = all_receive_ang[raySolNum];
                 int last_trig_bin = signalbinPA;
                 int my_ch_id = 0;
-                stations[i].PA_DAQ_Pass = last_trig_bin;
+                stations[i].Global_Pass = last_trig_bin;
                 for (size_t str = 0; str < detector->stations[i].strings.size(); str++) {
                     for (size_t ant = 0; ant < detector->stations[i].strings[str].antennas.size(); ant++) {
                         double peakvalue = 0;
@@ -5932,15 +5765,15 @@ void Report::checkPATrigger(
                             bin_value = signalbinPA - BINSIZE/2 + bin;
                             // stations[i].strings[str].antennas[ant].V_mimic.push_back( ( trigger->Full_window_V[ant][ last_trig_bin - settings1->NFOUR/4 + mimicbin ] )*1.e3 );// save in mV
                             // stations[i].strings[str].antennas[ant].time.push_back( last_trig_bin - settings1->NFOUR/4 + mimicbin );
-                            // stations[i].strings[str].antennas[ant].time_mimic.push_back( ( settings1->NFOUR/4 + mimicbin) * PATIMESTEP*1.e9 );// save in ns
+                            // stations[i].strings[str].antennas[ant].time_mimic.push_back( ( settings1->NFOUR/4 + mimicbin) * settings1->TIMESTEP*1.e9 );// save in ns
                             //stations[i].strings[0].antennas[ant].V_mimic.push_back(trigger->Full_window_V[ant][bin_value]*1e3);// save in mV (original kah)
                             stations[i].strings[str].antennas[ant].V_mimic.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
                             // stations[i].strings[0].antennas[ant].time.push_back( bin_value );
-                            // stations[i].strings[0].antennas[ant].time_mimic.push_back( ( BINSIZE/2 + bin) * PATIMESTEP*1.e9 );// save in ns
+                            // stations[i].strings[0].antennas[ant].time_mimic.push_back( ( BINSIZE/2 + bin) * settings1->TIMESTEP*1.e9 );// save in ns
                             //stations[i].strings[str].antennas[ant].waveformVoltage.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
                             stations[i].strings[str].antennas[ant].time.push_back( bin_value );
 
-                            stations[i].strings[str].antennas[ant].time_mimic.push_back( ( bin) * PATIMESTEP*1.e9 );// save in ns
+                            stations[i].strings[str].antennas[ant].time_mimic.push_back( ( bin) * settings1->TIMESTEP*1.e9 );// save in ns
                             if (TMath::Abs(trigger->Full_window_V[ant][bin_value]) > peakvalue) {
                                 peakvalue = TMath::Abs(trigger->Full_window_V[my_ch_id][bin_value]);
                             }
@@ -5993,28 +5826,7 @@ void Report::checkPATrigger(
                 int string_i = detector->getStringfromArbAntID( i, trig_j);
                 int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
 
-                // Handling sampling/digitizing rate related variables based on connection to PA DAQ or ARA DAQ
-                // Could be improved with the use of pointers and references
-                if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
-                    if (string_i==0) use_PA_DAQ=1; // string 0 is PA, always use PA DAQ 
-                    else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) use_PA_DAQ=1; // All ants connected to PA in these modes
-                    else use_PA_DAQ=0;
-                }    
-                if (use_PA_DAQ==1) {
-                    trig_window_bin = (int)(settings1->TRIG_WINDOW / PATIMESTEP);  // coincidence window bin for trigger
-                }
-                else{
-                    if ( ( settings1->TRIG_SCAN_MODE==5 || settings1->DETECTOR==5 ) && // User requested PA-related sim
-                            ( string_i==0 || settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) // We're in a situation where PA DAQ would be used
-                    ) { // Warn that we arent using the PA sampling/digitizing rate
-                        cout<<"Warning: Not using Phased Array sampling rate for PA-associated scenario."<<endl;
-                        cout<<"  TRIG_SCAN_MODE: "<<settings1->TRIG_SCAN_MODE;
-                        cout<<"  DETECTOR: "<<settings1->DETECTOR;
-                        cout<<"  DETECTOR_MODE: "<<settings1->DETECTOR_STATION;
-                        cout<<"  string index: "<<string_i<<endl;
-                    }
-                    trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
-                }
+                trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
 
                 Pthresh_value[trig_j]=0;
                 buffer[trig_j]=new CircularBuffer(trig_window_bin, powerthreshold, settings1->TRIG_SCAN_MODE);
@@ -6036,28 +5848,7 @@ void Report::checkPATrigger(
                     int string_i = detector->getStringfromArbAntID( i, trig_j);
                     int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
 
-                    // Handling sampling/digitizing rate related variables based on connection to PA DAQ or ARA DAQ
-                    // Could be improved with the use of pointers and references
-                    if ( settings1->TRIG_SCAN_MODE==5 && settings1->DETECTOR==5 ){ // PA Triggering mode AND PA detector in use
-                        if (string_i==0) use_PA_DAQ=1; // string 0 is PA, always use PA DAQ 
-                        else if ( settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) use_PA_DAQ=1; // All ants connected to PA in these modes
-                        else use_PA_DAQ=0;
-                    }    
-                    if (use_PA_DAQ==1) {
-                        trig_window_bin = (int)(settings1->TRIG_WINDOW / PATIMESTEP);  // coincidence window bin for trigger
-                    }
-                    else{
-                        if ( ( settings1->TRIG_SCAN_MODE==5 || settings1->DETECTOR==5 ) && // User requested PA-related sim
-                                ( string_i==0 || settings1->DETECTOR_STATION==2 || settings1->DETECTOR_STATION==3 ) // We're in a situation where PA DAQ would be used
-                        ) { // Warn that we arent using the PA sampling/digitizing rate
-                            cout<<"Warning: Not using Phased Array sampling rate for PA-associated scenario."<<endl;
-                            cout<<"  TRIG_SCAN_MODE: "<<settings1->TRIG_SCAN_MODE;
-                            cout<<"  DETECTOR: "<<settings1->DETECTOR;
-                            cout<<"  DETECTOR_MODE: "<<settings1->DETECTOR_STATION;
-                            cout<<"  string index: "<<string_i<<endl;
-                        }
-                        trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
-                    }
+                    trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
 
                     int channel_num = detector->GetChannelfromStringAntenna( 5, string_i, antenna_i, settings1 );
 
@@ -6296,7 +6087,7 @@ void Report::checkPATrigger(
                 double Y = detector->stations[i].strings[string_i].antennas[antenna_i].GetY();
                 double Z = detector->stations[i].strings[string_i].antennas[antenna_i].GetZ();
                 
-                stations[i].total_trig_search_bin = stations[i].ARA_DAQ_Pass + trig_window_bin - trig_search_init;
+                stations[i].total_trig_search_bin = stations[i].Global_Pass + trig_window_bin - trig_search_init;
 
 
             } // end for trig_j in numchans
@@ -6307,7 +6098,7 @@ void Report::checkPATrigger(
         if(hasTriggered==true) break;
         if(searchSecondRay == false) break;
 
-        //if(stations[i].ARA_DAQ_Pass > 0) break;
+        //if(stations[i].Global_Pass > 0) break;
     }//while ray solve
 
 }
