@@ -1789,3 +1789,26 @@ Related slide: https://aradocs.wipac.wisc.edu/docs/0022/002222/001/inIceMC_Hughe
 
 ==============================================================================
 
+2023/05/18 Myoungchul Kim
+
+If a user wants to know the location of the true signal (technically the center of signal) inside the WF, the user needs to perform the below calculation themselves.
+
+for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) {
+.... double signal_center_offset = (stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].time[0]) * settings1->TIMESTEP * 1.e9;
+.... double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
+.... stations[i].strings[string_i].antennas[antenna_i].SignalBinTime.push_back(signal_center_time);
+}
+
+for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++): loop over each ray solution
+stations[i].strings[string_i].antennas[antenna_i].SignalBin[m]: bin index of each ray's signal center in the long noise pad (length = settings1->DATA_BIN_SIZE)
+stations[i].strings[string_i].antennas[antenna_i].time[0]: bin index of the beginning of the readout window (output WF) in the long noise pad
+settings1->TIMESTEP * 1.e9: time width in nanosecond
+double signal_center_offset: time offset between beginning of readout window and center of the signal
+stations[i].strings[string_i].antennas[antenna_i].time_mimic[0]: time of the beginning of the readout window (output WF)
+double signal_center_time: time of center of the signal based on readout window time config
+SignalBinTime: name of the output array
+
+I just decided to implement it inside the sim...
+
+==============================================================================
+
