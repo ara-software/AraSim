@@ -5318,7 +5318,7 @@ void Detector::SetupInstalledStations(Settings *settings1) {
     // This variable needs to include testbed!
     // So if you are trying to say "we have installed TB, A1, A2",
     // then number_of_installed_stations = 3
-    int number_of_installed_stations = 6;
+    int number_of_installed_stations = 7;
 
     InstalledStations.resize(number_of_installed_stations);
 
@@ -5570,6 +5570,95 @@ void Detector::SetupInstalledStations(Settings *settings1) {
         InstalledStations[5].nChannelsVH = 16;
     }
 
+    if (InstalledStations.size() > 6) { // Phased Array
+        
+        // Make Phased Array
+        Antennas.push_back(109); // PAHpol at Z=-184.8
+        Antennas.push_back(108); // PAHpol at Z=-182.8
+        Antennas.push_back(107); // PAVpol at Z=-180.8
+        Antennas.push_back(106); // PAVpol at Z=-178.8
+        Antennas.push_back(104); // PAVpol at Z=-176.7
+        Antennas.push_back(103); // PAVpol at Z=-175.7
+        Antennas.push_back(102); // PAVpol at Z=-174.7
+        Antennas.push_back(101); // PAVpol at Z=-173.7
+        Antennas.push_back(100); // PAVpol at Z=-172.7
+        InstalledStations[6].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+
+        if (settings1->DETECTOR_STATION==1) {
+            // No A5 Antennas on the PA DAQ 
+
+            InstalledStations[6].nChannels = 9;
+            InstalledStations[6].nChannelsVH = 9;
+
+        }
+        else if (settings1->DETECTOR_STATION==1) {
+            // ARA05 DAQ off, not connected to PA, only split A5 channel connected
+            
+            // Make string 1
+            // Antennas.push_back(4);// Antennas.push_back(12);
+            // Antennas.push_back(0);// Antennas.push_back(8);
+            // InstalledStations[6].VHChannel.push_back(Antennas); 
+            // Antennas.clear();
+
+            // Make string 2
+            // Antennas.push_back(5);// Antennas.push_back(13);
+            // Antennas.push_back(1);// Antennas.push_back(9);
+            // InstalledStations[6].VHChannel.push_back(Antennas); 
+            // Antennas.clear();
+            
+            // Make string 3
+            // Antennas.push_back(6);// Antennas.push_back(14);
+            // Antennas.push_back(2);// Antennas.push_back(10);
+            // InstalledStations[6].VHChannel.push_back(Antennas); 
+            // Antennas.clear();
+
+            // Make string 4
+            Antennas.push_back(7);// Antennas.push_back(15);
+            // Antennas.push_back(3);// Antennas.push_back(11);
+            InstalledStations[6].VHChannel.push_back(Antennas); 
+            Antennas.clear();
+
+            InstalledStations[6].nChannels = 10;
+            InstalledStations[6].nChannelsVH = 10;
+        }
+        else if (settings1->DETECTOR_STATION==3) {
+            // ARA05 DAQ off, only 7 vpols available
+            
+            // Make string 3
+            Antennas.push_back(4);// Antennas.push_back(12);
+            Antennas.push_back(0);// Antennas.push_back(8);
+            InstalledStations[6].VHChannel.push_back(Antennas); 
+            Antennas.clear();
+
+            // Make string 0
+            Antennas.push_back(5);// Antennas.push_back(13);
+            Antennas.push_back(1);// Antennas.push_back(9);
+            InstalledStations[6].VHChannel.push_back(Antennas); 
+            Antennas.clear();
+            
+            // Make string 1
+            Antennas.push_back(6);// Antennas.push_back(14);
+            // Antennas.push_back(2);// Antennas.push_back(10);
+            InstalledStations[6].VHChannel.push_back(Antennas); 
+            Antennas.clear();
+
+            // Make string 2
+            Antennas.push_back(7);// Antennas.push_back(15);
+            Antennas.push_back(3);// Antennas.push_back(11);
+            InstalledStations[6].VHChannel.push_back(Antennas); 
+            Antennas.clear();
+
+            InstalledStations[6].nChannels = 16;
+            InstalledStations[6].nChannelsVH = 16;
+        }
+
+        InstalledStations[6].nStrings = InstalledStations[6].VHChannel.size();
+
+        // A5 has no surface stations
+        InstalledStations[6].nSurfaces = InstalledStations[6].surfaceChannels.size();
+    } // end phased array
+
 }
     
     
@@ -5729,7 +5818,7 @@ int Detector::GetChannelfromStringAntenna ( int stationNum, int stringnum, int a
     }
     // for Phased Array detector modes
     else if (settings1->DETECTOR==5) {
-        int stationId=5;
+        int stationId=6;
         //      cout << settings1->DETECTOR << endl;
         //      int stationId=stationNum;
         // cout<<int(InstalledStations.size())<<" "<<int(InstalledStations[stationId].VHChannel.size())<<" "<<int(InstalledStations[stationId].VHChannel[stringnum].size())<<endl;
