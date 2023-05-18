@@ -113,8 +113,8 @@ int main(int argc, char **argv) {   // read setup.txt file
         // }
         if (settings1->NNU == 0){
             // No events were read in from file, quit program
-            cout<<"No events found in provided file. Exiting simulation."
-            return -1
+            cout<<"No events found in provided file. Exiting simulation."<<endl;
+            return -1;
         }
     }
     // set gRandom as TRandom3 when settings1->RANDOM_MODE = 1
