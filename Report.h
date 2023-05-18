@@ -111,6 +111,7 @@ class Antenna_r {
 
         vector <int> SignalBin; // the bin number where the center of signal located. we can compare this value to Trig_Pass value to have likely triggered ray trace solution
 
+        vector <double> SignalBinTime; ///< the time of center of bin where signal should locate after sim decided the readout window. MK added -2023-05-18-
 
         vector <int> noise_ID;      // information about which pure noise waveform is used for trigger analysis
 
@@ -136,7 +137,7 @@ class Antenna_r {
         void clear ();  // clear all vector format information for next event
         void clear_useless ( Settings *settings1 );  // clear all vector information which are useless
 
-        ClassDef(Antenna_r,2);
+        ClassDef(Antenna_r,3);
 };
 
 class String_r {

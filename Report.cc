@@ -193,6 +193,7 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     Vm_zoom_T.clear();
 
     SignalBin.clear();
+    SignalBinTime.clear();
     SignalExt.clear(); 
     
     SCT_threshold_pass.clear();
@@ -2618,6 +2619,15 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin);
                                             stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9 + detector->params.TestBed_WFtime_offset_ns);    // save in ns
                                         }
+                                        if (mimicbin == 0) {
+                                            for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) { ///< calculates time of center of each rays signal based on readout window time config
+                                                double signal_center_offset = (double)(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].time[0]) * settings1->TIMESTEP * 1.e9;
+                                                double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
+                                                //! signal_center_offset: time offset between beginning of readout window and center of signal
+                                                //! signal_center_time: time of center of signal based on readout window time config
+                                                stations[i].strings[string_i].antennas[antenna_i].SignalBinTime.push_back(signal_center_time);
+                                            }
+                                        }
                                     }
 
                                     // set global_trig_bin values
@@ -2667,6 +2677,15 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);    // save in mV
                                             stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin);
                                             stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9 + detector->params.TestBed_WFtime_offset_ns);    // save in ns
+                                        }
+                                        if (mimicbin == 0) {
+                                            for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) { ///< calculates time of center of each rays signal based on readout window time config
+                                                double signal_center_offset = (double)(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].time[0]) * settings1->TIMESTEP * 1.e9;
+                                                double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
+                                                //! signal_center_offset: time offset between beginning of readout window and center of signal
+                                                //! signal_center_time: time of center of signal based on readout window time config
+                                                stations[i].strings[string_i].antennas[antenna_i].SignalBinTime.push_back(signal_center_time);
+                                            }
                                         }
                                     }
 
@@ -3724,7 +3743,16 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( ( -(detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) - waveformLength/2 + waveformCenter + mimicbin) * settings1->TIMESTEP*1.e9 + detector->params.TestBed_WFtime_offset_ns );// save in ns
            	    
 	  }
-        	
+      if (mimicbin == 0) {
+        for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) { ///< calculates time of center of each rays signal based on readout window time config
+            double signal_center_offset = (double)(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].time[0]) * settings1->TIMESTEP * 1.e9;
+            double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
+            //! signal_center_offset: time offset between beginning of readout window and center of signal
+            //! signal_center_time: time of center of signal based on readout window time config
+            stations[i].strings[string_i].antennas[antenna_i].SignalBinTime.push_back(signal_center_time);
+        }
+      }      
+  	
       }
       
             
