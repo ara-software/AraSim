@@ -177,6 +177,12 @@ int main(int argc, char **argv) {   // read setup.txt file
     // Build output files
     ofstream event_file;
     TFile *AraFile;
+    if (argc > 2) {
+        AraFile=new TFile((outputdir+"/AraOut."+setupfile.substr(setupfile.find_last_of("/")+1)+".run"+run_no+".root").c_str(),"RECREATE","ara");
+    }
+    else {
+        AraFile=new TFile((outputdir+"/AraOut.root").c_str(),"RECREATE","ara");
+    }
     TTree *AraTree=new TTree("AraTree","AraTree");    // for single entry
     TTree *AraTree2=new TTree("AraTree2","AraTree2"); //for many entries
     if (settings1->EVENT_GENERATION_MODE == 2){
@@ -188,14 +194,8 @@ int main(int argc, char **argv) {   // read setup.txt file
         event_file.open(output_file_name);
     }
     else{ 
-        // Create tree for simulation outputs
-        if (argc > 2) {
-            AraFile=new TFile((outputdir+"/AraOut."+setupfile.substr(setupfile.find_last_of("/")+1)+".run"+run_no+".root").c_str(),"RECREATE","ara");
-        }
-        else {
-            AraFile=new TFile((outputdir+"/AraOut.root").c_str(),"RECREATE","ara");
-        }
 
+        // Create tree for simulation outputs
         cout<<"assign AraFile, AraTrees"<<endl;
 
         AraTree->Branch("detector",&detector);
