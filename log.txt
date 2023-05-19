@@ -1812,3 +1812,15 @@ I just decided to implement it inside the sim...
 
 ==============================================================================
 
+2023/05/19 Myoungchul Kim
+
+We are only saving the Nu position (x, y, z, r, theta, phi) from the earth's center point of view.
+So, the true theta and phi values of Neutrino are not much useful for the current reconstruction method.
+And in order to compare the reconstructed Nu position with the true Nu position, we (at least me) need to recalculate the true position from the antenna center point of view.
+I decided to add another Nu position that calculated from the antenna center
+
+PosNuFromAntennaCenter() in the Primaries class will load antenna and Nu positions, and apply simply built-in SetXYZ() in Vector class
+The re-calculated value will be saved in the posnu_from_antcen array
+
+==============================================================================
+
