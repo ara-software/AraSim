@@ -86,23 +86,11 @@ class Trigger {
      int CheckChannelsPass( vector <double> &V_total_diode);
      
      
-     void myconvlv(vector <double> &data, const int NFOUR, vector <double> &fdiode, vector <double> &diodeconv);
+     void myconvlv(vector <double> &data, const int DATA_BIN_SIZE, vector <double> &fdiode, vector <double> &diodeconv);
 
-     void myconvlv(double *data, const int NFOUR, vector <double> &fdiode, vector <double> &diodeconv);
+     void myconvlv(double *data, const int DATA_BIN_SIZE, vector <double> &fdiode, vector <double> &diodeconv);
 
-     
-
-     void myconvlv_half(vector <double> &data, const int NFOUR, vector <double> &fdiode, vector <double> &diodeconv);
-
-     void myconvlv_half(double *data, const int NFOUR, vector <double> &fdiode, vector <double> &diodeconv);
-
-
-
-           //double Full_window[16][16384];  // test with array, not vector
-           //vector < vector <double> >  Full_window;  // test with array, not vector
-
-     
-     ClassDef(Trigger,1);
+     ClassDef(Trigger,2);
 
 };
 
