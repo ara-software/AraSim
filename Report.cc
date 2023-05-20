@@ -897,21 +897,30 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 /*!
                                                     after we apply all the detector responses, we tranform the signal spectrum back to time-domain signal
                                                     then, 1) we apply interpolation to signal to have user/pre-configured time width
-                                                    2) crop the WF in length of NFOUR / 2
+                                                    2) while we do interpolation, crop the WF in length of NFOUR / 2
                                                     later we will merge this cropped signal WF with noise WF and gonna apply trigger algorithm 
                                                 */                                                
 
                                                 //! get time-domain waveform back by inv fft
                                                 Tools::realft(V_forfft, -1, pad_len); ///< -1: F-dimain to T-domain
 
+                                                /*! 
+                                                    MK added -2023-05-20-
+                                                    change length of interpolate/cropped WF to slightly lonager than length of original time-domain signal
+                                                    this automatic changes will prevent the cliped WF no matter how signal is long
+                                                */
+                                                int new_NFOUR = settings1->NFOUR;
+                                                if (settings1->DYNAMIC_NFOUR == 1) {
+                                                    new_NFOUR = ((int)(pad_len / 4) + 1) * 4; ///< slightly longer, but also can be divided by 4
+
                                                 //! do linear interpolation
                                                 //! changed to sinc interpolation Dec 2020 by BAC
-                                                Tools::SincInterpolation(pad_len, T_forfft, V_forfft, settings1->NFOUR / 2, T_forint, volts_forint);
+                                                Tools::SincInterpolation(pad_len, T_forfft, V_forfft, new_NFOUR / 2, T_forint, volts_forint);
 
                                                 stations[i].strings[j].antennas[k].Pol_factor.push_back(Pol_factor); ///< save in Report branch
 
                                                 //! store signal WF into 'V' array
-                                                for (int n = 0; n < settings1->NFOUR / 2; n++) {
+                                                for (int n = 0; n < new_NFOUR / 2; n++) {
                                                     if (settings1->TRIG_ANALYSIS_MODE != 2) { ///< not pure noise mode (we need signal)
                                                         stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(volts_forint[n] * 2. / (double)pad_len);  // 2/N for inverse FFT normalization factor
                                                     } else if (settings1->TRIG_ANALYSIS_MODE == 2) { ///< pure noise mode (set signal to 0). we might need to move this part bit earlier in the code...
