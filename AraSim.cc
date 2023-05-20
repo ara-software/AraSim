@@ -514,6 +514,7 @@ int main(int argc, char **argv) {   // read setup.txt file
 
                 inu++;
                 Events_Thrown++;
+                event->delete_all();
 
             } // end add event to file
 
