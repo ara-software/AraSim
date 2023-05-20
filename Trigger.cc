@@ -97,7 +97,6 @@ void Trigger::Reset_V_noise_freqbin(Settings *settings1, Detector *detector) {
     else if (settings1->NOISE_CHANNEL_MODE == 1) {
     
         for (int ch=0; ch<detector->params.number_of_antennas; ch++) {
-            //V_noise_freqbin_ch.push_back( sqrt( (double)(settings1->DATA_BIN_SIZE) * 50. * KBOLTZ * settings1->NOISE_TEMP / (settings1->TIMESTEP * 2.) ) );
             V_noise_freqbin_ch.push_back( sqrt( (double)(settings1->DATA_BIN_SIZE) * 50. * KBOLTZ * detector->GetTemp(0, ch, settings1) / (settings1->TIMESTEP * 2.) ) );
         }
     }

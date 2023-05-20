@@ -330,10 +330,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
     double freq_tmp, heff, antenna_theta, antenna_phi;  // values needed for apply antenna gain factor and prepare fft, trigger
     double volts_forfft[settings1->NFOUR / 2];  // array for fft
     double dT_forfft;
-    double volts_forint[settings1->NFOUR / 2];  // array for interpolation
-    double T_forint[settings1->NFOUR / 2];  // array for interpolation
-
-    double dF_NFOUR = 1. / ((double)(settings1->NFOUR / 2) *settings1->TIMESTEP);   // in Hz
 
     int waveformLength = settings1->WAVEFORM_LENGTH;
     int waveformCenter = settings1->WAVEFORM_CENTER;
@@ -354,6 +350,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
     RandomTshift = gRandom->Rndm();
 
     init_T = settings1->TIMESTEP *-1.e9 *((double) settings1->NFOUR / 4 + RandomTshift);    // locate zero time at the middle and give random time shift
+
+    int new_NFOUR = settings1->NFOUR;
+    int new_NFOUR_max = settings1->NFOUR;
+    double volts_forint[settings1->NFOUR / 2];  // array for interpolation
+    double T_forint[settings1->NFOUR / 2];  // array for interpolation
 
     for (int n = 0; n < settings1->NFOUR / 2; n++)
     {
@@ -910,21 +911,28 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     this automatic changes will prevent the cliped WF no matter how signal is long
                                                     user dont have to empirically adjust the NFOUR values
                                                 */
-                                                int new_NFOUR = settings1->NFOUR;
                                                 if (settings1->DYNAMIC_NFOUR == 1) {
                                                     new_NFOUR = ((int)(pad_len / 4) + 1) * 4; ///< slightly longer, but also can be divided by 4
+                                                    init_T = settings1->TIMESTEP * -1.e9 * ((double) new_NFOUR / 4 + RandomTshift);
+                                                    if (new_NFOUR > new_NFOUR_max) new_NFOUR_max = new_NFOUR; 
                                                 }
+                                                double new_volts_forint[new_NFOUR / 2];
+                                                double new_T_forint[new_NFOUR / 2];
+                                                for(int n = 0; n < new_NFOUR / 2; n++){
+                                                    new_T_forint[n] = init_T + (double)n * settings1->TIMESTEP * 1.e9;
+                                                }
+                                                stations[i].strings[j].antennas[k].New_NFOUR[ray_sol_cnt].push_back(new_NFOUR); ///< save in Report branch
     
                                                 //! do linear interpolation
                                                 //! changed to sinc interpolation Dec 2020 by BAC
-                                                Tools::SincInterpolation(pad_len, T_forfft, V_forfft, new_NFOUR / 2, T_forint, volts_forint);
+                                                Tools::SincInterpolation(pad_len, T_forfft, V_forfft, new_NFOUR / 2, new_T_forint, new_volts_forint);
 
                                                 stations[i].strings[j].antennas[k].Pol_factor.push_back(Pol_factor); ///< save in Report branch
 
                                                 //! store signal WF into 'V' array
                                                 for (int n = 0; n < new_NFOUR / 2; n++) {
                                                     if (settings1->TRIG_ANALYSIS_MODE != 2) { ///< not pure noise mode (we need signal)
-                                                        stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(volts_forint[n] * 2. / (double)pad_len);  // 2/N for inverse FFT normalization factor
+                                                        stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(new_volts_forint[n] * 2. / (double)pad_len);  // 2/N for inverse FFT normalization factor
                                                     } else if (settings1->TRIG_ANALYSIS_MODE == 2) { ///< pure noise mode (set signal to 0). we might need to move this part bit earlier in the code...
                                                         stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(0.);
                                                     }
@@ -1637,7 +1645,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
             // if there is any ray_sol (don't check trigger if there is no ray_sol at all)
 
             // calculate total number of bins we need to do trigger check
-            max_total_bin = (stations[i].max_arrival_time - stations[i].min_arrival_time) / settings1->TIMESTEP + settings1->NFOUR *3 + trigger->maxt_diode_bin;    // make more time
+            max_total_bin = (stations[i].max_arrival_time - stations[i].min_arrival_time) / settings1->TIMESTEP + new_NFOUR_max * 3 + trigger->maxt_diode_bin;    // make more time
 
             //stations[i].max_total_bin = max_total_bin;
 
@@ -1913,7 +1921,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         for (int m = 0; m < stations[i].strings[j].antennas[k].ray_sol_cnt; m++)
                         {
                             // loop over raysol numbers
-                            signal_bin.push_back((stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time) / (settings1->TIMESTEP) + settings1->NFOUR *2 + trigger->maxt_diode_bin);
+                            signal_bin.push_back((stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time) / (settings1->TIMESTEP) + stations[i].strings[j].antennas[k].New_NFOUR[m] *2 + trigger->maxt_diode_bin);
 
                             // store signal located bin
                             stations[i].strings[j].antennas[k].SignalBin.push_back(signal_bin[m]);
@@ -1922,7 +1930,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             {
                                 signal_dbin.push_back(signal_bin[m] - signal_bin[m - 1]);
                                 // cout<<"  signal_dbin["<<m-1<<"] : "<<signal_dbin[m-1];
-                                if (signal_dbin[m - 1] < settings1->NFOUR / 2)
+                                if ((signal_dbin[m - 1] < stations[i].strings[j].antennas[k].New_NFOUR[m - 1] / 2) || (signal_dbin[m - 1] < stations[i].strings[j].antennas[k].New_NFOUR[m] / 2))
                                 {
                                     // if two ray_sol time delay is smaller than time window
                                     connect_signals.push_back(1);
@@ -1943,7 +1951,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                         // cout<<"done calculating signal bins / connect or not"<<endl;
 
-                        // grab noise waveform (NFOUR/2 bins or NFOUR) for diode convlv
+                        // grab noise waveform for diode convlv
                         for (int m = 0; m < stations[i].strings[j].antennas[k].ray_sol_cnt; m++)
                         {
                             // loop over raysol numbers

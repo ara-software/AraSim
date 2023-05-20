@@ -5065,7 +5065,6 @@ void Detector::get_NewDiodeModel(Settings *settings1) {
     fdiode_real_databin.clear();
 
     // save f domain diode response in fdiode_real
-    //for (int i=0; i<settings1->DATA_BIN_SIZE+512; i++) {
     for (int i=0; i<settings1->DATA_BIN_SIZE*2; i++) {
         fdiode_real_databin.push_back( diode_real_fft[i] );
     }
