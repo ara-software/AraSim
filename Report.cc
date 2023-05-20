@@ -906,8 +906,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                                 /*! 
                                                     MK added -2023-05-20-
-                                                    change length of interpolate/cropped WF to slightly lonager than length of original time-domain signal
+                                                    changes the length of interpolated/cropped WF to slightly longer than length of original time-domain signal
                                                     this automatic changes will prevent the cliped WF no matter how signal is long
+                                                    user dont have to empirically adjust the NFOUR values
                                                 */
                                                 int new_NFOUR = settings1->NFOUR;
                                                 if (settings1->DYNAMIC_NFOUR == 1) {
