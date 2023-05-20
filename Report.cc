@@ -913,7 +913,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 int new_NFOUR = settings1->NFOUR;
                                                 if (settings1->DYNAMIC_NFOUR == 1) {
                                                     new_NFOUR = ((int)(pad_len / 4) + 1) * 4; ///< slightly longer, but also can be divided by 4
-
+                                                }
+    
                                                 //! do linear interpolation
                                                 //! changed to sinc interpolation Dec 2020 by BAC
                                                 Tools::SincInterpolation(pad_len, T_forfft, V_forfft, new_NFOUR / 2, T_forint, volts_forint);
