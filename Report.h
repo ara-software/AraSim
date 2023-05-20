@@ -98,9 +98,9 @@ class Antenna_r {
         // below time domain simulation output
         vector <double> time;   // time of time domain Askaryan radiation
         vector <double> time_mimic;   // time of time domain Askaryan radiation (same time range with data)
-        vector <double> V_mimic;    // signal + noise waveform which mimics the data (size : NFOUR/2 bin)
+        vector <double> V_mimic;    // signal + noise waveform which mimics the data (size : WAVEFORM_LENGTH bin)
 
-        int global_trig_bin; // from V_mimic [0, NFOUR/2] bins, where global trigger occured
+        int global_trig_bin; // from V_mimic [0, WAVEFORM_LENGTH/2] bins, where global trigger occured
 
         vector < vector <double> > Ax;     // vector potential x component
         vector < vector <double> > Ay;

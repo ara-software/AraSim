@@ -768,232 +768,153 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                         if (settings1->EVENT_TYPE == 0)
                                         {
-                                            // see if integrated shower profile LQ is non-zero
-                                            // and near the cone viewangle
+                                            //! see if integrated shower profile LQ is non-zero
+                                            //! and near the cone viewangle
                                             if (event->Nu_Interaction[0].LQ > 0 && (fabs(viewangle - signal->CHANGLE_ICE) <= settings1->OFFCONE_LIMIT *RADDEG))
                                             {
-                                                // initially give raysol has actual signal
+                                                //! initially give raysol has actual signal
                                                 stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] = 1;
 
-                                                // let's make NFOUR/2 bin of time domain pure signal part for now
-                                                // later once we understand how to apply antenna phase, total electronics with phase, apply those
-
+                                                //! get attenuation factor
                                                 double atten_factor = 0.;
-                                                if (settings1->USE_ARA_ICEATTENU == 1 || settings1->USE_ARA_ICEATTENU == 0)
-                                                {
-                                                    atten_factor = 1. / ray_output[0][ray_sol_cnt] *IceAttenFactor *mag * fresnel;  // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
-                                                }
-                                                else if (settings1->USE_ARA_ICEATTENU == 2)
-                                                {
-                                                    atten_factor = 1. / ray_output[0][ray_sol_cnt] *mag * fresnel;  //apply freq dependent IceAttenFactor later
-                                                }
+                                                double ice_atten_factor = IceAttenFactor ; ///< assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                                                if (settings1->USE_ARA_ICEATTENU == 2) ice_atten_factor = 1.; //apply freq dependent IceAttenFactor later
+                                                atten_factor = 1. / ray_output[0][ray_sol_cnt] *ice_atten_factor *mag * fresnel;
 
-                                                // signal before the antenna (get signal at 1m and apply atten factor)
+                                                //! pure time-domain signal before the antenna (get signal at 1m and apply atten factor)
                                                 signal->GetVm_FarField_Tarray(event, settings1, viewangle, atten_factor, outbin, Tarray, Earray, stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt]);
+                                                for (int n = 0; n < outbin; n++) { ///< save E-field in Report branch 
+                                                    stations[i].strings[j].antennas[k].Vm_zoom[ray_sol_cnt].push_back(Earray[n]);
+                                                    stations[i].strings[j].antennas[k].Vm_zoom_T[ray_sol_cnt].push_back(Tarray[n]);
+                                                }
 
+                                                /*! 
+                                                    let's make zero pad for time domain pure signal part for now
+                                                    then later, apply antenna phase, total electronics with phase
+                                                */
+
+                                                //! first, let's figure out zero pad length
+                                                //! if dT of E-field is smaller then zeropad dT, increas zero pad length to have fine resolution of frequency spectrum
                                                 dT_forfft = Tarray[1] - Tarray[0];  // step in ns
-
-                                                int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
-                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
-                                                while (Ntmp > 1)
-                                                {
-                                                    Ntmp = Ntmp / 2;
-                                                    stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *2;
+                                                int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft; ///< dT ratio
+                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1; ///< pad scale
+                                                while (Ntmp > 1) { ///< double the zeropad scale until dt (Ntmp) ratio is bigger than 1
+                                                    stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] * 2;
+                                                    Ntmp = Ntmp / 2; ///< zero pad is doubled. so, ratio is now half
                                                 }
-                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2;
-                                                // now new NFOUR for zero padding
+                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2; ///< now new Nnew for zero padding
 
-                                                // now we have to make NFOUR/2 number of bins with random init time
-                                                //
-                                                // as a test, make first as it is and zero pad
-
-                                                double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
-                                                double T_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
-
-                                                for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]; n++)
-                                                {
-
-                                                    if (n < outbin)
-                                                    {
-                                                        stations[i].strings[j].antennas[k].Vm_zoom[ray_sol_cnt].push_back(Earray[n]);
-                                                        stations[i].strings[j].antennas[k].Vm_zoom_T[ray_sol_cnt].push_back(Tarray[n]);
-                                                    }
-
-                                                    // make Tarray, Earray located at the center of Nnew array
-
-                                                    T_forfft[n] = Tarray[outbin / 2] - (dT_forfft *(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - n));
-
-                                                    if ((n >= stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - outbin / 2) &&
-                                                        (n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 + outbin / 2))
-                                                    {
-                                                        V_forfft[n] = Earray[n - (stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - outbin / 2)];
-                                                    }
-                                                    else
-                                                        V_forfft[n] = 0.;
+                                                //! second, let's make zero pad what has Nnew length and fill with E-field
+                                                int pad_len = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt];
+                                                double V_forfft[pad_len]; ///< E-field value
+                                                double T_forfft[pad_len]; ///< time in ns
+                                                double time_offset = Tarray[outbin / 2] - dT_forfft * (double)(pad_len / 2); ///< time offset between E-field center and zero-pad center
+                                                int front_pad_len = pad_len / 2 - outbin / 2; ///< length of eampty space in front
+                                                int back_pad_len = pad_len / 2 + outbin / 2; ///< length of eampty space in back
+                                                for (int n = 0; n < pad_len; n++) {
+                                                    //! make Tarray, Earray located at the center of Nnew array
+                                                    T_forfft[n] = time_offset + (double)n * dT_forfft;
+                                                    if ((n >= front_pad_len) && (n < back_pad_len)) V_forfft[n] = Earray[n - front_pad_len]; ///< fill with E-field value
+                                                    else V_forfft[n] = 0.; ///< fill with zero
                                                 }
 
-                                                // just get peak from the array
+                                                //! just get peak from the array and save in Report branch
                                                 stations[i].strings[j].antennas[k].PeakV.push_back(FindPeak(Earray, outbin));
 
-                                                // this forward fft volts_forfft is now in unit of V at each freq we can just apply each bin's gain factor to each freq bins
-                                                // without any phase consideration,
-                                                // apply same factor to both real, img parts
-
-                                                // get spectrum with zero padded WF
-                                                Tools::realft(V_forfft, 1, stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);
-
-                                                dF_Nnew = 1. / ((double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]) *(dT_forfft) *1.e-9);    // in Hz
-
-                                                freq_tmp = dF_Nnew *((double) stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2. + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
-
-                                                freq_lastbin = freq_tmp;
-
-                                                /*
-                                                // Get ant gain with 2-D interpolation (may have bug?) 
+                                                /*!
+                                                    now, tranform zero-padded E-field into frequency spectrum
+                                                    then, apply 
+                                                    1) freq dependent attenuation model (if USE_ARA_ICEATTENU is 2)
+                                                    2) antenna factor (effective height, and polarization)
+                                                    4) electronic chain gain
+                                                    into each frequency bin
+                                                */
+                                    
+                                                //! get frequency spectrum with zero padded WF and dF
+                                                Tools::realft(V_forfft, 1, pad_len); ///< 1: T-dimain to F-domain
+                                                dF_Nnew = 1. / ((double)pad_len * dT_forfft * 1.e-9); // in Hz. Unit of dT_forfft is [ns]
+                                                
+                                                /*!
+                                                    Get ant gain with 2-D interpolation (may have bug?) 
                                                  */
-                                                if (settings1->ALL_ANT_V_ON == 0)
-                                                {
-                                                    if (settings1->ANTENNA_MODE != 1)
-                                                    {
-                                                        heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
-                                                                antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
-                                                            freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
-                                                    }
-                                                    if (settings1->ANTENNA_MODE == 1)
-                                                    {
-                                                        heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
-                                                                antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k),
-                                                            freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
-                                                    }
-                                                }
-                                                else if (settings1->ALL_ANT_V_ON == 1)
-                                                {
-                                                    if (settings1->ANTENNA_MODE != 1)
-                                                    {
-                                                        heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
-                                                                antenna_theta, antenna_phi, 0),
-                                                            freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
-                                                    }
-                                                    if (settings1->ANTENNA_MODE == 1)
-                                                    {
-                                                        heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
-                                                                antenna_theta, antenna_phi, 0, k),
-                                                            freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
-                                                    }
-                                                }
+                                                int ant_number = 0; 
+                                                if (settings1->ANTENNA_MODE == 1) ant_number = k; ///< There are dfferences in Top and Bottom VPol. if ant_number is 2, GetGain_1D_OutZero() will apply Top VPol gain 
+                                                int ant_type = detector->stations[i].strings[j].antennas[k].type; ///< 0: VPol, 1: HPol
+                                                if (settings1->ALL_ANT_V_ON == 1) ant_type = 0; ///< all the antennas are VPol
+                                               
+                                                //! effective height for last frequency bin 
+                                                freq_lastbin = dF_Nnew *((double)pad_len / 2. + 0.5); ///< in Hz 0.5 to place the middle of the bin and avoid zero freq
+                                                heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_lastbin *1.E-6,   // to MHz
+                                                                antenna_theta, antenna_phi, ant_type, ant_number),
+                                                                freq_lastbin, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
 
-                                                for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2; n++)
-                                                {
+                                                //! loop over all frequency bin and apply detector response
+                                                for (int n = 0; n < pad_len / 2; n++) {
+                                                    //! get value of frequency bin 
                                                     freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
 
-                                                    if (settings1->ALL_ANT_V_ON == 0)
-                                                    {
-                                                        if (settings1->ANTENNA_MODE != 1)
-                                                        {
-                                                            heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
-                                                                    antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
-                                                                freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
-                                                        }
-
-                                                        if (settings1->ANTENNA_MODE == 1)
-                                                        {
-                                                            heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
-                                                                    antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k),
-                                                                freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
-                                                        }
-                                                    }
-                                                    else if (settings1->ALL_ANT_V_ON == 1)
-                                                    {
-                                                        if (settings1->ANTENNA_MODE != 1)
-                                                        {
-                                                            heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
-                                                                    antenna_theta, antenna_phi, 0),
-                                                                freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
-                                                        }
-                                                        if (settings1->ANTENNA_MODE == 1)
-                                                        {
-                                                            heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
-                                                                    antenna_theta, antenna_phi, 0, k),
-                                                                freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
-                                                        }
-                                                    }
-
-                                                    stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(heff);
-
-                                                    //apply freq dependent attenuation model
-                                                    if (settings1->USE_ARA_ICEATTENU == 2)
-                                                    {
+                                                    //! apply freq dependent attenuation model
+                                                    if (settings1->USE_ARA_ICEATTENU == 2) {
                                                         double IceAttenFactor = 1.;
                                                         double dx, dz, dl;
-                                                        for (int steps = 1; steps < (int) RayStep[ray_sol_cnt][0].size(); steps++)
-                                                        {
+                                                        for (int steps = 1; steps < (int) RayStep[ray_sol_cnt][0].size(); steps++) {
                                                             dx = RayStep[ray_sol_cnt][0][steps - 1] - RayStep[ray_sol_cnt][0][steps];
                                                             dz = RayStep[ray_sol_cnt][1][steps - 1] - RayStep[ray_sol_cnt][1][steps];
                                                             dl = sqrt((dx *dx) + (dz *dz));
 
-                                                            // Skipping attenuation calculation when the distance between two RaySteps is 0. Prevening adds -nan into the IceAttenFactor. (MK 2021)
-                                                            if (dl > 0)
-                                                            {
-                                                                // use ray midpoint for attenuation calculation
+                                                            //! Skipping attenuation calculation when the distance between two RaySteps is 0. Prevening adds -nan into the IceAttenFactor. (MK 2021)
+                                                            if (dl > 0) {
+                                                                //! use ray midpoint for attenuation calculation
                                                                 IceAttenFactor *= (exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps], freq_tmp *1.E-9)) +
-                                                                    exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps - 1], freq_tmp *1.E-9))
-                                                               ) / 2.;  // 1e9 for conversion to GHz
+                                                                    exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_sol_cnt][1][steps - 1], freq_tmp *1.E-9))) / 2.;  ///< 1e9 for conversion to GHz
                                                             }
                                                         }
                                                         //cout << "apply IceAttenFactor to the real part of fft. V_forfft[2 *n] = " << V_forfft[2 *n] << " *" << IceAttenFactor << endl;
-                                                        V_forfft[2 *n] *= IceAttenFactor;   // apply IceAttenFactor to the real part of fft
-                                                        V_forfft[2 *n + 1] *= IceAttenFactor;   // apply IceAttenFactor to the imag part of fft
+                                                        V_forfft[2 *n] *= IceAttenFactor;   ///< apply IceAttenFactor to the real part of fft
+                                                        V_forfft[2 *n + 1] *= IceAttenFactor;   ///< apply IceAttenFactor to the imag part of fft
                                                     }
 
-                                                    // apply ant factors
-                                                    if (n > 0)
-                                                    {
-                                                        if (settings1->ALL_ANT_V_ON == 0)
-                                                        {
-                                                            ApplyAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
-                                                                heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], settings1, antenna_theta, antenna_phi);
-                                                        }
-                                                        else if (settings1->ALL_ANT_V_ON == 1)
-                                                        {
-                                                            ApplyAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, 0),
-                                                                heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], settings1, antenna_theta, antenna_phi);
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        ApplyAntFactors_Tdomain_FirstTwo(heff, heff_lastbin, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi);
+                                                    //! calculate antenna effective height
+                                                    heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
+                                                                antenna_theta, antenna_phi, ant_type, ant_number),
+                                                                freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
+                                                    stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(heff); ///< save in Report branch
+
+                                                    //! apply ant factors
+                                                    if (n > 0) {
+                                                        ApplyAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, ant_type),
+                                                            heff, n_trg_pokey, n_trg_slappy, Pol_vector, ant_type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], settings1, antenna_theta, antenna_phi);
+                                                    } else {
+                                                        ApplyAntFactors_Tdomain_FirstTwo(heff, heff_lastbin, n_trg_pokey, n_trg_slappy, Pol_vector, ant_type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi);
                                                     }
 
-                                                    // apply entire elect chain gain, phase
-                                                    if (n > 0)
-                                                    {
-                                                        ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
-						    }
-                                                    else
-                                                    {
-                                                        ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
-                                                    }
+                                                    //! apply entire elect chain gain, phase
+                                                    if (n > 0) ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
+                                                    else ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
+                                                    
                                                 }   // end for freq bin
 
-                                                // now get time domain waveform back by inv fft
-                                                Tools::realft(V_forfft, -1, stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);
+                                                /*!
+                                                    after we apply all the detector responses, we tranform the signal spectrum back to time-domain signal
+                                                    then, 1) we apply interpolation to signal to have user/pre-configured time width
+                                                    2) crop the WF in length of NFOUR / 2
+                                                    later we will merge this cropped signal WF with noise WF and gonna apply trigger algorithm 
+                                                */                                                
 
-                                                // do linear interpolation
-                                                // changed to sinc interpolation Dec 2020 by BAC
-                                                Tools::SincInterpolation(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR / 2, T_forint, volts_forint);
+                                                //! get time-domain waveform back by inv fft
+                                                Tools::realft(V_forfft, -1, pad_len); ///< -1: F-dimain to T-domain
 
-                                                stations[i].strings[j].antennas[k].Pol_factor.push_back(Pol_factor);
-                                                for (int n = 0; n < settings1->NFOUR / 2; n++)
-                                                {
+                                                //! do linear interpolation
+                                                //! changed to sinc interpolation Dec 2020 by BAC
+                                                Tools::SincInterpolation(pad_len, T_forfft, V_forfft, settings1->NFOUR / 2, T_forint, volts_forint);
 
-                                                    if (settings1->TRIG_ANALYSIS_MODE != 2)
-                                                    {
-                                                        // not pure noise mode (we need signal)
-                                                        stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(volts_forint[n] *2. / (double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]));  // 2/N for inverse FFT normalization factor
-                                                    }
-                                                    else if (settings1->TRIG_ANALYSIS_MODE == 2)
-                                                    {
-                                                        // pure noise mode (set signal to 0)
+                                                stations[i].strings[j].antennas[k].Pol_factor.push_back(Pol_factor); ///< save in Report branch
+
+                                                //! store signal WF into 'V' array
+                                                for (int n = 0; n < settings1->NFOUR / 2; n++) {
+                                                    if (settings1->TRIG_ANALYSIS_MODE != 2) { ///< not pure noise mode (we need signal)
+                                                        stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(volts_forint[n] * 2. / (double)pad_len);  // 2/N for inverse FFT normalization factor
+                                                    } else if (settings1->TRIG_ANALYSIS_MODE == 2) { ///< pure noise mode (set signal to 0). we might need to move this part bit earlier in the code...
                                                         stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(0.);
                                                     }
                                                 }
