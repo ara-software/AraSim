@@ -726,21 +726,9 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
     
     
     const int length=DATA_BIN_SIZE;
-//    double data_copy[length];
-    //double fdiode_real[length];
 
     // we are going to make double sized array for complete convolution
     double power_noise_copy[length*2];
-
-/*    
-    for (int i=0;i<NFOUR/2;i++) {
-	data_copy[i]=data[i];
-    }
-    for (int i=NFOUR/2;i<length;i++) {
-	data_copy[i]=0.;
-    }
-*/  
-
 
     // fill half of the array as power (actually energy) and another half (actually extanded part) with zero padding (Numerical Recipes 643 page)
     for (int i=0;i<length;i++) {
@@ -827,20 +815,9 @@ void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdi
     
     
     const int length=DATA_BIN_SIZE;
-//    double data_copy[length];
-    //double fdiode_real[length];
 
     // we are going to make double sized array for complete convolution
     double power_noise_copy[length*2];
-
-/*    
-    for (int i=0;i<NFOUR/2;i++) {
-	data_copy[i]=data[i];
-    }
-    for (int i=NFOUR/2;i<length;i++) {
-	data_copy[i]=0.;
-    }
-*/  
 
 
     // fill half of the array as power (actually energy) and another half (actually extanded part) with zero padding (Numerical Recipes 643 page)
@@ -933,18 +910,7 @@ void Trigger::myconvlv_half(vector <double> &data,const int NFOUR,vector <double
     
     
     const int length=NFOUR;
-//    double data_copy[length];
-    //double fdiode_real[length];
     double power_noise_copy[length];
-
-/*    
-    for (int i=0;i<NFOUR/2;i++) {
-	data_copy[i]=data[i];
-    }
-    for (int i=NFOUR/2;i<length;i++) {
-	data_copy[i]=0.;
-    }
-*/  
 
 
     for (int i=0;i<length;i++) {
@@ -1022,19 +988,8 @@ void Trigger::myconvlv_half(double *data,const int NFOUR,vector <double> &fdiode
     
     
     const int length=NFOUR;
-//    double data_copy[length];
-    //double fdiode_real[length];
     double power_noise_copy[length];
   
-/*    
-    for (int i=0;i<NFOUR/2;i++) {
-	data_copy[i]=data[i];
-    }
-    for (int i=NFOUR/2;i<length;i++) {
-	data_copy[i]=0.;
-    }
-*/  
-
 
     for (int i=0;i<length;i++) {
 	power_noise_copy[i]=(data[i]*data[i])/Zr*TIMESTEP;
