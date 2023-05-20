@@ -83,8 +83,6 @@ class Trigger {
 
      void GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Report *report);
 
-     int CheckChannelsPass( vector <double> &V_total_diode);
-     
      
      void myconvlv(vector <double> &data, const int DATA_BIN_SIZE, vector <double> &fdiode, vector <double> &diodeconv);
 

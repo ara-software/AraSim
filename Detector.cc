@@ -4960,7 +4960,6 @@ void Detector::getDiodeModel(Settings *settings1) {
     // now get f domain response with realft
     
     double diode_real_fft[settings1->DATA_BIN_SIZE*2];  // double sized array for myconvlv
-    //double diode_real_fft[settings1->DATA_BIN_SIZE + 512];  // DATA_BIN_SIZE + 512 bin (zero padding) for myconvlv
     double diode_real_fft_half[NFOUR];    // double sized array for NFOUR/2
     double diode_real_fft_double[NFOUR*2];    // test with NFOUR*2 array
     
