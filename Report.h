@@ -285,14 +285,12 @@ class Report {
 
         void ApplyFilter(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFilter_databin(int bin_n, Detector *detector, double &vmmhz);
-        void ApplyFilter_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFilter_OutZero (double freq, Detector *detector, double &vmmhz);
 
 
         // apply gain in Preamp
         void ApplyPreamp(int bin_n, Detector *detector, double &vmmhz);
         void ApplyPreamp_databin(int bin_n, Detector *detector, double &vmmhz);
-        void ApplyPreamp_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyPreamp_OutZero (double freq, Detector *detector, double &vmmhz);
 
 	void ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double &vmmhz, Settings *settings1);
@@ -300,7 +298,6 @@ class Report {
         // apply gain in FOAM
         void ApplyFOAM(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFOAM_databin(int bin_n, Detector *detector, double &vmmhz);
-        void ApplyFOAM_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFOAM_OutZero (double freq, Detector *detector, double &vmmhz);
 
 

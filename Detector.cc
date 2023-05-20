@@ -3355,23 +3355,6 @@ inline void Detector::ReadFilter(string filename, Settings *settings1) {    // w
         FilterGain_databin.push_back( ygain_databin[i] );
     }
     
-    
-    // for NFOUR/2 t domain array
-    double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
-    double ygain_NFOUR[settings1->NFOUR/4+1];   // array for gain in FFT bin
-    
-    df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
-
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
-    
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {
-        FilterGain_NFOUR.push_back( ygain_NFOUR[i] );
-    }
-    
 }
 
 
@@ -3459,24 +3442,6 @@ inline void Detector::ReadPreamp(string filename, Settings *settings1) {    // w
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
         PreampGain_databin.push_back( ygain_databin[i] );
     }
-    
-    
-    // for NFOUR/2 t domain array
-    double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
-    double ygain_NFOUR[settings1->NFOUR/4+1];   // array for gain in FFT bin
-    
-    df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
-
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
-    
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {
-        PreampGain_NFOUR.push_back( ygain_NFOUR[i] );
-    }
-    
     
 }
 
@@ -3568,22 +3533,6 @@ inline void Detector::ReadFOAM(string filename, Settings *settings1) {    // wil
         FOAMGain_databin.push_back( ygain_databin[i] );
     }
     
-
-    // for NFOUR/2 t domain array
-    double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
-    double ygain_NFOUR[settings1->NFOUR/4+1];   // array for gain in FFT bin
-    
-    df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
-
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
-    
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {
-        FOAMGain_NFOUR.push_back( ygain_NFOUR[i] );
-    }
 }
 
 void Detector::ReadNoiseFigure(string filename, Settings *settings1)

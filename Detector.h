@@ -236,18 +236,15 @@ class Detector {
         void ReadFilter(string filename, Settings *settings1);
         double FilterGain[freq_step_max];   // Filter gain (dB) for Detector freq bin array
         vector <double> FilterGain_databin;   // Filter gain (dB) for DATA_BIN_SIZE bin array
-        vector <double> FilterGain_NFOUR;   // Filter gain (dB) for NFOUR bin array
 
         void ReadPreamp(string filename, Settings *settings1);
         double PreampGain[freq_step_max];   // Filter gain (dB) for Detector freq bin array
         vector <double> PreampGain_databin;   // Filter gain (dB) for DATA_BIN_SIZE bin array
-        vector <double> PreampGain_NFOUR;   // Filter gain (dB) for NFOUR bin array
 
 
         void ReadFOAM(string filename, Settings *settings1);
         double FOAMGain[freq_step_max];   // Filter gain (dB) for Detector freq bin array
         vector <double> FOAMGain_databin;   // Filter gain (dB) for DATA_BIN_SIZE bin array
-        vector <double> FOAMGain_NFOUR;   // Filter gain (dB) for NFOUR bin array
 
 
 
@@ -358,18 +355,15 @@ class Detector {
 
         double GetFilterGain(int bin) { return FilterGain[bin]; }   // same bin with Vgain, Hgain
         double GetFilterGain_databin(int bin) { return FilterGain_databin[bin]; }   // bin for FFT
-        double GetFilterGain_NFOUR(int bin) { return FilterGain_NFOUR[bin]; }   // bin for FFT
 
         double GetFilterGain_1D_OutZero(double freq); // interpolated output, with outside band returns zero
 
         double GetPreampGain(int bin) { return PreampGain[bin]; }   // same bin with Vgain, Hgain
         double GetPreampGain_databin(int bin) { return PreampGain_databin[bin]; }   // bin for FFT
-        double GetPreampGain_NFOUR(int bin) { return PreampGain_NFOUR[bin]; }   // bin for FFT
         double GetPreampGain_1D_OutZero(double freq);
 
         double GetFOAMGain(int bin) { return FOAMGain[bin]; }   // same bin with Vgain, Hgain
         double GetFOAMGain_databin(int bin) { return FOAMGain_databin[bin]; }   // bin for FFT
-        double GetFOAMGain_NFOUR(int bin) { return FOAMGain_NFOUR[bin]; }   // bin for FFT
         double GetFOAMGain_1D_OutZero(double freq);
 
 	
