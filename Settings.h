@@ -90,6 +90,8 @@ class Settings
 
         int NFOUR;              // number of total bins for FFT. has to be power of 2 values
 
+        int DYNAMIC_NFOUR;      // 0 : (default) follow pre/user-configured NFOUR value, 1: change NFOUR value by following signal length. MK added -2023-05-20-
+
         int NOISE;              // noise condition settings degault 0 ( : thermal flat noise), 1 : Rayleigh dist. fit for installed TestBed geom, 2: Noise figure values for station 2 (??) from Thomas Meures 2015/2016
 
         int ATMOSPHERE;         // include atmosphere 1, no 0
@@ -437,7 +439,7 @@ int horizontal_banana_points;
  // end of values from icemc
 
 
-  ClassDef(Settings,1);
+  ClassDef(Settings,2);
 
 
 };
