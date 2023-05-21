@@ -177,7 +177,7 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     Az.clear();
 
     V.clear();
-
+    New_NFOUR.clear();
     noise_ID.clear();
 
     PeakV.clear();
@@ -352,6 +352,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
     init_T = settings1->TIMESTEP *-1.e9 *((double) settings1->NFOUR / 4 + RandomTshift);    // locate zero time at the middle and give random time shift
 
     int new_NFOUR = settings1->NFOUR;
+    int new_NFOUR_min = settings1->NFOUR;
     int new_NFOUR_max = settings1->NFOUR;
     double volts_forint[settings1->NFOUR / 2];  // array for interpolation
     double T_forint[settings1->NFOUR / 2];  // array for interpolation
@@ -505,6 +506,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 stations[i].strings[j].antennas[k].Vfft_noise.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].V.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].SignalExt.resize(ray_sol_cnt + 1);
+                                stations[i].strings[j].antennas[k].New_NFOUR.resize(ray_sol_cnt + 1);
+                                stations[i].strings[j].antennas[k].New_NFOUR[ray_sol_cnt] = settings1->NFOUR;                             
 
                                 // calculate the polarization vector at the source
                                 Pol_vector = GetPolarization(event->Nu_Interaction[0].nnu, launch_vector);
@@ -913,16 +916,18 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 */
                                                 if (settings1->DYNAMIC_NFOUR == 1) {
                                                     new_NFOUR = ((int)(pad_len / 4) + 1) * 4; ///< slightly longer, but also can be divided by 4
+                                                    if (new_NFOUR < settings1->NFOUR) new_NFOUR = settings1->NFOUR;
                                                     init_T = settings1->TIMESTEP * -1.e9 * ((double) new_NFOUR / 4 + RandomTshift);
-                                                    if (new_NFOUR > new_NFOUR_max) new_NFOUR_max = new_NFOUR; 
+                                                    if (new_NFOUR < new_NFOUR_min) new_NFOUR_min = new_NFOUR; 
+                                                    if (new_NFOUR > new_NFOUR_max) new_NFOUR_max = new_NFOUR;
                                                 }
                                                 double new_volts_forint[new_NFOUR / 2];
                                                 double new_T_forint[new_NFOUR / 2];
                                                 for(int n = 0; n < new_NFOUR / 2; n++){
                                                     new_T_forint[n] = init_T + (double)n * settings1->TIMESTEP * 1.e9;
                                                 }
-                                                stations[i].strings[j].antennas[k].New_NFOUR.push_back(new_NFOUR); ///< save in Report branch
-    
+                                                stations[i].strings[j].antennas[k].New_NFOUR[ray_sol_cnt] = new_NFOUR; ///< save in Report branch
+   
                                                 //! do linear interpolation
                                                 //! changed to sinc interpolation Dec 2020 by BAC
                                                 Tools::SincInterpolation(pad_len, T_forfft, V_forfft, new_NFOUR / 2, new_T_forint, new_volts_forint);
@@ -945,6 +950,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                                 // initially give raysol has actual signal
                                                 stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] = 0;
+
+                                                stations[i].strings[j].antennas[k].New_NFOUR[ray_sol_cnt] = settings1->NFOUR;
 
                                                 // if no signal, push_back 0 values (otherwise the value inside will remain as old value)
                                                 for (int n = 0; n < settings1->NFOUR / 2; n++)
@@ -1897,7 +1904,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         }   // if we are not in debug mode
 
                     }
-
+                    
                     // currently there is a initial spoiled bins (maxt_diode_bin) at the initial Full_window "AND" at the initial of connected noisewaveform (we can fix this by adding values but not accomplished yet)
 
                     // cout<<"done filling noise diode arrays for trigger!"<<endl;
@@ -1915,7 +1922,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                     // do only if it's not in debugmode
                     if (debugmode == 0)
                     {
-
                         for (int m = 0; m < stations[i].strings[j].antennas[k].ray_sol_cnt; m++)
                         {
                             // loop over raysol numbers
@@ -1956,7 +1962,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         {
                             // loop over raysol numbers
                             // when ray_sol_cnt == 0, this loop inside codes will not run
-
                             if (m == 0)
                             {
                                 // if it's first sol
@@ -2092,7 +2097,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                 int check_ch;
 
-                trig_search_init = trigger->maxt_diode_bin + settings1->NFOUR;  // give some time shift for mimicing force trig events
+                trig_search_init = trigger->maxt_diode_bin + new_NFOUR_min;  // give some time shift for mimicing force trig events
                 trig_i = trig_search_init;
 
                 // save trig search bin info default (if no global trig, this value saved)
@@ -3480,9 +3485,9 @@ void Report::ClearUselessfromConnect(Detector *detector, Settings *settings1, Tr
 
 
 // this one is for single signal
-void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex, int new_NFOUR) {
+void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex, int new_NFOUR1) {
 
-    int BINSIZE = new_NFOUR / 2;
+    int BINSIZE = new_NFOUR1 / 2;
 
     int bin_value;
     
