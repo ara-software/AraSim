@@ -94,7 +94,7 @@ class Antenna_r {
         vector < vector <double> > Vfft;  // signal V preparing for FFT
         vector < vector <double> > Vfft_noise;  // noise V preparing for FFT
 
-        vector < vector <int> > New_NFOUR; ///< dynamic nfour length for each signal. MK added -2023-05-20-
+        vector <int> New_NFOUR; ///< dynamic nfour length for each signal. MK added -2023-05-20-
 
         // below time domain simulation output
         vector <double> time;   // time of time domain Askaryan radiation

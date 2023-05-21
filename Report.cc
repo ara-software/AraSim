@@ -921,7 +921,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 for(int n = 0; n < new_NFOUR / 2; n++){
                                                     new_T_forint[n] = init_T + (double)n * settings1->TIMESTEP * 1.e9;
                                                 }
-                                                stations[i].strings[j].antennas[k].New_NFOUR[ray_sol_cnt].push_back(new_NFOUR); ///< save in Report branch
+                                                stations[i].strings[j].antennas[k].New_NFOUR.push_back(new_NFOUR); ///< save in Report branch
     
                                                 //! do linear interpolation
                                                 //! changed to sinc interpolation Dec 2020 by BAC
@@ -1647,8 +1647,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
             // calculate total number of bins we need to do trigger check
             max_total_bin = (stations[i].max_arrival_time - stations[i].min_arrival_time) / settings1->TIMESTEP + new_NFOUR_max * 3 + trigger->maxt_diode_bin;    // make more time
 
-            //stations[i].max_total_bin = max_total_bin;
-
             // test generating new noise waveform for only stations if there's any ray trace solutions
             if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0)
             {
@@ -1921,7 +1919,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         for (int m = 0; m < stations[i].strings[j].antennas[k].ray_sol_cnt; m++)
                         {
                             // loop over raysol numbers
-                            signal_bin.push_back((stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time) / (settings1->TIMESTEP) + stations[i].strings[j].antennas[k].New_NFOUR[m] *2 + trigger->maxt_diode_bin);
+                            int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m];
+                            signal_bin.push_back((stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time) / (settings1->TIMESTEP) + new_NFOUR1 * 2 + trigger->maxt_diode_bin);
 
                             // store signal located bin
                             stations[i].strings[j].antennas[k].SignalBin.push_back(signal_bin[m]);
@@ -1930,7 +1929,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             {
                                 signal_dbin.push_back(signal_bin[m] - signal_bin[m - 1]);
                                 // cout<<"  signal_dbin["<<m-1<<"] : "<<signal_dbin[m-1];
-                                if ((signal_dbin[m - 1] < stations[i].strings[j].antennas[k].New_NFOUR[m - 1] / 2) || (signal_dbin[m - 1] < stations[i].strings[j].antennas[k].New_NFOUR[m] / 2))
+                                int new_NFOUR2 = stations[i].strings[j].antennas[k].New_NFOUR[m - 1];
+                                if ((signal_dbin[m - 1] < new_NFOUR2 / 2) || (signal_dbin[m - 1] < new_NFOUR1 / 2))
                                 {
                                     // if two ray_sol time delay is smaller than time window
                                     connect_signals.push_back(1);
@@ -1960,19 +1960,19 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             if (m == 0)
                             {
                                 // if it's first sol
-
+                                int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m];
                                 if (connect_signals[m] == 1)
                                 {
 
                                     // do two convlv with double array m, m+1
-
+                                    int new_NFOUR2 = stations[i].strings[j].antennas[k].New_NFOUR[m + 1];
                                     Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i,
-                                                                stations[i].strings[j].antennas[k].New_NFOUR[m], stations[i].strings[j].antennas[k].New_NFOUR[m + 1]);
+                                                                new_NFOUR1, new_NFOUR2);
                                 }
                                 else if (connect_signals[m] == 0)
                                 {
                                     // cout << noise_ID << " : " << ch_ID << " : " << i << " : " << endl;
-                                    Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, stations[i].strings[j].antennas[k].New_NFOUR[m]);
+                                    Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, new_NFOUR1);
                                 }
                             }
                             else
@@ -1986,16 +1986,17 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     if (connect_signals[m] == 1)
                                     {
                                         // next raysol is connected
-
+                                        int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m];
+                                        int new_NFOUR2 = stations[i].strings[j].antennas[k].New_NFOUR[m + 1];
                                         if (connect_signals[m - 1] == 1)
                                         {
                                             // and previous raysol also connected
 
                                             // double size array with m-1, m, m+1 raysols all added
-                                            //
+                                            int new_NFOUR0 = stations[i].strings[j].antennas[k].New_NFOUR[m - 1];
                                             Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m - 1], signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m - 1], 
                                                                         stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i,
-                                                                        stations[i].strings[j].antennas[k].New_NFOUR[m - 1], stations[i].strings[j].antennas[k].New_NFOUR[m], stations[i].strings[j].antennas[k].New_NFOUR[m + 1]);
+                                                                        new_NFOUR0, new_NFOUR1, new_NFOUR2);
                                         }
                                         else if (connect_signals[m - 1] == 0)
                                         {
@@ -2004,7 +2005,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             // double size array with m, m+1 raysols
                                             //
                                             Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], 
-                                                                        noise_ID, ch_ID, i, stations[i].strings[j].antennas[k].New_NFOUR[m], stations[i].strings[j].antennas[k].New_NFOUR[m + 1]);
+                                                                        noise_ID, ch_ID, i, new_NFOUR1, new_NFOUR2);
                                         }
                                     }
                                     else if (connect_signals[m] == 0)
@@ -2024,8 +2025,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             // and previous raysol not connected
 
                                             // single size array with only m raysol
-                                            //
-                                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, stations[i].strings[j].antennas[k].New_NFOUR[m]);
+                                            int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m];
+                                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, new_NFOUR1);
                                         }
                                     }
                                 }
@@ -2046,8 +2047,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                         // and previous raysol is not connected
 
                                         // single size array with only m raysol
-                                        //
-                                        Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, stations[i].strings[j].antennas[k].New_NFOUR[m]);
+                                        int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m];
+                                        Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, new_NFOUR1);
                                     }
                                 }
                             }   // if not the first raysol (all other raysols)
@@ -2097,16 +2098,13 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 // save trig search bin info default (if no global trig, this value saved)
                 stations[i].total_trig_search_bin = max_total_bin - trig_search_init;
 
-                if (settings1->TRIG_SCAN_MODE == 0)
-                {
+                if (settings1->TRIG_SCAN_MODE == 0) {
                     // ********************old mode left as-is ********************
 
                     // avoid really long trig_window_bin case (change trig_window to check upto max_total_bin)
                     if (max_total_bin - trig_window_bin <= trig_i) trig_window_bin = max_total_bin - trig_i - 1;
 
-                    //while (trig_i < settings1->DATA_BIN_SIZE - trig_window_bin) {
-                    while (trig_i < max_total_bin - trig_window_bin)
-                    {
+                    while (trig_i < max_total_bin - trig_window_bin) {
 
                         N_pass = 0;
                         N_pass_V = 0;
@@ -2116,8 +2114,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                         //for (trig_j=0; trig_j < ch_ID; trig_j++) {        // loop over all channels
                         trig_j = 0;
-                        while (trig_j < ch_ID)
-                        {
+                        while (trig_j < ch_ID) {
 
                             int string_i = detector->getStringfromArbAntID(i, trig_j);
                             int antenna_i = detector->getAntennafromArbAntID(i, trig_j);
@@ -2181,196 +2178,101 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             }
                             // check all triggered channels not just 3
                             trig_j++;   // if station not passed the trigger, just go to next channel
-
                         }   // while trig_j < ch_ID
 
-                        //if (N_pass > settings1->N_TRIG-1) {   // now as global trigged!! = more or eq to N_TRIG triggered
                         if (((trig_mode == 0) && (N_pass > settings1->N_TRIG - 1))  // trig_mode = 0 case!
                             ||  // or
-                            ((trig_mode == 1) && ((N_pass_V > settings1->N_TRIG_V - 1) || (N_pass_H > settings1->N_TRIG_H - 1)))    // trig_mode = 1 case!
-                       )
-                        {
+                            ((trig_mode == 1) && ((N_pass_V > settings1->N_TRIG_V - 1) || (N_pass_H > settings1->N_TRIG_H - 1)))) {    // trig_mode = 1 case!
 
                             check_ch = 0;
                             stations[i].Global_Pass = last_trig_bin;    // where actually global trigger occured
 
                             trig_i = max_total_bin; // also if we know this station is trigged, don't need to check rest of time window
-                            for (int ch_loop = 0; ch_loop < ch_ID; ch_loop++)
-                            {
+                            for (int ch_loop = 0; ch_loop < ch_ID; ch_loop++) {
                                 //cout << ch_loop << "/" << ch_ID << endl;
                                 int string_i = detector->getStringfromArbAntID(i, ch_loop);
                                 int antenna_i = detector->getAntennafromArbAntID(i, ch_loop);
                                 //          cout << "string:antenna: " << string_i << " : " << antenna_i << endl;
                                 stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = -1;  // no likely init
-                                if (ch_loop == Passed_chs[check_ch] && check_ch < N_pass)
-                                {
+
+                                if (ch_loop == Passed_chs[check_ch] && check_ch < N_pass) {
                                     // added one more condition (check_ch < N_Pass) for bug in vector Passed_chs.clear()???
-
                                     // store which ray sol is triggered based on trig time
-                                    //
-
                                     int mindBin = 1.e9; // init big value
                                     int dBin = 0;
+                                    int trig_pass = stations[i].strings[string_i].antennas[antenna_i].Trig_Pass;
 
-                                    for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++)
-                                    {
+                                    for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) {
                                         // loop over raysol numbers
-
-                                        if (stations[i].strings[string_i].antennas[antenna_i].SignalExt[m])
-                                        {
-
-                                            dBin = abs(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].Trig_Pass);
-
-                                            if (dBin < mindBin)
-                                            {
+                                        if (stations[i].strings[string_i].antennas[antenna_i].SignalExt[m]) {
+                                            dBin = abs(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - trig_pass);
+                                            if (dBin < mindBin) {
                                                 stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = m;   // store the ray sol number which is minimum difference between Trig_Pass bin
                                                 mindBin = dBin;
                                             }
                                         }
                                     }
-
+    
+                                    int ant_types = detector->stations[i].strings[string_i].antennas[antenna_i].type;
+                                    double posnu_d = event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i]);
+                                    int noise_id = stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
+                                    int likely_sol = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol;
                                     //skip this passed ch as it already has bin info
-                                    if (settings1->TRIG_ONLY_LOW_CH_ON == 0)
-                                    {
-                                        cout << endl << "trigger passed at bin " << stations[i].strings[string_i].antennas[antenna_i].Trig_Pass << "  passed ch : " << ch_loop << " (" << detector->stations[i].strings[string_i].antennas[antenna_i].type << "type) Direct dist btw posnu : " << event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i]) << " noiseID : " << stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
-                                        if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol != -1)
-                                        {
-                                            cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[0] *DEGRAD << " LikelyTrigSignal : " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol;
-                                        }
+                                    if (settings1->TRIG_ONLY_LOW_CH_ON == 0) {
+                                        cout << endl << "trigger passed at bin " << trig_pass << "  passed ch : " << ch_loop << " (" << ant_types << "type) Direct dist btw posnu : " << posnu_d << " noiseID : " << noise_id;
+                                    } else if (settings1->TRIG_ONLY_LOW_CH_ON == 1) {
+                                        cout << endl << "trigger passed at bin " << trig_pass << "  passed ant: str[" << string_i << "].ant[" << antenna_i << "] (" << ant_types << "type) Direct dist btw posnu : " << posnu_d << " noiseID : " << noise_id;
                                     }
-                                    else if (settings1->TRIG_ONLY_LOW_CH_ON == 1)
-                                    {
-                                        cout << endl << "trigger passed at bin " << stations[i].strings[string_i].antennas[antenna_i].Trig_Pass << "  passed ant: str[" << string_i << "].ant[" << antenna_i << "] (" << detector->stations[i].strings[string_i].antennas[antenna_i].type << "type) Direct dist btw posnu : " << event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i]) << " noiseID : " << stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
-                                        if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol != -1)
-                                        {
-                                            cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[0] *DEGRAD << " LikelyTrigSignal : " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol;
-                                        }
-                                    }
+                                    if (likely_sol != -1) {
+                                        cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[0] *DEGRAD << " LikelyTrigSignal : " << likely_sol;
+                                    }                                    
 
                                     //cout << "True station number: " << detector->InstalledStations[0].VHChannel[string_i][antenna_i] << endl;
                                     //cout << event->Nu_Interaction[0].posnu[0] << " : " <<  event->Nu_Interaction[0].posnu[1] << " : " << event->Nu_Interaction[0].posnu[2] << endl;
                                     check_ch++;
-
-                                    // now save the voltage waveform to V_mimic
-                                    //
-
-                                    for (int mimicbin = 0; mimicbin < waveformLength; mimicbin++)
-                                    {
-
-                                        // new DAQ waveform writing mechanism test
-                                        if (V_mimic_mode == 0)
-                                        {
-                                            // Global passed bin is the center of the window
-                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);   // save in mV
-                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin + waveformCenter - waveformLength / 2 + mimicbin);
-                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9);    // save in ns
-                                        }
-                                        else if (V_mimic_mode == 1)
-                                        {
-                                            // Global passed bin is the center of the window + delay to each chs from araGeom
-                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);   // save in mV
-                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin);
-                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9);   // save in ns
-                                        }
-                                        else if (V_mimic_mode == 2)
-                                        {
-                                            // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
-                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);    // save in mV
-                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin);
-                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9 + detector->params.TestBed_WFtime_offset_ns);    // save in ns
-                                        }
-                                        if (mimicbin == 0) {
-                                            for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) { ///< calculates time of center of each rays signal based on readout window time config
-                                                double signal_center_offset = (double)(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].time[0]) * settings1->TIMESTEP * 1.e9;
-                                                double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
-                                                //! signal_center_offset: time offset between beginning of readout window and center of signal
-                                                //! signal_center_time: time of center of signal based on readout window time config
-                                                stations[i].strings[string_i].antennas[antenna_i].SignalBinTime.push_back(signal_center_time);
-                                            }
-                                        }
-                                    }
-
-                                    // set global_trig_bin values
-                                    if (V_mimic_mode == 0)
-                                    {
-                                        // Global passed bin is the center of the window
-                                        stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (waveformLength / 2 - waveformCenter);
-                                    }
-                                    else if (V_mimic_mode == 1)
-                                    {
-                                        // Global passed bin is the center of the window + delay to each chs from araGeom
-                                        stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) - waveformCenter + waveformLength / 2;
-                                    }
-                                    else if (V_mimic_mode == 2)
-                                    {
-                                        // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
-                                        stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) - waveformCenter + waveformLength / 2;
-                                    }
-                                }
-                                else
-                                {
+                                } else {
                                     stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 0.;
+                                }
+                                // now save the voltage waveform to V_mimic
+                                int time_bin_i = waveformCenter - waveformLength / 2;
+                                int testbed_ch_delay = detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin;
+                                int manual_delay_bins = detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin;
+                                
+                                // new DAQ waveform writing mechanism test
+                                for (int mimicbin = 0; mimicbin < waveformLength; mimicbin++) {
 
                                     // new DAQ waveform writing mechanism test
-                                    for (int mimicbin = 0; mimicbin < waveformLength; mimicbin++)
-                                    {
-                                        if (V_mimic_mode == 0)
-                                        {
-                                            // Global passed bin is the center of the window
-                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);   // save in mV
-                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin + waveformCenter - waveformLength / 2 + mimicbin);
-                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9);    // save in ns
-                                        }
-                                        else if (V_mimic_mode == 1)
-                                        {
-                                            // Global passed bin is the center of the window + delay to each chs from araGeom
-                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);   // save in mV
-                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin);
-                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9);   // save in ns
-                                        }
-                                        if (V_mimic_mode == 2)
-                                        {
-                                            // Global passed bin is the center of the window + delay to each chs from araGeom + fitted delay
-                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);    // save in mV
-                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin);
-                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9 + detector->params.TestBed_WFtime_offset_ns);    // save in ns
-                                        }
-                                        if (mimicbin == 0) {
-                                            for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) { ///< calculates time of center of each rays signal based on readout window time config
-                                                double signal_center_offset = (double)(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].time[0]) * settings1->TIMESTEP * 1.e9;
-                                                double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
-                                                //! signal_center_offset: time offset between beginning of readout window and center of signal
-                                                //! signal_center_time: time of center of signal based on readout window time config
-                                                stations[i].strings[string_i].antennas[antenna_i].SignalBinTime.push_back(signal_center_time);
-                                            }
-                                        }
+                                    int time_bin = time_bin_i + mimicbin;
+                                    int wf_bin = last_trig_bin + time_bin;
+                                    if (V_mimic_mode == 1 || V_mimic_mode == 2) {
+                                        wf_bin -= testbed_ch_delay;
+                                        time_bin -= testbed_ch_delay;
                                     }
+                                    if (V_mimic_mode == 2) wf_bin -= manual_delay_bins;
+                                    double time_mimic_val = (double)time_bin * settings1->TIMESTEP * 1.e9;
+                                    if (V_mimic_mode == 2) time_mimic_val += detector->params.TestBed_WFtime_offset_ns;
 
-                                    // set global_trig_bin values
-                                    if (V_mimic_mode == 0)
-                                    {
-                                        // Global passed bin is the center of the window
-                                        stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = waveformLength / 2 - waveformCenter;
-                                    }
-                                    else if (V_mimic_mode == 1)
-                                    {
-                                        // Global passed bin is the center of the window + delay to each chs from araGeom
-                                        stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformLength / 2 - waveformCenter;
-                                    }
-                                    else if (V_mimic_mode == 2)
-                                    {
-                                        // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
-                                        stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformLength / 2 - waveformCenter;
-                                    }
+                                    stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back(trigger->Full_window_V[ch_loop][wf_bin] * 1.e3);   // save in mV
+                                    stations[i].strings[string_i].antennas[antenna_i].time.push_back(wf_bin);
+                                    stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back(time_mimic_val);    // save in ns
 
-                                    // done V_mimic for non-triggered chs (done fixed V_mimic)
+                                    if (mimicbin == 0) {
+                                        for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) { ///< calculates time of center of each rays signal based on readout window time config
+                                            //! time offset between beginning of readout window and center of signal
+                                            double signal_center_offset = (double)(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - wf_bin) * settings1->TIMESTEP * 1.e9;
+                                            //! time of center of signal based on readout window time config
+                                            double signal_center_time = signal_center_offset + time_mimic_val;
+                                            stations[i].strings[string_i].antennas[antenna_i].SignalBinTime.push_back(signal_center_time);
+                                        }
+                                    }
                                 }
 
-                                double arrivtime = stations[i].strings[string_i].antennas[antenna_i].arrival_time[0];
-                                double X = detector->stations[i].strings[string_i].antennas[antenna_i].GetX();
-                                double Y = detector->stations[i].strings[string_i].antennas[antenna_i].GetY();
-                                double Z = detector->stations[i].strings[string_i].antennas[antenna_i].GetZ();
-                                //std::cout << "Arrival time:X:Y:Z " << arrivtime << " : " << X << " : " << Y << " : " << Z << std::endl;
+                                // set global_trig_bin values
+                                // Global passed bin is the center of the window
+                                int global_trig_bins = -1 * time_bin_i; // if (V_mimic_mode == 0) Global passed bin is the center of the window
+                                if (V_mimic_mode == 1 || V_mimic_mode == 2) global_trig_bins += testbed_ch_delay; // Global passed bin is the center of the window + delay to each chs from araGeom
+                                if (V_mimic_mode == 2) global_trig_bins += manual_delay_bins; // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
+                                stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = global_trig_bins;
                             }
 
                             //cout<<"Global trigger passed!!, N_pass : "<<N_pass<<endl;
@@ -2379,8 +2281,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             // save trig search bin info
                             stations[i].total_trig_search_bin = stations[i].Global_Pass + trig_window_bin - trig_search_init;
                         }   // if global trig!
-                        else
-                        {
+                        else {
                             trig_i++;   // also if station not passed the trigger, just go to next bin
                         }
                     }   // while trig_i
@@ -3707,7 +3608,7 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 
 
 // this one is for three connected signals 
-void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin0, int signalbin1, int signalbin2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, int new_NFOUR1, int new_NFOUR2, int new_NFOUR3) {
+void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin0, int signalbin1, int signalbin2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, int new_NFOUR0, int new_NFOUR1, int new_NFOUR2) {
 
     int bin_value;
     int signal_dbin = signalbin2 - signalbin1;
