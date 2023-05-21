@@ -1905,8 +1905,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                     // cout<<"done filling noise diode arrays for trigger!"<<endl;
 
                     // now we need to calculate bin values for the signal
-                    // with the bin values, grap noise voltage waveform (NFOUR/2) and do myconvlv
-                    // and replace by init : bin + maxt_diode_bin, fin : bin + NFOUR/2
+                    // with the bin values, grap noise voltage waveform (new_NFOUR/2) and do myconvlv
+                    // and replace by init : bin + maxt_diode_bin, fin : bin + new_NFOUR/2
                     // after we do this for all channels, do trigger check
 
                     // calculate the bin values for the signal
@@ -1972,7 +1972,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 else if (connect_signals[m] == 0)
                                 {
                                     // cout << noise_ID << " : " << ch_ID << " : " << i << " : " << endl;
-                                    // do NFOUR/2 size array convlv (m)
                                     Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, stations[i].strings[j].antennas[k].New_NFOUR[m]);
                                 }
                             }
@@ -2124,340 +2123,63 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             int antenna_i = detector->getAntennafromArbAntID(i, trig_j);
 
                             int channel_num = detector->GetChannelfromStringAntenna(i, string_i, antenna_i, settings1);
+                            if ((settings1->TRIG_ONLY_LOW_CH_ON == 1) && (settings1->DETECTOR != 3)) channel_num = GetChannelNum8_LowAnt(string_i, antenna_i); // reset channel numbers so that bottom antennas have ch 1-8
+
+                            double Thres_val = detector->GetThres(i, channel_num - 1, settings1) * detector->GetThresOffset(i, channel_num - 1, settings1);
+                            if (settings1->NOISE_CHANNEL_MODE == 0) {Thres_val *= trigger->rmsdiode;}
+                            else if (settings1->NOISE_CHANNEL_MODE == 1) {Thres_val *= trigger->rmsdiode_ch[channel_num - 1];}
+                            else if (settings1->NOISE_CHANNEL_MODE == 2) {
+                                if ((settings1->TRIG_ONLY_BH_ON == 1) && (settings1->DETECTOR == 3)) {Thres_val *= trigger->rmsdiode_ch[channel_num - 1];}
+                                else { 
+                                    if (channel_num - 1 < 8) {Thres_val *= trigger->rmsdiode_ch[channel_num - 1];}
+                                    else {Thres_val *= trigger->rmsdiode_ch[8];}
+                                }                                
+                            }
+   
+                            bool trig_start = false;
                             // check if we want to use BH chs only for trigger analysis
-                            //if (settings1->TRIG_ONLY_BH_ON == 1) {
-                            if ((settings1->TRIG_ONLY_BH_ON == 1) && (settings1->DETECTOR == 3))
-                            {
+                            if ((settings1->TRIG_ONLY_BH_ON == 1) && (settings1->DETECTOR == 3)) {
                                 // trig by BH is only for TestBed case
-
                                 // check if this channel is BH ch (DAQchan)
-                                if (detector->stations[i].strings[string_i].antennas[antenna_i].DAQchan == 0)
-                                {
-
-                                    trig_bin = 0;
-                                    while (trig_bin < trig_window_bin)
-                                    {
-
-                                        //cout<<"trig_bin : "<<trig_bin<<endl;
-
-                                        if (settings1->NOISE_CHANNEL_MODE == 0)
-                                        {
-                                            // with threshold offset by chs
-                                            if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) *trigger->rmsdiode *detector->GetThresOffset(i, channel_num - 1, settings1)))
-                                            {
-                                                // if this channel passed the trigger!
-                                                //cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
-                                                //stations[i].strings[(int)((trig_j)/4)].antennas[(int)((trig_j)%4)].Trig_Pass = trig_i+trig_bin;
-                                                stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
-                                                N_pass++;
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
-                                                {
-                                                    // Vpol
-                                                    N_pass_V++;
-                                                }
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 1)
-                                                {
-                                                    // Hpol
-                                                    N_pass_H++;
-                                                }
-                                                if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
-                                                trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                                                Passed_chs.push_back(trig_j);
-                                            }
-                                        }
-                                        else if (settings1->NOISE_CHANNEL_MODE == 1)
-                                        {
-                                            // with threshold offset by chs
-                                            if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) *trigger->rmsdiode_ch[channel_num - 1] *detector->GetThresOffset(i, channel_num - 1, settings1)))
-                                            {
-                                                // if this channel passed the trigger!
-                                                //cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
-                                                //stations[i].strings[(int)((trig_j)/4)].antennas[(int)((trig_j)%4)].Trig_Pass = trig_i+trig_bin;
-                                                stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
-                                                N_pass++;
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
-                                                {
-                                                    // Vpol
-                                                    N_pass_V++;
-                                                }
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 1)
-                                                {
-                                                    // Hpol
-                                                    N_pass_H++;
-                                                }
-                                                if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
-                                                trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                                                Passed_chs.push_back(trig_j);
-                                            }
-                                        }
-                                        else if (settings1->NOISE_CHANNEL_MODE == 2)
-                                        {
-                                            // with threshold offset by chs
-                                            // for TRIG_ONLY_BH_ON = 1 case, we are only using first 8 chs so don't worry about other chs
-                                            if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) *trigger->rmsdiode_ch[channel_num - 1] *detector->GetThresOffset(i, channel_num - 1, settings1)))
-                                            {
-                                                // if this channel passed the trigger!
-                                                //cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
-                                                //stations[i].strings[(int)((trig_j)/4)].antennas[(int)((trig_j)%4)].Trig_Pass = trig_i+trig_bin;
-                                                stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
-                                                N_pass++;
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
-                                                {
-                                                    // Vpol
-                                                    N_pass_V++;
-                                                }
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 1)
-                                                {
-                                                    // Hpol
-                                                    N_pass_H++;
-                                                }
-                                                if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
-                                                trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                                                Passed_chs.push_back(trig_j);
-                                            }
-                                        }
-
-                                        trig_bin++;
-                                    }
+                                if (detector->stations[i].strings[string_i].antennas[antenna_i].DAQchan == 0) {
+                                    trig_start = true;
                                 }
                             }
-
                             // in this case just use first 8 chs' thres values
-                            else if ((settings1->TRIG_ONLY_LOW_CH_ON == 1) && (settings1->DETECTOR != 3))
-                            {
+                            else if ((settings1->TRIG_ONLY_LOW_CH_ON == 1) && (settings1->DETECTOR != 3)) {
                                 // non-TestBed case, and only trig by lower 8 channels
-
-                                // reset channel numbers so that bottom antennas have ch 1-8
-                                channel_num = GetChannelNum8_LowAnt(string_i, antenna_i);
-
-                                if (antenna_i < 2)
-                                {
+                                if (antenna_i < 2) {
                                     // only antenna 0, 1 which are bottom 2 antennas
-
                                     // set channel_num as new value (antenna 0, 1 are only possible antennas for channel_num 1 - 8)
-
-                                    trig_bin = 0;
-                                    while (trig_bin < trig_window_bin)
-                                    {
-
-                                        if (settings1->NOISE_CHANNEL_MODE == 0)
-                                        {
-                                            // with threshold offset by chs
-                                            if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) *trigger->rmsdiode *detector->GetThresOffset(i, channel_num - 1, settings1)))
-                                            {
-                                                // if this channel passed the trigger!
-                                                //cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
-                                                //stations[i].strings[(int)((trig_j)/4)].antennas[(int)((trig_j)%4)].Trig_Pass = trig_i+trig_bin;
-                                                stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
-                                                N_pass++;
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
-                                                {
-                                                    // Vpol
-                                                    N_pass_V++;
-                                                }
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 1)
-                                                {
-                                                    // Hpol
-                                                    N_pass_H++;
-                                                }
-                                                if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
-                                                trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                                                Passed_chs.push_back(trig_j);
-                                            }
-                                        }
-                                        else if (settings1->NOISE_CHANNEL_MODE == 1)
-                                        {
-                                            // with threshold offset by chs
-                                            if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) *trigger->rmsdiode_ch[channel_num - 1] *detector->GetThresOffset(i, channel_num - 1, settings1)))
-                                            {
-                                                // if this channel passed the trigger!
-                                                stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
-                                                N_pass++;
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
-                                                {
-                                                    // Vpol
-                                                    N_pass_V++;
-                                                }
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 1)
-                                                {
-                                                    // Hpol
-                                                    N_pass_H++;
-                                                }
-                                                if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
-                                                trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                                                Passed_chs.push_back(trig_j);
-                                            }
-                                        }
-                                        else if (settings1->NOISE_CHANNEL_MODE == 2)
-                                        {
-                                            // with threshold offset by chs
-                                            // for TRIG_ONLY_BH_ON = 1 case, we are only using first 8 chs so don't worry about other chs
-                                            if (channel_num - 1 < 8)
-                                            {
-                                                if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) *trigger->rmsdiode_ch[channel_num - 1] *detector->GetThresOffset(i, channel_num - 1, settings1)))
-                                                {
-                                                    // if this channel passed the trigger!
-                                                    stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
-                                                    N_pass++;
-                                                    if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
-                                                    {
-                                                        // Vpol
-                                                        N_pass_V++;
-                                                    }
-                                                    if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 1)
-                                                    {
-                                                        // Hpol
-                                                        N_pass_H++;
-                                                    }
-                                                    if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
-                                                    trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                                                    Passed_chs.push_back(trig_j);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                // chs starting from 8 (counted from 0), uses same rmsdiode value
-                                                if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) *trigger->rmsdiode_ch[8] *detector->GetThresOffset(i, channel_num - 1, settings1)))
-                                                {
-                                                    // if this channel passed the trigger!
-                                                    stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
-                                                    N_pass++;
-                                                    if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
-                                                    {
-                                                        // Vpol
-                                                        N_pass_V++;
-                                                    }
-                                                    if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 1)
-                                                    {
-                                                        // Hpol
-                                                        N_pass_H++;
-                                                    }
-                                                    if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
-                                                    trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                                                    Passed_chs.push_back(trig_j);
-                                                }
-                                            }
-                                        }
-
-                                        trig_bin++;
-                                    }
+                                    trig_start = true;
                                 }
                             }
+                            // other cases, use all possible chs for trigger analysis
+                            else {
+                                trig_start = true;
+                            }
 
-                            //else if (settings1->TRIG_ONLY_BH_ON == 0) {
-                            else
-                            {
-                                // other cases, use all possible chs for trigger analysis
+                            if (trig_start == true) {
+                                //cout<<"trig_bin : "<<trig_bin<<endl;
                                 trig_bin = 0;
-                                while (trig_bin < trig_window_bin)
-                                {
-
-                                    if (settings1->NOISE_CHANNEL_MODE == 0)
-                                    {
-                                        // with threshold offset by chs
-                                        if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) *trigger->rmsdiode *detector->GetThresOffset(i, channel_num - 1, settings1)))
-                                        {
-                                            // if this channel passed the trigger!
-                                            //cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
-                                            //stations[i].strings[(int)((trig_j)/4)].antennas[(int)((trig_j)%4)].Trig_Pass = trig_i+trig_bin;
-                                            stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
-                                            N_pass++;
-                                            if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
-                                            {
-                                                // Vpol
-                                                N_pass_V++;
-                                            }
-                                            if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 1)
-                                            {
-                                                // Hpol
-                                                N_pass_H++;
-                                            }
-                                            if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
-                                            trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                                            Passed_chs.push_back(trig_j);
-                                        }
+                                //cout<<"trig_bin : "<<trig_bin<<endl;
+                                while (trig_bin < trig_window_bin) {
+                                    // with threshold offset by chs
+                                    if (trigger->Full_window[trig_j][trig_i + trig_bin] < Thres_val) {
+                                        // if this channel passed the trigger!
+                                        //cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
+                                        stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
+                                        N_pass++;
+                                        if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0) N_pass_V++; // Vpol
+                                        if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 1) N_pass_H++; // Hpol
+                                        if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
+                                        trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
+                                        Passed_chs.push_back(trig_j);
                                     }
-                                    else if (settings1->NOISE_CHANNEL_MODE == 1)
-                                    {
-                                        // with threshold offset by chs
-                                        if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) *trigger->rmsdiode_ch[channel_num - 1] *detector->GetThresOffset(i, channel_num - 1, settings1)))
-                                        {
-                                            // if this channel passed the trigger!
-                                            stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
-                                            N_pass++;
-                                            if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
-                                            {
-                                                // Vpol
-                                                N_pass_V++;
-                                            }
-                                            if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 1)
-                                            {
-                                                // Hpol
-                                                N_pass_H++;
-                                            }
-                                            if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
-                                            trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                                            Passed_chs.push_back(trig_j);
-                                        }
-                                    }
-                                    else if (settings1->NOISE_CHANNEL_MODE == 2)
-                                    {
-                                        // with threshold offset by chs
-                                        // for TRIG_ONLY_BH_ON = 1 case, we are only using first 8 chs so don't worry about other chs
-                                        if (channel_num - 1 < 8)
-                                        {
-                                            if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) *trigger->rmsdiode_ch[channel_num - 1] *detector->GetThresOffset(i, channel_num - 1, settings1)))
-                                            {
-                                                // if this channel passed the trigger!
-                                                stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
-                                                N_pass++;
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
-                                                {
-                                                    // Vpol
-                                                    N_pass_V++;
-                                                }
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 1)
-                                                {
-                                                    // Hpol
-                                                    N_pass_H++;
-                                                }
-                                                if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
-                                                trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                                                Passed_chs.push_back(trig_j);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            // chs starting from 8 (counted from 0), uses same rmsdiode value
-                                            if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) *trigger->rmsdiode_ch[8] *detector->GetThresOffset(i, channel_num - 1, settings1)))
-                                            {
-                                                // if this channel passed the trigger!
-                                                stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
-                                                N_pass++;
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
-                                                {
-                                                    // Vpol
-                                                    N_pass_V++;
-                                                }
-                                                if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 1)
-                                                {
-                                                    // Hpol
-                                                    N_pass_H++;
-                                                }
-                                                if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
-                                                trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                                                Passed_chs.push_back(trig_j);
-                                            }
-                                        }
-                                    }
-
                                     trig_bin++;
                                 }
                             }
-
                             // check all triggered channels not just 3
-                            //if (N_pass > 2) trig_j += ch_ID;      // if the number of passed channels is 3 or more, no need to check other remaining channels as this station is trigged!
-                            //else trig_j++;    // if station not passed the trigger, just go to next channel
                             trig_j++;   // if station not passed the trigger, just go to next channel
 
                         }   // while trig_j < ch_ID
@@ -2470,10 +2192,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         {
 
                             check_ch = 0;
-                            //stations[i].Global_Pass = trig_i;
                             stations[i].Global_Pass = last_trig_bin;    // where actually global trigger occured
 
-                            //trig_i = settings1->DATA_BIN_SIZE;    // also if we know this station is trigged, don't need to check rest of time window
                             trig_i = max_total_bin; // also if we know this station is trigged, don't need to check rest of time window
                             for (int ch_loop = 0; ch_loop < ch_ID; ch_loop++)
                             {
@@ -2510,10 +2230,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     }
 
                                     //skip this passed ch as it already has bin info
-                                    //cout<<"trigger passed at bin "<<stations[i].strings[(int)((ch_loop)/4)].antennas[(int)((ch_loop)%4)].Trig_Pass<<"  passed ch : "<<ch_loop<<" Direct dist btw posnu : "<<event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[(int)((ch_loop)/4)].antennas[(int)((ch_loop)%4)])<<endl;
-                                    //cout<<endl<<"trigger passed at bin "<<stations[i].strings[string_i].antennas[antenna_i].Trig_Pass<<"  passed ch : "<<ch_loop<<" ("<<detector->stations[i].strings[string_i].antennas[antenna_i].type<<"type) Direct dist btw posnu : "<<event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i])<<" noiseID : "<<stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
-                                    //cout<<endl<<"trigger passed at bin "<<stations[i].strings[string_i].antennas[antenna_i].Trig_Pass<<"  passed ch : "<<ch_loop<<" ("<<detector->stations[i].strings[string_i].antennas[antenna_i].type<<"type) Direct dist btw posnu : "<<event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i])<<" noiseID : "<<stations[i].strings[string_i].antennas[antenna_i].noise_ID[0]<<" ViewAngle : "<<stations[i].strings[string_i].antennas[antenna_i].view_ang[0]*DEGRAD;
-
                                     if (settings1->TRIG_ONLY_LOW_CH_ON == 0)
                                     {
                                         cout << endl << "trigger passed at bin " << stations[i].strings[string_i].antennas[antenna_i].Trig_Pass << "  passed ch : " << ch_loop << " (" << detector->stations[i].strings[string_i].antennas[antenna_i].type << "type) Direct dist btw posnu : " << event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i]) << " noiseID : " << stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
@@ -2593,8 +2309,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 }
                                 else
                                 {
-                                    //stations[i].strings[(int)((ch_loop)/4)].antennas[(int)((ch_loop)%4)].Trig_Pass = stations[i].Global_Pass + settings1->NFOUR/4;    // so that global trig is 
-                                    //stations[i].strings[(int)((ch_loop)/4)].antennas[(int)((ch_loop)%4)].Trig_Pass = 0.;
                                     stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 0.;
 
                                     // new DAQ waveform writing mechanism test
@@ -2617,7 +2331,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                         if (V_mimic_mode == 2)
                                         {
                                             // Global passed bin is the center of the window + delay to each chs from araGeom + fitted delay
-                                            //stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back(trigger->Full_window_V[ch_loop][ last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop]-detector->params.TestBed_BH_Mean_delay_bin) - settings1->NFOUR/4 + mimicbin ]);
                                             stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);    // save in mV
                                             stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin);
                                             stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9 + detector->params.TestBed_WFtime_offset_ns);    // save in ns
@@ -2658,26 +2371,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 double Y = detector->stations[i].strings[string_i].antennas[antenna_i].GetY();
                                 double Z = detector->stations[i].strings[string_i].antennas[antenna_i].GetZ();
                                 //std::cout << "Arrival time:X:Y:Z " << arrivtime << " : " << X << " : " << Y << " : " << Z << std::endl;
-                                /*
-                                int AraRootChannel = 0;
-                                AraRootChannel = detector->GetChannelfromStringAntenna (i, string_i, antenna_i, settings1);
-
-                                int UsefulEventBin;
-                                if (settings1->NFOUR/2<EFFECTIVE_LAB3_SAMPLES*2) UsefulEventBin = settings1->NFOUR/2;
-                                else UsefulEventBin = EFFECTIVE_LAB3_SAMPLES*2;
-
-                                //for (int mimicbin=0; mimicbin<settings1->NFOUR/2; mimicbin++) {
-                                for (int mimicbin=0; mimicbin < UsefulEventBin; mimicbin++) {
-                                    theUsefulEvent->fVoltsRF[AraRootChannel-1][mimicbin] = stations[i].strings[string_i].antennas[antenna_i].V_mimic[mimicbin];
-                                    //theUsefulEvent->fTimesRF[AraRootChannel-1][mimicbin] = double(stations[i].strings[string_i].antennas[antenna_i].time[mimicbin])*settings1->TIMESTEP*1.0E9;
-                                    theUsefulEvent->fTimesRF[AraRootChannel-1][mimicbin] = stations[i].strings[string_i].antennas[antenna_i].time_mimic[mimicbin];
-                                    //cout << theUsefulEvent->fVoltsRF[ch_loop][mimicbin] << endl;
-                                    //cout << theUsefulEvent->fTimesRF[ch_loop][mimicbin] <<endl;
-                                }
-                                //theUsefulEvent->fNumPointsRF[ch_loop] = EFFECTIVE_SAMPLES * 2;
-                                theUsefulEvent->fNumPointsRF[ch_loop] = UsefulEventBin;
-                                //cout << " : " << theUsefulEvent->fNumPointsRF[ch_loop] << endl;
-                                 */
                             }
 
                             //cout<<"Global trigger passed!!, N_pass : "<<N_pass<<endl;
@@ -2689,28 +2382,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         else
                         {
                             trig_i++;   // also if station not passed the trigger, just go to next bin
-                            /*
-                            for (int ch_loop=0; ch_loop < ch_ID; ch_loop++) {
-                                int string_i = detector->getStringfromArbAntID(i, ch_loop);
-                                int antenna_i = detector->getAntennafromArbAntID(i, ch_loop);
-                                int AraRootChannel = 0;
-                                AraRootChannel = detector->GetChannelfromStringAntenna (i, string_i, antenna_i, settings1);
-
-                                int UsefulEventBin;
-                                if (settings1->NFOUR/2<EFFECTIVE_LAB3_SAMPLES*2) UsefulEventBin = settings1->NFOUR/2;
-                                else UsefulEventBin = EFFECTIVE_LAB3_SAMPLES*2;
-
-                                //for (int mimicbin=0; mimicbin<settings1->NFOUR/2; mimicbin++) {
-                                for (int mimicbin=0; mimicbin < UsefulEventBin; mimicbin++) {
-                                    theUsefulEvent->fVoltsRF[AraRootChannel-1][mimicbin] = 0;
-                                    theUsefulEvent->fTimesRF[AraRootChannel-1][mimicbin] = 0;
-                                    //cout << theUsefulEvent->fVoltsRF[ch_loop][mimicbin] << endl;
-                                    //cout << theUsefulEvent->fTimesRF[ch_loop][mimicbin] <<endl;
-                                }
-                                //theUsefulEvent->fNumPointsRF[ch_loop] = EFFECTIVE_SAMPLES * 2;
-                                theUsefulEvent->fNumPointsRF[ch_loop] = UsefulEventBin;
-                            }
-                            */
                         }
                     }   // while trig_i
 
