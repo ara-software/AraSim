@@ -6014,62 +6014,6 @@ void Report::checkPATrigger(
                         }
                     }     
                 } // for m (ray sol numbers)
-                
-                // now save the voltage waveform to V_mimic
-                for (int mimicbin=0; mimicbin < waveformLength/2; mimicbin++) {
-                // new DAQ waveform writing mechanism test
-
-                if (settings1->V_MIMIC_MODE == 0) { // Global passed bin is the center of the window
-                    
-                    stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( 
-                    ( trigger->Full_window_V[trig_j][ bin_to_save_on - waveformLength/2 + waveformCenter + mimicbin ] )*1.e3 
-                    );// save in mV
-                    stations[i].strings[string_i].antennas[antenna_i].time.push_back(  
-                    bin_to_save_on - waveformLength/2 + waveformCenter + mimicbin 
-                    );
-                    stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( 
-                    ( waveformLength/2 + waveformCenter + mimicbin) * settings1->TIMESTEP*1.e9  
-                    );// save in ns
-
-                }
-                else if (settings1->V_MIMIC_MODE == 1) { // Global passed bin is the center of the window + delay to each chs from araGeom
-                    
-                    stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( 
-                    ( trigger->Full_window_V[trig_j][  bin_to_save_on - (detector->params.TestBed_Ch_delay_bin[trig_j] 
-                    - detector->params.TestBed_BH_Mean_delay_bin) - waveformLength/2 + waveformCenter + mimicbin ] )*1.e3 
-                    );// save in mV
-                    stations[i].strings[string_i].antennas[antenna_i].time.push_back( 
-                    bin_to_save_on - (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) 
-                    - waveformLength/2 + waveformCenter + mimicbin 
-                    );
-                    stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( 
-                    ( -(detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) 
-                        - waveformLength/2 + waveformCenter + mimicbin) * settings1->TIMESTEP*1.e9  
-                    );// save in ns      
-
-                }
-                else if (settings1->V_MIMIC_MODE == 2) { // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
-                    
-                    stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( 
-                    ( trigger->Full_window_V[trig_j][  bin_to_save_on - (detector->params.TestBed_Ch_delay_bin[trig_j] 
-                    - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) 
-                    - waveformLength/2 + waveformCenter + mimicbin ] )*1.e3 
-                    );// save in mV
-                    stations[i].strings[string_i].antennas[antenna_i].time.push_back(  
-                    bin_to_save_on - (detector->params.TestBed_Ch_delay_bin[trig_j] 
-                    - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) 
-                    - waveformLength/2 + waveformCenter + mimicbin 
-                    );
-                    stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( 
-                    ( -(detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin 
-                    + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) 
-                    - waveformLength/2 + waveformCenter + mimicbin) * settings1->TIMESTEP*1.e9 
-                    + detector->params.TestBed_WFtime_offset_ns 
-                    );// save in ns
-
-                }
-
-                } // end save the voltage to V_Mimic
                         
                 // set global_trig_bin values
                 if (settings1->V_MIMIC_MODE == 0) { // Global passed bin is the center of the window
