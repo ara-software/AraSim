@@ -507,7 +507,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 stations[i].strings[j].antennas[k].V.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].SignalExt.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].New_NFOUR.resize(ray_sol_cnt + 1);
-                                stations[i].strings[j].antennas[k].New_NFOUR[ray_sol_cnt] = settings1->NFOUR;                             
+                                stations[i].strings[j].antennas[k].New_NFOUR[ray_sol_cnt] = settings1->NFOUR; ///< fill with default value incase there is no signal for ray solution                         
 
                                 // calculate the polarization vector at the source
                                 Pol_vector = GetPolarization(event->Nu_Interaction[0].nnu, launch_vector);
@@ -950,8 +950,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                                 // initially give raysol has actual signal
                                                 stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] = 0;
-
-                                                stations[i].strings[j].antennas[k].New_NFOUR[ray_sol_cnt] = settings1->NFOUR;
 
                                                 // if no signal, push_back 0 values (otherwise the value inside will remain as old value)
                                                 for (int n = 0; n < settings1->NFOUR / 2; n++)
@@ -1926,7 +1924,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         {
                             // loop over raysol numbers
                             int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m];
-                            signal_bin.push_back((stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time) / (settings1->TIMESTEP) + new_NFOUR1 * 2 + trigger->maxt_diode_bin);
+                            signal_bin.push_back((stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time) / (settings1->TIMESTEP) + new_NFOUR_max * 2 + trigger->maxt_diode_bin);
 
                             // store signal located bin
                             stations[i].strings[j].antennas[k].SignalBin.push_back(signal_bin[m]);
@@ -3590,6 +3588,16 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 
     }
 
+    /*
+    //debug
+    std::cout<<"signalbin1: "<<signalbin1<<std::endl;
+    std::cout<<"signalbin2: "<<signalbin2<<std::endl;
+    std::cout<<"signal_dbin: "<<signal_dbin<<std::endl;
+    std::cout<<"new_NFOUR1/4: "<<new_NFOUR1/4<<std::endl;
+    std::cout<<"new_NFOUR2/4: "<<new_NFOUR2/4<<std::endl;
+    std::cout<<"binsize: "<<BINSIZE<<std::endl;
+    */
+
     // do myconvlv and replace the diode response array
     trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv);
 
@@ -3602,7 +3610,6 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
         if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;
         else if ( trigger->Full_window_V[ID][bin] < -1.*settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = -1.*settings1->V_SATURATION;
     }
-
 
     //V_total_forconvlv.clear();
 
