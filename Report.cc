@@ -917,7 +917,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 int new_NFOUR = settings1->NFOUR;
                                                 int new_init_T = init_T;
                                                 if (settings1->DYNAMIC_NFOUR == 1) {
-                                                    new_NFOUR = ((int)(pad_len / 4) + 1) * 4; ///< slightly longer, but also can be divided by 4
+                                                    new_NFOUR = pad_len; ///< slightly longer, but also can be divided by 4
                                                     if (new_NFOUR < settings1->NFOUR) new_NFOUR = settings1->NFOUR;
                                                     new_init_T = settings1->TIMESTEP * -1.e9 * ((double) new_NFOUR / 4 + RandomTshift);
                                                     if (new_NFOUR < new_NFOUR_min) new_NFOUR_min = new_NFOUR; 
@@ -3537,7 +3537,8 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
     }
 
     // do myconvlv and replace the diode response array
-    trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv);
+    if (BINSIZE == int(settings1->NFOUR / 2)) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv); ///< use default diode
+    else if (BINSIZE == settings1->NFOUR) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv); ///< use default double length diode
 
     // do replace the part we get from noise + signal
     for (int bin = signalbin - BINSIZE / 2 + (trigger->maxt_diode_bin); bin < signalbin + BINSIZE / 2; bin++) {
@@ -3556,8 +3557,8 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 
     int bin_value;
     int signal_dbin = signalbin2 - signalbin1;
-    //int BINSIZE = new_NFOUR1 / 4 + signal_dbin + new_NFOUR2 / 4;
-    int BINSIZE = settings1->NFOUR;
+    int BINSIZE = new_NFOUR1 / 4 + signal_dbin + new_NFOUR2 / 4;
+    if (BINSIZE > int(settings1->NFOUR / 2) && BINSIZE <= settings1->NFOUR) BINSIZE = settings1->NFOUR; ///< Let just use double length. It is easier to apply diode
     int V2_offset = signalbin2 - new_NFOUR2 / 4 - (signalbin1 - new_NFOUR1 / 4); ///< offset index when second signal is entered at the pad
     double V_tmp[BINSIZE];
     for(int bin_tmp=0; bin_tmp<BINSIZE; bin_tmp++) {
@@ -3593,7 +3594,7 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
             V_tmp[bin] += V1[bin];
         }
         if (bin >= V2_offset) { ///< add second signal
-            if (bin - V2_offset < settings1->NFOUR / 2) {
+            if (bin - V2_offset < new_NFOUR2 / 2) {
             V_total_forconvlv[bin] += V2[bin - V2_offset];
             V_tmp[bin] += V2[bin - V2_offset];}
         }
@@ -3610,7 +3611,8 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
     
 
     // do myconvlv and replace the diode response array
-    trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv);
+    if (BINSIZE == int(settings1->NFOUR / 2)) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv); ///< use default diode
+    else if (BINSIZE == settings1->NFOUR) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv); ///< use default double length diode
 
     // do replace the part we get from noise + signal
     for (int bin = signalbin1 - new_NFOUR1 / 4 + (trigger->maxt_diode_bin); bin < signalbin2 + new_NFOUR2 / 4; bin++) {
