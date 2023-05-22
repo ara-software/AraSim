@@ -34,71 +34,48 @@ Detector::Detector() {
 }
 
 
-Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) {
-    //Detector::Detector(int mode, IceModel *icesurface) {
-    cout << "good" << endl;
-    
-    // set freq_forfft for later use
-    //
-    
-    // set freq_forfft array
-    // same with icemc anita class initialization function
-    
-    
-    double freqstep=1./(double)(settings1->NFOUR/2)/(settings1->TIMESTEP);
-    
-    NFOUR = settings1->NFOUR;
-    TIMESTEP = settings1->TIMESTEP;
-    
-    NoiseFig_numCh=16;
+Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile) {
 
-    //for (int i=0;i<HALFNFOUR/2;i++) {
-    for (int i=0;i<settings1->NFOUR/4;i++) {
-        //--------------------------------------------------
-        // freq_forfft[2*i]=(double)i*freqstep;
-        // freq_forfft[2*i+1]=(double)i*freqstep;
-        //-------------------------------------------------- 
-        freq_forfft.push_back( (double)i*freqstep );    // even numbers
-        freq_forfft.push_back( (double)i*freqstep );    // odd numbers
-        
+
+    double freqstep = 1. / (double)(settings1 -> NFOUR / 2) / (settings1 -> TIMESTEP);
+
+    NFOUR = settings1 -> NFOUR;
+    TIMESTEP = settings1 -> TIMESTEP;
+
+    NoiseFig_numCh = 16;
+
+    for (int i = 0; i < settings1 -> NFOUR / 4; i++) {
+
+        freq_forfft.push_back((double) i * freqstep); // even numbers
+        freq_forfft.push_back((double) i * freqstep); // odd numbers
+
     }
-    for (int i=settings1->NFOUR/4;i<settings1->NFOUR/2;i++) {
-        //--------------------------------------------------
-        // freq_forfft[2*i]=(double)i*freqstep;
-        // freq_forfft[2*i+1]=(double)i*freqstep;
-        //-------------------------------------------------- 
-        freq_forfft.push_back( (double)i*freqstep );    // even numbers
-        freq_forfft.push_back( (double)i*freqstep );    // odd numbers
-        
+    for (int i = settings1 -> NFOUR / 4; i < settings1 -> NFOUR / 2; i++) {
+        freq_forfft.push_back((double) i * freqstep); // even numbers
+        freq_forfft.push_back((double) i * freqstep); // odd numbers
+
     }
     // end of settings freq_forfft
-    
-    
-    
-    
+
     //set mode ex) mode 0 = testbed,
     // mode 1 = ARA_1
     // mode 2 = ARA_2
     // mode 3 = ARA_37
-    int mode = settings1->DETECTOR;
+    int mode = settings1 -> DETECTOR;
     Detector_mode = mode;
-    
+
     int string_id = -1;
-    //    int string_id = 0;
     int antenna_id = 0;
-    
-    
-    //    Parameters params;
-    //    vector <Antenna_string> strings;
+
     ARA_station temp_station;
     Antenna_string temp;
     Antenna_string temp_string;
     Antenna temp_antenna;
     Surface_antenna temp_surface;
-    
+
     params.number_of_strings = 0;
     params.number_of_antennas = 0;
-    
+
     //initialize few params values.
     params.freq_step = 60;
     params.ang_step = 2664;
@@ -106,884 +83,743 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
     params.freq_init = 83.333;
     params.DeployedStations = 4;
     //end initialize
-    
+
     //Parameters to use if using Arianna_WIPLD_hpol.dat
-    
-    if (settings1->ANTENNA_MODE == 2){
-      params.freq_step = 238;//60
-      params.ang_step = 2664;//2664;
-      params.freq_width = 5; //16.667;
-      params.freq_init = 15;//83.333;
-      params.DeployedStations = 4;
+
+    if (settings1 -> ANTENNA_MODE == 2) {
+        params.freq_step = 238; //60
+        params.ang_step = 2664; //2664;
+        params.freq_width = 5; //16.667;
+        params.freq_init = 15; //83.333;
+        params.DeployedStations = 4;
     }
-    
+
     //copy freq_width, freq_init in params to Detector freq_width, freq_init
     freq_step = params.freq_step;
     ang_step = params.ang_step;
     freq_width = params.freq_width;
     freq_init = params.freq_init;
     //end copy
-    
-    
+
     string testbed_file = "testbed_info.txt";
-//--------------------------------------------------
-//     string ARA_N_file = "ARA_N_info.txt";
-//     string ARA37_file = "ARA37_info.txt";
-//-------------------------------------------------- 
     string ARA_N_file = setupfile;
     string ARA37_file = setupfile;
-    
+
     string line, label;
 
     // setup installed station information
     // setup actual installed staion information regardless of what DETECTOR mode is in use
     SetupInstalledStations();
-    
-    //    IceModel *icesurface = new IceModel;
-    //cout<<"Ice surface at 0,0 : "<<icesurface->Geoid(0.)<<endl;
-    
-    
-    ////////////////////////////////////////////////////////////////////////////////////    
-    
+
+
     if (mode == 0) {
-        cout<<"\n\tDector mode 0 : testbed"<<endl;
-        ifstream testbed( testbed_file.c_str() );
-        cout<<"We use "<<testbed_file.c_str()<<" as antenna info."<<endl;
-        
-        
-        if ( testbed.is_open() ) {
-            while (testbed.good() ) {
-                getline (testbed, line);
-                
-                if (line[0] != "/"[0]) {
-                    label = line.substr(0, line.find_first_of("=") );
-                    
+        cout << "\n\tDector mode 0 : testbed" << endl;
+        ifstream testbed(testbed_file.c_str());
+        cout << "We use " << testbed_file.c_str() << " as antenna info." << endl;
+
+        if (testbed.is_open()) {
+            while (testbed.good()) {
+                getline(testbed, line);
+
+                if (line[0] != "/" [0]) {
+                    label = line.substr(0, line.find_first_of("="));
+
                     if (label == "number_of_strings") {
-                        params.number_of_strings = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
-                        for (int i=0; i<(int) params.number_of_strings; i++) {
+                        params.number_of_strings = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+                        for (int i = 0; i < (int) params.number_of_strings; i++) {
                             strings.push_back(temp);
                         }
-                        cout<<"read numner_of_strings"<<endl;
+                        cout << "read numner_of_strings" << endl;
                         //                        Parameters.number_of_strings = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
-                    }
-                    else if (label == "antenna_string") {
+                    } else if (label == "antenna_string") {
                         string_id++;
                         antenna_id = 0;
-                        cout<<"read antenna_string"<<endl;
+                        cout << "read antenna_string" << endl;
                         //                        if (string_id + 1 >= params.number_of_strings) {
                         //                            cout<<"Error! Too many strings!"<<endl;
                         //                        }
-                    }
-                    else if (label == "x") {
+                    } else if (label == "x") {
                         //strings[string_id].x = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        strings[string_id].SetX( atof( line.substr( line.find_first_of("=") + 1).c_str() ) );
-                        cout<<"read x : "<<(double)strings[string_id].GetX()<<" string_id : "<<string_id<<endl;
-                    }
-                    else if (label == "y") {
+                        strings[string_id].SetX(atof(line.substr(line.find_first_of("=") + 1).c_str()));
+                        cout << "read x : " << (double) strings[string_id].GetX() << " string_id : " << string_id << endl;
+                    } else if (label == "y") {
                         //strings[string_id].y = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        strings[string_id].SetY( atof( line.substr( line.find_first_of("=") + 1).c_str() ) );
-                        cout<<"read y : "<<(double)strings[string_id].GetY()<<" string_id : "<<string_id<<endl;
-                    }
-                    else if (label == "z") {
+                        strings[string_id].SetY(atof(line.substr(line.find_first_of("=") + 1).c_str()));
+                        cout << "read y : " << (double) strings[string_id].GetY() << " string_id : " << string_id << endl;
+                    } else if (label == "z") {
                         strings[string_id].antennas.push_back(temp_antenna);
                         //strings[string_id].antennas[antenna_id].z = atof( line.substr( line.find_first_of("=") + 1, line.find_first_of(",") ).c_str() );
-                        strings[string_id].antennas[antenna_id].SetZ( atof( line.substr( line.find_first_of("=") + 1, line.find_first_of(",") ).c_str() ) );
-                        strings[string_id].antennas[antenna_id].type = atoi( line.substr( line.find_first_of(",") + 1).c_str() );
-                        cout<<"read z : "<<(double)strings[string_id].antennas[antenna_id].GetZ()<<" string_id : "<<string_id<<" antenna_id : "<<antenna_id<<" type : "<<(int)strings[string_id].antennas[antenna_id].type<<endl;
+                        strings[string_id].antennas[antenna_id].SetZ(atof(line.substr(line.find_first_of("=") + 1, line.find_first_of(",")).c_str()));
+                        strings[string_id].antennas[antenna_id].type = atoi(line.substr(line.find_first_of(",") + 1).c_str());
+                        cout << "read z : " << (double) strings[string_id].antennas[antenna_id].GetZ() << " string_id : " << string_id << " antenna_id : " << antenna_id << " type : " << (int) strings[string_id].antennas[antenna_id].type << endl;
                         antenna_id++;
                         params.number_of_antennas++;
                         //                        Parameters.number_of_antennas++;
                     }
-                    
-                    
+
                 }
             }
             testbed.close();
-        }
-        
-        else {
-            cout<<"Unable to open antenna array file !"<<endl;
+        } else {
+            cout << "Unable to open antenna array file !" << endl;
             //            return 1;
         }
-        
-        
+
         // testbed version of FlattoEarth_ARA 
         // strings and antennas on the strings use geoid surface!
-        double Dist = 0.;   //for sqrt(x^2 + y^2)
-        double R1 = icesurface->Surface(0.,0.); // from core of earth to surface at theta, phi = 0.
+        double Dist = 0.; //for sqrt(x^2 + y^2)
+        double R1 = icesurface -> Surface(0., 0.); // from core of earth to surface at theta, phi = 0.
         double theta_tmp;
         double phi_tmp;
-        
+
         // set same theta, phi to all antennas in same string
-        for (int i=0; i<params.number_of_strings; i++) {
-            
-            Dist = sqrt( pow(strings[i].GetX(),2) + pow(strings[i].GetY(),2) );
-            theta_tmp = Dist/R1;    // assume R1 is constant (which is not)
-            phi_tmp = atan2(strings[i].GetY(),strings[i].GetX());
-            
-            if (phi_tmp<0.) phi_tmp += 2.*PI;
-            
+        for (int i = 0; i < params.number_of_strings; i++) {
+
+            Dist = sqrt(pow(strings[i].GetX(), 2) + pow(strings[i].GetY(), 2));
+            theta_tmp = Dist / R1; // assume R1 is constant (which is not)
+            phi_tmp = atan2(strings[i].GetY(), strings[i].GetX());
+
+            if (phi_tmp < 0.) phi_tmp += 2. * PI;
+
             // set theta, phi for strings.
             strings[i].SetThetaPhi(theta_tmp, phi_tmp);
             //set R for strings.
-            strings[i].SetR( icesurface->Surface( strings[i].Lon(), strings[i].Lat()) );
-            
-            cout<<"R, Theta, Phi : "<<strings[i].R()<<" "<<strings[i].Theta()<<" "<<strings[i].Phi()<<endl;
-            
+            strings[i].SetR(icesurface -> Surface(strings[i].Lon(), strings[i].Lat()));
+
+            cout << "R, Theta, Phi : " << strings[i].R() << " " << strings[i].Theta() << " " << strings[i].Phi() << endl;
+
             // set antennas r, theta, phi
-            for (int j=0; j<antenna_id; j++) {
-                strings[i].antennas[j].SetRThetaPhi( strings[i].R() + strings[i].antennas[j].GetZ() , strings[i].Theta(), strings[i].Phi() );
+            for (int j = 0; j < antenna_id; j++) {
+                strings[i].antennas[j].SetRThetaPhi(strings[i].R() + strings[i].antennas[j].GetZ(), strings[i].Theta(), strings[i].Phi());
             }
         }
-        
-        
-        
-        
-        
-        
-    }
-    
+
+    } // if mode == 0 
+
     /////////////////////////////////////////////////////////////////////////////
-    
-    
-    
-    
     else if (mode == 1) {
-//        cout<<"\n\tDector mode 1 : Specific number of stations (less than 7 stations) !"<<endl;
-        ifstream ARA_N( ARA_N_file.c_str() );
-//        cout<<"We use "<<ARA_N_file.c_str()<<" as antenna info."<<endl;
-        
-        
+        //        cout<<"\n\tDector mode 1 : Specific number of stations (less than 7 stations) !"<<endl;
+        ifstream ARA_N(ARA_N_file.c_str());
+        //        cout<<"We use "<<ARA_N_file.c_str()<<" as antenna info."<<endl;
+
         // initialize info
         params.number_of_stations = 1;
-        params.number_of_strings_station = 4;   // ARA-1 has 4 strings
+        params.number_of_strings_station = 4; // ARA-1 has 4 strings
         params.number_of_antennas_string = 4; // 4 antennas on each strings
         params.number_of_surfaces_station = 4;
-        
-	
 
         //double core_x = 0.; 
         //double core_y = 0.;
-        params.core_x = 10000.; 
+        params.core_x = 10000.;
         params.core_y = 10000.;
-        double R_string = 10.;  // all units are in meter
+        double R_string = 10.; // all units are in meter
         double R_surface = 60.;
         double z_max = 200.;
         double z_btw = 10.;
         double z_btw_array[6]; // assume there will be less than 6 bore hole antennas at each string
-	// these z_btw array will be used when settings->BH_ANT_SEP_DIST_ON=1 case
-        for (int i=0; i<6; i++) {
-            if (i==0) z_btw_array[i] = 0.;
+        // these z_btw array will be used when settings->BH_ANT_SEP_DIST_ON=1 case
+        for (int i = 0; i < 6; i++) {
+            if (i == 0) z_btw_array[i] = 0.;
             //else z_btw_array[i] = z_btw;
-            else if (i==1) z_btw_array[i] = 2.;
-            else if (i==2) z_btw_array[i] = 15.;
-            else if (i==3) z_btw_array[i] = 2.;
+            else if (i == 1) z_btw_array[i] = 2.;
+            else if (i == 2) z_btw_array[i] = 15.;
+            else if (i == 3) z_btw_array[i] = 2.;
             else z_btw_array[i] = z_btw;
         }
         double z_btw_total;
-        params.stations_per_side = 4;       // total 37 stations
-        params.station_spacing = 2000.;     // 2km spacing
-        params.antenna_orientation = 0;     // all antenna facing x
-        params.bore_hole_antenna_layout = settings1->BORE_HOLE_ANTENNA_LAYOUT;
+        params.stations_per_side = 4; // total 37 stations
+        params.station_spacing = 2000.; // 2km spacing
+        params.antenna_orientation = 0; // all antenna facing x
+        params.bore_hole_antenna_layout = settings1 -> BORE_HOLE_ANTENNA_LAYOUT;
         // finish initialization
         //
-        
-        
-        
-        
-        
+
         // Read new parameters if there are...
-        if ( ARA_N.is_open() ) {
-            while (ARA_N.good() ) {
-                getline (ARA_N, line);
-                
-                if (line[0] != "/"[0]) {
-                    label = line.substr(0, line.find_first_of("=") );
-                    
+        if (ARA_N.is_open()) {
+            while (ARA_N.good()) {
+                getline(ARA_N, line);
+
+                if (line[0] != "/" [0]) {
+                    label = line.substr(0, line.find_first_of("="));
+
                     if (label == "core_x") {
-                        params.core_x = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read core_x"<<endl;
-                    }
-                    else if (label == "core_y") {
-                        params.core_y = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read core_y"<<endl;
-                    }
-                    else if (label == "R_string") {
-                        R_string = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read R_string"<<endl;
-                    }
-                    else if (label == "R_surface") {
-                        R_surface = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read R_surface"<<endl;
-                    }
-                    else if (label == "z_max") {
-                        z_max = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_max"<<endl;
-                    }
-                    else if (label == "z_btw") {
-                        z_btw = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw"<<endl;
-                    }
-                    else if (label == "z_btw01") {
-                        z_btw_array[1] = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw bh ant0 and ant1"<<endl;
-                    }
-                    else if (label == "z_btw12") {
-                        z_btw_array[2] = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw bh ant1 and ant2"<<endl;
-                    }
-                    else if (label == "z_btw23") {
-                        z_btw_array[3] = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw bh ant2 and ant3"<<endl;
-                    }
-                    else if (label == "z_btw34") {
-                        z_btw_array[4] = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw bh ant3 and ant4"<<endl;
-                    }
-                    else if (label == "z_btw45") {
-                        z_btw_array[5] = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw bh ant4 and ant5"<<endl;
-                    }
-                    else if (label == "number_of_stations") {
-                        params.number_of_stations = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read stations_per_side"<<endl;
-                    }
-                    else if (label == "station_spacing") {
-                        params.station_spacing = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read station_spacting"<<endl;
-                    }
-                    else if (label == "antenna_orientation") {
-                        params.antenna_orientation = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read antenna_orientation"<<endl;
-                    }
-                    else if (label == "number_of_strings_station") {
-                        params.number_of_strings_station = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read number of strings"<<endl;
-                    }
-                    else if (label == "number_of_antennas_string") {
-                        params.number_of_antennas_string = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read number of antennas per string"<<endl;
+                        params.core_x = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read core_x" << endl;
+                    } else if (label == "core_y") {
+                        params.core_y = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read core_y" << endl;
+                    } else if (label == "R_string") {
+                        R_string = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read R_string" << endl;
+                    } else if (label == "R_surface") {
+                        R_surface = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read R_surface" << endl;
+                    } else if (label == "z_max") {
+                        z_max = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_max" << endl;
+                    } else if (label == "z_btw") {
+                        z_btw = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw" << endl;
+                    } else if (label == "z_btw01") {
+                        z_btw_array[1] = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw bh ant0 and ant1" << endl;
+                    } else if (label == "z_btw12") {
+                        z_btw_array[2] = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw bh ant1 and ant2" << endl;
+                    } else if (label == "z_btw23") {
+                        z_btw_array[3] = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw bh ant2 and ant3" << endl;
+                    } else if (label == "z_btw34") {
+                        z_btw_array[4] = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw bh ant3 and ant4" << endl;
+                    } else if (label == "z_btw45") {
+                        z_btw_array[5] = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw bh ant4 and ant5" << endl;
+                    } else if (label == "number_of_stations") {
+                        params.number_of_stations = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read stations_per_side" << endl;
+                    } else if (label == "station_spacing") {
+                        params.station_spacing = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read station_spacting" << endl;
+                    } else if (label == "antenna_orientation") {
+                        params.antenna_orientation = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read antenna_orientation" << endl;
+                    } else if (label == "number_of_strings_station") {
+                        params.number_of_strings_station = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read number of strings" << endl;
+                    } else if (label == "number_of_antennas_string") {
+                        params.number_of_antennas_string = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read number of antennas per string" << endl;
                     }
                 }
             }
             ARA_N.close();
         }
         // finished reading new parameters
-        
-        
-        
+
         // set number of antennas in a string
         if (params.bore_hole_antenna_layout == 0) { // VHVH layout
             params.number_of_antennas_string = 4;
-        }
-        else if (params.bore_hole_antenna_layout == 1) { // VHV layout
+        } else if (params.bore_hole_antenna_layout == 1) { // VHV layout
             params.number_of_antennas_string = 3;
-        }
-        else if (params.bore_hole_antenna_layout == 2) { // VHVV layout
+        } else if (params.bore_hole_antenna_layout == 2) { // VHVV layout
             params.number_of_antennas_string = 4;
-        }
-        else if (params.bore_hole_antenna_layout == 3) { // VHHH layout
+        } else if (params.bore_hole_antenna_layout == 3) { // VHHH layout
             params.number_of_antennas_string = 4;
-        }
-        else if (params.bore_hole_antenna_layout == 4) { // VHH layout
+        } else if (params.bore_hole_antenna_layout == 4) { // VHH layout
             params.number_of_antennas_string = 3;
-        }
-        else if (params.bore_hole_antenna_layout == 5) { // VVVV layout
+        } else if (params.bore_hole_antenna_layout == 5) { // VVVV layout
             params.number_of_antennas_string = 4;
-        }
-        else if (params.bore_hole_antenna_layout == 6) { // VV layout
+        } else if (params.bore_hole_antenna_layout == 6) { // VV layout
             params.number_of_antennas_string = 2;
-        }
-	else if (params.bore_hole_antenna_layout == 7) { // V layout
+        } else if (params.bore_hole_antenna_layout == 7) { // V layout
             params.number_of_antennas_string = 1;
         }
 
-        
-        
-        
-        
         //
         // caculate number of stations, strings, antennas 
         params.number_of_strings = params.number_of_stations * params.number_of_strings_station;
         params.number_of_antennas = params.number_of_strings * params.number_of_antennas_string;
         //
         //
-        
-        
-        
+
         //
         // prepare vectors
-        for (int i=0; i<params.number_of_stations; i++) {
+        for (int i = 0; i < params.number_of_stations; i++) {
             stations.push_back(temp_station);
-            
-            for (int j=0; j<params.number_of_surfaces_station; j++) {
+
+            for (int j = 0; j < params.number_of_surfaces_station; j++) {
                 stations[i].surfaces.push_back(temp_surface);
             }
-            
-            for (int k=0; k<params.number_of_strings_station; k++) {
+
+            for (int k = 0; k < params.number_of_strings_station; k++) {
                 stations[i].strings.push_back(temp_string);
-                
-                for (int l=0; l<params.number_of_antennas_string; l++) {
+
+                for (int l = 0; l < params.number_of_antennas_string; l++) {
                     stations[i].strings[k].antennas.push_back(temp_antenna);
                 }
-                
+
             }
-            
-            
+
         }
         // end prepare vectors
         //
-        
-        
-        
-        
-        
+
         //
         // for ARA-37 (or more than 1 station case), need code for setting position for all 37 stations here!
         //
         int station_count = 0;
-        
+
         int side_step;
 
-        double next_dir = PI*2./3;
+        double next_dir = PI * 2. / 3;
 
-        for (int istation = 0; istation < (int)params.number_of_stations; istation++) {
-	  stations[istation].StationID=istation;
-	
-            if (station_count < (int)params.number_of_stations - 1) {
+        for (int istation = 0; istation < (int) params.number_of_stations; istation++) {
+            stations[istation].StationID = istation;
 
+            if (station_count < (int) params.number_of_stations - 1) {
 
-                if ( station_count < 6 ) { // first layer
-                    stations[station_count].SetX( params.core_x + (double)params.station_spacing * cos( (PI/3.) * (double)station_count ) );
-                    stations[station_count].SetY( params.core_y + (double)params.station_spacing * sin( (PI/3.) * (double)station_count ) );
-                }
-                else if ( station_count < 18 ) { // second layer
+                if (station_count < 6) { // first layer
+                    stations[station_count].SetX(params.core_x + (double) params.station_spacing * cos((PI / 3.) * (double) station_count));
+                    stations[station_count].SetY(params.core_y + (double) params.station_spacing * sin((PI / 3.) * (double) station_count));
+                } else if (station_count < 18) { // second layer
 
                     // if the first outter layer station
-                    if ( station_count == 6 ) {
+                    if (station_count == 6) {
                         side_step = 2;
-                        stations[station_count].SetX( params.core_x + (double)params.station_spacing * 2. );
-                        stations[station_count].SetY( params.core_y );
+                        stations[station_count].SetX(params.core_x + (double) params.station_spacing * 2.);
+                        stations[station_count].SetY(params.core_y);
                     }
                     // after first station
-                    else { 
-                        if ( side_step > 0 ) {
-                            stations[station_count].SetX( stations[station_count-1].GetX() + (double)params.station_spacing * cos(next_dir) );
-                            stations[station_count].SetY( stations[station_count-1].GetY() + (double)params.station_spacing * sin(next_dir) );
+                    else {
+                        if (side_step > 0) {
+                            stations[station_count].SetX(stations[station_count - 1].GetX() + (double) params.station_spacing * cos(next_dir));
+                            stations[station_count].SetY(stations[station_count - 1].GetY() + (double) params.station_spacing * sin(next_dir));
                             side_step--;
-                        }
-                        else {
+                        } else {
                             side_step = 1;
-                            next_dir+=PI/3.; // rotate
-                            stations[station_count].SetX( stations[station_count-1].GetX() + (double)params.station_spacing * cos(next_dir) );
-                            stations[station_count].SetY( stations[station_count-1].GetY() + (double)params.station_spacing * sin(next_dir) );
+                            next_dir += PI / 3.; // rotate
+                            stations[station_count].SetX(stations[station_count - 1].GetX() + (double) params.station_spacing * cos(next_dir));
+                            stations[station_count].SetY(stations[station_count - 1].GetY() + (double) params.station_spacing * sin(next_dir));
                         }
                     }
-                }
-                else if ( station_count < 36 ) { // third layer
+                } else if (station_count < 36) { // third layer
 
                     // if the first outter layer station
-                    if ( station_count == 6 ) {
+                    if (station_count == 6) {
                         side_step = 3;
-                        stations[station_count].SetX( params.core_x + (double)params.station_spacing * 3. );
-                        stations[station_count].SetY( params.core_y );
+                        stations[station_count].SetX(params.core_x + (double) params.station_spacing * 3.);
+                        stations[station_count].SetY(params.core_y);
                     }
                     // after first station
-                    else { 
-                        if ( side_step > 0 ) {
-                            stations[station_count].SetX( stations[station_count-1].GetX() + (double)params.station_spacing * cos(next_dir) );
-                            stations[station_count].SetY( stations[station_count-1].GetY() + (double)params.station_spacing * sin(next_dir) );
+                    else {
+                        if (side_step > 0) {
+                            stations[station_count].SetX(stations[station_count - 1].GetX() + (double) params.station_spacing * cos(next_dir));
+                            stations[station_count].SetY(stations[station_count - 1].GetY() + (double) params.station_spacing * sin(next_dir));
                             side_step--;
-                        }
-                        else {
+                        } else {
                             side_step = 2;
-                            next_dir+=PI/3.; // rotate
-                            stations[station_count].SetX( stations[station_count-1].GetX() + (double)params.station_spacing * cos(next_dir) );
-                            stations[station_count].SetY( stations[station_count-1].GetY() + (double)params.station_spacing * sin(next_dir) );
+                            next_dir += PI / 3.; // rotate
+                            stations[station_count].SetX(stations[station_count - 1].GetX() + (double) params.station_spacing * cos(next_dir));
+                            stations[station_count].SetY(stations[station_count - 1].GetY() + (double) params.station_spacing * sin(next_dir));
                         }
                     }
 
                 }
 
                 station_count++;
-            }
-            else if (station_count < (int)params.number_of_stations) {
+            } else if (station_count < (int) params.number_of_stations) {
                 //stations[station_count].x = core_x;
                 //stations[station_count].y = core_y;
-                stations[station_count].SetX( params.core_x );
-                stations[station_count].SetY( params.core_y );
+                stations[station_count].SetX(params.core_x);
+                stations[station_count].SetY(params.core_y);
                 station_count++;
-            }
-            else {
-                cout<<"\n\tError, too many stations !"<<endl;
+            } else {
+                cout << "\n\tError, too many stations !" << endl;
             }
         }
         // finished setting all stations' position
-        
 
-        
-//        cout<<"total station_count : "<<station_count<<endl;
-        if (station_count != (int)params.number_of_stations) cout<<"\n\tError, station number not match !"<<endl;       
-        
+        //        cout<<"total station_count : "<<station_count<<endl;
+        if (station_count != (int) params.number_of_stations) cout << "\n\tError, station number not match !" << endl;
+
         //
         // set antenna values from parameters
         // set station positions
-        if (settings1->READGEOM == 0) { // use idealized geometry
-            //SetupInstalledStations();
+        if (settings1 -> READGEOM == 0) { // use idealized geometry
 
-            for (int i=0; i<params.number_of_stations; i++) {
-                
+            for (int i = 0; i < params.number_of_stations; i++) {
+
                 //
                 // set string postions based on station position
-                stations[i].strings[0].SetX( stations[i].GetX() - (R_string * cos(PI/4.)) );
-                stations[i].strings[0].SetY( stations[i].GetY() + (R_string * sin(PI/4.)) );
-                
-                stations[i].strings[1].SetX( stations[i].GetX() + (R_string * cos(PI/4.)) );
-                stations[i].strings[1].SetY( stations[i].GetY() + (R_string * sin(PI/4.)) );
-                
-                stations[i].strings[2].SetX( stations[i].GetX() - (R_string * cos(PI/4.)) );
-                stations[i].strings[2].SetY( stations[i].GetY() - (R_string * sin(PI/4.)) );
-                
-                stations[i].strings[3].SetX( stations[i].GetX() + (R_string * cos(PI/4.)) );
-                stations[i].strings[3].SetY( stations[i].GetY() - (R_string * sin(PI/4.)) );
-                
-                
+                stations[i].strings[0].SetX(stations[i].GetX() - (R_string * cos(PI / 4.)));
+                stations[i].strings[0].SetY(stations[i].GetY() + (R_string * sin(PI / 4.)));
+
+                stations[i].strings[1].SetX(stations[i].GetX() + (R_string * cos(PI / 4.)));
+                stations[i].strings[1].SetY(stations[i].GetY() + (R_string * sin(PI / 4.)));
+
+                stations[i].strings[2].SetX(stations[i].GetX() - (R_string * cos(PI / 4.)));
+                stations[i].strings[2].SetY(stations[i].GetY() - (R_string * sin(PI / 4.)));
+
+                stations[i].strings[3].SetX(stations[i].GetX() + (R_string * cos(PI / 4.)));
+                stations[i].strings[3].SetY(stations[i].GetY() - (R_string * sin(PI / 4.)));
+
                 //
                 // set antenna postions in borehole
                 // and set type (h or v pol antenna) and set orientation (facing x or y)
-                if ( params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
-                    
-                    for (int j=0; j<params.number_of_strings_station; j++) {
-                        for (int k=0; k<params.number_of_antennas_string; k++) {
+                if (params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
 
-                            if (settings1->BH_ANT_SEP_DIST_ON==0) 
-                            stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
+                    for (int j = 0; j < params.number_of_strings_station; j++) {
+                        for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                            else if (settings1->BH_ANT_SEP_DIST_ON==1) {
+                            if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                                stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
+
+                            else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
                                 z_btw_total = 0.;
-                                for (int l=0; l<k+1; l++) {
+                                for (int l = 0; l < k + 1; l++) {
                                     z_btw_total += z_btw_array[l];
                                 }
-                                stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
+                                stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
                             }
-                            
-                            if (k%2 == 0) {
-                                stations[i].strings[j].antennas[k].type = 0;   // v-pol
+
+                            if (k % 2 == 0) {
+                                stations[i].strings[j].antennas[k].type = 0; // v-pol
+                            } else {
+                                stations[i].strings[j].antennas[k].type = 1; // h-pol
                             }
-                            else {
-                                stations[i].strings[j].antennas[k].type = 1;   // h-pol
-                            }
-                            
-                            if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+
+                            if (params.antenna_orientation == 0) { // all borehole antennas facing same x
                                 stations[i].strings[j].antennas[k].orient = 0;
-                            }
-                            else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
-                                if ( j==0||j==3 ) {
-                                    if ( k==0||k==1 ) {
+                            } else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
+                                if (j == 0 || j == 3) {
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 0;
-                                    }
-                                    else {
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 1;
                                     }
-                                }
-                                else {
-                                    if ( k==0||k==1 ) {
+                                } else {
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 1;
-                                    }
-                                    else {
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 0;
                                     }
                                 }
-                                
-                            }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+
+                            } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
                         }
                     }
-                    
+
                 } // end if bore hole antenna layout = 0 or 1 (where VHVH way but different numbers)
-                
-                
-                else if ( params.bore_hole_antenna_layout == 2) {   // it's V-H-V-V
-                    
-                    for (int j=0; j<params.number_of_strings_station; j++) {
-                        for (int k=0; k<params.number_of_antennas_string; k++) {
+                else if (params.bore_hole_antenna_layout == 2) { // it's V-H-V-V
 
-                            if (settings1->BH_ANT_SEP_DIST_ON==0) 
-                            stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
+                    for (int j = 0; j < params.number_of_strings_station; j++) {
+                        for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                            else if (settings1->BH_ANT_SEP_DIST_ON==1) {
+                            if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                                stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
+
+                            else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
                                 z_btw_total = 0.;
-                                for (int l=0; l<k+1; l++) {
+                                for (int l = 0; l < k + 1; l++) {
                                     z_btw_total += z_btw_array[l];
                                 }
-                                stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
+                                stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
                             }
-                            
-                            if (k == 1) {   // only the second antenna is H pol
-                                stations[i].strings[j].antennas[k].type = 1;   // h-pol
+
+                            if (k == 1) { // only the second antenna is H pol
+                                stations[i].strings[j].antennas[k].type = 1; // h-pol
+                            } else { // other antennas are V pol
+                                stations[i].strings[j].antennas[k].type = 0; // v-pol
                             }
-                            else {  // other antennas are V pol
-                                stations[i].strings[j].antennas[k].type = 0;   // v-pol
-                            }
-                            
-                            if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+
+                            if (params.antenna_orientation == 0) { // all borehole antennas facing same x
                                 stations[i].strings[j].antennas[k].orient = 0;
-                            }
-                            else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
-                                if ( j==0||j==3 ) {
-                                    if ( k==0||k==1 ) {
+                            } else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
+                                if (j == 0 || j == 3) {
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 0;
-                                    }
-                                    else {
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 1;
                                     }
-                                }
-                                else {
-                                    if ( k==0||k==1 ) {
+                                } else {
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 1;
-                                    }
-                                    else {
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 0;
                                     }
                                 }
-                                
-                            }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+
+                            } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
                         }
                     }
-                    
+
                 } // end if bore hole antenna layout = 2 (where VHVV way but different numbers)
-                
-                
-                else if ( params.bore_hole_antenna_layout == 3 || params.            
-                         bore_hole_antenna_layout == 4 ) {   // it's V-H-H-H or V-H-H
-                    
-                    for (int j=0; j<params.number_of_strings_station; j++) {
-                        for (int k=0; k<params.number_of_antennas_string; k++) {
+                else if (params.bore_hole_antenna_layout == 3 || params.bore_hole_antenna_layout == 4) { // it's V-H-H-H or V-H-H
 
-                            if (settings1->BH_ANT_SEP_DIST_ON==0) 
-                            stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
+                    for (int j = 0; j < params.number_of_strings_station; j++) {
+                        for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                            else if (settings1->BH_ANT_SEP_DIST_ON==1) {
+                            if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                                stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
+
+                            else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
                                 z_btw_total = 0.;
-                                for (int l=0; l<k+1; l++) {
+                                for (int l = 0; l < k + 1; l++) {
                                     z_btw_total += z_btw_array[l];
                                 }
-                                stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
+                                stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
                             }
 
-                            
-                            if (k == 0) {   // only the first antenna is V pol
-                                stations[i].strings[j].antennas[k].type = 0;   // v-pol
+                            if (k == 0) { // only the first antenna is V pol
+                                stations[i].strings[j].antennas[k].type = 0; // v-pol
+                            } else { // other antennas are H pol
+                                stations[i].strings[j].antennas[k].type = 1; // h-pol
                             }
-                            else {  // other antennas are H pol
-                                stations[i].strings[j].antennas[k].type = 1;   // h-pol
-                            }
-                            
-                            if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+
+                            if (params.antenna_orientation == 0) { // all borehole antennas facing same x
                                 stations[i].strings[j].antennas[k].orient = 0;
-                            }
-                            else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
-                                if ( j==0||j==3 ) {
-                                    if ( k==0||k==1 ) {
+                            } else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
+                                if (j == 0 || j == 3) {
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 0;
-                                    }
-                                    else {
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 1;
                                     }
-                                }
-                                else {
-                                    if ( k==0||k==1 ) {
+                                } else {
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 1;
-                                    }
-                                    else {
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 0;
                                     }
                                 }
-                                
-                            }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+
+                            } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
                         }
                     }
-                    
+
                 } // end if bore hole antenna layout = 3 (where VHHH way)
+                else if (params.bore_hole_antenna_layout == 5 ||
+                    params.bore_hole_antenna_layout == 6 ||
+                    params.bore_hole_antenna_layout == 7) { // it's V-V-V-V or V-V or V
 
-                else if ( params.bore_hole_antenna_layout == 5 || 
-			  params.bore_hole_antenna_layout == 6 || 
-			  params.bore_hole_antenna_layout == 7 ) {   // it's V-V-V-V or V-V or V
-                    
-                    for (int j=0; j<params.number_of_strings_station; j++) {
-                        for (int k=0; k<params.number_of_antennas_string; k++) {
-			  
-			  if (settings1->BH_ANT_SEP_DIST_ON==0) 
-                            stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
-			  
-			  else if (settings1->BH_ANT_SEP_DIST_ON==1) {
-			    z_btw_total = 0.;
-			    for (int l=0; l<k+1; l++) {
-			      z_btw_total += z_btw_array[l];
-			    }
-			    stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
-			  }
+                    for (int j = 0; j < params.number_of_strings_station; j++) {
+                        for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-			  stations[i].strings[j].antennas[k].type = 0;   // all antennas v-pol			  
-                            
-			  if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
-			    stations[i].strings[j].antennas[k].orient = 0;
-			  }
-			  else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
-			    if ( j==0||j==3 ) {
-			      if ( k==0||k==1 ) {
-				stations[i].strings[j].antennas[k].orient = 0;
-			      }
-                                    else {
-                                        stations[i].strings[j].antennas[k].orient = 1;
-                                    }
+                            if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                                stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
+
+                            else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
+                                z_btw_total = 0.;
+                                for (int l = 0; l < k + 1; l++) {
+                                    z_btw_total += z_btw_array[l];
                                 }
-                                else {
-                                    if ( k==0||k==1 ) {
+                                stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
+                            }
+
+                            stations[i].strings[j].antennas[k].type = 0; // all antennas v-pol			  
+
+                            if (params.antenna_orientation == 0) { // all borehole antennas facing same x
+                                stations[i].strings[j].antennas[k].orient = 0;
+                            } else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
+                                if (j == 0 || j == 3) {
+                                    if (k == 0 || k == 1) {
+                                        stations[i].strings[j].antennas[k].orient = 0;
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 1;
                                     }
-                                    else {
+                                } else {
+                                    if (k == 0 || k == 1) {
+                                        stations[i].strings[j].antennas[k].orient = 1;
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 0;
                                     }
                                 }
-                                
-                            }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+
+                            } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
                         }
                     }
-                    
+
                 } // end if bore hole antenna layout = 5,6,7 (VVVV, VV, V)
-                
+
                 //
                 // set surface antenna postions
-                stations[i].surfaces[0].SetX( stations[i].GetX() + (R_surface * cos(PI/3.)) );
-                stations[i].surfaces[0].SetY( stations[i].GetY() + (R_surface * sin(PI/3.)) );
-                
-                stations[i].surfaces[1].SetX( stations[i].GetX() + (R_surface * cos(-PI/3.)) );
-                stations[i].surfaces[1].SetY( stations[i].GetY() + (R_surface * sin(-PI/3.)) );
-                
-                stations[i].surfaces[2].SetX( stations[i].GetX() + (R_surface * cos(PI)) );
-                stations[i].surfaces[2].SetY( stations[i].GetY() );
-                
-                stations[i].surfaces[3].SetX( stations[i].GetX() );
-                stations[i].surfaces[3].SetY( stations[i].GetY() );
-                
+                stations[i].surfaces[0].SetX(stations[i].GetX() + (R_surface * cos(PI / 3.)));
+                stations[i].surfaces[0].SetY(stations[i].GetY() + (R_surface * sin(PI / 3.)));
+
+                stations[i].surfaces[1].SetX(stations[i].GetX() + (R_surface * cos(-PI / 3.)));
+                stations[i].surfaces[1].SetY(stations[i].GetY() + (R_surface * sin(-PI / 3.)));
+
+                stations[i].surfaces[2].SetX(stations[i].GetX() + (R_surface * cos(PI)));
+                stations[i].surfaces[2].SetY(stations[i].GetY());
+
+                stations[i].surfaces[3].SetX(stations[i].GetX());
+                stations[i].surfaces[3].SetY(stations[i].GetY());
 
                 stations[i].number_of_antennas = params.number_of_strings_station * params.number_of_antennas_string;
 
-
-            }// loop over stations i
-
+            } // loop over stations i
 
             // for idealized geometry, number of antennas in a station is constant
             max_number_of_antennas_station = params.number_of_strings_station * params.number_of_antennas_string;
 
-
-
-
         } // if idealized geometry
-#ifdef ARA_UTIL_EXISTS
+        #ifdef ARA_UTIL_EXISTS
 
         else { // non-idealized geometry
 
-	  //SetupInstalledStations();        
             //for (int i=0; i<params.number_of_stations; i++) {
-      
-                //AraGeomTool *araGeom=AraGeomTool::Instance();
-                AraGeomTool *araGeom = new AraGeomTool();
-                cout<<"read AraGeomTool"<<endl;
-                
-                for (int i=0; i<params.number_of_stations; i++) {
-                    for (int j = 0; j < params.number_of_strings_station; j++){
-                        
-                        double avgX, avgY;
-                        
-                        for (int k = 0; k < params.number_of_antennas_string; k++){
-                            
-                            //int chan = GetChannelfromStringAntenna (i+1,j,k);
-                            int chan = GetChannelfromStringAntenna (i+1,j,k,settings1);
-                            
-                            stations[i].strings[j].antennas[k].SetX(stations[i].GetX()+araGeom->getStationInfo(i+1)->fAntInfo[chan-1].antLocation[0]);
-                            stations[i].strings[j].antennas[k].SetY(stations[i].GetY()+araGeom->getStationInfo(i+1)->fAntInfo[chan-1].antLocation[1]);
-                            //stations[i].strings[j].antennas[k].SetZ(araGeom->fStationInfo[i+1].fAntInfo[chan-1].antLocation[2]-double(settings1->DEPTH_CHANGE));
-                            stations[i].strings[j].antennas[k].SetZ(araGeom->getStationInfo(i+1)->fAntInfo[chan-1].antLocation[2]);
-                                                    cout <<
-                             "DetectorStation:string:antenna:X:Y:Z:: " <<
-                             i<< " : " <<
-                             j<< " : " <<
-                             k<< " : " <<
-                             stations[i].strings[j].antennas[k].GetX() << " : " <<
-                             stations[i].strings[j].antennas[k].GetY() << " : " <<
-                             stations[i].strings[j].antennas[k].GetZ() << " : " <<
-			     chan << " : " <<	
-			     //araGeom->fStationInfo[i+1].fAntInfo[chan-1].antLocation[2]-double(settings1->DEPTH_CHANGE) << " : " <<
-			     //double(settings1->DEPTH_CHANGE) << " : " <<
-                             endl;
-                             
-                        }
-                        
-                        //int chanstring = GetChannelfromStringAntenna (i+1, j,2);
-                        int chanstring = GetChannelfromStringAntenna (i+1, j,2,settings1);
-                        
-                        stations[i].strings[j].SetX(stations[i].GetX()+araGeom->getStationInfo(i+1)->fAntInfo[chanstring-1].antLocation[0]);
-                        stations[i].strings[j].SetY(stations[i].GetY()+araGeom->getStationInfo(i+1)->fAntInfo[chanstring-1].antLocation[1]);
-                        
+
+            //AraGeomTool *araGeom=AraGeomTool::Instance();
+            AraGeomTool * araGeom = new AraGeomTool();
+            cout << "read AraGeomTool" << endl;
+
+            for (int i = 0; i < params.number_of_stations; i++) {
+                for (int j = 0; j < params.number_of_strings_station; j++) {
+
+                    double avgX, avgY;
+
+                    for (int k = 0; k < params.number_of_antennas_string; k++) {
+
+                        //int chan = GetChannelfromStringAntenna (i+1,j,k);
+                        int chan = GetChannelfromStringAntenna(i + 1, j, k, settings1);
+
+                        stations[i].strings[j].antennas[k].SetX(stations[i].GetX() + araGeom -> getStationInfo(i + 1) -> fAntInfo[chan - 1].antLocation[0]);
+                        stations[i].strings[j].antennas[k].SetY(stations[i].GetY() + araGeom -> getStationInfo(i + 1) -> fAntInfo[chan - 1].antLocation[1]);
+                        //stations[i].strings[j].antennas[k].SetZ(araGeom->fStationInfo[i+1].fAntInfo[chan-1].antLocation[2]-double(settings1->DEPTH_CHANGE));
+                        stations[i].strings[j].antennas[k].SetZ(araGeom -> getStationInfo(i + 1) -> fAntInfo[chan - 1].antLocation[2]);
+                        cout <<
+                            "DetectorStation:string:antenna:X:Y:Z:: " <<
+                            i << " : " <<
+                            j << " : " <<
+                            k << " : " <<
+                            stations[i].strings[j].antennas[k].GetX() << " : " <<
+                            stations[i].strings[j].antennas[k].GetY() << " : " <<
+                            stations[i].strings[j].antennas[k].GetZ() << " : " <<
+                            chan << " : " <<
+                            //araGeom->fStationInfo[i+1].fAntInfo[chan-1].antLocation[2]-double(settings1->DEPTH_CHANGE) << " : " <<
+                            //double(settings1->DEPTH_CHANGE) << " : " <<
+                            endl;
+
                     }
-                
-                
+
+                    //int chanstring = GetChannelfromStringAntenna (i+1, j,2);
+                    int chanstring = GetChannelfromStringAntenna(i + 1, j, 2, settings1);
+
+                    stations[i].strings[j].SetX(stations[i].GetX() + araGeom -> getStationInfo(i + 1) -> fAntInfo[chanstring - 1].antLocation[0]);
+                    stations[i].strings[j].SetY(stations[i].GetY() + araGeom -> getStationInfo(i + 1) -> fAntInfo[chanstring - 1].antLocation[1]);
+
+                }
+
                 //
                 // set antenna postions in borehole
                 // and set type (h or v pol antenna) and set orientation (facing x or y)
-                if ( params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
-                    
-                    for (int j=0; j<params.number_of_strings_station; j++) {
-                        for (int k=0; k<params.number_of_antennas_string; k++) {
+                if (params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
 
-                            if (k%2 == 0) {
-                                stations[i].strings[j].antennas[k].type = 0;   // v-pol
+                    for (int j = 0; j < params.number_of_strings_station; j++) {
+                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+
+                            if (k % 2 == 0) {
+                                stations[i].strings[j].antennas[k].type = 0; // v-pol
+                            } else {
+                                stations[i].strings[j].antennas[k].type = 1; // h-pol
                             }
-                            else {
-                                stations[i].strings[j].antennas[k].type = 1;   // h-pol
-                            }
-                            
-                            if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+
+                            if (params.antenna_orientation == 0) { // all borehole antennas facing same x
                                 stations[i].strings[j].antennas[k].orient = 0;
-                            }
-                            else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
-                                if ( j==0||j==3 ) {
-                                    if ( k==0||k==1 ) {
+                            } else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
+                                if (j == 0 || j == 3) {
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 0;
-                                    }
-                                    else {
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 1;
                                     }
-                                }
-                                else {
-                                    if ( k==0||k==1 ) {
+                                } else {
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 1;
-                                    }
-                                    else {
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 0;
                                     }
                                 }
-                                
-                            }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+
+                            } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
                         }
                     }
-                    
+
                 } // end if bore hole antenna layout = 0 or 1 (where VHVH way but different numbers)
-                
-                
-                else if ( params.bore_hole_antenna_layout == 2) {   // it's V-H-V-V
-                    
-                    for (int j=0; j<params.number_of_strings_station; j++) {
-                        for (int k=0; k<params.number_of_antennas_string; k++) {
-                            
-                            if (k == 1) {   // only the second antenna is H pol
-                                stations[i].strings[j].antennas[k].type = 1;   // h-pol
+                else if (params.bore_hole_antenna_layout == 2) { // it's V-H-V-V
+
+                    for (int j = 0; j < params.number_of_strings_station; j++) {
+                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+
+                            if (k == 1) { // only the second antenna is H pol
+                                stations[i].strings[j].antennas[k].type = 1; // h-pol
+                            } else { // other antennas are V pol
+                                stations[i].strings[j].antennas[k].type = 0; // v-pol
                             }
-                            else {  // other antennas are V pol
-                                stations[i].strings[j].antennas[k].type = 0;   // v-pol
-                            }
-                            
-                            if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+
+                            if (params.antenna_orientation == 0) { // all borehole antennas facing same x
                                 stations[i].strings[j].antennas[k].orient = 0;
-                            }
-                            else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
-                                if ( j==0||j==3 ) {
-                                    if ( k==0||k==1 ) {
+                            } else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
+                                if (j == 0 || j == 3) {
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 0;
-                                    }
-                                    else {
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 1;
                                     }
-                                }
-                                else {
-                                    if ( k==0||k==1 ) {
+                                } else {
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 1;
-                                    }
-                                    else {
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 0;
                                     }
                                 }
-                                
-                            }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+
+                            } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
                         }
                     }
-                    
+
                 } // end if bore hole antenna layout = 2 (where VHVV way but different numbers)
-                
-                
-                else if ( params.bore_hole_antenna_layout == 3 || params.            
-                         bore_hole_antenna_layout == 4 ) {   // it's V-H-H-H or V-H-H
-                    
-                    for (int j=0; j<params.number_of_strings_station; j++) {
-                        for (int k=0; k<params.number_of_antennas_string; k++) {
-                            
-                            if (k == 0) {   // only the first antenna is V pol
-                                stations[i].strings[j].antennas[k].type = 0;   // v-pol
+                else if (params.bore_hole_antenna_layout == 3 || params.bore_hole_antenna_layout == 4) { // it's V-H-H-H or V-H-H
+
+                    for (int j = 0; j < params.number_of_strings_station; j++) {
+                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+
+                            if (k == 0) { // only the first antenna is V pol
+                                stations[i].strings[j].antennas[k].type = 0; // v-pol
+                            } else { // other antennas are H pol
+                                stations[i].strings[j].antennas[k].type = 1; // h-pol
                             }
-                            else {  // other antennas are H pol
-                                stations[i].strings[j].antennas[k].type = 1;   // h-pol
-                            }
-                            
-                            if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+
+                            if (params.antenna_orientation == 0) { // all borehole antennas facing same x
                                 stations[i].strings[j].antennas[k].orient = 0;
-                            }
-                            else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
-                                if ( j==0||j==3 ) {
-                                    if ( k==0||k==1 ) {
+                            } else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
+                                if (j == 0 || j == 3) {
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 0;
-                                    }
-                                    else {
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 1;
                                     }
-                                }
-                                else {
-                                    if ( k==0||k==1 ) {
+                                } else {
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 1;
-                                    }
-                                    else {
+                                    } else {
                                         stations[i].strings[j].antennas[k].orient = 0;
                                     }
                                 }
-                                
-                            }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+
+                            } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
                         }
                     }
-                    
+
                 } // end if bore hole antenna layout = 3 (where VHHH way)
-                
-                
-                
-                
+
                 //
                 // set surface antenna postions
-                stations[i].surfaces[0].SetX( stations[i].GetX() + (R_surface * cos(PI/3.)) );
-                stations[i].surfaces[0].SetY( stations[i].GetY() + (R_surface * sin(PI/3.)) );
-                
-                stations[i].surfaces[1].SetX( stations[i].GetX() + (R_surface * cos(-PI/3.)) );
-                stations[i].surfaces[1].SetY( stations[i].GetY() + (R_surface * sin(-PI/3.)) );
-                
-                stations[i].surfaces[2].SetX( stations[i].GetX() + (R_surface * cos(PI)) );
-                stations[i].surfaces[2].SetY( stations[i].GetY() );
-                
-                stations[i].surfaces[3].SetX( stations[i].GetX() );
-                stations[i].surfaces[3].SetY( stations[i].GetY() );
+                stations[i].surfaces[0].SetX(stations[i].GetX() + (R_surface * cos(PI / 3.)));
+                stations[i].surfaces[0].SetY(stations[i].GetY() + (R_surface * sin(PI / 3.)));
 
-                
+                stations[i].surfaces[1].SetX(stations[i].GetX() + (R_surface * cos(-PI / 3.)));
+                stations[i].surfaces[1].SetY(stations[i].GetY() + (R_surface * sin(-PI / 3.)));
+
+                stations[i].surfaces[2].SetX(stations[i].GetX() + (R_surface * cos(PI)));
+                stations[i].surfaces[2].SetY(stations[i].GetY());
+
+                stations[i].surfaces[3].SetX(stations[i].GetX());
+                stations[i].surfaces[3].SetY(stations[i].GetY());
+
             } // end loop over stations i
 
-
             //}// end loop over stations i
-            
 
             int antenna_count = 0;
             max_number_of_antennas_station = 0;
             // for non-idealized geometry, it's better to actually count number of stations
-            for (int i=0; i<(int)(stations.size()); i++) {
-            
+            for (int i = 0; i < (int)(stations.size()); i++) {
+
                 antenna_count = 0;
-                for (int j=0; j<(int)(stations[i].strings.size()); j++) {
-                    for (int k=0; k<(int)(stations[i].strings[j].antennas.size()); k++) {
+                for (int j = 0; j < (int)(stations[i].strings.size()); j++) {
+                    for (int k = 0; k < (int)(stations[i].strings[j].antennas.size()); k++) {
                         antenna_count++;
                     }
                 }
@@ -992,18 +828,14 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
                 if (max_number_of_antennas_station < antenna_count) max_number_of_antennas_station = antenna_count;
             }
 
-            
-        }// if non-idealized geom
-#endif
-        
-        
+        } // if non-idealized geom
+        #endif
 
-	ReadAllAntennaGains(settings1);
-	
-	//	if (settings1->NOISE == 2){
-	  ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
-	  //	}
+        ReadAllAntennaGains(settings1);
 
+        //	if (settings1->NOISE == 2){
+        ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
+        //	}
 
         // read filter file!!
         ReadFilter("./data/filter.csv", settings1);
@@ -1012,466 +844,382 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         // read FOAM gain file!!
         ReadFOAM("./data/FOAM.csv", settings1);
         // read gain offset for chs file!!
-        ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1);// only TestBed for now
+        ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1); // only TestBed for now
         // read threshold offset for chs file!!
-        ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1);// only TestBed for now
-	// read threshold values for chs file
-	ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
+        ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1); // only TestBed for now
+        // read threshold values for chs file
+        ReadThres_TestBed("./data/thresholds_TB.csv", settings1); // only TestBed for now
         // read system temperature for chs file!!
-	cout << "check read testbed temp1" << endl;
-        if (settings1->NOISE_CHANNEL_MODE != 0) {
-	  
-            ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
+        cout << "check read testbed temp1" << endl;
+        if (settings1 -> NOISE_CHANNEL_MODE != 0) {
+
+            ReadTemp_TestBed("./data/system_temperature.csv", settings1); // only TestBed for now
 
         }
         // read total elec. chain response file!!
-        cout<<"start read elect chain"<<endl;
-        if(settings1->CUSTOM_ELECTRONICS==0){
+        cout << "start read elect chain" << endl;
+        if (settings1 -> CUSTOM_ELECTRONICS == 0) {
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
-            //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
-        }
+	    ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+          //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+	}
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/custom_electronics.txt", settings1);
+             ReadElectChain("./data/gain/custom_electronics.csv", settings1);
         }
-        cout<<"done read elect chain"<<endl;
-        
-        
+        cout << "done read elect chain" << endl;
+
     } // if mode == 1
-    
-    
-    
-    
+
     /////////////////////////////////////////////////////////////////////////////////    
-    
-    
-    
     else if (mode == 2) {
-        cout<<"\n\tDector mode 2 : Pentagon"<<endl;
-        cout<<"\n\tBy default, ARA-37 is set"<<endl;
-        ifstream ARA37( ARA37_file.c_str() );
-        cout<<"We use "<<ARA37_file.c_str()<<" as antenna info."<<endl;
+        cout << "\n\tDector mode 2 : Pentagon" << endl;
+        cout << "\n\tBy default, ARA-37 is set" << endl;
+        ifstream ARA37(ARA37_file.c_str());
+        cout << "We use " << ARA37_file.c_str() << " as antenna info." << endl;
 
-        //SetupInstalledStations();
-
-        
         //
         // initialize info
         params.number_of_stations = 37;
-        params.number_of_strings_station = 4;   // ARA-1 has 4 strings
+        params.number_of_strings_station = 4; // ARA-1 has 4 strings
         params.number_of_antennas_string = 4; // 4 antennas on each strings
         params.number_of_surfaces_station = 4;
-        
+
         //double core_x = 0.;  // all units are in meter
         //double core_y = 0.;
-        params.core_x = 10000.;  // all units are in meter
+        params.core_x = 10000.; // all units are in meter
         params.core_y = 10000.;
         double R_string = 10.;
         double R_surface = 60.;
         double z_max = 200.;
         double z_btw = 10.;
         double z_btw_array[6]; // assume there will be less than 6 bore hole antennas at each string
-	// these z_btw array will be used when settings->BH_ANT_SEP_DIST_ON=1 case
-        for (int i=0; i<6; i++) {
-            if (i==0) z_btw_array[i] = 0.;
+        // these z_btw array will be used when settings->BH_ANT_SEP_DIST_ON=1 case
+        for (int i = 0; i < 6; i++) {
+            if (i == 0) z_btw_array[i] = 0.;
             //else z_btw_array[i] = z_btw;
-            else if (i==1) z_btw_array[i] = 2.;
-            else if (i==2) z_btw_array[i] = 15.;
-            else if (i==3) z_btw_array[i] = 2.;
+            else if (i == 1) z_btw_array[i] = 2.;
+            else if (i == 2) z_btw_array[i] = 15.;
+            else if (i == 3) z_btw_array[i] = 2.;
             else z_btw_array[i] = z_btw;
         }
         double z_btw_total;
-        params.stations_per_side = 4;       // total 37 stations
-        params.station_spacing = 2000.;     // 2km spacing
-        params.antenna_orientation = 0;     // all antenna facing x
-        params.bore_hole_antenna_layout = settings1->BORE_HOLE_ANTENNA_LAYOUT;
+        params.stations_per_side = 4; // total 37 stations
+        params.station_spacing = 2000.; // 2km spacing
+        params.antenna_orientation = 0; // all antenna facing x
+        params.bore_hole_antenna_layout = settings1 -> BORE_HOLE_ANTENNA_LAYOUT;
         // finish initialization
         //
-        
-        
-        
-        
-        
-        
+
         // Read new parameters if there are...
-        if ( ARA37.is_open() ) {
-            while (ARA37.good() ) {
-                getline (ARA37, line);
-                
-                if (line[0] != "/"[0]) {
-                    label = line.substr(0, line.find_first_of("=") );
-                    
+        if (ARA37.is_open()) {
+            while (ARA37.good()) {
+                getline(ARA37, line);
+
+                if (line[0] != "/" [0]) {
+                    label = line.substr(0, line.find_first_of("="));
+
                     if (label == "core_x") {
-                        params.core_x = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read core_x"<<endl;
-                    }
-                    else if (label == "core_y") {
-                        params.core_y = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read core_y"<<endl;
-                    }
-                    else if (label == "R_string") {
-                        R_string = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read R_string"<<endl;
-                    }
-                    else if (label == "R_surface") {
-                        R_surface = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read R_surface"<<endl;
-                    }
-                    else if (label == "z_max") {
-                        z_max = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_max"<<endl;
-                    }
-                    else if (label == "z_btw") {
-                        z_btw = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw"<<endl;
-                    }
-                    else if (label == "z_btw01") {
-                        z_btw_array[1] = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw bh ant0 and ant1"<<endl;
-                    }
-                    else if (label == "z_btw12") {
-                        z_btw_array[2] = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw bh ant1 and ant2"<<endl;
-                    }
-                    else if (label == "z_btw23") {
-                        z_btw_array[3] = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw bh ant2 and ant3"<<endl;
-                    }
-                    else if (label == "z_btw34") {
-                        z_btw_array[4] = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw bh ant3 and ant4"<<endl;
-                    }
-                    else if (label == "z_btw45") {
-                        z_btw_array[5] = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw bh ant4 and ant5"<<endl;
-                    }
-                    else if (label == "stations_per_side") {
-                        params.stations_per_side = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read stations_per_side"<<endl;
-                    }
-                    else if (label == "station_spacing") {
-                        params.station_spacing = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read station_spacting"<<endl;
-                    }
-                    else if (label == "antenna_orientation") {
-                        params.antenna_orientation = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read antenna_orientation"<<endl;
+                        params.core_x = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read core_x" << endl;
+                    } else if (label == "core_y") {
+                        params.core_y = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read core_y" << endl;
+                    } else if (label == "R_string") {
+                        R_string = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read R_string" << endl;
+                    } else if (label == "R_surface") {
+                        R_surface = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read R_surface" << endl;
+                    } else if (label == "z_max") {
+                        z_max = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_max" << endl;
+                    } else if (label == "z_btw") {
+                        z_btw = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw" << endl;
+                    } else if (label == "z_btw01") {
+                        z_btw_array[1] = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw bh ant0 and ant1" << endl;
+                    } else if (label == "z_btw12") {
+                        z_btw_array[2] = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw bh ant1 and ant2" << endl;
+                    } else if (label == "z_btw23") {
+                        z_btw_array[3] = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw bh ant2 and ant3" << endl;
+                    } else if (label == "z_btw34") {
+                        z_btw_array[4] = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw bh ant3 and ant4" << endl;
+                    } else if (label == "z_btw45") {
+                        z_btw_array[5] = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw bh ant4 and ant5" << endl;
+                    } else if (label == "stations_per_side") {
+                        params.stations_per_side = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read stations_per_side" << endl;
+                    } else if (label == "station_spacing") {
+                        params.station_spacing = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read station_spacting" << endl;
+                    } else if (label == "antenna_orientation") {
+                        params.antenna_orientation = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read antenna_orientation" << endl;
                     }
                 }
             }
             ARA37.close();
         }
         // finished reading new parameters
-        
-        
-        
+
         // set number of antennas in a string
         if (params.bore_hole_antenna_layout == 0) { // VHVH layout
             params.number_of_antennas_string = 4;
-        }
-        else if (params.bore_hole_antenna_layout == 1) { // VHV layout
+        } else if (params.bore_hole_antenna_layout == 1) { // VHV layout
+            params.number_of_antennas_string = 3;
+        } else if (params.bore_hole_antenna_layout == 2) { // VHVV layout
+            params.number_of_antennas_string = 4;
+        } else if (params.bore_hole_antenna_layout == 3) { // VHHH layout
+            params.number_of_antennas_string = 4;
+        } else if (params.bore_hole_antenna_layout == 4) { // VHH layout
             params.number_of_antennas_string = 3;
         }
-        else if (params.bore_hole_antenna_layout == 2) { // VHVV layout
-            params.number_of_antennas_string = 4;
-        }
-        else if (params.bore_hole_antenna_layout == 3) { // VHHH layout
-            params.number_of_antennas_string = 4;
-        }
-        else if (params.bore_hole_antenna_layout == 4) { // VHH layout
-            params.number_of_antennas_string = 3;
-        }
-        
-        
-        
-        
-        
+
         //
         // caculate number of stations, strings, antennas 
         params.number_of_stations = 1 + (3 * params.stations_per_side) * (params.stations_per_side - 1);
-        
+
         params.number_of_strings = params.number_of_stations * params.number_of_strings_station;
         params.number_of_antennas = params.number_of_strings * params.number_of_antennas_string;
         // 
-        
-        
-        
+
         //
         // prepare vectors
-        for (int i=0; i<params.number_of_stations; i++) {
+        for (int i = 0; i < params.number_of_stations; i++) {
             stations.push_back(temp_station);
-            
-            for (int j=0; j<params.number_of_surfaces_station; j++) {
+
+            for (int j = 0; j < params.number_of_surfaces_station; j++) {
                 stations[i].surfaces.push_back(temp_surface);
             }
-            
-            for (int k=0; k<params.number_of_strings_station; k++) {
+
+            for (int k = 0; k < params.number_of_strings_station; k++) {
                 stations[i].strings.push_back(temp_string);
-                
-                for (int l=0; l<params.number_of_antennas_string; l++) {
+
+                for (int l = 0; l < params.number_of_antennas_string; l++) {
                     stations[i].strings[k].antennas.push_back(temp_antenna);
                 }
-                
+
             }
-            
-            
+
         }
         // end perpare vectors
         //
-        
-        
-        
-        
-        
-        
-        
-        
+
         //
         // for ARA-37 (or more than 1 station case), need code for setting position for all 37 stations here!
         //
         //
         // here, this only works for pentagon shape!
         //
-        double y_offset = (double)params.station_spacing * sqrt(3) / 2.;
-        
+        double y_offset = (double) params.station_spacing * sqrt(3) / 2.;
+
         int station_count = 0;
-        
-        for (int irow = 0; irow < ((int)params.stations_per_side * 2)-1; irow++) {
-            double current_y = y_offset * ( (double)params.stations_per_side - 1 - irow) + params.core_y;
-            int stations_this_row = (2 * (int)params.stations_per_side - 1) - abs((int)params.stations_per_side - 1 - irow);
-            
+
+        for (int irow = 0; irow < ((int) params.stations_per_side * 2) - 1; irow++) {
+            double current_y = y_offset * ((double) params.stations_per_side - 1 - irow) + params.core_y;
+            int stations_this_row = (2 * (int) params.stations_per_side - 1) - abs((int) params.stations_per_side - 1 - irow);
+
             for (int istation = 0; istation < stations_this_row; istation++) {
-                if (station_count < (int)params.number_of_stations) {
-                    stations[station_count].SetY( current_y );
-                    stations[station_count].SetX( (double)params.station_spacing * ((double)istation - ((double)stations_this_row - 1.) / 2.) + params.core_x );
+                if (station_count < (int) params.number_of_stations) {
+                    stations[station_count].SetY(current_y);
+                    stations[station_count].SetX((double) params.station_spacing * ((double) istation - ((double) stations_this_row - 1.) / 2.) + params.core_x);
                     station_count++;
-                }
-                else {
-                    cout<<"\n\tError, too many stations !"<<endl;
+                } else {
+                    cout << "\n\tError, too many stations !" << endl;
                 }
             }
         }
         // finished setting all stations' position
-        
-        
-        cout<<"total station_count : "<<station_count<<endl;
-        if (station_count != (int)params.number_of_stations) cout<<"\n\tError, station number not match !"<<endl;        
-        
+
+        cout << "total station_count : " << station_count << endl;
+        if (station_count != (int) params.number_of_stations) cout << "\n\tError, station number not match !" << endl;
+
         //
         // set antenna values from parameters
         // set station positions
-        for (int i=0; i<params.number_of_stations; i++) {
-            
+        for (int i = 0; i < params.number_of_stations; i++) {
+
             //
             // set string postions based on station position
             //            for (int j=0; j<params.number_of_strings_station; j++) {
             //            stations[i].string[0].x = stations[i].x - (R_string / 1.414);
-            stations[i].strings[0].SetX( stations[i].GetX() - (R_string * cos(PI/4.)) );
-            stations[i].strings[0].SetY( stations[i].GetY() + (R_string * sin(PI/4.)) );
-            
-            stations[i].strings[1].SetX( stations[i].GetX() + (R_string * cos(PI/4.)) );
-            stations[i].strings[1].SetY( stations[i].GetY() + (R_string * sin(PI/4.)) );
-            
-            stations[i].strings[2].SetX( stations[i].GetX() - (R_string * cos(PI/4.)) );
-            stations[i].strings[2].SetY( stations[i].GetY() - (R_string * sin(PI/4.)) );
-            
-            stations[i].strings[3].SetX( stations[i].GetX() + (R_string * cos(PI/4.)) );
-            stations[i].strings[3].SetY( stations[i].GetY() - (R_string * sin(PI/4.)) );
-            
-            
-            
-            
+            stations[i].strings[0].SetX(stations[i].GetX() - (R_string * cos(PI / 4.)));
+            stations[i].strings[0].SetY(stations[i].GetY() + (R_string * sin(PI / 4.)));
+
+            stations[i].strings[1].SetX(stations[i].GetX() + (R_string * cos(PI / 4.)));
+            stations[i].strings[1].SetY(stations[i].GetY() + (R_string * sin(PI / 4.)));
+
+            stations[i].strings[2].SetX(stations[i].GetX() - (R_string * cos(PI / 4.)));
+            stations[i].strings[2].SetY(stations[i].GetY() - (R_string * sin(PI / 4.)));
+
+            stations[i].strings[3].SetX(stations[i].GetX() + (R_string * cos(PI / 4.)));
+            stations[i].strings[3].SetY(stations[i].GetY() - (R_string * sin(PI / 4.)));
+
             //
             // set antenna postions in borehole
             // and set type (h or v pol antenna) and set orientation (facing x or y)
-            if ( params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
-                for (int j=0; j<params.number_of_strings_station; j++) {
-                    for (int k=0; k<params.number_of_antennas_string; k++) {
+            if (params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
+                for (int j = 0; j < params.number_of_strings_station; j++) {
+                    for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                        if (settings1->BH_ANT_SEP_DIST_ON==0) 
-                        stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
+                        if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                            stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
 
-                        else if (settings1->BH_ANT_SEP_DIST_ON==1) {
+                        else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
                             z_btw_total = 0.;
-                            for (int l=0; l<k+1; l++) {
+                            for (int l = 0; l < k + 1; l++) {
                                 z_btw_total += z_btw_array[l];
                             }
-                            stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
+                            stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
                         }
-                        
-                        if (k%2 == 0) {
-                            stations[i].strings[j].antennas[k].type = 0;   // v-pol
+
+                        if (k % 2 == 0) {
+                            stations[i].strings[j].antennas[k].type = 0; // v-pol
+                        } else {
+                            stations[i].strings[j].antennas[k].type = 1; // h-pol
                         }
-                        else {
-                            stations[i].strings[j].antennas[k].type = 1;   // h-pol
-                        }
-                        
-                        if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+
+                        if (params.antenna_orientation == 0) { // all borehole antennas facing same x
                             stations[i].strings[j].antennas[k].orient = 0;
-                        }
-                        else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
-                            if ( j==0||j==3 ) {
-                                if ( k==0||k==1 ) {
+                        } else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
+                            if (j == 0 || j == 3) {
+                                if (k == 0 || k == 1) {
                                     stations[i].strings[j].antennas[k].orient = 0;
-                                }
-                                else {
+                                } else {
                                     stations[i].strings[j].antennas[k].orient = 1;
                                 }
-                            }
-                            else {
-                                if ( k==0||k==1 ) {
+                            } else {
+                                if (k == 0 || k == 1) {
                                     stations[i].strings[j].antennas[k].orient = 1;
-                                }
-                                else {
+                                } else {
                                     stations[i].strings[j].antennas[k].orient = 0;
                                 }
                             }
-                            
-                        }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+
+                        } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
                     }
                 }
             } // end if bore hole antenna layout = 0 or 1 (where VHVH way but different numbers)
-            
-            
-            else if ( params.bore_hole_antenna_layout == 2) {   // it's V-H-V-V
-                for (int j=0; j<params.number_of_strings_station; j++) {
-                    for (int k=0; k<params.number_of_antennas_string; k++) {
+            else if (params.bore_hole_antenna_layout == 2) { // it's V-H-V-V
+                for (int j = 0; j < params.number_of_strings_station; j++) {
+                    for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                        if (settings1->BH_ANT_SEP_DIST_ON==0) 
-                        stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
+                        if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                            stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
 
-                        else if (settings1->BH_ANT_SEP_DIST_ON==1) {
+                        else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
                             z_btw_total = 0.;
-                            for (int l=0; l<k+1; l++) {
+                            for (int l = 0; l < k + 1; l++) {
                                 z_btw_total += z_btw_array[l];
                             }
-                            stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
+                            stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
                         }
-                        
-                        if (k == 1) {   // only the second antenna is H pol
-                            stations[i].strings[j].antennas[k].type = 1;   // h-pol
+
+                        if (k == 1) { // only the second antenna is H pol
+                            stations[i].strings[j].antennas[k].type = 1; // h-pol
+                        } else { // other antennas are V pol
+                            stations[i].strings[j].antennas[k].type = 0; // v-pol
                         }
-                        else {  // other antennas are V pol
-                            stations[i].strings[j].antennas[k].type = 0;   // v-pol
-                        }
-                        
-                        if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+
+                        if (params.antenna_orientation == 0) { // all borehole antennas facing same x
                             stations[i].strings[j].antennas[k].orient = 0;
-                        }
-                        else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
-                            if ( j==0||j==3 ) {
-                                if ( k==0||k==1 ) {
+                        } else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
+                            if (j == 0 || j == 3) {
+                                if (k == 0 || k == 1) {
                                     stations[i].strings[j].antennas[k].orient = 0;
-                                }
-                                else {
+                                } else {
                                     stations[i].strings[j].antennas[k].orient = 1;
                                 }
-                            }
-                            else {
-                                if ( k==0||k==1 ) {
+                            } else {
+                                if (k == 0 || k == 1) {
                                     stations[i].strings[j].antennas[k].orient = 1;
-                                }
-                                else {
+                                } else {
                                     stations[i].strings[j].antennas[k].orient = 0;
                                 }
                             }
-                            
-                        }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+
+                        } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
                     }
                 }
             } // end if bore hole antenna layout = 0 or 1 (where VHVH way but different numbers)
-            
-            
-            
-            else if ( params.bore_hole_antenna_layout == 3 || params.bore_hole_antenna_layout == 4 ) {   // it's V-H-H-H or V-H-H
-                for (int j=0; j<params.number_of_strings_station; j++) {
-                    for (int k=0; k<params.number_of_antennas_string; k++) {
+            else if (params.bore_hole_antenna_layout == 3 || params.bore_hole_antenna_layout == 4) { // it's V-H-H-H or V-H-H
+                for (int j = 0; j < params.number_of_strings_station; j++) {
+                    for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                        if (settings1->BH_ANT_SEP_DIST_ON==0) 
-                        stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw*k );
+                        if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                            stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
 
-                        else if (settings1->BH_ANT_SEP_DIST_ON==1) {
+                        else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
                             z_btw_total = 0.;
-                            for (int l=0; l<k+1; l++) {
+                            for (int l = 0; l < k + 1; l++) {
                                 z_btw_total += z_btw_array[l];
                             }
-                            stations[i].strings[j].antennas[k].SetZ( -z_max + z_btw_total );
+                            stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
                         }
-                        
-                        if (k == 0) {   // only the first antenna is V pol
-                            stations[i].strings[j].antennas[k].type = 0;   // v-pol
+
+                        if (k == 0) { // only the first antenna is V pol
+                            stations[i].strings[j].antennas[k].type = 0; // v-pol
+                        } else { // other antennas are H pol
+                            stations[i].strings[j].antennas[k].type = 1; // h-pol
                         }
-                        else {  // other antennas are H pol
-                            stations[i].strings[j].antennas[k].type = 1;   // h-pol
-                        }
-                        
-                        if ( params.antenna_orientation == 0 ) {    // all borehole antennas facing same x
+
+                        if (params.antenna_orientation == 0) { // all borehole antennas facing same x
                             stations[i].strings[j].antennas[k].orient = 0;
-                        }
-                        else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
-                            if ( j==0||j==3 ) {
-                                if ( k==0||k==1 ) {
+                        } else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
+                            if (j == 0 || j == 3) {
+                                if (k == 0 || k == 1) {
                                     stations[i].strings[j].antennas[k].orient = 0;
-                                }
-                                else {
+                                } else {
                                     stations[i].strings[j].antennas[k].orient = 1;
                                 }
-                            }
-                            else {
-                                if ( k==0||k==1 ) {
+                            } else {
+                                if (k == 0 || k == 1) {
                                     stations[i].strings[j].antennas[k].orient = 1;
-                                }
-                                else {
+                                } else {
                                     stations[i].strings[j].antennas[k].orient = 0;
                                 }
                             }
-                            
-                        }// end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
+
+                        } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
                     }
                 }
             } // end if bore hole antenna layout = 3 (where VHHH way)
-            
-            
-            
-            
-            
-            
-            
+
             //
             // set surface antenna postions
-            stations[i].surfaces[0].SetX( stations[i].GetX() + (R_surface * cos(PI/3.)) );
-            stations[i].surfaces[0].SetY( stations[i].GetY() + (R_surface * sin(PI/3.)) );
-            
-            stations[i].surfaces[1].SetX( stations[i].GetX() + (R_surface * cos(-PI/3.)) );
-            stations[i].surfaces[1].SetY( stations[i].GetY() + (R_surface * sin(-PI/3.)) );
-            
-            stations[i].surfaces[2].SetX( stations[i].GetX() + (R_surface * cos(PI)) );
-            //            stations[i].surfaces[2].y = stations[i].y + (R_surface * sin(PI));
-            stations[i].surfaces[2].SetY( stations[i].GetY() );
-            
-            stations[i].surfaces[3].SetX( stations[i].GetX() );
-            stations[i].surfaces[3].SetY( stations[i].GetY() );
+            stations[i].surfaces[0].SetX(stations[i].GetX() + (R_surface * cos(PI / 3.)));
+            stations[i].surfaces[0].SetY(stations[i].GetY() + (R_surface * sin(PI / 3.)));
 
+            stations[i].surfaces[1].SetX(stations[i].GetX() + (R_surface * cos(-PI / 3.)));
+            stations[i].surfaces[1].SetY(stations[i].GetY() + (R_surface * sin(-PI / 3.)));
+
+            stations[i].surfaces[2].SetX(stations[i].GetX() + (R_surface * cos(PI)));
+            //            stations[i].surfaces[2].y = stations[i].y + (R_surface * sin(PI));
+            stations[i].surfaces[2].SetY(stations[i].GetY());
+
+            stations[i].surfaces[3].SetX(stations[i].GetX());
+            stations[i].surfaces[3].SetY(stations[i].GetY());
 
             stations[i].number_of_antennas = params.number_of_strings_station * params.number_of_antennas_string;
-            
-        }// loop over stations i
-        
-        
+
+        } // loop over stations i
+
         // for idealized geometry, number of antennas in a station is constant
         max_number_of_antennas_station = params.number_of_strings_station * params.number_of_antennas_string;
-        
 
-        
+        ReadAllAntennaGains(settings1);
 
-	ReadAllAntennaGains(settings1);
-
-	//	if (settings1->NOISE==2){
-	ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
-	  //	}
+        //	if (settings1->NOISE==2){
+        ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
+        //	}
 
         ReadFilter("./data/filter.csv", settings1);
         // read preamp gain file!!
@@ -1479,283 +1227,495 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
         // read FOAM gain file!!
         ReadFOAM("./data/FOAM.csv", settings1);
         // read gain offset for chs file!!
-        ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1);// only TestBed for now
+        ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1); // only TestBed for now
         // read threshold offset for chs file!!
-        ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1);// only TestBed for now
-	// read threshold values for chs file
-	ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
+        ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1); // only TestBed for now
+        // read threshold values for chs file
+        ReadThres_TestBed("./data/thresholds_TB.csv", settings1); // only TestBed for now
         // read system temperature for chs file!!
 
-	cout << "check read temp testbed 2" << endl;
-       if (settings1->NOISE_CHANNEL_MODE != 0) {
-            ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
+        cout << "check read temp testbed 2" << endl;
+        if (settings1 -> NOISE_CHANNEL_MODE != 0) {
+            ReadTemp_TestBed("./data/system_temperature.csv", settings1); // only TestBed for now
         }
         // read total elec. chain response file!!
-        cout<<"start read elect chain"<<endl;
-        if(settings1->CUSTOM_ELECTRONICS==0){
+        cout << "start read elect chain" << endl;
+        if (settings1 -> CUSTOM_ELECTRONICS == 0) {
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
-            //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
-        }
+            ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
+          //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+	}
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/custom_electronics.txt", settings1);
+             ReadElectChain("./data/gain/custom_electronics.csv", settings1);
+
         }
-        
-        
-    }
-    
-    
+
+    } // if mode == 2
+
     /////////////////////////////////////////////////////////////////////////////////    
-    else if (mode == 3) {        //        cout<<"\n\tDector mode 3 : Testbed and eventual inclusion of a specific number of stations (less than 7 stations) !"<<endl;
+    else if (mode == 3) { //        cout<<"\n\tDector mode 3 : Testbed and eventual inclusion of a specific number of stations (less than 7 stations) !"<<endl;
         //        cout<<"We use "<<ARA_N_file.c_str()<<" as antenna info."<<endl;
-        
-        //SetupInstalledStations();        
-        
+
         // initialize info
         params.number_of_stations = 1; //including Testbed
-        params.number_of_strings_station = 4;   // ARA-1 has 4 strings
+        params.number_of_strings_station = 4; // ARA-1 has 4 strings
         params.number_of_antennas_string = 4; // 4 antennas on each strings
         params.number_of_surfaces_station = 4;
         params.number_of_channels = 20;
-        
+
         //double core_x = 0.;
         //double core_y = 0.;
         params.core_x = 10000.;
         params.core_y = 10000.;
-        double R_string = 10.;  // all units are in meter
+        double R_string = 10.; // all units are in meter
         double R_surface = 60.;
         double z_max = 200.;
         double z_btw = 20.;
-        params.stations_per_side = 4;       // total 37 stations
-        params.station_spacing = 2000.;     // 2km spacing for borehole stations
-        params.antenna_orientation = 0;     // all antenna facing x
-        params.bore_hole_antenna_layout = settings1->BORE_HOLE_ANTENNA_LAYOUT;
+        params.stations_per_side = 4; // total 37 stations
+        params.station_spacing = 2000.; // 2km spacing for borehole stations
+        params.antenna_orientation = 0; // all antenna facing x
+        params.bore_hole_antenna_layout = settings1 -> BORE_HOLE_ANTENNA_LAYOUT;
         // finish initialization
         //
-        
 
-        
         // mode == 3 currently just use installed TestBed station geom information.
         // So don't need to read any more information
-        
+
         // Read new parameters if there are...
-        ifstream ARA_N( ARA_N_file.c_str() );
-        if ( ARA_N.is_open() ) {
-            while (ARA_N.good() ) {
-                getline (ARA_N, line);
-                
-                if (line[0] != "/"[0]) {
-                    label = line.substr(0, line.find_first_of("=") );
-                    
+        ifstream ARA_N(ARA_N_file.c_str());
+        if (ARA_N.is_open()) {
+            while (ARA_N.good()) {
+                getline(ARA_N, line);
+
+                if (line[0] != "/" [0]) {
+                    label = line.substr(0, line.find_first_of("="));
+
                     if (label == "core_x") {
-                        params.core_x = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read core_x"<<endl;
-                    }
-                    else if (label == "core_y") {
-                        params.core_y = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read core_y"<<endl;
-                    }
-                    else if (label == "R_string") {
-                        R_string = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read R_string"<<endl;
-                    }
-                    else if (label == "R_surface") {
-                        R_surface = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read R_surface"<<endl;
-                    }
-                    else if (label == "z_max") {
-                        z_max = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_max"<<endl;
-                    }
-                    else if (label == "z_btw") {
-                        z_btw = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw"<<endl;
-                    }
-                    else if (label == "number_of_stations") {
-                        params.number_of_stations = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read stations_per_side"<<endl;
-                    }
-                    else if (label == "station_spacing") {
-                        params.station_spacing = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read station_spacting"<<endl;
-                    }
-                    else if (label == "antenna_orientation") {
-                        params.antenna_orientation = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read antenna_orientation"<<endl;
+                        params.core_x = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read core_x" << endl;
+                    } else if (label == "core_y") {
+                        params.core_y = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read core_y" << endl;
+                    } else if (label == "R_string") {
+                        R_string = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read R_string" << endl;
+                    } else if (label == "R_surface") {
+                        R_surface = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read R_surface" << endl;
+                    } else if (label == "z_max") {
+                        z_max = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_max" << endl;
+                    } else if (label == "z_btw") {
+                        z_btw = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw" << endl;
+                    } else if (label == "number_of_stations") {
+                        params.number_of_stations = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read stations_per_side" << endl;
+                    } else if (label == "station_spacing") {
+                        params.station_spacing = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read station_spacting" << endl;
+                    } else if (label == "antenna_orientation") {
+                        params.antenna_orientation = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read antenna_orientation" << endl;
                     }
                 }
             }
             ARA_N.close();
         }
         // finished reading new parameters
-        
-        
-        
+
         params.number_of_antennas_string = 4;
 
-        
         // prepare vectors
         PrepareVectorsInstalled();
         // end prepare vectors
-        
+
         //
         // for ARA-37 (or more than 1 station case), need code for setting position for all 37 stations here!
         //
         int station_count = 0;
-        
-        for (int istation = 0; istation < (int)params.number_of_stations; istation++) {
-            if (station_count < (int)params.number_of_stations - 1) {
+
+        for (int istation = 0; istation < (int) params.number_of_stations; istation++) {
+            if (station_count < (int) params.number_of_stations - 1) {
                 //stations[station_count].x = core_x + (double)params.station_spacing * cos( (PI/3.) * (double)station_count );
                 //stations[station_count].y = core_y + (double)params.station_spacing * sin( (PI/3.) * (double)station_count );
-                stations[station_count].SetX( params.core_x + (double)params.station_spacing * cos( (PI/3.) * (double)station_count ) );
-                stations[station_count].SetY( params.core_y + (double)params.station_spacing * sin( (PI/3.) * (double)station_count ) );
+                stations[station_count].SetX(params.core_x + (double) params.station_spacing * cos((PI / 3.) * (double) station_count));
+                stations[station_count].SetY(params.core_y + (double) params.station_spacing * sin((PI / 3.) * (double) station_count));
                 station_count++;
-            }
-            else if (station_count < (int)params.number_of_stations) {
+            } else if (station_count < (int) params.number_of_stations) {
                 //stations[station_count].x = core_x;
                 //stations[station_count].y = core_y;
-                stations[station_count].SetX( params.core_x );
-                stations[station_count].SetY( params.core_y );
+                stations[station_count].SetX(params.core_x);
+                stations[station_count].SetY(params.core_y);
                 station_count++;
-            }
-            else {
-                cout<<"\n\tError, too many stations !"<<endl;
+            } else {
+                cout << "\n\tError, too many stations !" << endl;
             }
         }
         // finished setting all stations' position
-        
-        
+
         //        cout<<"total station_count : "<<station_count<<endl;
-        if (station_count != (int)params.number_of_stations) cout<<"\n\tError, station number not match !"<<endl;
-        
+        if (station_count != (int) params.number_of_stations) cout << "\n\tError, station number not match !" << endl;
+
         //
         // set antenna values from parameters
         // set station positions
         //cout << "READGEOM:" << settings1->READGEOM << endl;
-        
-#ifdef ARA_UTIL_EXISTS
+
+        #ifdef ARA_UTIL_EXISTS
         UseAntennaInfo(0, settings1);
-#endif
-//            UseAntennaInfo(1, settings1);
-        for (int i = 0; i < (int)params.number_of_stations; i++){
+        #endif
+        //            UseAntennaInfo(1, settings1);
+        for (int i = 0; i < (int) params.number_of_stations; i++) {
             stations[i].StationID = i;
-            if (settings1->USE_INSTALLED_TRIGGER_SETTINGS == 0){
+            if (settings1 -> USE_INSTALLED_TRIGGER_SETTINGS == 0) {
                 stations[i].NFOUR = 1024;
-                stations[i].TIMESTEP = 1./2.6*1.E-9;
+                stations[i].TIMESTEP = 1. / 2.6 * 1.E-9;
                 stations[i].TRIG_WINDOW = 2.5E-7;
-                stations[i].DATA_BIN_SIZE = settings1->DATA_BIN_SIZE;
-            }
-            else if (settings1->USE_INSTALLED_TRIGGER_SETTINGS == 1){
-                if (stations[i].StationID == 0){
+                stations[i].DATA_BIN_SIZE = settings1 -> DATA_BIN_SIZE;
+            } else if (settings1 -> USE_INSTALLED_TRIGGER_SETTINGS == 1) {
+                if (stations[i].StationID == 0) {
                     stations[i].NFOUR = 1024;
-                    stations[i].TIMESTEP = 1./2.6*1.E-9;
+                    stations[i].TIMESTEP = 1. / 2.6 * 1.E-9;
                     stations[i].TRIG_WINDOW = 2.5E-7;
-                    stations[i].DATA_BIN_SIZE = settings1->DATA_BIN_SIZE;
+                    stations[i].DATA_BIN_SIZE = settings1 -> DATA_BIN_SIZE;
                 }
-               if (stations[i].StationID == 1){
+                if (stations[i].StationID == 1) {
                     stations[i].NFOUR = 1024;
-                    stations[i].TIMESTEP = 1./2.6*1.E-9;
+                    stations[i].TIMESTEP = 1. / 2.6 * 1.E-9;
                     stations[i].TRIG_WINDOW = 2.5E-7;
-                    stations[i].DATA_BIN_SIZE = settings1->DATA_BIN_SIZE;
+                    stations[i].DATA_BIN_SIZE = settings1 -> DATA_BIN_SIZE;
                 }
             }
         }
-        
+
         params.number_of_antennas = 0;
 
-            cout<<"DETECTOR=3 TB station geom info"<<endl;
-        
-            for (int j = 0; j < stations[0].strings.size(); j++){
-                for (int k = 0; k < stations[0].strings[j].antennas.size(); k++){
-                    
-                     cout <<
-                     "DetectorStation2:string:antenna:X:Y:Z:chno :: " <<
-                     j<< " : " <<
-                     k<< " : " <<
-                     stations[0].strings[j].antennas[k].GetX() << " : " <<
-                     stations[0].strings[j].antennas[k].GetY() << " : " <<
-                     stations[0].strings[j].antennas[k].GetZ() << " : \t" <<
-                     //GetChannelfromStringAntenna ( 0, j, k)<<
-                     GetChannelfromStringAntenna ( 0, j, k, settings1)<<
-                     endl;
+        cout << "DETECTOR=3 TB station geom info" << endl;
 
-                     params.number_of_antennas++;
+        for (int j = 0; j < stations[0].strings.size(); j++) {
+            for (int k = 0; k < stations[0].strings[j].antennas.size(); k++) {
+
+                cout <<
+                    "DetectorStation2:string:antenna:X:Y:Z:chno :: " <<
+                    j << " : " <<
+                    k << " : " <<
+                    stations[0].strings[j].antennas[k].GetX() << " : " <<
+                    stations[0].strings[j].antennas[k].GetY() << " : " <<
+                    stations[0].strings[j].antennas[k].GetZ() << " : \t" <<
+                    //GetChannelfromStringAntenna ( 0, j, k)<<
+                    GetChannelfromStringAntenna(0, j, k, settings1) <<
+                    endl;
+
+                params.number_of_antennas++;
+            }
+        }
+
+        cout << "after FlattoEarth, station0 location" << endl;
+        for (int j = 0; j < stations[0].strings.size(); j++) {
+            for (int k = 0; k < stations[0].strings[j].antennas.size(); k++) {
+
+                cout <<
+                    "Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: " <<
+                    "0" << " : " <<
+                    j << " : " <<
+                    k << " : " <<
+                    stations[0].strings[j].antennas[k].GetX() << " : " <<
+                    stations[0].strings[j].antennas[k].GetY() << " : " <<
+                    stations[0].strings[j].antennas[k].GetZ() << " : " <<
+                    stations[0].strings[j].antennas[k].R() << " : " <<
+                    stations[0].strings[j].antennas[k].Theta() << " : " <<
+                    stations[0].strings[j].antennas[k].Phi() << " : " <<
+                    icesurface -> Surface(stations[0].strings[j].antennas[k].Lon(), stations[0].strings[j].antennas[k].Lat()) << " : " <<
+                    //             icesurface->Surface(stations[0].strings[j].antennas[k].Lat(), stations[0].strings[j].antennas[k].Lon()) << " : " <<
+                    endl;
+
+            }
+        }
+
+        int antenna_count = 0;
+        max_number_of_antennas_station = 0;
+        // for non-idealized geometry, it's better to actually count number of stations
+        for (int i = 0; i < (int)(stations.size()); i++) {
+
+            antenna_count = 0;
+            for (int j = 0; j < (int)(stations[i].strings.size()); j++) {
+                for (int k = 0; k < (int)(stations[i].strings[j].antennas.size()); k++) {
+                    antenna_count++;
                 }
             }
-        
+            stations[i].number_of_antennas = antenna_count;
 
-
-
-            cout<<"after FlattoEarth, station0 location"<<endl;
-    for (int j = 0; j < stations[0].strings.size(); j++){
-        for (int k = 0; k < stations[0].strings[j].antennas.size(); k++){
-
-             cout <<
-             "Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: " <<
-             "0" << " : " <<
-             j<< " : " <<
-             k<< " : " <<
-             stations[0].strings[j].antennas[k].GetX() << " : " <<
-             stations[0].strings[j].antennas[k].GetY() << " : " <<
-             stations[0].strings[j].antennas[k].GetZ() << " : " <<
-             stations[0].strings[j].antennas[k].R() << " : " <<
-             stations[0].strings[j].antennas[k].Theta() << " : " <<
-             stations[0].strings[j].antennas[k].Phi() << " : " <<
-             icesurface->Surface(stations[0].strings[j].antennas[k].Lon(), stations[0].strings[j].antennas[k].Lat()) << " : " <<
-//             icesurface->Surface(stations[0].strings[j].antennas[k].Lat(), stations[0].strings[j].antennas[k].Lon()) << " : " <<
-             endl;
-                 
-                     
+            if (max_number_of_antennas_station < antenna_count) max_number_of_antennas_station = antenna_count;
         }
-    }
 
+        ReadAllAntennaGains(settings1);
 
+        ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 
-            int antenna_count = 0;
-            max_number_of_antennas_station = 0;
-            // for non-idealized geometry, it's better to actually count number of stations
-            for (int i=0; i<(int)(stations.size()); i++) {
-            
-                antenna_count = 0;
-                for (int j=0; j<(int)(stations[i].strings.size()); j++) {
-                    for (int k=0; k<(int)(stations[i].strings[j].antennas.size()); k++) {
-                        antenna_count++;
+        // read filter file!!
+        ReadFilter("./data/filter.csv", settings1);
+        // read preamp gain file!!
+        ReadPreamp("./data/preamp.csv", settings1);
+        // read FOAM gain file!!
+        ReadFOAM("./data/FOAM.csv", settings1);
+
+        if (settings1 -> NOISE == 1) {
+            // read Rayleigh fit for freq range, bh channels
+            ReadRayleighFit_TestBed("data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
+        }
+
+        if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
+            // read RFCM gain file!! (measured value in ICL)
+            ReadRFCM_TestBed("data/TestBed_RFCM/R1C1.csv", settings1); // read and save RFCM gain for ch1
+            ReadRFCM_TestBed("data/TestBed_RFCM/R1C2.csv", settings1); // read and save RFCM gain for ch2
+            ReadRFCM_TestBed("data/TestBed_RFCM/R1C3.csv", settings1); // read and save RFCM gain for ch3
+            ReadRFCM_TestBed("data/TestBed_RFCM/R1C4.csv", settings1); // read and save RFCM gain for ch4
+            ReadRFCM_TestBed("data/TestBed_RFCM/R2C5.csv", settings1); // read and save RFCM gain for ch5
+            ReadRFCM_TestBed("data/TestBed_RFCM/R2C6.csv", settings1); // read and save RFCM gain for ch6
+            ReadRFCM_TestBed("data/TestBed_RFCM/R2C7.csv", settings1); // read and save RFCM gain for ch7
+            ReadRFCM_TestBed("data/TestBed_RFCM/R2C8.csv", settings1); // read and save RFCM gain for ch8
+            ReadRFCM_TestBed("data/TestBed_RFCM/R3C9.csv", settings1); // read and save RFCM gain for ch9
+            ReadRFCM_TestBed("data/TestBed_RFCM/R3C10.csv", settings1); // read and save RFCM gain for ch10
+            ReadRFCM_TestBed("data/TestBed_RFCM/R3C11.csv", settings1); // read and save RFCM gain for ch11
+            ReadRFCM_TestBed("data/TestBed_RFCM/R3C12.csv", settings1); // read and save RFCM gain for ch12
+            ReadRFCM_TestBed("data/TestBed_RFCM/R4C13.csv", settings1); // read and save RFCM gain for ch13
+            ReadRFCM_TestBed("data/TestBed_RFCM/R4C14.csv", settings1); // read and save RFCM gain for ch14
+            ReadRFCM_TestBed("data/TestBed_RFCM/R4C15.csv", settings1); // read and save RFCM gain for ch15
+            ReadRFCM_TestBed("data/TestBed_RFCM/R4C16.csv", settings1); // read and save RFCM gain for ch16
+        }
+
+        // read gain offset for chs file!!
+        ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1); // only TestBed for now
+        // read threshold offset for chs file!!
+        ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1); // only TestBed for now
+        // read threshold values for chs file
+        ReadThres_TestBed("./data/thresholds_TB.csv", settings1); // only TestBed for now
+        // read system temperature for chs file!!
+        cout << "check read temp testbed 3" << endl;
+        if (settings1 -> NOISE_CHANNEL_MODE != 0) {
+            ReadTemp_TestBed("./data/system_temperature.csv", settings1); // only TestBed for now
+        }
+
+        // read total elec. chain response file!!
+        cout << "start read elect chain" << endl;
+        if (settings1 -> CUSTOM_ELECTRONICS == 0) {
+            //read the standard ARA electronics
+            cout<<"     Reading standard ARA electronics response"<<endl;
+            ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
+          //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+	}
+        else if (settings1->CUSTOM_ELECTRONICS==1){
+            //read a custom user defined electronics gain
+            cout<<"     Reading custom electronics response"<<endl;
+             ReadElectChain("./data/gain/custom_electronics.csv", settings1);
+
+        }
+        cout << "done read elect chain" << endl;
+
+        // if calpulser case
+        if (settings1 -> CALPULSER_ON > 0) {
+            // read TestBed Calpulser waveform measured (before pulser)
+            ReadCalPulserWF("./data/CalPulserWF.txt", settings1);
+        }
+
+    } // if mode == 3
+    
+    else if (mode == 4) {
+        // cout<<"\n\tDector mode 4 : Single installed station determined by DETECTOR_STATION !"<<endl;
+
+        // initialize info
+        params.number_of_stations = 1; //including Testbed
+        params.number_of_strings_station = 4; // ARA-1 has 4 strings
+        params.number_of_antennas_string = 4; // 4 antennas on each strings
+        params.number_of_surfaces_station = 4;
+        params.number_of_channels = 20;
+
+        params.core_x = 10000.;
+        params.core_y = 10000.;
+        double R_string = 10.; // all units are in meter
+        double R_surface = 60.;
+        double z_max = 200.;
+        double z_btw = 20.;
+        params.stations_per_side = 4; // total 37 stations
+        params.station_spacing = 2000.; // 2km spacing for borehole stations
+        params.antenna_orientation = 0; // all antenna facing x
+        params.bore_hole_antenna_layout = settings1 -> BORE_HOLE_ANTENNA_LAYOUT;
+        // finish initialization
+
+        // Read new parameters if there are...
+        ifstream ARA_N(ARA_N_file.c_str());
+        if (ARA_N.is_open()) {
+            while (ARA_N.good()) {
+                getline(ARA_N, line);
+
+                if (line[0] != "/" [0]) {
+                    label = line.substr(0, line.find_first_of("="));
+
+                    if (label == "core_x") {
+                        params.core_x = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read core_x" << endl;
+                    } else if (label == "core_y") {
+                        params.core_y = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read core_y" << endl;
+                    } else if (label == "R_string") {
+                        R_string = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read R_string" << endl;
+                    } else if (label == "R_surface") {
+                        R_surface = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read R_surface" << endl;
+                    } else if (label == "z_max") {
+                        z_max = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_max" << endl;
+                    } else if (label == "z_btw") {
+                        z_btw = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read z_btw" << endl;
+                    } else if (label == "number_of_stations") {
+                        params.number_of_stations = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read stations_per_side" << endl;
+                    } else if (label == "station_spacing") {
+                        params.station_spacing = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read station_spacting" << endl;
+                    } else if (label == "antenna_orientation") {
+                        params.antenna_orientation = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+                        cout << "read antenna_orientation" << endl;
                     }
                 }
-                stations[i].number_of_antennas = antenna_count;
-
-                if (max_number_of_antennas_station < antenna_count) max_number_of_antennas_station = antenna_count;
             }
+            ARA_N.close();
+        }
+        // finished reading new parameters
+
+        params.number_of_antennas_string = 4;
+
+        PrepareVectorsInstalled(settings1 -> DETECTOR_STATION);
+
+        int station_count = 0;
+
+        stations[0].SetX(params.core_x);
+        stations[0].SetY(params.core_y);
+
+        // cout<<"total station_count : "<<station_count<<endl;
+        if (station_count != (int) params.number_of_stations) cout << "\n\tError, station number not match !" << endl;
 
 
-            
-            
+        #ifdef ARA_UTIL_EXISTS
+        ImportStationInfo(settings1, 0, settings1 -> DETECTOR_STATION);
+        #endif
+
+        std::cout << "Imported Station info" << std::endl;
+
+        int stationID = settings1 -> DETECTOR_STATION;
 
 
+        for (int i = 0; i < (int) params.number_of_stations; i++) {
+            stations[i].StationID = settings1 -> DETECTOR_STATION;
+            if (settings1 -> USE_INSTALLED_TRIGGER_SETTINGS == 0) {
+                stations[i].NFOUR = 1024;
+                stations[i].TIMESTEP = 1. / 2.6 * 1.E-9;
+                stations[i].TRIG_WINDOW = 2.5E-7;
+                stations[i].DATA_BIN_SIZE = settings1 -> DATA_BIN_SIZE;
+            } else if (settings1 -> USE_INSTALLED_TRIGGER_SETTINGS == 1) {
+                if (stations[i].StationID == 0) {
+                    stations[i].NFOUR = 1024;
+                    stations[i].TIMESTEP = 1. / 2.6 * 1.E-9;
+                    stations[i].TRIG_WINDOW = 2.5E-7;
+                    stations[i].DATA_BIN_SIZE = settings1 -> DATA_BIN_SIZE;
+                }
+                if (stations[i].StationID == 1) {
+                    stations[i].NFOUR = 1024;
+                    stations[i].TIMESTEP = 1. / 2.6 * 1.E-9;
+                    stations[i].TRIG_WINDOW = 2.5E-7;
+                    stations[i].DATA_BIN_SIZE = settings1 -> DATA_BIN_SIZE;
+                }
+            }
+        }
 
-	    ReadAllAntennaGains(settings1);
-	    
+        params.number_of_antennas = 0;
 
-	    ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
-	      
-            // read filter file!!
-            ReadFilter("./data/filter.csv", settings1);
-            // read preamp gain file!!
-            ReadPreamp("./data/preamp.csv", settings1);
-            // read FOAM gain file!!
-            ReadFOAM("./data/FOAM.csv", settings1);
+        cout << "DETECTOR=4 imported station geom info" << endl;
 
+        for (int j = 0; j < stations[0].strings.size(); j++) {
+            for (int k = 0; k < stations[0].strings[j].antennas.size(); k++) {
 
+                cout <<
+                    "DetectorStation2:string:antenna:X:Y:Z:chno :: " <<
+                    j << " : " <<
+                    k << " : " <<
+                    stations[0].strings[j].antennas[k].GetX() << " : " <<
+                    stations[0].strings[j].antennas[k].GetY() << " : " <<
+                    stations[0].strings[j].antennas[k].GetZ() << " : \t" <<
+                    GetChannelfromStringAntenna(stationID, j, k, settings1) <<
+                    endl;
 
-            if ( settings1->NOISE==1) {
+                params.number_of_antennas++;
+            }
+        }
+
+        cout << "after FlattoEarth, station0 location" << endl;
+        for (int j = 0; j < stations[0].strings.size(); j++) {
+            for (int k = 0; k < stations[0].strings[j].antennas.size(); k++) {
+
+                cout <<
+                    "Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: " <<
+                    "0" << " : " <<
+                    j << " : " <<
+                    k << " : " <<
+                    stations[0].strings[j].antennas[k].GetX() << " : " <<
+                    stations[0].strings[j].antennas[k].GetY() << " : " <<
+                    stations[0].strings[j].antennas[k].GetZ() << " : " <<
+                    stations[0].strings[j].antennas[k].R() << " : " <<
+                    stations[0].strings[j].antennas[k].Theta() << " : " <<
+                    stations[0].strings[j].antennas[k].Phi() << " : " <<
+                    icesurface -> Surface(stations[0].strings[j].antennas[k].Lon(), stations[0].strings[j].antennas[k].Lat()) << " : " <<
+                    endl;
+            }
+        }
+
+        int antenna_count = 0;
+        max_number_of_antennas_station = 0;
+        // for non-idealized geometry, it's better to actually count number of stations
+        for (int i = 0; i < (int)(stations.size()); i++) {
+
+            antenna_count = 0;
+            for (int j = 0; j < (int)(stations[i].strings.size()); j++) {
+                for (int k = 0; k < (int)(stations[i].strings[j].antennas.size()); k++) {
+                    antenna_count++;
+                }
+            }
+            stations[i].number_of_antennas = antenna_count;
+
+            if (max_number_of_antennas_station < antenna_count) max_number_of_antennas_station = antenna_count;
+        }
+
+        ReadAllAntennaGains(settings1);
+
+        //	    if (settings1->NOISE == 2){
+        //Read the noise figures
+        ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
+        //	    }
+
+        // read filter file!!
+        ReadFilter("./data/filter.csv", settings1);
+        // read preamp gain file!!
+        ReadPreamp("./data/preamp.csv", settings1);
+        // read FOAM gain file!!
+        ReadFOAM("./data/FOAM.csv", settings1);
+
+        if (settings1 -> NOISE_CHANNEL_MODE != 0) {
+            ReadTemp_TestBed("./data/system_temperature.csv", settings1); // only TestBed for now
+        }
+
+        if (settings1 -> DETECTOR_STATION == 0) {
+            if (settings1 -> NOISE == 1) {
                 // read Rayleigh fit for freq range, bh channels
                 ReadRayleighFit_TestBed("data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
             }
 
-            if ( settings1->USE_TESTBED_RFCM_ON==1) {
+            if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
                 // read RFCM gain file!! (measured value in ICL)
                 ReadRFCM_TestBed("data/TestBed_RFCM/R1C1.csv", settings1); // read and save RFCM gain for ch1
                 ReadRFCM_TestBed("data/TestBed_RFCM/R1C2.csv", settings1); // read and save RFCM gain for ch2
@@ -1776,367 +1736,79 @@ Detector::Detector(Settings *settings1, IceModel *icesurface, string setupfile) 
             }
 
             // read gain offset for chs file!!
-            ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1);// only TestBed for now
+            ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1); // only TestBed for now
             // read threshold offset for chs file!!
-            ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1);// only TestBed for now
-	    // read threshold values for chs file
-	    ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
+            ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1); // only TestBed for now
+            // read threshold values for chs file
+            ReadThres_TestBed("./data/thresholds_TB.csv", settings1); // only TestBed for now
             // read system temperature for chs file!!
-	cout << "check read temp testbed 3" << endl;
-            if (settings1->NOISE_CHANNEL_MODE!=0) {
-                ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
+            cout << "check read temp testbed 4" << endl;
+            if (settings1 -> NOISE_CHANNEL_MODE != 0) {
+                ReadTemp_TestBed("./data/system_temperature.csv", settings1); // only TestBed for now
             }
-	    
-            // read total elec. chain response file!!
-	    cout<<"start read elect chain"<<endl;
-        if(settings1->CUSTOM_ELECTRONICS==0){
-            //read the standard ARA electronics
-            cout<<"     Reading standard ARA electronics response"<<endl;
-             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
-            //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
         }
-        else if (settings1->CUSTOM_ELECTRONICS==1){
-            //read a custom user defined electronics gain
-            cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/custom_electronics.txt", settings1);
-        }
-	    cout<<"done read elect chain"<<endl;
-	    
-
-	    
-	    // if calpulser case
-            if (settings1->CALPULSER_ON > 0) {
-	      // read TestBed Calpulser waveform measured (before pulser)
-	      ReadCalPulserWF("./data/CalPulserWF.txt", settings1);
-            }
-	    
-	    
-
-    }// if mode == 3
-
-    else if (mode == 4) {        
-      //        cout<<"\n\tDector mode 4 : Single installed station determined by DETECTOR_STATION !"<<endl;
-      //        cout<<"We use "<<ARA_N_file.c_str()<<" as antenna info."<<endl;
-        
-        //SetupInstalledStations();        
-        
-        // initialize info
-        params.number_of_stations = 1; //including Testbed
-        params.number_of_strings_station = 4;   // ARA-1 has 4 strings
-        params.number_of_antennas_string = 4; // 4 antennas on each strings
-        params.number_of_surfaces_station = 4;
-        params.number_of_channels = 20;
-        
-        //double core_x = 0.;
-        //double core_y = 0.;
-        params.core_x = 10000.;
-        params.core_y = 10000.;
-        double R_string = 10.;  // all units are in meter
-        double R_surface = 60.;
-        double z_max = 200.;
-        double z_btw = 20.;
-        params.stations_per_side = 4;       // total 37 stations
-        params.station_spacing = 2000.;     // 2km spacing for borehole stations
-        params.antenna_orientation = 0;     // all antenna facing x
-        params.bore_hole_antenna_layout = settings1->BORE_HOLE_ANTENNA_LAYOUT;
-        // finish initialization
-        //
-
-        // mode == 4 currently just use installed TestBed station geom information.
-        // So don't need to read any more information
-        
-        // Read new parameters if there are...
-        ifstream ARA_N( ARA_N_file.c_str() );
-        if ( ARA_N.is_open() ) {
-            while (ARA_N.good() ) {
-                getline (ARA_N, line);
-                
-                if (line[0] != "/"[0]) {
-                    label = line.substr(0, line.find_first_of("=") );
-                    
-                    if (label == "core_x") {
-                        params.core_x = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read core_x"<<endl;
-                    }
-                    else if (label == "core_y") {
-                        params.core_y = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read core_y"<<endl;
-                    }
-                    else if (label == "R_string") {
-                        R_string = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read R_string"<<endl;
-                    }
-                    else if (label == "R_surface") {
-                        R_surface = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read R_surface"<<endl;
-                    }
-                    else if (label == "z_max") {
-                        z_max = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_max"<<endl;
-                    }
-                    else if (label == "z_btw") {
-                        z_btw = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read z_btw"<<endl;
-                    }
-                    else if (label == "number_of_stations") {
-                        params.number_of_stations = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read stations_per_side"<<endl;
-                    }
-                    else if (label == "station_spacing") {
-                        params.station_spacing = atof( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read station_spacting"<<endl;
-                    }
-                    else if (label == "antenna_orientation") {
-                        params.antenna_orientation = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
-                        cout<<"read antenna_orientation"<<endl;
-                    }
-                }
-            }
-            ARA_N.close();
-        }
-        // finished reading new parameters
-        
-        params.number_of_antennas_string = 4;
-        
-        // prepare vectors
-        PrepareVectorsInstalled(settings1->DETECTOR_STATION);
-        // end prepare vectors
-        
-        //
-        // for ARA-37 (or more than 1 station case), need code for setting position for all 37 stations here!
-        //
-        int station_count = 0;
-
-
-	stations[0].SetX( params.core_x );
-	stations[0].SetY( params.core_y );
-
-        
-        //        cout<<"total station_count : "<<station_count<<endl;
-        if (station_count != (int)params.number_of_stations) cout<<"\n\tError, station number not match !"<<endl;
-        
-        //
-        // set antenna values from parameters
-        // set station positions
-        //cout << "READGEOM:" << settings1->READGEOM << endl;
-        
-#ifdef ARA_UTIL_EXISTS
-        ImportStationInfo(settings1, 0, settings1->DETECTOR_STATION);
-#endif
-//            UseAntennaInfo(1, settings1);
-	int stationID = settings1->DETECTOR_STATION;
-        for (int i = 0; i < (int)params.number_of_stations; i++){
-	  stations[i].StationID = settings1->DETECTOR_STATION;
-	  if (settings1->USE_INSTALLED_TRIGGER_SETTINGS == 0){
-	    stations[i].NFOUR = 1024;
-	    stations[i].TIMESTEP = 1./2.6*1.E-9;
-	    stations[i].TRIG_WINDOW = 2.5E-7;
-	    stations[i].DATA_BIN_SIZE = settings1->DATA_BIN_SIZE;
-	  }
-	  else if (settings1->USE_INSTALLED_TRIGGER_SETTINGS == 1){
-	    if (stations[i].StationID == 0){
-	      stations[i].NFOUR = 1024;
-	      stations[i].TIMESTEP = 1./2.6*1.E-9;
-	      stations[i].TRIG_WINDOW = 2.5E-7;
-	      stations[i].DATA_BIN_SIZE = settings1->DATA_BIN_SIZE;
-	    }
-	    if (stations[i].StationID == 1){
-	      stations[i].NFOUR = 1024;
-	      stations[i].TIMESTEP = 1./2.6*1.E-9;
-	      stations[i].TRIG_WINDOW = 2.5E-7;
-	      stations[i].DATA_BIN_SIZE = settings1->DATA_BIN_SIZE;
-	    }
-	  }
-        }
-        
-        params.number_of_antennas = 0;
-	
-	cout<<"DETECTOR=4 imported station geom info"<<endl;
-        
-	for (int j = 0; j < stations[0].strings.size(); j++){
-	  for (int k = 0; k < stations[0].strings[j].antennas.size(); k++){
-	    
-	    cout <<
-	      "DetectorStation2:string:antenna:X:Y:Z:chno :: " <<
-	      j<< " : " <<
-	      k<< " : " <<
-	      stations[0].strings[j].antennas[k].GetX() << " : " <<
-	      stations[0].strings[j].antennas[k].GetY() << " : " <<
-	      stations[0].strings[j].antennas[k].GetZ() << " : \t" <<
-	      //GetChannelfromStringAntenna ( 0, j, k)<<
-	      GetChannelfromStringAntenna ( stationID, j, k, settings1)<<
-	      endl;
-	    
-	    params.number_of_antennas++;
-	  }
-	}
-        
-
-
-
-	cout<<"after FlattoEarth, station0 location"<<endl;
-	for (int j = 0; j < stations[0].strings.size(); j++){
-	  for (int k = 0; k < stations[0].strings[j].antennas.size(); k++){
-	    
-	    cout <<
-             "Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: " <<
-             "0" << " : " <<
-             j<< " : " <<
-             k<< " : " <<
-             stations[0].strings[j].antennas[k].GetX() << " : " <<
-             stations[0].strings[j].antennas[k].GetY() << " : " <<
-             stations[0].strings[j].antennas[k].GetZ() << " : " <<
-             stations[0].strings[j].antennas[k].R() << " : " <<
-             stations[0].strings[j].antennas[k].Theta() << " : " <<
-             stations[0].strings[j].antennas[k].Phi() << " : " <<
-             icesurface->Surface(stations[0].strings[j].antennas[k].Lon(), stations[0].strings[j].antennas[k].Lat()) << " : " <<
-//             icesurface->Surface(stations[0].strings[j].antennas[k].Lat(), stations[0].strings[j].antennas[k].Lon()) << " : " <<
-             endl;
-                 
-                     
-        }
-	}
-
-
-
-            int antenna_count = 0;
-            max_number_of_antennas_station = 0;
-            // for non-idealized geometry, it's better to actually count number of stations
-            for (int i=0; i<(int)(stations.size()); i++) {
-            
-                antenna_count = 0;
-                for (int j=0; j<(int)(stations[i].strings.size()); j++) {
-                    for (int k=0; k<(int)(stations[i].strings[j].antennas.size()); k++) {
-                        antenna_count++;
-                    }
-                }
-                stations[i].number_of_antennas = antenna_count;
-
-                if (max_number_of_antennas_station < antenna_count) max_number_of_antennas_station = antenna_count;
-            }
-
-	    ReadAllAntennaGains(settings1);
-
-	    //	    if (settings1->NOISE == 2){
-	      //Read the noise figures
-	      ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
-	      //	    }
-
-            // read filter file!!
-            ReadFilter("./data/filter.csv", settings1);
-            // read preamp gain file!!
-            ReadPreamp("./data/preamp.csv", settings1);
-            // read FOAM gain file!!
-            ReadFOAM("./data/FOAM.csv", settings1);
-
-	    if (settings1->NOISE_CHANNEL_MODE!=0) {
-	      ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
-	    }
-	    
-
-	    if (settings1->DETECTOR_STATION == 0){
-	      if ( settings1->NOISE==1) {
-                // read Rayleigh fit for freq range, bh channels
-                ReadRayleighFit_TestBed("data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
-	      }
-	      
-	      if ( settings1->USE_TESTBED_RFCM_ON==1) {
-                // read RFCM gain file!! (measured value in ICL)
-                ReadRFCM_TestBed("data/TestBed_RFCM/R1C1.csv", settings1); // read and save RFCM gain for ch1
-                ReadRFCM_TestBed("data/TestBed_RFCM/R1C2.csv", settings1); // read and save RFCM gain for ch2
-                ReadRFCM_TestBed("data/TestBed_RFCM/R1C3.csv", settings1); // read and save RFCM gain for ch3
-                ReadRFCM_TestBed("data/TestBed_RFCM/R1C4.csv", settings1); // read and save RFCM gain for ch4
-                ReadRFCM_TestBed("data/TestBed_RFCM/R2C5.csv", settings1); // read and save RFCM gain for ch5
-                ReadRFCM_TestBed("data/TestBed_RFCM/R2C6.csv", settings1); // read and save RFCM gain for ch6
-                ReadRFCM_TestBed("data/TestBed_RFCM/R2C7.csv", settings1); // read and save RFCM gain for ch7
-                ReadRFCM_TestBed("data/TestBed_RFCM/R2C8.csv", settings1); // read and save RFCM gain for ch8
-                ReadRFCM_TestBed("data/TestBed_RFCM/R3C9.csv", settings1); // read and save RFCM gain for ch9
-                ReadRFCM_TestBed("data/TestBed_RFCM/R3C10.csv", settings1); // read and save RFCM gain for ch10
-                ReadRFCM_TestBed("data/TestBed_RFCM/R3C11.csv", settings1); // read and save RFCM gain for ch11
-                ReadRFCM_TestBed("data/TestBed_RFCM/R3C12.csv", settings1); // read and save RFCM gain for ch12
-                ReadRFCM_TestBed("data/TestBed_RFCM/R4C13.csv", settings1); // read and save RFCM gain for ch13
-                ReadRFCM_TestBed("data/TestBed_RFCM/R4C14.csv", settings1); // read and save RFCM gain for ch14
-                ReadRFCM_TestBed("data/TestBed_RFCM/R4C15.csv", settings1); // read and save RFCM gain for ch15
-                ReadRFCM_TestBed("data/TestBed_RFCM/R4C16.csv", settings1); // read and save RFCM gain for ch16
-	      }
-
-	      // read gain offset for chs file!!
-	      ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1);// only TestBed for now
-	      // read threshold offset for chs file!!
-	      ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1);// only TestBed for now
-	      // read threshold values for chs file
-	      ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
-	      // read system temperature for chs file!!
-	      cout << "check read temp testbed 4" << endl;
-	      if (settings1->NOISE_CHANNEL_MODE!=0) {
-		ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
-	      }
-	    }
-        if(settings1->DETECTOR_STATION>0){            
+        if (settings1 -> DETECTOR_STATION > 0) {
             // simulating a deep station (not testbed, DETECTOR_STATION==0)
-            
+
             // if simuating detector specific noise, need to load those files
+
             if(settings1->NOISE==1){
-                char the_rayleigh_filename[500];
+                cout <<"Reading in situ ARA noise for this station and configuration from file: " <<endl;
+		char the_rayleigh_filename[500];
                 sprintf(the_rayleigh_filename, "./data/noise/sigmavsfreq_A_%d_config_%d.csv", 
                     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
-                ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
+                cout << the_rayleigh_filename << endl;
+		ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
             }
         }
-        
-            // read total elec. chain response file!!
-	    cout<<"start read elect chain"<<endl;
-        if(settings1->CUSTOM_ELECTRONICS==0){
+
+        // read total elec. chain response file!!
+        cout << "start read elect chain" << endl;
+        if (settings1 -> CUSTOM_ELECTRONICS == 0) {
             //read the standard ARA electronics
-            cout<<"     Reading standard ARA electronics response"<<endl;
-             ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
-            //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
-        }
+            if(settings1->DETECTOR_STATION > 0){
+	  	cout <<" Reading in situ ARA electronics response for this station and configuration from file:"<<endl;	
+		char the_gain_filename[500];
+		sprintf(the_gain_filename, "./data/gain/In_situ_Electronics_A%d_C%d.csv", 	
+		     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+		cout << the_gain_filename <<endl;
+		ReadElectChain(std::string(the_gain_filename), settings1);
+		 //ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+         	 //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+            }
+	    else{
+		cout <<"    In situ gain model does not exist for this station"<<endl;
+            	cout<<"     Reading standard ARA electronics response"<<endl;
+		ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+		//ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+	    }
+	}
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/custom_electronics.txt", settings1);
+             ReadElectChain("./data/gain/custom_electronics.csv", settings1);
         }
-	    cout<<"done read elect chain"<<endl;
-    
-	    // if calpulser case
-            if (settings1->CALPULSER_ON > 0) {
-	      // read TestBed Calpulser waveform measured (before pulser)
-	      ReadCalPulserWF("./data/CalPulserWF.txt", settings1);
-            }
-	    
+        cout << "done read elect chain" << endl;
 
+        // if calpulser case
+        if (settings1 -> CALPULSER_ON > 0) {
+            // read TestBed Calpulser waveform measured (before pulser)
+            ReadCalPulserWF("./data/CalPulserWF.txt", settings1);
+        }
 
-    }// if mode == 4
-
-
-    /////////////////////////////////////////////////////////////////////////////////    
-
-
-
-            
-        
+    } // if mode == 4
 
     // add additional depth if it's on
     AddAdditional_Depth(settings1);
 
-    
-            
     // change coordinate from flat surface to curved Earth surface
     //FlattoEarth_ARA(icesurface);
-    FlattoEarth_ARA_sharesurface(icesurface);   // this one will share the lowest surface at each station.
+    FlattoEarth_ARA_sharesurface(icesurface); // this one will share the lowest surface at each station.
 
-    
-    
-    //cout<<"done settings detectors, gain, filters"<<endl;
-    
-    getDiodeModel(settings1);    // set diode_real and fdiode_real values.
-    
-    
-    //    return 0;
-    
-    //cout<<"test2"<<endl;
+    getDiodeModel(settings1); // set diode_real and fdiode_real values.
+
 }
+
 
 inline void Detector::ReadAllAntennaGains(Settings *settings1){
     if (settings1->ANTENNA_MODE == 0){
@@ -3245,9 +2917,9 @@ double Detector::GetFOAMGain_1D_OutZero( double freq ) {
 
 
 // set outside value as 0
-double Detector::GetElectGain_1D_OutZero( double freq ) {
-
-
+double Detector::GetElectGain_1D_OutZero( double freq, int gain_ch_no) {
+   
+ 
     double slope_1; // slope of init part
 
     double Gout;
@@ -3255,17 +2927,17 @@ double Detector::GetElectGain_1D_OutZero( double freq ) {
     int bin = (int)( (freq - freq_init) / freq_width )+1;
 
 
-    slope_1 = (ElectGain[1] - ElectGain[0]) / (Freq[1] - Freq[0]);
+    slope_1 = (ElectGain[gain_ch_no][1] - ElectGain[gain_ch_no][0]) / (Freq[1] - Freq[0]);
 
 
     // if freq is lower than freq_init
-    if ( freq < freq_init ) {
+    if ( bin < 1) {
 
         //Gout = slope_1 * (freq - Freq[0]) + ElectGain[0];
         Gout = 0.;
     }
     // if freq is higher than last freq
-    else if ( freq > Freq[freq_step-1] ) {
+    else if ( bin > freq_step -1 ){
 
         //Gout = slope_2 * (freq - Freq[freq_step-1]) + FOAMGain[freq_step-1];
         Gout = 0.;
@@ -3273,7 +2945,7 @@ double Detector::GetElectGain_1D_OutZero( double freq ) {
 
     else {
 
-        Gout = ElectGain[bin-1] + (freq-Freq[bin-1])*(ElectGain[bin]-ElectGain[bin-1])/(Freq[bin]-Freq[bin-1]);
+        Gout = ElectGain[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectGain[gain_ch_no][bin]-ElectGain[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
     } // not outside the Freq[] range
     
 
@@ -3285,7 +2957,7 @@ double Detector::GetElectGain_1D_OutZero( double freq ) {
 
 
 // set outside value as 0
-double Detector::GetElectPhase_1D( double freq ) {
+double Detector::GetElectPhase_1D( double freq, int gain_ch_no ) {
 
 
     double slope_1, slope_2; // slope of init, final part
@@ -3297,14 +2969,14 @@ double Detector::GetElectPhase_1D( double freq ) {
 
     // ElectPhase are in rad (not deg)
 
-    slope_1 = (ElectPhase[1] - ElectPhase[0]) / (Freq[1] - Freq[0]);
-    slope_2 = (ElectPhase[freq_step-1] - ElectPhase[freq_step-2]) / (Freq[freq_step-1] - Freq[freq_step-2]);
+    slope_1 = (ElectPhase[gain_ch_no][1] - ElectPhase[gain_ch_no][0]) / (Freq[1] - Freq[0]);
+    slope_2 = (ElectPhase[gain_ch_no][freq_step-1] - ElectPhase[gain_ch_no][freq_step-2]) / (Freq[freq_step-1] - Freq[freq_step-2]);
 
 
     // if freq is lower than freq_init
-    if ( freq < freq_init ) {
+      if ( bin < 1 ){
 
-        phase = slope_1 * (freq - Freq[0]) + ElectPhase[0];
+        phase = slope_1 * (freq - Freq[0]) + ElectPhase[gain_ch_no][0];
 
         if ( phase > PI ) {
             while ( phase > PI ) {
@@ -3318,9 +2990,9 @@ double Detector::GetElectPhase_1D( double freq ) {
         }
     }
     // if freq is higher than last freq
-    else if ( freq > Freq[freq_step-1] ) {
+      else if ( bin > freq_step-1){
 
-        phase = slope_2 * (freq - Freq[freq_step-1]) + ElectPhase[freq_step-1];
+        phase = slope_2 * (freq - Freq[freq_step-1]) + ElectPhase[gain_ch_no][freq_step-1];
 
         if ( phase > PI ) {
             while ( phase > PI ) {
@@ -3339,23 +3011,23 @@ double Detector::GetElectPhase_1D( double freq ) {
         // not at the first two bins
         if ( bin<freq_step-1 && bin>1 ) {
 
-            slope_t1 = (ElectPhase[bin-1] - ElectPhase[bin-2]) / (Freq[bin-1] - Freq[bin-2]);
-            slope_t2 = (ElectPhase[bin+1] - ElectPhase[bin]) / (Freq[bin+1] - Freq[bin]);
+            slope_t1 = (ElectPhase[gain_ch_no][bin-1] - ElectPhase[gain_ch_no][bin-2]) / (Freq[bin-1] - Freq[bin-2]);
+            slope_t2 = (ElectPhase[gain_ch_no][bin+1] - ElectPhase[gain_ch_no][bin]) / (Freq[bin+1] - Freq[bin]);
 
             // down going case
-            if ( slope_t1 * slope_t2 > 0. && ElectPhase[bin] - ElectPhase[bin-1] > PI ) {
+            if ( slope_t1 * slope_t2 > 0. && ElectPhase[gain_ch_no][bin] - ElectPhase[gain_ch_no][bin-1] > PI ) {
 
-                phase = ElectPhase[bin-1] + (freq-Freq[bin-1])*(ElectPhase[bin]-2*PI-ElectPhase[bin-1])/(Freq[bin]-Freq[bin-1]);
+                phase = ElectPhase[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectPhase[gain_ch_no][bin]-2*PI-ElectPhase[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
             }
 
             // up going case
-            else if ( slope_t1 * slope_t2 > 0. && ElectPhase[bin] - ElectPhase[bin-1] < -PI ) {
-                phase = ElectPhase[bin-1] + (freq-Freq[bin-1])*(ElectPhase[bin]+2*PI-ElectPhase[bin-1])/(Freq[bin]-Freq[bin-1]);
+            else if ( slope_t1 * slope_t2 > 0. && ElectPhase[gain_ch_no][bin] - ElectPhase[gain_ch_no][bin-1] < -PI ) {
+                phase = ElectPhase[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectPhase[gain_ch_no][bin]+2*PI-ElectPhase[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
             }
 
             // neither case
             else {
-                phase = ElectPhase[bin-1] + (freq-Freq[bin-1])*(ElectPhase[bin]-ElectPhase[bin-1])/(Freq[bin]-Freq[bin-1]);
+                phase = ElectPhase[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectPhase[gain_ch_no][bin]-ElectPhase[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
             }
 
             // if outside the range, put inside
@@ -3373,7 +3045,7 @@ double Detector::GetElectPhase_1D( double freq ) {
         }// not first two bins
 
         else {
-            phase = ElectPhase[bin-1] + (freq-Freq[bin-1])*(ElectPhase[bin]-ElectPhase[bin-1])/(Freq[bin]-Freq[bin-1]);
+            phase = ElectPhase[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectPhase[gain_ch_no][bin]-ElectPhase[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
         }
 
         // if outside the range, put inside
@@ -3389,8 +3061,8 @@ double Detector::GetElectPhase_1D( double freq ) {
         }
 
     } // not outside the Freq[] range
-    
-
+   
+ 
 
     return phase;
 
@@ -4116,181 +3788,301 @@ inline void Detector::ReadCalPulserWF(string filename, Settings *settings1 ) {  
 
 
 
-
-
-
-
-
-
-
-
-
-
 inline void Detector::ReadElectChain(string filename, Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
-    
-    ifstream Elect( filename.c_str() );
-    
-    string line;
-    string line2;
-    string line3;
-    
-    int N=-1;
-    
-    vector <double> xfreq_tmp;
-    vector <double> ygain_tmp;
-    vector <double> phase_tmp;
 
-    int skipline = 3;
-    int first_time = 1;
+/*
+The main goal of this function is to store gain and phase values to be used. 
+This is update stores values for each channel in vectors.
+The first dimension is the number of channels (this is "number of channels")
+The second dimension is for the number of frequency bins (this is "number of frequency bins" long).
+	
 
-    
-    if ( Elect.is_open() ) {
-        while (Elect.good() ) {
-            
-            if ( first_time == 1 ) {
-                for (int sl=0; sl<skipline; sl++) {
-                    getline (Elect, line);
-                }
-                first_time = 0;
-            }
-                    
+This function has two main parts: (1) loading of gain/phase values from gainFile containing the gain model and 
+(2) interpolating these values to the frequency binning of "Freq" array having frequencies used in the simulation.  
+*/
 
-            getline (Elect, line);
+//This is the beginning of PART 1: getting gain/phase and frequency values out of the gain model file
 
-            N++;
+	// check if the gain file exists
+	char errorMessage[400];
+	struct stat buffer;
 
-            xfreq_tmp.push_back( atof( line.substr(0, line.find_first_of(",")).c_str() ) );
-            // cout<<"freq : "<<xfreq_tmp[N]<<"\t";
+	bool gainFileExists = (stat(filename.c_str(), &buffer)==0);
+	if (!gainFileExists){
+		sprintf(errorMessage, "Gain model file is not found (gain file exists %d) ", gainFileExists);
+		cout << "The not found gain filename is: " << filename << endl; 		
+		cerr << errorMessage << endl;
+		cerr << "Defaulting to standard response" << endl;
+		filename = "./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv";
+		cout << "Defaulted to standard response from file: " << filename << endl;
+	}
 
-            line2 = line.substr( line.find_first_of(",")+1);
+	ifstream gainFile(filename.c_str()); // open the file
+	string line; // a dummy variable we can stream over
 
-            ygain_tmp.push_back( atof( line2.substr(0, line2.find_first_of(",")).c_str() ) );
-            // cout<<"gain : "<<ygain_tmp[N]<<"\t";
+	// if the gain file exists, then make sure our user has formatted the file correctly
+	// in particular, it means we really need to see the word "Frequency" as the first word in the header file
+	string expected_first_column_header = "Frequency";
+	if(gainFile.is_open()){
+		while(gainFile.good()){
+			getline(gainFile, line, ',');
+			string first_header_entry = line.c_str();
+			if (! (first_header_entry == expected_first_column_header)){
+				sprintf(errorMessage, 
+					"The first word of the header line is '%s'. It was expected to be '%s'. Please double check file format!!", 
+					first_header_entry.c_str(),
+					expected_first_column_header.c_str());
+				cout << "The gain filename is: " << filename << endl; 
+				throw std::runtime_error(errorMessage);
+			}
 
-            line3 = line2.substr( line2.find_first_of(",")+1);
+            		else{
+                		// otherwise, the first header of the file is correct, and we can proceed
+                		break;
+			}
+		
+		}
+	 
+	}
 
-            phase_tmp.push_back( atof( line3.substr(0).c_str() ) );
-            // cout<<"phase : "<<phase_tmp[N]<<" N : "<<N<<endl;
+	else{
+        	sprintf(errorMessage, "Gain model file did not open correctly.");
+		cout << "The gain filename is: " << filename << endl; 
+        	throw std::runtime_error(errorMessage);	
+    	}
 
-            /*
-            xfreq_tmp.push_back( atof( line.substr(0, 10).c_str() ) );
-            cout<<"freq : "<<xfreq_tmp[N]<<"\t";
-            
-            ygain_tmp.push_back( atof( line.substr(11, 19).c_str() ) );
-            cout<<"gain : "<<ygain_tmp[N]<<"\t";
+	// go back to the beginning of the file
+	// we have already verified that the file exists, so no need to check again...
+	gainFile.clear();
+	gainFile.seekg(0, ios::beg);
 
-            phase_tmp.push_back( atof( line.substr(31).c_str() ) );
-            cout<<"phase : "<<phase_tmp[N]<<" N : "<<N<<endl;
-            */
-            
+
+	// second, figure out how many frequency bins are available
+	int lineCount = 0;
+	if(gainFile.is_open()){
+		while(gainFile.peek()!=EOF){
+			getline(gainFile, line);
+			lineCount++;
+		}
+	}
+
+	
+	
+	gainFile.clear(); // back to the beginning of the file again
+	gainFile.seekg(0, ios::beg);
+	int numFreqBins = lineCount - 1; // one row is dedicated to headers; number of freq bins is therefore # rows - 1
+
+	//Set up containers to stream the csv file into.
+	// vector of the frequencies
+	std::vector<double> frequencies;
+	frequencies.resize(numFreqBins); // resize to account for the number of frequency bins
+	// Third, figure out how many columns we have.
+	// This tells us how many channels we are reading in.
+	// We expect 1 column for frequency, (N-1)/2 columns for gains, and (N-1)/2 columns for phases.
+	// So there should be (((N-1)/2 + (N-1)/2 channels + 1 Frequency) - 1)/2= (N-1)/2 channels worth of commas.
+	int numCommas = 0;
+	int theLineNo = 0;
+	if(gainFile.is_open()){
+		while(gainFile.good()){
+			if(theLineNo==0){
+				getline(gainFile, line, '\n');
+				std::string first_line = line.c_str();
+				numCommas = int(std::count(first_line.begin(), first_line.end(), ','));
+				theLineNo++;
+			}
+			else{
+				break;
+			}
+		}
+	}
+
+	
+	gainFile.clear(); // back to the beginning of the file again
+	gainFile.seekg(0, ios::beg);
+
+	// make sure the number of commas is even since we have gain+phase pairs per channel 
+	if ( numCommas%2 == 1){
+                                sprintf(errorMessage,
+                                        "The number of columns in the gain file (disregarding the one for frequency) is not even. We need gain AND phase pairs per channel.");
+				cout << "The gain filename is: " << filename << endl; 
+                                throw std::runtime_error(errorMessage);
+                        }
+
+	else { //we can continue
+	gain_ch = numCommas/2; // also need to set this detector wide variable, 
+                                // which specifies how many channels for which we have separate gain models
         }
-        Elect.close();
-    }
-    
-    else cout<<"Elect file can not opened!!"<<endl;
+	
+	/*
+    	Fourth, we loop over the rows of the file again,
+    	and get the frequency values out, as well as the gain and phase values.
+    	First, setup two vector of vectors to hold the gain and phase values we stream in.
+   	The first dimension is for the number of channels (so this is "number of channels" long).
+    	The second dimension is for the number of frequency bins (so this is "number of frequency bins" long).
+    	(which goes first and which goes second is arbitrary; 
+    	the TestBed version does it in this order, so replicate here)
+	*/
+	std::vector< std::vector <double> > gains;
+	std::vector< std::vector <double> > phases;
+    	gains.resize(gain_ch); // resize to account for number of channels
+    	phases.resize(gain_ch); // resize to account for number of channels
+    	for(int iCh=0; iCh<gain_ch; iCh++){
+		gains[iCh].resize(numFreqBins); // resize to account for number of freq bins
+		phases[iCh].resize(numFreqBins); //resize to account for number of freq bins
+	}
 
-    // cout<<"N : "<<N<<endl;
-    
-    double xfreq[N], ygain[N], phase[N];  // need array for Tools::SimpleLinearInterpolation
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-    double phase_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-    double df_fft;
-    
-    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
-    
-    for (int i=0;i<N;i++) { // copy values
-        xfreq[i] = xfreq_tmp[i];
-        ygain[i] = ygain_tmp[i];
-        phase[i] = phase_tmp[i];
-    }
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-    
-    
-    // Tools::SimpleLinearInterpolation will return Filter array (in dB)
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, Freq, ElectGain );
-    
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
-    
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
-        ElectGain_databin.push_back( ygain_databin[i] );
-    }
+	theLineNo = 0; // reset this counter
+	if (gainFile.is_open()){
+		while(gainFile.peek()!=EOF){
 
-    Tools::SimpleLinearInterpolation( N, xfreq, phase, freq_step, Freq, ElectPhase );
-    
-    Tools::SimpleLinearInterpolation( N, xfreq, phase, settings1->DATA_BIN_SIZE/2, xfreq_databin, phase_databin );
-    
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
-        ElectPhase_databin.push_back( phase_databin[i] );
-    }
+			if(theLineNo == 0 ){
+				// skip the first line (the header file)
+				getline (gainFile, line);
+				theLineNo++;
+			}
+			else{
+				/*
+ 				from the second line forward, read in the values
+				the first column is the frequency
+				the second, fourth, sixth, etc. column should be the gain values for the channels.
+				the third, fifth, seventh, etc. column should be the phase values for the corresponding channel.
+				so we need to loop over all the comma separated entries in the single line
+				*/
 
-    
-    
-    // for NFOUR/2 t domain array
-    double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
-    double ygain_NFOUR[settings1->NFOUR/4+1];   // array for gain in FFT bin
-    double phase_NFOUR[settings1->NFOUR/4+1];   // array for gain in FFT bin
-    
-    df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
+				// first, peel off the frequency
+				int theFreqBin = theLineNo -1 ;
+				getline(gainFile, line, ',');
+				double temp_freq_val = atof(line.c_str()); // the frequency in MHz
+				if(std::isnan(temp_freq_val) || temp_freq_val < 0 || temp_freq_val > 1200){
+					sprintf(errorMessage, 
+						"The frequency value (freq bin %d) is a nan or negative or very large (%e). Stop!", 
+						theFreqBin, temp_freq_val);
+					cout << "The gain filename is: " << filename << endl; 
+					throw std::runtime_error(errorMessage);
+				}
 
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
+				frequencies[theFreqBin] = temp_freq_val;
 
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
-    
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {
-        ElectGain_NFOUR.push_back( ygain_NFOUR[i] );
-    }
+				/*
+				then loop over the channels, splitting most on the comma ","
+				Because the "separating" character for the very last channel is a newline (\n),
+				we have to loop over n_channels - 1 here,
+				and then change to the newline character for the final channel
+				(see below).
+				*/
+				int numColsPair = 0;
+				while(numColsPair < gain_ch-1){	//numColsPair is the number of column pairs e.g. columns
+								//2 and 3 correspond to gain and phase of channel 0.
+								
+					
+					//get and store the gain values
+					getline(gainFile, line, ',');
+					double temp_gain_val = atof(line.c_str());
 
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, phase_NFOUR );
-    
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {
-        ElectPhase_NFOUR.push_back( phase_NFOUR[i] );
-    }
+					if(std::isnan(temp_gain_val) || temp_gain_val < 0 || temp_gain_val > 1E6){
+						sprintf(errorMessage, 
+ 							"A gain value (freq bin %d, ch %d) is a nan or negative or very large (%e). Stop!", 
+ 							 theFreqBin, numColsPair, temp_gain_val);
+						cout << "The gain filename is: " << filename << endl; 
+						throw std::runtime_error(errorMessage);
+					}
 
-    
+					gains[numColsPair][theFreqBin] = temp_gain_val;
+
+					//get and store the phase values
+					getline(gainFile, line, ',');
+					double temp_phase_val = atof(line.c_str()); 
+
+                          		if(std::isnan(temp_phase_val)){
+                                              	sprintf(errorMessage, 
+							"A phase value (freq bin %d, ch %d) is a nan. Stop!", 
+							theFreqBin, numColsPair);
+						cout << "The gain filename is: " << filename << endl; 
+						throw std::runtime_error(errorMessage);
+                                      }
+
+					phases[numColsPair][theFreqBin] = temp_phase_val;
+
+					numColsPair++; // advance number of column pair
+
+				}
+                 
+
+				// once more to get the final channel, this time we need to detect the newline character after getting the last gain
+				// NB: at this point, numColsPair == final channel number, so we can just use it
+				// (no need to increment numColsPair again)
+				
+				getline(gainFile, line, ','); //getting last gain
+				double temp_gain_val = atof(line.c_str());
+
+				gains[numColsPair][theFreqBin] = temp_gain_val;
+			
+				getline(gainFile, line, '\n'); //getting last phase
+				double temp_phase_val = atof(line.c_str());
+
+				phases[numColsPair][theFreqBin] = temp_phase_val;
+
+				// now we're done!
+				theLineNo++; //advance the line number
+
+
+			}
+		}
+	}
+	gainFile.close();
+	
+
+//This is the end of PART 1. Done getting data from the gain-phase file
+
+
+//This is the beginning of PART 2: Interpolate gain and phase values to the frequency binning used by AraSim (given "Freq" array)
+
+	// the content of the vectors needs to be stuffed into arrays for the interpolator
+	// so, copy over the vector of frequencies into an array
+	
+	double frequencies_asarray[numFreqBins];
+	std::copy(frequencies.begin(), frequencies.end(), frequencies_asarray);
+
+	ElectGain.resize(gain_ch); //resize ElectGain to have the size of number of channels
+	ElectPhase.resize(gain_ch); //resize ElectPhase to have the size of number of channels
+
+	// loop over channel, and do the interpolation
+	for(int iCh=0; iCh<gain_ch; iCh++){
+	   
+		// same issue as with the frequencies; we need to copy the results for this station and channel to an array
+		double gains_asarray[numFreqBins];
+	        std::copy(gains[iCh].begin(), gains[iCh].end(), gains_asarray);
+		double phases_asarray[numFreqBins];
+	        std::copy(phases[iCh].begin(), phases[iCh].end(), phases_asarray);
+	
+		// output value
+		double interp_gains[freq_step];   // array for interpolated gain values
+		double interp_phases[freq_step];   // array for interpolated phases values
+		
+
+		// now, do interpolation
+		Tools::SimpleLinearInterpolation(
+			numFreqBins, frequencies_asarray, gains_asarray, //From original binning
+			freq_step, Freq, interp_gains	//To the new binning
+			);
+		       
+		Tools::SimpleLinearInterpolation(
+			numFreqBins, frequencies_asarray, phases_asarray, //From original binning
+			freq_step, Freq, interp_phases //To the new binning
+			);
+		       
+	
+		// copy the interpolated values out
+		for(int iFreqBin=0; iFreqBin<freq_step; iFreqBin++){
+			ElectGain[iCh].push_back( interp_gains[iFreqBin] );
+			ElectPhase[iCh].push_back( interp_phases[iFreqBin] );
+                             }
+		
+	}
+		
+//This is the end of PART 2. Done interpolating gain and phase values to the binning of "Freq" array. 
+
 }
-
-
-
-void Detector::ReadElectChain_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
-
-    // We can use FilterGain array as a original array
-
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-    double phase_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-
-    double df_fft;
-    
-    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
-
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-
-    Tools::SimpleLinearInterpolation( freq_step, Freq, ElectGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
-        
-    ElectGain_databin.clear();
-    
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
-        ElectGain_databin.push_back( ygain_databin[i] );
-    }
-
-    Tools::SimpleLinearInterpolation( freq_step, Freq, ElectPhase, settings1->DATA_BIN_SIZE/2, xfreq_databin, phase_databin );
-        
-    ElectPhase_databin.clear();
-    
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
-        ElectPhase_databin.push_back( phase_databin[i] );
-    }
-
-
-}
-
 
 
 
@@ -4739,6 +4531,21 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
     if(rayleighFile.is_open()){
         while(rayleighFile.peek()!=EOF){
             getline(rayleighFile, line);
+
+            /*
+            Double check to see if the line is a blank line.
+            If it's a blank line, we should just skip it.
+            The unsigned char conversion is meant to protected against
+            undefined behavior when c is neither an unsigned char
+            or not EOF.
+            see: https://stackoverflow.com/questions/6444842/efficient-way-to-check-if-stdstring-has-only-spaces
+            */
+
+            if (std::all_of(line.begin(), line.end(), [](unsigned char c){ return std::isspace(c); })){
+                // skip this line WITHOUT advancing the line counter
+                continue;
+            }
+
             lineCount++;
         }
     }
@@ -4799,6 +4606,7 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
                 theLineNo++;
             }
             else{
+
                 /*
                 from the second line forward, read in the values
                 the first column is the frequency
@@ -4806,14 +4614,21 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
                 so we need to loop over all the comma separated entries in the single line
                 */
 
+                // again check for blank lines
+                // (see above for more details on how this was constructed)
+                getline(rayleighFile, line, ',');
+                if (std::all_of(line.begin(), line.end(), [](unsigned char c){ return std::isspace(c); })){
+                    // skip this line WITHOUT advancing the line counter
+                    continue;
+                }
+
                 // first, peel off the frequency
                 int theFreqBin = theLineNo -1 ;
-                getline(rayleighFile, line, ',');
                 double temp_freq_val = atof(line.c_str()); // the frequency in MHz
                 if(std::isnan(temp_freq_val) || temp_freq_val < 0 || temp_freq_val > 1200){
                     sprintf(errorMessage, 
                             "A rayleigh frequency value (freq bin %d) is a nan or negative or very large (%e). Stop!", 
-                            temp_freq_val);
+                            theFreqBin, temp_freq_val);
                     throw std::runtime_error(errorMessage);
                 }
                 // printf("Frequency bin %d value is %f \n", theFreqBin, temp_freq_val);
@@ -5341,195 +5156,287 @@ void Detector::PrepareVectorsInstalled(){
 
 void Detector::PrepareVectorsInstalled(int importedStation) {
 
-  ARA_station temp_station;
-  Antenna_string temp;
-  Antenna_string temp_string;
-  Antenna temp_antenna;
-  Surface_antenna temp_surface;
-  
-  // prepare vectors
-  for (int i=0; i<params.number_of_stations; i++) {
-    stations.push_back(temp_station);
-    
-    for (int j = 0; j < InstalledStations[importedStation].nSurfaces; j++) {
-      stations[i].surfaces.push_back(temp_surface);
+    ARA_station temp_station;
+    Antenna_string temp;
+    Antenna_string temp_string;
+    Antenna temp_antenna;
+    Surface_antenna temp_surface;
+
+    // prepare vectors
+    for (int i = 0; i < params.number_of_stations; i++) {
+        stations.push_back(temp_station);
+        for (int j = 0; j < InstalledStations[importedStation].nSurfaces; j++) {
+            stations[i].surfaces.push_back(temp_surface);
+        }
+        for (int k = 0; k < InstalledStations[importedStation].nStrings; k++) {
+
+            stations[i].strings.push_back(temp_string);
+
+            for (int l = 0; l < InstalledStations[importedStation].VHChannel[k].size(); l++) {
+                stations[i].strings[k].antennas.push_back(temp_antenna);
+            }
+        }
     }
-    
-    for (int k = 0; k < InstalledStations[importedStation].nStrings; k++) {
-      
-      stations[i].strings.push_back(temp_string);
-      
-      for (int l = 0; l < InstalledStations[importedStation].VHChannel[k].size(); l++){
-	stations[i].strings[k].antennas.push_back(temp_antenna);
-      }
-    }
-  }
 }
 
 
-void Detector::SetupInstalledStations(){
- 
-    int number_of_installed_stations = 4;
-    
+void Detector::SetupInstalledStations() {
+
+    // This variable needs to include testbed!
+    // So if you are trying to say "we have installed TB, A1, A2",
+    // then number_of_installed_stations = 3
+    int number_of_installed_stations = 6;
+
     InstalledStations.resize(number_of_installed_stations);
-    
+
     std::vector < int > Antennas;
-    
-    if (InstalledStations.size() > 0){ // Testbed
+
+    if (InstalledStations.size() > 0) { // Testbed
+
+        // Make string 0        
+        Antennas.push_back(4); Antennas.push_back(1);
+        InstalledStations[0].VHChannel.push_back(Antennas);
+        Antennas.clear();
         
-        Antennas.push_back(4);Antennas.push_back(1);
-        InstalledStations[0].VHChannel.push_back(Antennas); // Make string 0
+        // Make string 1
+        Antennas.push_back(2); Antennas.push_back(7);
+        InstalledStations[0].VHChannel.push_back(Antennas); 
         Antennas.clear();
-        Antennas.push_back(2);Antennas.push_back(7);
-        InstalledStations[0].VHChannel.push_back(Antennas); // Make string 1
+        
+        // Make string 2
+        Antennas.push_back(6); Antennas.push_back(3);
+        InstalledStations[0].VHChannel.push_back(Antennas); 
         Antennas.clear();
-        Antennas.push_back(6);Antennas.push_back(3);
-        InstalledStations[0].VHChannel.push_back(Antennas); // Make string 2
+        
+        // Make string 3
+        Antennas.push_back(5); Antennas.push_back(8);
+        InstalledStations[0].VHChannel.push_back(Antennas); 
         Antennas.clear();
-        Antennas.push_back(5);Antennas.push_back(8);
-        InstalledStations[0].VHChannel.push_back(Antennas); // Make string 3
+        
+        // Make string 4
+        Antennas.push_back(12); Antennas.push_back(9);
+        InstalledStations[0].VHChannel.push_back(Antennas); 
         Antennas.clear();
-        Antennas.push_back(12);Antennas.push_back(9);
-        InstalledStations[0].VHChannel.push_back(Antennas); // Make string 4
+        
+        // Make string 5
+        Antennas.push_back(14); Antennas.push_back(13);
+        InstalledStations[0].VHChannel.push_back(Antennas); 
         Antennas.clear();
-        Antennas.push_back(14);Antennas.push_back(13);
-        InstalledStations[0].VHChannel.push_back(Antennas); // Make string 5
-        Antennas.clear();
+        
+        // Make string 6
         Antennas.push_back(10);
-        InstalledStations[0].VHChannel.push_back(Antennas); // Make string 6
-        Antennas.clear();
-        Antennas.push_back(11);
-        InstalledStations[0].VHChannel.push_back(Antennas); // Make string 7
+        InstalledStations[0].VHChannel.push_back(Antennas); 
         Antennas.clear();
         
+        // Make string 7
+        Antennas.push_back(11);
+        InstalledStations[0].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+
         InstalledStations[0].nStrings = InstalledStations[0].VHChannel.size();
 
+        // Make surface antennas
         InstalledStations[0].surfaceChannels.push_back(15);
-        InstalledStations[0].surfaceChannels.push_back(16); 
-        
+        InstalledStations[0].surfaceChannels.push_back(16);
+
         InstalledStations[0].nSurfaces = InstalledStations[0].surfaceChannels.size();
-        
+
         InstalledStations[0].nChannels = 16;
         InstalledStations[1].nChannelsVH = 14;
 
     }
-    
-    if ( InstalledStations.size() > 1 ){ // Station 1 
-      //        Antennas.push_back(5);Antennas.push_back(9);Antennas.push_back(1);Antennas.push_back(17);
-      Antennas.push_back(5);Antennas.push_back(9);Antennas.push_back(1);Antennas.push_back(13);
-      InstalledStations[1].VHChannel.push_back(Antennas); // Make string 0
-      Antennas.clear();
-      //        Antennas.push_back(6);Antennas.push_back(10);Antennas.push_back(2);Antennas.push_back(18);
-      Antennas.push_back(6);Antennas.push_back(10);Antennas.push_back(2);Antennas.push_back(14);
-      InstalledStations[1].VHChannel.push_back(Antennas); // Make string 1
-      Antennas.clear();
-      //        Antennas.push_back(7);Antennas.push_back(11);Antennas.push_back(3);Antennas.push_back(19);
-      Antennas.push_back(7);Antennas.push_back(11);Antennas.push_back(3);Antennas.push_back(15);
-      InstalledStations[1].VHChannel.push_back(Antennas); // Make string 2
-      Antennas.clear();
-      //        Antennas.push_back(8);Antennas.push_back(12);Antennas.push_back(4);Antennas.push_back(20);
-      Antennas.push_back(4);Antennas.push_back(8);Antennas.push_back(0);Antennas.push_back(12);
-      InstalledStations[1].VHChannel.push_back(Antennas); // Make string 3
-      Antennas.clear();
-      
-      InstalledStations[1].nStrings = InstalledStations[1].VHChannel.size();
-      
-      /*
-        InstalledStations[1].surfaceChannels.push_back(13);
-        InstalledStations[1].surfaceChannels.push_back(14);
-        InstalledStations[1].surfaceChannels.push_back(15);
-        InstalledStations[1].surfaceChannels.push_back(16);
-      */
-      
-      InstalledStations[1].surfaceChannels.push_back(17);
-      InstalledStations[1].surfaceChannels.push_back(18);
-      InstalledStations[1].surfaceChannels.push_back(19);
-      InstalledStations[1].surfaceChannels.push_back(20);
-      
-      InstalledStations[1].nSurfaces = InstalledStations[1].surfaceChannels.size();
+
+    if (InstalledStations.size() > 1) { // Station 1 
         
-      InstalledStations[1].nChannels = 20;
-      InstalledStations[1].nChannelsVH = 16;
-      
+        // Make string 0
+        Antennas.push_back(5); Antennas.push_back(9);
+        Antennas.push_back(1); Antennas.push_back(13);
+        InstalledStations[1].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+        
+        // Make string 1
+        Antennas.push_back(6); Antennas.push_back(10);
+        Antennas.push_back(2); Antennas.push_back(14);
+        InstalledStations[1].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+        
+        // Make string 2
+        Antennas.push_back(7); Antennas.push_back(11);
+        Antennas.push_back(3); Antennas.push_back(15);
+        InstalledStations[1].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+
+        // Make string 3
+        Antennas.push_back(4); Antennas.push_back(8);
+        Antennas.push_back(0); Antennas.push_back(12);
+        InstalledStations[1].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+
+        InstalledStations[1].nStrings = InstalledStations[1].VHChannel.size();
+
+        // Make surface antennas
+        InstalledStations[1].surfaceChannels.push_back(17);
+        InstalledStations[1].surfaceChannels.push_back(18);
+        InstalledStations[1].surfaceChannels.push_back(19);
+        InstalledStations[1].surfaceChannels.push_back(20);
+
+        InstalledStations[1].nSurfaces = InstalledStations[1].surfaceChannels.size();
+
+        InstalledStations[1].nChannels = 20;
+        InstalledStations[1].nChannelsVH = 16;
+
     }
-    
-    if ( InstalledStations.size() > 2 ){ // Station 2
-	
-	//        Antennas.push_back(5);Antennas.push_back(9);Antennas.push_back(1);Antennas.push_back(17);
-        Antennas.push_back(5);Antennas.push_back(13);Antennas.push_back(1);Antennas.push_back(9);
-        InstalledStations[2].VHChannel.push_back(Antennas); // Make string 0
+
+    if (InstalledStations.size() > 2) { // Station 2
+
+        // Make string 0
+        Antennas.push_back(5); Antennas.push_back(13);
+        Antennas.push_back(1); Antennas.push_back(9);
+        InstalledStations[2].VHChannel.push_back(Antennas); 
         Antennas.clear();
-	//        Antennas.push_back(6);Antennas.push_back(10);Antennas.push_back(2);Antennas.push_back(18);
-        Antennas.push_back(6);Antennas.push_back(14);Antennas.push_back(2);Antennas.push_back(10);
-        InstalledStations[2].VHChannel.push_back(Antennas); // Make string 1
+
+        // Make string 1
+        Antennas.push_back(6); Antennas.push_back(14);
+        Antennas.push_back(2); Antennas.push_back(10);
+        InstalledStations[2].VHChannel.push_back(Antennas); 
         Antennas.clear();
-	//        Antennas.push_back(7);Antennas.push_back(11);Antennas.push_back(3);Antennas.push_back(19);
-        Antennas.push_back(7);Antennas.push_back(15);Antennas.push_back(3);Antennas.push_back(11);
-        InstalledStations[2].VHChannel.push_back(Antennas); // Make string 2
-        Antennas.clear();
-	//        Antennas.push_back(8);Antennas.push_back(12);Antennas.push_back(4);Antennas.push_back(20);
-        Antennas.push_back(4);Antennas.push_back(12);Antennas.push_back(0);Antennas.push_back(8);
-        InstalledStations[2].VHChannel.push_back(Antennas); // Make string 3
+
+        // Make string 2
+        Antennas.push_back(7); Antennas.push_back(15);
+        Antennas.push_back(3); Antennas.push_back(11);
+        InstalledStations[2].VHChannel.push_back(Antennas); 
         Antennas.clear();
         
+        // Make string 3
+        Antennas.push_back(4); Antennas.push_back(12);
+        Antennas.push_back(0); Antennas.push_back(8);
+        InstalledStations[2].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+
         InstalledStations[2].nStrings = InstalledStations[2].VHChannel.size();
-        
-	/*
-	  InstalledStations[1].surfaceChannels.push_back(13);
-	  InstalledStations[1].surfaceChannels.push_back(14);
-	  InstalledStations[1].surfaceChannels.push_back(15);
-	  InstalledStations[1].surfaceChannels.push_back(16);
-	*/
-	
+
+        // Make surface antennas
         InstalledStations[2].surfaceChannels.push_back(16);
         InstalledStations[2].surfaceChannels.push_back(17);
         InstalledStations[2].surfaceChannels.push_back(18);
         InstalledStations[2].surfaceChannels.push_back(19);
-	
+
         InstalledStations[2].nSurfaces = InstalledStations[2].surfaceChannels.size();
-        
+
         InstalledStations[2].nChannels = 20;
         InstalledStations[2].nChannelsVH = 16;
-      }
+    }
 
-
-    if ( InstalledStations.size() > 3 ){ // Station 3
-	//        Antennas.push_back(5);Antennas.push_back(9);Antennas.push_back(1);Antennas.push_back(17);
-        Antennas.push_back(5);Antennas.push_back(13);Antennas.push_back(1);Antennas.push_back(9);
-        InstalledStations[3].VHChannel.push_back(Antennas); // Make string 0
-        Antennas.clear();
-	//        Antennas.push_back(6);Antennas.push_back(10);Antennas.push_back(2);Antennas.push_back(18);
-        Antennas.push_back(6);Antennas.push_back(14);Antennas.push_back(2);Antennas.push_back(10);
-        InstalledStations[3].VHChannel.push_back(Antennas); // Make string 1
-        Antennas.clear();
-	//        Antennas.push_back(7);Antennas.push_back(11);Antennas.push_back(3);Antennas.push_back(19);
-        Antennas.push_back(7);Antennas.push_back(15);Antennas.push_back(3);Antennas.push_back(11);
-        InstalledStations[3].VHChannel.push_back(Antennas); // Make string 2
-        Antennas.clear();
-	//        Antennas.push_back(8);Antennas.push_back(12);Antennas.push_back(4);Antennas.push_back(20);
-        Antennas.push_back(4);Antennas.push_back(12);Antennas.push_back(0);Antennas.push_back(8);
-        InstalledStations[3].VHChannel.push_back(Antennas); // Make string 3
+    if (InstalledStations.size() > 3) { // Station 3
+        
+        // Make string 0
+        Antennas.push_back(5); Antennas.push_back(13);
+        Antennas.push_back(1); Antennas.push_back(9);
+        InstalledStations[3].VHChannel.push_back(Antennas); 
         Antennas.clear();
         
+        // Make string 1
+        Antennas.push_back(6); Antennas.push_back(14);
+        Antennas.push_back(2); Antennas.push_back(10);
+        InstalledStations[3].VHChannel.push_back(Antennas);
+        Antennas.clear();
+        
+        // Make string 2
+        Antennas.push_back(7); Antennas.push_back(15);
+        Antennas.push_back(3); Antennas.push_back(11);
+        InstalledStations[3].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+        
+        // Make string 3
+        Antennas.push_back(4); Antennas.push_back(12);
+        Antennas.push_back(0); Antennas.push_back(8);
+        InstalledStations[3].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+
         InstalledStations[3].nStrings = InstalledStations[3].VHChannel.size();
-        
-	/*
-	  InstalledStations[1].surfaceChannels.push_back(13);
-	  InstalledStations[1].surfaceChannels.push_back(14);
-	  InstalledStations[1].surfaceChannels.push_back(15);
-	  InstalledStations[1].surfaceChannels.push_back(16);
-	*/
-	
+
+        // Make surface antennas
         InstalledStations[3].surfaceChannels.push_back(16);
         InstalledStations[3].surfaceChannels.push_back(17);
         InstalledStations[3].surfaceChannels.push_back(18);
         InstalledStations[3].surfaceChannels.push_back(19);
-	
+
         InstalledStations[3].nSurfaces = InstalledStations[3].surfaceChannels.size();
-        
+
         InstalledStations[3].nChannels = 20;
         InstalledStations[3].nChannelsVH = 16;
-      }
+    }
+
+    if (InstalledStations.size() > 4) { // Station 4
+        
+        // Make string 0
+        Antennas.push_back(5); Antennas.push_back(13);
+        Antennas.push_back(1); Antennas.push_back(9);
+        InstalledStations[4].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+        
+         // Make string 1
+        Antennas.push_back(6); Antennas.push_back(14);
+        Antennas.push_back(2); Antennas.push_back(10);
+        InstalledStations[4].VHChannel.push_back(Antennas);
+        Antennas.clear();
+        
+        // Make string 2
+        Antennas.push_back(7); Antennas.push_back(15);
+        Antennas.push_back(3); Antennas.push_back(11);
+        InstalledStations[4].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+
+        // Make string 3
+        Antennas.push_back(4); Antennas.push_back(12);
+        Antennas.push_back(0); Antennas.push_back(8);
+        InstalledStations[4].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+
+        InstalledStations[4].nStrings = InstalledStations[4].VHChannel.size();
+
+        // A4 has no surface antennas
+        InstalledStations[4].nSurfaces = InstalledStations[4].surfaceChannels.size();
+
+        InstalledStations[4].nChannels = 16;
+        InstalledStations[4].nChannelsVH = 16;
+    }
+
+    if (InstalledStations.size() > 5) { // Station 5
+        
+        // Make string 0
+        Antennas.push_back(5); Antennas.push_back(13);
+        Antennas.push_back(1); Antennas.push_back(9);
+        InstalledStations[5].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+        
+        // Make string 1
+        Antennas.push_back(6); Antennas.push_back(14);
+        Antennas.push_back(2); Antennas.push_back(10);
+        InstalledStations[5].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+
+        // Make string 2
+        Antennas.push_back(7); Antennas.push_back(15);
+        Antennas.push_back(3); Antennas.push_back(11);
+        InstalledStations[5].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+        
+        // Make string 3
+        Antennas.push_back(4); Antennas.push_back(12);
+        Antennas.push_back(0); Antennas.push_back(8);
+        InstalledStations[5].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+
+        InstalledStations[5].nStrings = InstalledStations[5].VHChannel.size();
+
+        // A5 has no surface stations
+        InstalledStations[5].nSurfaces = InstalledStations[5].surfaceChannels.size();
+
+        InstalledStations[5].nChannels = 16;
+        InstalledStations[5].nChannelsVH = 16;
+    }
+
 }
     
     
@@ -5729,58 +5636,57 @@ void Detector::GetSSAfromChannel ( int stationID, int channelNum, int * antennaN
 }
 
 
-void Detector::GetSSAfromChannel ( int stationID, int channelNum, int * antennaNum, int * stringNum, Settings *settings1) {
-    *stringNum = -1;
-    *antennaNum = -1;
+void Detector::GetSSAfromChannel(int stationID, int channelNum, int * antennaNum, int * stringNum, Settings * settings1) {
+    * stringNum = -1;
+    * antennaNum = -1;
 
     // for the cases when actual installed TestBed stations geom info is in use
-    if ( settings1->DETECTOR==3 ) {
-      for (int i = 0; i < int(InstalledStations[stationID].VHChannel.size()); i++){
-	for (int j = 0; j < int(InstalledStations[stationID].VHChannel[i].size()); j++){
-	  if (channelNum == InstalledStations[stationID].VHChannel[i][j]){
-	    *stringNum = i;
-	    *antennaNum = j;
-	  }
-	}
-      }
-      
-      if (*stringNum == -1){
-	cerr << "No string/antenna matches the channel number" << endl;
-      }
-    }
-    else if (settings1->DETECTOR==4){
+    if (settings1 -> DETECTOR == 3) {
+        for (int i = 0; i < int(InstalledStations[stationID].VHChannel.size()); i++) {
+            for (int j = 0; j < int(InstalledStations[stationID].VHChannel[i].size()); j++) {
+                if (channelNum == InstalledStations[stationID].VHChannel[i][j]) {
+                    * stringNum = i;
+                    * antennaNum = j;
+                }
+            }
+        }
 
-      for (int i = 0; i < int(InstalledStations[stationID].VHChannel.size()); i++){
-	for (int j = 0; j < int(InstalledStations[stationID].VHChannel[i].size()); j++){
-	  if (channelNum == InstalledStations[stationID].VHChannel[i][j]){
-	    *stringNum = i;
-	    *antennaNum = j;
-	  }
-	}
-      }
-      
-      if (*stringNum == -1){
-	cerr << "No string/antenna matches the channel number" << endl;
-      }
+        if ( * stringNum == -1) {
+            cerr << "No string/antenna matches the channel number" << endl;
+        }
+    } else if (settings1 -> DETECTOR == 4) {
+
+        for (int i = 0; i < int(InstalledStations[stationID].VHChannel.size()); i++) {
+            for (int j = 0; j < int(InstalledStations[stationID].VHChannel[i].size()); j++) {
+                if (channelNum == InstalledStations[stationID].VHChannel[i][j]) {
+                    * stringNum = i;
+                    * antennaNum = j;
+                }
+            }
+        }
+
+        if ( * stringNum == -1) {
+            cerr << "No string/antenna matches the channel number" << endl;
+        }
 
     }
     // if only ideal stations are in use and also installed ARA1a (use ARA1a ch mapping for now)
     else {
 
-        for (int i = 0; i < int(InstalledStations[1].VHChannel.size()); i++){
-            for (int j = 0; j < int(InstalledStations[1].VHChannel[i].size()); j++){
-                if (channelNum == InstalledStations[1].VHChannel[i][j]){
-                    *stringNum = i;
-                    *antennaNum = j;
+        for (int i = 0; i < int(InstalledStations[1].VHChannel.size()); i++) {
+            for (int j = 0; j < int(InstalledStations[1].VHChannel[i].size()); j++) {
+                if (channelNum == InstalledStations[1].VHChannel[i][j]) {
+                    * stringNum = i;
+                    * antennaNum = j;
                 }
             }
         }
-    
-        if (*stringNum == -1){
+
+        if ( * stringNum == -1) {
             cerr << "No string/antenna matches the channel number" << endl;
         }
     }
-    
+
     return;
 }
 
@@ -5939,6 +5845,7 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
     if (StationID == 0) params.TestBed_BH_Mean_delay = 0.;
     //cout<<"No of chs in station "<<stationNum<<" : "<<InstalledStations[stationNum].nChannels+1<<endl;
     
+    std::cout<<"InstalledStations[StationID].nChannels is "<<InstalledStations[StationID].nChannels<<std::endl;
     for ( int chan = 0; chan < InstalledStations[StationID].nChannels; chan++){
         
       int antId;
@@ -6011,7 +5918,7 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
 
             
             //cout << "Borehole ch: " << chan << " station: " << stationNum << " string: " << stringNum << " ant: " << antennaNum << " X: " << stations[stationNum].strings[stringNum].antennas[antennaNum].GetX() << " Y: " << stations[stationNum].strings[stringNum].antennas[antennaNum].GetY() << " Z: " << stations[stationNum].strings[stringNum].antennas[antennaNum].GetZ() << " Type: " << stations[stationNum].strings[stringNum].antennas[antennaNum].type << endl;
-            cout << "Borehole ch: " << chan << " inserted station: " << StationIndex << "station: " << StationID << " string: " << stringNum << " ant: " << antennaNum << " Type: " << stations[StationIndex].strings[stringNum].antennas[antennaNum].type << endl;
+            cout << "Borehole ch: " << chan << " inserted station: " << StationIndex << " station: " << StationID << " string: " << stringNum << " ant: " << antennaNum << " Type: " << stations[StationIndex].strings[stringNum].antennas[antennaNum].type << endl;
 
 
 

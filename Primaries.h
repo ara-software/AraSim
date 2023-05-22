@@ -296,6 +296,8 @@ Interaction (IceModel *antarctica, Detector *detector, Settings *settings1, Prim
   void FlattoEarth_Near_Surface ( IceModel *antarctica, double X, double Y, double D, double max_depth);
   void FlattoEarth_Spherical ( IceModel *antarctica, double X, double Y, double Z);
 
+  void PosNuFromAntennaCenter (Detector *detector); ///< re-calculate Neutrino position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
+
   void PickNear_Cylinder (IceModel *antarctica, Detector *detector, Settings *settings1);
   double PickNear_Sphere (IceModel *antarctica, Detector *detector, Settings *settings1);
 
@@ -373,6 +375,7 @@ static const double banana_signal_fluct;//Turn off noise for banana plots (setti
 // void setCurrent(Primaries *primary1);
   void setCurrent(Primaries *primary1, Settings *settings1);
   Position posnu;
+  Position posnu_from_antcen; ///< Nu position (x,y,z,r,theta,phi) from antenna center. MK added -2023-05-19-
   Position posnu_down;
 //--------------------------------------------------
 // string  nuflavor;                   // neutrino flavor
@@ -431,7 +434,7 @@ double dnutries; //product of dtryingdirection and dtryingposition
 
  */
 
- ClassDef(Interaction,1);
+ ClassDef(Interaction,2);
 
 
 };//Interaction

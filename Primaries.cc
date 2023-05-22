@@ -975,6 +975,10 @@ Interaction::Interaction(IceModel *antarctica, Detector *detector, Settings *set
     
     
   }
+
+  //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
+  PosNuFromAntennaCenter(detector);
+
   //cout<<" Finished Pick posnu, r_in, r_enterice, nuexitice!!"<<endl;
   
   
@@ -1129,6 +1133,10 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
 
 
     }
+
+    //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
+    PosNuFromAntennaCenter(detector);
+
     //cout<<" Finished Pick posnu, r_in, r_enterice, nuexitice!!"<<endl;
 
 
@@ -1513,8 +1521,8 @@ Interaction::Interaction (Settings *settings1, Detector *detector, IceModel *ant
 	}
     }
 	
-	
-
+	//! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
+    PosNuFromAntennaCenter(detector);
     
     double tmp; // for useless information
     
@@ -2344,11 +2352,23 @@ void Interaction::PickNear_Cylinder_AboveIce (IceModel *antarctica, Detector *de
 }
 
 
+//! A function to set the exact neutrino interaction position
+/*!
 
+	PickExact will take in the specified theta (zenith) and phi (azimuth) angles and radial 
+		distance from the setup file (POSNU_THETA, POSNU_PHI, POSNU_R). This requires 
+		INTERACTION_MODE=2.
+	The convention is to measure phi in [0, 2*pi) from the positive x-hat direction and theta
+		in [0,pi] from the positive z-hat direction. The conversion to cartiesian 
+		coordinates is then
 
+		x = R * cos(phi) * sin(theta)
+		y = R * sin(phi) * sin(theta)
+		z = R * cos(theta)
 
-
-
+	These positions are measured relative to the center of the station, which is given by the 
+		variables avgX, avgY, and avgZ below (which may include the offset by core_x and core_y). 
+ */
 
 void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings *settings1, double thisR, double thisTheta, double thisPhi) {
     
@@ -2381,7 +2401,6 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
     double avgY = sumY/double(count);
     double avgZ = sumZ/double(count);
     
-    
 //    std::cout << "DetectorStation:X:Y:: "  << detector->stations[0].GetX() << " : " << detector->stations[0].GetY() << std::endl;
     printf("avgx: %.5f, avgy: %.5f, avgz: %.5f, detectorx: %.5f, detectory: %.5f, detectorz: %.5f, icesurface: %.5f\n", avgX, avgY, avgZ, detector->stations[0].GetX(), detector->stations[0].GetY(), detector->stations[0].GetZ(), antarctica->Surface(detector->stations[0].Lon(), detector->stations[0].Lat()));
     
@@ -2390,20 +2409,21 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
     if (detector->Get_mode() == 1 || detector->Get_mode() == 2 ||detector->Get_mode() == 3 ||detector->Get_mode() == 4) {   // detector mode is for ARA stations;
 //        X = detector->params.core_x + thisR*cos(thisPhi)*cos(thisTheta);
 //        Y = detector->params.core_y + thisR*sin(thisPhi)*cos(thisTheta);
-        X = avgX + thisR*cos(thisPhi)*cos(thisTheta);
-        Y = avgY + thisR*sin(thisPhi)*cos(thisTheta);
+        X = avgX + thisR*cos(thisPhi)*sin(thisTheta);
+        Y = avgY + thisR*sin(thisPhi)*sin(thisTheta);
         D = pow(X*X + Y*Y, 0.5);
         //interaction1->posnu.SetThetaPhi( D/antarctica->Surface(0., 0.), atan2(Y,X) ); 
+        
     }
     //calculate posnu's X, Y wrt to (0,0)
     else {  // for mode = 0 (testbed)
-        X = thisR*cos(thisPhi)*cos(thisTheta);
-        Y = thisR*sin(thisPhi)*cos(thisTheta);
+        X = thisR*cos(thisPhi)*sin(thisTheta);
+        Y = thisR*sin(thisPhi)*sin(thisTheta);
         D = pow(X*X + Y*Y, 0.5);
     }
 
 //    double centerZ = (detector->stations[0].strings[0].antennas[1].GetZ()+ detector->stations[0].strings[0].antennas[2].GetZ())/2.;
-    Z = avgZ + thisR*sin(thisTheta);
+    Z = avgZ + thisR*cos(thisTheta);
     //    std::cout << "CenterPosition:X:Y:Z:: "  << avgX << " : " << avgY << " : " << avgZ <<  std::endl;
 
     //std::cout << "Central position: " << centerZ << " : " << Z << " : " << X << " : " << Y << std::endl;
@@ -3197,7 +3217,44 @@ void Interaction::FlattoEarth_Spherical ( IceModel *antarctica, double X, double
   posnu.SetR( antarctica->Surface(posnu.Lon(), posnu.Lat()) + (Z) ); // note Z is negative
 }
 
+/*!
+    MK added -2023-05-19-
+    re-calculate Neutrino position from antenna center point of view 
+    Neutrino x,y,z,r,theta,phi will be saved on Position posnu_from_antcen array
+     
+*/
 
+void Interaction::PosNuFromAntennaCenter (Detector *detector) {
+
+    //! calculate antenna center
+    double avgX = 0.;
+    double avgY = 0.;
+    double avgZ = 0.;
+    int count = 0;
+
+    //! load antenna XYZ position
+    for (int i = 0; i < detector->stations[0].strings.size(); i++){
+        for (int j = 0; j < detector->stations[0].strings[i].antennas.size(); j++){
+            avgX = avgX + detector->stations[0].strings[i].antennas[j].GetX();
+            avgY = avgY + detector->stations[0].strings[i].antennas[j].GetY();
+            avgZ = avgZ + detector->stations[0].strings[i].antennas[j].GetZ();
+            count++;
+        }
+    }
+
+    avgX /= double(count);
+    avgY /= double(count);
+    avgZ /= double(count);
+
+    //! calculate Neutrino XYZ position from antenna center point of view
+    double posnu_x = posnu.GetX() - avgX;
+    double posnu_y = posnu.GetY() - avgY;
+    double posnu_z = posnu.GetZ() - avgZ;
+
+    //! store in array
+    posnu_from_antcen.SetXYZ(posnu_x, posnu_y, posnu_z); ///< SetXYZ() in Vector class will automatically update r, thrta, and phi by UpdateThetaPhi()
+
+}
      
 void Interaction::PickAnyDirection() {
   double rndlist[2];

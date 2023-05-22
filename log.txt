@@ -1702,3 +1702,125 @@ In Interaction::PickNear_Sphere, which is setting vertex positions, the 'adding 
 So, if we use DETECTOR=4, It will do nothing
 I added 'detector->Get_mode() == 4' option in the Interaction::PickNear_Sphere. 
 So that user can use effective area (INTERACTION_MODE=0) mode with deployed station mode (DETECTOR=4)
+
+==============================================================================
+
+2022/11/01 Alex Machtay (machtay.1@osu.edu)
+
+The PickExact mode used in Primaries.cc used a different convention from the rest of AraSim. 
+Instead of the neutrino trajectory being determined by an azimuthal angle measured 
+from the positive x-axis and a theta angle measured from the positive z-axis, 
+the azimuthal angle was measured from the positive x-axis (consistent with the rest of AraSim) 
+and the zenith angle was measured from the x-y plane (inconsistent with the rest of AraSim). 
+So the zenith angle went from [-pi/2, pi/2], with negative values below the x-y plane 
+and positive values above. AraSim's convention is to measure the 
+zenith angle from the positive z-axis, in the range [0, pi]. 
+
+Here is the old way of setting the trajectory in PickExact (line 2406 in Primaries.cc):
+
+X = avgX + thisR*cos(thisPhi)*cos(thisTheta);
+Y = avgY + thisR*sin(thisPhi)*cos(thisTheta);
+Z = avgZ + thisR*sin(thisTheta);
+
+Here is the updated method:
+
+X = avgX + thisR*cos(thisPhi)*sin(thisTheta);
+Y = avgY + thisR*sin(thisPhi)*sin(thisTheta);
+Z = avgZ + thisR*cos(thisTheta);
+
+Also updated the content of eventReadIn.txt so that it is consistent
+with this convention.
+
+==============================================================================
+
+2023/02/28 Brian Clark
+
+Changes were made to the Detector and Settings classes to enable
+AraSim to simulate A4 and A5, the fourth and fifth ARA stations.
+
+In Settings, this required altering CheckCompatibilitiesSettings
+to allow for detector livetime configs to work for stations larger than A2 an A3.
+
+In Detector.cc, the really important change was updating the function
+SetupInstalledStations to have the A4 and A5 geometry information.
+I also linted the main Detector function to fix a bunch of tabbing issues.
+This improved readability.
+
+There's also a minor update to the Deep Station rayleigh reader
+to make it more robust against the presence of blank lines.
+
+=============================================================================
+2023/04/03 Myoungchul Kim
+
+In continuous energy mode (EXPENONT < 5), the energy spectrum range is fixed to 10^16 ~ 21.5 eV (Based on the code, I believe the true intention was 10^16 ~ 22 eV...).
+But the calculation limit of the cross-section in GetSigma() in the Primary class is 10^16 ~ 21 eV based on Connolly et al. 2011
+Because of this, the simulation skips the event if Nu energy happens to be above 10^21 eV
+This PR allows users to freely customize (avoid the skip or focus certain energy range) the energy spectrum range by EXPONENT_MAX and EXPONENT_MIN options.
+EXPONENT_MIN: lower limit for energy spectrum range. The default is 10^16 [eV]
+EXPONENT_MAX: upper limit for energy spectrum range. The default is 10^22 [eV]
+
+==============================================================================
+2023/04/19 Alan Salcedo G
+
+This upgrade allows to use per-channel gain modeling. 
+For this, I restructured how gain/phase model files are read and loaded. 
+These changes happen primarily in Detector::ReadElectChain. 
+
+I rewrote the previous gain files, ARA_Electronics_TotalGainPhase.txt, ARA_Electronics_TotalGain_TwoFilters.txt, 
+and custom_electronics.txt, in the required .csv formats using the same names.
+
+Note: I found and fixed a preexisting bug in AraSim occurring in Detector::GetElectGain_1D_OutZero and
+Detector::GetElectPhase_1D dealing gain and phase interpolations. See changes in the if-else conditions on
+there functions here:   
+
+Full documentation of this work is available on DocDB: https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2757 
+ 
+==============================================================================
+
+2023/05/02 Myoungchul Kim
+
+Default value of Z_THIS_TOLERANCE is now 1
+Unless user changes Z_THIS_TOLERANCE to 0 which is dynamic requiredAccuracy setting, 
+requiredAccuracy is always follow Z_TOLERANCE parameter which is 0.2 as a default
+
+Added PA ice model in RaySolver.cc
+If user set RAY_TRACE_ICE_MODEL_PARAMS = 40, AraSim will use UNL Modified (PA model).
+Related slide: https://aradocs.wipac.wisc.edu/docs/0022/002222/001/inIceMC_Hughes_A5locations_10222020.pdf
+
+==============================================================================
+
+2023/05/18 Myoungchul Kim
+
+If a user wants to know the location of the true signal (technically the center of signal) inside the WF, the user needs to perform the below calculation themselves.
+
+for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) {
+.... double signal_center_offset = (stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].time[0]) * settings1->TIMESTEP * 1.e9;
+.... double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
+.... stations[i].strings[string_i].antennas[antenna_i].SignalBinTime.push_back(signal_center_time);
+}
+
+for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++): loop over each ray solution
+stations[i].strings[string_i].antennas[antenna_i].SignalBin[m]: bin index of each ray's signal center in the long noise pad (length = settings1->DATA_BIN_SIZE)
+stations[i].strings[string_i].antennas[antenna_i].time[0]: bin index of the beginning of the readout window (output WF) in the long noise pad
+settings1->TIMESTEP * 1.e9: time width in nanosecond
+double signal_center_offset: time offset between beginning of readout window and center of the signal
+stations[i].strings[string_i].antennas[antenna_i].time_mimic[0]: time of the beginning of the readout window (output WF)
+double signal_center_time: time of center of the signal based on readout window time config
+SignalBinTime: name of the output array
+
+I just decided to implement it inside the sim...
+
+==============================================================================
+
+2023/05/19 Myoungchul Kim
+
+We are only saving the Nu position (x, y, z, r, theta, phi) from the earth's center point of view.
+So, the true theta and phi values of Neutrino are not much useful for the current reconstruction method.
+And in order to compare the reconstructed Nu position with the true Nu position, we (at least me) need to recalculate the true position from the antenna center point of view.
+I decided to add another Nu position that calculated from the antenna center
+
+PosNuFromAntennaCenter() in the Primaries class will load antenna and Nu positions, and apply simply built-in SetXYZ() in Vector class
+The re-calculated value will be saved in the posnu_from_antcen array
+
+==============================================================================
+

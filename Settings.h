@@ -51,6 +51,10 @@ class Settings
 
         double EXPONENT; // 10^19 eV neutrinos only
 
+        double EXPONENT_MIN; // minimum log10(eV) of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino
+
+        double EXPONENT_MAX; // maximum log10(eV) of Neutrino energy spectrum, if user use continuous energy spectrum for simulating Neutrino
+
         int DETECTOR;   // choose detector layout
 
 	int DETECTOR_STATION; // for DETECTOR=4, indicates the single station to be simulated
@@ -298,8 +302,8 @@ class Settings
 	int APPLY_NOISE_FIGURE; // 0: do not apply new noise figure from Thomas Meures 2016
 	                        // 1: apply new noise figure to data
 
-	int CUSTOM_ELECTRONICS; //0 (default): use the regular "ARA_Electronics_TotalGain_TwoFilter.txt" file
-							//1 : load a custom electronics file, stored as "custom_electronics.txt" in the `data` directory
+	int CUSTOM_ELECTRONICS; //0 (default): use the regular "ARA_Electronics_TotalGain_TwoFilter.csv" file
+							//1 : load a custom electronics file, stored as "custom_electronics.csv" in the `data` directory
 
 
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
