@@ -3511,12 +3511,11 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
     
     V_total_forconvlv.clear();
     
-    // first, fill the noise values
+    //! first, fill the noise values
     for (int bin=0; bin<BINSIZE; bin++) { 
         bin_value = signalbin - BINSIZE/2 + bin;
 
-        // save the noise + signal waveform
-                           
+        //! save the noise + signal waveform
         if ( settings1->NOISE_CHANNEL_MODE==0) {
             V_total_forconvlv.push_back( trigger->v_noise_timedomain[ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
         }
@@ -3532,20 +3531,18 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
                 V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[8][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
             }
         }
-
-
     }
-
-    // do myconvlv and replace the diode response array
+    
+    //! do myconvlv and replace the diode response array
     if (BINSIZE == int(settings1->NFOUR / 2)) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv); ///< use default diode
     else if (BINSIZE == settings1->NFOUR) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv); ///< use default double length diode
 
-    // do replace the part we get from noise + signal
+    //! do replace the part we get from noise + signal
     for (int bin = signalbin - BINSIZE / 2 + (trigger->maxt_diode_bin); bin < signalbin + BINSIZE / 2; bin++) {
         trigger->Full_window[ID][bin] = V_total_forconvlv[bin - signalbin + BINSIZE/2];
         trigger->Full_window_V[ID][bin] += V[bin - signalbin + BINSIZE/2];
 
-        // electronics saturation effect
+        //! electronics saturation effect
         if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;
         else if ( trigger->Full_window_V[ID][bin] < -1.*settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = -1.*settings1->V_SATURATION;
 
@@ -3556,22 +3553,31 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin1, int signalbin2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, int new_NFOUR1, int new_NFOUR2) {
 
     int bin_value;
-    int signal_dbin = signalbin2 - signalbin1;
-    int BINSIZE = new_NFOUR1 / 4 + signal_dbin + new_NFOUR2 / 4;
+    //! set the edge of convolution pad in case second signal is covering entire first signal or vise versa
+    int min_bin1 = signalbin1 - new_NFOUR1 / 4;
+    int min_bin2 = signalbin2 - new_NFOUR2 / 4;
+    int min_bin = min_bin1;
+    if (min_bin1 > min_bin2) min_bin = min_bin2;
+    int max_bin1 = signalbin1 + new_NFOUR1 / 4;
+    int max_bin2 = signalbin2 + new_NFOUR2 / 4;
+    int max_bin = max_bin2;
+    if (max_bin1 > max_bin2) max_bin = max_bin1;
+    int BINSIZE = max_bin - min_bin + 1;
     if (BINSIZE > int(settings1->NFOUR / 2) && BINSIZE <= settings1->NFOUR) BINSIZE = settings1->NFOUR; ///< Let just use double length. It is easier to apply diode
-    int V2_offset = signalbin2 - new_NFOUR2 / 4 - (signalbin1 - new_NFOUR1 / 4); ///< offset index when second signal is entered at the pad
     double V_tmp[BINSIZE];
     for(int bin_tmp=0; bin_tmp<BINSIZE; bin_tmp++) {
         V_tmp[bin_tmp] = 0.;
     }
-    
+   
     V_total_forconvlv.clear();
     
-    // first, fill the noise values
+    //! first, fill the noise values
+    int sig1_bin_counts = 0;
+    int sig2_bin_counts = 0;
     for (int bin=0; bin<BINSIZE; bin++) {
-        bin_value = signalbin1 - new_NFOUR1 / 4 + bin;
+        bin_value = min_bin + bin;
 
-        // save the noise waveform
+        //! save the noise waveform
         if ( settings1->NOISE_CHANNEL_MODE==0) {
             V_total_forconvlv.push_back( trigger->v_noise_timedomain[ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ] );
         }
@@ -3588,33 +3594,24 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
         }
 
 
-        // exchange from pure noise to noise + signal
-        if (bin < new_NFOUR1 / 2) { ///< add first signal
-            V_total_forconvlv[bin] += V1[bin];
-            V_tmp[bin] += V1[bin];
+        //! exchange from pure noise to noise + signal
+        if (bin_value >= min_bin1 && bin_value < max_bin1) { ///< add 1st signal
+            V_total_forconvlv[bin] += V1[sig1_bin_counts];
+            V_tmp[bin] += V1[sig1_bin_counts];
+            sig1_bin_counts++;
         }
-        if (bin >= V2_offset) { ///< add second signal
-            if (bin - V2_offset < new_NFOUR2 / 2) {
-            V_total_forconvlv[bin] += V2[bin - V2_offset];
-            V_tmp[bin] += V2[bin - V2_offset];}
+        if (bin_value >= min_bin2 && bin_value < max_bin2) { ///< add 2nd signal
+            V_total_forconvlv[bin] += V2[sig2_bin_counts];
+            V_tmp[bin] += V2[sig2_bin_counts];
+            sig2_bin_counts++;        
         }
     }
-
     
-    //debug
-    //std::cout<<"signalbin1: "<<signalbin1<<std::endl;
-    //std::cout<<"signalbin2: "<<signalbin2<<std::endl;
-    //std::cout<<"signal_dbin: "<<signal_dbin<<std::endl;
-    //std::cout<<"new_NFOUR1/4: "<<new_NFOUR1/4<<std::endl;
-    //std::cout<<"new_NFOUR2/4: "<<new_NFOUR2/4<<std::endl;
-    //std::cout<<"binsize: "<<BINSIZE<<std::endl;
-    
-
-    // do myconvlv and replace the diode response array
+    //! do myconvlv and replace the diode response array
     if (BINSIZE == int(settings1->NFOUR / 2)) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv); ///< use default diode
     else if (BINSIZE == settings1->NFOUR) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv); ///< use default double length diode
 
-    // do replace the part we get from noise + signal
+    //! do replace the part we get from noise + signal
     for (int bin = signalbin1 - new_NFOUR1 / 4 + (trigger->maxt_diode_bin); bin < signalbin2 + new_NFOUR2 / 4; bin++) {
         trigger->Full_window[ID][bin] = V_total_forconvlv[bin - signalbin1 + new_NFOUR1 / 4];
         trigger->Full_window_V[ID][bin] += V_tmp[bin - signalbin1 + new_NFOUR1 / 4];
@@ -3630,11 +3627,19 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin0, int signalbin1, int signalbin2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, int new_NFOUR0, int new_NFOUR1, int new_NFOUR2) {
 
     int bin_value;
-    int signal_dbin = signalbin2 - signalbin1;
-    int signal_dbin0 = signalbin1 - signalbin0;
-    int BINSIZE = new_NFOUR1 / 4 + signal_dbin + new_NFOUR2 / 4;
-    int V0_offset = signalbin0 + new_NFOUR0 / 4 - (signalbin1 - new_NFOUR1 / 4); ///< offset index when previous signal is ended at the pad
-    int V2_offset = signalbin2 - new_NFOUR2 / 4 - (signalbin1 - new_NFOUR1 / 4); ///< offset index when second signal is entered at the pad
+    //! set the edge of convolution pad in case second signal is covering entire first signal or vise versa
+    int min_bin0 = signalbin0 - new_NFOUR0 / 4; ///< previous signal min edge
+    int min_bin1 = signalbin1 - new_NFOUR1 / 4;
+    int min_bin2 = signalbin2 - new_NFOUR2 / 4;
+    int min_bin = min_bin1;
+    if (min_bin1 > min_bin2) min_bin = min_bin2;
+    int max_bin0 = signalbin0 + new_NFOUR0 / 4; ///< previous signal max edge
+    int max_bin1 = signalbin1 + new_NFOUR1 / 4;
+    int max_bin2 = signalbin2 + new_NFOUR2 / 4;
+    int max_bin = max_bin2;
+    if (max_bin1 > max_bin2) max_bin = max_bin1;
+    int BINSIZE = max_bin - min_bin + 1;
+    if (BINSIZE > int(settings1->NFOUR / 2) && BINSIZE <= settings1->NFOUR) BINSIZE = settings1->NFOUR; ///< Let just use double length. It is easier to apply diode
     double V_tmp[BINSIZE];
     for(int bin_tmp=0; bin_tmp<BINSIZE; bin_tmp++) {
         V_tmp[bin_tmp] = 0.;
@@ -3642,11 +3647,14 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
     
     V_total_forconvlv.clear();
     
-    // first, fill the noise values
+    //! first, fill the noise values
+    int sig0_bin_counts = 0;
+    int sig1_bin_counts = 0;
+    int sig2_bin_counts = 0;
     for (int bin = 0; bin < BINSIZE; bin++) {
-        bin_value = signalbin1 - new_NFOUR1 / 4 + bin;
+        bin_value = min_bin + bin;
 
-        // save the noise waveform
+        //! save the noise waveform
         if ( settings1->NOISE_CHANNEL_MODE==0) {
             V_total_forconvlv.push_back( trigger->v_noise_timedomain[ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ] );
         }
@@ -3663,30 +3671,35 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
         }
 
 
-        // exchange from pure noise to noise + signal
-        if (bin < new_NFOUR1 / 2) { ///< add first signal
-            V_total_forconvlv[bin] += V1[bin];
-            V_tmp[bin] += V1[bin];
+        //! exchange from pure noise to noise + signal
+        if (bin_value >= min_bin1 && bin_value < max_bin1) { ///< add 1st signal
+            V_total_forconvlv[bin] += V1[sig1_bin_counts];
+            V_tmp[bin] += V1[sig1_bin_counts];
+            sig1_bin_counts++;
         }
-        if (bin >= V2_offset) { ///< add second signal
-            V_total_forconvlv[bin] += V2[bin - V2_offset];
-            V_tmp[bin] += V2[bin - V2_offset];
+        if (bin_value >= min_bin2 && bin_value < max_bin2) { ///< add 2nd signal
+            V_total_forconvlv[bin] += V2[sig2_bin_counts];
+            V_tmp[bin] += V2[sig2_bin_counts];
+            sig2_bin_counts++;
         }
-        if (bin < V0_offset) { ///< add previous signal
-            V_total_forconvlv[bin] += V0[bin + (new_NFOUR0 / 2 - V0_offset)];
-            V_tmp[bin] += V2[bin + (new_NFOUR0 / 2 - V0_offset)];
+        if (bin_value >= min_bin0 && bin_value < max_bin0) { ///< add previous signal
+            V_total_forconvlv[bin] += V0[sig0_bin_counts + abs(min_bin0 - min_bin)];
+            V_tmp[bin] += V0[sig0_bin_counts + abs(min_bin0 - min_bin)];
+            sig0_bin_counts++;
         }
+
     }
+    
+    //! do myconvlv and replace the diode response array
+    if (BINSIZE == int(settings1->NFOUR / 2)) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv); ///< use default diode
+    else if (BINSIZE == settings1->NFOUR) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv); ///< use default double length diode
 
-    // do myconvlv and replace the diode response array
-    trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv);
-
-    // do replace the part we get from noise + signal
+    //! do replace the part we get from noise + signal
     for (int bin = signalbin1 - new_NFOUR1 / 4 + (trigger->maxt_diode_bin); bin < signalbin2 + new_NFOUR2 / 4; bin++) {
         trigger->Full_window[ID][bin] = V_total_forconvlv[bin - signalbin1 + new_NFOUR1 / 4];
         trigger->Full_window_V[ID][bin] += V_tmp[bin - signalbin1 + new_NFOUR1 / 4];
 
-        // electronics saturation effect
+        //! electronics saturation effect
         if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;
         else if ( trigger->Full_window_V[ID][bin] < -1.*settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = -1.*settings1->V_SATURATION;
     }
