@@ -405,6 +405,7 @@ class Detector {
         double GetFreq(int bin) {return Freq[bin]*1.e6;} //from MHz to Hz
 
         vector <double> diode_real; // NFOUR/2 array of t domain tunnel diode response. same with icemc -> anita -> diode_real  but only full bandwidth array 4
+        vector <double> fdiode_real_dynamic_databin;    ///< dynamic length array of f domain tunnel diode response (FFT of diode_real). MK added -2023-05-22-
         vector <double> fdiode_real_databin;    // NFOUR array of f domain tunnel diode response (FFT of diode_real). also same with icemc -> anita -> fdiode_real  but only full bandwidth array 4
         vector <double> fdiode_real;    // NFOUR/2 array of f domain tunnel diode response (FFT of diode_real). also same with icemc -> anita -> fdiode_real  but only full bandwidth array 4
         vector <double> fdiode_real_double;    // NFOUR array of f domain tunnel diode response (FFT of diode_real). also same with icemc -> anita -> fdiode_real  but only full bandwidth array 4
@@ -429,6 +430,8 @@ class Detector {
         // this is a test version for getting new noise waveforms for each event
         // for a best performance, we can just set a new reasonable DATA_BIN_SIZE and make new values for those
         void get_NewDiodeModel(Settings *settings1);
+        
+        void get_NewDynamicDiodeModel(int pad_len); ///< repadding diode value based on input pad length. MK added -2023-05-22-
 
         void ReadFilter_New(Settings *settings1);    // get filter vector array with new DATA_BIN_SIZE 
 

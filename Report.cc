@@ -3536,6 +3536,10 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
     //! do myconvlv and replace the diode response array
     if (BINSIZE == int(settings1->NFOUR / 2)) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv); ///< use default diode
     else if (BINSIZE == settings1->NFOUR) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv); ///< use default double length diode
+    else { ///< repad diode value
+        detector->get_NewDynamicDiodeModel(BINSIZE);
+        trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_dynamic_databin, V_total_forconvlv);
+    }
 
     //! do replace the part we get from noise + signal
     for (int bin = signalbin - BINSIZE / 2 + (trigger->maxt_diode_bin); bin < signalbin + BINSIZE / 2; bin++) {
@@ -3610,6 +3614,10 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
     //! do myconvlv and replace the diode response array
     if (BINSIZE == int(settings1->NFOUR / 2)) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv); ///< use default diode
     else if (BINSIZE == settings1->NFOUR) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv); ///< use default double length diode
+    else { ///< repad diode value
+        detector->get_NewDynamicDiodeModel(BINSIZE);
+        trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_dynamic_databin, V_total_forconvlv);
+    }
 
     //! do replace the part we get from noise + signal
     for (int bin = signalbin1 - new_NFOUR1 / 4 + (trigger->maxt_diode_bin); bin < signalbin2 + new_NFOUR2 / 4; bin++) {
@@ -3693,6 +3701,10 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
     //! do myconvlv and replace the diode response array
     if (BINSIZE == int(settings1->NFOUR / 2)) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv); ///< use default diode
     else if (BINSIZE == settings1->NFOUR) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv); ///< use default double length diode
+    else { ///< repad diode value
+        detector->get_NewDynamicDiodeModel(BINSIZE);
+        trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_dynamic_databin, V_total_forconvlv);
+    }
 
     //! do replace the part we get from noise + signal
     for (int bin = signalbin1 - new_NFOUR1 / 4 + (trigger->maxt_diode_bin); bin < signalbin2 + new_NFOUR2 / 4; bin++) {

@@ -5071,7 +5071,30 @@ void Detector::get_NewDiodeModel(Settings *settings1) {
 
 }
 
+//! repadding diode value based on input pad length
+void Detector::get_NewDynamicDiodeModel(int pad_len) {
 
+    double diode_real_fft[pad_len * 2]; ///< double sized array for myconvlv
+
+    for (int i = 0; i < pad_len * 2; i++) {  // 512 bin added for zero padding
+        if ( i < (int)(maxt_diode / TIMESTEP) ) {
+            diode_real_fft[i] = diode_real[i];
+        } else {
+            diode_real_fft[i] = 0.;
+        }
+    }
+
+    // forward FFT
+    Tools::realft(diode_real_fft, 1, pad_len * 2);
+
+    // clear previous data as we need new diode response array for new pad_len
+    fdiode_real_dynamic_databin.clear(); 
+
+    // save f domain diode response in fdiode_real_dynamic_databin
+    for (int i = 0; i < pad_len * 2; i++) {
+        fdiode_real_dynamic_databin.push_back( diode_real_fft[i] );
+    }
+}
 
 void Detector::PrepareVectorsInstalled(){
     ARA_station temp_station;
