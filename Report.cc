@@ -330,6 +330,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
     double freq_tmp, heff, antenna_theta, antenna_phi;  // values needed for apply antenna gain factor and prepare fft, trigger
     double volts_forfft[settings1->NFOUR / 2];  // array for fft
     double dT_forfft;
+    double volts_forint[settings1->NFOUR / 2];  // array for interpolation
+    double T_forint[settings1->NFOUR / 2];  // array for interpolation
 
     int waveformLength = settings1->WAVEFORM_LENGTH;
     int waveformCenter = settings1->WAVEFORM_CENTER;
@@ -351,11 +353,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
     init_T = settings1->TIMESTEP *-1.e9 *((double) settings1->NFOUR / 4 + RandomTshift);    // locate zero time at the middle and give random time shift
 
-    int new_NFOUR = settings1->NFOUR;
+    //! max and min new NFOUR values for placing signla into noise. defalut is set to settings1->NFOUR value
     int new_NFOUR_min = settings1->NFOUR;
     int new_NFOUR_max = settings1->NFOUR;
-    double volts_forint[settings1->NFOUR / 2];  // array for interpolation
-    double T_forint[settings1->NFOUR / 2];  // array for interpolation
 
     for (int n = 0; n < settings1->NFOUR / 2; n++)
     {
@@ -507,7 +507,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 stations[i].strings[j].antennas[k].V.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].SignalExt.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].New_NFOUR.resize(ray_sol_cnt + 1);
-                                stations[i].strings[j].antennas[k].New_NFOUR[ray_sol_cnt] = settings1->NFOUR; ///< fill with default value incase there is no signal for ray solution                         
+                                stations[i].strings[j].antennas[k].New_NFOUR[ray_sol_cnt] = settings1->NFOUR; ///< fill with default value in case there is no signal for ray solution                         
 
                                 // calculate the polarization vector at the source
                                 Pol_vector = GetPolarization(event->Nu_Interaction[0].nnu, launch_vector);
@@ -806,7 +806,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] * 2;
                                                     Ntmp = Ntmp / 2; ///< zero pad is doubled. so, ratio is now half
                                                 }
-                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2; ///< now new Nnew for zero padding
+                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] * settings1->NFOUR / 2; ///< now new Nnew for zero padding
 
                                                 //! second, let's make zero pad what has Nnew length and fill with E-field
                                                 int pad_len = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt];
@@ -914,17 +914,19 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     this automatic changes will prevent the cliped WF no matter how signal is long
                                                     user dont have to empirically adjust the NFOUR values
                                                 */
+                                                int new_NFOUR = settings1->NFOUR;
+                                                int new_init_T = init_T;
                                                 if (settings1->DYNAMIC_NFOUR == 1) {
                                                     new_NFOUR = ((int)(pad_len / 4) + 1) * 4; ///< slightly longer, but also can be divided by 4
                                                     if (new_NFOUR < settings1->NFOUR) new_NFOUR = settings1->NFOUR;
-                                                    init_T = settings1->TIMESTEP * -1.e9 * ((double) new_NFOUR / 4 + RandomTshift);
+                                                    new_init_T = settings1->TIMESTEP * -1.e9 * ((double) new_NFOUR / 4 + RandomTshift);
                                                     if (new_NFOUR < new_NFOUR_min) new_NFOUR_min = new_NFOUR; 
                                                     if (new_NFOUR > new_NFOUR_max) new_NFOUR_max = new_NFOUR;
                                                 }
                                                 double new_volts_forint[new_NFOUR / 2];
                                                 double new_T_forint[new_NFOUR / 2];
                                                 for(int n = 0; n < new_NFOUR / 2; n++){
-                                                    new_T_forint[n] = init_T + (double)n * settings1->TIMESTEP * 1.e9;
+                                                    new_T_forint[n] = new_init_T + (double)n * settings1->TIMESTEP * 1.e9;
                                                 }
                                                 stations[i].strings[j].antennas[k].New_NFOUR[ray_sol_cnt] = new_NFOUR; ///< save in Report branch
    
@@ -936,11 +938,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                                 //! store signal WF into 'V' array
                                                 for (int n = 0; n < new_NFOUR / 2; n++) {
-                                                    if (settings1->TRIG_ANALYSIS_MODE != 2) { ///< not pure noise mode (we need signal)
-                                                        stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(new_volts_forint[n] * 2. / (double)pad_len);  // 2/N for inverse FFT normalization factor
-                                                    } else if (settings1->TRIG_ANALYSIS_MODE == 2) { ///< pure noise mode (set signal to 0). we might need to move this part bit earlier in the code...
-                                                        stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(0.);
-                                                    }
+                                                    double V_val = new_volts_forint[n] * 2. / (double)pad_len; ///< not pure noise mode (we need signal). 2/N for inverse FFT normalization factor
+                                                    if (settings1->TRIG_ANALYSIS_MODE == 2) V_val = 0; ///< pure noise mode (set signal to 0). we might need to move this part bit earlier in the code...
+                                                    stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(V_val); ///< save in Report branch
                                                 }
                                             }
 
@@ -950,6 +950,10 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                                 // initially give raysol has actual signal
                                                 stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] = 0;
+
+                                                //! fill the default NFOUR value 
+                                                new_NFOUR_min = settings1->NFOUR;
+                                                new_NFOUR_max = settings1->NFOUR;
 
                                                 // if no signal, push_back 0 values (otherwise the value inside will remain as old value)
                                                 for (int n = 0; n < settings1->NFOUR / 2; n++)
@@ -1649,7 +1653,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
         {
             // if there is any ray_sol (don't check trigger if there is no ray_sol at all)
 
-            // calculate total number of bins we need to do trigger check
+            //! calculate total number of bins we need to do trigger check
+            //! set length by using new_NFOUR_max value to contain the longest signal in noise pad
             max_total_bin = (stations[i].max_arrival_time - stations[i].min_arrival_time) / settings1->TIMESTEP + new_NFOUR_max * 3 + trigger->maxt_diode_bin;    // make more time
 
             // test generating new noise waveform for only stations if there's any ray trace solutions
@@ -1922,8 +1927,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                     {
                         for (int m = 0; m < stations[i].strings[j].antennas[k].ray_sol_cnt; m++)
                         {
-                            // loop over raysol numbers
-                            int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m];
+                            //! loop over raysol numbers
+                            //! set signal center bin index by using new_NFOUR_max value to contain the longest signal in noise pad
                             signal_bin.push_back((stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time) / (settings1->TIMESTEP) + new_NFOUR_max * 2 + trigger->maxt_diode_bin);
 
                             // store signal located bin
@@ -1933,8 +1938,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             {
                                 signal_dbin.push_back(signal_bin[m] - signal_bin[m - 1]);
                                 // cout<<"  signal_dbin["<<m-1<<"] : "<<signal_dbin[m-1];
-                                int new_NFOUR2 = stations[i].strings[j].antennas[k].New_NFOUR[m - 1];
-                                if ((signal_dbin[m - 1] < new_NFOUR2 / 2) || (signal_dbin[m - 1] < new_NFOUR1 / 2))
+                                //! signal_dbin should be smaller than sum of half length of each signal WF to have connceted signals
+                                int new_NFOUR_d = stations[i].strings[j].antennas[k].New_NFOUR[m - 1] / 4 + stations[i].strings[j].antennas[k].New_NFOUR[m] / 4;
+                                if (signal_dbin[m - 1] < new_NFOUR_d)
                                 {
                                     // if two ray_sol time delay is smaller than time window
                                     connect_signals.push_back(1);
@@ -1963,12 +1969,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             if (m == 0)
                             {
                                 // if it's first sol
-                                int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m];
+                                int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m]; ///< double length of 1st signal
                                 if (connect_signals[m] == 1)
                                 {
 
                                     // do two convlv with double array m, m+1
-                                    int new_NFOUR2 = stations[i].strings[j].antennas[k].New_NFOUR[m + 1];
+                                    int new_NFOUR2 = stations[i].strings[j].antennas[k].New_NFOUR[m + 1]; ///< double length of 2nd signal
                                     Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i,
                                                                 new_NFOUR1, new_NFOUR2);
                                 }
@@ -1996,7 +2002,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             // and previous raysol also connected
 
                                             // double size array with m-1, m, m+1 raysols all added
-                                            int new_NFOUR0 = stations[i].strings[j].antennas[k].New_NFOUR[m - 1];
+                                            int new_NFOUR0 = stations[i].strings[j].antennas[k].New_NFOUR[m - 1]; ///< double length of 0th signal
                                             Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m - 1], signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m - 1], 
                                                                         stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i,
                                                                         new_NFOUR0, new_NFOUR1, new_NFOUR2);
@@ -2122,9 +2128,13 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             int string_i = detector->getStringfromArbAntID(i, trig_j);
                             int antenna_i = detector->getAntennafromArbAntID(i, trig_j);
 
+                            //! set channel number for GetThres() and GetThresOffset() at here
+                            //! we only use different channle number, if we only want to use VPol for trigger
                             int channel_num = detector->GetChannelfromStringAntenna(i, string_i, antenna_i, settings1);
-                            if ((settings1->TRIG_ONLY_LOW_CH_ON == 1) && (settings1->DETECTOR != 3)) channel_num = GetChannelNum8_LowAnt(string_i, antenna_i); // reset channel numbers so that bottom antennas have ch 1-8
+                            if ((settings1->TRIG_ONLY_LOW_CH_ON == 1) && (settings1->DETECTOR != 3)) channel_num = GetChannelNum8_LowAnt(string_i, antenna_i); ///< reset channel numbers so that bottom antennas have ch 1-8
 
+                            //! set threshold value at here
+                            //! threshold value can be different hased on NOISE_CHANNEL_MODE and TRIG_ONLY_BH_ON options
                             double Thres_val = detector->GetThres(i, channel_num - 1, settings1) * detector->GetThresOffset(i, channel_num - 1, settings1);
                             if (settings1->NOISE_CHANNEL_MODE == 0) {Thres_val *= trigger->rmsdiode;}
                             else if (settings1->NOISE_CHANNEL_MODE == 1) {Thres_val *= trigger->rmsdiode_ch[channel_num - 1];}
@@ -2135,92 +2145,97 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     else {Thres_val *= trigger->rmsdiode_ch[8];}
                                 }                                
                             }
-   
+  
+                            //! determine when we launch the trigger search at here 
+                            //! if trig_start is true, we do trigger search
                             bool trig_start = false;
-                            // check if we want to use BH chs only for trigger analysis
+                            //! check if we want to use BH chs only for trigger analysis
                             if ((settings1->TRIG_ONLY_BH_ON == 1) && (settings1->DETECTOR == 3)) {
-                                // trig by BH is only for TestBed case
-                                // check if this channel is BH ch (DAQchan)
+                                //! trig by BH is only for TestBed case
+                                //! check if this channel is BH ch (DAQchan)
                                 if (detector->stations[i].strings[string_i].antennas[antenna_i].DAQchan == 0) {
                                     trig_start = true;
                                 }
                             }
-                            // in this case just use first 8 chs' thres values
+                            //! in this case just use first 8 chs' thres values
                             else if ((settings1->TRIG_ONLY_LOW_CH_ON == 1) && (settings1->DETECTOR != 3)) {
-                                // non-TestBed case, and only trig by lower 8 channels
+                                //! non-TestBed case, and only trig by lower 8 channels
                                 if (antenna_i < 2) {
-                                    // only antenna 0, 1 which are bottom 2 antennas
-                                    // set channel_num as new value (antenna 0, 1 are only possible antennas for channel_num 1 - 8)
+                                    //! only antenna 0, 1 which are bottom 2 antennas
+                                    //! set channel_num as new value (antenna 0, 1 are only possible antennas for channel_num 1 - 8)
                                     trig_start = true;
                                 }
                             }
-                            // other cases, use all possible chs for trigger analysis
+                            //! other cases, use all possible chs for trigger analysis
                             else {
                                 trig_start = true;
                             }
 
+                            //! launch trigger scan
                             if (trig_start == true) {
-                                //cout<<"trig_bin : "<<trig_bin<<endl;
+                                // cout<<"trig_bin : "<<trig_bin<<endl;
                                 trig_bin = 0;
-                                //cout<<"trig_bin : "<<trig_bin<<endl;
+                                // cout<<"trig_bin : "<<trig_bin<<endl;
+                                int ant_type = detector->stations[i].strings[string_i].antennas[antenna_i].type;
                                 while (trig_bin < trig_window_bin) {
-                                    // with threshold offset by chs
+                                    //! with threshold offset by chs
                                     if (trigger->Full_window[trig_j][trig_i + trig_bin] < Thres_val) {
-                                        // if this channel passed the trigger!
-                                        //cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
+                                        //! if this channel passed the trigger!
+                                        // cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
                                         stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
                                         N_pass++;
-                                        if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0) N_pass_V++; // Vpol
-                                        if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 1) N_pass_H++; // Hpol
-                                        if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
-                                        trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
+                                        if (ant_type == 0) N_pass_V++; // Vpol
+                                        if (ant_type == 1) N_pass_H++; // Hpol
+                                        if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   ///< added for fixed V_mimic
+                                        trig_bin = trig_window_bin; ///< if confirmed this channel passed the trigger, no need to do rest of bins
                                         Passed_chs.push_back(trig_j);
                                     }
                                     trig_bin++;
                                 }
                             }
-                            // check all triggered channels not just 3
-                            trig_j++;   // if station not passed the trigger, just go to next channel
-                        }   // while trig_j < ch_ID
+                            //! check all triggered channels not just 3
+                            trig_j++;   ///< if station not passed the trigger, just go to next channel
+                        }   ///< while trig_j < ch_ID
 
-                        if (((trig_mode == 0) && (N_pass > settings1->N_TRIG - 1))  // trig_mode = 0 case!
+                        if (((trig_mode == 0) && (N_pass > settings1->N_TRIG - 1))  ///< trig_mode = 0 case!
                             ||  // or
-                            ((trig_mode == 1) && ((N_pass_V > settings1->N_TRIG_V - 1) || (N_pass_H > settings1->N_TRIG_H - 1)))) {    // trig_mode = 1 case!
+                            ((trig_mode == 1) && ((N_pass_V > settings1->N_TRIG_V - 1) || (N_pass_H > settings1->N_TRIG_H - 1)))) {    ///< trig_mode = 1 case!
 
                             check_ch = 0;
-                            stations[i].Global_Pass = last_trig_bin;    // where actually global trigger occured
+                            stations[i].Global_Pass = last_trig_bin;    ///< where actually global trigger occured
 
-                            trig_i = max_total_bin; // also if we know this station is trigged, don't need to check rest of time window
+                            trig_i = max_total_bin; ///< also if we know this station is trigged, don't need to check rest of time window
                             for (int ch_loop = 0; ch_loop < ch_ID; ch_loop++) {
                                 //cout << ch_loop << "/" << ch_ID << endl;
                                 int string_i = detector->getStringfromArbAntID(i, ch_loop);
                                 int antenna_i = detector->getAntennafromArbAntID(i, ch_loop);
                                 //          cout << "string:antenna: " << string_i << " : " << antenna_i << endl;
-                                stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = -1;  // no likely init
+                                stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = -1;  ///< no likely init
 
                                 if (ch_loop == Passed_chs[check_ch] && check_ch < N_pass) {
-                                    // added one more condition (check_ch < N_Pass) for bug in vector Passed_chs.clear()???
-                                    // store which ray sol is triggered based on trig time
+                                    //! added one more condition (check_ch < N_Pass) for bug in vector Passed_chs.clear()???
+                                    //! store which ray sol is triggered based on trig time
                                     int mindBin = 1.e9; // init big value
                                     int dBin = 0;
                                     int trig_pass = stations[i].strings[string_i].antennas[antenna_i].Trig_Pass;
 
                                     for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) {
-                                        // loop over raysol numbers
+                                        //! loop over raysol numbers
                                         if (stations[i].strings[string_i].antennas[antenna_i].SignalExt[m]) {
                                             dBin = abs(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - trig_pass);
                                             if (dBin < mindBin) {
-                                                stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = m;   // store the ray sol number which is minimum difference between Trig_Pass bin
+                                                stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = m;   ///< store the ray sol number which is minimum difference between Trig_Pass bin
                                                 mindBin = dBin;
                                             }
                                         }
                                     }
     
+                                    //! set msg for triggered event at here
                                     int ant_types = detector->stations[i].strings[string_i].antennas[antenna_i].type;
                                     double posnu_d = event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i]);
                                     int noise_id = stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
                                     int likely_sol = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol;
-                                    //skip this passed ch as it already has bin info
+                                    //! skip this passed ch as it already has bin info
                                     if (settings1->TRIG_ONLY_LOW_CH_ON == 0) {
                                         cout << endl << "trigger passed at bin " << trig_pass << "  passed ch : " << ch_loop << " (" << ant_types << "type) Direct dist btw posnu : " << posnu_d << " noiseID : " << noise_id;
                                     } else if (settings1->TRIG_ONLY_LOW_CH_ON == 1) {
@@ -2236,24 +2251,29 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 } else {
                                     stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 0.;
                                 }
-                                // now save the voltage waveform to V_mimic
-                                int time_bin_i = waveformCenter - waveformLength / 2;
-                                int testbed_ch_delay = detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin;
-                                int manual_delay_bins = detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin;
+
+                                //! now save the voltage waveform to V_mimic
+                                //! set initial time bin index and delay bins length at here
+                                int time_bin_i = waveformCenter - waveformLength / 2; ///< center minus half length. yeah, this is initial time
+                                int testbed_ch_delay = detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin; ///< testbed delay
+                                int manual_delay_bins = detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin; ///< manual delay by user
                                 
-                                // new DAQ waveform writing mechanism test
+                                //! new DAQ waveform writing mechanism test
+                                //! loop over readout window bin
                                 for (int mimicbin = 0; mimicbin < waveformLength; mimicbin++) {
 
-                                    // new DAQ waveform writing mechanism test
                                     int time_bin = time_bin_i + mimicbin;
                                     int wf_bin = last_trig_bin + time_bin;
-                                    if (V_mimic_mode == 1 || V_mimic_mode == 2) {
+                                    if (V_mimic_mode == 1 || V_mimic_mode == 2) { ///< add delay bin
                                         wf_bin -= testbed_ch_delay;
                                         time_bin -= testbed_ch_delay;
                                     }
-                                    if (V_mimic_mode == 2) wf_bin -= manual_delay_bins;
-                                    double time_mimic_val = (double)time_bin * settings1->TIMESTEP * 1.e9;
-                                    if (V_mimic_mode == 2) time_mimic_val += detector->params.TestBed_WFtime_offset_ns;
+                                    if (V_mimic_mode == 2) { ///< add manual delay bin
+                                        wf_bin -= manual_delay_bins;
+                                        time_bin -= manual_delay_bins;
+                                    }
+                                    double time_mimic_val = (double)time_bin * settings1->TIMESTEP * 1.e9; ///< set time at here by multiplying time width
+                                    if (V_mimic_mode == 2) time_mimic_val += detector->params.TestBed_WFtime_offset_ns; ///< add offset time
 
                                     stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back(trigger->Full_window_V[ch_loop][wf_bin] * 1.e3);   // save in mV
                                     stations[i].strings[string_i].antennas[antenna_i].time.push_back(wf_bin);
@@ -2270,11 +2290,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     }
                                 }
 
-                                // set global_trig_bin values
-                                // Global passed bin is the center of the window
-                                int global_trig_bins = -1 * time_bin_i; // if (V_mimic_mode == 0) Global passed bin is the center of the window
-                                if (V_mimic_mode == 1 || V_mimic_mode == 2) global_trig_bins += testbed_ch_delay; // Global passed bin is the center of the window + delay to each chs from araGeom
-                                if (V_mimic_mode == 2) global_trig_bins += manual_delay_bins; // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
+                                //! set global_trig_bin values
+                                //! Global passed bin is the center of the window
+                                int global_trig_bins = -1 * time_bin_i; ///< if (V_mimic_mode == 0) Global passed bin is the center of the window
+                                if (V_mimic_mode == 1 || V_mimic_mode == 2) global_trig_bins += testbed_ch_delay; ///< Global passed bin is the center of the window + delay to each chs from araGeom
+                                if (V_mimic_mode == 2) global_trig_bins += manual_delay_bins; ///< Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
                                 stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = global_trig_bins;
                             }
 
@@ -3529,21 +3549,16 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
         else if ( trigger->Full_window_V[ID][bin] < -1.*settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = -1.*settings1->V_SATURATION;
 
     }
-
-
-    //V_total_forconvlv.clear();
-
 }
-
-
-
 
 // this one is for two connected signals 
 void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin1, int signalbin2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, int new_NFOUR1, int new_NFOUR2) {
 
     int bin_value;
     int signal_dbin = signalbin2 - signalbin1;
-    int BINSIZE = new_NFOUR1 / 4 + signal_dbin + new_NFOUR2 / 4;
+    //int BINSIZE = new_NFOUR1 / 4 + signal_dbin + new_NFOUR2 / 4;
+    int BINSIZE = settings1->NFOUR;
+    int V2_offset = signalbin2 - new_NFOUR2 / 4 - (signalbin1 - new_NFOUR1 / 4); ///< offset index when second signal is entered at the pad
     double V_tmp[BINSIZE];
     for(int bin_tmp=0; bin_tmp<BINSIZE; bin_tmp++) {
         V_tmp[bin_tmp] = 0.;
@@ -3573,30 +3588,26 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 
 
         // exchange from pure noise to noise + signal
-        if (bin < (BINSIZE - new_NFOUR2 / 2)) {  // bins where only first signal is shown
-            V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin];
-            V_tmp[bin] = V1[bin];
+        if (bin < new_NFOUR1 / 2) { ///< add first signal
+            V_total_forconvlv[bin] += V1[bin];
+            V_tmp[bin] += V1[bin];
         }
-        else if (bin < new_NFOUR1 / 2) { // bins where first + second signal is shown
-            V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V2[bin - (BINSIZE - new_NFOUR2 / 2)];
-            V_tmp[bin] = V1[bin] + V2[bin - (BINSIZE - new_NFOUR2 / 2)];
+        if (bin >= V2_offset) { ///< add second signal
+            if (bin - V2_offset < settings1->NFOUR / 2) {
+            V_total_forconvlv[bin] += V2[bin - V2_offset];
+            V_tmp[bin] += V2[bin - V2_offset];}
         }
-        else { // bins where only second signal is shown
-            V_total_forconvlv[bin] = V_total_forconvlv[bin] + V2[bin - (BINSIZE - new_NFOUR2 / 2)];
-            V_tmp[bin] = V2[bin - (BINSIZE - new_NFOUR2 / 2)];
-        }
-
     }
 
-    /*
+    
     //debug
-    std::cout<<"signalbin1: "<<signalbin1<<std::endl;
-    std::cout<<"signalbin2: "<<signalbin2<<std::endl;
-    std::cout<<"signal_dbin: "<<signal_dbin<<std::endl;
-    std::cout<<"new_NFOUR1/4: "<<new_NFOUR1/4<<std::endl;
-    std::cout<<"new_NFOUR2/4: "<<new_NFOUR2/4<<std::endl;
-    std::cout<<"binsize: "<<BINSIZE<<std::endl;
-    */
+    //std::cout<<"signalbin1: "<<signalbin1<<std::endl;
+    //std::cout<<"signalbin2: "<<signalbin2<<std::endl;
+    //std::cout<<"signal_dbin: "<<signal_dbin<<std::endl;
+    //std::cout<<"new_NFOUR1/4: "<<new_NFOUR1/4<<std::endl;
+    //std::cout<<"new_NFOUR2/4: "<<new_NFOUR2/4<<std::endl;
+    //std::cout<<"binsize: "<<BINSIZE<<std::endl;
+    
 
     // do myconvlv and replace the diode response array
     trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv);
@@ -3610,13 +3621,7 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
         if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;
         else if ( trigger->Full_window_V[ID][bin] < -1.*settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = -1.*settings1->V_SATURATION;
     }
-
-    //V_total_forconvlv.clear();
-
-
 }
-
-
 
 
 // this one is for three connected signals 
@@ -3626,6 +3631,8 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
     int signal_dbin = signalbin2 - signalbin1;
     int signal_dbin0 = signalbin1 - signalbin0;
     int BINSIZE = new_NFOUR1 / 4 + signal_dbin + new_NFOUR2 / 4;
+    int V0_offset = signalbin0 + new_NFOUR0 / 4 - (signalbin1 - new_NFOUR1 / 4); ///< offset index when previous signal is ended at the pad
+    int V2_offset = signalbin2 - new_NFOUR2 / 4 - (signalbin1 - new_NFOUR1 / 4); ///< offset index when second signal is entered at the pad
     double V_tmp[BINSIZE];
     for(int bin_tmp=0; bin_tmp<BINSIZE; bin_tmp++) {
         V_tmp[bin_tmp] = 0.;
@@ -3655,31 +3662,18 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 
 
         // exchange from pure noise to noise + signal
-        if (bin < (BINSIZE - new_NFOUR2 / 2)) {  // bins where no second signal is shown
-            if (bin < (signalbin0 + new_NFOUR0 / 4 - signalbin1)) {   // previous signal is also here!
-                V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V0[bin + (new_NFOUR0 / 2 - (signalbin0 + new_NFOUR0 / 4 - signalbin1))];
-                V_tmp[bin] = V1[bin] + V0[bin + (new_NFOUR0 / 2 - (signalbin0 + new_NFOUR0 / 4 - signalbin1))];
-            }
-            else {  // no previous signal, and next signal
-                V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin];
-                V_tmp[bin] = V1[bin];
-            }
+        if (bin < new_NFOUR1 / 2) { ///< add first signal
+            V_total_forconvlv[bin] += V1[bin];
+            V_tmp[bin] += V1[bin];
         }
-        else if (bin < new_NFOUR1 / 2) { // bins where first + second signal is shown
-            if ( signal_dbin0 + bin < BINSIZE ) {   // previous signal is also here!
-                V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V0[bin + (new_NFOUR0 / 2 - (signalbin0 + new_NFOUR0 / 4 - signalbin1))] + V2[bin - (BINSIZE - new_NFOUR2 / 2)];
-                V_tmp[bin] = V1[bin] + V0[bin + (new_NFOUR0 / 2 - (signalbin0 + new_NFOUR0 / 4 - signalbin1))] + V2[bin - (BINSIZE - new_NFOUR2 / 2)];
-            }
-            else {  // no previous signal, and next signal
-                V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V2[bin - (BINSIZE - new_NFOUR2 / 2)];
-                V_tmp[bin] = V1[bin] + V2[bin - (BINSIZE - new_NFOUR2 / 2)];
-            }
+        if (bin >= V2_offset) { ///< add second signal
+            V_total_forconvlv[bin] += V2[bin - V2_offset];
+            V_tmp[bin] += V2[bin - V2_offset];
         }
-        else { // bins where only second signal is shown
-            V_total_forconvlv[bin] = V_total_forconvlv[bin] + V2[bin - (BINSIZE - new_NFOUR2 / 2)];
-            V_tmp[bin] = V2[bin - (BINSIZE - new_NFOUR2 / 2)];
+        if (bin < V0_offset) { ///< add previous signal
+            V_total_forconvlv[bin] += V0[bin + (new_NFOUR0 / 2 - V0_offset)];
+            V_tmp[bin] += V2[bin + (new_NFOUR0 / 2 - V0_offset)];
         }
-
     }
 
     // do myconvlv and replace the diode response array
@@ -3694,10 +3688,6 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
         if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;
         else if ( trigger->Full_window_V[ID][bin] < -1.*settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = -1.*settings1->V_SATURATION;
     }
-
-    //V_total_forconvlv.clear();
-
-
 }
 
 
