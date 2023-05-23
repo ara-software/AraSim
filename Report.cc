@@ -353,7 +353,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
     init_T = settings1->TIMESTEP *-1.e9 *((double) settings1->NFOUR / 4 + RandomTshift);    // locate zero time at the middle and give random time shift
 
-    //! max and min new NFOUR values for placing signla into noise. defalut is set to settings1->NFOUR value
+    //! Maximum and minimum new NFOUR values of each event's WF (total 32 WF based on number channels and ray solutions)
+    //! It is for placing signla into noise pad. Defalut is set to settings1->NFOUR value
     int new_NFOUR_min = settings1->NFOUR;
     int new_NFOUR_max = settings1->NFOUR;
 
@@ -507,7 +508,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 stations[i].strings[j].antennas[k].V.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].SignalExt.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].New_NFOUR.resize(ray_sol_cnt + 1);
-                                stations[i].strings[j].antennas[k].New_NFOUR[ray_sol_cnt] = settings1->NFOUR; ///< fill with default value in case there is no signal for ray solution                         
+                                stations[i].strings[j].antennas[k].New_NFOUR[ray_sol_cnt] = settings1->NFOUR; ///< Filled with default value in case there is no ray solution for the injected signal                        
 
                                 // calculate the polarization vector at the source
                                 Pol_vector = GetPolarization(event->Nu_Interaction[0].nnu, launch_vector);
@@ -782,7 +783,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 //! get attenuation factor
                                                 double atten_factor = 0.;
                                                 double ice_atten_factor = IceAttenFactor ; ///< assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
-                                                if (settings1->USE_ARA_ICEATTENU == 2) ice_atten_factor = 1.; //apply freq dependent IceAttenFactor later
+                                                if (settings1->USE_ARA_ICEATTENU == 2) ice_atten_factor = 1.; ///< apply freq dependent IceAttenFactor later
                                                 atten_factor = 1. / ray_output[0][ray_sol_cnt] *ice_atten_factor *mag * fresnel;
 
                                                 //! pure time-domain signal before the antenna (get signal at 1m and apply atten factor)
@@ -797,8 +798,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     then later, apply antenna phase, total electronics with phase
                                                 */
 
-                                                //! first, let's figure out zero pad length
-                                                //! if dT of E-field is smaller then zeropad dT, increas zero pad length to have fine resolution of frequency spectrum
+                                                //! First, let's figure out zero pad length
+                                                //! If dT of E-field is smaller then zeropad dT, increase zero pad length to have a fine resolution of the frequency spectrum
                                                 dT_forfft = Tarray[1] - Tarray[0];  // step in ns
                                                 int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft; ///< dT ratio
                                                 stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1; ///< pad scale
@@ -806,28 +807,29 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] * 2;
                                                     Ntmp = Ntmp / 2; ///< zero pad is doubled. so, ratio is now half
                                                 }
-                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] * settings1->NFOUR / 2; ///< now new Nnew for zero padding
+                                                //! now new pad length (Nnew) for zero padding
+                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] * settings1->NFOUR / 2;
 
-                                                //! second, let's make zero pad what has Nnew length and fill with E-field
+                                                //! Second, let's make zero pad that has the length of the Nnew and filled with E-field and time
                                                 int pad_len = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt];
                                                 double V_forfft[pad_len]; ///< E-field value
                                                 double T_forfft[pad_len]; ///< time in ns
                                                 double time_offset = Tarray[outbin / 2] - dT_forfft * (double)(pad_len / 2); ///< time offset between E-field center and zero-pad center
-                                                int front_pad_len = pad_len / 2 - outbin / 2; ///< length of eampty space in front
-                                                int back_pad_len = pad_len / 2 + outbin / 2; ///< length of eampty space in back
+                                                int front_pad_len = pad_len / 2 - outbin / 2; ///< Front boundary of E-field WF in zero-pad
+                                                int back_pad_len = pad_len / 2 + outbin / 2; ///< Back boundary of E-field WF in zero-pad
                                                 for (int n = 0; n < pad_len; n++) {
                                                     //! make Tarray, Earray located at the center of Nnew array
                                                     T_forfft[n] = time_offset + (double)n * dT_forfft;
-                                                    if ((n >= front_pad_len) && (n < back_pad_len)) V_forfft[n] = Earray[n - front_pad_len]; ///< fill with E-field value
-                                                    else V_forfft[n] = 0.; ///< fill with zero
+                                                    if ((n >= front_pad_len) && (n < back_pad_len)) V_forfft[n] = Earray[n - front_pad_len]; ///< filled with E-field value
+                                                    else V_forfft[n] = 0.; ///< filled with zero
                                                 }
 
                                                 //! just get peak from the array and save in Report branch
                                                 stations[i].strings[j].antennas[k].PeakV.push_back(FindPeak(Earray, outbin));
 
                                                 /*!
-                                                    now, tranform zero-padded E-field into frequency spectrum
-                                                    then, apply 
+                                                    Now, tranform zero-padded E-field into frequency spectrum
+                                                    Then, apply 
                                                     1) freq dependent attenuation model (if USE_ARA_ICEATTENU is 2)
                                                     2) antenna factor (effective height, and polarization)
                                                     4) electronic chain gain
@@ -841,8 +843,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 /*!
                                                     Get ant gain with 2-D interpolation (may have bug?) 
                                                  */
-                                                int ant_number = 0; 
-                                                if (settings1->ANTENNA_MODE == 1) ant_number = k; ///< There are dfferences in Top and Bottom VPol. if ant_number is 2, GetGain_1D_OutZero() will apply Top VPol gain 
+                                                //! Set antenna number and polarization type at here
+                                                int ant_number = 0;
+                                                //! In ANTENNA_MODE == 1, Top and Bottom VPol have a different gain model.
+                                                //! If ant_number is 2, GetGain_1D_OutZero() will apply Top VPol gain 
+                                                if (settings1->ANTENNA_MODE == 1) ant_number = k;
                                                 int ant_type = detector->stations[i].strings[j].antennas[k].type; ///< 0: VPol, 1: HPol
                                                 if (settings1->ALL_ANT_V_ON == 1) ant_type = 0; ///< all the antennas are VPol
                                                
@@ -878,7 +883,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                         V_forfft[2 *n + 1] *= IceAttenFactor;   ///< apply IceAttenFactor to the imag part of fft
                                                     }
 
-                                                    //! calculate antenna effective height
+                                                    //! Calculate antenna effective height for each frequency bin
                                                     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
                                                                 antenna_theta, antenna_phi, ant_type, ant_number),
                                                                 freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
@@ -899,9 +904,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 }   // end for freq bin
 
                                                 /*!
-                                                    after we apply all the detector responses, we tranform the signal spectrum back to time-domain signal
-                                                    then, 1) we apply interpolation to signal to have user/pre-configured time width
-                                                    2) while we do interpolation, crop the WF in length of NFOUR / 2
+                                                    After we apply all the detector responses, we tranform the signal frequency spectrum back to time-domain signal
+                                                    Then, 1) we apply interpolation to signal to have user/pre-configured time width (TIMESTEP)
+                                                    2) while we do interpolation, we pad/crop the WF in length of NFOUR / 2
                                                     later we will merge this cropped signal WF with noise WF and gonna apply trigger algorithm 
                                                 */                                                
 
@@ -910,19 +915,24 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                                 /*! 
                                                     MK added -2023-05-20-
-                                                    changes the length of interpolated/cropped WF to slightly longer than length of original time-domain signal
-                                                    this automatic changes will prevent the cliped WF no matter how signal is long
-                                                    user dont have to empirically adjust the NFOUR values
+                                                    If user selected DYNAMIC_NFOUR to 1,
+                                                    Changes the length of zero-pad (NFOUR / 2) to have a same length with original time-domain signal
+                                                    These automatic changes will prevent the cliped WF issue no matter how signal is long
+                                                    User don't have to empirically adjust the NFOUR values
                                                 */
-                                                int new_NFOUR = settings1->NFOUR;
+                                                int new_NFOUR = settings1->NFOUR; ///< Default is user/pre-configured NFOUR
                                                 int new_init_T = init_T;
                                                 if (settings1->DYNAMIC_NFOUR == 1) {
-                                                    new_NFOUR = pad_len; ///< slightly longer, but also can be divided by 4
-                                                    if (new_NFOUR < settings1->NFOUR) new_NFOUR = settings1->NFOUR;
-                                                    new_init_T = settings1->TIMESTEP * -1.e9 * ((double) new_NFOUR / 4 + RandomTshift);
+                                                    new_NFOUR = pad_len; ///< same with original signal WF
+                                                    if (new_NFOUR < settings1->NFOUR) new_NFOUR = settings1->NFOUR; ///< if length of signal is smaller than default NFOUR, just use default NFOUR
+                                                    new_init_T = settings1->TIMESTEP * -1.e9 * ((double) new_NFOUR / 4 + RandomTshift); ///< recalculate initial time
+                                                    //! We save the longest/smallest NFOUR for placing signal into noise pad at later.
+                                                    //! Use maximum NFOUR will prevent entire signal to be placed outside of noise pad
+                                                    //! Use minimum NFOUR will allow trigger scan to start the scan from the begining of all the signals in the noise pad
                                                     if (new_NFOUR < new_NFOUR_min) new_NFOUR_min = new_NFOUR; 
                                                     if (new_NFOUR > new_NFOUR_max) new_NFOUR_max = new_NFOUR;
                                                 }
+                                                //! Filled interpolated signal WF into zero-pad
                                                 double new_volts_forint[new_NFOUR / 2];
                                                 double new_T_forint[new_NFOUR / 2];
                                                 for(int n = 0; n < new_NFOUR / 2; n++){
@@ -1654,7 +1664,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
             // if there is any ray_sol (don't check trigger if there is no ray_sol at all)
 
             //! calculate total number of bins we need to do trigger check
-            //! set length by using new_NFOUR_max value to contain the longest signal in noise pad
+            //! set the max_total_bin length by using new_NFOUR_max value to contain the longest signal in noise pad. MK added -2023-05-23-
             max_total_bin = (stations[i].max_arrival_time - stations[i].min_arrival_time) / settings1->TIMESTEP + new_NFOUR_max * 3 + trigger->maxt_diode_bin;    // make more time
 
             // test generating new noise waveform for only stations if there's any ray trace solutions
@@ -1928,7 +1938,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         for (int m = 0; m < stations[i].strings[j].antennas[k].ray_sol_cnt; m++)
                         {
                             //! loop over raysol numbers
-                            //! set signal center bin index by using new_NFOUR_max value to contain the longest signal in noise pad
+                            //! set the index of signal center bin by using new_NFOUR_max value to contain the longest signal in noise pad. MK added -2023-05-23-
                             signal_bin.push_back((stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time) / (settings1->TIMESTEP) + new_NFOUR_max * 2 + trigger->maxt_diode_bin);
 
                             // store signal located bin
@@ -1995,8 +2005,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     if (connect_signals[m] == 1)
                                     {
                                         // next raysol is connected
-                                        int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m];
-                                        int new_NFOUR2 = stations[i].strings[j].antennas[k].New_NFOUR[m + 1];
+                                        int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m]; ///< double length of 1st signal
+                                        int new_NFOUR2 = stations[i].strings[j].antennas[k].New_NFOUR[m + 1]; ///< double length of 2nd signal
                                         if (connect_signals[m - 1] == 1)
                                         {
                                             // and previous raysol also connected
@@ -2034,7 +2044,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             // and previous raysol not connected
 
                                             // single size array with only m raysol
-                                            int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m];
+                                            int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m]; ///< double length of 1st signal
                                             Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, new_NFOUR1);
                                         }
                                     }
@@ -2056,7 +2066,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                         // and previous raysol is not connected
 
                                         // single size array with only m raysol
-                                        int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m];
+                                        int new_NFOUR1 = stations[i].strings[j].antennas[k].New_NFOUR[m]; ///< double length of 1st signal
                                         Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, new_NFOUR1);
                                     }
                                 }
@@ -2101,6 +2111,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                 int check_ch;
 
+                //! Use new_NFOUR_min will allow trigger scan to start the scan from the begining of all the signals in the noise pad. MK added -2023-05-23-
                 trig_search_init = trigger->maxt_diode_bin + new_NFOUR_min;  // give some time shift for mimicing force trig events
                 trig_i = trig_search_init;
 
@@ -2128,13 +2139,13 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             int string_i = detector->getStringfromArbAntID(i, trig_j);
                             int antenna_i = detector->getAntennafromArbAntID(i, trig_j);
 
-                            //! set channel number for GetThres() and GetThresOffset() at here
-                            //! we only use different channle number, if we only want to use VPol for trigger
+                            //! Set channel number for GetThres() and GetThresOffset() at here
+                            //! We only use different channle number (GetChannelNum8_LowAnt()), if we want to use only VPol for trigger
                             int channel_num = detector->GetChannelfromStringAntenna(i, string_i, antenna_i, settings1);
                             if ((settings1->TRIG_ONLY_LOW_CH_ON == 1) && (settings1->DETECTOR != 3)) channel_num = GetChannelNum8_LowAnt(string_i, antenna_i); ///< reset channel numbers so that bottom antennas have ch 1-8
 
-                            //! set threshold value at here
-                            //! threshold value can be different hased on NOISE_CHANNEL_MODE and TRIG_ONLY_BH_ON options
+                            //! Set threshold value at here
+                            //! Threshold value can be different based on NOISE_CHANNEL_MODE and TRIG_ONLY_BH_ON options
                             double Thres_val = detector->GetThres(i, channel_num - 1, settings1) * detector->GetThresOffset(i, channel_num - 1, settings1);
                             if (settings1->NOISE_CHANNEL_MODE == 0) {Thres_val *= trigger->rmsdiode;}
                             else if (settings1->NOISE_CHANNEL_MODE == 1) {Thres_val *= trigger->rmsdiode_ch[channel_num - 1];}
@@ -2146,8 +2157,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 }                                
                             }
   
-                            //! determine when we launch the trigger search at here 
-                            //! if trig_start is true, we do trigger search
+                            //! Determine when we launch the trigger scan at here 
+                            //! If trig_start is true, we do trigger scan
                             bool trig_start = false;
                             //! check if we want to use BH chs only for trigger analysis
                             if ((settings1->TRIG_ONLY_BH_ON == 1) && (settings1->DETECTOR == 3)) {
@@ -2171,7 +2182,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 trig_start = true;
                             }
 
-                            //! launch trigger scan
+                            //! launch trigger scan if trig_start is true
                             if (trig_start == true) {
                                 // cout<<"trig_bin : "<<trig_bin<<endl;
                                 trig_bin = 0;
@@ -2230,7 +2241,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                         }
                                     }
     
-                                    //! set msg for triggered event at here
+                                    //! set the terminal msg for triggered event at here
                                     int ant_types = detector->stations[i].strings[string_i].antennas[antenna_i].type;
                                     double posnu_d = event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i]);
                                     int noise_id = stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
@@ -3505,7 +3516,7 @@ void Report::ClearUselessfromConnect(Detector *detector, Settings *settings1, Tr
 // this one is for single signal
 void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex, int new_NFOUR1) {
 
-    int BINSIZE = new_NFOUR1 / 2;
+    int BINSIZE = new_NFOUR1 / 2; ///< now length of convolution array is follwoing input signal length. MK added -2023-05-23-
 
     int bin_value;
     
@@ -3534,10 +3545,11 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
     }
     
     //! do myconvlv and replace the diode response array
+    //! Since signal WF length can be different by DYNAMIC_NFOUR option, based on the signal WF length we use different length of f-domain diode array. MK added -2023-05-23-
     if (BINSIZE == int(settings1->NFOUR / 2)) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv); ///< use default diode
     else if (BINSIZE == settings1->NFOUR) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv); ///< use default double length diode
-    else { ///< repad diode value
-        detector->get_NewDynamicDiodeModel(BINSIZE);
+    else { ///< signal length is different than any default diode, we repad the diode and use it
+        detector->get_NewDynamicDiodeModel(BINSIZE); ///< repad diode value
         trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_dynamic_databin, V_total_forconvlv);
     }
 
@@ -3557,15 +3569,17 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin1, int signalbin2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, int new_NFOUR1, int new_NFOUR2) {
 
     int bin_value;
-    //! set the edge of convolution pad in case second signal is covering entire first signal or vise versa
-    int min_bin1 = signalbin1 - new_NFOUR1 / 4;
-    int min_bin2 = signalbin2 - new_NFOUR2 / 4;
+    //! MK added -2023-05-23-
+    //! set the edge of convolution pad by checking all the input signals length
+    //! We do this in case second signal is covering entire first signal or vise versa
+    int min_bin1 = signalbin1 - new_NFOUR1 / 4; ///< 1st signal
+    int min_bin2 = signalbin2 - new_NFOUR2 / 4; ///< 2nd signal
     int min_bin = min_bin1;
-    if (min_bin1 > min_bin2) min_bin = min_bin2;
+    if (min_bin1 > min_bin2) min_bin = min_bin2; ///< if 2nd signal edge is smaller than 1st signal, we use 2nd signal edge for pad edge
     int max_bin1 = signalbin1 + new_NFOUR1 / 4;
     int max_bin2 = signalbin2 + new_NFOUR2 / 4;
     int max_bin = max_bin2;
-    if (max_bin1 > max_bin2) max_bin = max_bin1;
+    if (max_bin1 > max_bin2) max_bin = max_bin1; ///< if 1st signal edge is smaller than 2nd signal, we use 1st signal edge for pad edge
     int BINSIZE = max_bin - min_bin + 1;
     if (BINSIZE > int(settings1->NFOUR / 2) && BINSIZE <= settings1->NFOUR) BINSIZE = settings1->NFOUR; ///< Let just use double length. It is easier to apply diode
     double V_tmp[BINSIZE];
@@ -3599,10 +3613,11 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 
 
         //! exchange from pure noise to noise + signal
+        //! Identify location of signal by comapring bin index of signal edges and noise pad index. MK added -2023-05-23- 
         if (bin_value >= min_bin1 && bin_value < max_bin1) { ///< add 1st signal
             V_total_forconvlv[bin] += V1[sig1_bin_counts];
             V_tmp[bin] += V1[sig1_bin_counts];
-            sig1_bin_counts++;
+            sig1_bin_counts++; ///< counts bin index of signal seperately, using noise pad bin index is too complicated
         }
         if (bin_value >= min_bin2 && bin_value < max_bin2) { ///< add 2nd signal
             V_total_forconvlv[bin] += V2[sig2_bin_counts];
@@ -3612,10 +3627,11 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
     }
     
     //! do myconvlv and replace the diode response array
+    //! Since signal WF length can be different by DYNAMIC_NFOUR option, based on the signal WF length we use different length of f-domain diode array. MK added -2023-05-23-
     if (BINSIZE == int(settings1->NFOUR / 2)) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv); ///< use default diode
     else if (BINSIZE == settings1->NFOUR) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv); ///< use default double length diode
-    else { ///< repad diode value
-        detector->get_NewDynamicDiodeModel(BINSIZE);
+    else { ///< signal length is different than any default diode, we repad the diode and use it
+        detector->get_NewDynamicDiodeModel(BINSIZE); ///< repad diode value
         trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_dynamic_databin, V_total_forconvlv);
     }
 
@@ -3635,17 +3651,20 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin0, int signalbin1, int signalbin2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, int new_NFOUR0, int new_NFOUR1, int new_NFOUR2) {
 
     int bin_value;
-    //! set the edge of convolution pad in case second signal is covering entire first signal or vise versa
+    //! MK added -2023-05-23-
+    //! set the edge of convolution pad by checking all the input signals length
+    //! We do this in case second signal is covering entire first signal or vise versa
+    //! We don't care previous signal since it is considered to not triggered by simulation
     int min_bin0 = signalbin0 - new_NFOUR0 / 4; ///< previous signal min edge
-    int min_bin1 = signalbin1 - new_NFOUR1 / 4;
-    int min_bin2 = signalbin2 - new_NFOUR2 / 4;
+    int min_bin1 = signalbin1 - new_NFOUR1 / 4; ///< 1st signal
+    int min_bin2 = signalbin2 - new_NFOUR2 / 4; ///< 2nd signal
     int min_bin = min_bin1;
-    if (min_bin1 > min_bin2) min_bin = min_bin2;
+    if (min_bin1 > min_bin2) min_bin = min_bin2; ///< if 2nd signal edge is smaller than 1st signal, we use 2nd signal edge for pad edge
     int max_bin0 = signalbin0 + new_NFOUR0 / 4; ///< previous signal max edge
     int max_bin1 = signalbin1 + new_NFOUR1 / 4;
-    int max_bin2 = signalbin2 + new_NFOUR2 / 4;
+    int max_bin2 = signalbin2 + new_NFOUR2 / 4; 
     int max_bin = max_bin2;
-    if (max_bin1 > max_bin2) max_bin = max_bin1;
+    if (max_bin1 > max_bin2) max_bin = max_bin1; ///< if 1st signal edge is smaller than 2nd signal, we use 1st signal edge for pad edge
     int BINSIZE = max_bin - min_bin + 1;
     if (BINSIZE > int(settings1->NFOUR / 2) && BINSIZE <= settings1->NFOUR) BINSIZE = settings1->NFOUR; ///< Let just use double length. It is easier to apply diode
     double V_tmp[BINSIZE];
@@ -3680,10 +3699,11 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 
 
         //! exchange from pure noise to noise + signal
+        //! Identify location of signal by comapring bin index of signal edges and noise pad index. MK added -2023-05-23-
         if (bin_value >= min_bin1 && bin_value < max_bin1) { ///< add 1st signal
             V_total_forconvlv[bin] += V1[sig1_bin_counts];
             V_tmp[bin] += V1[sig1_bin_counts];
-            sig1_bin_counts++;
+            sig1_bin_counts++; ///< counts bin index of signal seperately, using noise pad bin index is too complicated
         }
         if (bin_value >= min_bin2 && bin_value < max_bin2) { ///< add 2nd signal
             V_total_forconvlv[bin] += V2[sig2_bin_counts];
@@ -3691,7 +3711,7 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
             sig2_bin_counts++;
         }
         if (bin_value >= min_bin0 && bin_value < max_bin0) { ///< add previous signal
-            V_total_forconvlv[bin] += V0[sig0_bin_counts + abs(min_bin0 - min_bin)];
+            V_total_forconvlv[bin] += V0[sig0_bin_counts + abs(min_bin0 - min_bin)]; ///< Since previous can be cut by convolution pad, we apply abs(min_bin0 - min_bin) to locate signal
             V_tmp[bin] += V0[sig0_bin_counts + abs(min_bin0 - min_bin)];
             sig0_bin_counts++;
         }
@@ -3699,10 +3719,11 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
     }
     
     //! do myconvlv and replace the diode response array
+    //! Identify location of signal by comapring bin index of signal edges and noise pad index. MK added -2023-05-23-
     if (BINSIZE == int(settings1->NFOUR / 2)) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv); ///< use default diode
     else if (BINSIZE == settings1->NFOUR) trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_double, V_total_forconvlv); ///< use default double length diode
-    else { ///< repad diode value
-        detector->get_NewDynamicDiodeModel(BINSIZE);
+    else { ///< signal length is different than any default diode, we repad the diode and use it
+        detector->get_NewDynamicDiodeModel(BINSIZE); ///< repad diode value
         trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real_dynamic_databin, V_total_forconvlv);
     }
 
