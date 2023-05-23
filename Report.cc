@@ -3620,9 +3620,9 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
     }
 
     //! do replace the part we get from noise + signal
-    for (int bin = signalbin1 - new_NFOUR1 / 4 + (trigger->maxt_diode_bin); bin < signalbin2 + new_NFOUR2 / 4; bin++) {
-        trigger->Full_window[ID][bin] = V_total_forconvlv[bin - signalbin1 + new_NFOUR1 / 4];
-        trigger->Full_window_V[ID][bin] += V_tmp[bin - signalbin1 + new_NFOUR1 / 4];
+    for (int bin = min_bin + (trigger->maxt_diode_bin); bin < max_bin; bin++) {
+        trigger->Full_window[ID][bin] = V_total_forconvlv[bin - min_bin];
+        trigger->Full_window_V[ID][bin] += V_tmp[bin - min_bin];
         
         // electronics saturation effect
         if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;
@@ -3707,9 +3707,9 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
     }
 
     //! do replace the part we get from noise + signal
-    for (int bin = signalbin1 - new_NFOUR1 / 4 + (trigger->maxt_diode_bin); bin < signalbin2 + new_NFOUR2 / 4; bin++) {
-        trigger->Full_window[ID][bin] = V_total_forconvlv[bin - signalbin1 + new_NFOUR1 / 4];
-        trigger->Full_window_V[ID][bin] += V_tmp[bin - signalbin1 + new_NFOUR1 / 4];
+    for (int bin = min_bin + (trigger->maxt_diode_bin); bin < max_bin; bin++) {
+        trigger->Full_window[ID][bin] = V_total_forconvlv[bin - min_bin];
+        trigger->Full_window_V[ID][bin] += V_tmp[bin - min_bin];
 
         //! electronics saturation effect
         if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;
