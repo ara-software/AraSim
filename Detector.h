@@ -262,8 +262,11 @@ class Detector {
 
 	void ReadTrig_Delays_Masking(string filename, Settings *settings1);
 	std::vector<double> triggerDelay; //trigger delay for a given channel (seconds?)
-	std::vector<double> triggerMask;  //trigger masking decision value (either 0 or 1)
-	std::vector<double> activeDelay;  //decision value to activate delay (either 0 or 1)
+	std::vector<int> triggerMask;  //trigger masking decision value (either 0 or 1)
+	std::vector<int> activeDelay;  //decision value to activate delay (either 0 or 1)
+
+	int GetTrigOffset( int ch, Settings *settings1 );
+	int GetTrigMasking( int ch );
 
         void ReadGainOffset_TestBed(string filename, Settings *settings1);
         vector <double> GainOffset_TB_ch;   // constant gain offset for the TestBed chs 
