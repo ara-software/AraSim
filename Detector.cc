@@ -1796,6 +1796,20 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             ReadCalPulserWF("./data/CalPulserWF.txt", settings1);
         }
 
+	if(settings1->DETECTOR_STATION > 0){
+	cout <<" Reading trigger formation values for this station and configuration from file:"<<endl;
+                char the_trig_filename[500];
+                sprintf(the_trig_filename, "./data/trigger/delays_masking_A%d_C%d.csv",
+                     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+                cout << the_trig_filename <<endl;
+                ReadTrig_Delays_Masking(std::string(the_trig_filename), settings1);
+	}
+	else{
+		cout <<"    Trigger formation file does not exist for this station"<<endl;
+                cout<<"     Reading standard trigger formation values"<<endl;
+                ReadElectChain("./data/trigger/delays_masking_custom.csv", settings1);
+	}
+
     } // if mode == 4
 
     // add additional depth if it's on
@@ -4188,7 +4202,7 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
 	trigFile.clear(); // back to the beginning of the file again
 	trigFile.seekg(0, ios::beg);
         int numChannels = lineCount - 1; // one row is dedicated to headers; number of channels is therefore # rows - 1			
-
+	
 	//Set up containers to stream the csv file into.
 	
 	//vector of delays
@@ -4201,12 +4215,12 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
         activeDelay.resize(numChannels); // resize to account for the number of channels
 
 	theLineNo = 0; // reset this counter
-	if (gainFile.is_open()){
-                while(gainFile.peek()!=EOF){
+	if (trigFile.is_open()){
+                while(trigFile.peek()!=EOF){
 
                         if(theLineNo == 0 ){
 				// skip the first line (the header file)
-				getline (gainFile, line);
+				getline(trigFile, line);
                                 theLineNo++;
                         }
                         else{
@@ -4284,10 +4298,28 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
 			
 				// now we're done!
 				theLineNo++; //advance the line number
-			 }		
+				
+			}		
 		}
 	}
 	trigFile.close();
+
+//ADDED FOR DEBUGGING - REMOVE AT THE END
+
+for(int i=0; i<triggerDelay.size(); i++){
+	cout << "Trigger delay (Ch." << i << "): ";
+	cout << triggerDelay[i] << endl;
+	}
+
+for(int i=0; i<triggerMask.size(); i++){
+        cout << "Trigger mask (Ch." << i << "): ";
+        cout << triggerMask[i] << endl;
+        }
+
+for(int i=0; i<activeDelay.size(); i++){
+        cout << "Active delay (Ch." << i << "): ";
+        cout << activeDelay[i] << endl;
+        }
 
 }
 
@@ -5045,8 +5077,33 @@ void Detector::ReadRayleigh_New(Settings *settings1) {    // will return gain (d
 }
 
 
+//Added by Alan for Trig Delays and Making
 
+int Detector::GetTrigOffset( int ch, Settings *settings1 ){
+	
+	double mostDelay;
+	int offset;
+		
+	if(activeDelay[ch]==1){
 
+		mostDelay = *max_element(triggerDelay.begin(), triggerDelay.end());
+		offset = int((mostDelay -  triggerDelay[ch]) / (settings1->TIMESTEP * 1e9));
+	}
+	else{
+		offset = 0;
+	}
+	
+	return offset;
+}
+
+int Detector::GetTrigMasking( int ch ){ 
+	
+	int masking;
+	masking = triggerMask[ch];
+	
+	return masking; 
+	
+}
 
 
 double Detector::GetGainOffset( int StationID, int ch, Settings *settings1 ) { // returns voltage factor for specific channel gain off set
