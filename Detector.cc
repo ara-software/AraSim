@@ -871,6 +871,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         }
         cout << "done read elect chain" << endl;
 
+	cout<<"     Reading standard trigger formation values"<<endl;
+        ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
+
     } // if mode == 1
 
     /////////////////////////////////////////////////////////////////////////////////    
@@ -1253,6 +1256,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
         }
 
+	cout<<"     Reading standard trigger formation values"<<endl;
+	ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
+
     } // if mode == 2
 
     /////////////////////////////////////////////////////////////////////////////////    
@@ -1521,6 +1527,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             // read TestBed Calpulser waveform measured (before pulser)
             ReadCalPulserWF("./data/CalPulserWF.txt", settings1);
         }
+
+	cout<<"     Reading standard trigger formation values"<<endl;
+        ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
 
     } // if mode == 3
     
@@ -1807,7 +1816,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 	else{
 		cout <<"    Trigger formation file does not exist for this station"<<endl;
                 cout<<"     Reading standard trigger formation values"<<endl;
-                ReadElectChain("./data/trigger/delays_masking_custom.csv", settings1);
+                ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
 	}
 
     } // if mode == 4
@@ -4118,7 +4127,7 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
                 cout << "The not found trigger formation filename is: " << filename << endl;            
                 cerr << errorMessage << endl;
                 cerr << "Defaulting to standard trigger formation" << endl;
-                filename = "./data/trigger/standard_trigger_formation.csv";
+                filename = "./data/trigger/delays_masking_custom.csv";
                 cout << "Defaulted to standard trigger formation from file: " << filename << endl;
         }
 
@@ -5080,13 +5089,15 @@ void Detector::ReadRayleigh_New(Settings *settings1) {    // will return gain (d
 //Added by Alan for Trig Delays and Making
 
 int Detector::GetTrigOffset( int ch, Settings *settings1 ){
-	
+cout << "Ch. no. inside offset function: " << ch << endl;
 	double mostDelay;
 	int offset;
 		
 	if(activeDelay[ch]==1){
 
 		mostDelay = *max_element(triggerDelay.begin(), triggerDelay.end());
+cout << "mostDelay: "<< mostDelay << endl;
+cout << "trigger Delay[ch]: " << triggerDelay[ch] << endl;
 		offset = int((mostDelay -  triggerDelay[ch]) / (settings1->TIMESTEP * 1e9));
 	}
 	else{
@@ -5097,10 +5108,10 @@ int Detector::GetTrigOffset( int ch, Settings *settings1 ){
 }
 
 int Detector::GetTrigMasking( int ch ){ 
-	
+cout << "Channel no. inside masking function: "<< ch << endl;	
 	int masking;
 	masking = triggerMask[ch];
-	
+cout << "Masking value: " << masking << endl;
 	return masking; 
 	
 }
