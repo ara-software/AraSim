@@ -2178,17 +2178,25 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                             int string_i = detector->getStringfromArbAntID(i, trig_j);
                             int antenna_i = detector->getAntennafromArbAntID(i, trig_j);
+			    int channel_num = detector->GetChannelfromStringAntenna(i, string_i, antenna_i, settings1);
 
-                            int channel_num = detector->GetChannelfromStringAntenna(i, string_i, antenna_i, settings1);
+			    if (!(settings1->DETECTOR==4)){
+ 			    	channel_num = channel_num+1; // Channel numbering is different for DETECTOR=(1,2,3) than for DETECTOR = 4 in GetChannelfromStringAntenna(), it needs that shift 
+ 			    }
+
 //masking here
-			    if( detector->GetTrigMasking(channel_num)==1){
+cout << "Ch. no. before mapping: " << trig_j << endl;
+cout << "Ch. no. after mapping: " << channel_num << endl;
+
+			    if( detector->GetTrigMasking(channel_num-1)==1){
 				trig_j++;
 				continue;	
 			    }
+cout << "Masked? Compare to ch. before mapping: " << trig_j << endl;
 //offset calculated here!
 			    int offset=0;
-			    offset = detector->GetTrigOffset(channel_num, settings1);
-
+			    offset = detector->GetTrigOffset(channel_num-1, settings1);
+cout << "Offset: " << offset << endl;
                             // check if we want to use BH chs only for trigger analysis
                             //if (settings1->TRIG_ONLY_BH_ON == 1) {
                             if ((settings1->TRIG_ONLY_BH_ON == 1) && (settings1->DETECTOR == 3))
