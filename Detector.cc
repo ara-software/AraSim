@@ -5086,18 +5086,15 @@ void Detector::ReadRayleigh_New(Settings *settings1) {    // will return gain (d
 }
 
 
-//Added by Alan for Trig Delays and Making
 
 int Detector::GetTrigOffset( int ch, Settings *settings1 ){
-cout << "Ch. no. inside offset function: " << ch << endl;
+
 	double mostDelay;
 	int offset;
 		
 	if(activeDelay[ch]==1){
 
 		mostDelay = *max_element(triggerDelay.begin(), triggerDelay.end());
-cout << "mostDelay: "<< mostDelay << endl;
-cout << "trigger Delay[ch]: " << triggerDelay[ch] << endl;
 		offset = int((mostDelay -  triggerDelay[ch]) / (settings1->TIMESTEP * 1e9));
 	}
 	else{
@@ -5107,11 +5104,10 @@ cout << "trigger Delay[ch]: " << triggerDelay[ch] << endl;
 	return offset;
 }
 
-int Detector::GetTrigMasking( int ch ){ 
-cout << "Channel no. inside masking function: "<< ch << endl;	
+int Detector::GetTrigMasking( int ch){ 
+
 	int masking;
 	masking = triggerMask[ch];
-cout << "Masking value: " << masking << endl;
 	return masking; 
 	
 }
