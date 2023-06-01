@@ -4123,12 +4123,8 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
 
         bool trigFileExists = (stat(filename.c_str(), &buffer)==0);
         if (!trigFileExists){
-                sprintf(errorMessage, "Trigger formation file is not found (trigger formation file exists %d) ", trigFileExists);
-                cout << "The not found trigger formation filename is: " << filename << endl;            
-                cerr << errorMessage << endl;
-                cerr << "Defaulting to standard trigger formation" << endl;
-                filename = "./data/trigger/delays_masking_custom.csv";
-                cout << "Defaulted to standard trigger formation from file: " << filename << endl;
+		sprintf(errorMessage, "Trigger formation file is not found (trigger file exists %d) ", trigFileExists);
+        	throw std::runtime_error(errorMessage);
         }
 
 	ifstream trigFile(filename.c_str()); // open the file
