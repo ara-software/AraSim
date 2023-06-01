@@ -4110,10 +4110,6 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 
 inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *settings1) { //will return trigger delays and channels masked from trigger logic
 
-/* Large comment to be added at the end
- *
- *
- */ 
 	
 	//First, let's check that the file exists and the format is correct
 	
@@ -4308,23 +4304,6 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
 		}
 	}
 	trigFile.close();
-
-//ADDED FOR DEBUGGING - REMOVE AT THE END
-
-for(int i=0; i<triggerDelay.size(); i++){
-	cout << "Trigger delay (Ch." << i << "): ";
-	cout << triggerDelay[i] << endl;
-	}
-
-for(int i=0; i<triggerMask.size(); i++){
-        cout << "Trigger mask (Ch." << i << "): ";
-        cout << triggerMask[i] << endl;
-        }
-
-for(int i=0; i<activeDelay.size(); i++){
-        cout << "Active delay (Ch." << i << "): ";
-        cout << activeDelay[i] << endl;
-        }
 
 }
 
