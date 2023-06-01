@@ -4133,7 +4133,7 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
 	// if the trigger formation file exists, then make sure our user has formatted the file correctly
 	// in particular, it means we really need to see the word "Channel No." as the first word in the header file 
 
-	string expected_first_column_header = "Channel No.";
+	string expected_first_column_header = "Channel";
         if(trigFile.is_open()){
                 while(trigFile.good()){
                         getline(trigFile, line, ',');
