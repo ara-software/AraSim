@@ -107,11 +107,11 @@ class Antenna_r {
         vector < vector <double> > Az;
         vector < vector <double> > V;   // volt signal with all factors applied (as far as we can) (from fft)
 
+        vector <double> SignalBinTime; ///< the time of center of bin where signal should locate after sim decided the readout window. MK added -2023-05-18-
+
         vector <int> SignalExt; // flag if actual signal exist for the ray trace solution
 
         vector <int> SignalBin; // the bin number where the center of signal located. we can compare this value to Trig_Pass value to have likely triggered ray trace solution
-
-        vector <double> SignalBinTime; ///< the time of center of bin where signal should locate after sim decided the readout window. MK added -2023-05-18-
 
         vector <int> noise_ID;      // information about which pure noise waveform is used for trigger analysis
 
@@ -137,7 +137,7 @@ class Antenna_r {
         void clear ();  // clear all vector format information for next event
         void clear_useless ( Settings *settings1 );  // clear all vector information which are useless
 
-        ClassDef(Antenna_r,2);
+        ClassDef(Antenna_r,3);
 };
 
 class String_r {
@@ -283,14 +283,12 @@ class Report {
 
         void ApplyFilter(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFilter_databin(int bin_n, Detector *detector, double &vmmhz);
-        void ApplyFilter_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFilter_OutZero (double freq, Detector *detector, double &vmmhz);
 
 
         // apply gain in Preamp
         void ApplyPreamp(int bin_n, Detector *detector, double &vmmhz);
         void ApplyPreamp_databin(int bin_n, Detector *detector, double &vmmhz);
-        void ApplyPreamp_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyPreamp_OutZero (double freq, Detector *detector, double &vmmhz);
 
 	    void ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double &vmmhz, Settings *settings1);
@@ -298,7 +296,6 @@ class Report {
         // apply gain in FOAM
         void ApplyFOAM(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFOAM_databin(int bin_n, Detector *detector, double &vmmhz);
-        void ApplyFOAM_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFOAM_OutZero (double freq, Detector *detector, double &vmmhz);
 
 
