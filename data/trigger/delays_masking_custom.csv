@@ -1,4 +1,4 @@
-Channel No.,trigger delay,trigger masking,active delays\n
+Channel,trigger-delay(ns),trigger-masking,active-delays\n
 0,0,0,1\n
 1,0,0,1\n
 2,0,0,1\n
