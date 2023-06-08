@@ -3355,23 +3355,6 @@ inline void Detector::ReadFilter(string filename, Settings *settings1) {    // w
         FilterGain_databin.push_back( ygain_databin[i] );
     }
     
-    
-    // for NFOUR/2 t domain array
-    double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
-    double ygain_NFOUR[settings1->NFOUR/4+1];   // array for gain in FFT bin
-    
-    df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
-
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
-    
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {
-        FilterGain_NFOUR.push_back( ygain_NFOUR[i] );
-    }
-    
 }
 
 
@@ -3459,24 +3442,6 @@ inline void Detector::ReadPreamp(string filename, Settings *settings1) {    // w
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
         PreampGain_databin.push_back( ygain_databin[i] );
     }
-    
-    
-    // for NFOUR/2 t domain array
-    double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
-    double ygain_NFOUR[settings1->NFOUR/4+1];   // array for gain in FFT bin
-    
-    df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
-
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
-    
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {
-        PreampGain_NFOUR.push_back( ygain_NFOUR[i] );
-    }
-    
     
 }
 
@@ -3568,22 +3533,6 @@ inline void Detector::ReadFOAM(string filename, Settings *settings1) {    // wil
         FOAMGain_databin.push_back( ygain_databin[i] );
     }
     
-
-    // for NFOUR/2 t domain array
-    double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
-    double ygain_NFOUR[settings1->NFOUR/4+1];   // array for gain in FFT bin
-    
-    df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
-
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
-    
-    for (int i=0;i<settings1->NFOUR/4+1;i++) {
-        FOAMGain_NFOUR.push_back( ygain_NFOUR[i] );
-    }
 }
 
 void Detector::ReadNoiseFigure(string filename, Settings *settings1)
@@ -5011,7 +4960,6 @@ void Detector::getDiodeModel(Settings *settings1) {
     // now get f domain response with realft
     
     double diode_real_fft[settings1->DATA_BIN_SIZE*2];  // double sized array for myconvlv
-    //double diode_real_fft[settings1->DATA_BIN_SIZE + 512];  // DATA_BIN_SIZE + 512 bin (zero padding) for myconvlv
     double diode_real_fft_half[NFOUR];    // double sized array for NFOUR/2
     double diode_real_fft_double[NFOUR*2];    // test with NFOUR*2 array
     
@@ -5117,14 +5065,36 @@ void Detector::get_NewDiodeModel(Settings *settings1) {
     fdiode_real_databin.clear();
 
     // save f domain diode response in fdiode_real
-    //for (int i=0; i<settings1->DATA_BIN_SIZE+512; i++) {
     for (int i=0; i<settings1->DATA_BIN_SIZE*2; i++) {
         fdiode_real_databin.push_back( diode_real_fft[i] );
     }
 
 }
 
+//! repadding diode value based on input pad length. MK added -2023-05-23-
+void Detector::get_NewDynamicDiodeModel(int pad_len) {
 
+    double diode_real_fft[pad_len * 2]; ///< double sized array for myconvlv
+
+    for (int i = 0; i < pad_len * 2; i++) {  ///< add diode value in zero pad
+        if ( i < (int)(maxt_diode / TIMESTEP) ) {
+            diode_real_fft[i] = diode_real[i];
+        } else {
+            diode_real_fft[i] = 0.;
+        }
+    }
+
+    //! forward FFT
+    Tools::realft(diode_real_fft, 1, pad_len * 2);
+
+    //! clear previous data as we need new diode response array for new pad_len
+    fdiode_real_dynamic_databin.clear(); 
+
+    //! save f domain diode response in fdiode_real_dynamic_databin
+    for (int i = 0; i < pad_len * 2; i++) {
+        fdiode_real_dynamic_databin.push_back( diode_real_fft[i] );
+    }
+}
 
 void Detector::PrepareVectorsInstalled(){
     ARA_station temp_station;

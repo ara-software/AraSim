@@ -112,7 +112,9 @@ outputdir="outputs"; // directory where outputs go
   PHASE=90.;            // default : 90 deg phase (it means all imaginary values)
 
   NFOUR=1024;           // default : 1024, same as in icemc
-    
+  
+  DYNAMIC_NFOUR=0;      // 0 : (default) follow pre/user-configured NFOUR value, 1: change NFOUR value by following signal length. MK added -2023-05-20-
+  
   NOISE=0;              // degault : 0, flat thermal noise, 1 : for TestBed (DETECTOR=3), use Rayleigh distribution fitted for borehole channels
 
   ATMOSPHERE=1;         // default : 1, include atmosphere
@@ -404,6 +406,9 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "NFOUR") {
                   NFOUR = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "DYNAMIC_NFOUR") {
+                  DYNAMIC_NFOUR = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "NOISE") {
                   NOISE = atof( line.substr(line.find_first_of("=") + 1).c_str() );

@@ -287,11 +287,6 @@ int main(int argc, char **argv) {   // read setup.txt file
 
     */
 
-    double x_V[settings1->NFOUR/2];
-    double y_V[settings1->NFOUR/2];
-
-
-
     double xbin[settings1->DATA_BIN_SIZE];
     for (int i=0; i<settings1->DATA_BIN_SIZE; i++) {
         xbin[i] = i;

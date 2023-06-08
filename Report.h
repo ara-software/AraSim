@@ -96,13 +96,14 @@ class Antenna_r {
         vector < vector <double> > Vfft;  // signal V preparing for FFT
         vector < vector <double> > Vfft_noise;  // noise V preparing for FFT
 
+        vector <int> New_NFOUR; ///< dynamic nfour length for each signal. MK added -2023-05-20-
 
         // below time domain simulation output
         vector <double> time;   // time of time domain Askaryan radiation
         vector <double> time_mimic;   // time of time domain Askaryan radiation (same time range with data)
-        vector <double> V_mimic;    // signal + noise waveform which mimics the data (size : NFOUR/2 bin)
+        vector <double> V_mimic;    // signal + noise waveform which mimics the data (size : WAVEFORM_LENGTH bin)
 
-        int global_trig_bin; // from V_mimic [0, NFOUR/2] bins, where global trigger occured
+        int global_trig_bin; // from V_mimic [0, WAVEFORM_LENGTH/2] bins, where global trigger occured
 
         vector < vector <double> > Ax;     // vector potential x component
         vector < vector <double> > Ay;
@@ -139,7 +140,7 @@ class Antenna_r {
         void clear ();  // clear all vector format information for next event
         void clear_useless ( Settings *settings1 );  // clear all vector information which are useless
 
-        ClassDef(Antenna_r,3);
+        ClassDef(Antenna_r,4);
 };
 
 class String_r {
@@ -250,12 +251,13 @@ class Report {
     
     void ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger);
 
-    
-        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
+   
+        //! Signal + noise convolution functions for multiple connected signal cases. Now each function will accept each signal's NFOUR value and use them for convolution. MK updated -2023-05-23-
+        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex, int new_NFOUR1);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
         
-        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin_1, int signalbin_2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
+        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin_1, int signalbin_2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, int new_NFOUR1, int new_NFOUR2);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
 
-        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin_0, int signalbin_1, int signalbin_2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
+        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin_0, int signalbin_1, int signalbin_2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, int new_NFOUR0, int new_NFOUR1, int new_NFOUR2);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
 
 
         void Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *detector, int ID, int StationIndex); // we need to apply a gain offset to the basic waveforms.
@@ -287,14 +289,12 @@ class Report {
 
         void ApplyFilter(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFilter_databin(int bin_n, Detector *detector, double &vmmhz);
-        void ApplyFilter_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFilter_OutZero (double freq, Detector *detector, double &vmmhz);
 
 
         // apply gain in Preamp
         void ApplyPreamp(int bin_n, Detector *detector, double &vmmhz);
         void ApplyPreamp_databin(int bin_n, Detector *detector, double &vmmhz);
-        void ApplyPreamp_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyPreamp_OutZero (double freq, Detector *detector, double &vmmhz);
 
 	void ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double &vmmhz, Settings *settings1);
@@ -302,7 +302,6 @@ class Report {
         // apply gain in FOAM
         void ApplyFOAM(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFOAM_databin(int bin_n, Detector *detector, double &vmmhz);
-        void ApplyFOAM_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFOAM_OutZero (double freq, Detector *detector, double &vmmhz);
 
 
@@ -371,7 +370,7 @@ class Report {
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
 
 
-        ClassDef(Report,1);
+        ClassDef(Report,2);
 
 };
 
