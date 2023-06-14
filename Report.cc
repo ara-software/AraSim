@@ -193,6 +193,7 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     Vm_zoom_T.clear();
 
     SignalBin.clear();
+    SignalBinTime.clear();
     SignalExt.clear(); 
     
     SCT_threshold_pass.clear();
@@ -386,6 +387,17 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 // cout << i << " : " << j << " : " << k << endl;
 
                 stations[i].strings[j].antennas[k].clear(); // clear data in antenna which stored in previous event
+                
+                // This (gain_ch_no) is used for per-channel gain implementation. 
+                // It is used in all instances of ApplyElect_Tdomain() and ApplyElect_Tdomain_FirstTwo(), to indicate channel number
+                // Note that channel numbering is different for DETECTOR==4 than for the other modes (1-3). See that in the definition of GetChannelfromStringAntenna() 
+                int gain_ch_no;
+                if (settings1->DETECTOR==4){
+                    gain_ch_no = detector->GetChannelfromStringAntenna (i, j, k, settings1)-1;
+                }
+                else{
+                    gain_ch_no = detector->GetChannelfromStringAntenna (i, j, k, settings1);
+                }                
 
                 // run ray solver, see if solution exist
                 // if not, skip (set something like Sol_No = 0;
@@ -955,11 +967,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     // apply entire elect chain gain, phase
                                                     if (n > 0)
                                                     {
-                                                        ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], settings1);
+                                                        ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
                                                     }
                                                     else
                                                     {
-                                                        ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1]);
+                                                        ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
                                                     }
                                                 }   // end for freq bin
 
@@ -1249,11 +1261,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 //
                                                 if (n > 0)
                                                 {
-                                                    ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], settings1);
+                                                    ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
                                                 }
                                                 else
                                                 {
-                                                    ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1]);
+                                                    ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
                                                 }
                                             }   // end for freq bin
 
@@ -1457,11 +1469,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 //
                                                 if (n > 0)
                                                 {
-                                                    ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], settings1);
+                                                    ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
                                                 }
                                                 else
                                                 {
-                                                    ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1]);
+                                                    ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
                                                 }
                                             }   // end for freq bin
 
@@ -1791,11 +1803,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             //
                                             if (n > 0)
                                             {
-                                                ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], settings1);
+                                                ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
                                             }
                                             else
                                             {
-                                                ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1]);
+                                                ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
                                             }
                                         }   // end for freq bin
 
@@ -2828,8 +2840,19 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin);
                                             stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9 + detector->params.TestBed_WFtime_offset_ns);    // save in ns
                                         }
+                                        if (mimicbin == 0) {
+                                            for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) { ///< calculates time of center of each rays signal based on readout window time config
+                                                double signal_center_offset = (double)(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].time[0]) * settings1->TIMESTEP * 1.e9;
+                                                double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
+                                                //! signal_center_offset: time offset between beginning of readout window and center of signal
+                                                //! signal_center_time: time of center of signal based on readout window time config
+                                                stations[i].strings[string_i].antennas[antenna_i].SignalBinTime.push_back(signal_center_time);
+                                            }
+                                        }                                        
                                     }
 
+                                    
+                                    
                                     // set global_trig_bin values
                                     if (V_mimic_mode == 0)
                                     {
@@ -2878,6 +2901,15 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin);
                                             stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9 + detector->params.TestBed_WFtime_offset_ns);    // save in ns
                                         }
+                                        if (mimicbin == 0) {
+                                            for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) { ///< calculates time of center of each rays signal based on readout window time config
+                                                double signal_center_offset = (double)(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].time[0]) * settings1->TIMESTEP * 1.e9;
+                                                double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
+                                                //! signal_center_offset: time offset between beginning of readout window and center of signal
+                                                //! signal_center_time: time of center of signal based on readout window time config
+                                                stations[i].strings[string_i].antennas[antenna_i].SignalBinTime.push_back(signal_center_time);
+                                            }
+                                        }                                        
                                     }
 
                                     // set global_trig_bin values
@@ -3020,6 +3052,18 @@ void Report::rerun_event(Event *event, Detector *detector,
 
     for(int j=0; j<num_strings; j++){
         for(int k=0; k<num_antennas; k++){
+        
+
+            // This (gain_ch_no) is used for per-channel gain implementation. 
+            // It is used in all instances of ApplyElect_Tdomain() and ApplyElect_Tdomain_FirstTwo(), to indicate channel number
+            // Note that channel numbering is different for DETECTOR==4 than for the rest (1-3). See that in the definition of GetChannelfromStringAntenna()  
+            int gain_ch_no;
+            if (settings->DETECTOR==4){
+                    gain_ch_no = detector->GetChannelfromStringAntenna (0, j, k, settings)-1;
+            }       
+            else{
+                    gain_ch_no = detector->GetChannelfromStringAntenna (0, j, k, settings);
+            }        
 
             int idx = ((j*4)+k);
 
@@ -3190,7 +3234,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                                 settings, antenna_theta, antenna_phi
                                 );
                             ApplyElect_Tdomain(freq_tmp*1.e-6, detector,
-                                V_forfft[2*n], V_forfft[2*n + 1], settings
+                                V_forfft[2*n], V_forfft[2*n + 1], gain_ch_no, settings
                                 );
                         }
                         else{
@@ -3202,7 +3246,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                                 );
                             ApplyElect_Tdomain_FirstTwo(freq_tmp*1.e-6,
                                 freq_lastbin*1.e-6, detector,
-                                V_forfft[2*n], V_forfft[2*n + 1]
+                                V_forfft[2*n], V_forfft[2*n + 1], gain_ch_no
                                 );
                         }
                     }
@@ -4618,8 +4662,7 @@ void Report::ApplyFilter_OutZero (double freq, Detector *detector, double &vmmhz
 }
 
 
-void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, Settings *settings1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
-
+void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, int gain_ch_no, Settings *settings1) { // read elect chain gain (unitless), phase (rad) and apply to V/m
     if ( settings1->PHASE_SKIP_MODE == 0 ) {
 
         double phase_current;
@@ -4642,21 +4685,21 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
         }
 
         // V amplitude
-        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) * detector->GetElectGain_1D_OutZero( freq ); // apply gain (unitless) to amplitude
+        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) * detector->GetElectGain_1D_OutZero( freq, gain_ch_no ); // apply gain (unitless) to amplitude
 
         // real, img terms with phase shift
         //vm_real = v_amp * cos( phase_current + detector->GetElectPhase_1D(freq) );
         //vm_img = v_amp * sin( phase_current + detector->GetElectPhase_1D(freq) );
 
-        vm_real = v_amp * cos( phase_current - detector->GetElectPhase_1D(freq) );
-        vm_img = v_amp * sin( phase_current - detector->GetElectPhase_1D(freq) );
+        vm_real = v_amp * cos( phase_current - detector->GetElectPhase_1D(freq, gain_ch_no) );
+        vm_img = v_amp * sin( phase_current - detector->GetElectPhase_1D(freq, gain_ch_no ) );
     }
 
     else {
 
-        vm_real = vm_real * detector->GetElectGain_1D_OutZero( freq ); // only amplitude
+        vm_real = vm_real * detector->GetElectGain_1D_OutZero( freq, gain_ch_no); // only amplitude
 
-        vm_img = vm_img * detector->GetElectGain_1D_OutZero( freq ); // only amplitude
+        vm_img = vm_img * detector->GetElectGain_1D_OutZero( freq, gain_ch_no); // only amplitude
     }
 
 }
@@ -4664,10 +4707,10 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
 
 
 
-void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
+void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, int gain_ch_no) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
 
-    vm_bin0 = vm_bin0 * detector->GetElectGain_1D_OutZero( freq0 );
-    vm_bin1 = vm_bin1 * detector->GetElectGain_1D_OutZero( freq1 );
+    vm_bin0 = vm_bin0 * detector->GetElectGain_1D_OutZero( freq0 , gain_ch_no);
+    vm_bin1 = vm_bin1 * detector->GetElectGain_1D_OutZero( freq1 , gain_ch_no);
 
 }
 

@@ -169,7 +169,7 @@ outputdir="outputs"; // directory where outputs go
 
   NNU_D_PHI=0.0873;// default : nnu_d_phi : 5 deg
 
-  Z_THIS_TOLERANCE=0; // 0 : (default) use default 'requiredAccuracy' parameter for ray tracing, 1 : change 'requiredAccuracy' parameter by Z_TOLERANCE
+  Z_THIS_TOLERANCE=1; // 0 : use default 'requiredAccuracy' metod for ray tracing, 1 (default) : change 'requiredAccuracy' parameter by Z_TOLERANCE
 
   Z_TOLERANCE=0.2; // 0.2 : (default)   
  
@@ -302,7 +302,7 @@ outputdir="outputs"; // directory where outputs go
     ANTENNA_MODE=0; //default: 0 - old antenna model information
     APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
 
-    CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.tst"
+    CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.csv"
     
     CLOCK_ANGLE=0; //Default: 0 -- Angle of polarization "on the clock".  Angle of zero is pure thetaPol, whereas 90º is pure phiPol.
 
@@ -1002,7 +1002,28 @@ int Settings::CheckCompatibilitiesSettings() {
 	    if (DETECTOR_STATION <0 || DETECTOR_STATION >= NUM_INSTALLED_STATIONS){
 	        cerr << "DETECTOR_STATION is not set to a valid station number" << endl;
 	        num_err++;
-	    }	
+	    }
+        if(DETECTOR_STATION_LIVETIME_CONFIG>-1){
+            if((int)DETECTOR_STATION==2){
+                if(DETECTOR_STATION_LIVETIME_CONFIG>6 || DETECTOR_STATION_LIVETIME_CONFIG<1){
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only six expected configurations for A2"<<endl;
+                    num_err++;
+                }
+            }
+            else if((int)DETECTOR_STATION==3){
+                if(DETECTOR_STATION_LIVETIME_CONFIG>7 || DETECTOR_STATION_LIVETIME_CONFIG<1){
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only seven expected configurations for A3"<<endl;
+                    num_err++;
+                }
+            }
+
+
+            else{
+                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but DETECTOR_STATION is "<<DETECTOR_STATION<<endl;
+                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is only valid for A2 and A3 "<<endl;
+                num_err++;
+            }
+        }          
       }
     }
 

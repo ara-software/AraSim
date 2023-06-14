@@ -9,6 +9,7 @@
 
 using namespace std;
 
+class Settings;
 class Spectra {
 
 private:
@@ -32,6 +33,8 @@ private:
 
   //int EXPONENT_model; // set flux model
   double EXPONENT_model; // set flux model
+  double EXPONENT_min;
+  double EXPONENT_max;
 
   double pnu_EXPONENT;  // if mono energy from EXPONENT, pnu_EXPONENT = log10(pnu), constant pnu for all events.
 
@@ -43,8 +46,7 @@ public:
   double E2dNdEdAdt[E_bin_max]; //flux of incident neutrinos vs. energy E^2*dN/dE/dA/dt
   
   Spectra();    // default constructor
-  //Spectra(int EXPONENT); // constructor  
-  Spectra(double EXPONENT); // constructor  
+  Spectra(Settings *settings1); // constructor  
   ~Spectra();   // destructor
   
   double GetNuEnergy_bin(); // get the neutrino energy which follows neutrino flux. (bin step)
