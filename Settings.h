@@ -310,7 +310,8 @@ class Settings
 	int CUSTOM_ELECTRONICS; //0 (default): use the regular "ARA_Electronics_TotalGain_TwoFilter.csv" file
 							//1 : load a custom electronics file, stored as "custom_electronics.csv" in the `data` directory
                             
-    double CLOCK_ANGLE;  // default: 0; Angle of polarization "on the clock" for use in pulser events (EVENT_TYPE=11)
+  double CLOCK_ANGLE;  // default: 0; Angle of polarization "on the clock" for use in pulser events (EVENT_TYPE=11)
+
 
 
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1

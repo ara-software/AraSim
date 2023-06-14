@@ -983,6 +983,10 @@ Interaction::Interaction(IceModel *antarctica, Detector *detector, Settings *set
   PosNuFromAntennaCenter(detector);      
     
   }
+
+  //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
+  PosNuFromAntennaCenter(detector);
+
   //cout<<" Finished Pick posnu, r_in, r_enterice, nuexitice!!"<<endl;
   
   
@@ -1145,6 +1149,10 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
     PosNuFromAntennaCenter(detector);        
 
     }
+
+    //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
+    PosNuFromAntennaCenter(detector);
+
     //cout<<" Finished Pick posnu, r_in, r_enterice, nuexitice!!"<<endl;
 
 
@@ -1535,7 +1543,6 @@ Interaction::Interaction (Settings *settings1, Detector *detector, IceModel *ant
     }
     #endif        
     }
-	
 	
 	//! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
     PosNuFromAntennaCenter(detector);
@@ -2417,7 +2424,6 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
     double avgY = sumY/double(count);
     double avgZ = sumZ/double(count);
     
-    
 //    std::cout << "DetectorStation:X:Y:: "  << detector->stations[0].GetX() << " : " << detector->stations[0].GetY() << std::endl;
     printf("avgx: %.5f, avgy: %.5f, avgz: %.5f, detectorx: %.5f, detectory: %.5f, detectorz: %.5f, icesurface: %.5f\n", avgX, avgY, avgZ, detector->stations[0].GetX(), detector->stations[0].GetY(), detector->stations[0].GetZ(), antarctica->Surface(detector->stations[0].Lon(), detector->stations[0].Lat()));
     
@@ -2430,6 +2436,7 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
         Y = avgY + thisR*sin(thisPhi)*sin(thisTheta);
         D = pow(X*X + Y*Y, 0.5);
         //interaction1->posnu.SetThetaPhi( D/antarctica->Surface(0., 0.), atan2(Y,X) ); 
+        
     }
     //calculate posnu's X, Y wrt to (0,0)
     else {  // for mode = 0 (testbed)

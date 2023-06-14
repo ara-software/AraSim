@@ -307,6 +307,8 @@ outputdir="outputs"; // directory where outputs go
     CLOCK_ANGLE=0; //Default: 0 -- Angle of polarization "on the clock".  Angle of zero is pure thetaPol, whereas 90º is pure phiPol.
 
 
+
+
     /*
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
     EVID[100] = {0};
@@ -1017,13 +1019,14 @@ int Settings::CheckCompatibilitiesSettings() {
                 }
             }
 
-
             else{
                 cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but DETECTOR_STATION is "<<DETECTOR_STATION<<endl;
                 cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is only valid for A2 and A3 "<<endl;
                 num_err++;
             }
+
         }          
+
       }
     }
 
