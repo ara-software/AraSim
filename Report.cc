@@ -398,19 +398,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 else{
                     gain_ch_no = detector->GetChannelfromStringAntenna (i, j, k, settings1);
                 }                
-
-		// This (gain_ch_no) is used for per-channel gain implementation. 
-		// It is used in all instances of ApplyElect_Tdomain() and ApplyElect_Tdomain_FirstTwo(), to indicate channel number
-		// Note that channel numbering is different for DETECTOR==4 than for the other modes (1-3). See that in the definition of GetChannelfromStringAntenna() 
-		int gain_ch_no;
-		if (settings1->DETECTOR==4){
-			gain_ch_no = detector->GetChannelfromStringAntenna (i, j, k, settings1)-1;
-		}
-		else{
-			gain_ch_no = detector->GetChannelfromStringAntenna (i, j, k, settings1);
-		}
 		
-		// run ray solver, see if solution exist
+                // run ray solver, see if solution exist
                 // if not, skip (set something like Sol_No = 0;
                 // if solution exist, calculate view angle and calculate TaperVmMHz
 
