@@ -1856,7 +1856,10 @@ void IceModel::GetFresnel (
             r_coeff_pokey = 1.;
             r_coeff_slappy = 1.;
         }
-
+        else if (launch_angle==0){ // there is refracted ray to air, r_coeff calculated via taking limit as launch_ang -> 0 to avoid divide by 0 crashing the code
+            r_coeff_pokey = ( 1 - (n1/n2) ) / ( 1 + (n1/n2) );
+            r_coeff_slappy = ( 1 - (n1/n2) ) / ( 1 + (n1/n2) );
+        }
         else {  // there is refracted ray to air
 
             double t_angle = asin( n1/n2 * sin(launch_angle) ); // transmitted ray (which we don't care) angle
