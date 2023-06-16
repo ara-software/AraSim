@@ -521,6 +521,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 if ( (mag==0) or !( mag==mag ) ){ // If mag is 0 or nan, set an approximate mag
                                     mag = icemodel->GetN(event->Nu_Interaction[0].posnu) / icemodel->GetN(detector->stations[i].strings[j].antennas[k]);
                                 }
+                                if ( mag > 2) mag=2; // Set a cap like NuRadioMC does
 
                                 if (ray_output[3][ray_sol_cnt] < PI / 2.)
                                 {
@@ -2900,6 +2901,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                     if ( (mag==0) or !( mag==mag ) ){ // If mag is 0 or nan, set an approximate mag
                         mag = icemodel->GetN(event->Nu_Interaction[0].posnu) / icemodel->GetN(detector->stations[i].strings[j].antennas[k]);
                     }
+                    if ( mag > 2) mag=2; // Set a cap like NuRadioMC does
 
                     // get arrival angle at the antenna
                     double antenna_theta, antenna_phi;
