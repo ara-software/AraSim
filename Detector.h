@@ -256,13 +256,9 @@ class Detector {
 
 
         void ReadElectChain(string filename, Settings *settings1);
-        double ElectGain[freq_step_max];   // Elect chain gain (unitless) for Detector freq bin array
-        double ElectPhase[freq_step_max];   // Elect chain phase (rad) for Detector freq bin array
-        vector <double> ElectGain_databin;   // Elect gain (unitless) for DATA_BIN_SIZE bin array
-        vector <double> ElectPhase_databin;   // Elect phase (rad) for DATA_BIN_SIZE bin array
-        vector <double> ElectGain_NFOUR;   // Elect gain (unitless) for NFOUR bin array
-        vector <double> ElectPhase_NFOUR;   // Elect phase (rad) for NFOUR bin array
-
+        int gain_ch; // Number of channels used for gain model array population in ReadElectChain()
+	std::vector< std::vector <double> > ElectGain; //Elect chain gain (unitless) for Detector freq bin array
+	std::vector< std::vector <double> > ElectPhase; // Elect chain phase (rad) for Detector freq bin array 
 
 
         void ReadGainOffset_TestBed(string filename, Settings *settings1);
@@ -376,11 +372,10 @@ class Detector {
         double GetFOAMGain_NFOUR(int bin) { return FOAMGain_NFOUR[bin]; }   // bin for FFT
         double GetFOAMGain_1D_OutZero(double freq);
 
-        double GetElectGain(int bin) { return ElectGain[bin]; }   // same bin with Vgain, Hgain
-        double GetElectGain_databin(int bin) { return ElectGain_databin[bin]; }   // bin for FFT
-        double GetElectGain_NFOUR(int bin) { return ElectGain_NFOUR[bin]; }   // bin for FFT
-        double GetElectGain_1D_OutZero(double freq);
-        double GetElectPhase_1D(double freq);
+	
+	double GetElectGain(int bin, int gain_ch_no) { return ElectGain[gain_ch_no][bin]; }   // same bin with Vgain, Hgain
+        double GetElectGain_1D_OutZero(double freq, int gain_ch_no);
+        double GetElectPhase_1D(double freq, int gain_ch_no);
 
 
 
@@ -446,8 +441,6 @@ class Detector {
         void ReadPreamp_New(Settings *settings1);    // get filter vector array with new DATA_BIN_SIZE 
 
         void ReadFOAM_New(Settings *settings1);    // get filter vector array with new DATA_BIN_SIZE 
-
-        void ReadElectChain_New(Settings *settings1);    // get elect chain vector array with new DATA_BIN_SIZE 
 
         void ReadRFCM_New(Settings *settings1);    // get filter vector array with new DATA_BIN_SIZE 
 
