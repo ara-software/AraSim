@@ -2899,7 +2899,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                         settings, fresnel, mag, Pol_vector
                         );
                     if ( (mag==0) or !( mag==mag ) ){ // If mag is 0 or nan, set an approximate mag
-                        mag = icemodel->GetN(event->Nu_Interaction[0].posnu) / icemodel->GetN(detector->stations[i].strings[j].antennas[k]);
+                        mag = icemodel->GetN(event->Nu_Interaction[0].posnu) / icemodel->GetN(detector->stations[0].strings[j].antennas[k]);
                     }
                     if ( mag > 2) mag=2; // Set a cap like NuRadioMC does
 
