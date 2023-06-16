@@ -9,6 +9,8 @@
 #include <vector>
 #include "TGraph.h"
 
+#include "Position.h"
+
 #ifndef __CINT__
 //Include output format to enable reading by analysis software AraRoot
 #ifdef ARA_UTIL_EXISTS
