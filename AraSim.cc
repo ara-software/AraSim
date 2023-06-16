@@ -529,7 +529,7 @@ int main(int argc, char **argv) {   // read setup.txt file
                 }
                 // cout << "weight: " << weight <<endl;    
             #endif
-                     
+
             report->ClearUselessfromConnect(detector, settings1, trigger);
             for(int i=0;i<event->Nu_Interaction.size(); i++)
                 event->Nu_Interaction[i].clear_useless(settings1);
@@ -805,7 +805,7 @@ int main(int argc, char **argv) {   // read setup.txt file
 
         cout<<"test Veff(ice) : "<<Veff_test<<" m3sr, "<<Veff_test*1.E-9<<" km3sr"<<endl;
         cout<<"test Veff(water eq.) : "<<Veff_test_we<<" m3sr, "<<Veff_test_we*1.E-9<<" km3sr"<<endl;
-        cout<<"And Veff(water eq.) error plus : "<<error_plus*1.E-9<<" and error minus : "<<error_minus*1.E-9<<endl;
+        cout<<"And Veff(water eq.) error plus : "<<error_plus*1.E-9<<"km3sr and error minus : "<<error_minus*1.E-9<<" km3sr"<<endl;
     }
 
 
