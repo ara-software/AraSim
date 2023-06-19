@@ -2190,8 +2190,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 				continue;	
 			    }
 
-			    int offset=0;
-			    offset = detector->GetTrigOffset(channel_num-1, settings1);
+			    int offset = detector->GetTrigOffset(channel_num-1, settings1);
 
                             // check if we want to use BH chs only for trigger analysis
                             //if (settings1->TRIG_ONLY_BH_ON == 1) {

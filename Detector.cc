@@ -4120,7 +4120,11 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
         bool trigFileExists = (stat(filename.c_str(), &buffer)==0);
         if (!trigFileExists){
 		sprintf(errorMessage, "Trigger formation file is not found (trigger file exists %d) ", trigFileExists);
-        	throw std::runtime_error(errorMessage);
+                cout << "The not found trigger formation filename is: " << filename << endl;
+                cerr << errorMessage << endl;
+                cerr << "Defaulting to custom trigger formation file" << endl;
+                filename = "./data/trigger/delays_masking_custom.csv";
+                cout << "Defaulted to custom trigger formation from file: " << filename << endl;
         }
 
 	ifstream trigFile(filename.c_str()); // open the file
@@ -4131,23 +4135,17 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
 
 	string expected_first_column_header = "Channel";
         if(trigFile.is_open()){
-                while(trigFile.good()){
-                        getline(trigFile, line, ',');
-                        string first_header_entry = line.c_str();
-                        if (! (first_header_entry == expected_first_column_header)){
-                                sprintf(errorMessage,
-                                        "The first word of the header line is '%s'. It was expected to be '%s'. Please double check file format!!",
-                                        first_header_entry.c_str(),
-                                        expected_first_column_header.c_str());
-                                cout << "The trigger formation filename is: " << filename << endl;
-                                throw std::runtime_error(errorMessage);
-                        }
-
-			else{
-				// otherwise, the first header of the file is correct, and we can proceed
-				break;
-             		}
-		}
+        	getline(trigFile, line, ',');
+        	string first_header_entry = line.c_str();
+       		if (! (first_header_entry == expected_first_column_header)){
+                	sprintf(errorMessage,
+                        "The first word of the header line is '%s'. It was expected to be '%s'. Please double check file format!!",
+                        first_header_entry.c_str(),
+                        expected_first_column_header.c_str());
+                        cout << "The trigger formation filename is: " << filename << endl;
+                        throw std::runtime_error(errorMessage);
+                }
+		
 	}
 
 	else{
@@ -4166,16 +4164,11 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
 	int numCommas = 0;
         int theLineNo = 0;
         if(trigFile.is_open()){
-                while(trigFile.good()){
-                        if(theLineNo==0){
-                                getline(trigFile, line, '\n');
-                                std::string first_line = line.c_str();
-                                numCommas = int(std::count(first_line.begin(), first_line.end(), ','));
-                                theLineNo++;
-                        }
-                        else{
-                                break;
-                        }
+        	if(theLineNo==0){
+                	getline(trigFile, line, '\n');
+                        std::string first_line = line.c_str();
+                        numCommas = int(std::count(first_line.begin(), first_line.end(), ','));
+                        theLineNo++;
                 }
         }
 
@@ -4268,7 +4261,7 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
 
 				//get and store the value for trigger masking decision
 				getline(trigFile, line, ',');
-                                double temp_mask_val = atof(line.c_str());
+                                int temp_mask_val = atof(line.c_str());
 
                                 if(!(temp_mask_val==1 || temp_mask_val==0)){
                                            sprintf(errorMessage,
@@ -4285,7 +4278,7 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
 			
 				//get and store the value to activate delay
 				getline(trigFile, line, '\n');
-                                double temp_activeDelay_val = atof(line.c_str());
+                                int temp_activeDelay_val = atof(line.c_str());
 
                                 if(!(temp_activeDelay_val==1 || temp_activeDelay_val==0)){
                                            sprintf(errorMessage,
@@ -5081,10 +5074,8 @@ int Detector::GetTrigOffset( int ch, Settings *settings1 ){
 
 int Detector::GetTrigMasking( int ch){ 
 
-	int masking;
-	masking = triggerMask[ch];
-	return masking; 
-	
+	return triggerMask[ch]; 
+
 }
 
 
