@@ -983,7 +983,14 @@ int Settings::CheckCompatibilitiesSettings() {
 	        num_err++;
 	    }
         if(DETECTOR_STATION_LIVETIME_CONFIG>-1){
-            if((int)DETECTOR_STATION==2){
+	    if((int)DETECTOR_STATION==1){
+                if(DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1){
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only seven expected configurations for A1"<<endl;
+                    num_err++;
+                }
+            }
+	
+            else if((int)DETECTOR_STATION==2){
                 if(DETECTOR_STATION_LIVETIME_CONFIG>6 || DETECTOR_STATION_LIVETIME_CONFIG<1){
                     cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only six expected configurations for A2"<<endl;
                     num_err++;
