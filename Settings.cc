@@ -291,7 +291,7 @@ outputdir="outputs"; // directory where outputs go
     ARBITRARY_EVENT_ATTENUATION = 1.0;
     PICK_ABOVE_HEIGHT = 3000;
 
-    EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: event mode
+    EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: read in event mode, 2: write out event mode (no simulation)
     //    EVENT_NUM = 10;//read in event number in EVENT_GENERATION_MODE=1, no more than 100 events
     ANTENNA_MODE=0; //default: 0 - old antenna model information
     APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information

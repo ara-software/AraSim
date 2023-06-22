@@ -39,8 +39,8 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         pnu = spectra1->GetNuEnergy();
         
         if (settings1->EVENT_GENERATION_MODE == 1){
-            // pnu = pow(10., settings1->PNU[inu_thrown]);
-            settings1->EXPONENT = settings1->PNU[inu_thrown];
+            pnu = settings1->PNU[inu_thrown];
+            settings1->EXPONENT = 400 + log10(settings1->PNU[inu_thrown])*10.;
             spectra1 = new Spectra(settings1);
             settings1->SELECT_FLAVOR = settings1->NUFLAVORINT[inu_thrown];
             settings1->NU_NUBAR_SELECT_MODE = settings1->NUBAR[inu_thrown];
@@ -58,7 +58,6 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
             settings1->YPARAM = 2;
             settings1->ELAST_Y = settings1->ELAST[inu_thrown];
         }
-        pnu = spectra1->GetNuEnergy();
         // cout << pnu << endl;
         /*
         double hereTheta = 10.;

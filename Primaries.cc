@@ -2402,11 +2402,17 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
     double avgZ = sumZ/double(count);
     
 //    std::cout << "DetectorStation:X:Y:: "  << detector->stations[0].GetX() << " : " << detector->stations[0].GetY() << std::endl;
-    printf("avgx: %.5f, avgy: %.5f, avgz: %.5f, detectorx: %.5f, detectory: %.5f, detectorz: %.5f, icesurface: %.5f\n", avgX, avgY, avgZ, detector->stations[0].GetX(), detector->stations[0].GetY(), detector->stations[0].GetZ(), antarctica->Surface(detector->stations[0].Lon(), detector->stations[0].Lat()));
+    // printf("avgx: %.5f, avgy: %.5f, avgz: %.5f, detectorx: %.5f, detectory: %.5f, detectorz: %.5f, icesurface: %.5f\n", avgX, avgY, avgZ, detector->stations[0].GetX(), detector->stations[0].GetY(), detector->stations[0].GetZ(), antarctica->Surface(detector->stations[0].Lon(), detector->stations[0].Lat()));
     
 
     //calculate posnu's X, Y wrt detector core
-    if (detector->Get_mode() == 1 || detector->Get_mode() == 2 ||detector->Get_mode() == 3 ||detector->Get_mode() == 4) {   // detector mode is for ARA stations;
+    if (settings1->EVENT_GENERATION_MODE == 1){
+      // Don't shift neutrino vertices when events are provided
+        X = thisR*cos(thisPhi)*sin(thisTheta);
+        Y = thisR*sin(thisPhi)*sin(thisTheta);
+        D = pow(X*X + Y*Y, 0.5);
+    }
+    else if (detector->Get_mode() == 1 || detector->Get_mode() == 2 ||detector->Get_mode() == 3 ||detector->Get_mode() == 4) {   // detector mode is for ARA stations;
 //        X = detector->params.core_x + thisR*cos(thisPhi)*cos(thisTheta);
 //        Y = detector->params.core_y + thisR*sin(thisPhi)*cos(thisTheta);
         X = avgX + thisR*cos(thisPhi)*sin(thisTheta);
@@ -2423,7 +2429,13 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
     }
 
 //    double centerZ = (detector->stations[0].strings[0].antennas[1].GetZ()+ detector->stations[0].strings[0].antennas[2].GetZ())/2.;
-    Z = avgZ + thisR*cos(thisTheta);
+    if (settings1->EVENT_GENERATION_MODE == 1){
+      // Don't shift neutrino vertices when events are provided
+        Z = thisR*cos(thisTheta);
+    }
+    else {
+      Z = avgZ + thisR*cos(thisTheta);
+    }
     //    std::cout << "CenterPosition:X:Y:Z:: "  << avgX << " : " << avgY << " : " << avgZ <<  std::endl;
 
     //std::cout << "Central position: " << centerZ << " : " << Z << " : " << X << " : " << Y << std::endl;
