@@ -1852,7 +1852,7 @@ void IceModel::GetFresnel (
 
         double r_coeff_pokey, r_coeff_slappy;
 
-        if (n1/n2 * sin(refl_angle) >= 1.) {  // total internal reflection case
+        if ( abs(n1/n2 * sin(refl_angle)) >= 1.) {  // total internal reflection case
             r_coeff_pokey = 1.;
             r_coeff_slappy = 1.;
         }
@@ -1862,10 +1862,10 @@ void IceModel::GetFresnel (
         }
         else {  // there is refracted ray to air
 
-            double t_angle = asin( n1/n2 * sin(refl_angle) ); // transmitted ray (which we don't care) angle
+            double t_angle = asin( n1/n2 * sin(abs(refl_angle)) ); // transmitted ray (which we don't care) angle
 
-            r_coeff_pokey = tan(refl_angle - t_angle) / tan(refl_angle + t_angle);  // only reflected ray can be a signal
-            r_coeff_slappy = sin(refl_angle - t_angle) / sin(refl_angle + t_angle);
+            r_coeff_pokey = tan(abs(refl_angle) - t_angle) / tan(abs(refl_angle) + t_angle);  // only reflected ray can be a signal
+            r_coeff_slappy = sin(abs(refl_angle) - t_angle) / sin(abs(refl_angle) + t_angle);
 
         }
 
