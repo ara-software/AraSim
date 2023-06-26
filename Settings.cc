@@ -241,7 +241,7 @@ outputdir="outputs"; // directory where outputs go
 
     OFFCONE_LIMIT = 10.; // offcone angle (deg) limit to calculate time domain signal. Increasing this value will result in drametically increase computation time
 
-    ALL_ANT_V_ON = 1; // use Vpol antenna gain for both Vpol and Hpol = 1, use Hpol gain for Hpol model = 0
+    ALL_ANT_V_ON = 0; // use Vpol antenna gain for both Vpol and Hpol = 1, use Hpol gain for Hpol model = 0
 
     PHASE_SKIP_MODE = 0; // skip applying phase in t-domain mode (SIMULATION_MODE = 1). default 0 : don't skip (apply all phase), 1 : only upto Askaryan radiation, 2 : only upto antenna
 
