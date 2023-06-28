@@ -27,8 +27,12 @@ ClassImp(Surface_antenna_r);
 ClassImp(String_r);
 ClassImp(Station_r);
 
+//Debugging - JCF 6/23/2023
 Report::Report() {
 }
+
+// Report::Report() = default;
+//End debugging
 
 Report::Report(Detector *detector, Settings *settings1) {
     // Default constructor
@@ -1025,19 +1029,19 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 stations[i].strings[j].antennas[k].PeakV.push_back(0.);
                                             }
                                             
-                                            // @Justin:  Make this dynamic for user to set polarization and check if it does ray-tracing.
+//                                             // @Justin:  Make this dynamic for user to set polarization and check if it does ray-tracing.
                                             
-                                            double psi = TMath::DegToRad()*settings1->CLOCK_ANGLE;
-                                            double theta = acos(receive_vector[2]); //receive_vector is a unit vector
-                                            double phi = atan2(receive_vector[1],receive_vector[0]);
+//                                             double psi = TMath::DegToRad()*settings1->CLOCK_ANGLE;
+//                                             double theta = acos(receive_vector[2]); //receive_vector is a unit vector
+//                                             double phi = atan2(receive_vector[1],receive_vector[0]);
                                                                              
-                                            //Justin's method
-                                            double newPol_vectorX = -cos(psi)*cos(theta)*cos(phi) + sin(psi)*sin(phi);
-                                            double newPol_vectorY = -cos(psi)*cos(theta)*sin(phi) - sin(psi)*cos(phi);
-                                            double newPol_vectorZ = cos(psi)*sin(theta);
+//                                             //Justin's method
+//                                             double newPol_vectorX = -cos(psi)*cos(theta)*cos(phi) + sin(psi)*sin(phi);
+//                                             double newPol_vectorY = -cos(psi)*cos(theta)*sin(phi) - sin(psi)*cos(phi);
+//                                             double newPol_vectorZ = cos(psi)*sin(theta);
                                             
-                                            Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
-                                            //Justin's Method
+//                                             Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
+//                                             //Justin's Method
                                             
                                         } // neutrino events
                                         else if (settings1->EVENT_TYPE == 10)
@@ -1106,7 +1110,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                             // just get peak from the array
                                             //stations[i].strings[j].antennas[k].PeakV.push_back(FindPeak(detector->CalPulserWF_V, CP_bin));
-                                            stations[i].strings[j].antennas[k].PeakV.push_back(-1.);    // just let -1.
+                                            // stations[i].strings[j].antennas[k].PeakV.push_back(-1.);    // just let -1.
+                                            stations[i].strings[j].antennas[k].PeakV.push_back(FindPeak(V_forfft, waveform_bin));
 
                                             // get spectrum with zero padded WF
                                             //Tools::realft(volts_forfft,1,settings1->NFOUR/2);
@@ -1368,7 +1373,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             }
 
                                             // just get peak from the array
-                                            stations[i].strings[j].antennas[k].PeakV.push_back(-1.);    // just let -1.
+                                            // stations[i].strings[j].antennas[k].PeakV.push_back(-1.);    // just let -1.
+                                            stations[i].strings[j].antennas[k].PeakV.push_back(FindPeak(V_forfft, waveform_bin));
 
                                             // get spectrum with zero padded WF
                                             Tools::realft(V_forfft, 1, stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);
@@ -1409,6 +1415,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                             //
                                             //
+                                            //Debugging by removing antenna and electronics response from waveform. - JCF 6/27/2023
                                             for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2; n++)
                                             {
 
@@ -1480,6 +1487,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
                                                 }
                                             }   // end for freq bin
+                                            //End Debugging
 
                                             // now get time domain waveform back by inv fft
                                             Tools::realft(V_forfft, -1, stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);
