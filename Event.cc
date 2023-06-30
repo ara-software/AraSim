@@ -39,9 +39,28 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         pnu = spectra1->GetNuEnergy();
         
         if (settings1->EVENT_GENERATION_MODE == 1){
-            pnu = settings1->PNU[inu_thrown];
-            settings1->EXPONENT = 400 + log10(settings1->PNU[inu_thrown])*10.;
+
+            // Determine if PNU is provided as settings->EXPONENT 
+            //   or actual energy and create spectra
+            if (settings1->PNU[inu_thrown] < 1000) { // pnu is settings->EXPONENT
+                settings1->EXPONENT = settings1->PNU[inu_thrown];
+            } 
+            else if (settings1->PNU[inu_thrown] < 1e14) { // pnu is energy in GeV
+                pnu = settings1->PNU[inu_thrown] * 1e9; // convert to eV
+                settings1->EXPONENT = 400 + log10(pnu)*10.;
+            }
+            else { // pnu is energy in eV
+                pnu = settings1->PNU[inu_thrown];
+                settings1->EXPONENT = 400 + log10(pnu)*10.;
+            }
             spectra1 = new Spectra(settings1);
+            if (settings1->PNU[inu_thrown] < 1000) { 
+                // set the pnu that wasn't set manually bc 
+                // provided pnu was in exponent form
+                pnu = spectra1->GetNuEnergy();
+            } 
+
+            // Prepare the rest of the parameters
             settings1->SELECT_FLAVOR = settings1->NUFLAVORINT[inu_thrown];
             settings1->NU_NUBAR_SELECT_MODE = settings1->NUBAR[inu_thrown];
             settings1->SELECT_CURRENT = settings1->CURRENTINT[inu_thrown];
