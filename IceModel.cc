@@ -6,6 +6,7 @@
 #include "EarthModel.h"
 #include "Vector.h"
 #include "Ray.h"
+#include "RaySolver.h"
 #include "Settings.h"
 //#include "icemodel.hh"
 //#include "earthmodel.hh"
@@ -1807,20 +1808,12 @@ void IceModel::GetFresnel_pokey (double i_ang, double n1, double n2, double &r, 
 
 void IceModel::GetFresnel (
         double launch_angle, double rec_angle,
-        double refl_angle, Position &posnu, Vector &launch_vector, Vector &rec_vector, Settings *settings1, double &fresnel, double &mag,
+        double refl_angle, Position &posnu, Vector &launch_vector, Vector &rec_vector, Settings *settings1, double &fresnel,
         Vector &Pol // will read the polarization at the source and return polarization at the target antenna
         ) {
 
     double n1 = 1.35;   // index of refraction at the firn
     double n2 = 1.;     // index of refraction at the air
-
-    // calculate the magnification factor for plane / spherical wave case
-    if (settings1->WAVE_TYPE == 0) { // plane wave
-        mag = sqrt( abs(tan(rec_angle)) / abs(tan (launch_angle)) );
-    }
-    else if (settings1->WAVE_TYPE == 1) { // spherical wave
-        mag = sqrt( abs(tan (launch_angle)) / abs(tan (rec_angle)) );
-    }
 
     /*
       * BAC, AC, JT on 2020/11/3
@@ -1848,24 +1841,31 @@ void IceModel::GetFresnel (
     double pol_perp_trg=0, pol_parallel_trg=0;
 
     // check if ray is reflected or not
-    if (refl_angle < PI/2.) {   // the ray is reflected at the surface
+    if (launch_angle < PI/2.) {   // the ray is reflected at the surface
+    // if (refl_angle < PI/2.) {   // the ray is reflected at the surface
 
         double r_coeff_pokey, r_coeff_slappy;
 
-        if ( abs(n1/n2 * sin(refl_angle)) >= 1.) {  // total internal reflection case
+        if ( abs(n1/n2 * sin(launch_angle)) >= 1.) {  // total internal reflection case
+        // if ( abs(n1/n2 * sin(refl_angle)) >= 1.) {  // total internal reflection case
             r_coeff_pokey = 1.;
             r_coeff_slappy = 1.;
         }
-        else if (refl_angle==0){ // there is refracted ray to air, r_coeff calculated via taking limit as launch_ang -> 0 to avoid divide by 0 crashing the code
+        else if (launch_angle==0){ // there is refracted ray to air, r_coeff calculated via taking limit as launch_ang -> 0 to avoid divide by 0 crashing the code
+        // else if (refl_angle==0){ // there is refracted ray to air, r_coeff calculated via taking limit as launch_ang -> 0 to avoid divide by 0 crashing the code
             r_coeff_pokey = ( 1 - (n1/n2) ) / ( 1 + (n1/n2) );
             r_coeff_slappy = ( 1 - (n1/n2) ) / ( 1 + (n1/n2) );
         }
         else {  // there is refracted ray to air
 
-            double t_angle = asin( n1/n2 * sin(abs(refl_angle)) ); // transmitted ray (which we don't care) angle
+            // double t_angle = asin( n1/n2 * sin(abs(refl_angle)) ); // transmitted ray (which we don't care) angle
+            double t_angle = asin( n1/n2 * sin(abs(launch_angle)) ); // transmitted ray (which we don't care) angle
 
-            r_coeff_pokey = tan(abs(refl_angle) - t_angle) / tan(abs(refl_angle) + t_angle);  // only reflected ray can be a signal
-            r_coeff_slappy = sin(abs(refl_angle) - t_angle) / sin(abs(refl_angle) + t_angle);
+            // r_coeff_pokey = tan(abs(refl_angle) - t_angle) / tan(abs(refl_angle) + t_angle);  // only reflected ray can be a signal
+            // r_coeff_slappy = sin(abs(refl_angle) - t_angle) / sin(abs(refl_angle) + t_angle);
+
+            r_coeff_pokey = tan(abs(launch_angle) - t_angle) / tan(abs(launch_angle) + t_angle);  // only reflected ray can be a signal
+            r_coeff_slappy = sin(abs(launch_angle) - t_angle) / sin(abs(launch_angle) + t_angle);
 
         }
 
@@ -1885,6 +1885,51 @@ void IceModel::GetFresnel (
 
 }
 
+
+void IceModel::GetMag (
+    double &mag, double ray_path_length, 
+    double launch_angle, double rec_angle, int ray_sol_cnt,
+    Position &posnu, Position &posant,
+    double antshift,
+    IceModel *icemodel, Settings *settings1, 
+    std::vector < std::vector < std::vector <double> > > &RayStep
+) { // Calculates magnification factor (aka focusing factor/correction)
+  
+  // Calculate (easy) variables needed
+  double launch_index = GetN(posnu);
+  double rec_index = GetN(posant);
+  double rec_depth = posant.GetZ();
+
+  // Calculate variables needed from the shifted ray
+  Position posant_shifted;
+  posant_shifted.SetXYZ(posant.GetX(), posant.GetY(), posant.GetZ() + antshift);
+  vector<vector < double>> shifted_ray_output; // Initialize shifted ray output
+  RaySolver *shiftedraysolver = new RaySolver();
+  shiftedraysolver->Solve_Ray( // solve shifted ray from neutrino to shifted antenna
+      posnu, posant_shifted, 
+      icemodel, shifted_ray_output, settings1, RayStep
+  );   
+  double shifted_rec_depth = posant_shifted.GetZ();
+  double shifted_launch_angle = shifted_ray_output[1][ray_sol_cnt];
+
+  // Magnification Factor Calculation
+  mag = sqrt(
+      ( ray_path_length / sin(rec_angle) ) * 
+      abs( (launch_angle - shifted_launch_angle) / 
+           (rec_depth - shifted_rec_depth)          ) *
+      ( launch_index / rec_index )
+  );
+
+  // Gently catch and adjust for issues in calculation
+  if ( (mag==0) or !( mag==mag ) ){ // If mag is 0 or nan, approximate
+      mag = launch_index / rec_index ;
+  }
+  if ( mag > 2) mag=2; // Set a cap, inspired from NuRadioMC
+
+  // Clean up
+  delete shiftedraysolver;
+
+}
 
 //void IceModel::FillArraysforTree(double icethck[1200][1000],double elev[1068][869],double lon_ground[1068][869],double lat_ground[1068][869],double lon_ice[1200][1000],double lat_ice[1200][1000],double h20_depth[1200][1000],double lon_water[1200][1000],double lat_water[1200][1000]) {
 // void IceModel::FillArraysforTree(double lon_ground[1068][869],double lat_ground[1068][869],double lon_ice[1200][1000],double lat_ice[1200][1000],double lon_water[1200][1000],double lat_water[1200][1000]) {

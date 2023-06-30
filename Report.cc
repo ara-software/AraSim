@@ -516,12 +516,19 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     receive_vector,
                                     settings1,
                                     fresnel,
-                                    mag,
                                     Pol_vector);    // input src Pol and return Pol at trg
-                                if ( (mag==0) or !( mag==mag ) ){ // If mag is 0 or nan, set an approximate mag
-                                    mag = icemodel->GetN(event->Nu_Interaction[0].posnu) / icemodel->GetN(detector->stations[i].strings[j].antennas[k]);
-                                }
-                                if ( mag > 2) mag=2; // Set a cap like NuRadioMC does
+                                icemodel->GetMag(
+                                    mag, 
+                                    ray_output[0][ray_sol_cnt], // ray path length
+                                    ray_output[1][ray_sol_cnt], // zenith angle of ray at launch
+                                    ray_output[2][ray_sol_cnt], // zenith angle of ray upon receipt
+                                    ray_sol_cnt,
+                                    event->Nu_Interaction[0].posnu, // Neutrino
+                                    detector->stations[i].strings[j].antennas[k], // Antenna
+                                    -0.01, // 1cm antenna shift, inspired from NuRadioMC
+                                    icemodel, settings1, RayStep
+                                );
+                                cout<<mag<<endl;
 
                                 if (ray_output[3][ray_sol_cnt] < PI / 2.)
                                 {
@@ -2896,12 +2903,19 @@ void Report::rerun_event(Event *event, Detector *detector,
                         ray_output[3][ray_sol_cnt],
                         event->Nu_Interaction[0].posnu,
                         launch_vector, receive_vector,
-                        settings, fresnel, mag, Pol_vector
+                        settings, fresnel, Pol_vector
                         );
-                    if ( (mag==0) or !( mag==mag ) ){ // If mag is 0 or nan, set an approximate mag
-                        mag = icemodel->GetN(event->Nu_Interaction[0].posnu) / icemodel->GetN(detector->stations[0].strings[j].antennas[k]);
-                    }
-                    if ( mag > 2) mag=2; // Set a cap like NuRadioMC does
+                    icemodel->GetMag(
+                        mag, 
+                        ray_output[0][ray_sol_cnt], // ray path length
+                        ray_output[1][ray_sol_cnt], // zenith angle of ray at launch
+                        ray_output[2][ray_sol_cnt], // zenith angle of ray upon receipt
+                        ray_sol_cnt,
+                        event->Nu_Interaction[0].posnu, // Neutrino
+                        detector->stations[0].strings[j].antennas[k], // Antenna
+                        -0.01, // 1cm antenna shift, inspired from NuRadioMC
+                        icemodel, settings, Ray_Step
+                    );
 
                     // get arrival angle at the antenna
                     double antenna_theta, antenna_phi;
