@@ -1824,6 +1824,18 @@ The re-calculated value will be saved in the posnu_from_antcen array
 
 ==============================================================================
 
+2023/06/05 Alan Salcedo
+
+This upgrade allows the user to add trigger delays and channel masking.
+For this, I added a function to load trigger delays, delay and masking-decision values.
+These changes happen primarily in Detector::ReadTrig_Delays_Masking.
+
+I added two new functions: Detector::GetTrigOffset and Detector::GetTrigMasking to apply delays and masking, respectively.
+
+Full documentation of this work is available on https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2812
+
+==============================================================================
+
 2023/06/30 Abby Bishop
 
 Refreshed the settings->EVENT_GENERATION_MODE pipeline. 

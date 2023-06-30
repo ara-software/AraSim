@@ -871,6 +871,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         }
         cout << "done read elect chain" << endl;
 
+	cout<<"     Reading standard trigger formation values"<<endl;
+        ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
+
     } // if mode == 1
 
     /////////////////////////////////////////////////////////////////////////////////    
@@ -1253,6 +1256,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
         }
 
+	cout<<"     Reading standard trigger formation values"<<endl;
+	ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
+
     } // if mode == 2
 
     /////////////////////////////////////////////////////////////////////////////////    
@@ -1521,6 +1527,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             // read TestBed Calpulser waveform measured (before pulser)
             ReadCalPulserWF("./data/CalPulserWF.txt", settings1);
         }
+
+	cout<<"     Reading standard trigger formation values"<<endl;
+        ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
 
     } // if mode == 3
     
@@ -1795,6 +1804,20 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             // read TestBed Calpulser waveform measured (before pulser)
             ReadCalPulserWF("./data/CalPulserWF.txt", settings1);
         }
+
+	if(settings1->DETECTOR_STATION > 0){
+	cout <<" Reading trigger formation values for this station and configuration from file:"<<endl;
+                char the_trig_filename[500];
+                sprintf(the_trig_filename, "./data/trigger/delays_masking_A%d_C%d.csv",
+                     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+                cout << the_trig_filename <<endl;
+                ReadTrig_Delays_Masking(std::string(the_trig_filename), settings1);
+	}
+	else{
+		cout <<"    Trigger formation file does not exist for this station"<<endl;
+                cout<<"     Reading standard trigger formation values"<<endl;
+                ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
+	}
 
     } // if mode == 4
 
@@ -4085,7 +4108,197 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 }
 
 
+inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *settings1) { //will return trigger delays and channels masked from trigger logic
 
+	
+	//First, let's check that the file exists and the format is correct
+	
+	// check if the file with delays + masking exists
+	char errorMessage[400];
+        struct stat buffer;
+
+        bool trigFileExists = (stat(filename.c_str(), &buffer)==0);
+        if (!trigFileExists){
+		sprintf(errorMessage, "Trigger formation file is not found (trigger file exists %d) ", trigFileExists);
+                cout << "The not found trigger formation filename is: " << filename << endl;
+                cerr << errorMessage << endl;
+                cerr << "Defaulting to custom trigger formation file" << endl;
+                filename = "./data/trigger/delays_masking_custom.csv";
+                cout << "Defaulted to custom trigger formation from file: " << filename << endl;
+        }
+
+	ifstream trigFile(filename.c_str()); // open the file
+	string line; // a dummy variable we can stream over
+
+	// if the trigger formation file exists, then make sure our user has formatted the file correctly
+	// in particular, it means we really need to see the word "Channel No." as the first word in the header file 
+
+	string expected_first_column_header = "Channel";
+        if(trigFile.is_open()){
+        	getline(trigFile, line, ',');
+        	string first_header_entry = line.c_str();
+       		if (! (first_header_entry == expected_first_column_header)){
+                	sprintf(errorMessage,
+                        "The first word of the header line is '%s'. It was expected to be '%s'. Please double check file format!!",
+                        first_header_entry.c_str(),
+                        expected_first_column_header.c_str());
+                        cout << "The trigger formation filename is: " << filename << endl;
+                        throw std::runtime_error(errorMessage);
+                }
+		
+	}
+
+	else{
+                sprintf(errorMessage, "Trigger formation file did not open correctly.");
+                cout << "The trigger formation filename is: " << filename << endl;
+                throw std::runtime_error(errorMessage);
+        }
+
+	// go back to the beginning of the file
+	// we have already verified that the file exists, so no need to check again...
+	trigFile.clear();
+        trigFile.seekg(0, ios::beg);
+
+
+	// Figure out how many columns we have, to check we get the four expected columns 
+	int numCommas = 0;
+        int theLineNo = 0;
+        if(trigFile.is_open()){
+        	if(theLineNo==0){
+                	getline(trigFile, line, '\n');
+                        std::string first_line = line.c_str();
+                        numCommas = int(std::count(first_line.begin(), first_line.end(), ','));
+                        theLineNo++;
+                }
+        }
+
+	if(!(numCommas==3)){
+		sprintf(errorMessage, "Trigger formation file does not have expected columns: Channel No., trigger delay, in trigger, active delay\n");
+                cout << "The trigger formation filename is: " << filename << endl;
+                throw std::runtime_error(errorMessage);
+	}
+
+	trigFile.clear(); // back to the beginning of the file again
+	trigFile.seekg(0, ios::beg);
+
+	
+	//Second, let us extract the data from the file
+
+	// Figure out how many channels there are
+	int lineCount = 0;
+        if(trigFile.is_open()){
+                while(trigFile.peek()!=EOF){
+                        getline(trigFile, line);
+                        lineCount++;
+                }
+        }
+
+	trigFile.clear(); // back to the beginning of the file again
+	trigFile.seekg(0, ios::beg);
+        int numChannels = lineCount - 1; // one row is dedicated to headers; number of channels is therefore # rows - 1			
+	
+	//Set up containers to stream the csv file into.
+	
+	//vector of delays
+        triggerDelay.resize(numChannels); // resize to account for the number of channels
+	
+	//vector of trigger masking
+        triggerMask.resize(numChannels); // resize to account for the number of channels
+	
+	//vector for active delays
+        activeDelay.resize(numChannels); // resize to account for the number of channels
+
+	theLineNo = 0; // reset this counter
+	if (trigFile.is_open()){
+                while(trigFile.peek()!=EOF){
+
+                        if(theLineNo == 0 ){
+				// skip the first line (the header file)
+				getline(trigFile, line);
+                                theLineNo++;
+                        }
+                        else{
+				/* 
+ 				from the second line forward, read in the values
+				the first column is the channel number
+				the second has the trigger delay values,
+				the third determines if the channel is in trigger (masking),
+				the fourth determines if the channel has active delays	
+				*/
+			
+				// first, peel off the channel no.
+				int chBin = theLineNo -1 ;
+				getline(trigFile, line, ',');
+				double temp_channel_val = atof(line.c_str());
+				if(std::isnan(temp_channel_val) || temp_channel_val < 0){
+                                        sprintf(errorMessage,
+                                                "The channel no. %d is a nan or negative (%e). Stop!",
+                                                chBin, temp_channel_val);
+                                        cout << "The trigger formation filename is: " << filename << endl;
+                                        throw std::runtime_error(errorMessage);
+                                }
+				
+				/*
+				then loop over the columns, splitting most on the comma ","
+				Because the "separating" character for the very last column is a newline (\n),
+				we need to change to the newline character for the final column
+				(see below).
+ 				*/
+					
+				//get and store the trigger delay values
+				getline(trigFile, line, ',');
+                                double temp_delay_val = atof(line.c_str());		
+				
+				if(std::isnan(temp_delay_val) || temp_delay_val < 0 || temp_delay_val > 1E6){
+                                           sprintf(errorMessage,
+                                                   "A delay value (ch %d) is a nan or negative or very large (%e). Stop!",
+                                                    chBin, temp_delay_val);
+                                           cout << "The trigger formation filename is: " << filename << endl;
+                                           throw std::runtime_error(errorMessage);
+                                }
+
+                                triggerDelay[chBin] = temp_delay_val;
+
+				//get and store the value for trigger masking decision
+				getline(trigFile, line, ',');
+                                int temp_mask_val = atof(line.c_str());
+
+                                if(!(temp_mask_val==1 || temp_mask_val==0)){
+                                           sprintf(errorMessage,
+                                                   "Trigger masking decision value (ch %d) is different than 0 or 1. Stop!",
+                                                   chBin);
+                                           cout << "The trigger formation filename is: " << filename << endl;
+                                           throw std::runtime_error(errorMessage);
+                                }
+
+                                triggerMask[chBin] = temp_mask_val;	
+
+		
+				// once more to get the final column, this time we need to detect the newline character		
+			
+				//get and store the value to activate delay
+				getline(trigFile, line, '\n');
+                                int temp_activeDelay_val = atof(line.c_str());
+
+                                if(!(temp_activeDelay_val==1 || temp_activeDelay_val==0)){
+                                           sprintf(errorMessage,
+                                                  "Decision value to activate delay (ch %d) is different than 0 or 1. Stop!",
+                                                  chBin);
+                                           cout << "The trigger formation filename is: " << filename << endl;
+                                           throw std::runtime_error(errorMessage);
+                                }
+
+                                activeDelay[chBin] = temp_activeDelay_val;
+			
+				// now we're done!
+				theLineNo++; //advance the line number
+				
+			}		
+		}
+	}
+	trigFile.close();
+
+}
 
 
 inline void Detector::ReadGainOffset_TestBed(string filename, Settings *settings1) {    // will return gain offset (unit in voltage) for different chs
@@ -4842,7 +5055,28 @@ void Detector::ReadRayleigh_New(Settings *settings1) {    // will return gain (d
 
 
 
+int Detector::GetTrigOffset( int ch, Settings *settings1 ){
 
+	double mostDelay;
+	int offset;
+		
+	if(activeDelay[ch]==1){
+
+		mostDelay = *max_element(triggerDelay.begin(), triggerDelay.end());
+		offset = int((mostDelay -  triggerDelay[ch]) / (settings1->TIMESTEP * 1e9));
+	}
+	else{
+		offset = 0;
+	}
+	
+	return offset;
+}
+
+int Detector::GetTrigMasking( int ch){ 
+
+	return triggerMask[ch]; 
+
+}
 
 
 double Detector::GetGainOffset( int StationID, int ch, Settings *settings1 ) { // returns voltage factor for specific channel gain off set
