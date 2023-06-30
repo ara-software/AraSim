@@ -4768,7 +4768,7 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 ApplyPreamp_databin(k, detector, V_tmp);
                 ApplyFOAM_databin(k, detector, V_tmp);
                 if (settings1 -> APPLY_NOISE_FIGURE == 1) {
-                    ApplyNoiseFig_databin(ch % 28, k, detector, V_tmp, settings1);
+                    ApplyNoiseFig_databin(ch % 16, k, detector, V_tmp, settings1);
                 }
             } else if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
                 // apply RFCM gain
