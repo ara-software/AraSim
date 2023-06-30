@@ -465,8 +465,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
     init_T = settings1->TIMESTEP *-1.e9 *((double) settings1->NFOUR / 4 + RandomTshift);    // locate zero time at the middle and give random time shift
 
-    int use_PA_DAQ = 0;
-
     // decide whether debug mode or not
     int debugmode = 0;
     if (settings1->DEBUG_MODE_ON == 1 && evt < settings1->DEBUG_SKIP_EVT) debugmode = 1;
@@ -2961,7 +2959,6 @@ void Report::rerun_event(Event *event, Detector *detector,
     double RandomTshift = 0. ; // for replication, we have no choice by to set this
     double init_T;
     double T_forint[settings->NFOUR/2];
-    int use_PA_DAQ = 0; 
 
     int num_strings = detector->stations[0].strings.size();
     int num_antennas = detector->stations[0].strings[0].antennas.size();
@@ -3222,7 +3219,6 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
   
   double Pthresh_value[numChan];
   CircularBuffer **buffer=new CircularBuffer*[numChan];
-  int use_PA_DAQ = 0;
   for(int trig_j=0;trig_j<numChan; trig_j++){// initialize Trig_Pass and buffers
         
     int string_i = detector->getStringfromArbAntID( i, trig_j);
@@ -3342,10 +3338,6 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       // fill the buffers (if any changes occur mark check_TDR_configuration as non-zero)
       if(trig_i<trig_search_init+trig_window_bin) check_TDR_configuration+=buffer[trig_j]->fill(Pthresh_value[trig_j]);
       else check_TDR_configuration+=buffer[trig_j]->add(Pthresh_value[trig_j]);
-
-      // End this iteration now if we're analyzing an antenna connected to the PA DAQ
-      // This prevents PA antennas from adding to N_Pass, N_Pass_V, and N_Pass_H
-      if (use_PA_DAQ==1) continue;
 	
       if(buffer[trig_j]->addToNPass>0){// if there is at least one value above threshold in the buffer, this is ++
 	  
@@ -5941,7 +5933,6 @@ void Report::checkPATrigger(
             int first_trigger=0;
 
             // Calculate PThresh information (taken from triggerCheckLoop)
-            int use_PA_DAQ = 0;
             for(int trig_j=0;trig_j<numChan; trig_j++){// initialize Trig_Pass and buffers for each channel
                 int string_i = detector->getStringfromArbAntID( i, trig_j);
                 int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
