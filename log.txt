@@ -1835,3 +1835,33 @@ I added two new functions: Detector::GetTrigOffset and Detector::GetTrigMasking 
 Full documentation of this work is available on https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2812
 
 ==============================================================================
+
+2023/06/30 Abby Bishop
+
+Refreshed the settings->EVENT_GENERATION_MODE pipeline. 
+If settings->EVENT_GENERATION_MODE = 
+   1: Events are read in. Changed Event.cc so that the pnu read in 
+      intelligently decides if the value should be treated as an 
+      exponent (the historical way) and otherwise its treated as an energy
+          if pnu < 1000: treat as settings->EXPONENT
+          if 1000 <= pnu < 1e14: treat as energy in GeV (and convert to eV)
+          if pnu >= 1e14: treat as energy in eV
+   2: Event lists are generated (space-separated, one event per line). 
+      The data saved per event is as follows: 
+          EVID:             Event ID (kind of arbitrary, 
+                              you can set this to any integer) 
+          NUFLAVORINT:      Flavor of neutrino
+          NUBAR:            Whether particle is neutrino or anti-neutrino
+          PNU:              Energy of neutrino
+          CURRENTINT:       Neutral or Charged current interaction
+          IND_POSNU_R*:     Radius of neutrino interaction vertex from the 
+                              middle of the Earth
+          IND_POSNU_THETA*: Zenith location of neutrino interaction vertex
+          IND_POSNU_PHI*:   Azimuthal location of neutrino interaction vertex
+          IND_NNU_THETA:    Zenith direction of neutrino travel
+          IND_NNU_PHI:      Azimuthal direction of neutrino travel
+          ELAST:            Inelasticity of interaction
+
+*AraSim neutrino interaction vertex recorded in spherical coordinates where the origin is at Earth's center
+
+==============================================================================
