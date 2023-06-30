@@ -54,6 +54,11 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 settings1->EXPONENT = 400 + log10(pnu)*10.;
             }
             spectra1 = new Spectra(settings1);
+            if (settings1->PNU[inu_thrown] < 1000) { 
+                // set the pnu that wasn't set manually bc 
+                // provided pnu was in exponent form
+                pnu = spectra1->GetNuEnergy();
+            } 
 
             // Prepare the rest of the parameters
             settings1->SELECT_FLAVOR = settings1->NUFLAVORINT[inu_thrown];
