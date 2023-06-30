@@ -1858,7 +1858,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             // Only PA Attached to PA DAQ in DETECTOR_STATION == 1
             if (settings1->DETECTOR_STATION == 2){ // 1 Vanilla VPol from 1 string attached to PA DAQ
                 stations[i].strings.push_back(temp_string);
-                stations[i].strings[1].antennas.push_back(temp_antenna); // A5E 24, A5RF  7, PA  5
+                stations[i].strings[1].antennas.push_back(temp_antenna); // A5E 24, A5RF  7, PA  5 (Formally "String 4")
             }
             else if (settings1->DETECTOR_STATION == 3){ // 7 Vanilla VPols from 4 strings attached to PA DAQ
                 stations[i].strings.push_back(temp_string);
@@ -1970,8 +1970,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 // Set ARA5 string locations
                 // DETECTOR_STATION == 1 has no ARA5 strings attached to PA DAQ
                 if (settings1->DETECTOR_STATION == 2){
-                    stations[i].strings[1].SetX( stations[i].GetX() -12.96 );
-                    stations[i].strings[1].SetY( stations[i].GetY() - 8.65);
+                    stations[i].strings[1].SetX( stations[i].GetX() +12.33 ); // Formally "String 4"
+                    stations[i].strings[1].SetY( stations[i].GetY() -31.89 ); // Formally "String 4"
                 }
                 else if (settings1->DETECTOR_STATION == 3){
                     stations[i].strings[1].SetX( stations[i].GetX() + 29.63 ); // A5E 8-11
