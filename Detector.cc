@@ -1827,7 +1827,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         // Detector setup according to the real station's configuration 
         //  over time specified by DETECTOR_STATION settings parameter
         //  Options available: 
-        //   1: Jan 2018 - Dec 2018 (All ARA05 and PA channels)
+        //   1: Jan 2018 - Dec 2018 (PA channels only)
         //   2: October 2019 - Jan 2020 (All PA channels and 1 A5 channel)
         //   3: Jan 2020 - present (PA + 7 VPols from A5)
    

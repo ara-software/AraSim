@@ -60,7 +60,7 @@ class Settings
 	int DETECTOR_STATION; // for DETECTOR=4, indicates the single station to be simulated
 	                      // 0 = testbed, 1 = A1, 2 = A2, 3 = A3
                               // Detector=5 indicates Phased array. Detector Station determines setup to use
-                              // 1 = A5 and PA DAQ working, 2 = Only PA DAQ working + 1 nontriggering A5 Vpol, 3 = Only PA DAQ working + 7 nontriggering A5 Vpols
+                              // 1 = only PA antennas (ARA05 simulated separately), 2 = PA antennas + 1 nontriggering A5 Vpol, 3 = PA antennas + 7 nontriggering A5 Vpols
 
         int DETECTOR_STATION_LIVETIME_CONFIG; // for real deep station, what livetime configuration are we using?
 
