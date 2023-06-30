@@ -4,3 +4,6 @@ eventSimDict.C
 eventSimDict.h
 AraSim
 *.ipynb
+
+eventSimDict_rdict.pcm
+sigmaCrossSection.pdf
