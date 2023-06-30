@@ -409,7 +409,7 @@ int main(int argc, char **argv) {   // read setup.txt file
     double eff_PA[60];
     double angle_PA[188];
     double aSNR_PA[188];
-    if (settings1->DETECTOR==5){
+    if (settings1->TRIG_SCAN_MODE==5){
     
         cout << "Phased Array mode! Reading in data: " << endl;
         ifstream infile;
