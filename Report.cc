@@ -616,6 +616,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 stations[i].strings[j].antennas[k].Vfft.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].Vfft_noise.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].V.resize(ray_sol_cnt + 1);
+                                stations[i].strings[j].antennas[k].V_noise.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].SignalExt.resize(ray_sol_cnt + 1);
 
                                 // calculate the polarization vector at the source
@@ -2144,13 +2145,13 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                     // do two convlv with double array m, m+1
 
-                                    Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i);
+                                    Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i, &stations[i].strings[j].antennas[k].V_noise[m]);
                                 }
                                 else if (connect_signals[m] == 0)
                                 {
                                     // cout << noise_ID << " : " << ch_ID << " : " << i << " : " << endl;
                                     // do NFOUR/2 size array convlv (m)
-                                    Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i);
+                                    Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, &stations[i].strings[j].antennas[k].V_noise[m]);
                                 }
                             }
                             else
@@ -2171,7 +2172,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                             // double size array with m-1, m, m+1 raysols all added
                                             //
-                                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m - 1], signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m - 1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i);
+                                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m - 1], signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m - 1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i, &stations[i].strings[j].antennas[k].V_noise[m]);
                                         }
                                         else if (connect_signals[m - 1] == 0)
                                         {
@@ -2179,7 +2180,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                             // double size array with m, m+1 raysols
                                             //
-                                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i);
+                                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i, &stations[i].strings[j].antennas[k].V_noise[m]);
                                         }
                                     }
                                     else if (connect_signals[m] == 0)
@@ -2200,7 +2201,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                             // single size array with only m raysol
                                             //
-                                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i);
+                                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, &stations[i].strings[j].antennas[k].V_noise[m]);
                                         }
                                     }
                                 }
@@ -2222,7 +2223,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                         // single size array with only m raysol
                                         //
-                                        Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i);
+                                        Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, &stations[i].strings[j].antennas[k].V_noise[m]);
                                     }
                                 }
                             }   // if not the first raysol (all other raysols)
@@ -3985,7 +3986,7 @@ void Report::ClearUselessfromConnect(Detector *detector, Settings *settings1, Tr
 
 
 // this one is for single signal
-void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex) {
+void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise) {
 
     int BINSIZE = settings1->NFOUR/2;
 
@@ -4003,17 +4004,21 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
                            
         if ( settings1->NOISE_CHANNEL_MODE==0) {
             V_total_forconvlv.push_back( trigger->v_noise_timedomain[ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
+            V_with_noise->push_back(V_total_forconvlv[-1]);
         }
         else if ( settings1->NOISE_CHANNEL_MODE==1) {
             V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[ GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 ][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
+            V_with_noise->push_back(V_total_forconvlv[-1]);
         }
 
         else if ( settings1->NOISE_CHANNEL_MODE==2) {
             if ( (GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1) < 8) {
                 V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[ GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 ][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
+                V_with_noise->push_back(V_total_forconvlv[-1]);
             }
             else {
                 V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[8][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
+                V_with_noise->push_back(V_total_forconvlv[-1]);
             }
         }
 
@@ -4047,7 +4052,7 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 
 
 // this one is for two connected signals 
-void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin1, int signalbin2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex) {
+void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin1, int signalbin2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise) {
 
     int BINSIZE = settings1->NFOUR/2;
 
@@ -4087,14 +4092,17 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
         if (bin < signal_dbin) {  // bins where only first signal is shown
             V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin];
             V_tmp[bin] = V1[bin];
+            V_with_noise->push_back(V_total_forconvlv[-1]);
         }
         else if (bin < BINSIZE) { // bins where first + second signal is shown
             V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V2[bin - signal_dbin];
             V_tmp[bin] = V1[bin] + V2[bin - signal_dbin];
+            V_with_noise->push_back(V_total_forconvlv[-1]);
         }
         else if (bin < BINSIZE + signal_dbin) { // bins where only second signal is shown
             V_total_forconvlv[bin] = V_total_forconvlv[bin] + V2[bin - signal_dbin];
             V_tmp[bin] = V2[bin - signal_dbin];
+            V_with_noise->push_back(V_total_forconvlv[-1]);
         }
 
     }
@@ -4125,7 +4133,7 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 
 
 // this one is for three connected signals 
-void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin0, int signalbin1, int signalbin2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex) {
+void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin0, int signalbin1, int signalbin2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise) {
 
     int BINSIZE = settings1->NFOUR/2;
 
@@ -4167,25 +4175,30 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
             if ( signal_dbin0 + bin < BINSIZE ) {   // previous signal is also here!
                 V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V0[ signal_dbin0 + bin];
                 V_tmp[bin] = V1[bin] + V0[ signal_dbin0 + bin];
+                V_with_noise->push_back(V_total_forconvlv[-1]);
             }
             else {  // no previous signal, and next signal
                 V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin];
                 V_tmp[bin] = V1[bin];
+                V_with_noise->push_back(V_total_forconvlv[-1]);
             }
         }
         else if (bin < BINSIZE) { // bins where first + second signal is shown
             if ( signal_dbin0 + bin < BINSIZE ) {   // previous signal is also here!
                 V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V0[ signal_dbin0 + bin] + V2[bin - signal_dbin];
                 V_tmp[bin] = V1[bin] + V0[ signal_dbin0 + bin] + V2[bin - signal_dbin];
+                V_with_noise->push_back(V_total_forconvlv[-1]);
             }
             else {  // no previous signal, and next signal
                 V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V2[bin - signal_dbin];
                 V_tmp[bin] = V1[bin] + V2[bin - signal_dbin];
+                V_with_noise->push_back(V_total_forconvlv[-1]);
             }
         }
         else if (bin < BINSIZE + signal_dbin) { // bins where only second signal is shown
             V_total_forconvlv[bin] = V_total_forconvlv[bin] + V2[bin - signal_dbin];
             V_tmp[bin] = V2[bin - signal_dbin];
+            V_with_noise->push_back(V_total_forconvlv[-1]);
         }
 
     }
@@ -5687,18 +5700,43 @@ vector<double> Report::getHitTimesVectorHpol(Detector *detector, int station_i){
   
 }
 
-double Report::getAverageSNR2(int raysolnum){
+double Report::getAverageSNR2(int raysolnum, int station_i, int trig_analysis_mode){
     double total_snr = 0.0;
     double temp_snr = 0.0;
     double peak;
-    for (int ant_num = 0; ant_num<7; ant_num++){
+    for (int ant_num = 2; ant_num<9; ant_num++){
         peak = 0.0;
+        
+        if(trig_analysis_mode == 2) { // Noise only triggers
+            peak=3.5*0.04;
+        }
+        else if (trig_analysis_mode==1) // Noise + signal triggers
+            // Estimate average SNR in topmost vpol
+            if(stations[station_i].strings[0].antennas[ant_num].V.size()>raysolnum) {
+                int total_bins = stations[station_i].strings[0].antennas[ant_num].V_noise[raysolnum].size();
+                for (int bin=0; bin<total_bins; bin++){
+                    if(TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V_noise[raysolnum][bin])>peak){
+                        peak = TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V_noise[raysolnum][bin]);
 
-        int total_bins = stations[0].strings[0].antennas[ant_num].V[raysolnum].size();
-        for (int bin=0; bin<total_bins; bin++){
-            if(TMath::Abs(stations[0].strings[0].antennas[ant_num].V[raysolnum][bin])>peak){
-                peak = TMath::Abs(stations[0].strings[0].antennas[ant_num].V[raysolnum][bin]);
+                    }
+                }
+            }
+            else {
+                peak = 0.0;
+            }
+        else { // signal only triggers
+            // Estimate average SNR in topmost vpol
+            if(stations[station_i].strings[0].antennas[ant_num].V.size()>raysolnum) {
+                int total_bins = stations[station_i].strings[0].antennas[ant_num].V[raysolnum].size();
+                for (int bin=0; bin<total_bins; bin++){
+                    if(TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V[raysolnum][bin])>peak){
+                        peak = TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V[raysolnum][bin]);
 
+                    }
+                }
+            }
+            else {
+                peak = 0.0;
             }
         }
 
@@ -5776,13 +5814,23 @@ void Report::checkPATrigger(
         int bin_value;
         double noise_rms = 0.04; //The noise RMS for an ARA waveform
         double avgSnr;
-        if(settings1->TRIG_ANALYSIS_MODE == 2) {
+        if(settings1->TRIG_ANALYSIS_MODE == 2) { // Noise only triggers
             avgSnr=3.5;
         }
-        else {
+        else if (settings1->TRIG_ANALYSIS_MODE==1) // Noise + signal triggers
+            // Estimate average SNR in topmost vpol
+            if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
+                avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V_noise[raySolNum]);
+                // avgSnr = getAverageSNR2(raySolNum, i, settings1->TRIG_ANALYSIS_MODE);
+            }
+            else {
+                avgSnr = 0.0;
+            }
+        else { // signal only triggers
             // Estimate average SNR in topmost vpol
             if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
                 avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V[raySolNum]);
+                // avgSnr = getAverageSNR2(raySolNum, i, settings1->TRIG_ANALYSIS_MODE);
             }
             else {
                 avgSnr = 0.0;
