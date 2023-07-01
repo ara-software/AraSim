@@ -1895,39 +1895,56 @@ void IceModel::GetMag (
     std::vector < std::vector < std::vector <double> > > &RayStep
 ) { // Calculates magnification factor (aka focusing factor/correction)
   
-  // Calculate (easy) variables needed
-  double launch_index = GetN(posnu);
-  double rec_index = GetN(posant);
-  double rec_depth = posant.GetZ();
+    // Calculate (easy) variables needed
+    double launch_index = GetN(posnu);
+    double rec_index = GetN(posant);
+    double rec_depth = posant.GetZ();
 
-  // Calculate variables needed from the shifted ray
-  Position posant_shifted;
-  posant_shifted.SetXYZ(posant.GetX(), posant.GetY(), posant.GetZ() + antshift);
-  vector<vector < double>> shifted_ray_output; // Initialize shifted ray output
-  RaySolver *shiftedraysolver = new RaySolver();
-  shiftedraysolver->Solve_Ray( // solve shifted ray from neutrino to shifted antenna
-      posnu, posant_shifted, 
-      icemodel, shifted_ray_output, settings1, RayStep
-  );   
-  double shifted_rec_depth = posant_shifted.GetZ();
-  double shifted_launch_angle = shifted_ray_output[1][ray_sol_cnt];
+    // Prepare the Ray for the shifted antenna
+    Position posant_shifted;
+    posant_shifted.SetXYZ(posant.GetX(), posant.GetY(), posant.GetZ() + antshift);
+    vector<vector < double>> shifted_ray_output; // Initialize shifted ray output
+    RaySolver *shiftedraysolver = new RaySolver();
+    shiftedraysolver->Solve_Ray( // solve shifted ray from neutrino to shifted antenna
+        posnu, posant_shifted, 
+        icemodel, shifted_ray_output, settings1, RayStep
+    );  
 
-  // Magnification Factor Calculation
-  mag = sqrt(
-      ( ray_path_length / sin(rec_angle) ) * 
-      abs( (launch_angle - shifted_launch_angle) / 
-           (rec_depth - shifted_rec_depth)          ) *
-      ( launch_index / rec_index )
-  );
+    // If there is no ray solution for the shifted antenna, 
+    // shift it in the opposite direction
+    if ( shifted_ray_output.size() == 0 ){
+        posant_shifted.SetXYZ(posant.GetX(), posant.GetY(), posant.GetZ() - antshift);
+        shiftedraysolver->Solve_Ray( // solve shifted ray from neutrino to shifted antenna
+            posnu, posant_shifted, 
+            icemodel, shifted_ray_output, settings1, RayStep
+        );  
+    }
 
-  // Gently catch and adjust for issues in calculation
-  if ( (mag==0) or !( mag==mag ) ){ // If mag is 0 or nan, approximate
-      mag = launch_index / rec_index ;
-  }
-  if ( mag > 2) mag=2; // Set a cap, inspired from NuRadioMC
+    // If there is a ray solution for the shifted antenna, 
+    //   calculate the magnification factor with the full equation. 
+    //   Otherwise, use the ratio of index_of_refractions approximation
+    if ( shifted_ray_output.size() > 0 ) {
+        double shifted_rec_depth = posant_shifted.GetZ();
+        double shifted_launch_angle = shifted_ray_output[1][ray_sol_cnt];
+        mag = sqrt(
+            ( ray_path_length / sin(rec_angle) ) * 
+            abs( (launch_angle - shifted_launch_angle) / 
+                (rec_depth - shifted_rec_depth)          ) *
+            ( launch_index / rec_index )
+        );
+    }
+    else {
+        mag = launch_index / rec_index ;
+    }
 
-  // Clean up
-  delete shiftedraysolver;
+    // Gently catch and adjust for issues in calculation
+    if ( (mag==0) or !( mag==mag ) ){ // If mag is 0 or nan, approximate
+        mag = launch_index / rec_index ;
+    }
+    if ( mag > 2) mag=2; // Set a cap, inspired from NuRadioMC
+
+    // Clean up
+    delete shiftedraysolver;
 
 }
 
