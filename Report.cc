@@ -528,7 +528,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     -0.01, // 1cm antenna shift, inspired from NuRadioMC
                                     icemodel, settings1, RayStep
                                 );
-                                cout<<mag<<endl;
 
                                 if (ray_output[3][ray_sol_cnt] < PI / 2.)
                                 {
