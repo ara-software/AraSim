@@ -180,8 +180,7 @@ void GetFresnel (
       double launch_angle, double rec_angle, int ray_sol_cnt,
       Position &posnu, Position &posant,
       double antshift,
-      IceModel *icemodel, Settings *settings1, 
-      std::vector < std::vector < std::vector <double> > > &RayStep
+      IceModel *icemodel, Settings *settings1
   );
 
   // new ARA ice attenuation measurement values (at 300 MHz)

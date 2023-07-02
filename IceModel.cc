@@ -1891,8 +1891,7 @@ void IceModel::GetMag (
     double launch_angle, double rec_angle, int ray_sol_cnt,
     Position &posnu, Position &posant,
     double antshift,
-    IceModel *icemodel, Settings *settings1, 
-    std::vector < std::vector < std::vector <double> > > &RayStep
+    IceModel *icemodel, Settings *settings1
 ) { // Calculates magnification factor (aka focusing factor/correction)
   
     // Calculate (easy) variables needed
@@ -1905,18 +1904,20 @@ void IceModel::GetMag (
     posant_shifted.SetXYZ(posant.GetX(), posant.GetY(), posant.GetZ() + antshift);
     vector<vector < double>> shifted_ray_output; // Initialize shifted ray output
     RaySolver *shiftedraysolver = new RaySolver();
+    std::vector < std::vector < std::vector <double> > > ShiftedRayStep;
     shiftedraysolver->Solve_Ray( // solve shifted ray from neutrino to shifted antenna
         posnu, posant_shifted, 
-        icemodel, shifted_ray_output, settings1, RayStep
+        icemodel, shifted_ray_output, settings1, ShiftedRayStep
     );  
 
     // If there is no ray solution for the shifted antenna, 
     // shift it in the opposite direction
     if ( shifted_ray_output.size() == 0 ){
+        ShiftedRayStep.clear();
         posant_shifted.SetXYZ(posant.GetX(), posant.GetY(), posant.GetZ() - antshift);
         shiftedraysolver->Solve_Ray( // solve shifted ray from neutrino to shifted antenna
             posnu, posant_shifted, 
-            icemodel, shifted_ray_output, settings1, RayStep
+            icemodel, shifted_ray_output, settings1, ShiftedRayStep
         );  
     }
 

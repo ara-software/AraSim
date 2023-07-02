@@ -526,7 +526,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     event->Nu_Interaction[0].posnu, // Neutrino
                                     detector->stations[i].strings[j].antennas[k], // Antenna
                                     -0.01, // 1cm antenna shift, inspired from NuRadioMC
-                                    icemodel, settings1, RayStep
+                                    icemodel, settings1
                                 );
 
                                 if (ray_output[3][ray_sol_cnt] < PI / 2.)
@@ -2927,7 +2927,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                         event->Nu_Interaction[0].posnu, // Neutrino
                         detector->stations[0].strings[j].antennas[k], // Antenna
                         -0.01, // 1cm antenna shift, inspired from NuRadioMC
-                        icemodel, settings, Ray_Step
+                        icemodel, settings
                     );
 
                     // get arrival angle at the antenna
