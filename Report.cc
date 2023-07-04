@@ -1329,17 +1329,20 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             //dT_forfft = detector->CalPulserWF_ns[1] - detector->CalPulserWF_ns[0];    // step in ns
                                             dT_forfft = signal->PulserWaveform_T[1] - signal->PulserWaveform_T[0];    // step in ns
 
-                                            //                  cout << "dT_forfft: " << dT_forfft << endl;
+                                            cout << "dT_forfft: " << dT_forfft << endl;
                                             int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
-                                            //                  cout << Ntmp << endl;
-
+                                            cout << "Ntmp = " << Ntmp << endl;
+                                            
                                             stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
+                                            cout << "Nnew = " << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
                                             while (Ntmp > 1)
                                             {
                                                 Ntmp = Ntmp / 2;
                                                 stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *2;
                                             }
+                                            cout << "Ntmp = " << Ntmp << endl;
                                             stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2;
+                                            cout << "Nnew = " << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
                                             // now new NFOUR for zero padding
 
                                             // now we have to make NFOUR/2 number of bins with random init time
@@ -1348,6 +1351,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                             double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
                                             double T_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
+                                            
+                                            cout << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
+                                            cout << waveform_bin << endl;
 
                                             for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]; n++)
                                             {
@@ -1454,25 +1460,43 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 }
 
                                                 stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(heff);
-
+                                                cout << "icemodel->GetN() = " << icemodel->GetN(detector->stations[i].strings[j].antennas[k]) << endl;
                                                 if (n > 0)
                                                 {
-
+                                                    cout << "antenna_theta = " << antenna_theta << endl;
+                                                    cout << "antenna_phi = " << antenna_phi << endl;
+                                                    
                                                     if (settings1->ALL_ANT_V_ON == 0)
                                                     {
-
+                                                        // cout << "before ApplyAnt" << endl;
+                                                        // cout << n << endl;
+                                                        // cout << V_forfft[2 *n] << endl;
+                                                        // cout << V_forfft[2 *n + 1] << endl;
                                                         ApplyAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
                                                             heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], settings1, antenna_theta, antenna_phi);
+                                                        // cout << "AfterApplyAnt, before InvertAnt" << endl;
+                                                        // cout << V_forfft[2 *n] << endl;
+                                                        // cout << V_forfft[2 *n + 1] << endl;
+                                                        InvertAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
+                                                           heff, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi);
+                                                        // cout << "AfterInvertAnt" << endl;
+                                                        // cout << V_forfft[2 *n] << endl;
+                                                        // cout << V_forfft[2 *n + 1] << endl;
                                                     }
                                                     else if (settings1->ALL_ANT_V_ON == 1)
                                                     {
+
                                                         ApplyAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, 0),
                                                             heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], settings1, antenna_theta, antenna_phi);
+                                                        // InvertAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, 0),
+                                                           // heff, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi);                                                        
                                                     }
                                                 }
                                                 else
                                                 {
                                                     ApplyAntFactors_Tdomain_FirstTwo(heff, heff_lastbin, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi);
+                                                    // InvertAntFactors_Tdomain_FirstTwo(heff, heff_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi);
+                                                    
                                                 }
 
                                                 //
@@ -1480,25 +1504,48 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 //
                                                 if (n > 0)
                                                 {
+                                                    // cout << "before ApplyElect" << endl;
+                                                    // cout << n << endl;
+                                                    // cout << V_forfft[2 *n] << endl;
+                                                    // cout << V_forfft[2 *n + 1] << endl;                                                    
                                                     ApplyElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
+                                                    // cout << "AfterApplyElect, before InvertElect" << endl;
+                                                    // cout << V_forfft[2 *n] << endl;
+                                                    // cout << V_forfft[2 *n + 1] << endl;                                                    
+                                                    // InvertElect_Tdomain(freq_tmp *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
+                                                    // cout << "AfterInvertElect" << endl;
+                                                    // cout << V_forfft[2 *n] << endl;
+                                                    // cout << V_forfft[2 *n + 1] << endl;                                                    
                                                 }
                                                 else
                                                 {
                                                     ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
+                                                    // InvertElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
                                                 }
                                             }   // end for freq bin
                                             //End Debugging
 
                                             // now get time domain waveform back by inv fft
+                                            // cout << "ggggggggg" << endl;
+                                            cout << "Nnew = " << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;            
+                                            cout << "Before InvFFT V_forfft[230] = " << V_forfft[230] << endl;
+                                            cout << "Before InvFFT V_forfft[231] = " << V_forfft[231] << endl;                                            
                                             Tools::realft(V_forfft, -1, stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);
-
+                                            cout << "V_forfft[230] = " << V_forfft[230] << endl;              
+                                            cout << "V_forfft[231] = " << V_forfft[231] << endl;                                              
+                                            // cout << "hhhhhhhhh" << endl;
                                             // we need to do normal time ordering as we did zero padding(?)
                                             // If signal is located at the center, we don't need to do NormalTimeOrdering???
                                             //Tools::NormalTimeOrdering(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], V_forfft);
 
                                             // skip linear interpolation for now
                                             // changed to sinc interpolation Dec 2020 by BAC
+                                            //Debuggin - JCF 6/28/2023
                                             Tools::SincInterpolation(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR / 2, T_forint, volts_forint);
+                                            // volts_forint = V_forfft;
+                                            // T_forint = T_forfft;
+                                            cout << "iiiiiiiii" << endl;
+                                            //End debugging
 
                                             // check what we save as V[], volts_forint? or volts_forfft
 
@@ -4645,10 +4692,88 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin,
 
     vm_bin0 = vm_bin0 / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
     vm_bin1 = vm_bin1 / sqrt(2.) * 0.5 * heff_lastbin * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
+    
 
 }
 
 
+
+//Creating inverse functions of ApplyAntFactors_Tdomain that simply divide out the terms (in Fourier space) applied in the original functions. - JCF 6/29/2023
+void Report::InvertAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, double antenna_theta, double antenna_phi, bool useInTransmitterMode) {  // vm is input and output. output will have some antenna factors on it
+
+    // first, work out if we would like to use this function in "transmit" mode
+     // which means that when we apply the phase shift, we need to subtract (!!)
+     // AntPhase*RADDEG; where if in "receive" mode (useInTransmitterMode=false) we must
+     // add (!!) AntPhase*RADDEG
+     // or at least, that minus sign was the only difference between 
+     // ApplyAntFactors_Tdomain and ApplyAntFactors_Tdomain_Transmitter when
+     // Brian merged the two functions in Nov 2020
+     double sign = 1.;
+     if(useInTransmitterMode==true){ sign=-1.;};
+
+    //double pol_factor;
+    pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
+    if (true) {
+        double phase_current;
+        // cout << "ccccccc" << endl;
+        if ( vm_real != 0. ) {
+            phase_current = atan( vm_img / vm_real );
+            // phase in +-PI range
+            if (vm_real<0.) {
+                if (vm_img>0.) phase_current += PI;
+                else if (vm_img<0.) phase_current -= PI;
+            }
+        }
+        else {
+            if ( vm_img>0. ) phase_current = PI;
+            else if (vm_img<0.) phase_current = -PI;
+            else phase_current = 0.;
+        }
+        // cout << "dddddddddd" << endl;
+        // V amplitude
+        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / (1 / sqrt(2.) * 0.5 * heff * pol_factor); // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
+
+        // real, img terms with phase shift
+        // cout << "eeeeeeee" << endl;
+        vm_real = v_amp * cos( phase_current - (sign * AntPhase*RADDEG) );
+        vm_img =  v_amp * sin( phase_current - (sign * AntPhase*RADDEG) );
+        // cout << "ffffffff" << endl;
+        //vm_real = v_amp * cos( phase_current - AntPhase*RADDEG ); // subtract AntPhase for four1 function's equation definition (inverse in img values)
+        //vm_img = v_amp * sin( phase_current - AntPhase*RADDEG );
+    }
+
+    else { // only amplitude
+        vm_real = vm_real / (1 / sqrt(2.) * 0.5 * heff * pol_factor); // only amplitude
+        vm_img = vm_img / (1 / sqrt(2.) * 0.5 * heff * pol_factor); // only amplitude
+    }
+    if (std::isnan(vm_real)) {
+        vm_real = 0.0;
+    }
+    if (std::isnan(vm_img)) {
+        vm_img = 0.0;
+    }    
+
+}
+
+
+
+void Report::InvertAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi) {  // vm is input and output. output will have some antenna factors on it
+
+    //double pol_factor;
+    pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
+
+    vm_bin0 = vm_bin0 / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
+    vm_bin1 = vm_bin1 / sqrt(2.) * 0.5 * heff_lastbin * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
+    
+    if (std::isnan(vm_bin0)) {
+        vm_bin0 = 0.0;
+    }
+    if (std::isnan(vm_bin1)) {
+        vm_bin1 = 0.0;      
+    }    
+
+}
+//End new inverse functions
 
 
 
@@ -4741,7 +4866,71 @@ void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *d
 
 }
 
+//Create inverse operators of ApplyElect_Tdomain - JCF 6/29/2023
+void Report::InvertElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, int gain_ch_no) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
 
+    if ( true ) {
+
+        double phase_current;
+
+        if ( vm_real != 0. ) {
+
+            phase_current = atan( vm_img / vm_real );
+
+            // phase in +-PI range
+            if (vm_real<0.) {
+                if (vm_img>0.) phase_current += PI;
+                else if (vm_img<0.) phase_current -= PI;
+            }
+        }
+        else {
+
+            if ( vm_img>0. ) phase_current = PI;
+            else if (vm_img<0.) phase_current = -PI;
+            else phase_current = 0.;
+        }
+
+        // V amplitude
+        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / detector->GetElectGain_1D_OutZero( freq, gain_ch_no ); // apply gain (unitless) to amplitude
+
+        // real, img terms with phase shift
+        //vm_real = v_amp * cos( phase_current + detector->GetElectPhase_1D(freq) );
+        //vm_img = v_amp * sin( phase_current + detector->GetElectPhase_1D(freq) );
+
+        vm_real = v_amp * cos( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no) );
+        vm_img = v_amp * sin( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no ) );
+    }
+
+    else {
+
+        vm_real = vm_real * detector->GetElectGain_1D_OutZero( freq, gain_ch_no); // only amplitude
+
+        vm_img = vm_img * detector->GetElectGain_1D_OutZero( freq, gain_ch_no); // only amplitude
+    }
+    if (std::isnan(vm_real)) {
+        vm_real = 0.0;
+    }
+    if (std::isnan(vm_img)) {
+        vm_img = 0.0;
+    }    
+}
+
+
+
+
+void Report::InvertElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, int gain_ch_no) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
+
+    vm_bin0 = vm_bin0 / detector->GetElectGain_1D_OutZero( freq0 , gain_ch_no);
+    vm_bin1 = vm_bin1 / detector->GetElectGain_1D_OutZero( freq1 , gain_ch_no);
+    
+    if (std::isnan(vm_bin0)) {
+        vm_bin0 = 0.0;
+    }
+    if (std::isnan(vm_bin1)) {
+        vm_bin1 = 0.0;    
+    }
+}
+//End new inverse functions
 
 
 
