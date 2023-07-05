@@ -1811,8 +1811,9 @@ void IceModel::GetFresnel (
         Vector &Pol // will read the polarization at the source and return polarization at the target antenna
         ) {
 
-    double n1 = 1.35;   // index of refraction at the firn
+    // double n1 = 1.35;   // index of refraction at the firn
     double n2 = 1.;     // index of refraction at the air
+    double nL = GetN(posnu);
 
     // calculate the magnification factor for plane / spherical wave case
     if (settings1->WAVE_TYPE == 0) { // plane wave
@@ -1852,14 +1853,14 @@ void IceModel::GetFresnel (
 
         double r_coeff_pokey, r_coeff_slappy;
 
-        if (n1/n2 * sin(launch_angle) >= 1.) {  // total internal reflection case
+        if (nL/n2 * sin(launch_angle) >= 1.) {  // total internal reflection case
             r_coeff_pokey = 1.;
             r_coeff_slappy = 1.;
         }
 
         else {  // there is refracted ray to air
 
-            double t_angle = asin( n1/n2 * sin(launch_angle) ); // transmitted ray (which we don't care) angle
+            double t_angle = asin( nL/n2 * sin(launch_angle) ); // transmitted ray (which we don't care) angle
 
             r_coeff_pokey = tan(launch_angle - t_angle) / tan(launch_angle + t_angle);  // only reflected ray can be a signal
             r_coeff_slappy = sin(launch_angle - t_angle) / sin(launch_angle + t_angle);
