@@ -5815,15 +5815,16 @@ void Report::checkPATrigger(
         if(settings1->TRIG_ANALYSIS_MODE == 2) { // Noise only triggers
             avgSnr=3.5;
         }
-        else if (settings1->TRIG_ANALYSIS_MODE==1) // Noise + signal triggers
-            // Estimate average SNR in topmost vpol
-            if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
-                avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V_noise[raySolNum]);
-                // avgSnr = getAverageSNR2(raySolNum, i, settings1->TRIG_ANALYSIS_MODE);
-            }
-            else {
-                avgSnr = 0.0;
-            }
+        // I don't trust the signal+noise trigger estimator right now - ARB 7/7/23
+        // else if (settings1->TRIG_ANALYSIS_MODE==1) // Noise + signal triggers
+        //     // Estimate average SNR in topmost vpol
+        //     if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
+        //         avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V_noise[raySolNum]);
+        //         // avgSnr = getAverageSNR2(raySolNum, i, settings1->TRIG_ANALYSIS_MODE);
+        //     }
+        //     else {
+        //         avgSnr = 0.0;
+        //     }
         else { // signal only triggers
             // Estimate average SNR in topmost vpol
             if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
