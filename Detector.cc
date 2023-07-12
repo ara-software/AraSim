@@ -5060,7 +5060,7 @@ int Detector::GetTrigOffset( int ch, Settings *settings1 ){
 	double mostDelay;
 	int offset;
 		
-	if(activeDelay[ch]==1){
+	if(activeDelay[ch]==0){
 
 		mostDelay = *max_element(triggerDelay.begin(), triggerDelay.end());
 		offset = int((mostDelay -  triggerDelay[ch]) / (settings1->TIMESTEP * 1e9));
