@@ -56,6 +56,8 @@ int main(int argc, char **argv)
     TFile *fp = TFile::Open(argv[4]);
     if(!fp) { std::cerr << "Can't open file\n"; return -1; }
     printf("Root File opened!\n");
+    
+    //Check if sim or real data file by checking for existence of AraTree
 
     // data like
     TTree *eventTree = (TTree*) fp->Get("eventTree");
@@ -158,7 +160,16 @@ int main(int argc, char **argv)
             // if (i != 5){
             //    continue;
             // }
+            cout << "asdasdasda" << endl;
             TGraph *gr = usefulAtriEvPtr->getGraphFromRFChan(i);
+            cout << "zzzzzzzzzzzz" << endl;
+            //Apply band-pass filter
+            //Set frequency min and max in MHz
+            // double freqMin = 125.; 
+            // double freqMax = 400.;
+            // //Apply bandpass filter
+            // gr = FFTtools::simplePassBandFilter(gr, freqMin, freqMax);
+            //end band-pass filter
             int waveform_bin = gr->GetN();
             
             double heff_lastbin;
@@ -375,12 +386,39 @@ int main(int argc, char **argv)
 
                 }
                 
-                //Quick and dirty hack to filter out frequencies above 850 MHz.
-                if (freq_tmp > 825.*1.e6 or freq_tmp < 140.*1.e6) {
+                //Quick and dirty hack to filter out frequencies above 850 MHz and below 100 MHz.
+                // cout << "******************************************" << endl;
+                // cout << "Before Hard band-pass V_forfft = " << endl;
+                // cout << "V_forfft[2 *n] = "<< V_forfft[2 *n] << endl;
+                // cout << "V_forfft[2 *n + 1] = "<< V_forfft[2 *n + 1] << endl;                      
+                std::cout << std::endl;                
+                if (freq_tmp > 850.*1.e6 or freq_tmp < 100.*1.e6) {
                     V_forfft[2*n] = 0;
                     V_forfft[2*n+1] = 0;
                 }
-
+                // cout << "Before Butterworth V_forfft = " << endl;
+                // cout << "V_forfft[2 *n] = "<< V_forfft[2 *n] << endl;
+                // cout << "V_forfft[2 *n + 1] = "<< V_forfft[2 *n + 1] << endl;                     
+                //Apply homemade butterworth filter of the fourth order
+                double freqMin = 150*1e6;
+                double freqMax = 300*1e6;
+                
+                double weight = 1;
+                int order = 8;
+                weight /= sqrt(1 + TMath::Power(freqMin/freq_tmp, 4*order));
+                weight /= sqrt(1 + TMath::Power(freq_tmp/freqMax, 4*order));
+//                 if (freq_tmp < freqMin) {
+                        // weight /= sqrt(1 + TMath::Power(freqMin/freq_tmp, 4*order));
+//                 }
+//                 if (freq_tmp > freqMax) {
+//                         weight /= sqrt(1 + TMath::Power(freq_tmp/freqMax, 4*order));
+//                 }
+                V_forfft[2*n] *= weight;
+                V_forfft[2*n+1] *= weight;                                
+                //End Butterworth filter
+                // cout << "After Butterworth V_forfft = " << endl;
+                // cout << "V_forfft[2 *n] = "<< V_forfft[2 *n] << endl;
+                // cout << "V_forfft[2 *n + 1] = "<< V_forfft[2 *n + 1] << endl;     
                 // //
                 // // invert entire elect chain gain, phase
                 // //
@@ -405,7 +443,6 @@ int main(int argc, char **argv)
             for (int i = 0; i < sizeof(V_forfft) / sizeof(V_forfft[0]); i++) {
               std::cout << V_forfft[i] << ", ";
             }
-
             std::cout << std::endl;
                
             
