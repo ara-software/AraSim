@@ -2109,7 +2109,20 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             ReadElectChain("./data/custom_electronics.txt", settings1);
         }
         cout << "done read elect chain" << endl;
-      
+
+        // if calpulser case
+        if (settings1 -> CALPULSER_ON > 0) {
+            // read TestBed Calpulser waveform measured (before pulser)
+            ReadCalPulserWF("./data/CalPulserWF.txt", settings1);
+            // But warn the use if we have this set AND we're simulating more than one station
+            if (params.number_of_stations != 1){
+                cout<<"Warning: You're simulating calpulser events for an array of stations. ";
+                cout<<"You may receive unexpected results. "<<endl;
+                cout<<"    settings1->CALPULSER_ON:   "<<settings1->CALPULSER_ON<<endl;
+                cout<<"    params.number_of_stations: "<<params.number_of_stations<<endl;
+            }
+        }
+
     } // if mode == 5
 
     /////////////////////////////////////////////////////////////////////////////   
