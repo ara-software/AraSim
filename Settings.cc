@@ -1000,7 +1000,7 @@ int Settings::CheckCompatibilitiesSettings() {
         if(DETECTOR_STATION_LIVETIME_CONFIG>-1){
 
             if ( ( (int)DETECTOR_STATION == 5 ) && 
-                 ( ( DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1 ) ){
+                 ( ( DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1 ) ) ){
                     // Phased Array mode (DETECTOR=5) uses DETECTOR_STATION for DAQ configurations
                     // Need to check this before checking DETECTOR_STATION in the context of ARA stations
                     cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only five expected configurations for A1"<<endl;
