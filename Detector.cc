@@ -2085,13 +2085,24 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         if (settings1->NOISE_CHANNEL_MODE!=0) {
             ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
         }
+
+        // Load in detector_specific noise if requested
+        if(settings1->NOISE==1){
+            cout <<"Reading in situ PA noise for this station and configuration from file: " <<endl;
+            char the_rayleigh_filename[500];
+            sprintf(
+                the_rayleigh_filename, "./data/noise/sigmavsfreq_PA_config_%d.csv",
+                settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+            cout << the_rayleigh_filename << endl;
+            ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
+        }
+
         // read total elec. chain response file!!
         cout << "start read elect chain" << endl;
         if (settings1 -> CUSTOM_ELECTRONICS == 0) {
             //read the standard ARA electronics
-            cout << "     Reading standard ARA electronics response" << endl;
-            ReadElectChain("./data/ARA_Electronics_TotalGain_TwoFilters.txt", settings1);
-            //ReadElectChain("./data/ARA_Electronics_TotalGainPhase.txt", settings1);
+            cout << "     Reading standard PA electronics response" << endl;
+            ReadElectChain("./data/gain/PA_Electronics_TotalGainPhase.csv", settings1);  // Here's the change I made
         } else if (settings1 -> CUSTOM_ELECTRONICS == 1) {
             //read a custom user defined electronics gain
             cout << "     Reading custom electronics response" << endl;
