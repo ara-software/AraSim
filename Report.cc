@@ -503,7 +503,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 		// It is used in all instances of ApplyElect_Tdomain() and ApplyElect_Tdomain_FirstTwo(), to indicate channel number
 		// Note that channel numbering is different for DETECTOR==4 than for the other modes (1-3). See that in the definition of GetChannelfromStringAntenna() 
 		int gain_ch_no;
-		if (settings1->DETECTOR==4){
+		if (settings1->DETECTOR==4 || settings1->DETECTOR==5){
 			gain_ch_no = detector->GetChannelfromStringAntenna (i, j, k, settings1)-1;
 		}
 		else{
@@ -2974,7 +2974,7 @@ void Report::rerun_event(Event *event, Detector *detector,
             // It is used in all instances of ApplyElect_Tdomain() and ApplyElect_Tdomain_FirstTwo(), to indicate channel number
             // Note that channel numbering is different for DETECTOR==4 than for the rest (1-3). See that in the definition of GetChannelfromStringAntenna()  
             int gain_ch_no;
-            if (settings->DETECTOR==4){
+            if (settings->DETECTOR==4 || settings->DETECTOR==5){
                     gain_ch_no = detector->GetChannelfromStringAntenna (0, j, k, settings)-1;
             }       
             else{

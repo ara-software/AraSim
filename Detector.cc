@@ -2102,7 +2102,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         if (settings1 -> CUSTOM_ELECTRONICS == 0) {
             //read the standard ARA electronics
             cout << "     Reading standard PA electronics response" << endl;
-            ReadElectChain("./data/gain/PA_custom_electronics.cs", settings1);
+            ReadElectChain("./data/gain/PA_Electronics_TotalGainPhase.csv", settings1);  // Here's the change I made
         } else if (settings1 -> CUSTOM_ELECTRONICS == 1) {
             //read a custom user defined electronics gain
             cout << "     Reading custom PA electronics response" << endl;
@@ -5989,15 +5989,15 @@ void Detector::SetupInstalledStations(Settings *settings1) {
         // Antennas.push_back(102); // PAVpol at Z=-174.7
         // Antennas.push_back(101); // PAVpol at Z=-173.7
         // Antennas.push_back(100); // PAVpol at Z=-172.7
-        Antennas.push_back(13); // PAHpol at Z=-184.8
-        Antennas.push_back(13); // PAHpol at Z=-182.8
-        Antennas.push_back(5); // PAVpol at Z=-180.8
-        Antennas.push_back(5); // PAVpol at Z=-178.8
-        Antennas.push_back(5); // PAVpol at Z=-176.7
-        Antennas.push_back(5); // PAVpol at Z=-175.7
-        Antennas.push_back(5); // PAVpol at Z=-174.7
-        Antennas.push_back(5); // PAVpol at Z=-173.7
-        Antennas.push_back(5); // PAVpol at Z=-172.7
+        Antennas.push_back(9); // PAHpol at Z=-184.8
+        Antennas.push_back(8); // PAHpol at Z=-182.8
+        Antennas.push_back(7); // PAVpol at Z=-180.8
+        Antennas.push_back(6); // PAVpol at Z=-178.8
+        Antennas.push_back(4); // PAVpol at Z=-176.7
+        Antennas.push_back(3); // PAVpol at Z=-175.7
+        Antennas.push_back(2); // PAVpol at Z=-174.7
+        Antennas.push_back(1); // PAVpol at Z=-173.7
+        Antennas.push_back(0); // PAVpol at Z=-172.7
         InstalledStations[6].VHChannel.push_back(Antennas); 
         Antennas.clear();
 
@@ -6010,28 +6010,30 @@ void Detector::SetupInstalledStations(Settings *settings1) {
         }
         else if (settings1->DETECTOR_STATION==2) {
             // ARA05 DAQ off, not connected to PA, only split A5 channel connected
+            // Note that numbering of VPol channels is different here from DETECTOR=4
+            //   since this is the PA DAQ
             
             // Make string 1
-            // Antennas.push_back(4);// Antennas.push_back(12);
-            // Antennas.push_back(0);// Antennas.push_back(8);
+            // Antennas.push_back(12);// Antennas.push_back(x);
+            // Antennas.push_back(13);// Antennas.push_back(x);
             // InstalledStations[6].VHChannel.push_back(Antennas); 
             // Antennas.clear();
 
             // Make string 2
-            // Antennas.push_back(5);// Antennas.push_back(13);
-            // Antennas.push_back(1);// Antennas.push_back(9);
+            // Antennas.push_back(14);// Antennas.push_back(x);
+            // Antennas.push_back(15);// Antennas.push_back(x);
             // InstalledStations[6].VHChannel.push_back(Antennas); 
             // Antennas.clear();
             
             // Make string 3
-            // Antennas.push_back(6);// Antennas.push_back(14);
-            // Antennas.push_back(2);// Antennas.push_back(10);
+            // Antennas.push_back(10);// Antennas.push_back(x);
+            // Antennas.push_back(x);// Antennas.push_back(x);
             // InstalledStations[6].VHChannel.push_back(Antennas); 
             // Antennas.clear();
 
             // Make string 4
-            Antennas.push_back(7);// Antennas.push_back(15);
-            // Antennas.push_back(3);// Antennas.push_back(11);
+            Antennas.push_back(5);// Antennas.push_back(x);
+            // Antennas.push_back(11);// Antennas.push_back(x);
             InstalledStations[6].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
@@ -6040,28 +6042,30 @@ void Detector::SetupInstalledStations(Settings *settings1) {
         }
         else if (settings1->DETECTOR_STATION==3) {
             // ARA05 DAQ off, only 7 vpols available
-            
-            // Make string 3
-            Antennas.push_back(4);// Antennas.push_back(12);
-            Antennas.push_back(0);// Antennas.push_back(8);
-            InstalledStations[6].VHChannel.push_back(Antennas); 
-            Antennas.clear();
-
-            // Make string 0
-            Antennas.push_back(5);// Antennas.push_back(13);
-            Antennas.push_back(1);// Antennas.push_back(9);
-            InstalledStations[6].VHChannel.push_back(Antennas); 
-            Antennas.clear();
+            // Note that numbering of VPol channels is different here from DETECTOR=4 
+            //   since this is the PA DAQ
             
             // Make string 1
-            Antennas.push_back(6);// Antennas.push_back(14);
-            // Antennas.push_back(2);// Antennas.push_back(10);
+            Antennas.push_back(12);// Antennas.push_back(x);
+            Antennas.push_back(13);// Antennas.push_back(x);
             InstalledStations[6].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
             // Make string 2
-            Antennas.push_back(7);// Antennas.push_back(15);
-            Antennas.push_back(3);// Antennas.push_back(11);
+            Antennas.push_back(14);// Antennas.push_back(x);
+            Antennas.push_back(15);// Antennas.push_back(x);
+            InstalledStations[6].VHChannel.push_back(Antennas); 
+            Antennas.clear();
+            
+            // Make string 3
+            Antennas.push_back(10);// Antennas.push_back(x);
+            // Antennas.push_back(x);// Antennas.push_back(x);
+            InstalledStations[6].VHChannel.push_back(Antennas); 
+            Antennas.clear();
+
+            // Make string 4
+            Antennas.push_back(5);// Antennas.push_back(x);
+            Antennas.push_back(11);// Antennas.push_back(x);
             InstalledStations[6].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
@@ -6336,6 +6340,21 @@ void Detector::GetSSAfromChannel(int stationID, int channelNum, int * antennaNum
             cerr << "No string/antenna matches the channel number" << endl;
         }
 
+    } else if (settings1 -> DETECTOR == 5) {
+        stationID=6; // Force the funciton to use phased array and not the provided stationID
+
+        for (int i = 0; i < int(InstalledStations[stationID].VHChannel.size()); i++) {
+            for (int j = 0; j < int(InstalledStations[stationID].VHChannel[i].size()); j++) {
+                if (channelNum == InstalledStations[stationID].VHChannel[i][j]) {
+                    * stringNum = i;
+                    * antennaNum = j;
+                }
+            }
+        }
+
+        if ( * stringNum == -1) {
+            cerr << "No string/antenna matches the channel number" << endl;
+        }
     }
     // if only ideal stations are in use and also installed ARA1a (use ARA1a ch mapping for now)
     else {
