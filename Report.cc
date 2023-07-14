@@ -3276,13 +3276,7 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
                        ||
 	 (settings1->TRIG_ONLY_LOW_CH_ON==1 && settings1->DETECTOR!=3 && antenna_i<2 ) ){ // channel filter: choose if to use lower/borehole channels or not
       
-      int channel_num;
-      if (detector->Get_mode()==5){
-          channel_num = detector->GetChannelfromStringAntenna ( 5, string_i, antenna_i, settings1 );
-      }
-      else {
-          channel_num = detector->GetChannelfromStringAntenna ( i, string_i, antenna_i, settings1 );
-      }
+      int channel_num = detector->GetChannelfromStringAntenna ( i, string_i, antenna_i, settings1 );
 
       // assign Pthresh a value 
       if(settings1->NOISE_CHANNEL_MODE==0) Pthresh_value[trig_j]=trigger->Full_window[trig_j][trig_i]/(trigger->rmsdiode * detector->GetThresOffset( i, channel_num-1,settings1) );
