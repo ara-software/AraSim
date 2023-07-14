@@ -2102,7 +2102,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         if (settings1 -> CUSTOM_ELECTRONICS == 0) {
             //read the standard ARA electronics
             cout << "     Reading standard PA electronics response" << endl;
-            ReadElectChain("./data/gain/PA_Electronics_TotalGainPhase.csv", settings1);  // Here's the change I made
+            ReadElectChain("./data/gain/PA_custom_electronics.cs", settings1);
         } else if (settings1 -> CUSTOM_ELECTRONICS == 1) {
             //read a custom user defined electronics gain
             cout << "     Reading custom PA electronics response" << endl;
