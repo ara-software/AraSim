@@ -852,7 +852,7 @@ int Settings::CheckCompatibilitiesSettings() {
         num_err++;
     }
 
-    if (TRIG_SCAN_MODE==5 && ( DETECTOR!=5 && DETECTOR!=9 ) ){
+    if (TRIG_SCAN_MODE==5 && ( DETECTOR!=5 ) ){
         cerr<<"TRIG_SCAN_MODE=5 only compatible for Phased Array (DETECTOR= 5)"<<endl;
         num_err++;
     }
