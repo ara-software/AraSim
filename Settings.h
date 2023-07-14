@@ -59,6 +59,9 @@ class Settings
 
 	int DETECTOR_STATION; // for DETECTOR=4, indicates the single station to be simulated
 	                      // 0 = testbed, 1 = A1, 2 = A2, 3 = A3
+	
+	int DETECTOR_STATION_ARAROOT; // Also for DETECTOR=4, indicates the single station to be simulated, it just takes care of differentiating ARA_STATION1 (ICRR) vs ARA_STATION1B (ATRI) 
+					// Same values as DETECTOR_STATION. Except that when DETECTOR_STATION = 100, DETECTOR_STATION_ARAROOT = 100 and defaults DETECTOR_STATION back to 1
 
         int DETECTOR_STATION_LIVETIME_CONFIG; // for real deep station, what livetime configuration are we using?
 

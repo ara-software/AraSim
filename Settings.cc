@@ -85,6 +85,7 @@ outputdir="outputs"; // directory where outputs go
   DETECTOR=1;   //ARA layout with small number of stations
 
   DETECTOR_STATION=-1; // initiate this to negative -1, so it does nothing by default
+  DETECTOR_STATION_ARAROOT=-1; // initiate this to negative -1, so it does nothing by default
   DETECTOR_STATION_LIVETIME_CONFIG=-1; // intiative this to negative -1, so it does nothing by default
 
   INTERACTION_MODE=1;   //PickNear mode (0: Aeff mode using sphere surface around station, 1: Veff mode using cylinder volume around station)
@@ -362,6 +363,11 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "DETECTOR_STATION") {
                   DETECTOR_STATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+		  DETECTOR_STATION_ARAROOT = DETECTOR_STATION;
+		  if (DETECTOR_STATION == 100) {
+			DETECTOR_STATION = 1
+			DETECTOR_STATION_ARAROOT = 100;
+			}
               }
               else if (label == "DETECTOR_STATION_LIVETIME_CONFIG") {
                   DETECTOR_STATION_LIVETIME_CONFIG = atof( line.substr(line.find_first_of("=") + 1).c_str() );
