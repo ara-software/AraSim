@@ -998,13 +998,20 @@ int Settings::CheckCompatibilitiesSettings() {
 	        num_err++;
 	    }
         if(DETECTOR_STATION_LIVETIME_CONFIG>-1){
-	    if((int)DETECTOR_STATION==1){
+
+            if ( ( (int)DETECTOR_STATION == 5 ) && 
+                 ( ( DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1 ) ){
+                    // Phased Array mode (DETECTOR=5) uses DETECTOR_STATION for DAQ configurations
+                    // Need to check this before checking DETECTOR_STATION in the context of ARA stations
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only five expected configurations for A1"<<endl;
+                    num_err++;
+            }
+	        else if((int)DETECTOR_STATION==1){
                 if(DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1){
                     cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only seven expected configurations for A1"<<endl;
                     num_err++;
                 }
             }
-	
             else if((int)DETECTOR_STATION==2){
                 if(DETECTOR_STATION_LIVETIME_CONFIG>6 || DETECTOR_STATION_LIVETIME_CONFIG<1){
                     cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only six expected configurations for A2"<<endl;
@@ -1017,11 +1024,21 @@ int Settings::CheckCompatibilitiesSettings() {
                     num_err++;
                 }
             }
-	
-	
+            else if((int)DETECTOR_STATION==4){
+                if(DETECTOR_STATION_LIVETIME_CONFIG>4 || DETECTOR_STATION_LIVETIME_CONFIG<1){
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only four expected configurations for A3"<<endl;
+                    num_err++;
+                }
+            }
+            else if((int)DETECTOR_STATION==5){
+                if(DETECTOR_STATION_LIVETIME_CONFIG>2 || DETECTOR_STATION_LIVETIME_CONFIG<1){
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only two expected configurations for A3"<<endl;
+                    num_err++;
+                }
+            }
             else{
                 cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but DETECTOR_STATION is "<<DETECTOR_STATION<<endl;
-                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is only valid for A2 and A3 "<<endl;
+                cerr<<" This is not currently permitted in via error handling in Settings.cc "<<endl;
                 num_err++;
             }
         }
