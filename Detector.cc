@@ -5995,7 +5995,7 @@ void Detector::SetupInstalledStations(Settings *settings1) {
             InstalledStations[6].nChannelsVH = 9;
 
         }
-        else if (settings1->DETECTOR_STATION==1) {
+        else if (settings1->DETECTOR_STATION==2) {
             // ARA05 DAQ off, not connected to PA, only split A5 channel connected
             
             // Make string 1
