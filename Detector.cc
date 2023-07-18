@@ -5562,7 +5562,7 @@ void Detector::SetupInstalledStations(Settings *settings1) {
         	InstalledStations[1].nChannels = 20;
         	InstalledStations[1].nChannelsVH = 16;
 
-		}
+	}
 
      }
 
