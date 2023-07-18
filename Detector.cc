@@ -6075,6 +6075,7 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
     AraGeomTool *araGeom = new AraGeomTool();
 
     //    int stationNum = settings1->DETECTOR_STATION;
+    int StationID_AraRoot = settings1->DETECTOR_STATION_ARAROOT;
 
     if (StationID == 0) params.TestBed_BH_Mean_delay = 0.;
     //cout<<"No of chs in station "<<stationNum<<" : "<<InstalledStations[stationNum].nChannels+1<<endl;
@@ -6091,13 +6092,13 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
         int antennaNum, stringNum;
         //GetSSAfromChannel(stationNum, chan, &antennaNum, &stringNum);
         GetSSAfromChannel(StationID, chan, &antennaNum, &stringNum, settings1);
+	
+        if (araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].polType != AraAntPol::kSurface){
 
-        if (araGeom->getStationInfo(StationID)->fAntInfo[antId].polType != AraAntPol::kSurface){
-
-            stations[StationIndex].strings[stringNum].antennas[antennaNum].SetX(stations[StationIndex].GetX()+araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[0]);
-            stations[StationIndex].strings[stringNum].antennas[antennaNum].SetY(stations[StationIndex].GetY()+araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[1]);
+            stations[StationIndex].strings[stringNum].antennas[antennaNum].SetX(stations[StationIndex].GetX()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[0]);
+            stations[StationIndex].strings[stringNum].antennas[antennaNum].SetY(stations[StationIndex].GetY()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[1]);
             //stations[stationNum].strings[stringNum].antennas[antennaNum].SetZ(araGeom->fStationInfo[stationNum].fAntInfo[chan-1].antLocation[2]-double(settings1->DEPTH_CHANGE));
-            stations[StationIndex].strings[stringNum].antennas[antennaNum].SetZ(araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[2]);
+            stations[StationIndex].strings[stringNum].antennas[antennaNum].SetZ(araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[2]);
             
             /*
              cout <<
@@ -6111,10 +6112,10 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
              endl;
              */
             
-            stations[StationIndex].strings[stringNum].antennas[antennaNum].type = int(araGeom->getStationInfo(StationID)->fAntInfo[antId].polType);  //set polarization to match the deployed information
+            stations[StationIndex].strings[stringNum].antennas[antennaNum].type = int(araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].polType);  //set polarization to match the deployed information
             
-            stations[StationIndex].strings[stringNum].SetX(stations[StationIndex].GetX()+araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[0]);
-            stations[StationIndex].strings[stringNum].SetY(stations[StationIndex].GetY()+araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[1]);
+            stations[StationIndex].strings[stringNum].SetX(stations[StationIndex].GetX()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[0]);
+            stations[StationIndex].strings[stringNum].SetY(stations[StationIndex].GetY()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[1]);
             
             
             
@@ -6143,10 +6144,10 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
 
 
             // put DAQ channel type 
-            if (araGeom->getStationInfo(StationID)->fAntInfo[antId].daqChanType == AraDaqChanType::kDisconeChan) { // BH chs
+            if (araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].daqChanType == AraDaqChanType::kDisconeChan) { // BH chs
                 stations[StationIndex].strings[stringNum].antennas[antennaNum].DAQchan = 0;
             }
-            else if (araGeom->getStationInfo(StationID)->fAntInfo[antId].daqChanType == AraDaqChanType::kBatwingChan) { // not BH chs
+            else if (araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].daqChanType == AraDaqChanType::kBatwingChan) { // not BH chs
                 stations[StationIndex].strings[stringNum].antennas[antennaNum].DAQchan = 1;
             }
 
@@ -6159,7 +6160,7 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
             if (StationID == 0) {
 
                 //cout<<"TestBed ch"<<chan-1<<" delay : "<<araGeom->fStationInfo[stationNum].fAntInfo[chan-1].debugTotalCableDelay<<endl;
-                params.TestBed_Ch_delay[chan] = araGeom->getStationInfo(StationID)->fAntInfo[antId].debugTotalCableDelay;
+                params.TestBed_Ch_delay[chan] = araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].debugTotalCableDelay;
                 params.TestBed_Ch_delay_bin[chan] = params.TestBed_Ch_delay[chan]/(settings1->TIMESTEP * 1.e9); // change TIMESTEP s to ns
                 //cout<<"TestBed ch"<<chan-1<<" delay bin : "<<params.TestBed_Ch_delay_bin[chan-1]<<endl;
                 if (chan<8) params.TestBed_BH_Mean_delay += params.TestBed_Ch_delay[chan];
@@ -6182,11 +6183,11 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
         }// end polarization (antenna type) selection
         else {
             
-            int antPolNum = araGeom->getStationInfo(StationID)->fAntInfo[antId].antPolNum;
+            int antPolNum = araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antPolNum;
             // set surface antenna postions
             
-            stations[StationIndex].surfaces[antPolNum].SetX( stations[StationIndex].GetX()+araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[0]);
-            stations[StationIndex].surfaces[antPolNum].SetY( stations[StationIndex].GetY()+araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[1]);
+            stations[StationIndex].surfaces[antPolNum].SetX( stations[StationIndex].GetX()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[0]);
+            stations[StationIndex].surfaces[antPolNum].SetY( stations[StationIndex].GetY()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[1]);
             
             //                cout << "Surface: " << chan << " : " << stationNum << " : " << stringNum << " : " << antennaNum << " : " << stations[stationNum].surfaces[antPolNum].GetX() << " : " << stations[stationNum].surfaces[antPolNum].GetY() << " : " << stations[stationNum].surfaces[antPolNum].GetZ() << " : " << stations[stationNum].surfaces[antPolNum].type << endl;
             

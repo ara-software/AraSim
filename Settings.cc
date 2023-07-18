@@ -365,7 +365,7 @@ void Settings::ReadFile(string setupfile) {
                   DETECTOR_STATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
 		  DETECTOR_STATION_ARAROOT = DETECTOR_STATION;
 		  if (DETECTOR_STATION == 100) {
-			DETECTOR_STATION = 1
+			DETECTOR_STATION = 1;
 			DETECTOR_STATION_ARAROOT = 100;
 			}
               }
