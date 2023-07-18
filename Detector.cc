@@ -109,7 +109,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
     // setup installed station information
     // setup actual installed staion information regardless of what DETECTOR mode is in use
-    SetupInstalledStations();
+    SetupInstalledStations(settings1);
 
 
     if (mode == 0) {
@@ -5414,7 +5414,7 @@ void Detector::PrepareVectorsInstalled(int importedStation) {
 }
 
 
-void Detector::SetupInstalledStations() {
+void Detector::SetupInstalledStations(Settings *settings1) {
 
     // This variable needs to include testbed!
     // So if you are trying to say "we have installed TB, A1, A2",
@@ -5482,44 +5482,89 @@ void Detector::SetupInstalledStations() {
 
     if (InstalledStations.size() > 1) { // Station 1 
         
-        // Make string 0
-        Antennas.push_back(5); Antennas.push_back(9);
-        Antennas.push_back(1); Antennas.push_back(13);
-        InstalledStations[1].VHChannel.push_back(Antennas); 
-        Antennas.clear();
+	if(settings1-> DETECTOR_STATION_ARAROOT==1){
         
-        // Make string 1
-        Antennas.push_back(6); Antennas.push_back(10);
-        Antennas.push_back(2); Antennas.push_back(14);
-        InstalledStations[1].VHChannel.push_back(Antennas); 
-        Antennas.clear();
+		// Make string 0
+        	Antennas.push_back(5); Antennas.push_back(9);
+        	Antennas.push_back(1); Antennas.push_back(13);
+        	InstalledStations[1].VHChannel.push_back(Antennas); 
+        	Antennas.clear();
         
-        // Make string 2
-        Antennas.push_back(7); Antennas.push_back(11);
-        Antennas.push_back(3); Antennas.push_back(15);
-        InstalledStations[1].VHChannel.push_back(Antennas); 
-        Antennas.clear();
+        	// Make string 1
+        	Antennas.push_back(6); Antennas.push_back(10);
+        	Antennas.push_back(2); Antennas.push_back(14);
+        	InstalledStations[1].VHChannel.push_back(Antennas); 
+        	Antennas.clear();
+        
+        	// Make string 2
+        	Antennas.push_back(7); Antennas.push_back(11);
+        	Antennas.push_back(3); Antennas.push_back(15);
+        	InstalledStations[1].VHChannel.push_back(Antennas); 
+        	Antennas.clear();
 
-        // Make string 3
-        Antennas.push_back(4); Antennas.push_back(8);
-        Antennas.push_back(0); Antennas.push_back(12);
-        InstalledStations[1].VHChannel.push_back(Antennas); 
-        Antennas.clear();
+        	// Make string 3
+        	Antennas.push_back(4); Antennas.push_back(8);
+        	Antennas.push_back(0); Antennas.push_back(12);
+        	InstalledStations[1].VHChannel.push_back(Antennas); 
+        	Antennas.clear();
 
-        InstalledStations[1].nStrings = InstalledStations[1].VHChannel.size();
+        	InstalledStations[1].nStrings = InstalledStations[1].VHChannel.size();
 
-        // Make surface antennas
-        InstalledStations[1].surfaceChannels.push_back(17);
-        InstalledStations[1].surfaceChannels.push_back(18);
-        InstalledStations[1].surfaceChannels.push_back(19);
-        InstalledStations[1].surfaceChannels.push_back(20);
+        	// Make surface antennas
+        	InstalledStations[1].surfaceChannels.push_back(17);
+        	InstalledStations[1].surfaceChannels.push_back(18);
+        	InstalledStations[1].surfaceChannels.push_back(19);
+        	InstalledStations[1].surfaceChannels.push_back(20);
 
-        InstalledStations[1].nSurfaces = InstalledStations[1].surfaceChannels.size();
+        	InstalledStations[1].nSurfaces = InstalledStations[1].surfaceChannels.size();
 
-        InstalledStations[1].nChannels = 20;
-        InstalledStations[1].nChannelsVH = 16;
+        	InstalledStations[1].nChannels = 20;
+        	InstalledStations[1].nChannelsVH = 16;
 
-    }
+    	}
+	
+	if(settings1-> DETECTOR_STATION_ARAROOT==100){
+        	
+		// Make string 0
+        	Antennas.push_back(5); Antennas.push_back(13);
+        	Antennas.push_back(1); Antennas.push_back(9);
+        	InstalledStations[1].VHChannel.push_back(Antennas); 
+        	Antennas.clear();
+
+        	// Make string 1
+        	Antennas.push_back(6); Antennas.push_back(14);
+        	Antennas.push_back(2); Antennas.push_back(10);
+        	InstalledStations[1].VHChannel.push_back(Antennas); 
+        	Antennas.clear();
+
+        	// Make string 2
+        	Antennas.push_back(7); Antennas.push_back(15);
+        	Antennas.push_back(3); Antennas.push_back(11);
+        	InstalledStations[1].VHChannel.push_back(Antennas); 
+        	Antennas.clear();
+        
+        	// Make string 3
+        	Antennas.push_back(4); Antennas.push_back(12);
+        	Antennas.push_back(0); Antennas.push_back(8);
+        	InstalledStations[1].VHChannel.push_back(Antennas); 
+        	Antennas.clear();
+
+        	InstalledStations[1].nStrings = InstalledStations[1].VHChannel.size();
+
+        	// Make surface antennas
+        	InstalledStations[1].surfaceChannels.push_back(16);
+        	InstalledStations[1].surfaceChannels.push_back(17);
+        	InstalledStations[1].surfaceChannels.push_back(18);
+        	InstalledStations[1].surfaceChannels.push_back(19);
+
+        	InstalledStations[1].nSurfaces = InstalledStations[1].surfaceChannels.size();
+
+        	InstalledStations[1].nChannels = 20;
+        	InstalledStations[1].nChannelsVH = 16;
+
+		}
+
+     }
 
     if (InstalledStations.size() > 2) { // Station 2
 
