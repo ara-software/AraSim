@@ -5482,7 +5482,7 @@ void Detector::SetupInstalledStations(Settings *settings1) {
 
     if (InstalledStations.size() > 1) { // Station 1 
         
-	if(settings1-> DETECTOR_STATION_ARAROOT==1){
+	if(settings1-> DETECTOR_STATION_ARAROOT==1){ //Build A1 as an ICRR
         
 		// Make string 0
         	Antennas.push_back(5); Antennas.push_back(9);
@@ -5523,7 +5523,7 @@ void Detector::SetupInstalledStations(Settings *settings1) {
 
     	}
 	
-	if(settings1-> DETECTOR_STATION_ARAROOT==100){
+	else{ //Otherwise always build A1 as an ATRI
         	
 		// Make string 0
         	Antennas.push_back(5); Antennas.push_back(13);
@@ -5564,7 +5564,7 @@ void Detector::SetupInstalledStations(Settings *settings1) {
 
 	}
 
-     }
+    }
 
     if (InstalledStations.size() > 2) { // Station 2
 
