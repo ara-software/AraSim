@@ -5720,7 +5720,7 @@ void Detector::PrepareVectorsInstalled(int importedStation) {
 }
 
 
-void Detector::SetupInstalledStations(Settings *settings1) {
+void Detector::SetupInstalledStations(Settings *settings1=nullptr) {
 
     // This variable needs to include testbed!
     // So if you are trying to say "we have installed TB, A1, A2",
