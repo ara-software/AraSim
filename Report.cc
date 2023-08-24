@@ -295,9 +295,14 @@ int CircularBuffer::add(double input_value){
     else buffer[i]=0; // if under threshold just insert zero
       
     // improve best threshold value in the buffer
-    if(mode>1&&buffer[i]<best_value){ best_value=buffer[i]; temp_value=best_value; changelog=1;}
+    if ( mode>1 && buffer[i]<best_value ) { 
+        best_value=buffer[i]; 
+        temp_value=best_value; 
+        changelog=1;
+    }
 
-    if(mode>1&&std::fabs(last_value-best_value)<epsilon){ // i.e. if last_value==best_value. this happens when the best value leaves buffer
+    if( mode>1 && std::fabs(last_value-best_value)<epsilon ) { 
+        // i.e. if last_value==best_value. this happens when the best value leaves buffer
         best_value=findBestValue(); // rescan whole buffer. this should be rather rare...
         temp_value=best_value;
         changelog=1;
@@ -338,8 +343,10 @@ int CircularBuffer::fill(double input_value){// buffer is just filling, don't us
     
 double CircularBuffer::findBestValue(){
     double temp_best=0;
-    for(int ii=0;ii<N;ii++) if(buffer[ii]<temp_best) {
-        temp_best=buffer[ii];
+    for(int ii=0;ii<N;ii++) {
+        if ( buffer[ii]<temp_best ) {
+            temp_best=buffer[ii];
+        }
     }
     return temp_best;
 }
@@ -1919,13 +1926,21 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 }
                                             }
                                         }
-                                        else
+                                        else // if we are checking previous string, check upto entire antennas
                                         {
-                                            // if we are checking previous string, check upto entire antennas
-                                            if (settings1->DETECTOR==5 && settings1->DETECTOR_STATION==3 && j_sub==3 && k_sub==1) continue; // Avoids segfault from string 3 having 1 antenna for PA DETECTOR_STATION 3
+                                            // Avoids segfault from string 3 having 1 antenna for PA DETECTOR_STATION 3
+                                            if (
+                                                settings1->DETECTOR==5 && // Phased Array detector mode
+                                                settings1->DETECTOR_STATION==3 && // third PA detector configuration (PA + 7 ARA VPols)
+                                                j_sub==3 && // String 3
+                                                k_sub==1 // 2nd antenna that doesn't exist but this block of code expects it to
+                                            ) {
+                                                continue;
+                                            } 
+
+                                            // check only first one for now;;;
                                             if (noise_ID[l] == stations[i].strings[j_sub].antennas[k_sub].noise_ID[0])
                                             {
-                                                // check only first one for now;;;
                                                 noise_pass_nogo = 1;
                                             }
                                         }
@@ -3379,7 +3394,8 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       if(scan_mode==1) return trig_i; //  if we aren't going to scan all the Pthresh values, just return
     }
     
-    if(scan_mode>1&&check_TDR_configuration&&window_pass_bit){// if there's a trigger and anything changes in the buffers, restock the TDR arrays
+    // if there's a trigger and anything changes in the buffers, restock the TDR arrays
+    if( scan_mode>1 && check_TDR_configuration && window_pass_bit ){
       	    
       for(int trig_j=0;trig_j<numChan;trig_j++) TDR_all_sorted_temp[trig_j]=0;
       for(int trig_j=0;trig_j<numChanVpol;trig_j++) TDR_Vpol_sorted_temp[trig_j]=0;
@@ -5696,7 +5712,12 @@ double Report::getAverageSNR2(int raysolnum, int station_i, int trig_analysis_mo
     double total_snr = 0.0;
     double temp_snr = 0.0;
     double peak;
-    for (int ant_num = 2; ant_num<9; ant_num++){
+
+    // Collect max SNR values for all PAVpols 
+    int first_PAVPol_index = 2; // In detector object, on PA String (strings[0]), antenna index 0 and 1 are PA Hpols
+    int num_ants = 7;
+    double snr_cap = 25.0; 
+    for (int ant_num = first_PAVPol_index; ant_num<first_PAVPol_index+num_ants; ant_num++){
         peak = 0.0;
         
         if(trig_analysis_mode == 2) { // Noise only triggers
@@ -5733,12 +5754,12 @@ double Report::getAverageSNR2(int raysolnum, int station_i, int trig_analysis_mo
         }
 
         temp_snr = peak/0.04;
-        if(temp_snr>25) temp_snr = 25; // Cap SNR at 25
+        if(temp_snr>snr_cap) temp_snr = snr_cap; // Cap SNR
         total_snr = total_snr+temp_snr;
 
     }
 
-    total_snr = total_snr/7.0;
+    total_snr = total_snr/num_ants;
 
     return total_snr;
 }
@@ -5753,8 +5774,9 @@ double Report::getAverageSNR(const vector<double> & mysignal){
     }
     
     double snr = peak/0.04;
+    double snr_cap = 25.0;
 
-    if(snr>25) snr = 25.0; // Cap SNR at 25
+    if(snr>snr_cap) snr = snr_cap; // Cap SNR
     
     return snr;
 
@@ -5907,13 +5929,19 @@ void Report::checkPATrigger(
             double *TDR_Vpol_sorted_temp;
             double *TDR_Hpol_sorted_temp;
             
-            if(settings1->TRIG_SCAN_MODE>1){ // prepare TDR storage arrays 
+            if(settings1->TRIG_SCAN_MODE>1){ // prepare TDR storage arrays and initialize all values to 0
                 TDR_all_sorted_temp=new double[numChan];
                 TDR_Vpol_sorted_temp=new double[numChanVpol];
                 TDR_Hpol_sorted_temp=new double[numChanHpol];
-                for(int trig_j=0;trig_j<numChan;    trig_j++) TDR_all_sorted_temp[trig_j] =0;
-                for(int trig_j=0;trig_j<numChanVpol;trig_j++) TDR_Vpol_sorted_temp[trig_j]=0;
-                for(int trig_j=0;trig_j<numChanHpol;trig_j++) TDR_Hpol_sorted_temp[trig_j]=0;  
+                for(int trig_j=0; trig_j<numChan; trig_j++) {
+                    TDR_all_sorted_temp[trig_j] =0;
+                }
+                for(int trig_j=0; trig_j<numChanVpol; trig_j++) {
+                    TDR_Vpol_sorted_temp[trig_j]=0;
+                }
+                for(int trig_j=0; trig_j<numChanHpol; trig_j++) {
+                    TDR_Hpol_sorted_temp[trig_j]=0;  
+                }
             } // if scan_mode>1
 
             int check_TDR_configuration=0; // check if we need to reorder our TDR arrays
@@ -5951,11 +5979,35 @@ void Report::checkPATrigger(
                     int channel_num = detector->GetChannelfromStringAntenna( 5, string_i, antenna_i, settings1 );
 
                     // assign Pthresh a value 
-                    if(settings1->NOISE_CHANNEL_MODE==0) Pthresh_value[trig_j] = trigger->Full_window[trig_j][trig_i] / ( trigger->rmsdiode                   * detector->GetThresOffset( i, channel_num-1,settings1) );
-                    if(settings1->NOISE_CHANNEL_MODE==1) Pthresh_value[trig_j] = trigger->Full_window[trig_j][trig_i] / ( trigger->rmsdiode_ch[channel_num-1] * detector->GetThresOffset( i, channel_num-1,settings1) );
-                    if(settings1->NOISE_CHANNEL_MODE==2){
-                        if(channel_num-1 < 8)            Pthresh_value[trig_j] = trigger->Full_window[trig_j][trig_i] / ( trigger->rmsdiode_ch[channel_num-1] * detector->GetThresOffset( i, channel_num-1,settings1) );
-                        else                             Pthresh_value[trig_j] = trigger->Full_window[trig_j][trig_i] / ( trigger->rmsdiode_ch[8]             * detector->GetThresOffset( i, channel_num-1,settings1) );
+                    if( settings1->NOISE_CHANNEL_MODE==0 ) {
+                        Pthresh_value[trig_j] = (
+                            trigger->Full_window[trig_j][trig_i] / 
+                            (   trigger->rmsdiode 
+                              * detector->GetThresOffset(i, channel_num-1,settings1) )
+                        );
+                    }
+                    if( settings1->NOISE_CHANNEL_MODE==1 ) {
+                        Pthresh_value[trig_j] = (
+                            trigger->Full_window[trig_j][trig_i] / 
+                            (   trigger->rmsdiode_ch[channel_num-1] 
+                              * detector->GetThresOffset(i, channel_num-1,settings1) )
+                        );
+                    }
+                    if( settings1->NOISE_CHANNEL_MODE==2 ){
+                        if(channel_num-1 < 8) {
+                            Pthresh_value[trig_j] = (
+                                trigger->Full_window[trig_j][trig_i] / 
+                                (   trigger->rmsdiode_ch[channel_num-1] 
+                                  * detector->GetThresOffset(i, channel_num-1,settings1) )
+                            );
+                        }
+                        else {
+                            Pthresh_value[trig_j] = (
+                                trigger->Full_window[trig_j][trig_i] / 
+                                (   trigger->rmsdiode_ch[8]
+                                  * detector->GetThresOffset(i, channel_num-1,settings1) )
+                            );
+                        }
                     }
 
                     // this is to count how many local trigger clusters there are 
@@ -5986,10 +6038,13 @@ void Report::checkPATrigger(
                     else check_TDR_configuration+=buffer[trig_j]->add(Pthresh_value[trig_j]);
 
                     // if there is at least one value above threshold in the buffer, this is ++
-                    if( buffer[trig_j]->addToNPass>0 && 
+                    if ( 
+                        buffer[trig_j]->addToNPass>0 && 
                         string_i == 0 && 
                         detector->stations[i].strings[string_i].antennas[antenna_i].type == 0
-                    ) N_pass_V++;
+                    ) {
+                        N_pass_V++;
+                    }
                 
                 }// end iteration over channels to calculate PThresh
 
