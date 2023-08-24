@@ -5829,7 +5829,17 @@ void Report::checkPATrigger(
         if(settings1->TRIG_ANALYSIS_MODE == 2) { // Noise only triggers
             avgSnr=3.5;
         }
-        // I don't trust the signal+noise trigger estimator right now - ARB 7/7/23
+        // // ARB 7/7/23: 
+        // //    I don't trust the signal+noise trigger estimator right now 
+        // //    so it's commented out below. This is because the trigger 
+        // //    is determined based on PA trigger efficiency that was
+        // //    calculated with signal-only triggers IIRC. This means
+        // //    using signal+noise will artificially inflate the trigger rate.
+        // //    I think we'll need to develop trigger efficiency as a function
+        // //    of signal+noise data or actually build the actual physical
+        // //    triggering pipeline (forming beams, etc) before we can 
+        // //    run PA simulations over signal+noise. 
+        // //    This is a project for the future. 
         // else if (settings1->TRIG_ANALYSIS_MODE==1) // Noise + signal triggers
         //     // Estimate average SNR in topmost vpol
         //     if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
