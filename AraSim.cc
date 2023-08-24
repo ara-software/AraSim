@@ -410,62 +410,44 @@ int main(int argc, char **argv) {   // read setup.txt file
     double angle_PA[188];
     double aSNR_PA[188];
     if (settings1->TRIG_SCAN_MODE==5){
-    
+
         cout << "Phased Array mode! Reading in data: " << endl;
+    
+        // Load Efficiency vs SNR curve: 
         ifstream infile;
         infile.open("nuphase_trig_effc.txt",ios::in);
-        if(infile.fail()) // checks to see if file opended
-            {
+        if(infile.fail()){ // checks to see if file opended
             cout << "   error, file could not be opened" << endl;
             return 1; // no point continuing if the file didn't open...
-            }
-            int num = 0;
-            while(!infile.eof()) // reads file to end of *file*, not line
-            {
-                infile >> snr_PA[num]  // read first column number
-                       >> eff_PA[num]; // read second column number
-                ++num;
-                // you can also do it on the same line like this:
-                // infile >> exam1[num] >> exam2[num] >> exam3[num]; ++num;
-            }
-            cout<<"   number of triggering efficiency data points: "<<num<<endl;
+        }
+        int num = 0;
+        while(!infile.eof()) { // reads file to end of *file*, not line
+            infile >> snr_PA[num]  // read first column number
+                   >> eff_PA[num]; // read second column number
+            ++num;
+        }
+        cout<<"   number of triggering efficiency data points: "<<num<<endl;
         infile.close();
-        // std::cout << "The data from Phased array" << '\n';
-        // for (size_t i = 0; i < num; i++) 
-        // {
-        //     std::cout << snr_PA[i] << " "<< eff_PA[i] <<'\n';
-        // }
 
         //load Angle vs SNR curve:
         infile.clear();
         infile.open("nuphase_SNR_angle.txt",ios::in);
-        if(infile.fail()) // checks to see if file opended
-        {
+        if(infile.fail()) { // checks to see if file opended
             cout << "   error, file could not be opened" << endl;
             return 1; // no point continuing if the file didn't open...
         }
         num = 0;
-            while(!infile.eof()) // reads file to end of *file*, not line
-            {
-                infile >> angle_PA[num]   // read first column number
-                       >>  aSNR_PA[num];  // read second column number
-                ++num;
-                // you can also do it on the same line like this:
-                // infile >> exam1[num] >> exam2[num] >> exam3[num]; ++num;
-            }
-            cout<<"   number of SNR vs angle data points: "<<num<<endl;
+        while(!infile.eof()) { // reads file to end of *file*, not line
+            infile >> angle_PA[num]   // read first column number
+                    >>  aSNR_PA[num];  // read second column number
+            ++num;
+        }
+        cout<<"   number of SNR vs angle data points: "<<num<<endl;
         infile.close();
-        // std::cout << "The secondary data from Phased array" << '\n';
-        // for (size_t i = 0; i < num; i++) 
-        // {
-        //     std::cout << angle_PA[i] << " "<< aSNR_PA[i] <<'\n';
-        // }
 
     } // End if DETECTOR=5 (Phased Array sim)
 
-    // for (int inu=0;inu<settings1->NNU;inu++) { // loop over neutrinos
     while (inu < nuLimit){
-        // cout << "inu: " << inu << endl; 
         check_station_DC = 0;
         check_station_DC = 0;
         if ( settings1->DEBUG_MODE_ON==0 ) {
@@ -474,7 +456,6 @@ int main(int argc, char **argv) {   // read setup.txt file
                 cout<<"Thrown "<<Events_Thrown<<endl;
         }
 
-        // event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1 );
         event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1, Events_Thrown );
         if(event->Nu_Interaction.size()<1){
             // If for some reason no interactions were placed into the event holder, continue.
