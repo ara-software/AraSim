@@ -286,7 +286,7 @@ int CircularBuffer::add(double input_value){
     temp_value=best_value;
     
     if(buffer[i]<pthresh) addToNPass--; // if the value leaving the buffer is over threshold, we reduce the counter.
-    if(mode>1) last_value=buffer[i];// in mode 1 we don't care about the values, just about the addToNPass
+    if(mode>1) last_value=buffer[i]; // in mode 1 we don't care about the values, just about the addToNPass
         
     if(input_value<pthresh){
         addToNPass++; // if value entering buffer is over threshold we increase the counter.
@@ -360,15 +360,13 @@ int CircularBuffer::numBinsToOldestTrigger(){
 
     int j; // the number of bins after "i" where the first trigger is found 
     for(j=1; j<N; j++){
-        // if(i==0&&buffer[N-1]<0) return 1;
         // i-1 is b/c we did i++ in the last call to add/fill.
-        if(buffer[(i-1+j)%N]<0) break;// if there's any value here, its because it passed the threshold, so take it
-    }// for j
+        if(buffer[(i-1+j)%N]<0) break; // if there's any value here, its because it passed the threshold, so take it
+    } // for j
 
-    // if(j==0) return 0;
     return N-j; // the backward count of how many bins between i and the earliest trigger... 
     
-}// numBinsToOldestTrigger
+} // numBinsToOldestTrigger
     
 int CircularBuffer::numBinsToLatestTrigger(){
     
@@ -5884,14 +5882,7 @@ void Report::checkPATrigger(
                         for (int bin=0; bin<BINSIZE; bin++) {
 
                             bin_value = signalbinPA - BINSIZE/2 + bin;
-                            // stations[i].strings[str].antennas[ant].V_mimic.push_back( ( trigger->Full_window_V[ant][ last_trig_bin - settings1->NFOUR/4 + mimicbin ] )*1.e3 );// save in mV
-                            // stations[i].strings[str].antennas[ant].time.push_back( last_trig_bin - settings1->NFOUR/4 + mimicbin );
-                            // stations[i].strings[str].antennas[ant].time_mimic.push_back( ( settings1->NFOUR/4 + mimicbin) * settings1->TIMESTEP*1.e9 );// save in ns
-                            //stations[i].strings[0].antennas[ant].V_mimic.push_back(trigger->Full_window_V[ant][bin_value]*1e3);// save in mV (original kah)
                             stations[i].strings[str].antennas[ant].V_mimic.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
-                            // stations[i].strings[0].antennas[ant].time.push_back( bin_value );
-                            // stations[i].strings[0].antennas[ant].time_mimic.push_back( ( BINSIZE/2 + bin) * settings1->TIMESTEP*1.e9 );// save in ns
-                            //stations[i].strings[str].antennas[ant].waveformVoltage.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
                             stations[i].strings[str].antennas[ant].time.push_back( bin_value );
 
                             stations[i].strings[str].antennas[ant].time_mimic.push_back( ( bin) * settings1->TIMESTEP*1.e9 );// save in ns
