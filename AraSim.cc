@@ -405,15 +405,16 @@ int main(int argc, char **argv) {   // read setup.txt file
     int Events_Passed = 0;
 
     // Prepare arrays required by Phased Array sim
-    double snr_PA[60];
-    double eff_PA[60];
-    double angle_PA[188];
-    double aSNR_PA[188];
+    double snr_PA[60];    // First  column of nuphase_trig_effc.txt data
+    double eff_PA[60];    // Second column of nuphase_trig_effc.txt data
+    double angle_PA[188]; // First  column of nuphase_SNR_angle.txt data
+    double aSNR_PA[188];  // Second column of nuphase_SNR_angle.txt data
     if (settings1->TRIG_SCAN_MODE==5){
 
         cout << "Phased Array mode! Reading in data: " << endl;
     
         // Load Efficiency vs SNR curve: 
+        // From arxiv.1809.04573, Fig 15, Dashed Pink 0.8Hz/beam curve
         ifstream infile;
         infile.open("nuphase_trig_effc.txt",ios::in);
         if(infile.fail()){ // checks to see if file opended
@@ -430,6 +431,8 @@ int main(int argc, char **argv) {   // read setup.txt file
         infile.close();
 
         //load Angle vs SNR curve:
+        // Unsure how this curve was created but shapes of each beam resemble
+        // Fig 13b from arxiv.1809.04573
         infile.clear();
         infile.open("nuphase_SNR_angle.txt",ios::in);
         if(infile.fail()) { // checks to see if file opended

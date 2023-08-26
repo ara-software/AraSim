@@ -5862,11 +5862,19 @@ void Report::checkPATrigger(
 
         //scale snr to reflect the angle
         all_receive_ang[raySolNum] = all_receive_ang[raySolNum]*180.0/PI-90.0;
-        double snr_50 = interpolate(ang_data,snr_data,all_receive_ang[raySolNum],187);
+        double snr_50 = interpolate(
+            ang_data, snr_data, // x and y coordinates of curve to interpolate
+            all_receive_ang[raySolNum], // x value to interpolate y value for
+            *(&ang_data+1)-ang_data-1 // len(ang_data) - 1
+        );
         avgSnr = avgSnr*2.0/snr_50;
 
         // Estimate the PA signal efficiency of for this SNR from curve of efficiency vs data
-        double eff = interpolate(xdata,ydata,avgSnr,59);
+        double eff = interpolate(
+            xdata, ydata, // x and y coordinates of curve to interpolate
+            avgSnr, // x value to interpolate y value for
+            *(&xdata+1)-xdata-1 // len(xdata) - 1
+        ); 
         
         if(avgSnr > 0.5){
                    
