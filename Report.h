@@ -263,7 +263,7 @@ class Report {
     
 //    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger);
     
-    void Connect_Interaction_Detector_V2 (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt, double* xdata, double* ydata, double* ang_data, double* snr_data);     
+    void Connect_Interaction_Detector_V2 (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt);     
     void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings, int which_solution,
         vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
         );
@@ -275,8 +275,7 @@ class Report {
     void checkPATrigger(
         int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,
         Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
-        int trig_search_init, int max_total_bin, int trig_window_bin, 
-        double* xdata, double* ydata, double* ang_data, double* snr_data);    
+        int trig_search_init, int max_total_bin, int trig_window_bin);    
     double interpolate(double *xdata,double *ydata, double xi, int numData);
     
 #ifdef ARA_UTIL_EXISTS

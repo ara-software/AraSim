@@ -418,8 +418,7 @@ void Report::clear_useless(Settings *settings1) {   // to reduce the size of out
 
 }
 
-void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt,
-                                             double* xdata, double* ydata, double* ang_data, double* snr_data) {
+void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt) {
 
     int ray_sol_cnt;
     double viewangle;
@@ -2284,8 +2283,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                     checkPATrigger(
                         i, all_receive_ang, viewangle, ray_sol_cnt, 
                         detector, event, evt, trigger, settings1, 
-                        trig_search_init, max_total_bin, trig_window_bin, 
-                        xdata, ydata, ang_data, snr_data
+                        trig_search_init, max_total_bin, trig_window_bin
                     );
                 }
                 else if (settings1->TRIG_SCAN_MODE == 0)
@@ -5790,8 +5788,7 @@ bool Report::isTrigger(double eff){
 void Report::checkPATrigger(
     int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,
     Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
-    int trig_search_init, int max_total_bin, int trig_window_bin, 
-    double* xdata, double* ydata, double* ang_data, double* snr_data
+    int trig_search_init, int max_total_bin, int trig_window_bin
 ){
     // Calculates max SNR in topmost PA Vpol 
     //   and multplies it by viewing angle factors. 
@@ -5863,17 +5860,17 @@ void Report::checkPATrigger(
         //scale snr to reflect the angle
         all_receive_ang[raySolNum] = all_receive_ang[raySolNum]*180.0/PI-90.0;
         double snr_50 = interpolate(
-            ang_data, snr_data, // x and y coordinates of curve to interpolate
+            trigger->angle_PA, trigger->aSNR_PA, // x and y coordinates of curve to interpolate
             all_receive_ang[raySolNum], // x value to interpolate y value for
-            *(&ang_data+1)-ang_data-1 // len(ang_data) - 1
+            (*(&trigger->angle_PA+1) - trigger->angle_PA) - 1 // len(ang_data) - 1
         );
         avgSnr = avgSnr*2.0/snr_50;
 
         // Estimate the PA signal efficiency of for this SNR from curve of efficiency vs data
         double eff = interpolate(
-            xdata, ydata, // x and y coordinates of curve to interpolate
+            trigger->snr_PA, trigger->eff_PA, // x and y coordinates of curve to interpolate
             avgSnr, // x value to interpolate y value for
-            *(&xdata+1)-xdata-1 // len(xdata) - 1
+            (*(&trigger->snr_PA+1) - trigger->snr_PA) - 1 // len(xdata) - 1
         ); 
         
         if(avgSnr > 0.5){

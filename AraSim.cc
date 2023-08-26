@@ -404,52 +404,6 @@ int main(int argc, char **argv) {   // read setup.txt file
     int Events_Thrown = 0;
     int Events_Passed = 0;
 
-    // Prepare arrays required by Phased Array sim
-    double snr_PA[60];    // First  column of nuphase_trig_effc.txt data
-    double eff_PA[60];    // Second column of nuphase_trig_effc.txt data
-    double angle_PA[188]; // First  column of nuphase_SNR_angle.txt data
-    double aSNR_PA[188];  // Second column of nuphase_SNR_angle.txt data
-    if (settings1->TRIG_SCAN_MODE==5){
-
-        cout << "Phased Array mode! Reading in data: " << endl;
-    
-        // Load Efficiency vs SNR curve: 
-        // From arxiv.1809.04573, Fig 15, Dashed Pink 0.8Hz/beam curve
-        ifstream infile;
-        infile.open("nuphase_trig_effc.txt",ios::in);
-        if(infile.fail()){ // checks to see if file opended
-            cout << "   error, file could not be opened" << endl;
-            return 1; // no point continuing if the file didn't open...
-        }
-        int num = 0;
-        while(!infile.eof()) { // reads file to end of *file*, not line
-            infile >> snr_PA[num]  // read first column number
-                   >> eff_PA[num]; // read second column number
-            ++num;
-        }
-        cout<<"   number of triggering efficiency data points: "<<num<<endl;
-        infile.close();
-
-        //load Angle vs SNR curve:
-        // Unsure how this curve was created but shapes of each beam resemble
-        // Fig 13b from arxiv.1809.04573
-        infile.clear();
-        infile.open("nuphase_SNR_angle.txt",ios::in);
-        if(infile.fail()) { // checks to see if file opended
-            cout << "   error, file could not be opened" << endl;
-            return 1; // no point continuing if the file didn't open...
-        }
-        num = 0;
-        while(!infile.eof()) { // reads file to end of *file*, not line
-            infile >> angle_PA[num]   // read first column number
-                    >>  aSNR_PA[num];  // read second column number
-            ++num;
-        }
-        cout<<"   number of SNR vs angle data points: "<<num<<endl;
-        infile.close();
-
-    } // End if DETECTOR=5 (Phased Array sim)
-
     while (inu < nuLimit){
         check_station_DC = 0;
         check_station_DC = 0;
@@ -541,7 +495,7 @@ int main(int argc, char **argv) {   // read setup.txt file
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger);
 
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent);
-            report->Connect_Interaction_Detector_V2(event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown,snr_PA,eff_PA,angle_PA,aSNR_PA);
+            report->Connect_Interaction_Detector_V2(event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown);
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent, Events_Thrown);
 
             #ifdef ARA_UTIL_EXISTS
