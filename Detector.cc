@@ -1866,7 +1866,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             params.number_of_strings_station = 5;
         }
         else {
-            cout << "Input DETECTOR_STATION is invalid" << endl;
+            cerr << "Input DETECTOR_STATION is invalid for DETECTOR " << mode << endl;
         }
 
 
