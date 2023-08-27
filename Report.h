@@ -410,6 +410,9 @@ class Report {
         double my_averageSNR;
         double my_receive_ang;
         double my_raysol;
+        double pa_thermal_noise_snr = 3.5; 
+        double ara_noise_rms = 0.04;
+        double pa_snr_cap = 25.;
 
         ClassDef(Report,1);
 

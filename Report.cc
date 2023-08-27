@@ -5712,12 +5712,11 @@ double Report::getAverageSNR2(int raysolnum, int station_i, int trig_analysis_mo
     // Collect max SNR values for all PAVpols 
     int first_PAVPol_index = 2; // In detector object, on PA String (strings[0]), antenna index 0 and 1 are PA Hpols
     int num_ants = 7;
-    double snr_cap = 25.0; 
     for (int ant_num = first_PAVPol_index; ant_num<first_PAVPol_index+num_ants; ant_num++){
         peak = 0.0;
         
         if(trig_analysis_mode == 2) { // Noise only triggers
-            peak=3.5*0.04;
+            peak = pa_thermal_noise_snr * ara_noise_rms;
         }
         else if (trig_analysis_mode==1) // Noise + signal triggers
             // Estimate average SNR in topmost vpol
@@ -5749,8 +5748,8 @@ double Report::getAverageSNR2(int raysolnum, int station_i, int trig_analysis_mo
             }
         }
 
-        temp_snr = peak/0.04;
-        if(temp_snr>snr_cap) temp_snr = snr_cap; // Cap SNR
+        temp_snr = peak/ara_noise_rms;
+        if(temp_snr>pa_snr_cap) temp_snr = pa_snr_cap; // Cap SNR
         total_snr = total_snr+temp_snr;
 
     }
@@ -5769,10 +5768,8 @@ double Report::getAverageSNR(const vector<double> & mysignal){
         }
     }
     
-    double snr = peak/0.04;
-    double snr_cap = 25.0;
-
-    if(snr>snr_cap) snr = snr_cap; // Cap SNR
+    double snr = peak/ara_noise_rms;
+    if(snr>pa_snr_cap) snr = pa_snr_cap; // Cap SNR
     
     return snr;
 
@@ -5798,14 +5795,14 @@ void Report::checkPATrigger(
     // If triggered, saves relevant information.
 
     //cout <<"successfully made it to PA Trigger!" << endl;
-    int BINSIZE = 1200/(settings1->TIMESTEP*1.e9); 
+    
+    // For phased array, waveform length is 680 ns, but 
+    // for PA trigger check only 20 ns around the signal bin.
+    // This is to avoid getting the second ray
+    int BINSIZE = 1200/(settings1->TIMESTEP*1.e9);  // Number of bins (aka datapoints) of data to save
+
     int waveformLength = settings1->WAVEFORM_LENGTH;
     int waveformCenter = settings1->WAVEFORM_CENTER;
-    
-    // For phased array, waveform length is 680 ns, but for trigger
-    // check only 20 ns around the signal bin.
-    // This is to avoid getting the second ray
-
     int raySolNum = 0;
     int dsignalBin = 0;
     viewangle=viewangle*180.0/PI;
@@ -5821,10 +5818,9 @@ void Report::checkPATrigger(
 
         int signalbinPA = stations[i].strings[0].antennas[8].SignalBin[raySolNum]; //new kah
         int bin_value;
-        double noise_rms = 0.04; //The noise RMS for an ARA waveform
         double avgSnr;
         if(settings1->TRIG_ANALYSIS_MODE == 2) { // Noise only triggers
-            avgSnr=3.5;
+            avgSnr = pa_thermal_noise_snr; 
         }
         // // ARB 7/7/23: 
         // //    I don't trust the signal+noise trigger estimator right now 
@@ -5870,7 +5866,7 @@ void Report::checkPATrigger(
         double eff = interpolate(
             trigger->snr_PA, trigger->eff_PA, // x and y coordinates of curve to interpolate
             avgSnr, // x value to interpolate y value for
-            (*(&trigger->snr_PA+1) - trigger->snr_PA) - 1 // len(xdata) - 1
+            (*(&trigger->snr_PA+1) - trigger->snr_PA) - 1 // len(snr_PA) - 1
         ); 
         
         if(avgSnr > 0.5){
@@ -5899,7 +5895,6 @@ void Report::checkPATrigger(
                             bin_value = signalbinPA - BINSIZE/2 + bin;
                             stations[i].strings[str].antennas[ant].V_mimic.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
                             stations[i].strings[str].antennas[ant].time.push_back( bin_value );
-
                             stations[i].strings[str].antennas[ant].time_mimic.push_back( ( bin) * settings1->TIMESTEP*1.e9 );// save in ns
                             if (TMath::Abs(trigger->Full_window_V[ant][bin_value]) > peakvalue) {
                                 peakvalue = TMath::Abs(trigger->Full_window_V[my_ch_id][bin_value]);
