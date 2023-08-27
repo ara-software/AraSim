@@ -1038,7 +1038,7 @@ int Settings::CheckCompatibilitiesSettings() {
             }
             else{
                 cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but DETECTOR_STATION is "<<DETECTOR_STATION<<endl;
-                cerr<<" This is not currently permitted in via error handling in Settings.cc "<<endl;
+                cerr<<" Unfamiliar DETECTOR_STATION value"<<endl;
                 num_err++;
             }
         }
