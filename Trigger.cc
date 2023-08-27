@@ -91,7 +91,7 @@ Trigger::Trigger(Detector *detector, Settings *settings1) {
         // Load Efficiency vs SNR curve: 
         // From arxiv.1809.04573, Fig 15, Dashed Pink 0.8Hz/beam curve
         ifstream infile;
-        infile.open("nuphase_trig_effc.txt",ios::in);
+        infile.open("data/nuphase_trig_effc.txt",ios::in);
         if(infile.fail()){ // checks to see if file opended
             cerr << "   error, file could not be opened" << endl;
         }
@@ -108,7 +108,7 @@ Trigger::Trigger(Detector *detector, Settings *settings1) {
         // Unsure how this curve was created but shapes of each beam resemble
         // Fig 13b from arxiv.1809.04573
         infile.clear();
-        infile.open("nuphase_SNR_angle.txt",ios::in);
+        infile.open("data/nuphase_SNR_angle.txt",ios::in);
         if(infile.fail()) { // checks to see if file opended
             cerr << "   error, file could not be opened" << endl;
         }
