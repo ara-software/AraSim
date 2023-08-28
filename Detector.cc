@@ -1866,7 +1866,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             params.number_of_strings_station = 5;
         }
         else {
-            cerr << "Input DETECTOR_STATION is invalid for DETECTOR " << mode << endl;
+            cerr << "Input DETECTOR_STATION is invalid for PA DETECTOR " << mode << endl;
+            throw runtime_error("Invalid DETECTOR_STATION for PA DETECTOR");
         }
 
 
