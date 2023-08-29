@@ -1819,6 +1819,15 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
 	}
 
+	//for A1 ICRR/ATRI differentiation
+	if (settings1->DETECTOR_STATION_ARAROOT==1){
+		cout << "\n A1 is being simulated as an ICRR" << endl;
+	}
+	else if (settings1->DETECTOR_STATION_ARAROOT==100){
+		cout << "\n A1 is being simulated as an ATRI" << endl;
+	}
+	
+
     } // if mode == 4
 
     // add additional depth if it's on
@@ -5483,7 +5492,7 @@ void Detector::SetupInstalledStations(Settings *settings1) {
     if (InstalledStations.size() > 1) { // Station 1 
         
 	if(settings1-> DETECTOR_STATION_ARAROOT==1){ //Build A1 as an ICRR
-        
+	
 		// Make string 0
         	Antennas.push_back(5); Antennas.push_back(9);
         	Antennas.push_back(1); Antennas.push_back(13);
@@ -5524,7 +5533,7 @@ void Detector::SetupInstalledStations(Settings *settings1) {
     	}
 	
 	else{ //Otherwise always build A1 as an ATRI
-        	
+
 		// Make string 0
         	Antennas.push_back(5); Antennas.push_back(13);
         	Antennas.push_back(1); Antennas.push_back(9);
