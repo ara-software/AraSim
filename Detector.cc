@@ -1889,16 +1889,16 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             }
             else if (settings1->DETECTOR_STATION == 3){ // 7 Vanilla VPols from 4 strings attached to PA DAQ
                 stations[i].strings.push_back(temp_string);
-                stations[i].strings[1].antennas.push_back(temp_antenna); // A5E  0, A5RF  5, PA 12
-                stations[i].strings[1].antennas.push_back(temp_antenna); // A5E  1, A5RF  1, PA 13
+                stations[i].strings[1].antennas.push_back(temp_antenna); // A5E  0, A5RF  5, PA 12, AraSim s0a0
+                stations[i].strings[1].antennas.push_back(temp_antenna); // A5E  1, A5RF  1, PA 13, AraSim s0a2
                 stations[i].strings.push_back(temp_string);
-                stations[i].strings[2].antennas.push_back(temp_antenna); // A5E  8, A5RF  4, PA 14
-                stations[i].strings[2].antennas.push_back(temp_antenna); // A5E  9, A5RF  0, PA 15
+                stations[i].strings[2].antennas.push_back(temp_antenna);   // A5E 16, A5RF  6, PA 10, AraSim s1a0
                 stations[i].strings.push_back(temp_string);
-                stations[i].strings[3].antennas.push_back(temp_antenna); // A5E 16, A5RF  6, PA 10
+                stations[i].strings[3].antennas.push_back(temp_antenna);   // A5E 24, A5RF  7, PA  5, AraSim s2a0
+                stations[i].strings[3].antennas.push_back(temp_antenna);   // A5E 25, A5RF  3, PA 11, AraSim s2a2
                 stations[i].strings.push_back(temp_string);
-                stations[i].strings[4].antennas.push_back(temp_antenna); // A5E 24, A5RF  7, PA  5
-                stations[i].strings[4].antennas.push_back(temp_antenna); // A5E 25, A5RF  3, PA 11
+                stations[i].strings[4].antennas.push_back(temp_antenna);  // A5E  8, A5RF  4, PA 14, AraSim s3a0
+                stations[i].strings[4].antennas.push_back(temp_antenna); // A5E  9, A5RF  0, PA 15, AraSim s3a2
             }
         } // for i in number_of_stations (building vectors)
 
@@ -1997,18 +1997,18 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 // Set ARA5 string locations
                 // DETECTOR_STATION == 1 has no ARA5 strings attached to PA DAQ
                 if (settings1->DETECTOR_STATION == 2){
-                    stations[i].strings[1].SetX( stations[i].GetX() +12.33 ); // Formally "String 4"
-                    stations[i].strings[1].SetY( stations[i].GetY() -31.89 ); // Formally "String 4"
+                    stations[i].strings[1].SetX( stations[i].GetX() + 12.33); 
+                    stations[i].strings[1].SetY( stations[i].GetY() - 31.89); 
                 }
                 else if (settings1->DETECTOR_STATION == 3){
-                    stations[i].strings[1].SetX( stations[i].GetX() + 29.63 ); // A5E 8-11
-                    stations[i].strings[1].SetY( stations[i].GetY() -3.30 );
-                    stations[i].strings[2].SetX( stations[i].GetX() +1.55 );   // A5E 0-3	
-                    stations[i].strings[2].SetY( stations[i].GetY() +15.66 );
-                    stations[i].strings[3].SetX( stations[i].GetX() -12.96 );  // A5E 16-19
-                    stations[i].strings[3].SetY( stations[i].GetY() - 8.65);
-                    stations[i].strings[4].SetX( stations[i].GetX() +12.33 );  // A5E 24-27
-                    stations[i].strings[4].SetY( stations[i].GetY() -31.89 );
+                    stations[i].strings[1].SetX( stations[i].GetX() +  1.55); // A5E 0-3
+                    stations[i].strings[1].SetY( stations[i].GetY() + 15.66);
+                    stations[i].strings[2].SetX( stations[i].GetX() - 12.96); // A5E 16-19
+                    stations[i].strings[2].SetY( stations[i].GetY() -  8.65);
+                    stations[i].strings[3].SetX( stations[i].GetX() + 12.33); // A5E 24-27 
+                    stations[i].strings[3].SetY( stations[i].GetY() - 31.89);
+                    stations[i].strings[4].SetX( stations[i].GetX() + 29.63); // A5E 8-11
+                    stations[i].strings[4].SetY( stations[i].GetY() -  3.30);
                 }
 
                 // Set ARA5 antenna depths
@@ -2020,14 +2020,13 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 }
                 else if (settings1->DETECTOR_STATION == 3){
                     cout << "Using 7 ARA05 vanilla Vpols" << endl;
-                    stations[i].strings[1].antennas[0].SetZ(-194.73); // A5E  0, A5RF  5, PA 12
-                    stations[i].strings[1].antennas[1].SetZ(-165.09); // A5E  1, A5RF  1, PA 13
-                    stations[i].strings[2].antennas[0].SetZ(-196.20); // A5E  8, A5RF  4, PA 14
-                    stations[i].strings[2].antennas[1].SetZ(-166.53); // A5E  9, A5RF  0, PA 15
-                    stations[i].strings[3].antennas[0].SetZ(-177.75); // A5E 16, A5RF  6, PA 10
-                    // stations[i].strings[3].antennas[1].SetZ(-147.21); // A5E 17, A5RF  2
-                    stations[i].strings[4].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
-                    stations[i].strings[4].antennas[1].SetZ(-161.02); // A5E 25, A5RF  3, PA 11
+                    stations[i].strings[1].antennas[0].SetZ(-196.2045); // A5E  0, A5RF  5, PA 12, AraSim s0a0
+                    stations[i].strings[1].antennas[1].SetZ(-166.5366); // A5E  1, A5RF  1, PA 13, AraSim s0a2
+                    stations[i].strings[2].antennas[0].SetZ(-177.75);   // A5E 16, A5RF  6, PA 10, AraSim s1a0
+                    stations[i].strings[3].antennas[0].SetZ(-190.86);   // A5E 24, A5RF  7, PA  5, AraSim s2a0
+                    stations[i].strings[3].antennas[1].SetZ(-161.02);   // A5E 25, A5RF  3, PA 11, AraSim s2a2
+                    stations[i].strings[4].antennas[0].SetZ(-194.739);  // A5E  8, A5RF  4, PA 14, AraSim s3a0
+                    stations[i].strings[4].antennas[1].SetZ(-165.0948); // A5E  9, A5RF  0, PA 15, AraSim s3a2
                 }
 
                 // Set all antennas to VPOL (1 for HPOL)
@@ -6013,26 +6012,8 @@ void Detector::SetupInstalledStations(Settings *settings1=nullptr) {
             // ARA05 DAQ off, not connected to PA, only split A5 channel connected
             // Note that numbering of VPol channels is different here from DETECTOR=4
             //   since this is the PA DAQ
-            
-            // Make string 1
-            // Antennas.push_back(12);// Antennas.push_back(x);
-            // Antennas.push_back(13);// Antennas.push_back(x);
-            // InstalledStations[6].VHChannel.push_back(Antennas); 
-            // Antennas.clear();
 
-            // Make string 2
-            // Antennas.push_back(14);// Antennas.push_back(x);
-            // Antennas.push_back(15);// Antennas.push_back(x);
-            // InstalledStations[6].VHChannel.push_back(Antennas); 
-            // Antennas.clear();
-            
-            // Make string 3
-            // Antennas.push_back(10);// Antennas.push_back(x);
-            // Antennas.push_back(x);// Antennas.push_back(x);
-            // InstalledStations[6].VHChannel.push_back(Antennas); 
-            // Antennas.clear();
-
-            // Make string 4
+            // Make string 3s
             Antennas.push_back(5);// Antennas.push_back(x);
             // Antennas.push_back(11);// Antennas.push_back(x);
             InstalledStations[6].VHChannel.push_back(Antennas); 
@@ -6053,20 +6034,20 @@ void Detector::SetupInstalledStations(Settings *settings1=nullptr) {
             Antennas.clear();
 
             // Make string 2
-            Antennas.push_back(14);// Antennas.push_back(x);
-            Antennas.push_back(15);// Antennas.push_back(x);
-            InstalledStations[6].VHChannel.push_back(Antennas); 
-            Antennas.clear();
-            
-            // Make string 3
             Antennas.push_back(10);// Antennas.push_back(x);
             // Antennas.push_back(x);// Antennas.push_back(x);
             InstalledStations[6].VHChannel.push_back(Antennas); 
             Antennas.clear();
-
-            // Make string 4
+            
+            // Make string 3
             Antennas.push_back(5);// Antennas.push_back(x);
             Antennas.push_back(11);// Antennas.push_back(x);
+            InstalledStations[6].VHChannel.push_back(Antennas); 
+            Antennas.clear();
+
+            // Make string 4
+            Antennas.push_back(14);// Antennas.push_back(x);
+            Antennas.push_back(15);// Antennas.push_back(x);
             InstalledStations[6].VHChannel.push_back(Antennas); 
             Antennas.clear();
 
@@ -6250,7 +6231,7 @@ int Detector::GetChannelfromStringAntenna ( int stationNum, int stringnum, int a
                     return ChannelNum+1;
                 }
                 else {
-                    cerr << "Invalid request for station channel map: antenna number - 4" << endl;
+                    cerr << "Invalid request for station channel map: antenna number - 5" << endl;
                     //cerr << stationId << " : " << stringnum << " : " << antennanum << endl;
                     return -1;
                 }

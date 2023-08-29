@@ -1925,11 +1925,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                         }
                                         else // if we are checking previous string, check upto entire antennas
                                         {
-                                            // Avoids segfault from string 3 having 1 antenna for PA DETECTOR_STATION 3
+                                            // Avoids segfault from string 2 having 1 antenna for PA DETECTOR_STATION 3
                                             if (
                                                 settings1->DETECTOR==5 && // Phased Array detector mode
-                                                settings1->DETECTOR_STATION==3 && // third PA detector configuration (PA + 7 ARA VPols)
-                                                j_sub==3 && // String 3
+                                                settings1->DETECTOR_STATION==3 && // second PA detector configuration (PA + 7 ARA VPols)
+                                                j_sub==2 && // String 2
                                                 k_sub==1 // 2nd antenna that doesn't exist but this block of code expects it to
                                             ) {
                                                 continue;
