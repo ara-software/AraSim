@@ -5069,7 +5069,7 @@ int Detector::GetTrigOffset( int ch, Settings *settings1 ){
 	double mostDelay;
 	int offset;
 		
-	if(activeDelay[ch]==0){
+	if(activeDelay[ch]==0){ //value of 0 means the DAQ didn't record cable delays in data and must be added in simulations 
 
 		mostDelay = *max_element(triggerDelay.begin(), triggerDelay.end());
 		offset = int((mostDelay -  triggerDelay[ch]) / (settings1->TIMESTEP * 1e9));

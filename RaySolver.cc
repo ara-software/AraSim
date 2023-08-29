@@ -286,11 +286,6 @@ void RaySolver::Solve_Ray_org (Position &source, Position &target, std::vector <
       ns = 1.345;
       nd = 1.78;
       nc = 0.016;
-    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 4){
-      // Kaeli's ice model
-      ns = 1.326;
-      nd = 1.78;
-      nc = 0.0202;
     } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 10){
       // Moore's Bay values (MB #1)
       ns = 1.32;
