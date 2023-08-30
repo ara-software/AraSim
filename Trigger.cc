@@ -105,8 +105,9 @@ Trigger::Trigger(Detector *detector, Settings *settings1) {
         infile.close();
 
         //load Angle vs SNR curve:
-        // Unsure how this curve was created but shapes of each beam resemble
-        // Fig 13b from arxiv.1809.04573
+        // KAH says this curve is created by converting Fig 13b from 
+        //   arxiv.1809.04573 into digitized, linear units but ARB has not 
+        //   been able to replicate this
         infile.clear();
         infile.open("data/nuphase_SNR_angle.txt",ios::in);
         if(infile.fail()) { // checks to see if file opended
