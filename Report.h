@@ -410,9 +410,15 @@ class Report {
         double my_averageSNR;
         double my_receive_ang;
         double my_raysol;
-        double pa_thermal_noise_snr = 3.5; 
-        double ara_noise_rms = 0.04;
+        double pa_force_trigger_snr = 3.5; 
+            // SNR that should always trigger, 
+            // used (eg) when triggering on noise only events
+        double ara_noise_rms = 0.04; 
+            // KAH and ARB are unsure where this number comes from. 
+            // KAH belives she took this from the person who simulated PA before her 
         double pa_snr_cap = 25.;
+            // KAH thinks this is the max SNR she had efficiencies calculated for
+            // KAH says the PA has a SNR cap of 25 in practice and may have a link showing this.
 
         ClassDef(Report,1);
 

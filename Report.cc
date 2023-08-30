@@ -5716,7 +5716,7 @@ double Report::getAverageSNR2(int raysolnum, int station_i, int trig_analysis_mo
         peak = 0.0;
         
         if(trig_analysis_mode == 2) { // Noise only triggers
-            peak = pa_thermal_noise_snr * ara_noise_rms;
+            peak = pa_force_trigger_snr * ara_noise_rms;
         }
         else if (trig_analysis_mode==1) // Noise + signal triggers
             // Estimate average SNR in topmost vpol
@@ -5799,6 +5799,7 @@ void Report::checkPATrigger(
     // For phased array, waveform length is 680 ns, but 
     // for PA trigger check only 20 ns around the signal bin.
     // This is to avoid getting the second ray
+    // KAH and ARB are not sure where the 1200 number comes from
     int BINSIZE = 1200/(settings1->TIMESTEP*1.e9);  // Number of bins (aka datapoints) of data to save
 
     int waveformLength = settings1->WAVEFORM_LENGTH;
@@ -5820,7 +5821,7 @@ void Report::checkPATrigger(
         int bin_value;
         double avgSnr;
         if(settings1->TRIG_ANALYSIS_MODE == 2) { // Noise only triggers
-            avgSnr = pa_thermal_noise_snr; 
+            avgSnr = pa_force_trigger_snr; 
         }
         // // ARB 7/7/23: 
         // //    I don't trust the signal+noise trigger estimator right now 
