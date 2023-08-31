@@ -2185,7 +2185,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
  			    }
 
 
-			    if( detector->GetTrigMasking(channel_num-1)==1){ //Triggr Masking
+			    if( detector->GetTrigMasking(channel_num-1)==0){ //Antenna Masking (masked_ant=0 means this antenna should be ignored from trigger)
 				trig_j++;
 				continue;	
 			    }
