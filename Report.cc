@@ -2283,7 +2283,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                     checkPATrigger(
                         i, all_receive_ang, viewangle, ray_sol_cnt, 
                         detector, event, evt, trigger, settings1, 
-                        trig_search_init, max_total_bin, trig_window_bin
+                        trig_search_init, max_total_bin
                     );
                 }
                 else if (settings1->TRIG_SCAN_MODE == 0)
@@ -5785,7 +5785,7 @@ bool Report::isTrigger(double eff){
 void Report::checkPATrigger(
     int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,
     Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
-    int trig_search_init, int max_total_bin, int trig_window_bin
+    int trig_search_init, int max_total_bin
 ){
     // Calculates max SNR in topmost PA Vpol 
     //   and multplies it by viewing angle factors. 
@@ -5924,6 +5924,8 @@ void Report::checkPATrigger(
             double Pthresh_value[numChan];
             CircularBuffer **buffer=new CircularBuffer*[numChan];
 
+            int trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
+
             int SCTR_cluster_bit[numChan];
             for(int trig_j=0;trig_j<numChan;trig_j++) SCTR_cluster_bit[trig_j]=0;
 
@@ -5954,8 +5956,6 @@ void Report::checkPATrigger(
                 int string_i = detector->getStringfromArbAntID( i, trig_j);
                 int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
 
-                trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
-
                 Pthresh_value[trig_j]=0;
                 buffer[trig_j]=new CircularBuffer(trig_window_bin, powerthreshold, settings1->TRIG_SCAN_MODE);
 
@@ -5975,8 +5975,6 @@ void Report::checkPATrigger(
                 
                     int string_i = detector->getStringfromArbAntID( i, trig_j);
                     int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
-
-                    trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
 
                     int channel_num = detector->GetChannelfromStringAntenna( 5, string_i, antenna_i, settings1 );
 

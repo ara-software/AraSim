@@ -275,7 +275,7 @@ class Report {
     void checkPATrigger(
         int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,
         Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
-        int trig_search_init, int max_total_bin, int trig_window_bin);    
+        int trig_search_init, int max_total_bin);    
     double interpolate(double *xdata,double *ydata, double xi, int numData);
     
 #ifdef ARA_UTIL_EXISTS
