@@ -4479,7 +4479,7 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
         }
 
 	if(!(numCommas==3)){
-		sprintf(errorMessage, "Trigger formation file does not have expected columns: Channel No., trigger delay, in trigger, active delay\n");
+		sprintf(errorMessage, "Trigger formation file does not have expected columns: Channel, cable-delay, masked-ant, delay-enable\n");
                 cout << "The trigger formation filename is: " << filename << endl;
                 throw std::runtime_error(errorMessage);
 	}
@@ -5366,7 +5366,7 @@ int Detector::GetTrigOffset( int ch, Settings *settings1 ){
 	double mostDelay;
 	int offset;
 		
-	if(activeDelay[ch]==1){
+	if(activeDelay[ch]==0){ //value of 0 means the DAQ didn't record cable delays in data and must be added in simulations 
 
 		mostDelay = *max_element(triggerDelay.begin(), triggerDelay.end());
 		offset = int((mostDelay -  triggerDelay[ch]) / (settings1->TIMESTEP * 1e9));
@@ -6737,6 +6737,3 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
 Detector::~Detector() {
   //cout<<"Destruct class Detector"<<endl;
 }
-
-
-
