@@ -403,9 +403,8 @@ int main(int argc, char **argv) {   // read setup.txt file
     int inu = 0;
     int Events_Thrown = 0;
     int Events_Passed = 0;
-    // for (int inu=0;inu<settings1->NNU;inu++) { // loop over neutrinos
+
     while (inu < nuLimit){
-        // cout << "inu: " << inu << endl; 
         check_station_DC = 0;
         check_station_DC = 0;
         if ( settings1->DEBUG_MODE_ON==0 ) {
@@ -414,7 +413,6 @@ int main(int argc, char **argv) {   // read setup.txt file
                 cout<<"Thrown "<<Events_Thrown<<endl;
         }
 
-        // event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1 );
         event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1, Events_Thrown );
         if(event->Nu_Interaction.size()<1){
             // If for some reason no interactions were placed into the event holder, continue.
@@ -497,7 +495,7 @@ int main(int argc, char **argv) {   // read setup.txt file
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger);
 
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent);
-            report->Connect_Interaction_Detector_V2 (event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown);
+            report->Connect_Interaction_Detector_V2(event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown);
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent, Events_Thrown);
 
             #ifdef ARA_UTIL_EXISTS
