@@ -1376,14 +1376,14 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 else
                                                     V_forfft[n] = 0.;
 
-                                            }
+                                            }                                         
 
                                             // just get peak from the array
                                             // stations[i].strings[j].antennas[k].PeakV.push_back(-1.);    // just let -1.
                                             stations[i].strings[j].antennas[k].PeakV.push_back(FindPeak(V_forfft, waveform_bin));
 
                                             // get spectrum with zero padded WF
-                                            Tools::realft(V_forfft, 1, stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);
+                                            Tools::realft(V_forfft, 1, stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);                                            
 
                                             dF_Nnew = 1. / ((double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]) *(dT_forfft) *1.e-9);    // in Hz
 
@@ -1391,18 +1391,78 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                             freq_lastbin = freq_tmp;
                                             
+                                            if (settings1->ALL_ANT_V_ON == 0)
+                                            {
+                                                if (settings1->ANTENNA_MODE != 1)
+                                                {
+                                                    heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
+                                                            antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
+                                                        freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
+                                                }
+                                                if (settings1->ANTENNA_MODE == 1)
+                                                {
+                                                    heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
+                                                            antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k),
+                                                        freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
+                                                }
+                                            }
+                                            else if (settings1->ALL_ANT_V_ON == 1)
+                                            {
+                                                if (settings1->ANTENNA_MODE != 1)
+                                                {
+                                                    heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
+                                                            antenna_theta, antenna_phi, 0),
+                                                        freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
+                                                }
+                                                if (settings1->ANTENNA_MODE == 1)
+                                                {
+                                                    heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
+                                                            antenna_theta, antenna_phi, 0, k),
+                                                        freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
+                                                }
+                                            }                                            
+                                            
                                             // @Justin:  Make this dynamic for user to set polarization and check if it does ray-tracing.
+                                            //Method for defining polarization vector at the source (using receive_vector).  Commenting out to tray defining the polarization at the source. - JCF 9/5/2023
+                                            
+//                                             double psi = TMath::DegToRad()*settings1->CLOCK_ANGLE;
+//                                             double theta = acos(receive_vector[2]); //receive_vector is a unit vector
+//                                             double phi = atan2(receive_vector[1],receive_vector[0]);
+                                                                             
+//                                             //Justin's method
+//                                             double newPol_vectorX = -cos(psi)*cos(theta)*cos(phi) + sin(psi)*sin(phi);
+//                                             double newPol_vectorY = -cos(psi)*cos(theta)*sin(phi) - sin(psi)*cos(phi);
+//                                             double newPol_vectorZ = cos(psi)*sin(theta);
+                                            
+//                                             Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
+                                            
+                                            //Defining polarization at the source (using launch_vector) and having it propagate.
                                             
                                             double psi = TMath::DegToRad()*settings1->CLOCK_ANGLE;
-                                            double theta = acos(receive_vector[2]); //receive_vector is a unit vector
-                                            double phi = atan2(receive_vector[1],receive_vector[0]);
+                                            double theta = acos(launch_vector[2]); //launch_vector is a unit vector
+                                            double phi = atan2(launch_vector[1],launch_vector[0]);
                                                                              
                                             //Justin's method
                                             double newPol_vectorX = -cos(psi)*cos(theta)*cos(phi) + sin(psi)*sin(phi);
                                             double newPol_vectorY = -cos(psi)*cos(theta)*sin(phi) - sin(psi)*cos(phi);
                                             double newPol_vectorZ = cos(psi)*sin(theta);
                                             
-                                            Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
+                                            Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);                                            
+
+                                            icemodel->GetFresnel(ray_output[1][ray_sol_cnt],    // launch_angle
+                                                ray_output[2][ray_sol_cnt], // rec_angle
+                                                ray_output[3][ray_sol_cnt], // reflect_angle
+                                                event->Nu_Interaction[0].posnu,
+                                                launch_vector,
+                                                receive_vector,
+                                                settings1,
+                                                fresnel,
+                                                mag,
+                                                Pol_vector);    // input src Pol and return Pol at trg
+                                            
+                                            
+                                            
+                                            
                                             //Justin's Method
                                             
                                             //Trying a method Brian shared, as this vector holds both the D and R solutions.  I want to just redefine the D for now.
@@ -1422,6 +1482,10 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             //
                                             //
                                             //Debugging by removing antenna and electronics response from waveform. - JCF 6/27/2023
+                                            cout << "gain_ch_no = " << gain_ch_no << endl;
+                                            cout << "antenna_theta = " << antenna_theta << endl;
+                                            cout << "antenna_phi = " << antenna_phi << endl; 
+                                            cout << "icemodel->GetN() = " << icemodel->GetN(detector->stations[i].strings[j].antennas[k]) << endl;
                                             for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2; n++)
                                             {
 
@@ -1460,11 +1524,10 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 }
 
                                                 stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(heff);
-                                                cout << "icemodel->GetN() = " << icemodel->GetN(detector->stations[i].strings[j].antennas[k]) << endl;
+                                                // cout << "**************************************************************" << endl;
                                                 if (n > 0)
                                                 {
-                                                    cout << "antenna_theta = " << antenna_theta << endl;
-                                                    cout << "antenna_phi = " << antenna_phi << endl;
+
                                                     
                                                     if (settings1->ALL_ANT_V_ON == 0)
                                                     {
@@ -1477,8 +1540,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                         // cout << "AfterApplyAnt, before InvertAnt" << endl;
                                                         // cout << V_forfft[2 *n] << endl;
                                                         // cout << V_forfft[2 *n + 1] << endl;
-                                                        InvertAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
-                                                           heff, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi);
+                                                        // InvertAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
+                                                        //    heff, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi);
                                                         // cout << "AfterInvertAnt" << endl;
                                                         // cout << V_forfft[2 *n] << endl;
                                                         // cout << V_forfft[2 *n + 1] << endl;
@@ -1489,7 +1552,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                         ApplyAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, 0),
                                                             heff, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], settings1, antenna_theta, antenna_phi);
                                                         // InvertAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, 0),
-                                                           // heff, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi);                                                        
+                                                        //    heff, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi);                                                        
                                                     }
                                                 }
                                                 else
@@ -1527,12 +1590,23 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                             // now get time domain waveform back by inv fft
                                             // cout << "ggggggggg" << endl;
-                                            cout << "Nnew = " << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;            
-                                            cout << "Before InvFFT V_forfft[230] = " << V_forfft[230] << endl;
-                                            cout << "Before InvFFT V_forfft[231] = " << V_forfft[231] << endl;                                            
+                                            // cout << "Nnew = " << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;            
+                                            // cout << "Before InvFFT V_forfft[230] = " << V_forfft[230] << endl;
+                                            // cout << "Before InvFFT V_forfft[231] = " << V_forfft[231] << endl;
+                                            cout << "gain_ch_no = " << gain_ch_no << endl;
+                                            cout << "Before InvFFT V_forfft = " << endl;
+                                            for (int i = 0; i < sizeof(V_forfft) / sizeof(V_forfft[0]); i++) {
+                                              std::cout << V_forfft[i] << ", ";
+                                            }
+                                            std::cout << std::endl;
                                             Tools::realft(V_forfft, -1, stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);
-                                            cout << "V_forfft[230] = " << V_forfft[230] << endl;              
-                                            cout << "V_forfft[231] = " << V_forfft[231] << endl;                                              
+                                            cout << "After InvFFT V_forfft = " << endl;
+                                            for (int i = 0; i < sizeof(V_forfft) / sizeof(V_forfft[0]); i++) {
+                                              std::cout << V_forfft[i] << ", ";
+                                            }
+                                            std::cout << std::endl;
+                                            // cout << "V_forfft[230] = " << V_forfft[230] << endl;              
+                                            // cout << "V_forfft[231] = " << V_forfft[231] << endl;                                              
                                             // cout << "hhhhhhhhh" << endl;
                                             // we need to do normal time ordering as we did zero padding(?)
                                             // If signal is located at the center, we don't need to do NormalTimeOrdering???
@@ -1541,9 +1615,36 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             // skip linear interpolation for now
                                             // changed to sinc interpolation Dec 2020 by BAC
                                             //Debuggin - JCF 6/28/2023
+                                            // cout << "Nnew = " << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
+                                            // cout << "sizeof(T_forfft) = " << sizeof(T_forfft) << endl;
+                                            // cout << "sizeof(V_forfft) = " << sizeof(V_forfft) << endl;
+                                            // cout << "settings1->NFOUR / 2 = " << settings1->NFOUR / 2 << endl;
+                                            // cout << "sizeof(T_forint) = " << sizeof(T_forint) << endl;
+                                            // cout << "sizeof(volts_forint) = " << sizeof(volts_forint) << endl;
+                                            // cout << "T_forfft = " << endl;
+                                            // for (int i = 0; i < sizeof(T_forfft) / sizeof(T_forfft[0]); i++) {
+                                            //   std::cout << T_forfft[i] << ", ";
+                                            // }
+                                            // std::cout << std::endl; 
+                                            // cout << "T_forint = " << endl;
+                                            // for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
+                                            //   std::cout << T_forint[i] << ", ";
+                                            // }
+                                            // std::cout << std::endl;
+                                            // cout << "volts_forint = " << endl;
+                                            // for (int i = 0; i < sizeof(volts_forint) / sizeof(volts_forint[0]); i++) {
+                                            //   std::cout << volts_forint[i] << ", ";
+                                            // }
+                                            // std::cout << std::endl;                                              
                                             Tools::SincInterpolation(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR / 2, T_forint, volts_forint);
                                             // volts_forint = V_forfft;
                                             // T_forint = T_forfft;
+                                            cout << "gain_ch_no = " << gain_ch_no << endl;
+                                            cout << "Final waveform v(t) = " << endl;
+                                            for (int n = 0; n < sizeof(volts_forint) / sizeof(volts_forint[0]); n++) {
+                                              std::cout << settings1->ARBITRARY_EVENT_ATTENUATION*volts_forint[n]*2. / (double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]) << ", ";
+                                            }
+                                            std::cout << std::endl;                                                
                                             cout << "iiiiiiiii" << endl;
                                             //End debugging
 
@@ -1556,6 +1657,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 {
                                                     // not pure noise mode (we need signal)
                                                     stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(settings1->ARBITRARY_EVENT_ATTENUATION *volts_forint[n] *2. / (double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]));  // 2/N for inverse FFT normalization factor
+
+                                                    
+                                                    
                                                 }
                                                 else if (settings1->TRIG_ANALYSIS_MODE == 2)
                                                 {
@@ -4253,7 +4357,8 @@ void Report::ClearUselessfromConnect(Detector *detector, Settings *settings1, Tr
 void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex) {
 
     int BINSIZE = settings1->NFOUR/2;
-
+    // cout << "Select_wave_convlv_1" << endl;
+    
 //    int BINSIZE = detector->stations[StationIndex].NFOUR/2;
     int bin_value;
     //vector <double> V_total_forconvlv;   // total time domain waveform (noise + signal)
@@ -4267,6 +4372,7 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
         // save the noise + signal waveform
                            
         if ( settings1->NOISE_CHANNEL_MODE==0) {
+            // cout << "v_noise_timedomain = " << trigger->v_noise_timedomain[ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ] << endl;
             V_total_forconvlv.push_back( trigger->v_noise_timedomain[ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
         }
         else if ( settings1->NOISE_CHANNEL_MODE==1) {
@@ -4315,7 +4421,7 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin1, int signalbin2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex) {
 
     int BINSIZE = settings1->NFOUR/2;
-
+    // cout << "Select_wave_convlv_2" << endl;
 //    int BINSIZE = detector->stations[StationIndex].NFOUR/2;
     int bin_value;
     int signal_dbin = signalbin2 - signalbin1;
@@ -4349,7 +4455,7 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 
 
         // exchange from pure noise to noise + signal
-        if (bin < signal_dbin) {  // bins where only first signal is shown
+        if (bin < signal_dbin) {  // bins where only first signal is shown           
             V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin];
             V_tmp[bin] = V1[bin];
         }
@@ -4393,7 +4499,7 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin0, int signalbin1, int signalbin2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex) {
 
     int BINSIZE = settings1->NFOUR/2;
-
+    // cout << "Select_wave_convlv_3" << endl;
 //    int BINSIZE = detector->stations[StationIndex].NFOUR/2;
     int bin_value;
     int signal_dbin = signalbin2 - signalbin1;
@@ -4647,7 +4753,7 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
      // ApplyAntFactors_Tdomain and ApplyAntFactors_Tdomain_Transmitter when
      // Brian merged the two functions in Nov 2020
      double sign = 1.;
-     if(useInTransmitterMode==true){ sign=-1.;};
+     // if(useInTransmitterMode==true){ sign=-1.;};
 
     //double pol_factor;
     pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
@@ -4667,12 +4773,26 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
             else phase_current = 0.;
         }
         // V amplitude
+        // cout << "ant_type = " << ant_type << endl;
+        // cout << "vm_real = " << vm_real << endl;
+        // cout << "vm_img = " << vm_img << endl;
+        // cout << "phase_current = " << phase_current << endl;
+        // cout << "heff = " << heff << endl;
+        // cout << "AntPhase = " << AntPhase << endl;
+        // cout << "antenna_theta = " << antenna_theta << endl;
+        // cout << "antenna_phi = " << antenna_phi << endl;        
         double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
 
         // real, img terms with phase shift
         vm_real = v_amp * cos( phase_current + (sign * AntPhase*RADDEG) );
         vm_img =  v_amp * sin( phase_current + (sign * AntPhase*RADDEG) );
-
+        // cout << "v_amp = " << v_amp << endl;
+        // cout << "vm_real = " << vm_real << endl;
+        // cout << "vm_img = " << vm_img << endl;
+        // cout << "(sign * AntPhase*RADDEG) = " << (sign * AntPhase*RADDEG) << endl;
+        // cout << "phase_current + (sign * AntPhase*RADDEG) = " << phase_current + (sign * AntPhase*RADDEG) << endl;
+        // cout << "cos( phase_current + (sign * AntPhase*RADDEG)) = " << cos( phase_current + (sign * AntPhase*RADDEG)) << endl;
+        // cout << "sin( phase_current + (sign * AntPhase*RADDEG)) = " << sin( phase_current + (sign * AntPhase*RADDEG)) << endl;
         //vm_real = v_amp * cos( phase_current - AntPhase*RADDEG ); // subtract AntPhase for four1 function's equation definition (inverse in img values)
         //vm_img = v_amp * sin( phase_current - AntPhase*RADDEG );
     }
@@ -4709,7 +4829,7 @@ void Report::InvertAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol
      // ApplyAntFactors_Tdomain and ApplyAntFactors_Tdomain_Transmitter when
      // Brian merged the two functions in Nov 2020
      double sign = 1.;
-     if(useInTransmitterMode==true){ sign=-1.;};
+     // if(useInTransmitterMode==true){ sign=-1.;}; //commenting out for debugging -JCF 7/05/2023
 
     //double pol_factor;
     pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
@@ -4731,6 +4851,15 @@ void Report::InvertAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol
         }
         // cout << "dddddddddd" << endl;
         // V amplitude
+        // cout << "ant_type = " << ant_type << endl;
+        // cout << "vm_real = " << vm_real << endl;
+        // cout << "vm_img = " << vm_img << endl;
+        // cout << "phase_current = " << phase_current << endl;
+        // cout << "heff = " << heff << endl;
+        // cout << "AntPhase = " << AntPhase << endl;
+        // cout << "antenna_theta = " << antenna_theta << endl;
+        // cout << "antenna_phi = " << antenna_phi << endl;
+        // cout << "RADDEG = " << RADDEG << endl;
         double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / (1 / sqrt(2.) * 0.5 * heff * pol_factor); // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
 
         // real, img terms with phase shift
@@ -4740,18 +4869,25 @@ void Report::InvertAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol
         // cout << "ffffffff" << endl;
         //vm_real = v_amp * cos( phase_current - AntPhase*RADDEG ); // subtract AntPhase for four1 function's equation definition (inverse in img values)
         //vm_img = v_amp * sin( phase_current - AntPhase*RADDEG );
+        // cout << "v_amp = " << v_amp << endl;
+        // cout << "vm_real = " << vm_real << endl;
+        // cout << "vm_img = " << vm_img << endl;
+        // cout << "(sign * AntPhase*RADDEG) = " << (sign * AntPhase*RADDEG) << endl;
+        // cout << "phase_current - (sign * AntPhase*RADDEG) = " << phase_current - (sign * AntPhase*RADDEG) << endl;
+        // cout << "cos( phase_current - (sign * AntPhase*RADDEG)) = " << cos( phase_current - (sign * AntPhase*RADDEG)) << endl;
+        // cout << "sin( phase_current - (sign * AntPhase*RADDEG)) = " << sin( phase_current - (sign * AntPhase*RADDEG)) << endl;
     }
 
     else { // only amplitude
         vm_real = vm_real / (1 / sqrt(2.) * 0.5 * heff * pol_factor); // only amplitude
         vm_img = vm_img / (1 / sqrt(2.) * 0.5 * heff * pol_factor); // only amplitude
     }
-    if (std::isnan(vm_real)) {
-        vm_real = 0.0;
-    }
-    if (std::isnan(vm_img)) {
-        vm_img = 0.0;
-    }    
+    // if (std::isnan(vm_real)) {
+    //     vm_real = 0.0;
+    // }
+    // if (std::isnan(vm_img)) {
+    //     vm_img = 0.0;
+    // }    
 
 }
 
@@ -4765,12 +4901,12 @@ void Report::InvertAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin
     vm_bin0 = vm_bin0 / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
     vm_bin1 = vm_bin1 / sqrt(2.) * 0.5 * heff_lastbin * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
     
-    if (std::isnan(vm_bin0)) {
-        vm_bin0 = 0.0;
-    }
-    if (std::isnan(vm_bin1)) {
-        vm_bin1 = 0.0;      
-    }    
+    // if (std::isnan(vm_bin0)) {
+    //     vm_bin0 = 0.0;
+    // }
+    // if (std::isnan(vm_bin1)) {
+    //     vm_bin1 = 0.0;      
+    // }    
 
 }
 //End new inverse functions
@@ -4835,6 +4971,11 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
             else if (vm_img<0.) phase_current = -PI;
             else phase_current = 0.;
         }
+        // cout << "vm_real = " << vm_real << endl;
+        // cout << "vm_img = " << vm_img << endl;
+        // cout << "phase_current = " << phase_current << endl;
+        // cout << "freq = " << freq << endl;
+        // cout << "gain_ch_no = " << gain_ch_no << endl;        
 
         // V amplitude
         double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) * detector->GetElectGain_1D_OutZero( freq, gain_ch_no ); // apply gain (unitless) to amplitude
@@ -4845,6 +4986,15 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
 
         vm_real = v_amp * cos( phase_current - detector->GetElectPhase_1D(freq, gain_ch_no) );
         vm_img = v_amp * sin( phase_current - detector->GetElectPhase_1D(freq, gain_ch_no ) );
+        //Debugging statements:
+        // cout << "detector->GetElectGain_1D_OutZero( freq, gain_ch_no ) = " << detector->GetElectGain_1D_OutZero( freq, gain_ch_no ) << endl;
+        // cout << "v_amp = " << v_amp << endl;
+        // cout << "detector->GetElectPhase_1D(freq, gain_ch_no) = " << detector->GetElectPhase_1D(freq, gain_ch_no) << endl;
+        // cout << "phase_current - detector->GetElectPhase_1D(freq, gain_ch_no) = " << phase_current - detector->GetElectPhase_1D(freq, gain_ch_no) << endl;
+        // cout << "cos( phase_current - detector->GetElectPhase_1D(freq, gain_ch_no) = " << cos( phase_current - detector->GetElectPhase_1D(freq, gain_ch_no)) << endl;
+        // cout << "sin( phase_current - detector->GetElectPhase_1D(freq, gain_ch_no ) = " << sin( phase_current - detector->GetElectPhase_1D(freq, gain_ch_no )) << endl;
+        // cout << "vm_real = " << vm_real << endl;
+        // cout << "vm_img = " << vm_img << endl;        
     }
 
     else {
@@ -4889,6 +5039,11 @@ void Report::InvertElect_Tdomain(double freq, Detector *detector, double &vm_rea
             else if (vm_img<0.) phase_current = -PI;
             else phase_current = 0.;
         }
+        // cout << "vm_real = " << vm_real << endl;
+        // cout << "vm_img = " << vm_img << endl;
+        // cout << "phase_current = " << phase_current << endl;
+        // cout << "freq = " << freq << endl;
+        // cout << "gain_ch_no = " << gain_ch_no << endl;
 
         // V amplitude
         double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / detector->GetElectGain_1D_OutZero( freq, gain_ch_no ); // apply gain (unitless) to amplitude
@@ -4899,6 +5054,16 @@ void Report::InvertElect_Tdomain(double freq, Detector *detector, double &vm_rea
 
         vm_real = v_amp * cos( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no) );
         vm_img = v_amp * sin( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no ) );
+        
+        //Debugging statements:
+        // cout << "detector->GetElectGain_1D_OutZero( freq, gain_ch_no ) = " << detector->GetElectGain_1D_OutZero( freq, gain_ch_no ) << endl;
+        // cout << "v_amp = " << v_amp << endl;
+        // cout << "detector->GetElectPhase_1D(freq, gain_ch_no) = " << detector->GetElectPhase_1D(freq, gain_ch_no) << endl;
+        // cout << "phase_current + detector->GetElectPhase_1D(freq, gain_ch_no) = " << phase_current + detector->GetElectPhase_1D(freq, gain_ch_no) << endl;
+        // cout << "cos( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no) = " << cos( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no)) << endl;
+        // cout << "sin( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no ) = " << sin( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no )) << endl;
+        // cout << "vm_real = " << vm_real << endl;
+        // cout << "vm_img = " << vm_img << endl;
     }
 
     else {
@@ -4907,12 +5072,12 @@ void Report::InvertElect_Tdomain(double freq, Detector *detector, double &vm_rea
 
         vm_img = vm_img * detector->GetElectGain_1D_OutZero( freq, gain_ch_no); // only amplitude
     }
-    if (std::isnan(vm_real)) {
-        vm_real = 0.0;
-    }
-    if (std::isnan(vm_img)) {
-        vm_img = 0.0;
-    }    
+    // if (std::isnan(vm_real) or std::isinf(vm_real)) {
+    //     vm_real = 0.0;
+    // }
+    // if (std::isnan(vm_img) or std::isinf(vm_img)) {
+    //     vm_img = 0.0;
+    // }    
 }
 
 
@@ -4923,12 +5088,12 @@ void Report::InvertElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *
     vm_bin0 = vm_bin0 / detector->GetElectGain_1D_OutZero( freq0 , gain_ch_no);
     vm_bin1 = vm_bin1 / detector->GetElectGain_1D_OutZero( freq1 , gain_ch_no);
     
-    if (std::isnan(vm_bin0)) {
-        vm_bin0 = 0.0;
-    }
-    if (std::isnan(vm_bin1)) {
-        vm_bin1 = 0.0;    
-    }
+    // if (std::isnan(vm_bin0) or std::isinf(vm_bin0)) {
+    //     vm_bin0 = 0.0;
+    // }
+    // if (std::isnan(vm_bin1) or std::isinf(vm_bin1)) {
+    //     vm_bin1 = 0.0;
+    // }   
 }
 //End new inverse functions
 
