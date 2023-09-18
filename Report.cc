@@ -4936,6 +4936,57 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
             Tools::realft(vnoise, -1, settings1 -> DATA_BIN_SIZE);
 
         }
+        else if(settings1->DETECTOR==5 && settings1->DETECTOR_STATION>0){
+
+            // check to make sure we have this channel available
+            if(ch < 0 || ch >= detector->RayleighFit_ch){
+                char errorMessage[400];
+                sprintf(errorMessage,
+                    "L%d: You have asked for Rayleigh Fits for ch %d, which is not supported",
+                    __LINE__, ch
+                );
+                throw std::runtime_error(errorMessage);
+            }
+
+            // get the fits for this specific station
+            // this function will throw exceptions if the station doesn't exist
+            // so we can call this safely
+            auto fits_for_this_station = detector->GetRayleighFitVector_databin(settings1->DETECTOR_STATION, settings1);
+
+            // to normalize the bin content, we also need to keep delta f
+            double this_delta_f = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP);
+
+            // loop over frequency bins
+            for(int k=0; k<settings1->DATA_BIN_SIZE/2; k++){
+
+                Vfft_noise_before.push_back(fits_for_this_station[ch][k]);
+                current_phase = noise_phase[k];
+                V_tmp = fits_for_this_station[ch][k];
+                
+                // the right normalization factor is N * sqrt(deltaF)
+                V_tmp *= double(settings1->DATA_BIN_SIZE);
+                V_tmp *= sqrt(this_delta_f);
+
+                Tools::get_random_rician(0., 0., V_tmp, current_amplitude, current_phase); // draw a random number from the distribution with this rayleigh fit parameter
+
+                // set the real and imaginary components of the FFT
+                vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
+                vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
+                
+                // stash those values
+                Vfft_noise_after.push_back(vnoise[2 * k]);
+                Vfft_noise_after.push_back(vnoise[2 * k + 1]);
+
+                // and apply the inverse FFT normalization factor
+                vnoise[2 * k] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
+                vnoise[2 * k + 1] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
+
+            }
+
+            // real FT back to get vnoise in time domain waveform; 
+            Tools::realft(vnoise, -1, settings1 -> DATA_BIN_SIZE);
+
+        }
 
     } else { // currently there are no more options!
         cout << "no noise option for NOISE = " << settings1 -> NOISE << endl;
