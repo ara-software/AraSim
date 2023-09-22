@@ -3862,7 +3862,7 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 	if (stationID == 0){
 	  ch_limit = 14;
 	} else {
-	  ch_limit = 28;
+	  ch_limit = 16;
 	}
 
         for (int ch_loop=0; ch_loop<ch_limit; ch_loop++) {
@@ -3908,7 +3908,7 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 	if (stationID == 0){
 	  ch_limit = 14;
 	} else {
-	  ch_limit = 28;
+	  ch_limit = 16;
 	}
 
 	int maxElecChans = 32;
