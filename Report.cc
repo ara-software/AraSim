@@ -1857,7 +1857,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 }
 
                 // TODO: I think this is where the Rayleigh reading will go for this next version of the code
-                // if (settings1->NOISE==1 && settings1->DETECTOR==4) {
+                // if (settings1->NOISE==1 && settings1->DETECTOR==4 || settings1->DETECTOR==5) {
                 //     detector->ReadRayleigh_Station(settings1);
                 // }
 
@@ -2312,7 +2312,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             int antenna_i = detector->getAntennafromArbAntID(i, trig_j);
 			    int channel_num = detector->GetChannelfromStringAntenna(i, string_i, antenna_i, settings1);
 
-			    if (!(settings1->DETECTOR==4)){
+			    if (!(settings1->DETECTOR==4 || settings1->DETECTOR==5)){
  			    	channel_num = channel_num+1; // Channel numbering is different for DETECTOR=(1,2,3) than for DETECTOR = 4 in GetChannelfromStringAntenna(), it needs that shift 
  			    }
 
