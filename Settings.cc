@@ -979,7 +979,7 @@ int Settings::CheckCompatibilitiesSettings() {
     }
     */
 
-    // This is for installed stations
+    // Verify valid DETECTOR_STATION_LIVETIME_CONFIG values for Installed A1-A5 stations
     if (DETECTOR == 4 ) {
       if (ARAUTIL_EXISTS == false){
 	    cerr << "DETECTOR=4 only works with an installation of AraRoot" << endl;
@@ -998,15 +998,7 @@ int Settings::CheckCompatibilitiesSettings() {
 	        num_err++;
 	    }
         if(DETECTOR_STATION_LIVETIME_CONFIG>-1){
-
-            if ( ( (int)DETECTOR == 5 ) && 
-                 ( ( DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1 ) ) ){
-                    // Phased Array mode (DETECTOR=5) uses DETECTOR_STATION for DAQ configurations
-                    // Need to check this before checking DETECTOR_STATION in the context of ARA stations
-                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only five expected configurations for A1"<<endl;
-                    num_err++;
-            }
-	        else if((int)DETECTOR_STATION==1){
+	        if((int)DETECTOR_STATION==1){
                 if(DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1){
                     cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only seven expected configurations for A1"<<endl;
                     num_err++;
@@ -1045,6 +1037,28 @@ int Settings::CheckCompatibilitiesSettings() {
 		
       }
     }
+
+    // Verify valid DETECTOR_STATION_LIVETIME_CONFIG values for Installed PA
+    if ( (int)DETECTOR == 5 ){
+
+	    cerr << "DETECTOR is set to 5" << endl; 
+
+        // Phased Array mode (DETECTOR=5) uses DETECTOR_STATION for DAQ configurations
+	    if (DETECTOR_STATION < 1 || DETECTOR_STATION > 3) {
+	        cerr << "DETECTOR_STATION is not set to a valid station number" << endl;
+	        num_err++;
+	    }
+
+        if ( DETECTOR_STATION_LIVETIME_CONFIG > -1 ) {
+            if ( DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1 ) {
+                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to ";
+                cerr<<DETECTOR_STATION_LIVETIME_CONFIG;
+                cerr<<" but there are only five expected configurations for the PA"<<endl;
+                num_err++;
+            } 
+        }
+
+    } // end if DETECTOR==5
 
    //Check that DETECTOR_STATION=0 is only used with DETECTOR=3
    if (DETECTOR_STATION==0 && DETECTOR!=3){
