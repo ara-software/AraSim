@@ -19,6 +19,8 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: 3.7
+          node-version: 16
+
 
 
       - name: Install dependencies
