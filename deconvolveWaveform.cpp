@@ -124,7 +124,7 @@ int main(int argc, char **argv)
     Detector *detector = new Detector(settings1, icemodel, setupfile);  
     Report *report = new Report(detector, settings1);
     
-    settings1->NFOUR = 8192;
+    settings1->NFOUR = 4096;
     
     cout << "Settings->TIMESTEP = " << settings1->TIMESTEP << endl;
     
@@ -167,19 +167,19 @@ int main(int argc, char **argv)
             //Testing setting the outgoing pointer using the rawEvPtr to populate the calpulser/softtrigger parameters.
             // delete usefulAtriEvPtrOut;
             // usefulAtriEvPtrOut = new UsefulAtriStationEvent(rawAtriEvPtr, AraCalType::kLatestCalib);
-            if (rawAtriEvPtr->isCalpulserEvent()) {
-                cout << "Is calpulser" << endl;
-                usefulAtriEvPtrOut->isTrigType(1);
+//             if (rawAtriEvPtr->isCalpulserEvent()) {
+//                 cout << "Is calpulser" << endl;
+//                 usefulAtriEvPtrOut->isTrigType(1);
             
-            }
-            else if (rawAtriEvPtr->isSoftwareTrigger()) {
-                cout << "Is soft trigger" << endl;
-                usefulAtriEvPtrOut->isTrigType(2);
-            }
-            else {
-                cout << "Is rf event" << endl;
-                usefulAtriEvPtrOut->isTrigType(0);
-            }                    
+//             }
+//             else if (rawAtriEvPtr->isSoftwareTrigger()) {
+//                 cout << "Is soft trigger" << endl;
+//                 usefulAtriEvPtrOut->isTrigType(2);
+//             }
+//             else {
+//                 cout << "Is rf event" << endl;
+//                 usefulAtriEvPtrOut->isTrigType(0);
+//             }                    
         }
 
         int vertexRecoElectToRFChan[] = {14,2,6,10,12,0,4,8,15,3,7,11,13,1,5,9};
@@ -735,12 +735,18 @@ int main(int argc, char **argv)
                 // usefulAtriEvPtrOut->fVolts[fVoltsMap[i]].push_back(settings1->ARBITRARY_EVENT_ATTENUATION *volts_forint[n] *2. / (double)(Nnew));  // 2/N for inverse FFT normalization factor
                 // usefulAtriEvPtrOut->fTimes[fVoltsMap[i]].push_back(T_forint[n]);
             }
-            cout << "sizeof(fVolts) = " << sizeof(usefulAtriEvPtrOut->fVolts) << endl;
+            // cout << "sizeof(fVolts) = " << sizeof(usefulAtriEvPtrOut->fVolts) << endl;
             usefulAtriEvPtrOut->stationId = settings1->DETECTOR_STATION;
             
         } //channel loop
         usefulAtriEvPtrOut->eventNumber = usefulAtriEvPtr->eventNumber;
         usefulAtriEvPtrOut->unixTime = usefulAtriEvPtr->unixTime;
+        //Assign timestamp values to help identify calpulsers
+        usefulAtriEvPtrOut->timeStamp = usefulAtriEvPtr->timeStamp;
+        // Assign triggerInfo values to identify RF and software triggers.
+        for (int bit = 0; bit < 4; bit++) {
+            usefulAtriEvPtrOut->triggerInfo[bit] = usefulAtriEvPtr->triggerInfo[bit];
+        }
         fpOut->cd();
         outTree->Fill();
         usefulAtriEvPtrOut->fVolts.clear();
