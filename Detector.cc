@@ -2928,6 +2928,9 @@ double Detector::GetElectGain_1D_OutZero( double freq, int gain_ch_no) {
 
 
     slope_1 = (ElectGain[gain_ch_no][1] - ElectGain[gain_ch_no][0]) / (Freq[1] - Freq[0]);
+    
+
+    
 
 
     // if freq is lower than freq_init
@@ -2948,6 +2951,21 @@ double Detector::GetElectGain_1D_OutZero( double freq, int gain_ch_no) {
         Gout = ElectGain[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectGain[gain_ch_no][bin]-ElectGain[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
     } // not outside the Freq[] range
     
+    //Debug statments - JCF 7/5/2023
+    // cout << "freq = " << freq << endl;
+    // cout << "freq_init = " << freq_init << endl;
+    // cout << "freq_width = " << freq_width << endl;
+    // cout << "bin = " << bin << endl;    
+    // cout << "ElectGain[gain_ch_no][1] = " << ElectGain[gain_ch_no][1] << endl;
+    // cout << "ElectGain[gain_ch_no][0] = " << ElectGain[gain_ch_no][0] << endl;
+    // cout << "Freq[1] = " << Freq[1] << endl;
+    // cout << "Freq[0] = " << Freq[0] << endl;
+    // cout << "slope_1 = " << slope_1 << endl;
+    // cout << "ElectGain[gain_ch_no][bin-1] = " << ElectGain[gain_ch_no][bin-1] << endl; 
+    // cout << "Freq[bin-1] = " << Freq[bin-1] << endl; 
+    // cout << "ElectGain[gain_ch_no][bin] = " << ElectGain[gain_ch_no][bin] << endl; 
+    // cout << "ElectGain[gain_ch_no][bin-1] = " << ElectGain[gain_ch_no][bin-1] << endl;
+    // cout << "Freq[bin] = " << Freq[bin] << endl;
 
 
     return Gout;
