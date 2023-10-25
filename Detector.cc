@@ -871,6 +871,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         }
         cout << "done read elect chain" << endl;
 
+        cout<<"     Reading standard trigger formation values"<<endl;
+        ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);        
+        
     } // if mode == 1
 
     /////////////////////////////////////////////////////////////////////////////////    

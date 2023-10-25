@@ -257,9 +257,13 @@ class Detector {
 
         void ReadElectChain(string filename, Settings *settings1);
         int gain_ch; // Number of channels used for gain model array population in ReadElectChain()
-	std::vector< std::vector <double> > ElectGain; //Elect chain gain (unitless) for Detector freq bin array
-	std::vector< std::vector <double> > ElectPhase; // Elect chain phase (rad) for Detector freq bin array 
+        std::vector< std::vector <double> > ElectGain; //Elect chain gain (unitless) for Detector freq bin array
+        std::vector< std::vector <double> > ElectPhase; // Elect chain phase (rad) for Detector freq bin array 
 
+        void ReadTrig_Delays_Masking(string filename, Settings *settings1);
+        std::vector<double> triggerDelay; //trigger delay for a given channel (seconds?)
+        std::vector<int> triggerMask;  //trigger masking decision value (either 0 or 1)
+        std::vector<int> activeDelay;  //decision value to activate delay (either 0 or 1)    
 
         void ReadGainOffset_TestBed(string filename, Settings *settings1);
         vector <double> GainOffset_TB_ch;   // constant gain offset for the TestBed chs 
@@ -348,7 +352,8 @@ class Detector {
 
         double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, int ant_number=0);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
 
-	
+        int GetTrigOffset( int ch, Settings *settings1 );
+        int GetTrigMasking( int ch );	
 
 
         double GetAntPhase(double freq, double theta, double phi, int ant_m); // return antenna phase with 2-D interpolation
@@ -500,7 +505,7 @@ class Detector {
     vector < IdealStation > IdealStations;
     
 
-    void SetupInstalledStations();
+    void SetupInstalledStations(Settings *settings1);
     void PrepareVectorsInstalled();
     void PrepareVectorsInstalled(int importedStation);
 
