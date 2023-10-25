@@ -247,7 +247,7 @@ outputdir="outputs"; // directory where outputs go
 
     OFFCONE_LIMIT = 10.; // offcone angle (deg) limit to calculate time domain signal. Increasing this value will result in drametically increase computation time
 
-    ALL_ANT_V_ON = 1; // use Vpol antenna gain for both Vpol and Hpol = 1, use Hpol gain for Hpol model = 0
+    ALL_ANT_V_ON = 0; // use Vpol antenna gain for both Vpol and Hpol = 1, use Hpol gain for Hpol model = 0
 
     PHASE_SKIP_MODE = 0; // skip applying phase in t-domain mode (SIMULATION_MODE = 1). default 0 : don't skip (apply all phase), 1 : only upto Askaryan radiation, 2 : only upto antenna
 
@@ -875,6 +875,21 @@ int Settings::CheckCompatibilitiesSettings() {
         num_err++;
     }
 
+    if (TRIG_SCAN_MODE==5 && ( DETECTOR!=5 ) ){
+        cerr<<"TRIG_SCAN_MODE=5 only compatible for Phased Array (DETECTOR= 5)"<<endl;
+        num_err++;
+    }
+
+    if ( DETECTOR==5 && TRIG_SCAN_MODE!=5){
+        cout<<"Warning: PA trigger only checked on its own if TRIG_SCAN_MODE=5 (for DETECTOR = 5)"<<endl;
+        // cerr<<"PA trigger only checked if TRIG_SCAN_MODE=5 (for DETECTOR = 5)"<<endl;
+        // num_err++;
+    }
+
+    if ( DETECTOR==5 && ( DETECTOR_STATION<1 || DETECTOR_STATION>3 ) ) {
+        cerr<<"DETECTOR_STATION must be 1,2,3 for PA Station (DETECTOR = 5) "<<endl;
+        num_err++;
+    }
 
 
     // check modes which will only work for actual installed TestBed case
@@ -987,7 +1002,7 @@ int Settings::CheckCompatibilitiesSettings() {
     }
     */
 
-    // This is for installed stations
+    // Verify valid DETECTOR_STATION_LIVETIME_CONFIG values for Installed A1-A5 stations
     if (DETECTOR == 4 ) {
       if (ARAUTIL_EXISTS == false){
 	    cerr << "DETECTOR=4 only works with an installation of AraRoot" << endl;
@@ -1006,7 +1021,13 @@ int Settings::CheckCompatibilitiesSettings() {
 	        num_err++;
 	    }
         if(DETECTOR_STATION_LIVETIME_CONFIG>-1){
-            if((int)DETECTOR_STATION==2){
+	        if((int)DETECTOR_STATION==1){
+                if(DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1){
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only seven expected configurations for A1"<<endl;
+                    num_err++;
+                }
+            }
+            else if((int)DETECTOR_STATION==2){
                 if(DETECTOR_STATION_LIVETIME_CONFIG>6 || DETECTOR_STATION_LIVETIME_CONFIG<1){
                     cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only six expected configurations for A2"<<endl;
                     num_err++;
@@ -1018,17 +1039,49 @@ int Settings::CheckCompatibilitiesSettings() {
                     num_err++;
                 }
             }
-
+            else if((int)DETECTOR_STATION==4){
+                if(DETECTOR_STATION_LIVETIME_CONFIG>4 || DETECTOR_STATION_LIVETIME_CONFIG<1){
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only four expected configurations for A3"<<endl;
+                    num_err++;
+                }
+            }
+            else if((int)DETECTOR_STATION==5){
+                if(DETECTOR_STATION_LIVETIME_CONFIG>2 || DETECTOR_STATION_LIVETIME_CONFIG<1){
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only two expected configurations for A3"<<endl;
+                    num_err++;
+                }
+            }
             else{
                 cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but DETECTOR_STATION is "<<DETECTOR_STATION<<endl;
-                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is only valid for A2 and A3 "<<endl;
+                cerr<<" Unfamiliar DETECTOR_STATION value"<<endl;
                 num_err++;
             }
-
-        }          
-
+        }
+		
       }
     }
+
+    // Verify valid DETECTOR_STATION_LIVETIME_CONFIG values for Installed PA
+    if ( (int)DETECTOR == 5 ){
+
+	    cerr << "DETECTOR is set to 5" << endl; 
+
+        // Phased Array mode (DETECTOR=5) uses DETECTOR_STATION for DAQ configurations
+	    if (DETECTOR_STATION < 1 || DETECTOR_STATION > 3) {
+	        cerr << "DETECTOR_STATION is not set to a valid station number" << endl;
+	        num_err++;
+	    }
+
+        if ( DETECTOR_STATION_LIVETIME_CONFIG > -1 ) {
+            if ( DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1 ) {
+                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to ";
+                cerr<<DETECTOR_STATION_LIVETIME_CONFIG;
+                cerr<<" but there are only five expected configurations for the PA"<<endl;
+                num_err++;
+            } 
+        }
+
+    } // end if DETECTOR==5
 
    //Check that DETECTOR_STATION=0 is only used with DETECTOR=3
    if (DETECTOR_STATION==0 && DETECTOR!=3){

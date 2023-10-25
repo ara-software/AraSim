@@ -89,7 +89,9 @@ Spectra::Spectra(Settings *settings1) {
   else if (EXPONENT_model >= 510. && EXPONENT_model <= 650.) // g.n. added so we can have simulations at E^2=17.8 not just whole numbers
   {
       pnu_EXPONENT = (EXPONENT_model - 400) / 10;
-	cout<<"**************** energy is "<<pnu_EXPONENT<<" *******************"<<endl;
+      if (settings1->EVENT_GENERATION_MODE != 1){
+	      cout<<"**************** energy is "<<pnu_EXPONENT<<" *******************"<<endl;
+      }
   }
   
   else if (EXPONENT_model == 30.) // ESS baseline model. Used to be EXPONENT "0"
@@ -609,3 +611,4 @@ int Spectra::IsMonoenergetic() {
     }
     return out;
 }
+

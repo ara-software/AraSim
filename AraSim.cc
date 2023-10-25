@@ -175,7 +175,7 @@ int main(int argc, char **argv) {   // read setup.txt file
     cout<<"called Evt"<<endl;
 
     // Build output files
-    ofstream event_file;    
+    ofstream event_file;
     TFile *AraFile;
     if (argc > 2) {
         AraFile=new TFile((outputdir+"/AraOut."+setupfile.substr(setupfile.find_last_of("/")+1)+".run"+run_no+".root").c_str(),"RECREATE","ara");
@@ -183,7 +183,6 @@ int main(int argc, char **argv) {   // read setup.txt file
     else {
         AraFile=new TFile((outputdir+"/AraOut.root").c_str(),"RECREATE","ara");
     }
-
     TTree *AraTree=new TTree("AraTree","AraTree");    // for single entry
     TTree *AraTree2=new TTree("AraTree2","AraTree2"); //for many entries
     if (settings1->EVENT_GENERATION_MODE == 2){
@@ -229,7 +228,6 @@ int main(int argc, char **argv) {   // read setup.txt file
     TTree *eventTree;
     double weight = 0.;
     if (settings1->EVENT_GENERATION_MODE != 2) {
-    
 
         eventTree = new TTree("eventTree","Tree of ARA Events");
         eventTree->Branch("UsefulIcrrStationEvent", &theIcrrEvent);
@@ -407,7 +405,6 @@ int main(int argc, char **argv) {   // read setup.txt file
     int Events_Passed = 0;
 
     while (inu < nuLimit){
-
         check_station_DC = 0;
         check_station_DC = 0;
         if ( settings1->DEBUG_MODE_ON==0 ) {
@@ -432,15 +429,15 @@ int main(int argc, char **argv) {   // read setup.txt file
                 // If reading in events from a list, make sure you move to next event 
                 Events_Thrown++;
                 inu++;
-            }            
+            }
             continue;
         }
         event->inu_passed = -1;
-        
+
         if ( settings1->EVENT_GENERATION_MODE == 2 ){
             // Write event lists to file, no simulation
             for (int interaction_i=0; interaction_i<event->Nu_Interaction.size(); interaction_i++){
-
+                
                 event_file << inu << " "; // EVID    
                 event_file << event->nuflavorint << " "; // NUFLAVORINT       
                 event_file << event->nu_nubar << " "; // NUBAR       
@@ -460,7 +457,7 @@ int main(int argc, char **argv) {   // read setup.txt file
             } // end add event to file
 
             continue; // Skip the simulation steps and move to next event
-        }        
+        }
                 
         report = new Report(detector, settings1);
                         
@@ -511,7 +508,7 @@ int main(int argc, char **argv) {   // read setup.txt file
                     }
                     else if (settings1->DETECTOR == 5){
                         stationID = 6;
-                        stationIndex = 0;                        
+                        stationIndex = 0;
                     } else {
                         stationID = 0;
                         stationIndex = 0;
@@ -726,11 +723,11 @@ int main(int argc, char **argv) {   // read setup.txt file
 
     settings1->NNU = Events_Thrown;
     settings1->NNU_PASSED = Total_Global_Pass;
-    
+
     if (settings1->EVENT_GENERATION_MODE == 2){
         event_file.close();
         return 0;
-    }    
+    }
 
     // TrigWind << TRIG_WINDOW_Size << "\t" << Total_Global_Pass << endl;
     // cout << "TRIG_WINDOW_Size:Total_Global_Pass:: " << TRIG_WINDOW_Size << " : " << Total_Global_Pass << endl;

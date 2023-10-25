@@ -77,7 +77,6 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
             settings1->YPARAM = 2;
             settings1->ELAST_Y = settings1->ELAST[inu_thrown];
         }
-
         // cout << pnu << endl;
         /*
         double hereTheta = 10.;
