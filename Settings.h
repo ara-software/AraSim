@@ -181,6 +181,11 @@ class Settings
     
         double CONST_RMSDIODE;  // in case NOISE_CHANNEL_MODE = 1, just using this CONST_RMSDIODE value for threshold
 
+        double SOURCE_LATITUDE;  //Latitude, Longitude, and depth of simulating source in global coordinates for use in INTERACTION_MODE=5.
+
+        double SOURCE_LONGITUDE;
+
+        double SOURCE_DEPTH;
 
         int USE_TESTBED_RFCM_ON;    // use RFCM measurement for testbed or not (default 0)
     
@@ -307,6 +312,9 @@ class Settings
 
 	int CUSTOM_ELECTRONICS; //0 (default): use the regular "ARA_Electronics_TotalGain_TwoFilter.csv" file
 							//1 : load a custom electronics file, stored as "custom_electronics.csv" in the `data` directory
+                            
+  double CLOCK_ANGLE;  // default: 0; Angle of polarization "on the clock" for use in pulser events (EVENT_TYPE=11)
+
 
 
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
