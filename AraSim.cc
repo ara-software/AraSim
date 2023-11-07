@@ -505,6 +505,10 @@ int main(int argc, char **argv) {   // read setup.txt file
                     if (settings1->DETECTOR == 4){
                         stationID = settings1->DETECTOR_STATION;
                         stationIndex = 0;
+                    }
+                    else if (settings1->DETECTOR == 5){
+                        stationID = 6;
+                        stationIndex = 0;
                     } else {
                         stationID = 0;
                         stationIndex = 0;
