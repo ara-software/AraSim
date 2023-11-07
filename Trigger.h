@@ -104,6 +104,13 @@ class Trigger {
      
      ClassDef(Trigger,1);
 
+    // Phased Array Triggering Variables
+    double snr_PA[60];    // First  column of nuphase_trig_effc.txt data
+    double eff_PA[60];    // Second column of nuphase_trig_effc.txt data
+    double angle_PA[188]; // First  column of nuphase_SNR_angle.txt data
+    double aSNR_PA[188];  // Second column of nuphase_SNR_angle.txt data
+
+
 };
 
 #endif //TRIGGER_H

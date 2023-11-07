@@ -195,7 +195,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         }
 
     } // if mode == 0 
-
+    
     /////////////////////////////////////////////////////////////////////////////
     else if (mode == 1) {
         //        cout<<"\n\tDector mode 1 : Specific number of stations (less than 7 stations) !"<<endl;
@@ -1817,18 +1817,323 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 		cout <<"    Trigger formation file does not exist for this station"<<endl;
                 cout<<"     Reading standard trigger formation values"<<endl;
                 ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
-	}
-
-	//for A1 ICRR/ATRI differentiation
+  }
+	
+  //for A1 ICRR/ATRI differentiation
 	if (settings1->DETECTOR_STATION_ARAROOT==1){
 		cout << "\n A1 is being simulated as an ICRR" << endl;
 	}
 	else if (settings1->DETECTOR_STATION_ARAROOT==100){
 		cout << "\n A1 is being simulated as an ATRI" << endl;
 	}
-	
 
     } // if mode == 4
+
+    /////////////////////////////////////////////////////////////////////////////
+    else if (mode == 5){
+        // Simulates ARA05 + PA station(s)
+        // Detector setup according to the real station's configuration 
+        //  over time specified by DETECTOR_STATION settings parameter
+        //  Options available: 
+        //   1: Jan 2018 - Dec 2018 (PA channels only)
+        //   2: October 2019 - Jan 2020 (All PA channels and 1 A5 channel)
+        //   3: Jan 2020 - present (PA + 7 VPols from A5)
+   
+        cout << "Simulating realistic ARA05 and Phased Array." << endl;
+
+
+        // Initialize number of stations
+        params.number_of_stations = 1;
+
+        // Initialize parameters that haven't changed over time
+        // Distances are in meters
+        params.antenna_orientation = 0;     // all antennas facing x
+        params.bore_hole_antenna_layout = settings1->BORE_HOLE_ANTENNA_LAYOUT;
+        params.core_x = 10000.; 
+        params.core_y = 10000.; 
+        params.number_of_surfaces_station = 0; 
+        params.stations_per_side = 1; 
+        params.station_spacing = 2000.;
+        double R_string = 10.;  
+        double R_surface = 60.;
+
+        // Initialize parameters that have changed over time
+        if (settings1->DETECTOR_STATION==1){ // Using all vanilla VPols
+            params.number_of_antennas = 25;
+            params.number_of_strings = 5;
+            params.number_of_strings_station = 5;
+        }
+        else if (settings1->DETECTOR_STATION==2){ // Using 1 vanilla VPol
+            params.number_of_antennas = 10;
+            params.number_of_strings = 2;
+            params.number_of_strings_station = 2;
+        }
+        else if (settings1->DETECTOR_STATION==3){ // Using 7 vanilla VPols
+            params.number_of_antennas = 16;
+            params.number_of_strings = 5;
+            params.number_of_strings_station = 5;
+        }
+        else {
+            cerr << "Input DETECTOR_STATION is invalid for PA DETECTOR " << mode << endl;
+            throw runtime_error("Invalid DETECTOR_STATION for PA DETECTOR");
+        }
+
+
+        // Build Station/String/Antenna Vectors 
+        for (int i=0; i<params.number_of_stations; i++) {
+            stations.push_back(temp_station);
+
+            // Build Phased Array string
+            stations[i].strings.push_back(temp_string);
+            for (int l=0; l<9; l++) {
+                stations[i].strings[0].antennas.push_back(temp_antenna);
+            }   
+
+            // Build additional strings attached to PA
+            // Only PA Attached to PA DAQ in DETECTOR_STATION == 1
+            if (settings1->DETECTOR_STATION == 2){ // 1 Vanilla VPol from 1 string attached to PA DAQ
+                stations[i].strings.push_back(temp_string);
+                stations[i].strings[1].antennas.push_back(temp_antenna); // A5E 24, A5RF  7, PA  5 (Formally "String 4")
+            }
+            else if (settings1->DETECTOR_STATION == 3){ // 7 Vanilla VPols from 4 strings attached to PA DAQ
+                stations[i].strings.push_back(temp_string);
+                stations[i].strings[1].antennas.push_back(temp_antenna); // A5E  0, A5RF  5, PA 12, AraSim s0a0
+                stations[i].strings[1].antennas.push_back(temp_antenna); // A5E  1, A5RF  1, PA 13, AraSim s0a2
+                stations[i].strings.push_back(temp_string);
+                stations[i].strings[2].antennas.push_back(temp_antenna);   // A5E 16, A5RF  6, PA 10, AraSim s1a0
+                stations[i].strings.push_back(temp_string);
+                stations[i].strings[3].antennas.push_back(temp_antenna);   // A5E 24, A5RF  7, PA  5, AraSim s2a0
+                stations[i].strings[3].antennas.push_back(temp_antenna);   // A5E 25, A5RF  3, PA 11, AraSim s2a2
+                stations[i].strings.push_back(temp_string);
+                stations[i].strings[4].antennas.push_back(temp_antenna);  // A5E  8, A5RF  4, PA 14, AraSim s3a0
+                stations[i].strings[4].antennas.push_back(temp_antenna); // A5E  9, A5RF  0, PA 15, AraSim s3a2
+            }
+        } // for i in number_of_stations (building vectors)
+
+
+        // Set station locations by iterating through number_of_stations
+        int station_count = 0;
+        int side_step;
+        double next_dir = PI*2./3;
+        for (int istation = 0; istation < (int)params.number_of_stations; istation++) 
+        {
+            if (station_count < (int)params.number_of_stations - 1) {
+
+                if ( station_count < 6 ) { // first layer
+                    stations[station_count].SetX( params.core_x + (double)params.station_spacing * cos( (PI/3.) * (double)station_count ) );
+                    stations[station_count].SetY( params.core_y + (double)params.station_spacing * sin( (PI/3.) * (double)station_count ) );
+                } // end first layer
+                else if ( station_count < 18 ) { // second layer
+
+                    // if the first outter layer station
+                    if ( station_count == 6 ) {
+                        side_step = 2;
+                        stations[station_count].SetX( params.core_x + (double)params.station_spacing * 2. );
+                        stations[station_count].SetY( params.core_y );
+                    }
+                    // after first station
+                    else { 
+                        if ( side_step > 0 ) {
+                            stations[station_count].SetX( stations[station_count-1].GetX() + (double)params.station_spacing * cos(next_dir) );
+                            stations[station_count].SetY( stations[station_count-1].GetY() + (double)params.station_spacing * sin(next_dir) );
+                            side_step--;
+                        }
+                        else {
+                            side_step = 1;
+                            next_dir+=PI/3.; // rotate
+                            stations[station_count].SetX( stations[station_count-1].GetX() + (double)params.station_spacing * cos(next_dir) );
+                            stations[station_count].SetY( stations[station_count-1].GetY() + (double)params.station_spacing * sin(next_dir) );
+                        }
+                    }
+                } // end second layer
+                else if ( station_count < 36 ) { // third layer
+
+                    // if the first outter layer station
+                    if ( station_count == 6 ) {
+                        side_step = 3;
+                        stations[station_count].SetX( params.core_x + (double)params.station_spacing * 3. );
+                        stations[station_count].SetY( params.core_y );
+                    }
+                    // after first station
+                    else { 
+                        if ( side_step > 0 ) {
+                            stations[station_count].SetX( stations[station_count-1].GetX() + (double)params.station_spacing * cos(next_dir) );
+                            stations[station_count].SetY( stations[station_count-1].GetY() + (double)params.station_spacing * sin(next_dir) );
+                            side_step--;
+                        }
+                        else {
+                            side_step = 2;
+                            next_dir+=PI/3.; // rotate
+                            stations[station_count].SetX( stations[station_count-1].GetX() + (double)params.station_spacing * cos(next_dir) );
+                            stations[station_count].SetY( stations[station_count-1].GetY() + (double)params.station_spacing * sin(next_dir) );
+                        }
+                    }
+
+                } // end third layer
+
+                station_count++;
+            }
+            else if (station_count < (int)params.number_of_stations) {
+                //stations[station_count].x = core_x;
+                //stations[station_count].y = core_y;
+                stations[station_count].SetX( params.core_x );
+                stations[station_count].SetY( params.core_y );
+                station_count++;
+            }
+            else {
+                cout<<"\n\tError, too many stations !"<<endl;
+            }
+        } // finished iterating over stations to set locations
+
+
+        // set antenna values from parameters and set station positions
+        if (settings1->READGEOM == 0) {  // idealized geometry
+            for (int i=0; i<params.number_of_stations; i++) {
+                // Set Phased Array locations (load bottom to top)
+                stations[i].strings[0].SetX( stations[i].GetX()  );
+                stations[i].strings[0].SetY( stations[i].GetY()  );
+                stations[i].strings[0].antennas[0].SetZ(-184.79); // PA 9
+                stations[i].strings[0].antennas[1].SetZ(-182.79); // PA 8
+                stations[i].strings[0].antennas[2].SetZ(-180.79); // PA 7
+                stations[i].strings[0].antennas[3].SetZ(-178.75); // PA 6
+                stations[i].strings[0].antennas[4].SetZ(-176.70); // PA 4
+                stations[i].strings[0].antennas[5].SetZ(-175.68); // PA 3
+                stations[i].strings[0].antennas[6].SetZ(-174.66); // PA 2
+                stations[i].strings[0].antennas[7].SetZ(-173.65); // PA 1
+                stations[i].strings[0].antennas[8].SetZ(-172.635); // PA 0
+
+                // Set ARA5 string locations
+                // DETECTOR_STATION == 1 has no ARA5 strings attached to PA DAQ
+                if (settings1->DETECTOR_STATION == 2){
+                    stations[i].strings[1].SetX( stations[i].GetX() + 12.33); 
+                    stations[i].strings[1].SetY( stations[i].GetY() - 31.89); 
+                }
+                else if (settings1->DETECTOR_STATION == 3){
+                    stations[i].strings[1].SetX( stations[i].GetX() +  1.55); // A5E 0-3
+                    stations[i].strings[1].SetY( stations[i].GetY() + 15.66);
+                    stations[i].strings[2].SetX( stations[i].GetX() - 12.96); // A5E 16-19
+                    stations[i].strings[2].SetY( stations[i].GetY() -  8.65);
+                    stations[i].strings[3].SetX( stations[i].GetX() + 12.33); // A5E 24-27 
+                    stations[i].strings[3].SetY( stations[i].GetY() - 31.89);
+                    stations[i].strings[4].SetX( stations[i].GetX() + 29.63); // A5E 8-11
+                    stations[i].strings[4].SetY( stations[i].GetY() -  3.30);
+                }
+
+                // Set ARA5 antenna depths
+                // DETECTOR_STATION == 1 has no ARA5 antennas attached to PA DAQ
+                if (settings1->DETECTOR_STATION == 2){
+                    // Dont actually remember if it was ch16 that was not plugged in or not
+                    cout << "Using 1 ARA05 vanilla Vpol" << endl;
+                    stations[i].strings[1].antennas[0].SetZ(-190.86); // A5E 24, A5RF  7, PA  5
+                }
+                else if (settings1->DETECTOR_STATION == 3){
+                    cout << "Using 7 ARA05 vanilla Vpols" << endl;
+                    stations[i].strings[1].antennas[0].SetZ(-196.2045); // A5E  0, A5RF  5, PA 12, AraSim s0a0
+                    stations[i].strings[1].antennas[1].SetZ(-166.5366); // A5E  1, A5RF  1, PA 13, AraSim s0a2
+                    stations[i].strings[2].antennas[0].SetZ(-177.75);   // A5E 16, A5RF  6, PA 10, AraSim s1a0
+                    stations[i].strings[3].antennas[0].SetZ(-190.86);   // A5E 24, A5RF  7, PA  5, AraSim s2a0
+                    stations[i].strings[3].antennas[1].SetZ(-161.02);   // A5E 25, A5RF  3, PA 11, AraSim s2a2
+                    stations[i].strings[4].antennas[0].SetZ(-194.739);  // A5E  8, A5RF  4, PA 14, AraSim s3a0
+                    stations[i].strings[4].antennas[1].SetZ(-165.0948); // A5E  9, A5RF  0, PA 15, AraSim s3a2
+                }
+
+                // Set all antennas to VPOL (1 for HPOL)
+                stations[i].strings[0].antennas[0].type = 1; // PA Hpol
+                stations[i].strings[0].antennas[1].type = 1; // PA Hpol 
+                for (int l=2; l<9; l++) { // PA Vpols
+                    stations[i].strings[0].antennas[l].type = 0;
+                } 
+                if (settings1->DETECTOR_STATION > 1){ // Set all vanilla antennas to VPol
+                    for (int k=1; k<stations[i].strings.size(); k++) {
+                        for (int l=0; l<stations[i].strings[k].antennas.size(); l++) {
+                            stations[i].strings[k].antennas[l].type = 0;
+                        }
+                    } 
+                }
+
+                // Orient all antennas in x direction
+                for (int k=0; k<stations[i].strings.size(); k++) {
+                    for (int l=0; l<stations[i].strings[k].antennas.size(); l++) {
+                        stations[i].strings[k].antennas[l].orient = 0;
+                    }
+                } 
+
+                // Calculate the number of antennas created
+                stations[i].number_of_antennas = 0;
+                max_number_of_antennas_station = 0;
+                for (int k=0; k<stations[i].strings.size(); k++) {
+                    stations[i].number_of_antennas += stations[i].strings[k].antennas.size();
+                    max_number_of_antennas_station += stations[i].strings[k].antennas.size();
+                } 
+
+            } // end for i in number_of_stations
+
+        } // if idealized geometry
+        
+        ReadAllAntennaGains(settings1);
+
+        //	    if (settings1->NOISE == 2){
+        //Read the noise figures
+        ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
+        //	    }
+
+        // read filter file!!
+        ReadFilter("./data/filter.csv", settings1);
+        // read preamp gain file!!
+        ReadPreamp("./data/preamp.csv", settings1);
+        // read FOAM gain file!!
+        ReadFOAM("./data/FOAM.csv", settings1);
+        // read gain offset for chs file!!
+        ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1);// only TestBed for now
+        // read threshold offset for chs file!!
+        ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1);// only TestBed for now
+        // read threshold values for chs file
+        ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
+        // read system temperature for chs file!!
+        if (settings1->NOISE_CHANNEL_MODE!=0) {
+            ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
+        }
+
+        // Load in detector_specific noise if requested
+        if(settings1->NOISE==1){
+            cout <<"Reading in situ PA noise for this station and configuration from file: " <<endl;
+            char the_rayleigh_filename[500];
+            sprintf(
+                the_rayleigh_filename, "./data/noise/sigmavsfreq_PA_config_%d.csv",
+                settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+            cout << the_rayleigh_filename << endl;
+            ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
+        }
+
+        // read total elec. chain response file!!
+        cout << "start read elect chain" << endl;
+        if (settings1 -> CUSTOM_ELECTRONICS == 0) {
+            //read the standard ARA electronics
+            cout << "     Reading standard PA electronics response" << endl;
+            ReadElectChain("./data/gain/PA_Electronics_TotalGainPhase.csv", settings1);  // Here's the change I made
+        } else if (settings1 -> CUSTOM_ELECTRONICS == 1) {
+            //read a custom user defined electronics gain
+            cout << "     Reading custom PA electronics response" << endl;
+            ReadElectChain("./data/PA_custom_electronics.txt", settings1);
+        }
+        cout << "done read elect chain" << endl;
+
+        // if calpulser case
+        if (settings1 -> CALPULSER_ON > 0) {
+            // read TestBed Calpulser waveform measured (before pulser)
+            ReadCalPulserWF("./data/CalPulserWF.txt", settings1);
+            // But warn the use if we have this set AND we're simulating more than one station
+            if (params.number_of_stations != 1){
+                cout<<"Warning: You're simulating calpulser events for an array of stations. ";
+                cout<<"You may receive unexpected results. "<<endl;
+                cout<<"    settings1->CALPULSER_ON:   "<<settings1->CALPULSER_ON<<endl;
+                cout<<"    params.number_of_stations: "<<params.number_of_stations<<endl;
+            }
+        }
+
+    } // if mode == 5
+
+    /////////////////////////////////////////////////////////////////////////////   
 
     // add additional depth if it's on
     AddAdditional_Depth(settings1);
@@ -4182,7 +4487,7 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
         }
 
 	if(!(numCommas==3)){
-		sprintf(errorMessage, "Trigger formation file does not have expected columns: Channel No., trigger delay, in trigger, active delay\n");
+		sprintf(errorMessage, "Trigger formation file does not have expected columns: Channel, cable-delay, masked-ant, delay-enable\n");
                 cout << "The trigger formation filename is: " << filename << endl;
                 throw std::runtime_error(errorMessage);
 	}
@@ -5423,12 +5728,12 @@ void Detector::PrepareVectorsInstalled(int importedStation) {
 }
 
 
-void Detector::SetupInstalledStations(Settings *settings1) {
+void Detector::SetupInstalledStations(Settings *settings1=nullptr) {
 
     // This variable needs to include testbed!
     // So if you are trying to say "we have installed TB, A1, A2",
     // then number_of_installed_stations = 3
-    int number_of_installed_stations = 6;
+    int number_of_installed_stations = 7;
 
     InstalledStations.resize(number_of_installed_stations);
 
@@ -5491,87 +5796,88 @@ void Detector::SetupInstalledStations(Settings *settings1) {
 
     if (InstalledStations.size() > 1) { // Station 1 
         
-	if(settings1-> DETECTOR_STATION_ARAROOT==1){ //Build A1 as an ICRR
-	
-		// Make string 0
-        	Antennas.push_back(5); Antennas.push_back(9);
-        	Antennas.push_back(1); Antennas.push_back(13);
-        	InstalledStations[1].VHChannel.push_back(Antennas); 
-        	Antennas.clear();
+        if(settings1-> DETECTOR_STATION_ARAROOT==1){ //Build A1 as an ICRR
+
+		        // Make string 0
+        	  Antennas.push_back(5); Antennas.push_back(9);
+        	  Antennas.push_back(1); Antennas.push_back(13);
+        	  InstalledStations[1].VHChannel.push_back(Antennas); 
+        	  Antennas.clear();
+
+        	  // Make string 1
+        	  Antennas.push_back(6); Antennas.push_back(10);
+        	  Antennas.push_back(2); Antennas.push_back(14);
+        	  InstalledStations[1].VHChannel.push_back(Antennas); 
+        	  Antennas.clear();
+
+        	  // Make string 2
+        	  Antennas.push_back(7); Antennas.push_back(11);
+        	  Antennas.push_back(3); Antennas.push_back(15);
+        	  InstalledStations[1].VHChannel.push_back(Antennas); 
+        	  Antennas.clear();
+
+        	  // Make string 3
+        	  Antennas.push_back(4); Antennas.push_back(8);
+        	  Antennas.push_back(0); Antennas.push_back(12);
+        	  InstalledStations[1].VHChannel.push_back(Antennas); 
+        	  Antennas.clear();
+
+        	  InstalledStations[1].nStrings = InstalledStations[1].VHChannel.size();
+
+        	  // Make surface antennas
+        	  InstalledStations[1].surfaceChannels.push_back(17);
+        	  InstalledStations[1].surfaceChannels.push_back(18);
+        	  InstalledStations[1].surfaceChannels.push_back(19);
+        	  InstalledStations[1].surfaceChannels.push_back(20);
+
+        	  InstalledStations[1].nSurfaces = InstalledStations[1].surfaceChannels.size();
+
+        	  InstalledStations[1].nChannels = 20;
+        	  InstalledStations[1].nChannelsVH = 16;
+
+    	 }
+
+	     else{ //Otherwise always build A1 as an ATRI
         
-        	// Make string 1
-        	Antennas.push_back(6); Antennas.push_back(10);
-        	Antennas.push_back(2); Antennas.push_back(14);
-        	InstalledStations[1].VHChannel.push_back(Antennas); 
-        	Antennas.clear();
-        
-        	// Make string 2
-        	Antennas.push_back(7); Antennas.push_back(11);
-        	Antennas.push_back(3); Antennas.push_back(15);
-        	InstalledStations[1].VHChannel.push_back(Antennas); 
-        	Antennas.clear();
 
-        	// Make string 3
-        	Antennas.push_back(4); Antennas.push_back(8);
-        	Antennas.push_back(0); Antennas.push_back(12);
-        	InstalledStations[1].VHChannel.push_back(Antennas); 
-        	Antennas.clear();
+		       // Make string 0
+        	 Antennas.push_back(5); Antennas.push_back(13);
+        	 Antennas.push_back(1); Antennas.push_back(9);
+        	 InstalledStations[1].VHChannel.push_back(Antennas); 
+        	 Antennas.clear();
 
-        	InstalledStations[1].nStrings = InstalledStations[1].VHChannel.size();
+        	 // Make string 1
+        	 Antennas.push_back(6); Antennas.push_back(14);
+        	 Antennas.push_back(2); Antennas.push_back(10);
+        	 InstalledStations[1].VHChannel.push_back(Antennas); 
+        	 Antennas.clear();
 
-        	// Make surface antennas
-        	InstalledStations[1].surfaceChannels.push_back(17);
-        	InstalledStations[1].surfaceChannels.push_back(18);
-        	InstalledStations[1].surfaceChannels.push_back(19);
-        	InstalledStations[1].surfaceChannels.push_back(20);
+        	 // Make string 2
+        	 Antennas.push_back(7); Antennas.push_back(15);
+        	 Antennas.push_back(3); Antennas.push_back(11);
+        	 InstalledStations[1].VHChannel.push_back(Antennas); 
+        	 Antennas.clear(); 
 
-        	InstalledStations[1].nSurfaces = InstalledStations[1].surfaceChannels.size();
+        	 // Make string 3
+        	 Antennas.push_back(4); Antennas.push_back(12);
+        	 Antennas.push_back(0); Antennas.push_back(8);
+        	 InstalledStations[1].VHChannel.push_back(Antennas); 
+        	 Antennas.clear();
 
-        	InstalledStations[1].nChannels = 20;
-        	InstalledStations[1].nChannelsVH = 16;
+        	 InstalledStations[1].nStrings = InstalledStations[1].VHChannel.size();
 
-    	}
-	
-	else{ //Otherwise always build A1 as an ATRI
+        	 // Make surface antennas
+        	 InstalledStations[1].surfaceChannels.push_back(16);
+        	 InstalledStations[1].surfaceChannels.push_back(17);
+        	 InstalledStations[1].surfaceChannels.push_back(18);
+        	 InstalledStations[1].surfaceChannels.push_back(19);
 
-		// Make string 0
-        	Antennas.push_back(5); Antennas.push_back(13);
-        	Antennas.push_back(1); Antennas.push_back(9);
-        	InstalledStations[1].VHChannel.push_back(Antennas); 
-        	Antennas.clear();
+        	 InstalledStations[1].nSurfaces = InstalledStations[1].surfaceChannels.size();
 
-        	// Make string 1
-        	Antennas.push_back(6); Antennas.push_back(14);
-        	Antennas.push_back(2); Antennas.push_back(10);
-        	InstalledStations[1].VHChannel.push_back(Antennas); 
-        	Antennas.clear();
+        	 InstalledStations[1].nChannels = 20;
+        	 InstalledStations[1].nChannelsVH = 16;
 
-        	// Make string 2
-        	Antennas.push_back(7); Antennas.push_back(15);
-        	Antennas.push_back(3); Antennas.push_back(11);
-        	InstalledStations[1].VHChannel.push_back(Antennas); 
-        	Antennas.clear();
-        
-        	// Make string 3
-        	Antennas.push_back(4); Antennas.push_back(12);
-        	Antennas.push_back(0); Antennas.push_back(8);
-        	InstalledStations[1].VHChannel.push_back(Antennas); 
-        	Antennas.clear();
-
-        	InstalledStations[1].nStrings = InstalledStations[1].VHChannel.size();
-
-        	// Make surface antennas
-        	InstalledStations[1].surfaceChannels.push_back(16);
-        	InstalledStations[1].surfaceChannels.push_back(17);
-        	InstalledStations[1].surfaceChannels.push_back(18);
-        	InstalledStations[1].surfaceChannels.push_back(19);
-
-        	InstalledStations[1].nSurfaces = InstalledStations[1].surfaceChannels.size();
-
-        	InstalledStations[1].nChannels = 20;
-        	InstalledStations[1].nChannelsVH = 16;
-
-	}
+	     }
 
     }
 
@@ -5724,6 +6030,90 @@ void Detector::SetupInstalledStations(Settings *settings1) {
         InstalledStations[5].nChannels = 16;
         InstalledStations[5].nChannelsVH = 16;
     }
+
+    if (InstalledStations.size() > 6) { // Phased Array
+        
+        // Make Phased Array
+        // Antennas.push_back(109); // PAHpol at Z=-184.8
+        // Antennas.push_back(108); // PAHpol at Z=-182.8
+        // Antennas.push_back(107); // PAVpol at Z=-180.8
+        // Antennas.push_back(106); // PAVpol at Z=-178.8
+        // Antennas.push_back(104); // PAVpol at Z=-176.7
+        // Antennas.push_back(103); // PAVpol at Z=-175.7
+        // Antennas.push_back(102); // PAVpol at Z=-174.7
+        // Antennas.push_back(101); // PAVpol at Z=-173.7
+        // Antennas.push_back(100); // PAVpol at Z=-172.7
+        Antennas.push_back(9); // PAHpol at Z=-184.8
+        Antennas.push_back(8); // PAHpol at Z=-182.8
+        Antennas.push_back(7); // PAVpol at Z=-180.8
+        Antennas.push_back(6); // PAVpol at Z=-178.8
+        Antennas.push_back(4); // PAVpol at Z=-176.7
+        Antennas.push_back(3); // PAVpol at Z=-175.7
+        Antennas.push_back(2); // PAVpol at Z=-174.7
+        Antennas.push_back(1); // PAVpol at Z=-173.7
+        Antennas.push_back(0); // PAVpol at Z=-172.7
+        InstalledStations[6].VHChannel.push_back(Antennas); 
+        Antennas.clear();
+
+        if (settings1->DETECTOR_STATION==1) {
+            // No A5 Antennas on the PA DAQ 
+
+            InstalledStations[6].nChannels = 9;
+            InstalledStations[6].nChannelsVH = 9;
+
+        }
+        else if (settings1->DETECTOR_STATION==2) {
+            // ARA05 DAQ off, not connected to PA, only split A5 channel connected
+            // Note that numbering of VPol channels is different here from DETECTOR=4
+            //   since this is the PA DAQ
+
+            // Make string 3s
+            Antennas.push_back(5);// Antennas.push_back(x);
+            // Antennas.push_back(11);// Antennas.push_back(x);
+            InstalledStations[6].VHChannel.push_back(Antennas); 
+            Antennas.clear();
+
+            InstalledStations[6].nChannels = 10;
+            InstalledStations[6].nChannelsVH = 10;
+        }
+        else if (settings1->DETECTOR_STATION==3) {
+            // ARA05 DAQ off, only 7 vpols available
+            // Note that numbering of VPol channels is different here from DETECTOR=4 
+            //   since this is the PA DAQ
+            
+            // Make string 1
+            Antennas.push_back(12);// Antennas.push_back(x);
+            Antennas.push_back(13);// Antennas.push_back(x);
+            InstalledStations[6].VHChannel.push_back(Antennas); 
+            Antennas.clear();
+
+            // Make string 2
+            Antennas.push_back(10);// Antennas.push_back(x);
+            // Antennas.push_back(x);// Antennas.push_back(x);
+            InstalledStations[6].VHChannel.push_back(Antennas); 
+            Antennas.clear();
+            
+            // Make string 3
+            Antennas.push_back(5);// Antennas.push_back(x);
+            Antennas.push_back(11);// Antennas.push_back(x);
+            InstalledStations[6].VHChannel.push_back(Antennas); 
+            Antennas.clear();
+
+            // Make string 4
+            Antennas.push_back(14);// Antennas.push_back(x);
+            Antennas.push_back(15);// Antennas.push_back(x);
+            InstalledStations[6].VHChannel.push_back(Antennas); 
+            Antennas.clear();
+
+            InstalledStations[6].nChannels = 16;
+            InstalledStations[6].nChannelsVH = 16;
+        }
+
+        InstalledStations[6].nStrings = InstalledStations[6].VHChannel.size();
+
+        // A5 has no surface stations
+        InstalledStations[6].nSurfaces = InstalledStations[6].surfaceChannels.size();
+    } // end phased array
 
 }
     
@@ -5882,6 +6272,35 @@ int Detector::GetChannelfromStringAntenna ( int stationNum, int stringnum, int a
 
 
     }
+    // for Phased Array detector modes
+    else if (settings1->DETECTOR==5) {
+        int stationId=6;
+        //      cout << settings1->DETECTOR << endl;
+        //      int stationId=stationNum;
+        // cout<<int(InstalledStations.size())<<" "<<int(InstalledStations[stationId].VHChannel.size())<<" "<<int(InstalledStations[stationId].VHChannel[stringnum].size())<<endl;
+        if (stationId < int(InstalledStations.size())){
+            if (stringnum < int(InstalledStations[stationId].VHChannel.size())){
+                if (antennanum < int(InstalledStations[stationId].VHChannel[stringnum].size())){
+                    ChannelNum = InstalledStations[stationId].VHChannel[stringnum][antennanum];
+                    return ChannelNum+1;
+                }
+                else {
+                    cerr << "Invalid request for station channel map: antenna number - 5" << endl;
+                    //cerr << stationId << " : " << stringnum << " : " << antennanum << endl;
+                    return -1;
+                }
+            }
+            else {
+                cerr << "Invalid request for station channel map: string number" << endl;
+                return -1;
+            }
+        }
+        else {
+            cerr << "Invalid request for station channel map: station number" << endl;
+            cout << stationNum << " : " <<  int(InstalledStations.size()) << endl;
+            return -1;
+        }
+    }
     // if only ideal stations are in use and also installed ARA1a (use ARA1a ch mapping for now)
     else {
       if (stringnum < int(InstalledStations[1].VHChannel.size())){
@@ -5957,6 +6376,21 @@ void Detector::GetSSAfromChannel(int stationID, int channelNum, int * antennaNum
             cerr << "No string/antenna matches the channel number" << endl;
         }
 
+    } else if (settings1 -> DETECTOR == 5) {
+        stationID=6; // Force the funciton to use phased array and not the provided stationID
+
+        for (int i = 0; i < int(InstalledStations[stationID].VHChannel.size()); i++) {
+            for (int j = 0; j < int(InstalledStations[stationID].VHChannel[i].size()); j++) {
+                if (channelNum == InstalledStations[stationID].VHChannel[i][j]) {
+                    * stringNum = i;
+                    * antennaNum = j;
+                }
+            }
+        }
+
+        if ( * stringNum == -1) {
+            cerr << "No string/antenna matches the channel number" << endl;
+        }
     }
     // if only ideal stations are in use and also installed ARA1a (use ARA1a ch mapping for now)
     else {
@@ -6130,7 +6564,7 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
 
     //    int stationNum = settings1->DETECTOR_STATION;
     int StationID_AraRoot = settings1->DETECTOR_STATION_ARAROOT;
-
+    
     if (StationID == 0) params.TestBed_BH_Mean_delay = 0.;
     //cout<<"No of chs in station "<<stationNum<<" : "<<InstalledStations[stationNum].nChannels+1<<endl;
     
@@ -6146,7 +6580,7 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
         int antennaNum, stringNum;
         //GetSSAfromChannel(stationNum, chan, &antennaNum, &stringNum);
         GetSSAfromChannel(StationID, chan, &antennaNum, &stringNum, settings1);
-	
+
         if (araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].polType != AraAntPol::kSurface){
 
             stations[StationIndex].strings[stringNum].antennas[antennaNum].SetX(stations[StationIndex].GetX()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[0]);
@@ -6358,6 +6792,3 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
 Detector::~Detector() {
   //cout<<"Destruct class Detector"<<endl;
 }
-
-
-

@@ -232,6 +232,12 @@ outputdir="outputs"; // directory where outputs go
     ONLY_PASSED_EVENTS = 0;
     NNU_PASSED = 0;
 
+    //Defining source for INTERACTION_MODE == 5.
+    SOURCE_LATITUDE = -89.97953; //Latitude of SpiceCore (from 2023 survey data)
+
+    SOURCE_LONGITUDE = -100.78595; //Longitude of SpiceCore (from 2023 survey data)
+
+    SOURCE_DEPTH = -1000.0; //Default depth of 1000 meters below ice surface.    
 
 
     SHOWER_MODE = 2; // EM (0) or HAD (1) shower in t-domain signal. or either one which is bigger (3) or both EM and HAD (2)  default : 2, both EM and HAD showers
@@ -292,12 +298,16 @@ outputdir="outputs"; // directory where outputs go
     ARBITRARY_EVENT_ATTENUATION = 1.0;
     PICK_ABOVE_HEIGHT = 3000;
 
-    EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: read in event mode, 2: write out event mode (no simulation)
+    EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: event mode
     //    EVENT_NUM = 10;//read in event number in EVENT_GENERATION_MODE=1, no more than 100 events
     ANTENNA_MODE=0; //default: 0 - old antenna model information
     APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
 
     CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.csv"
+    
+    CLOCK_ANGLE=0; //Default: 0 -- Angle of polarization "on the clock".  Angle of zero is pure thetaPol, whereas 90º is pure phiPol.
+
+
 
 
     /*
@@ -693,6 +703,19 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "CUSTOM_ELECTRONICS"){
               	   CUSTOM_ELECTRONICS = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
+          else if (label == "CLOCK_ANGLE"){
+               CLOCK_ANGLE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          //Adding source easting, northing, and depth for INTERACTION_MODE=5.
+          else if (label == "SOURCE_LATITUDE"){
+              SOURCE_LATITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          else if (label == "SOURCE_LONGITUDE"){
+              SOURCE_LONGITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          else if (label == "SOURCE_DEPTH"){
+               SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
 
 
 
@@ -858,6 +881,21 @@ int Settings::CheckCompatibilitiesSettings() {
         num_err++;
     }
 
+    if (TRIG_SCAN_MODE==5 && ( DETECTOR!=5 ) ){
+        cerr<<"TRIG_SCAN_MODE=5 only compatible for Phased Array (DETECTOR= 5)"<<endl;
+        num_err++;
+    }
+
+    if ( DETECTOR==5 && TRIG_SCAN_MODE!=5){
+        cout<<"Warning: PA trigger only checked on its own if TRIG_SCAN_MODE=5 (for DETECTOR = 5)"<<endl;
+        // cerr<<"PA trigger only checked if TRIG_SCAN_MODE=5 (for DETECTOR = 5)"<<endl;
+        // num_err++;
+    }
+
+    if ( DETECTOR==5 && ( DETECTOR_STATION<1 || DETECTOR_STATION>3 ) ) {
+        cerr<<"DETECTOR_STATION must be 1,2,3 for PA Station (DETECTOR = 5) "<<endl;
+        num_err++;
+    }
 
 
     // check modes which will only work for actual installed TestBed case
@@ -970,7 +1008,7 @@ int Settings::CheckCompatibilitiesSettings() {
     }
     */
 
-    // This is for installed stations
+    // Verify valid DETECTOR_STATION_LIVETIME_CONFIG values for Installed A1-A5 stations
     if (DETECTOR == 4 ) {
       if (ARAUTIL_EXISTS == false){
 	    cerr << "DETECTOR=4 only works with an installation of AraRoot" << endl;
@@ -989,13 +1027,12 @@ int Settings::CheckCompatibilitiesSettings() {
 	        num_err++;
 	    }
         if(DETECTOR_STATION_LIVETIME_CONFIG>-1){
-	    if((int)DETECTOR_STATION==1){
+	        if((int)DETECTOR_STATION==1){
                 if(DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1){
                     cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only seven expected configurations for A1"<<endl;
                     num_err++;
                 }
             }
-	
             else if((int)DETECTOR_STATION==2){
                 if(DETECTOR_STATION_LIVETIME_CONFIG>6 || DETECTOR_STATION_LIVETIME_CONFIG<1){
                     cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only six expected configurations for A2"<<endl;
@@ -1008,17 +1045,49 @@ int Settings::CheckCompatibilitiesSettings() {
                     num_err++;
                 }
             }
-	
-	
+            else if((int)DETECTOR_STATION==4){
+                if(DETECTOR_STATION_LIVETIME_CONFIG>4 || DETECTOR_STATION_LIVETIME_CONFIG<1){
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only four expected configurations for A3"<<endl;
+                    num_err++;
+                }
+            }
+            else if((int)DETECTOR_STATION==5){
+                if(DETECTOR_STATION_LIVETIME_CONFIG>2 || DETECTOR_STATION_LIVETIME_CONFIG<1){
+                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only two expected configurations for A3"<<endl;
+                    num_err++;
+                }
+            }
             else{
                 cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but DETECTOR_STATION is "<<DETECTOR_STATION<<endl;
-                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is only valid for A2 and A3 "<<endl;
+                cerr<<" Unfamiliar DETECTOR_STATION value"<<endl;
                 num_err++;
             }
         }
 		
       }
     }
+
+    // Verify valid DETECTOR_STATION_LIVETIME_CONFIG values for Installed PA
+    if ( (int)DETECTOR == 5 ){
+
+	    cerr << "DETECTOR is set to 5" << endl; 
+
+        // Phased Array mode (DETECTOR=5) uses DETECTOR_STATION for DAQ configurations
+	    if (DETECTOR_STATION < 1 || DETECTOR_STATION > 3) {
+	        cerr << "DETECTOR_STATION is not set to a valid station number" << endl;
+	        num_err++;
+	    }
+
+        if ( DETECTOR_STATION_LIVETIME_CONFIG > -1 ) {
+            if ( DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1 ) {
+                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to ";
+                cerr<<DETECTOR_STATION_LIVETIME_CONFIG;
+                cerr<<" but there are only five expected configurations for the PA"<<endl;
+                num_err++;
+            } 
+        }
+
+    } // end if DETECTOR==5
 
    //Check that DETECTOR_STATION=0 is only used with DETECTOR=3
    if (DETECTOR_STATION==0 && DETECTOR!=3){
