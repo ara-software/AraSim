@@ -1817,6 +1817,14 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 		cout <<"    Trigger formation file does not exist for this station"<<endl;
                 cout<<"     Reading standard trigger formation values"<<endl;
                 ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
+  }
+	
+  //for A1 ICRR/ATRI differentiation
+	if (settings1->DETECTOR_STATION_ARAROOT==1){
+		cout << "\n A1 is being simulated as an ICRR" << endl;
+	}
+	else if (settings1->DETECTOR_STATION_ARAROOT==100){
+		cout << "\n A1 is being simulated as an ATRI" << endl;
 	}
 
     } // if mode == 4
@@ -5788,42 +5796,88 @@ void Detector::SetupInstalledStations(Settings *settings1=nullptr) {
 
     if (InstalledStations.size() > 1) { // Station 1 
         
-        // Make string 0
-        Antennas.push_back(5); Antennas.push_back(9);
-        Antennas.push_back(1); Antennas.push_back(13);
-        InstalledStations[1].VHChannel.push_back(Antennas); 
-        Antennas.clear();
+        if(settings1-> DETECTOR_STATION_ARAROOT==1){ //Build A1 as an ICRR
+
+		        // Make string 0
+        	  Antennas.push_back(5); Antennas.push_back(9);
+        	  Antennas.push_back(1); Antennas.push_back(13);
+        	  InstalledStations[1].VHChannel.push_back(Antennas); 
+        	  Antennas.clear();
+
+        	  // Make string 1
+        	  Antennas.push_back(6); Antennas.push_back(10);
+        	  Antennas.push_back(2); Antennas.push_back(14);
+        	  InstalledStations[1].VHChannel.push_back(Antennas); 
+        	  Antennas.clear();
+
+        	  // Make string 2
+        	  Antennas.push_back(7); Antennas.push_back(11);
+        	  Antennas.push_back(3); Antennas.push_back(15);
+        	  InstalledStations[1].VHChannel.push_back(Antennas); 
+        	  Antennas.clear();
+
+        	  // Make string 3
+        	  Antennas.push_back(4); Antennas.push_back(8);
+        	  Antennas.push_back(0); Antennas.push_back(12);
+        	  InstalledStations[1].VHChannel.push_back(Antennas); 
+        	  Antennas.clear();
+
+        	  InstalledStations[1].nStrings = InstalledStations[1].VHChannel.size();
+
+        	  // Make surface antennas
+        	  InstalledStations[1].surfaceChannels.push_back(17);
+        	  InstalledStations[1].surfaceChannels.push_back(18);
+        	  InstalledStations[1].surfaceChannels.push_back(19);
+        	  InstalledStations[1].surfaceChannels.push_back(20);
+
+        	  InstalledStations[1].nSurfaces = InstalledStations[1].surfaceChannels.size();
+
+        	  InstalledStations[1].nChannels = 20;
+        	  InstalledStations[1].nChannelsVH = 16;
+
+    	 }
+
+	     else{ //Otherwise always build A1 as an ATRI
         
-        // Make string 1
-        Antennas.push_back(6); Antennas.push_back(10);
-        Antennas.push_back(2); Antennas.push_back(14);
-        InstalledStations[1].VHChannel.push_back(Antennas); 
-        Antennas.clear();
-        
-        // Make string 2
-        Antennas.push_back(7); Antennas.push_back(11);
-        Antennas.push_back(3); Antennas.push_back(15);
-        InstalledStations[1].VHChannel.push_back(Antennas); 
-        Antennas.clear();
 
-        // Make string 3
-        Antennas.push_back(4); Antennas.push_back(8);
-        Antennas.push_back(0); Antennas.push_back(12);
-        InstalledStations[1].VHChannel.push_back(Antennas); 
-        Antennas.clear();
+		       // Make string 0
+        	 Antennas.push_back(5); Antennas.push_back(13);
+        	 Antennas.push_back(1); Antennas.push_back(9);
+        	 InstalledStations[1].VHChannel.push_back(Antennas); 
+        	 Antennas.clear();
 
-        InstalledStations[1].nStrings = InstalledStations[1].VHChannel.size();
+        	 // Make string 1
+        	 Antennas.push_back(6); Antennas.push_back(14);
+        	 Antennas.push_back(2); Antennas.push_back(10);
+        	 InstalledStations[1].VHChannel.push_back(Antennas); 
+        	 Antennas.clear();
 
-        // Make surface antennas
-        InstalledStations[1].surfaceChannels.push_back(17);
-        InstalledStations[1].surfaceChannels.push_back(18);
-        InstalledStations[1].surfaceChannels.push_back(19);
-        InstalledStations[1].surfaceChannels.push_back(20);
+        	 // Make string 2
+        	 Antennas.push_back(7); Antennas.push_back(15);
+        	 Antennas.push_back(3); Antennas.push_back(11);
+        	 InstalledStations[1].VHChannel.push_back(Antennas); 
+        	 Antennas.clear(); 
 
-        InstalledStations[1].nSurfaces = InstalledStations[1].surfaceChannels.size();
+        	 // Make string 3
+        	 Antennas.push_back(4); Antennas.push_back(12);
+        	 Antennas.push_back(0); Antennas.push_back(8);
+        	 InstalledStations[1].VHChannel.push_back(Antennas); 
+        	 Antennas.clear();
 
-        InstalledStations[1].nChannels = 20;
-        InstalledStations[1].nChannelsVH = 16;
+        	 InstalledStations[1].nStrings = InstalledStations[1].VHChannel.size();
+
+        	 // Make surface antennas
+        	 InstalledStations[1].surfaceChannels.push_back(16);
+        	 InstalledStations[1].surfaceChannels.push_back(17);
+        	 InstalledStations[1].surfaceChannels.push_back(18);
+        	 InstalledStations[1].surfaceChannels.push_back(19);
+
+        	 InstalledStations[1].nSurfaces = InstalledStations[1].surfaceChannels.size();
+
+        	 InstalledStations[1].nChannels = 20;
+        	 InstalledStations[1].nChannelsVH = 16;
+
+	     }
 
     }
 
@@ -6509,7 +6563,8 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
     AraGeomTool *araGeom = new AraGeomTool();
 
     //    int stationNum = settings1->DETECTOR_STATION;
-
+    int StationID_AraRoot = settings1->DETECTOR_STATION_ARAROOT;
+    
     if (StationID == 0) params.TestBed_BH_Mean_delay = 0.;
     //cout<<"No of chs in station "<<stationNum<<" : "<<InstalledStations[stationNum].nChannels+1<<endl;
     
@@ -6526,12 +6581,12 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
         //GetSSAfromChannel(stationNum, chan, &antennaNum, &stringNum);
         GetSSAfromChannel(StationID, chan, &antennaNum, &stringNum, settings1);
 
-        if (araGeom->getStationInfo(StationID)->fAntInfo[antId].polType != AraAntPol::kSurface){
+        if (araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].polType != AraAntPol::kSurface){
 
-            stations[StationIndex].strings[stringNum].antennas[antennaNum].SetX(stations[StationIndex].GetX()+araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[0]);
-            stations[StationIndex].strings[stringNum].antennas[antennaNum].SetY(stations[StationIndex].GetY()+araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[1]);
+            stations[StationIndex].strings[stringNum].antennas[antennaNum].SetX(stations[StationIndex].GetX()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[0]);
+            stations[StationIndex].strings[stringNum].antennas[antennaNum].SetY(stations[StationIndex].GetY()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[1]);
             //stations[stationNum].strings[stringNum].antennas[antennaNum].SetZ(araGeom->fStationInfo[stationNum].fAntInfo[chan-1].antLocation[2]-double(settings1->DEPTH_CHANGE));
-            stations[StationIndex].strings[stringNum].antennas[antennaNum].SetZ(araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[2]);
+            stations[StationIndex].strings[stringNum].antennas[antennaNum].SetZ(araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[2]);
             
             /*
              cout <<
@@ -6545,10 +6600,10 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
              endl;
              */
             
-            stations[StationIndex].strings[stringNum].antennas[antennaNum].type = int(araGeom->getStationInfo(StationID)->fAntInfo[antId].polType);  //set polarization to match the deployed information
+            stations[StationIndex].strings[stringNum].antennas[antennaNum].type = int(araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].polType);  //set polarization to match the deployed information
             
-            stations[StationIndex].strings[stringNum].SetX(stations[StationIndex].GetX()+araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[0]);
-            stations[StationIndex].strings[stringNum].SetY(stations[StationIndex].GetY()+araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[1]);
+            stations[StationIndex].strings[stringNum].SetX(stations[StationIndex].GetX()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[0]);
+            stations[StationIndex].strings[stringNum].SetY(stations[StationIndex].GetY()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[1]);
             
             
             
@@ -6577,10 +6632,10 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
 
 
             // put DAQ channel type 
-            if (araGeom->getStationInfo(StationID)->fAntInfo[antId].daqChanType == AraDaqChanType::kDisconeChan) { // BH chs
+            if (araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].daqChanType == AraDaqChanType::kDisconeChan) { // BH chs
                 stations[StationIndex].strings[stringNum].antennas[antennaNum].DAQchan = 0;
             }
-            else if (araGeom->getStationInfo(StationID)->fAntInfo[antId].daqChanType == AraDaqChanType::kBatwingChan) { // not BH chs
+            else if (araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].daqChanType == AraDaqChanType::kBatwingChan) { // not BH chs
                 stations[StationIndex].strings[stringNum].antennas[antennaNum].DAQchan = 1;
             }
 
@@ -6593,7 +6648,7 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
             if (StationID == 0) {
 
                 //cout<<"TestBed ch"<<chan-1<<" delay : "<<araGeom->fStationInfo[stationNum].fAntInfo[chan-1].debugTotalCableDelay<<endl;
-                params.TestBed_Ch_delay[chan] = araGeom->getStationInfo(StationID)->fAntInfo[antId].debugTotalCableDelay;
+                params.TestBed_Ch_delay[chan] = araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].debugTotalCableDelay;
                 params.TestBed_Ch_delay_bin[chan] = params.TestBed_Ch_delay[chan]/(settings1->TIMESTEP * 1.e9); // change TIMESTEP s to ns
                 //cout<<"TestBed ch"<<chan-1<<" delay bin : "<<params.TestBed_Ch_delay_bin[chan-1]<<endl;
                 if (chan<8) params.TestBed_BH_Mean_delay += params.TestBed_Ch_delay[chan];
@@ -6616,11 +6671,11 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
         }// end polarization (antenna type) selection
         else {
             
-            int antPolNum = araGeom->getStationInfo(StationID)->fAntInfo[antId].antPolNum;
+            int antPolNum = araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antPolNum;
             // set surface antenna postions
             
-            stations[StationIndex].surfaces[antPolNum].SetX( stations[StationIndex].GetX()+araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[0]);
-            stations[StationIndex].surfaces[antPolNum].SetY( stations[StationIndex].GetY()+araGeom->getStationInfo(StationID)->fAntInfo[antId].antLocation[1]);
+            stations[StationIndex].surfaces[antPolNum].SetX( stations[StationIndex].GetX()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[0]);
+            stations[StationIndex].surfaces[antPolNum].SetY( stations[StationIndex].GetY()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[1]);
             
             //                cout << "Surface: " << chan << " : " << stationNum << " : " << stringNum << " : " << antennaNum << " : " << stations[stationNum].surfaces[antPolNum].GetX() << " : " << stations[stationNum].surfaces[antPolNum].GetY() << " : " << stations[stationNum].surfaces[antPolNum].GetZ() << " : " << stations[stationNum].surfaces[antPolNum].type << endl;
             
