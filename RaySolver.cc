@@ -1388,6 +1388,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 
 
                             //testvector.resize(sol_no+1);
+                            RayStep.resize(sol_no+1);
 
                             // construct
                             pathStore_vector<RayTrace::minimalRayPosition> pathsave_test;
