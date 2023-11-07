@@ -412,7 +412,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 {
                     // if posnu is selected inside the antarctic ice
                     // cout << i << " : " << j << " : " << k << endl;
-                    if ( (i==0) && (j==3) && (k==1) ) cout << i << " : " << j << " : " << k << endl;
 
                     RayStep.clear();    // remove previous values
                     raysolver->Solve_Ray(event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], icemodel, ray_output, settings1, RayStep);   // solve ray between source and antenna
@@ -433,17 +432,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             //! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
                             stations[i].strings[j].antennas[k].ray_step.resize(ray_sol_cnt + 1);    ///< resize by number of ray solutions
                             stations[i].strings[j].antennas[k].ray_step[ray_sol_cnt].resize(2); ///< resize by xz values
-                            if ( (i==0) && (j==3) && (k==1) ){
-                                cout<<endl<<"Solution "<<ray_sol_cnt<<"  Ray step size "<<RayStep[ray_sol_cnt][0].size()<<" "<<RayStep[ray_sol_cnt][1].size()<<endl;
-                                cout<<"Ant: "<<detector->stations[i].strings[j].antennas[k].GetX()<<", "<<detector->stations[i].strings[j].antennas[k].GetY()<<", "<<detector->stations[i].strings[j].antennas[k].GetZ()<<endl;
-                                cout<<"Posnu: "<<event->Nu_Interaction[0].posnu.GetX()<<", "<<event->Nu_Interaction[0].posnu.GetY()<<", "<<event->Nu_Interaction[0].posnu.GetZ()<<endl;
-                                cout<<"Dirnu: "<<event->Nu_Interaction[0].cone_axis.GetX()<<", "<<event->Nu_Interaction[0].cone_axis.GetY()<<", "<<event->Nu_Interaction[0].cone_axis.GetZ()<<endl;
-                                cout<<"RayStep[ray_sol_cnt].size() "<<RayStep[ray_sol_cnt].size()<<endl;
-                                cout<<"stations[i].strings[j].antennas[k].ray_step[ray_sol_cnt].size() "<<stations[i].strings[j].antennas[k].ray_step[ray_sol_cnt].size()<<endl;
-                                for (int element=0; element<ray_output.size(); element++) cout<<ray_output[element][ray_sol_cnt]<<"  ";
-                                cout<<endl<<"0th z element "<<RayStep[ray_sol_cnt][1][0]<<endl;
-                                cout<<"0th x element "<<RayStep[ray_sol_cnt][0][0]<<endl;
-                            }
                             for (int steps = 0; steps < (int) RayStep[ray_sol_cnt][0].size(); steps++)
                             {
                                 ///< push back each ray step coordinates

@@ -1388,6 +1388,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 
 
                             //testvector.resize(sol_no+1);
+                            RayStep.resize(sol_no+1);
 
                             // construct
                             pathStore_vector<RayTrace::minimalRayPosition> pathsave_test;
@@ -1446,8 +1447,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 		// so probably it doesn't matter
 		if (outputs.size()>0){
 			int num_solutions = outputs[0].size();
-            for (int sol=0; sol<num_solutions; sol++) cout<<"Solution "<<sol<<" path len is "<<outputs[0][sol]<<" with ray step size "<<RayStep[sol][0].size()<<", 0th element is "<<RayStep[sol][0][0]<<endl;
-			if(num_solutions>1){
+            if(num_solutions>1){
 				// we only need to do something in the case of two solutions
 				double path_len_first_sol = outputs[0][0];
 				double path_len_second_sol = outputs[0][1];
