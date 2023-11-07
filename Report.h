@@ -69,9 +69,9 @@ class Antenna_r {
         //vector <Position> n_H;  // normalized vector for H pol
         //vector <Position> n_V;  // normalized vector for V pol
 
-	//! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
-	//! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
-	vector < vector < vector <double> > > ray_step;
+        //! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
+        //! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
+        vector < vector < vector <double> > > ray_step;
 
         // below freq domain simulation output
         vector < vector <double> > vmmhz;  // signal V/m/MHz for each freq bin
@@ -108,6 +108,7 @@ class Antenna_r {
         vector < vector <double> > Ay;
         vector < vector <double> > Az;
         vector < vector <double> > V;   // volt signal with all factors applied (as far as we can) (from fft)
+        vector < vector <double> > V_noise;   // volt signal with all factors applied (as far as we can) (from fft)
 
         vector <int> SignalExt; // flag if actual signal exist for the ray trace solution
 
@@ -120,8 +121,8 @@ class Antenna_r {
         vector <double> PeakV;  // peak voltage in time domain
         vector <int> Rank;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
 
-	//	vector <double> PeakV_fromFullWaveform; // peak voltage in time domain taken from full waveform, including noise at the time of signal insertion
-	//	vector <int> Rank_fromFullWaveform;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
+        //	vector <double> PeakV_fromFullWaveform; // peak voltage in time domain taken from full waveform, including noise at the time of signal insertion
+        //	vector <int> Rank_fromFullWaveform;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
 
         int Trig_Pass; // 0 if not passed the trigger, 1 if passed the trigger
         //vector <int> Trig_Pass; // 0 if not passed the trigger, 1 if passed the trigger
@@ -131,7 +132,7 @@ class Antenna_r {
         int SingleChannelTriggers; // how many bins passed the threshold in this channel (should be equal to size of SCT_threshold_pass).
         vector <double> SCT_threshold_pass; // for each bin that passed, what was the threshold value at which it passed (for TRIG_SCAN_MODE only). 
 	
-	long TotalBinsScannedPerChannel;
+        long TotalBinsScannedPerChannel;
 	
         vector <int> TooMuch_Tdelay;    // 0 is PeakV is located inside the DATA_BIN_SIZE array,  1 is when PeakV is located outside the DATA_BIN_SIZE so that we can't correctly check if it is triggered or not
 
@@ -180,6 +181,31 @@ class Station_r {
         ClassDef(Station_r,3);
 };
 
+class CircularBuffer{
+
+    public:
+        int i;
+        int mode; // in mode 1 only check number of values above threshold, in >1 check what the best value is too
+        int changelog;// if the best value changed, this is returned by add and fill
+        int N;// size of buffer
+        double *buffer;
+        double pthresh; // general run's pthresh
+        double best_value;// best value
+        double temp_value;// copy of best value, updates each call (so we can zero it when sorting)
+        double epsilon; // best value needs to be this close to current last value
+        double last_value; // value leaving buffer
+        int addToNPass; // number of values above pthresh inside buffer
+
+        CircularBuffer(int size, double threshold, int scan_mode) : N(size), pthresh(threshold), mode(scan_mode) {i=0; best_value=0; temp_value=0; last_value=0; addToNPass=0; epsilon=1e-6; buffer=new double[N]; for(int j=0;j<N;j++) buffer[j]=0;}
+        ~CircularBuffer(){ delete [] buffer; }
+
+        int add(double input_value);
+        int fill(double input_value);
+        double findBestValue();
+        int numBinsToOldestTrigger();
+        int numBinsToLatestTrigger();
+
+};
 
 
 class Report {
@@ -237,10 +263,20 @@ class Report {
     
 //    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger);
     
-    void Connect_Interaction_Detector_V2 (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt);    
+    void Connect_Interaction_Detector_V2 (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, int evt);     
     void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings, int which_solution,
         vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
         );
+    
+    // Phased Array functions    
+    double getAverageSNR(const vector<double> & mysignal);
+    double getAverageSNR2(int raysolnum, int station_i, int trig_analysis_mode);
+    bool isTrigger(double eff);
+    void checkPATrigger(
+        int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,
+        Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
+        int trig_search_init, int max_total_bin);    
+    double interpolate(double *xdata,double *ydata, double xi, int numData);
     
 #ifdef ARA_UTIL_EXISTS
 
@@ -251,12 +287,11 @@ class Report {
     void ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger);
 
     
-        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
+        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
         
-        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin_1, int signalbin_2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
+        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin_1, int signalbin_2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
 
-        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin_0, int signalbin_1, int signalbin_2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
-
+        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin_0, int signalbin_1, int signalbin_2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
 
         void Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *detector, int ID, int StationIndex); // we need to apply a gain offset to the basic waveforms.
 
@@ -370,6 +405,20 @@ class Report {
 
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
 
+        // Phased Array variables
+        double viewAngle;
+        double my_averageSNR;
+        double my_receive_ang;
+        double my_raysol;
+        double pa_force_trigger_snr = 3.5; 
+            // SNR that should always trigger, 
+            // used (eg) when triggering on noise only events
+        double ara_noise_rms = 0.04; 
+            // KAH and ARB are unsure where this number comes from. 
+            // KAH belives she took this from the person who simulated PA before her 
+        double pa_snr_cap = 25.;
+            // KAH thinks this is the max SNR she had efficiencies calculated for
+            // KAH says the PA has a SNR cap of 25 in practice and may have a link showing this.
 
         ClassDef(Report,1);
 
