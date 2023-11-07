@@ -231,6 +231,12 @@ outputdir="outputs"; // directory where outputs go
     ONLY_PASSED_EVENTS = 0;
     NNU_PASSED = 0;
 
+    //Defining source for INTERACTION_MODE == 5.
+    SOURCE_LATITUDE = -89.97953; //Latitude of SpiceCore (from 2023 survey data)
+
+    SOURCE_LONGITUDE = -100.78595; //Longitude of SpiceCore (from 2023 survey data)
+
+    SOURCE_DEPTH = -1000.0; //Default depth of 1000 meters below ice surface.    
 
 
     SHOWER_MODE = 2; // EM (0) or HAD (1) shower in t-domain signal. or either one which is bigger (3) or both EM and HAD (2)  default : 2, both EM and HAD showers
@@ -291,12 +297,16 @@ outputdir="outputs"; // directory where outputs go
     ARBITRARY_EVENT_ATTENUATION = 1.0;
     PICK_ABOVE_HEIGHT = 3000;
 
-    EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: read in event mode, 2: write out event mode (no simulation)
+    EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: event mode
     //    EVENT_NUM = 10;//read in event number in EVENT_GENERATION_MODE=1, no more than 100 events
     ANTENNA_MODE=0; //default: 0 - old antenna model information
     APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
 
     CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.csv"
+    
+    CLOCK_ANGLE=0; //Default: 0 -- Angle of polarization "on the clock".  Angle of zero is pure thetaPol, whereas 90º is pure phiPol.
+
+
 
 
     /*
@@ -687,6 +697,19 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "CUSTOM_ELECTRONICS"){
               	   CUSTOM_ELECTRONICS = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
+          else if (label == "CLOCK_ANGLE"){
+               CLOCK_ANGLE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          //Adding source easting, northing, and depth for INTERACTION_MODE=5.
+          else if (label == "SOURCE_LATITUDE"){
+              SOURCE_LATITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          else if (label == "SOURCE_LONGITUDE"){
+              SOURCE_LONGITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          else if (label == "SOURCE_DEPTH"){
+               SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
 
 
 
