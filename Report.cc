@@ -9,6 +9,7 @@
 #include "Tools.h"
 #include "Trigger.h"
 #include "Constants.h"
+#include "Birefringence.hh"
 
 #include <iostream>
 #include <sstream>
@@ -937,7 +938,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 						for ( int bire_ray_cnt = 0; bire_ray_cnt < max_bire_ray_cnt; bire_ray_cnt++ )
 						{
 		
-							max_bire_ray_cnt = birefringence->Reflected_ray_remove_bire(ray_output[3][ray_sol_cnt]); //change to 1 if the ray solution is reflected
+							max_bire_ray_cnt = birefringence->Reflected_ray_remove_bire(ray_output[3][ray_sol_cnt], max_bire_ray_cnt); //change to 1 if the ray solution is reflected
 
                                                 	for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]; n++)
                                                 	{
@@ -1494,7 +1495,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             for ( int bire_ray_cnt = 0; bire_ray_cnt < max_bire_ray_cnt; bire_ray_cnt++ )
 					    {
 
-						max_bire_ray_cnt = birefringence->Reflected_ray_remove_bire(ray_output[3][ray_sol_cnt]); //change to 1 if the ray solution is reflected					
+						max_bire_ray_cnt = birefringence->Reflected_ray_remove_bire(ray_output[3][ray_sol_cnt], max_bire_ray_cnt); //change to 1 if the ray solution is reflected					
                                             	for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]; n++)
                                             	{
                                                 	//cout << n << endl;
@@ -1580,19 +1581,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 	}
                                             	}                                            
                                             
-                                            	//Defining polarization at the source (using launch_vector) and having it propagate.
-                                            
-                                            	double psi = TMath::DegToRad()*settings1->CLOCK_ANGLE;
-                                            	double theta = acos(launch_vector[2]); //launch_vector is a unit vector
-                                            	double phi = atan2(launch_vector[1],launch_vector[0]);
-                                                                             
-                                            	//Justin's method
-                                            	double newPol_vectorX = -cos(psi)*cos(theta)*cos(phi) + sin(psi)*sin(phi);
-                                            	double newPol_vectorY = -cos(psi)*cos(theta)*sin(phi) - sin(psi)*cos(phi);
-                                            	double newPol_vectorZ = cos(psi)*sin(theta);
-                                            
-                                            	Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);                                            
-
                                             	icemodel->GetFresnel(ray_output[1][ray_sol_cnt],    // launch_angle
                                                 	ray_output[2][ray_sol_cnt], // rec_angle
                                                 	ray_output[3][ray_sol_cnt], // reflect_angle
