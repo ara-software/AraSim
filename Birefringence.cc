@@ -792,7 +792,7 @@ void Birefringence::Two_rays_interference(double *V_forfft, double *V_forfft_bir
      }
 }
 
-int Birefringence::Reflected_ray_remove_bire(double refl_angle, int max_bire_ray_cnt){ //default back to one ray if our ray solution is reflected
+int Birefringence::Reflected_ray_remove_bire(double refl_angle){ //default back to one ray if our ray solution is reflected
 
 	if (refl_angle < PI/2.) {   // the ray is reflected at the surface
 		return 1;

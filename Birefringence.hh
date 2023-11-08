@@ -50,7 +50,7 @@ class Birefringence {
 	void Time_shift_and_power_split(double *V_forfft, int size, int T_shift, double split_factor, int bire_ray_cnt, int max_bire_ray_cnt, Settings *settings1);
 	void Store_V_forfft_for_interference(double *V_forfft, double *V_forfft_bire, int size);
 	void Two_rays_interference(double *V_forfft, double *V_forfft_bire_1, double *V_forfft_bire_2, int size, int max_bire_ray_cnt, Settings *settings1);
-	int Reflected_ray_remove_bire(double refl_angle, int max_bire_ray_cnt);
+	int Reflected_ray_remove_bire(double refl_angle);
 
 	//Destructor
 	~Birefringence();
