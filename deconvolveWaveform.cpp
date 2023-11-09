@@ -192,7 +192,7 @@ int main(int argc, char **argv)
             // if (i != 0) {
             //     continue;
             // }
-            cout << "aaaaa" << endl;
+            // cout << "aaaaa" << endl;
             TGraph *gr = usefulAtriEvPtr->getGraphFromRFChan(i);  //This is where the code breaks for real data.
             
             //Save initial and final time for truncating the padded arrays before output.
@@ -204,15 +204,15 @@ int main(int argc, char **argv)
             
             //Pad waveform to a factor of two. - JCF 9/27/2023
             
-            cout << "gr->GetN() = "<< gr->GetN() << endl;
+            // cout << "gr->GetN() = "<< gr->GetN() << endl;
             if (gr->GetN() < settings1->NFOUR/2) {
                 gr = FFTtools::padWaveToLength(gr, settings1->NFOUR/2);
             }
-            //Padding 
-            cout << "bbbbbb" << endl;
+            // Padding 
+            // cout << "bbbbbb" << endl;
             int waveform_bin = gr->GetN();
-            cout << "ccccccc" << endl;
-            cout << "gr->GetN() = "<< gr->GetN() << endl;
+            // cout << "ccccccc" << endl;
+            // cout << "gr->GetN() = "<< gr->GetN() << endl;
             //Setting NFOUR to 4096 for testing on SpiceCore events
             // settings1->NFOUR = 8192;
             
@@ -221,20 +221,20 @@ int main(int argc, char **argv)
             double freq_lastbin;
             double time[waveform_bin];
             double voltage[waveform_bin];
-            cout << "ddddddd" << endl;
+            // cout << "ddddddd" << endl;
             double volts_forint[settings1->NFOUR / 2];
             double T_forint[settings1->NFOUR / 2];
-            cout << "waveform_bin = "<< waveform_bin << endl;
-            cout << "settings1->TIMESTP = " << settings1->TIMESTEP << endl;
+            // cout << "waveform_bin = "<< waveform_bin << endl;
+            // cout << "settings1->TIMESTP = " << settings1->TIMESTEP << endl;
             // double volts_forint[ int(waveform_bin /(settings1->TIMESTEP*1e9))];
-            cout << "eeeeeee" << endl;
+            // cout << "eeeeeee" << endl;
             // double T_forint[ int(waveform_bin /(settings1->TIMESTEP*1e9))]; 
-            cout << "fffffff" << endl;
+            // cout << "fffffff" << endl;
             
             //TODO: This init_T isn't dynamic to the imported data.  Should make have it defined based on the input waveform.
             double init_T = settings1->TIMESTEP *-1.e9 *((double) settings1->NFOUR / 4);    // locate zero time at the middle and give random time shift
             // double init_T = ((double) waveform_bin / 2); 
-            cout << "ggggggg" << endl;
+            // cout << "ggggggg" << endl;
            
 
 
@@ -249,7 +249,7 @@ int main(int argc, char **argv)
             }            
             delete gr;
             
-            cout << "init_T = " << init_T << endl;
+            // cout << "init_T = " << init_T << endl;
             // cout << "Changing init_T based on input waveform." << endl;
             // init_T = time[0];
             // cout << "init_T = " << init_T << endl;
@@ -260,12 +260,12 @@ int main(int argc, char **argv)
                 T_forint[m] = -512 + m*0.5;   // in ns
             }
             
-            std::cout << std::endl; 
-            cout << "T_forint (after definition) = " << endl;
-            for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
-              std::cout << T_forint[i] << ", ";
-            }
-            std::cout << std::endl; 
+            // std::cout << std::endl; 
+            // cout << "T_forint (after definition) = " << endl;
+            // for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
+            //   std::cout << T_forint[i] << ", ";
+            // }
+            // std::cout << std::endl; 
             
             //Importing the cutoff time between spicecore peaks
             double cutoffTimeChannel;
@@ -290,25 +290,25 @@ int main(int argc, char **argv)
             //     }
             // }               
 
-            std::cout << std::endl; 
-            cout << "T_forint (aaaaaaaaa) = " << endl;
-            for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
-              std::cout << T_forint[i] << ", ";
-            }
-            std::cout << std::endl; 
+            // std::cout << std::endl; 
+            // cout << "T_forint (aaaaaaaaa) = " << endl;
+            // for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
+            //   std::cout << T_forint[i] << ", ";
+            // }
+            // std::cout << std::endl; 
             
-            cout << "CutoffTime = " << cutoffTimeChannel << endl;
-            cout << "Initial waveform v(t) length = " << waveform_bin << endl;
-            cout << "Initial waveform v(t) = " << endl;
-            for (int i = 0; i < sizeof(voltage) / sizeof(voltage[0]); i++) {
-              std::cout << voltage[i] << ", ";
-            }            
-            std::cout << std::endl; 
-            cout << "T_forint (bbbbbbbbbb) = " << endl;
-            for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
-              std::cout << T_forint[i] << ", ";
-            }
-            std::cout << std::endl; 
+            // cout << "CutoffTime = " << cutoffTimeChannel << endl;
+            // cout << "Initial waveform v(t) length = " << waveform_bin << endl;
+            // cout << "Initial waveform v(t) = " << endl;
+            // for (int i = 0; i < sizeof(voltage) / sizeof(voltage[0]); i++) {
+            //   std::cout << voltage[i] << ", ";
+            // }            
+            // std::cout << std::endl; 
+            // cout << "T_forint (bbbbbbbbbb) = " << endl;
+            // for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
+            //   std::cout << T_forint[i] << ", ";
+            // }
+            // std::cout << std::endl; 
             //Add step that centers the waveform about zero in time, for purposes of the fourier transform.  Then save this shift and reapply it to restore the time-domain information after the InvFFT.
 //             cout << "*****************************************************************" << endl;
 //             cout << "time[0] = " << time[0] << endl;
@@ -334,12 +334,12 @@ int main(int argc, char **argv)
                 antenna_phi = reco_arrivalPhis[vertexRecoElectToRFChan[i]]*180/PI;
             }
             
-            std::cout << std::endl; 
-            cout << "T_forint (cccccccccc) = " << endl;
-            for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
-              std::cout << T_forint[i] << ", ";
-            }
-            std::cout << std::endl; 
+            // std::cout << std::endl; 
+            // cout << "T_forint (cccccccccc) = " << endl;
+            // for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
+            //   std::cout << T_forint[i] << ", ";
+            // }
+            // std::cout << std::endl; 
             cout << "antenna_theta = " << antenna_theta << endl;
             cout << "antenna_phi = " << antenna_phi << endl;
             
@@ -368,12 +368,12 @@ int main(int argc, char **argv)
             double newPol_vectorY = cos(antenna_phi*PI/180);
             double newPol_vectorZ = -1/sin(antenna_theta*PI/180);
             
-            std::cout << std::endl; 
-            cout << "T_forint (ddddddddd) = " << endl;
-            for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
-              std::cout << T_forint[i] << ", ";
-            }
-            std::cout << std::endl;             
+            // std::cout << std::endl; 
+            // cout << "T_forint (ddddddddd) = " << endl;
+            // for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
+            //   std::cout << T_forint[i] << ", ";
+            // }
+            // std::cout << std::endl;             
             //Testing using the actual polarization vector
             // double psi = argv[3]*PI/180;
             // double newPol_vectorX = -cos(psi)*cos(antenna_theta*PI/180)*cos(antenna_phi*PI/180) + sin(psi)*sin(antenna_phi*PI/180);
@@ -400,31 +400,31 @@ int main(int argc, char **argv)
             
             double dT_forfft = time[1] - time[0];
             
-            cout << "dT_forfft = " << dT_forfft << endl;
+            // cout << "dT_forfft = " << dT_forfft << endl;
         
             int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
             
             int Nnew = 1;
-            cout << "Ntmp = " << Ntmp << endl;
-            cout << "Nnew = " << Nnew << endl;            
+            // cout << "Ntmp = " << Ntmp << endl;
+            // cout << "Nnew = " << Nnew << endl;            
             while (Ntmp > 1)
             {
                 Ntmp = Ntmp / 2;
                 Nnew = Nnew *2;
-                cout << "Ntmp = " << Ntmp << endl;
-                cout << "Nnew = " << Nnew << endl;                
+                // cout << "Ntmp = " << Ntmp << endl;
+                // cout << "Nnew = " << Nnew << endl;                
             }
             Nnew = Nnew * settings1->NFOUR / 2;
             // Nnew = Nnew * waveform_bin;
-            cout << "Ntmp = " << Ntmp << endl;
-            cout << "Nnew = " << Nnew << endl;                
+            // cout << "Ntmp = " << Ntmp << endl;
+            // cout << "Nnew = " << Nnew << endl;                
 
-            std::cout << std::endl; 
-            cout << "T_forint (eeeeeeee) = " << endl;
-            for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
-              std::cout << T_forint[i] << ", ";
-            }
-            std::cout << std::endl;             
+            // std::cout << std::endl; 
+            // cout << "T_forint (eeeeeeee) = " << endl;
+            // for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
+            //   std::cout << T_forint[i] << ", ";
+            // }
+            // std::cout << std::endl;             
             
             //Stealing antenna and electronic response steps from AraSim, but applying the inverse functions instead.
             
@@ -599,6 +599,8 @@ int main(int argc, char **argv)
                 //Trying user inputted butterworth filter
                 double freqMin = atof(argv[7])*1e6;
                 double freqMax = atof(argv[8])*1e6;
+                cout << "freqMin = " << freqMin << endl;
+                cout << "freqMax = " << freqMax << endl;
   
                 
                 double weight = 1;  //TODO:  Make this dynamic for simulations and real data. - JCF 10/4/2023
