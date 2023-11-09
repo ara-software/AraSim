@@ -450,40 +450,40 @@ int main(int argc, char **argv)
                     V_forfft[n] = 0.;
 
             }
-            std::cout << std::endl; 
-            cout << "T_forint (ffffffffff) = " << endl;
-            for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
-              std::cout << T_forint[i] << ", ";
-            }
-            std::cout << std::endl;                  
-            // cout << "Before FFT V_forfft[230] = " << V_forfft[230] << endl;
-            // cout << "Before FFT V_forfft[231] = " << V_forfft[231] << endl;
-            // cout << "gain_ch_no = " << gain_ch_no << endl;
-            cout << "Before FFT V_forfft = " << endl;
-            for (int i = 0; i < sizeof(V_forfft) / sizeof(V_forfft[0]); i++) {
-              std::cout << V_forfft[i] << ", ";
-            }
-            std::cout << std::endl;    
+//             std::cout << std::endl; 
+//             cout << "T_forint (ffffffffff) = " << endl;
+//             for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
+//               std::cout << T_forint[i] << ", ";
+//             }
+//             std::cout << std::endl;                  
+//             // cout << "Before FFT V_forfft[230] = " << V_forfft[230] << endl;
+//             // cout << "Before FFT V_forfft[231] = " << V_forfft[231] << endl;
+//             // cout << "gain_ch_no = " << gain_ch_no << endl;
+//             cout << "Before FFT V_forfft = " << endl;
+//             for (int i = 0; i < sizeof(V_forfft) / sizeof(V_forfft[0]); i++) {
+//               std::cout << V_forfft[i] << ", ";
+//             }
+//             std::cout << std::endl;    
             
-            cout << "Before FFT T_forfft = " << endl;
-            for (int i = 0; i < sizeof(T_forfft) / sizeof(T_forfft[0]); i++) {
-              std::cout << T_forfft[i] << ", ";
-            }
-            std::cout << std::endl;
+//             cout << "Before FFT T_forfft = " << endl;
+//             for (int i = 0; i < sizeof(T_forfft) / sizeof(T_forfft[0]); i++) {
+//               std::cout << T_forfft[i] << ", ";
+//             }
+//             std::cout << std::endl;
             
-            cout << "Before FFT time = " << endl;
-            for (int i = 0; i < sizeof(time) / sizeof(time[0]); i++) {
-              std::cout << time[i] << ", ";
-            }
-            std::cout << std::endl;             
+//             cout << "Before FFT time = " << endl;
+//             for (int i = 0; i < sizeof(time) / sizeof(time[0]); i++) {
+//               std::cout << time[i] << ", ";
+//             }
+//             std::cout << std::endl;             
             
             // get spectrum with zero padded WF
             Tools::realft(V_forfft, 1, Nnew); 
-            cout << "After FFT V_forfft = " << endl;
-            for (int i = 0; i < sizeof(V_forfft) / sizeof(V_forfft[0]); i++) {
-              std::cout << V_forfft[i] << ", ";
-            }
-            std::cout << std::endl;            
+            // cout << "After FFT V_forfft = " << endl;
+            // for (int i = 0; i < sizeof(V_forfft) / sizeof(V_forfft[0]); i++) {
+            //   std::cout << V_forfft[i] << ", ";
+            // }
+            // std::cout << std::endl;            
             
             // cout << "After FFT V_forfft[230] = " << V_forfft[230] << endl;
             // cout << "After FFT V_forfft[231] = " << V_forfft[231] << endl;                  
@@ -504,12 +504,12 @@ int main(int argc, char **argv)
             
             // cout << "freq_tmp = " << freq_tmp << endl;
             
-            std::cout << std::endl; 
-            cout << "T_forint (ggggggggg) = " << endl;
-            for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
-              std::cout << T_forint[i] << ", ";
-            }
-            std::cout << std::endl;      
+            // std::cout << std::endl; 
+            // cout << "T_forint (ggggggggg) = " << endl;
+            // for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
+            //   std::cout << T_forint[i] << ", ";
+            // }
+            // std::cout << std::endl;      
             
             
             
@@ -520,14 +520,14 @@ int main(int argc, char **argv)
                 //    continue;
                 // }                
                 // cout << "**************************************************************" << endl;
-                cout << "n = " << n << endl;
-                cout << "aaa T_forint[0] = " << T_forint[0] << endl;
+                // cout << "n = " << n << endl;
+                // cout << "aaa T_forint[0] = " << T_forint[0] << endl;
                 freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
-                cout << "bbb T_forint[0] = " << T_forint[0] << endl;
+                // cout << "bbb T_forint[0] = " << T_forint[0] << endl;
                 heff_lastbin = report->GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
                         antenna_theta, antenna_phi, pol_ant),
                     freq_tmp, nice);                
-                cout << "ccc T_forint[0] = " << T_forint[0] << endl;
+                // cout << "ccc T_forint[0] = " << T_forint[0] << endl;
                 // cout << "freq_tmp*1e-6 = " << freq_tmp*1e-6 << endl;
                 // cout << "gain_ch_no = " << gain_ch_no << endl;
                 // cout << "detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, pol_ant) = " << detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, pol_ant) << endl;
@@ -538,7 +538,7 @@ int main(int argc, char **argv)
                 heff = report->GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
                         antenna_theta, antenna_phi, pol_ant),
                     freq_tmp, nice);
-                cout << "ddd T_forint[0] = " << T_forint[0] << endl;
+                // cout << "ddd T_forint[0] = " << T_forint[0] << endl;
                 // cout << "heff = " << heff << endl;
 
                 // cout << "n = " << n << endl;
@@ -557,7 +557,7 @@ int main(int argc, char **argv)
                 {
                     report->InvertElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
                 }
-                cout << "eee T_forint[0] = " << T_forint[0] << endl;
+                // cout << "eee T_forint[0] = " << T_forint[0] << endl;
                 if (n > 0)
                 {
                 
@@ -576,7 +576,7 @@ int main(int argc, char **argv)
                     // cout << "Pol_factor = " << Pol_factor << endl;
 
                 }
-                cout << "fff T_forint[0] = " << T_forint[0] << endl;
+                // cout << "fff T_forint[0] = " << T_forint[0] << endl;
                 
                 //Quick and dirty hack to filter out frequencies above 850 MHz and below 100 MHz.
                 // cout << "******************************************" << endl;
@@ -588,19 +588,24 @@ int main(int argc, char **argv)
                     V_forfft[2*n] = 0;
                     V_forfft[2*n+1] = 0;
                 }
-                cout << "ggg T_forint[0] = " << T_forint[0] << endl;
+                // cout << "ggg T_forint[0] = " << T_forint[0] << endl;
                 // cout << "Before Butterworth V_forfft = " << endl;
                 // cout << "V_forfft[2 *n] = "<< V_forfft[2 *n] << endl;
                 // cout << "V_forfft[2 *n + 1] = "<< V_forfft[2 *n + 1] << endl;                     
                 //Apply homemade butterworth filter of the fourth order
-                double freqMin = 150*1e6;
-                double freqMax = 300*1e6;
+                // double freqMin = 150*1e6;
+                // double freqMax = 300*1e6;
+                
+                //Trying user inputted butterworth filter
+                double freqMin = atof(argv[7])*1e6;
+                double freqMax = atof(argv[8])*1e6;
+  
                 
                 double weight = 1;  //TODO:  Make this dynamic for simulations and real data. - JCF 10/4/2023
                 int order = 8;
                 weight /= sqrt(1 + TMath::Power(freqMin/freq_tmp, 4*order));
                 weight /= sqrt(1 + TMath::Power(freq_tmp/freqMax, 4*order));
-                cout << "hhh T_forint[0] = " << T_forint[0] << endl;
+                // cout << "hhh T_forint[0] = " << T_forint[0] << endl;
 //                 if (freq_tmp < freqMin) {
                         // weight /= sqrt(1 + TMath::Power(freqMin/freq_tmp, 4*order));
 //                 }
@@ -609,7 +614,7 @@ int main(int argc, char **argv)
 //                 }
                 V_forfft[2*n] *= weight;
                 V_forfft[2*n+1] *= weight; 
-                cout << "iii T_forint[0] = " << T_forint[0] << endl;
+                // cout << "iii T_forint[0] = " << T_forint[0] << endl;
                 //End Butterworth filter
                 // cout << "After Butterworth V_forfft = " << endl;
                 // cout << "V_forfft[2 *n] = "<< V_forfft[2 *n] << endl;
@@ -631,47 +636,47 @@ int main(int argc, char **argv)
                 // }
             }   // end for freq bin
             
-            std::cout << std::endl; 
-            cout << "T_forint (hhhhhhhhh) = " << endl;
-            for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
-              std::cout << T_forint[i] << ", ";
-            }
-            std::cout << std::endl;                  
+            // std::cout << std::endl; 
+            // cout << "T_forint (hhhhhhhhh) = " << endl;
+            // for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
+            //   std::cout << T_forint[i] << ", ";
+            // }
+            // std::cout << std::endl;                  
             // now get time domain waveform back by inv fft
             // cout << "Nnew = " << Nnew << endl;            
             // cout << "Before InvFFT V_forfft[230] = " << V_forfft[230] << endl;
             // cout << "Before InvFFT V_forfft[231] = " << V_forfft[231] << endl;
-            cout << "Before InvFFT V_forfft = " << endl;
-            for (int i = 0; i < sizeof(V_forfft) / sizeof(V_forfft[0]); i++) {
-              std::cout << V_forfft[i] << ", ";
-            }
-            std::cout << std::endl;
+            // cout << "Before InvFFT V_forfft = " << endl;
+            // for (int i = 0; i < sizeof(V_forfft) / sizeof(V_forfft[0]); i++) {
+            //   std::cout << V_forfft[i] << ", ";
+            // }
+            // std::cout << std::endl;
                
             
             Tools::realft(V_forfft, -1, Nnew);
-            cout << "V_forfft[230] = " << V_forfft[230] << endl;              
-            cout << "V_forfft[231] = " << V_forfft[231] << endl;
-            cout << "After InvFFT V_forfft = " << endl;
-            for (int i = 0; i < sizeof(V_forfft) / sizeof(V_forfft[0]); i++) {
-              std::cout << V_forfft[i] << ", ";
-            }
+            // cout << "V_forfft[230] = " << V_forfft[230] << endl;              
+            // cout << "V_forfft[231] = " << V_forfft[231] << endl;
+            // cout << "After InvFFT V_forfft = " << endl;
+            // for (int i = 0; i < sizeof(V_forfft) / sizeof(V_forfft[0]); i++) {
+            //   std::cout << V_forfft[i] << ", ";
+            // }
 
-            std::cout << std::endl;            
-            cout << "Nnew = " << Nnew << endl;
-            cout << "sizeof(T_forfft) = " << sizeof(T_forfft) << endl;
-            cout << "sizeof(V_forfft) = " << sizeof(V_forfft) << endl;
-            cout << "settings1->NFOUR / 2 = " << settings1->NFOUR / 2 << endl;
-            cout << "sizeof(T_forint) = " << sizeof(T_forint) << endl;
-            cout << "sizeof(volts_forint) = " << sizeof(volts_forint) << endl;
-            cout << "T_forfft = " << endl;
-            for (int i = 0; i < sizeof(T_forfft) / sizeof(T_forfft[0]); i++) {
-              std::cout << T_forfft[i] << ", ";
-            }
-            std::cout << std::endl; 
-            cout << "T_forint = " << endl;
-            for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
-              std::cout << T_forint[i] << ", ";
-            }
+            // std::cout << std::endl;            
+            // cout << "Nnew = " << Nnew << endl;
+            // cout << "sizeof(T_forfft) = " << sizeof(T_forfft) << endl;
+            // cout << "sizeof(V_forfft) = " << sizeof(V_forfft) << endl;
+            // cout << "settings1->NFOUR / 2 = " << settings1->NFOUR / 2 << endl;
+            // cout << "sizeof(T_forint) = " << sizeof(T_forint) << endl;
+            // cout << "sizeof(volts_forint) = " << sizeof(volts_forint) << endl;
+            // cout << "T_forfft = " << endl;
+            // for (int i = 0; i < sizeof(T_forfft) / sizeof(T_forfft[0]); i++) {
+            //   std::cout << T_forfft[i] << ", ";
+            // }
+            // std::cout << std::endl; 
+            // cout << "T_forint = " << endl;
+            // for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
+            //   std::cout << T_forint[i] << ", ";
+            // }
 //             std::cout << std::endl;
 //             cout << "volts_forint = " << endl;
 //             for (int i = 0; i < sizeof(volts_forint) / sizeof(volts_forint[0]); i++) {
@@ -690,11 +695,11 @@ int main(int argc, char **argv)
             }                 
             Tools::SincInterpolation(Nnew, T_forfft, V_forfft, settings1->NFOUR / 2, T_forint, volts_forint);
             // Tools::SincInterpolation(Nnew, T_forfft, V_forfft, waveform_bin, T_forint, volts_forint);                                                 
-            cout << "T_forint (after interpolation) = " << endl;
-            for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
-              std::cout << T_forint[i] << ", ";
-            }
-            std::cout << std::endl;
+            // cout << "T_forint (after interpolation) = " << endl;
+            // for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
+            //   std::cout << T_forint[i] << ", ";
+            // }
+            // std::cout << std::endl;
             
             //Restore time shift in time domain
             // T_forint += timeshift;
@@ -702,11 +707,11 @@ int main(int argc, char **argv)
             //   T_forint[i] += timeshift;
             // }            
             
-            cout << "volts_forint (after interpolation) = " << endl;
-            for (int i = 0; i < sizeof(volts_forint) / sizeof(volts_forint[0]); i++) {
-              std::cout << volts_forint[i] << ", ";
-            }
-            std::cout << std::endl;
+            // cout << "volts_forint (after interpolation) = " << endl;
+            // for (int i = 0; i < sizeof(volts_forint) / sizeof(volts_forint[0]); i++) {
+            //   std::cout << volts_forint[i] << ", ";
+            // }
+            // std::cout << std::endl;
             // cout << "volts_forint (normalized) = " << endl;
             // for (int i = 0; i < sizeof(volts_forint) / sizeof(volts_forint[0]); i++) {
             //   std::cout << volts_forint[i]*2/Nnew << ", ";
