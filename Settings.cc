@@ -1117,6 +1117,18 @@ int Settings::CheckCompatibilitiesSettings() {
     num_err++;
    }
 
+   //Compatibilities for birefringence
+   if (BIREFRINGENCE==1){
+	if(DETECTOR=!4){
+	   cerr << "BIREFRINGENCE=1 is only supported for individual stations" <<endl; 
+	}	
+	if (BIAXIAL<0 || BIAXIAL>1){
+	 cerr << "BIREFRINGENCE only supports BIAXIAL=0 (uniaxial) or BIAXIAL=1 (biaxial)" << endl;
+	}
+	if (RAY_TRACE_ICE_MODEL_PARAMS!=50){
+	 cerr << "BIREFRINGENCE=1 should only work with RAY_TRACE_ICE_MODEL_PARAMS=50" <<endl;	
+	}
+   }
 
     return num_err;
 
