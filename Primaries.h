@@ -295,7 +295,7 @@ Interaction (IceModel *antarctica, Detector *detector, Settings *settings1, Prim
   void FlattoEarth_AboveIce ( IceModel *antarctica, double X, double Y, double D, double height);
   void FlattoEarth_Near_Surface ( IceModel *antarctica, double X, double Y, double D, double max_depth);
   void FlattoEarth_Spherical ( IceModel *antarctica, double X, double Y, double Z);
-
+    
   void PosNuFromAntennaCenter (Detector *detector); ///< re-calculate Neutrino position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
 
   void PickNear_Cylinder (IceModel *antarctica, Detector *detector, Settings *settings1);
@@ -313,6 +313,7 @@ Interaction (IceModel *antarctica, Detector *detector, Settings *settings1, Prim
     // end move from IceModel
   //
 
+  void PickExactGlobal(IceModel *antarctica, Detector *detector, Settings *settings1, double thisLat, double thisLong, double thisDepth);
 
   double pathlength_inice;
 
