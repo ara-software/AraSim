@@ -2419,7 +2419,6 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
             count++;
     }
     }
-
     double avgX = sumX/double(count);
     double avgY = sumY/double(count);
     double avgZ = sumZ/double(count);
