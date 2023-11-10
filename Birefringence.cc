@@ -3,17 +3,20 @@
 #include "Position.h"
 #include "Constants.h"
 #include "TVector3.h"
-#include "TGraph.h" 
+#include "TGraph.h"
 #include "Vector.h"
-#include "Birefringence.hh"
-
 #include <string>
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <stdio.h>
+#include <stdlib.h>
 
+using namespace std;
 
-Birefringence::Birefringence(Detector *detector, Settings *settings1) {
+#include "Birefringence.hh"
+
+Birefringence::Birefringence(Settings *settings1) {
 
 /*
  *	This birefringence model is based on AC paper: https://arxiv.org/pdf/2110.09015.pdf
@@ -25,7 +28,7 @@ Birefringence::Birefringence(Detector *detector, Settings *settings1) {
 	string sn2file="./data/birefringence/n2.txt";
 	string sn3file="./data/birefringence/n3.txt";
 
-	Read_Indicatrix_Par(sn1file, sn2file, sn3file, detector, settings1); //loading principal axes n1 (alpha in AC's paper), n2 (beta in AC's paper), n3 (gamma in AC's paper) and depths into nvec1, nvec2, nvec3, vdepths_n1, vdepths_n2, vdepths_n3
+	Read_Indicatrix_Par(sn1file, sn2file, sn3file, settings1); //loading principal axes n1 (alpha in AC's paper), n2 (beta in AC's paper), n3 (gamma in AC's paper) and depths into nvec1, nvec2, nvec3, vdepths_n1, vdepths_n2, vdepths_n3
  	
 	Smooth_Indicatrix_Par(); //smoothing values for principal axes nvec1, nvec2, nvec3
 }
@@ -410,7 +413,7 @@ double Birefringence::getDeltaN(int BIAXIAL, vector<double> nvec, TVector3 rhat,
 } // End of getDeltaN()
 
 
-void Birefringence::Read_Indicatrix_Par(string sn1file, string sn2file, string sn3file, Detector *detector, Settings *settings1){ //reads in data from n1file, n2file, n3file. These define the principal axes of the indicatrix
+void Birefringence::Read_Indicatrix_Par(string sn1file, string sn2file, string sn3file, Settings *settings1){ //reads in data from n1file, n2file, n3file. These define the principal axes of the indicatrix
 
 
 	int BIAXIAL = settings1->BIAXIAL; //BIAXIAL = 1 is the only allowed now (by settings inconsistencies) for modeling biaxial birefringence, but I'll leave the code and capability for uniaxial birefringence (BIAXIAL = 0) and isotropic (BIAXIAL = -1). -ASG 11/7/2023 

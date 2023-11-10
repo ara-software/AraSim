@@ -18,7 +18,7 @@ class Birefringence {
      public:
 	
 	//Constructor
-	Birefringence(Detector *detector, Settings *settings1);
+	Birefringence(Settings *settings1);
 
 	//Variables
 	vector<double> n1vec;
@@ -39,7 +39,7 @@ class Birefringence {
 	double angle_iceflow=(36.+ (46./60.) + (23./3600.) + 90.)/DEGRAD;
 
 	//Functions
-	void Read_Indicatrix_Par(string sn1file,string sn2file,string sn3file, Detector *detector, Settings *settings1 );
+	void Read_Indicatrix_Par(string sn1file,string sn2file,string sn3file, Settings *settings1 );
 	void Smooth_Indicatrix_Par();
 	double Time_Diff_TwoRays(vector <double> res, vector <double> zs, double refl_angle, Position interaction_vertex, Settings *settings1);
 	double getDeltaN(int BIAXIAL,vector<double> nvec,TVector3 rhat,double angle_iceflow, double n_e1, double n_e2,TVector3 &p_e1,TVector3 &p_e2);

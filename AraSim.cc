@@ -143,7 +143,7 @@ int main(int argc, char **argv) {   // read setup.txt file
     cout<<"end calling detector"<<endl;
     // Detector *detector=new Detector(settings1->DETECTOR); // builds antenna array, 0 for testbed
 
-    Birefringence *birefringence=new Birefringence(detector, settings1);
+    Birefringence *birefringence=new Birefringence(settings1);
 
     Trigger *trigger=new Trigger(detector, settings1); // builds the trigger  
     // Efficiencies *efficiencies=new Efficiencies(detector->getnRx(),outputdir); // keeps track of efficiencies at each stage of the simulation
