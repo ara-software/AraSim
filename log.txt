@@ -1865,3 +1865,12 @@ If settings->EVENT_GENERATION_MODE =
 *AraSim neutrino interaction vertex recorded in spherical coordinates where the origin is at Earth's center
 
 ==============================================================================
+
+2023/08/21 Alan Salcedo
+
+Modified AraSim to load A1 information from AraRoot in two different ways: considering A1 having an ICRR or an ATRI board.
+Added a new setting DETECTOR_STATION_ARAROOT which is used in functions involving AraRoot. 
+
+Full documentation of this work is available on https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2869
+
+==============================================================================
