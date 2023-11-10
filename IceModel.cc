@@ -1926,12 +1926,22 @@ void IceModel::GetMag (
         );
     }
     else {
-        mag = launch_index / rec_index ;
+        if (settings1->WAVE_TYPE==0) { // plane wave
+            mag = launch_index / rec_index ;
+        }
+        else if (settings1->WAVE_TYPE==1) { // spherical wave
+            mag = rec_index / launch_index ;
+        }   
     }
 
     // Gently catch and adjust for issues in calculation
     if ( (mag==0) or !( mag==mag ) ){ // If mag is 0 or nan, approximate
-        mag = launch_index / rec_index ;
+        if (settings1->WAVE_TYPE==0) { // plane wave
+            mag = launch_index / rec_index ;
+        }
+        else if (settings1->WAVE_TYPE==1) { // spherical wave
+            mag = rec_index / launch_index ;
+        } 
     }
     if ( mag > 2) mag=2; // Set a cap, inspired from NuRadioMC
 
