@@ -1884,6 +1884,7 @@ void IceModel::GetMag (
     double antshift,
     IceModel *icemodel, Settings *settings1
 ) { // Calculates magnification factor (aka focusing factor/correction)
+    // Reference: NuRadioMC paper, equation 19 (https://arxiv.org/abs/1906.01670)
   
     // Calculate (easy) variables needed
     double launch_index = GetN(posnu);
