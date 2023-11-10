@@ -1553,16 +1553,25 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             
                                             Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);                                            
 
-                                            icemodel->GetFresnel(ray_output[1][ray_sol_cnt],    // launch_angle
-                                                ray_output[2][ray_sol_cnt], // rec_angle
-                                                ray_output[3][ray_sol_cnt], // reflect_angle
+                                            icemodel->GetFresnel(
+                                                ray_output[1][ray_sol_cnt],
+                                                ray_output[2][ray_sol_cnt],
+                                                ray_output[3][ray_sol_cnt],
                                                 event->Nu_Interaction[0].posnu,
-                                                launch_vector,
-                                                receive_vector,
-                                                settings1,
-                                                fresnel,
-                                                mag,
-                                                Pol_vector);    // input src Pol and return Pol at trg
+                                                launch_vector, receive_vector,
+                                                settings1, fresnel, Pol_vector
+                                                );
+                                            icemodel->GetMag(
+                                                mag, 
+                                                ray_output[0][ray_sol_cnt], // ray path length
+                                                ray_output[1][ray_sol_cnt], // zenith angle of ray at launch
+                                                ray_output[2][ray_sol_cnt], // zenith angle of ray upon receipt
+                                                ray_sol_cnt,
+                                                event->Nu_Interaction[0].posnu, // Neutrino
+                                                detector->stations[0].strings[j].antennas[k], // Antenna
+                                                -0.01, // 1cm antenna shift, inspired from NuRadioMC
+                                                icemodel, settings1
+                                            );
                                             
                                             for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2; n++)
                                             {
