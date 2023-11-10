@@ -18,6 +18,7 @@
 
 #pragma link C++ class Event+;
 #pragma link C++ class Report+;
+#pragma link C++ class CircularBuffer+;
 #pragma link C++ class Antenna_r+;
 #pragma link C++ class Surface_antenna_r+;
 #pragma link C++ class String_r+;
