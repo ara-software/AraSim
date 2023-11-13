@@ -83,6 +83,46 @@ Trigger::Trigger(Detector *detector, Settings *settings1) {
 
     }
 
+    // Load in Phased Array Data
+    if (settings1->TRIG_SCAN_MODE==5){
+
+        cout << "Phased Array mode! Reading in data: " << endl;
+    
+        // Load Efficiency vs SNR curve: 
+        // From arxiv.1809.04573, Fig 15, Dashed Pink 0.8Hz/beam curve
+        ifstream infile;
+        infile.open("data/nuphase_trig_effc.txt",ios::in);
+        if(infile.fail()){ // checks to see if file opended
+            cerr << "   error, file could not be opened" << endl;
+        }
+        int num = 0;
+        while(!infile.eof()) { // reads file to end of *file*, not line
+            infile >> snr_PA[num]  // read first column number
+                   >> eff_PA[num]; // read second column number
+            ++num;
+        }
+        cout<<"   number of triggering efficiency data points: "<<num<<endl;
+        infile.close();
+
+        //load Angle vs SNR curve:
+        // KAH says this curve is created by converting Fig 13b from 
+        //   arxiv.1809.04573 into digitized, linear units but ARB has not 
+        //   been able to replicate this
+        infile.clear();
+        infile.open("data/nuphase_SNR_angle.txt",ios::in);
+        if(infile.fail()) { // checks to see if file opended
+            cerr << "   error, file could not be opened" << endl;
+        }
+        num = 0;
+        while(!infile.eof()) { // reads file to end of *file*, not line
+            infile >> angle_PA[num]   // read first column number
+                    >>  aSNR_PA[num];  // read second column number
+            ++num;
+        }
+        cout<<"   number of SNR vs angle data points: "<<num<<endl;
+        infile.close();
+
+    } // End if DETECTOR=5 (Phased Array sim)
 
 }
 

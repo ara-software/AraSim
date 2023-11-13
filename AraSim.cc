@@ -108,8 +108,13 @@ int main(int argc, char **argv) {   // read setup.txt file
         settings1->ReadEvtFile(evtfile);
         cout<<"Read "<< evtfile <<" file!"<<endl;
         cout << "EVID    NUFLAVORINT    NUBAR    PNU    CURRENTINT    IND_POSNU_R    IND_POSNU_THETA    IND_POSNU_PHI    IND_NNU_THETA    IND_NNU_PHI    ELAST" << endl;
-        for (int i = 0; i < settings1->NNU; i++){
-            cout << settings1->EVID[i] << "    " << settings1->NUFLAVORINT[i] << "    " << settings1->NUBAR[i] << "    " << settings1->PNU[i] << "    " << settings1->CURRENTINT[i] << "    " << settings1->IND_POSNU_R[i] << "    " << settings1->IND_POSNU_THETA[i] << "    " << settings1->IND_POSNU_PHI[i] << "    " << settings1->IND_NNU_THETA[i] << "    " << settings1->IND_NNU_PHI[i] << "    " << settings1->ELAST[i] << endl;
+        // for (int i = 0; i < settings1->NNU; i++){
+        //     cout << settings1->EVID[i] << "    " << settings1->NUFLAVORINT[i] << "    " << settings1->NUBAR[i] << "    " << settings1->PNU[i] << "    " << settings1->CURRENTINT[i] << "    " << settings1->IND_POSNU_R[i] << "    " << settings1->IND_POSNU_THETA[i] << "    " << settings1->IND_POSNU_PHI[i] << "    " << settings1->IND_NNU_THETA[i] << "    " << settings1->IND_NNU_PHI[i] << "    " << settings1->ELAST[i] << endl;
+        // }
+        if (settings1->NNU == 0){
+            // No events were read in from file, quit program
+            cout<<"No events found in provided file. Exiting simulation."<<endl;
+            return -1;
         }
     }
     // set gRandom as TRandom3 when settings1->RANDOM_MODE = 1
@@ -169,6 +174,8 @@ int main(int argc, char **argv) {   // read setup.txt file
     Report *report = new Report();
     cout<<"called Evt"<<endl;
 
+    // Build output files
+    ofstream event_file;
     TFile *AraFile;
     if (argc > 2) {
         AraFile=new TFile((outputdir+"/AraOut."+setupfile.substr(setupfile.find_last_of("/")+1)+".run"+run_no+".root").c_str(),"RECREATE","ara");
@@ -176,27 +183,38 @@ int main(int argc, char **argv) {   // read setup.txt file
     else {
         AraFile=new TFile((outputdir+"/AraOut.root").c_str(),"RECREATE","ara");
     }
-
     TTree *AraTree=new TTree("AraTree","AraTree");    // for single entry
     TTree *AraTree2=new TTree("AraTree2","AraTree2"); //for many entries
-    cout<<"assign AraFile, AraTrees"<<endl;
+    if (settings1->EVENT_GENERATION_MODE == 2){
+        // Create file to save event list to 
+        string output_file_name = (
+            outputdir+"/AraOut."+
+            setupfile.substr(setupfile.find_last_of("/")+1)+
+            ".run"+run_no+".txt");
+        event_file.open(output_file_name);
+    }
+    else{ 
 
-    AraTree->Branch("detector",&detector);
-    cout<<"branch detector"<<endl;
-    AraTree->Branch("icemodel",&icemodel);
-    cout<<"branch icemodel"<<endl;
-    AraTree->Branch("trigger",&trigger);
-    cout<<"branch trigger"<<endl;
-    AraTree->Branch("settings",&settings1);
-    cout<<"branch settings"<<endl;
-    AraTree->Branch("spectra",&spectra);
-    cout<<"branch spectra"<<endl;
-    AraTree2->Branch("event",&event);
-    cout<<"branch Evt"<<endl;
-    AraTree2->Branch("report",&report);
-    cout<<"branch report"<<endl;
+        // Create tree for simulation outputs
+        cout<<"assign AraFile, AraTrees"<<endl;
 
-    cout<<"finish tree assign"<<endl;
+        AraTree->Branch("detector",&detector);
+        cout<<"branch detector"<<endl;
+        AraTree->Branch("icemodel",&icemodel);
+        cout<<"branch icemodel"<<endl;
+        AraTree->Branch("trigger",&trigger);
+        cout<<"branch trigger"<<endl;
+        AraTree->Branch("settings",&settings1);
+        cout<<"branch settings"<<endl;
+        AraTree->Branch("spectra",&spectra);
+        cout<<"branch spectra"<<endl;
+        AraTree2->Branch("event",&event);
+        cout<<"branch Evt"<<endl;
+        AraTree2->Branch("report",&report);
+        cout<<"branch report"<<endl;
+
+        cout<<"finish tree assign"<<endl;
+    }
 
 
     RaySolver *raysolver = new RaySolver();
@@ -205,13 +223,12 @@ int main(int argc, char **argv) {   // read setup.txt file
     cout << "Make output file that is readable by AraRoot" << endl;
 
     #ifdef ARA_UTIL_EXISTS
-        UsefulIcrrStationEvent *theIcrrEvent =0;
-        UsefulAtriStationEvent *theAtriEvent =0;
-    
+    UsefulIcrrStationEvent *theIcrrEvent =0;
+    UsefulAtriStationEvent *theAtriEvent =0;
+    TTree *eventTree;
+    double weight = 0.;
+    if (settings1->EVENT_GENERATION_MODE != 2) {
 
-        TTree *eventTree;
-
-        double weight = 0.;
         eventTree = new TTree("eventTree","Tree of ARA Events");
         eventTree->Branch("UsefulIcrrStationEvent", &theIcrrEvent);
         eventTree->Branch("UsefulAtriStationEvent",&theAtriEvent);
@@ -243,6 +260,7 @@ int main(int argc, char **argv) {   // read setup.txt file
         eventTree3 = new TTree("eventTree3","Tree of Station 3 ARA Events");
         eventTree3->Branch("UsefulAtriStationEvent",&theAtriEventArray[3]);
         */
+    }
     #endif
 
 
@@ -385,9 +403,8 @@ int main(int argc, char **argv) {   // read setup.txt file
     int inu = 0;
     int Events_Thrown = 0;
     int Events_Passed = 0;
-    // for (int inu=0;inu<settings1->NNU;inu++) { // loop over neutrinos
+
     while (inu < nuLimit){
-        // cout << "inu: " << inu << endl; 
         check_station_DC = 0;
         check_station_DC = 0;
         if ( settings1->DEBUG_MODE_ON==0 ) {
@@ -396,7 +413,6 @@ int main(int argc, char **argv) {   // read setup.txt file
                 cout<<"Thrown "<<Events_Thrown<<endl;
         }
 
-        // event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1 );
         event = new Event ( settings1, spectra, primary1, icemodel, detector, signal, sec1, Events_Thrown );
         if(event->Nu_Interaction.size()<1){
             // If for some reason no interactions were placed into the event holder, continue.
@@ -409,9 +425,39 @@ int main(int argc, char **argv) {   // read setup.txt file
             // so this is just better generically.
             cout<<"Warning! The interaction vector is empty!"<<endl;
             cout<<"Continuing on to the next event."<<endl;
+            if (settings1->EVENT_GENERATION_MODE ==1){
+                // If reading in events from a list, make sure you move to next event 
+                Events_Thrown++;
+                inu++;
+            }
             continue;
         }
         event->inu_passed = -1;
+
+        if ( settings1->EVENT_GENERATION_MODE == 2 ){
+            // Write event lists to file, no simulation
+            for (int interaction_i=0; interaction_i<event->Nu_Interaction.size(); interaction_i++){
+                
+                event_file << inu << " "; // EVID    
+                event_file << event->nuflavorint << " "; // NUFLAVORINT       
+                event_file << event->nu_nubar << " "; // NUBAR       
+                event_file << event->pnu << " "; // PNU      
+                event_file << event->Nu_Interaction[interaction_i].currentint    << " "; // CURRENTINT       
+                event_file << event->Nu_Interaction[interaction_i].posnu.R()     << " "; // IND_POSNU_R      
+                event_file << event->Nu_Interaction[interaction_i].posnu.Theta() << " "; // IND_POSNU_THETA       
+                event_file << event->Nu_Interaction[interaction_i].posnu.Phi()   << " "; // IND_POSNU_PHI      
+                event_file << event->Nu_Interaction[interaction_i].nnu.Theta()   << " "; // IND_NNU_THETA      
+                event_file << event->Nu_Interaction[interaction_i].nnu.Phi()     << " "; // IND_NNU_PHI       
+                event_file << event->Nu_Interaction[interaction_i].elast_y       << endl; // ELAST
+
+                inu++;
+                Events_Thrown++;
+                event->delete_all();
+
+            } // end add event to file
+
+            continue; // Skip the simulation steps and move to next event
+        }
                 
         report = new Report(detector, settings1);
                         
@@ -449,7 +495,7 @@ int main(int argc, char **argv) {   // read setup.txt file
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger);
 
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent);
-            report->Connect_Interaction_Detector_V2 (event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown);
+            report->Connect_Interaction_Detector_V2(event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown);
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent, Events_Thrown);
 
             #ifdef ARA_UTIL_EXISTS
@@ -458,6 +504,10 @@ int main(int argc, char **argv) {   // read setup.txt file
                     int stationIndex;
                     if (settings1->DETECTOR == 4){
                         stationID = settings1->DETECTOR_STATION;
+                        stationIndex = 0;
+                    }
+                    else if (settings1->DETECTOR == 5){
+                        stationID = 6;
                         stationIndex = 0;
                     } else {
                         stationID = 0;
@@ -673,6 +723,11 @@ int main(int argc, char **argv) {   // read setup.txt file
 
     settings1->NNU = Events_Thrown;
     settings1->NNU_PASSED = Total_Global_Pass;
+
+    if (settings1->EVENT_GENERATION_MODE == 2){
+        event_file.close();
+        return 0;
+    }
 
     // TrigWind << TRIG_WINDOW_Size << "\t" << Total_Global_Pass << endl;
     // cout << "TRIG_WINDOW_Size:Total_Global_Pass:: " << TRIG_WINDOW_Size << " : " << Total_Global_Pass << endl;
