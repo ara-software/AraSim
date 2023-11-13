@@ -130,6 +130,8 @@ taumodes=0 // (DEFAULT=0) 0: no tau modes. 1: allow tau nu’s interaction in be
 DETECTOR=4 // (DEFAULT=1) 0: unused. 1: ideal ARA station. can choose 1 to 7 stations. 2: large array in hexagonal design. 3: testbed.
 
 DETECTOR_STATION=2
+
+DETECTOR_STATION_LIVETIME_CONFIG=6
  
 number_of_stations=1 // (DEFAULT=1) number of stations used in DETECTOR =1 mode. 
  
