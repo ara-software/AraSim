@@ -4145,9 +4145,11 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
   //    if (stationID < detector->params.number_of_stations){
 
         int i = stationID;
-	cout << "StationID: " << stationID << endl;
+	int stationID_AraRoot = settings1->DETECTOR_STATION_ARAROOT;
+	cout << "StationID: " << stationID << endl;	
+	cout << "StationID_AraRoot: " << stationID_AraRoot << endl;
 	theUsefulEvent->fNumChannels = 32;
-	theUsefulEvent->stationId = stationID;
+	theUsefulEvent->stationId = stationID_AraRoot;
 	
 	//	cout << endl << stationID << endl;
 	
@@ -4162,7 +4164,7 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 	
 	for (int ch_loop=0; ch_loop < ch_limit; ch_loop++) {
 	  //	  int elecChan = AraGeom->getElecChanFromRFChan(ch_loop, stationID);
-	  int elecChan = AraGeomTool::Instance()->getElecChanFromRFChan(ch_loop, stationID);
+	  int elecChan = AraGeomTool::Instance()->getElecChanFromRFChan(ch_loop, stationID_AraRoot);
 	  int string_i = 0;
 	  int antenna_i = 0;
 	  detector->GetSSAfromChannel(stationID, ch_loop, &antenna_i, &string_i, settings1);

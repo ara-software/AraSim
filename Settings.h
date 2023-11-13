@@ -58,9 +58,12 @@ class Settings
         int DETECTOR;   // choose detector layout
 
 	int DETECTOR_STATION; // for DETECTOR=4, indicates the single station to be simulated
-	                      // 0 = testbed, 1 = A1, 2 = A2, 3 = A3
+	                      // 0 = testbed, 1 = A1, 2 = A2, 3 = A3	
                               // Detector=5 indicates Phased array. Detector Station determines setup to use
                               // 1 = only PA antennas (ARA05 simulated separately), 2 = PA antennas + 1 nontriggering A5 Vpol, 3 = PA antennas + 7 nontriggering A5 Vpols
+  
+  int DETECTOR_STATION_ARAROOT; // Also for DETECTOR=4, indicates the single station to be simulated, it just takes care of differentiating ARA_STATION1 (ICRR) vs ARA_STATION1B (ATRI) 
+					// Same values as DETECTOR_STATION. Except that when DETECTOR_STATION = 100, DETECTOR_STATION_ARAROOT = 100 and defaults DETECTOR_STATION back to 1
 
         int DETECTOR_STATION_LIVETIME_CONFIG; // for real deep station, what livetime configuration are we using?
 
