@@ -197,11 +197,6 @@ int main(int argc, char **argv)
             }            
             delete gr;
             
-            // cout << "init_T = " << init_T << endl;
-            // cout << "Changing init_T based on input waveform." << endl;
-            // init_T = time[0];
-            // cout << "init_T = " << init_T << endl;
-            
             // for (int m = 0; m < settings1->NFOUR / 2; m++)
             for (int m = 0; m < 2048; m++)
             {
@@ -216,14 +211,7 @@ int main(int argc, char **argv)
             } else {
                 cutoffTimeChannel = cutoffTime[i];
             }            
-            //Add step that centers the waveform about zero in time, for purposes of the fourier transform.  Then save this shift and reapply it to restore the time-domain information after the InvFFT.
-//             cout << "*****************************************************************" << endl;
-//             cout << "time[0] = " << time[0] << endl;
-//             cout << "time[(waveform_bin-1)/2] = " << time[(waveform_bin-1)/2] << endl;
-//             cout << "time[waveform_bin/2] = " << time[waveform_bin/2] << endl;
-//             cout << "time[waveform_bin-1] = " << time[waveform_bin-1] << endl;
-//             cout << "*****************************************************************" << endl;
-            
+            //TODO: Add step that centers the waveform about zero in time, for purposes of the fourier transform.  Then save this shift and reapply it to restore the time-domain information after the InvFFT.            
             double timeshift = time[waveform_bin/2];
             cout << "timeshift = " << timeshift << endl;
     
@@ -244,7 +232,6 @@ int main(int argc, char **argv)
             cout << "antenna_phi = " << antenna_phi << endl;                    
             
             //Calculate polarization vector that inverts the polarization factor (makes dot products equal to one)
-            // polarization=np.array([-np.sin(phi),np.cos(phi),-1/np.sin(theta)]) via Jorge's pyrex application
             double newPol_vectorX = -sin(antenna_phi*PI/180);
             double newPol_vectorY = cos(antenna_phi*PI/180);
             double newPol_vectorZ = -1/sin(antenna_theta*PI/180);
@@ -259,7 +246,6 @@ int main(int argc, char **argv)
 
             double dF_Nnew;
 
-            // int NFOUR = 1024;
             double nice = 1.79;
 
 
@@ -290,15 +276,13 @@ int main(int argc, char **argv)
             double V_forfft[Nnew];
             double T_forfft[Nnew];
             
-            // cout << "waveform_bin = " << waveform_bin << endl;
-            
             for (int n = 0; n < Nnew; n++)
             {
 
                 // make Tarray, Earray located at the center of Nnew array
 
                 T_forfft[n] = time[waveform_bin / 2] - (dT_forfft *(double)(Nnew / 2 - n));
-                // T_forfft[n] = time[waveform_bin / 2] - (dT_forfft *(double)(Nnew / 2 - n)) - timeshift;  //Applying time shift to center array in time domain.
+                // T_forfft[n] = time[waveform_bin / 2] - (dT_forfft *(double)(Nnew / 2 - n)) - timeshift;  //TODO: Apply time shift to center array in time domain.
 
                 if ((n >= Nnew / 2 - waveform_bin / 2) &&
                     (n < Nnew / 2 + waveform_bin / 2))
@@ -350,42 +334,27 @@ int main(int argc, char **argv)
 
                 }
                 
-                // Quick and dirty hack to filter out frequencies above 850 MHz and below 100 MHz.
-                cout << "******************************************" << endl;
-                cout << "freq_tmp = " << freq_tmp << endl;
-                cout << "Before Hard band-pass V_forfft = " << endl;
-                cout << "V_forfft[2 *n] = "<< V_forfft[2 *n] << endl;
-                cout << "V_forfft[2 *n + 1] = "<< V_forfft[2 *n + 1] << endl;                      
-                // std::cout << std::endl;                
+                // Quick and dirty hack to filter out frequencies above 850 MHz and below 100 MHz.             
                 if (freq_tmp > 850.*1.e6 or freq_tmp < 100.*1.e6) {
                     V_forfft[2*n] = 0;
                     V_forfft[2*n+1] = 0;
-                }
-                // cout << "ggg T_forint[0] = " << T_forint[0] << endl;
-                cout << "Before Butterworth V_forfft = " << endl;
-                cout << "V_forfft[2 *n] = "<< V_forfft[2 *n] << endl;
-                cout << "V_forfft[2 *n + 1] = "<< V_forfft[2 *n + 1] << endl;                     
+                }                   
                 //Apply homemade butterworth filter of the fourth order
-                double freqMin = 150*1e6;
-                double freqMax = 300*1e6;
+                // double freqMin = 150*1e6;
+                // double freqMax = 300*1e6;
                 
                 //Trying user inputted butterworth filter
-                // double freqMin = atof(argv[7])*1e6;
-                // double freqMax = atof(argv[8])*1e6;
-                // cout << "freqMin = " << freqMin << endl;
-                // cout << "freqMax = " << freqMax << endl;
+                double freqMin = atof(argv[7])*1e6;
+                double freqMax = atof(argv[8])*1e6;
   
                 
-                double weight = 1;  //TODO:  Make this dynamic for simulations and real data. - JCF 10/4/2023
+                double weight = 1;  // Setting initial weight to one, then applying bandpass.  Weight is then multiplied by signal in this bin.
                 int order = 8;
                 weight /= sqrt(1 + TMath::Power(freqMin/freq_tmp, 4*order));
                 weight /= sqrt(1 + TMath::Power(freq_tmp/freqMax, 4*order));
                 V_forfft[2*n] *= weight;
                 V_forfft[2*n+1] *= weight; 
-                //End Butterworth filter
-                cout << "After Butterworth V_forfft = " << endl;
-                cout << "V_forfft[2 *n] = "<< V_forfft[2 *n] << endl;
-                cout << "V_forfft[2 *n + 1] = "<< V_forfft[2 *n + 1] << endl;     
+                //End Butterworth filter 
             }   // end for freq bin
                             
             // now get time domain waveform back by inv fft               
@@ -403,7 +372,7 @@ int main(int argc, char **argv)
             Tools::SincInterpolation(Nnew, T_forfft, V_forfft, settings1->NFOUR / 2, T_forint, volts_forint);
             // Tools::SincInterpolation(Nnew, T_forfft, V_forfft, waveform_bin, T_forint, volts_forint);      
             
-            //Restore time shift in time domain
+            //TODO: Restore time shift in time domain
             // T_forint += timeshift;
             // for (int i = 0; i < sizeof(T_forint) / sizeof(T_forint[0]); i++) {
             //   T_forint[i] += timeshift;
