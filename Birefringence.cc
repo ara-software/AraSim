@@ -14,7 +14,7 @@
 
 using namespace std;
 
-#include "Birefringence.hh"
+#include "Birefringence.h"
 
 Birefringence::Birefringence(Settings *settings1) {
 
@@ -416,9 +416,8 @@ double Birefringence::getDeltaN(int BIAXIAL, vector<double> nvec, TVector3 rhat,
 void Birefringence::Read_Indicatrix_Par(string sn1file, string sn2file, string sn3file, Settings *settings1){ //reads in data from n1file, n2file, n3file. These define the principal axes of the indicatrix
 
 
-	int BIAXIAL = settings1->BIAXIAL; //BIAXIAL = 1 is the only allowed now (by settings inconsistencies) for modeling biaxial birefringence, but I'll leave the code and capability for uniaxial birefringence (BIAXIAL = 0) and isotropic (BIAXIAL = -1). -ASG 11/7/2023 
+	int BIAXIAL = settings1->BIAXIAL; //BIAXIAL = 1 and = 0 are the only ones allowed now (by settings inconsistencies) for modeling biaxial (1) and uniaxial (0) birefringence, but I'll leave the code and capability for the isotropic case (BIAXIAL = -1). -ASG 11/7/2023 
 
-	int NDEPTHS_NS=81; //POSSIBLE IMPROVEMENT: This is not agnostic to the number of rows (depths) in sn1file. We may want to determine this by counting the number of lines. 
 	double thisn;
 	double thisdepth;
 	double firstn1;
@@ -429,8 +428,53 @@ void Birefringence::Read_Indicatrix_Par(string sn1file, string sn2file, string s
 	ifstream n1file(sn1file.c_str());
 	ifstream n2file(sn2file.c_str());
 	ifstream n3file(sn3file.c_str());
+	string line;
+	char errorMessage[400];
 
-    	n1file >> stemp;
+	//counting lines
+	int lineCount1 = 0;
+        if(n1file.is_open()){
+                while(n1file.peek()!=EOF){
+                        getline(n1file, line);
+                        lineCount1++;
+                }
+        }
+
+	int lineCount2 = 0;
+        if(n2file.is_open()){
+                while(n2file.peek()!=EOF){
+                        getline(n2file, line);
+                        lineCount2++;
+                }
+        }
+
+	int lineCount3 = 0;
+        if(n3file.is_open()){
+                while(n3file.peek()!=EOF){
+                        getline(n3file, line);
+                        lineCount3++;
+                }
+        }
+
+	if ((lineCount1 != lineCount2) || (lineCount2 != lineCount3)){
+		sprintf(errorMessage, "Files with principal axis for birefringence do not have the same number of lines");
+                throw std::runtime_error(errorMessage);
+	}
+	
+	int NDEPTHS_NS = lineCount1 - 1;
+
+        n1file.clear(); // back to the beginning of the file again
+        n1file.seekg(0, ios::beg);
+
+        n2file.clear(); // back to the beginning of the file again
+        n2file.seekg(0, ios::beg);
+    	
+        n3file.clear(); // back to the beginning of the file again
+        n3file.seekg(0, ios::beg);
+
+		
+	//Reading in the principal axes
+	n1file >> stemp;
     	for (int i=0;i<NDEPTHS_NS;i++) {
       		n1file >> thisdepth >> thisn;
       		vdepths_n1.push_back(-1.*thisdepth); 
@@ -458,7 +502,7 @@ void Birefringence::Read_Indicatrix_Par(string sn1file, string sn2file, string s
 			n3vec.push_back(n1vec[i]+1.E-5); // the 1.E-5 is so the eigenvectors don't just go in completely random directions                    
     	}
 
-    	if (CONSTANTINDICATRIX==1) {//Use first principal axes values always to define the indicatrix. I will set it to 0 in Birefringence.hh but leave this code here. -ASG 11/7/2023
+    	if (CONSTANTINDICATRIX==1) {//Use first principal axes values always to define the indicatrix. I will set it to 0 in Birefringence.h but leave this code here. -ASG 11/7/2023
       		firstn1=n1vec[0];
       		firstn2=n2vec[0];
       		firstn3=n3vec[0];
@@ -471,7 +515,7 @@ void Birefringence::Read_Indicatrix_Par(string sn1file, string sn2file, string s
       		n3vec.clear();
       
       		//adds the first values to the vectors
-      		for (int i=0;i<thissize;i++) {//why do we need a loop?
+      		for (int i=0;i<thissize;i++) {
 			n1vec.push_back(firstn1);
 			n2vec.push_back(firstn2);
 			n3vec.push_back(firstn3);

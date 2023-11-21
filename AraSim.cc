@@ -25,7 +25,7 @@
 #include "Spectra.h"
 #include "Tools.h"
 #include "Trigger.h"
-#include "Birefringence.hh"
+#include "Birefringence.h"
 
 using namespace std;
 

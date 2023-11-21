@@ -9,7 +9,7 @@
 #include "Tools.h"
 #include "Trigger.h"
 #include "Constants.h"
-#include "Birefringence.hh"
+#include "Birefringence.h"
 
 #include <iostream>
 #include <sstream>
