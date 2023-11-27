@@ -1122,7 +1122,11 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
       ns = 1.326;
       nd = 1.78;
       nc = 0.0202;
-    }
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 50){ // AC model for birefringence: https://arxiv.org/abs/2110.09015
+      ns = 1.35;
+      nd = 1.78;
+      nc = 0.03624;
+    }	
     else {
       // South Pole Values (AraSim original default, based on RICE)
       ns = 1.35;
