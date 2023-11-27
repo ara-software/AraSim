@@ -392,6 +392,8 @@ int main(int argc, char **argv)
         } //channel loop
         usefulAtriEvPtrOut->eventNumber = usefulAtriEvPtr->eventNumber;
         usefulAtriEvPtrOut->unixTime = usefulAtriEvPtr->unixTime;
+        cout << "usefulAtriEvPtr->unixTime = " << usefulAtriEvPtr->unixTime << endl;
+        cout << "usefulAtriEvPtrOut->unixTime = " << usefulAtriEvPtrOut->unixTime << endl;
         //Assign timestamp values to help identify calpulsers
         usefulAtriEvPtrOut->timeStamp = usefulAtriEvPtr->timeStamp;
         // Assign triggerInfo values to identify RF and software triggers.
