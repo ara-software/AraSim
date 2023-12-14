@@ -251,6 +251,9 @@ Spectra::Spectra(Settings *settings1) {
           case 112:
               GetFlux("yuksel_sfh.dat");
               break;
+          case 113: // equal number of triggers per lnE based on A23 2020 trigger-level effective area
+              GetFlux("equalTriggersPerLnE.dat");
+              break;
 //          case 100:
 //              GetFlux("berezinsky_saturate.dat");
 //              break;
