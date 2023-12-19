@@ -4724,9 +4724,6 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
         // real, img terms with phase shift
         vm_real = v_amp * cos( phase_current + (sign * AntPhase*RADDEG) );
         vm_img =  v_amp * sin( phase_current + (sign * AntPhase*RADDEG) );
-
-        //vm_real = v_amp * cos( phase_current - AntPhase*RADDEG ); // subtract AntPhase for four1 function's equation definition (inverse in img values)
-        //vm_img = v_amp * sin( phase_current - AntPhase*RADDEG );
     }
 
     else { // only amplitude
