@@ -2109,8 +2109,21 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         cout << "start read elect chain" << endl;
         if (settings1 -> CUSTOM_ELECTRONICS == 0) {
             //read the standard ARA electronics
-            cout << "     Reading standard PA electronics response" << endl;
-            ReadElectChain("./data/gain/PA_Electronics_TotalGainPhase.csv", settings1);  // Here's the change I made
+            char the_gain_filename[500];
+            sprintf(the_gain_filename, "./data/gain/In_situ_Electronics_PA_C%d.csv", 	
+                 settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+            cout <<" Reading in situ ARA electronics response for the PA and this configuration from file:"<<endl;	
+            cout << the_gain_filename <<endl;
+            struct stat buffer;
+            bool gainFileExists = (stat(the_gain_filename, &buffer)==0);
+            if(gainFileExists) {
+              ReadElectChain(std::string(the_gain_filename), settings1);
+            }
+            else {
+              cout <<"    In situ gain model does not exist for this station"<<endl;
+              cout << "     Reading standard PA electronics response" << endl;
+              ReadElectChain("./data/gain/PA_Electronics_TotalGainPhase.csv", settings1);  // Here's the change I made
+            }
         } else if (settings1 -> CUSTOM_ELECTRONICS == 1) {
             //read a custom user defined electronics gain
             cout << "     Reading custom PA electronics response" << endl;
