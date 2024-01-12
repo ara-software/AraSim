@@ -1594,16 +1594,27 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 	}
                                             	}                                            
                                             
-                                            	icemodel->GetFresnel(ray_output[1][ray_sol_cnt],    // launch_angle
-                                                	ray_output[2][ray_sol_cnt], // rec_angle
-                                                	ray_output[3][ray_sol_cnt], // reflect_angle
-                                                	event->Nu_Interaction[0].posnu,
-                                                	launch_vector,
-                                                	receive_vector,
-                                                	settings1,
-                                                	fresnel,
-                                                	mag,
-                                                	Pol_vector);    // input src Pol and return Pol at trg
+                                            	icemodel->GetFresnel(
+                                                    ray_output[1][ray_sol_cnt],    // launch_angle
+                                                    ray_output[2][ray_sol_cnt], // rec_angle
+                                                    ray_output[3][ray_sol_cnt], // reflect_angle
+                                                    event->Nu_Interaction[0].posnu,
+                                                    launch_vector,
+                                                    receive_vector,
+                                                    settings1,
+                                                    fresnel,
+                                                    Pol_vector);    // input src Pol and return Pol at trg
+                                                icemodel->GetMag(
+                                                    mag, 
+                                                    ray_output[0][ray_sol_cnt], // ray path length
+                                                    ray_output[1][ray_sol_cnt], // zenith angle of ray at launch
+                                                    ray_output[2][ray_sol_cnt], // zenith angle of ray upon receipt
+                                                    ray_sol_cnt,
+                                                    event->Nu_Interaction[0].posnu, // Neutrino
+                                                    detector->stations[i].strings[j].antennas[k], // Antenna
+                                                    -0.01, // 1cm antenna shift, inspired from NuRadioMC
+                                                    icemodel, settings1
+                                                );
 
 						birefringence->Principal_axes_polarization(Pol_vector, bire_ray_cnt, max_bire_ray_cnt, settings1); //For birefringence, modify the polarization at the antennas                                            
 
