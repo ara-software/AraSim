@@ -25,6 +25,7 @@
 #include "Spectra.h"
 #include "Tools.h"
 #include "Trigger.h"
+#include "Birefringence.h"
 
 using namespace std;
 
@@ -141,6 +142,8 @@ int main(int argc, char **argv) {   // read setup.txt file
     Detector *detector=new Detector(settings1, icemodel, setupfile ); // builds antenna array, 0 for testbed
     cout<<"end calling detector"<<endl;
     // Detector *detector=new Detector(settings1->DETECTOR); // builds antenna array, 0 for testbed
+
+    Birefringence *birefringence=new Birefringence(settings1);
 
     Trigger *trigger=new Trigger(detector, settings1); // builds the trigger  
     // Efficiencies *efficiencies=new Efficiencies(detector->getnRx(),outputdir); // keeps track of efficiencies at each stage of the simulation
@@ -495,7 +498,7 @@ int main(int argc, char **argv) {   // read setup.txt file
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger);
 
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent);
-            report->Connect_Interaction_Detector_V2(event, detector, raysolver, signal, icemodel, settings1, trigger, Events_Thrown);
+            report->Connect_Interaction_Detector_V2(event, detector, raysolver, signal, icemodel, birefringence, settings1, trigger, Events_Thrown);
             //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent, Events_Thrown);
 
             #ifdef ARA_UTIL_EXISTS
@@ -807,7 +810,7 @@ int main(int argc, char **argv) {   // read setup.txt file
 
         cout<<"test Veff(ice) : "<<Veff_test<<" m3sr, "<<Veff_test*1.E-9<<" km3sr"<<endl;
         cout<<"test Veff(water eq.) : "<<Veff_test_we<<" m3sr, "<<Veff_test_we*1.E-9<<" km3sr"<<endl;
-        cout<<"And Veff(water eq.) error plus : "<<error_plus*1.E-9<<"km3sr and error minus : "<<error_minus*1.E-9<<" km3sr"<<endl;
+        cout<<"And Veff(water eq.) error plus : "<<error_plus*1.E-9<<" km3sr and error minus : "<<error_minus*1.E-9<<" km3sr"<<endl;
     }
 
 

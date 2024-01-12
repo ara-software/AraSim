@@ -39,6 +39,8 @@ class Settings
   //These were moved here from IceModel under the new compilation scheme
         int ICE_MODEL; //Select ice model to be used.  0 = Crust 2.0 , 1 = BEDMAP.
         int NOFZ; // 1=depth dependent index of refraction,0=off
+	int BIREFRINGENCE; //To activate birefringence
+	int BIAXIAL; //Biaxial (1) or Uniaxial (0) birefringence
         int CONSTANTCRUST; // set crust density and thickness to constant values.
         int CONSTANTICETHICKNESS; // set ice thickness to constant value
         int FIXEDELEVATION; // fix the elevation to the thickness of ice.
@@ -58,9 +60,12 @@ class Settings
         int DETECTOR;   // choose detector layout
 
 	int DETECTOR_STATION; // for DETECTOR=4, indicates the single station to be simulated
-	                      // 0 = testbed, 1 = A1, 2 = A2, 3 = A3
+	                      // 0 = testbed, 1 = A1, 2 = A2, 3 = A3	
                               // Detector=5 indicates Phased array. Detector Station determines setup to use
                               // 1 = only PA antennas (ARA05 simulated separately), 2 = PA antennas + 1 nontriggering A5 Vpol, 3 = PA antennas + 7 nontriggering A5 Vpols
+  
+  int DETECTOR_STATION_ARAROOT; // Also for DETECTOR=4, indicates the single station to be simulated, it just takes care of differentiating ARA_STATION1 (ICRR) vs ARA_STATION1B (ATRI) 
+					// Same values as DETECTOR_STATION. Except that when DETECTOR_STATION = 100, DETECTOR_STATION_ARAROOT = 100 and defaults DETECTOR_STATION back to 1
 
         int DETECTOR_STATION_LIVETIME_CONFIG; // for real deep station, what livetime configuration are we using?
 
@@ -181,6 +186,11 @@ class Settings
     
         double CONST_RMSDIODE;  // in case NOISE_CHANNEL_MODE = 1, just using this CONST_RMSDIODE value for threshold
 
+        double SOURCE_LATITUDE;  //Latitude, Longitude, and depth of simulating source in global coordinates for use in INTERACTION_MODE=5.
+
+        double SOURCE_LONGITUDE;
+
+        double SOURCE_DEPTH;
 
         int USE_TESTBED_RFCM_ON;    // use RFCM measurement for testbed or not (default 0)
     
@@ -307,6 +317,9 @@ class Settings
 
 	int CUSTOM_ELECTRONICS; //0 (default): use the regular "ARA_Electronics_TotalGain_TwoFilter.csv" file
 							//1 : load a custom electronics file, stored as "custom_electronics.csv" in the `data` directory
+                            
+  double CLOCK_ANGLE;  // default: 0; Angle of polarization "on the clock" for use in pulser events (EVENT_TYPE=11)
+
 
 
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
