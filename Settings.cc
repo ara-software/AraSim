@@ -70,6 +70,8 @@ outputdir="outputs"; // directory where outputs go
   //These were moved here from IceModel under the new compilation scheme
   ICE_MODEL=0; //Select ice model to be used.  0 = Crust 2.0 , 1 = BEDMAP.
   NOFZ=1; // 1=depth dependent index of refraction,0=off
+  BIREFRINGENCE=0; // To activate birefringence. Default 0 means no birefringence
+  BIAXIAL=1; //Type of birefringence: 1 = biaxial, 0 = uniaxial 
   CONSTANTCRUST=0; // set crust density and thickness to constant values.
   CONSTANTICETHICKNESS=0; // set ice thickness to constant value
   FIXEDELEVATION=0; // fix the elevation to the thickness of ice.
@@ -347,6 +349,12 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "NOFZ") {
                   NOFZ = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
+	      else if (label == "BIREFRINGENCE"){
+		  BIREFRINGENCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );	
+	      }
+	      else if (label == "BIAXIAL"){
+		  BIAXIAL = atof( line.substr(line.find_first_of("=") + 1).c_str() );	
+	      }
               else if (label == "CONSTANTCRUST") {
                   CONSTANTCRUST = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -1109,6 +1117,25 @@ int Settings::CheckCompatibilitiesSettings() {
     num_err++;
    }
 
+   //Compatibilities for birefringence
+   if (BIREFRINGENCE==1){
+	if(DETECTOR!=4){
+	   cerr << "BIREFRINGENCE=1 is only supported for individual stations" <<endl;
+	   num_err++; 
+	}	
+	if (BIAXIAL<0 || BIAXIAL>1){
+	 cerr << "BIREFRINGENCE only supports BIAXIAL=0 (uniaxial) or BIAXIAL=1 (biaxial)" << endl;
+	 num_err++;
+	}
+	if (RAY_TRACE_ICE_MODEL_PARAMS!=50){
+	 cerr << "BIREFRINGENCE=1 should only work with RAY_TRACE_ICE_MODEL_PARAMS=50" <<endl;	
+	 num_err++;
+	}
+   }
+   if (BIREFRINGENCE!=1 && BIREFRINGENCE!=0){
+    cerr << "BIREFRINGENCE only takes 0 or 1" << endl;
+    num_err++;
+   }
 
     return num_err;
 
