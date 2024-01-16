@@ -1854,8 +1854,8 @@ void IceModel::GetFresnel (
         else if (launch_angle == 0.0) {
 
             // Use the limit as launch_angle -> 0 to avoid divide-by-zeros
-            r_coeff_pokey = ( 1 + (nL/n2) ) / ( 1 + (nL/n2) );
-            r_coeff_slappy = ( 1 + (nL/n2) ) / ( 1 + (nL/n2) );
+            r_coeff_pokey = ( 1 - (nL/n2) ) / ( 1 + (nL/n2) );
+            r_coeff_slappy = ( 1 - (nL/n2) ) / ( 1 + (nL/n2) );
 
         }
 
