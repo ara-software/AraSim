@@ -1788,17 +1788,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                       settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
               cout << the_gain_filename << endl;
               
-              struct stat buffer;
-              bool gainFileExists = (stat(the_gain_filename, &buffer)==0);
-              if(gainFileExists) {
-                ReadElectChain(std::string(the_gain_filename), settings1);
-              }
-              else {
-                char errMsg[500];
-                sprintf(errMsg, "In situ gain model does not exist for this station and livetime configuration\n");
-                sprintf(errMsg, "To use standard electronics response set DETECTOR_STATION_LIVETIME_CONFIG=-1");
-                throw runtime_error(errMsg);
-              }
+              ReadElectChain(std::string(the_gain_filename), settings1);
               //ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
               //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
             }
@@ -2138,17 +2128,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
               cout <<" Reading in situ ARA electronics response for the PA and this configuration from file:"<<endl;	
               cout << the_gain_filename <<endl;
             }
-            struct stat buffer;
-            bool gainFileExists = (stat(the_gain_filename, &buffer)==0);
-            if(gainFileExists) {
-              ReadElectChain(std::string(the_gain_filename), settings1);
-            }
-            else {
-              char errMsg[500];
-              sprintf(errMsg, "In situ gain model does not exist for this station and livetime configuration\n");
-              sprintf(errMsg, "To use standard electronics response set DETECTOR_STATION_LIVETIME_CONFIG=-1");
-              throw runtime_error(errMsg);
-            }
+            ReadElectChain(std::string(the_gain_filename), settings1);
         } else if (settings1 -> CUSTOM_ELECTRONICS == 1) {
             //read a custom user defined electronics gain
             cout << "     Reading custom PA electronics response" << endl;
@@ -4184,12 +4164,11 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 
 	bool gainFileExists = (stat(filename.c_str(), &buffer)==0);
 	if (!gainFileExists){
-		sprintf(errorMessage, "Gain model file is not found (gain file exists %d) ", gainFileExists);
-		cout << "The not found gain filename is: " << filename << endl; 		
-		cerr << errorMessage << endl;
-		cerr << "Defaulting to standard response" << endl;
-		filename = "./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv";
-		cout << "Defaulted to standard response from file: " << filename << endl;
+    char errMsg[500];
+		sprintf(errMsg, "Gain model file is not found (gain file exists %d) ", gainFileExists);
+    sprintf(errMsg, "In situ gain model %s does not exist for this station and livetime configuration\n", filename.c_str());
+    sprintf(errMsg, "To use standard electronics response set DETECTOR_STATION_LIVETIME_CONFIG=-1");
+    throw runtime_error(errMsg);
 	}
 
 	ifstream gainFile(filename.c_str()); // open the file
