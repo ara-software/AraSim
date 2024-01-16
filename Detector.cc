@@ -861,7 +861,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         if (settings1 -> CUSTOM_ELECTRONICS == 0) {
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-	    ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+            ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
           //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
 	}
         else if (settings1->CUSTOM_ELECTRONICS==1){
@@ -1774,24 +1774,41 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         // read total elec. chain response file!!
         cout << "start read elect chain" << endl;
         if (settings1 -> CUSTOM_ELECTRONICS == 0) {
-            //read the standard ARA electronics
-            if(settings1->DETECTOR_STATION > 0){
-	  	cout <<" Reading in situ ARA electronics response for this station and configuration from file:"<<endl;	
-		char the_gain_filename[500];
-		sprintf(the_gain_filename, "./data/gain/In_situ_Electronics_A%d_C%d.csv", 	
-		     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
-		cout << the_gain_filename <<endl;
-		ReadElectChain(std::string(the_gain_filename), settings1);
-		 //ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
-         	 //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+          //read the standard ARA electronics
+          if(settings1->DETECTOR_STATION > 0){
+            char the_gain_filename[500];
+            if(settings1->DETECTOR_STATION_LIVETIME_CONFIG == -1) {
+              sprintf(the_gain_filename, "./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv");
+              cout<<" Reading standard ARA electronics response from file:"<<endl;
+              cout << the_gain_filename <<endl;
             }
-	    else{
-		cout <<"    In situ gain model does not exist for this station"<<endl;
-            	cout<<"     Reading standard ARA electronics response"<<endl;
-		ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
-		//ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
-	    }
-	}
+            else {
+              cout <<" Reading in situ ARA electronics response for this station and configuration from file:"<<endl;	
+              sprintf(the_gain_filename, "./data/gain/In_situ_Electronics_A%d_C%d.csv", 	
+                      settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+              cout << the_gain_filename << endl;
+              
+              struct stat buffer;
+              bool gainFileExists = (stat(the_gain_filename, &buffer)==0);
+              if(gainFileExists) {
+                ReadElectChain(std::string(the_gain_filename), settings1);
+              }
+              else {
+                char errMsg[500];
+                sprintf(errMsg, "In situ gain model does not exist for this station and livetime configuration\n");
+                sprintf(errMsg, "To use standard electronics response set DETECTOR_STATION_LIVETIME_CONFIG=-1");
+                throw runtime_error(errMsg);
+              }
+              //ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+              //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+            }
+          }
+          else{ // testbed only
+            cout <<"    In situ gain model does not exist for this station"<<endl;
+            ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+            //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+          }
+        }
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
@@ -2110,19 +2127,27 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         if (settings1 -> CUSTOM_ELECTRONICS == 0) {
             //read the standard ARA electronics
             char the_gain_filename[500];
-            sprintf(the_gain_filename, "./data/gain/In_situ_Electronics_PA_C%d.csv", 	
-                 settings1->DETECTOR_STATION_LIVETIME_CONFIG);
-            cout <<" Reading in situ ARA electronics response for the PA and this configuration from file:"<<endl;	
-            cout << the_gain_filename <<endl;
+            if(settings1->DETECTOR_STATION_LIVETIME_CONFIG == -1) {
+              sprintf(the_gain_filename, "./data/gain/PA_Electronics_TotalGainPhase.csv"); 
+              cout << " Reading standard PA electronics response from file:" << endl;
+              cout << the_gain_filename <<endl;
+            }
+            else{
+              sprintf(the_gain_filename, "./data/gain/In_situ_Electronics_PA_C%d.csv", 	
+                   settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+              cout <<" Reading in situ ARA electronics response for the PA and this configuration from file:"<<endl;	
+              cout << the_gain_filename <<endl;
+            }
             struct stat buffer;
             bool gainFileExists = (stat(the_gain_filename, &buffer)==0);
             if(gainFileExists) {
               ReadElectChain(std::string(the_gain_filename), settings1);
             }
             else {
-              cout <<"    In situ gain model does not exist for this station"<<endl;
-              cout << "     Reading standard PA electronics response" << endl;
-              ReadElectChain("./data/gain/PA_Electronics_TotalGainPhase.csv", settings1);  // Here's the change I made
+              char errMsg[500];
+              sprintf(errMsg, "In situ gain model does not exist for this station and livetime configuration\n");
+              sprintf(errMsg, "To use standard electronics response set DETECTOR_STATION_LIVETIME_CONFIG=-1");
+              throw runtime_error(errMsg);
             }
         } else if (settings1 -> CUSTOM_ELECTRONICS == 1) {
             //read a custom user defined electronics gain
