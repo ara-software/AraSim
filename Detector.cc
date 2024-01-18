@@ -6789,6 +6789,13 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
     }
 }
 
+inline void Detector::ReadRealImpedance(string filename, Settings *settings1) {
+    ifstream NecOut( filename.c_str() );
+    const int N = freq_step;
+    
+    
+}//ReadRealImpedance
+
 Detector::~Detector() {
   //cout<<"Destruct class Detector"<<endl;
 }

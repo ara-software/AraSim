@@ -229,6 +229,16 @@ class Detector {
         double Hgain[freq_step_max][ang_step_max];
         double Hphase[freq_step_max][ang_step_max];
         double Freq[freq_step_max];
+    
+        //Define impedance and gain for transmitting antenna
+        double RealImpedanceTx[freq_step_max];
+        double ImagImpedanceTx[freq_step_max];
+        double VgainTx[freq_step_max][ang_step_max];
+        double VphaseTx[freq_step_max][ang_step_max];
+        double HgainTx[freq_step_max][ang_step_max];
+        double HphaseTx[freq_step_max][ang_step_max];
+        void ReadRealImpedance(string filename, Settings *settings1);
+    	void ReadImagImpedance(string filename, Settings *settings1);    
 
 
 	

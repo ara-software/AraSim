@@ -199,6 +199,11 @@ Signal::~Signal() {
      std::string pulserWaveform = "IDL1_waveformNoiseless.txt";
      ReadPulserWaveform(pulserWaveform);
      
+     // Added function to read in voltage versus time of IDL2 pulser data provided by Alisa.  Need ot expand this to be dynamic to other voltage sources in the future.
+     std::string inputVoltage = "IDL2_InputVoltageVersusTime.txt";
+     ReadInputVoltage(inputVoltage);
+        
+     
   SetParameterization(settings1->WHICHPARAMETERIZATION);
 
   logscalefactor_taper=0.;
@@ -309,13 +314,30 @@ Signal::~Signal() {
      while (1){
        infile >> time_tmp >> e_field;
        if (!infile.good()) break;
-//       cout << time_tmp << " : " << e_field <<endl;
        PulserWaveform_T.push_back(time_tmp);
        PulserWaveform_V.push_back(e_field);
      }
     } else {
         std::cerr << "No pulser waveform file!" << std::endl;
-    }
+    }  
+}
+
+  //Adding function to read input voltage at transmitting antenna - JCF 1/10/2024   
+ void Signal::ReadInputVoltage(string target){
+   double voltage_tmp;
+   double time_tmp;
+
+   ifstream infile(target.c_str());
+   if (infile){
+     while (1){
+       infile >> time_tmp >> voltage_tmp;
+       if (!infile.good()) break;
+       InputVoltage_T.push_back(time_tmp);
+       InputVoltage_V.push_back(voltage_tmp);
+     }
+    } else {
+        std::cerr << "No pulser waveform file!" << std::endl;
+    }  
 }
 
 
