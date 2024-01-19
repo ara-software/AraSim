@@ -6789,9 +6789,21 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
     }
 }
 
-inline void Detector::ReadRealImpedance(string filename, Settings *settings1) {
+inline void Detector::ReadImpedance(string filename, Settings *settings1) {
     ifstream NecOut( filename.c_str() );
     const int N = freq_step;
+    string line;
+    if ( NecOut.is_open() ) {
+        while (NecOut.good() ) {
+            getline (NecOut, line); //Gets first line to skip header
+            for (int i=0; i<freq_step; i++){
+                getline (NecOut, line, '\t');
+                RealImpedanceTx[i] = line[1];
+                ImagImpedanceTx[i] = line[2];
+            } //end frep_step
+        }// end while NecOut.good
+        NecOut.close();
+    }// end if file open    
     
     
 }//ReadRealImpedance
