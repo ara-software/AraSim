@@ -832,6 +832,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         #endif
 
         ReadAllAntennaGains(settings1);
+        ReadAllAntennaImpedanceTx(settings1);
 
         //	if (settings1->NOISE == 2){
         ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
@@ -1219,6 +1220,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         max_number_of_antennas_station = params.number_of_strings_station * params.number_of_antennas_string;
 
         ReadAllAntennaGains(settings1);
+        ReadAllAntennaImpedanceTx(settings1);
 
         //	if (settings1->NOISE==2){
         ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
@@ -1459,6 +1461,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         }
 
         ReadAllAntennaGains(settings1);
+        ReadAllAntennaImpedanceTx(settings1);
 
         ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 
@@ -1701,6 +1704,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         }
 
         ReadAllAntennaGains(settings1);
+        ReadAllAntennaImpedanceTx(settings1);
 
         //	    if (settings1->NOISE == 2){
         //Read the noise figures
@@ -2071,6 +2075,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         } // if idealized geometry
         
         ReadAllAntennaGains(settings1);
+        ReadAllAntennaImpedanceTx(settings1);
 
         //	    if (settings1->NOISE == 2){
         //Read the noise figures
