@@ -311,6 +311,8 @@ class Settings
                        // 3: use the chiba xfdtd models (treats top and bottom as the same)
                        // 4: use the chiba in-situ models (treats top and bottom as the same)
                        // The related wiki page for antenna models description:http://ara.icecube.wisc.edu/wiki/index.php/Antenna_model
+                       
+   int TX_ANTENNA_IMPEDANCE; // 0: Default: impedance for PVA antenna provided by Mohammad Ful Hossain Seikh from Kansas.
 
 	int APPLY_NOISE_FIGURE; // 0: do not apply new noise figure from Thomas Meures 2016
 	                        // 1: apply new noise figure to data

@@ -2185,6 +2185,12 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         ReadHgain("./data/antennas/In_situ_HPol_Model.txt", settings1);
     }
 }
+//Defining function that reads in TX antenna impedances
+inline void Detector::ReadAllAntennaImpedanceTx(Settings *settings1) {
+    if (settings1->TX_ANTENNA_IMPEDANCE == 0){
+        ReadImpedance("./data/antennas/PVA_Impedance_2023.txt", settings1);
+    }
+}//ReadAllAntennaImpedanceTx
 
 // convert the swr into a transmission coefficient
 inline double Detector::SWRtoTransCoeff(double swr){
