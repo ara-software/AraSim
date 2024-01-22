@@ -1703,6 +1703,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                                 	stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(heff);
                                                     
+                                                    
+                                                    
                                                     //Apply Tx antenna factors
                                                     if (n > 0)
                                                 	{

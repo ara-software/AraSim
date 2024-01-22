@@ -2821,13 +2821,43 @@ double Detector::GetGain_1D( double freq, double theta, double phi, int ant_m ) 
 
 }
 
-double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int ant_number) {
-
+double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int ant_number, bool useInTransmitterMode) {
 
     // find nearest theta, phi bin
     //
     //int i = (int)(theta/5.);
     //int j = (int)(phi/5.);
+    
+    //Define local array for tempGain to allow for dynamic usage of different gains for different antennas.
+    double tempGain[freq_step_max][ang_step_max];
+    
+    //VPol Rx
+    if ( ant_m == 0 and not useInTransmitterMode) {
+        if (ant_number == 0) {
+            // tempGain = Vgain;
+            memcpy(tempGain, Vgain, sizeof(tempGain));
+        }
+        else if (ant_number == 2) {
+            // tempGain = VgainTop;
+            memcpy(tempGain, VgainTop, sizeof(tempGain));
+        }
+    }
+    //HPol Rx
+    else if ( ant_m == 1 and not useInTransmitterMode) {
+        // tempGain = Hgain;
+        memcpy(tempGain, Hgain, sizeof(tempGain));
+    }
+    //VPol Tx
+    else if ( ant_m == 0 and useInTransmitterMode) {
+        // tempGain = VgainTx;
+        memcpy(tempGain, VgainTx, sizeof(tempGain));
+    }
+    //HPol Tx
+    else if ( ant_m == 1 and useInTransmitterMode) {
+        // tempGain = HgainTx;
+        memcpy(tempGain, HgainTx, sizeof(tempGain));
+    }    
+        
 
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
@@ -2846,79 +2876,27 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
     int bin = (int)( (freq - freq_init) / freq_width )+1;
 
-    // Vpol
-    if ( ant_m == 0 ) {
-
-      if(ant_number==0){//bottom Vpol
-        slope_1 = (Vgain[1][angle_bin] - Vgain[0][angle_bin]) / (Freq[1] - Freq[0]);
+     //Interpolation of tempGain
+    slope_1 = (tempGain[1][angle_bin] - tempGain[0][angle_bin]) / (Freq[1] - Freq[0]);
 
 
-        // if freq is lower than freq_init
-        if ( freq < freq_init ) {
+    // if freq is lower than freq_init
+    if ( freq < freq_init ) {
 
-            Gout = slope_1 * (freq - Freq[0]) + Vgain[0][angle_bin];
-        }
-        // if freq is higher than last freq
-        else if ( freq > Freq[freq_step-1] ) {
+        Gout = slope_1 * (freq - Freq[0]) + tempGain[0][angle_bin];
+    }
+    // if freq is higher than last freq
+    else if ( freq > Freq[freq_step-1] ) {
 
-            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
-            Gout = 0.;
-        }
+        //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
+        Gout = 0.;
+    }
 
-        else {
+    else {
 
-            Gout = Vgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vgain[bin][angle_bin]-Vgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-        } // not outside the Freq[] range
-      }//bottom Vpol
-      else if(ant_number==2){//Top Vpol
-//	cerr << "Does it happen: yes it happens! " << ant_number << endl;
-        slope_1 = (VgainTop[1][angle_bin] - VgainTop[0][angle_bin]) / (Freq[1] - Freq[0]);
-
-
-        // if freq is lower than freq_init
-        if ( freq < freq_init ) {
-
-            Gout = slope_1 * (freq - Freq[0]) + VgainTop[0][angle_bin];
-        }
-        // if freq is higher than last freq
-        else if ( freq > Freq[freq_step-1] ) {
-
-            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
-            Gout = 0.;
-        }
-
-        else {
-
-            Gout = VgainTop[bin-1][angle_bin] + (freq-Freq[bin-1])*(VgainTop[bin][angle_bin]-VgainTop[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-	}
-      }//Top Vpol
+        Gout = tempGain[bin-1][angle_bin] + (freq-Freq[bin-1])*(tempGain[bin][angle_bin]-tempGain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+    } // not outside the Freq[] range    
     
-    } // Vpol case
-
-    // Hpol
-    else if ( ant_m == 1 ) {
-
-        slope_1 = (Hgain[1][angle_bin] - Hgain[0][angle_bin]) / (Freq[1] - Freq[0]);
-
-
-        // if freq is lower than freq_init
-        if ( freq < freq_init ) {
-
-            Gout = slope_1 * (freq - Freq[0]) + Hgain[0][angle_bin];
-        }
-        // if freq is higher than last freq
-        else if ( freq > Freq[freq_step-1] ) {
-
-            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Hgain[freq_step-1][angle_bin];
-            Gout = 0.;
-        }
-
-        else {
-
-            Gout = Hgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hgain[bin][angle_bin]-Hgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-        } // not outside the Freq[] range
-    
-    } // Hpol case
 
 
     if ( Gout < 0. ){ // gain can not go below 0
