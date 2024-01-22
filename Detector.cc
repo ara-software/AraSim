@@ -2912,13 +2912,33 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
 
 
-double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m ) {
+double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m, bool useInTransmitterMode ) {
 
 
     // find nearest theta, phi bin
     //
     //int i = (int)(theta/5.);
     //int j = (int)(phi/5.);
+    
+    //Creating tempPhase array to make this function more dynamic for Rx and Tx mode.
+    double tempPhase[freq_step_max][ang_step_max];
+    
+    //VPol Rx
+    if ( ant_m == 0 and not useInTransmitterMode) {
+        memcpy(tempPhase, Vphase, sizeof(tempPhase));
+    }
+    //HPol Rx
+    else if ( ant_m == 1 and not useInTransmitterMode) {
+        memcpy(tempPhase, Hphase, sizeof(tempPhase));
+    }
+    //VPol Tx
+    else if ( ant_m == 0 and useInTransmitterMode) {
+        memcpy(tempPhase, VphaseTx, sizeof(tempPhase));
+    }
+    //HPol Tx
+    else if ( ant_m == 1 and useInTransmitterMode) {
+        memcpy(tempPhase, HphaseTx, sizeof(tempPhase));
+    }        
 
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
@@ -2938,86 +2958,65 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
 
     int bin = (int)( (freq - freq_init) / freq_width )+1;
 
-    // Vpol
-    if ( ant_m == 0 ) {
-
-        slope_1 = (Vphase[1][angle_bin] - Vphase[0][angle_bin]) / (Freq[1] - Freq[0]);
-        slope_2 = (Vphase[freq_step-1][angle_bin] - Vphase[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
+    slope_1 = (tempPhase[1][angle_bin] - tempPhase[0][angle_bin]) / (Freq[1] - Freq[0]);
+    slope_2 = (tempPhase[freq_step-1][angle_bin] - tempPhase[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
 
 
-        // if freq is lower than freq_init
-        if ( freq < freq_init ) {
+    // if freq is lower than freq_init
+    if ( freq < freq_init ) {
 
-            phase = slope_1 * (freq - Freq[0]) + Vphase[0][angle_bin];
+        phase = slope_1 * (freq - Freq[0]) + tempPhase[0][angle_bin];
 
-            if ( phase > 180. ) {
-                while ( phase > 180. ) {
-                    phase = phase - 360.;
-                }
-            }
-            else if ( phase < -180. ) {
-                while ( phase < -180. ) {
-                    phase = phase + 360.;
-                }
+        if ( phase > 180. ) {
+            while ( phase > 180. ) {
+                phase = phase - 360.;
             }
         }
-        // if freq is higher than last freq
-        else if ( freq > Freq[freq_step-1] ) {
-
-            phase = slope_2 * (freq - Freq[freq_step-1]) + Vphase[freq_step-1][angle_bin];
-
-            if ( phase > 180. ) {
-                while ( phase > 180. ) {
-                    phase = phase - 360.;
-                }
-            }
-            else if ( phase < -180. ) {
-                while ( phase < -180. ) {
-                    phase = phase + 360.;
-                }
+        else if ( phase < -180. ) {
+            while ( phase < -180. ) {
+                phase = phase + 360.;
             }
         }
+    }
+    // if freq is higher than last freq
+    else if ( freq > Freq[freq_step-1] ) {
 
-        else {
+        phase = slope_2 * (freq - Freq[freq_step-1]) + tempPhase[freq_step-1][angle_bin];
 
-            // not at the first two bins
-            if ( bin<freq_step-1 && bin>1 ) {
+        if ( phase > 180. ) {
+            while ( phase > 180. ) {
+                phase = phase - 360.;
+            }
+        }
+        else if ( phase < -180. ) {
+            while ( phase < -180. ) {
+                phase = phase + 360.;
+            }
+        }
+    }
 
-                slope_t1 = (Vphase[bin-1][angle_bin] - Vphase[bin-2][angle_bin]) / (Freq[bin-1] - Freq[bin-2]);
-                slope_t2 = (Vphase[bin+1][angle_bin] - Vphase[bin][angle_bin]) / (Freq[bin+1] - Freq[bin]);
+    else {
 
-                // down going case
-                if ( slope_t1 * slope_t2 > 0. && Vphase[bin][angle_bin] - Vphase[bin-1][angle_bin] > 180. ) {
+        // not at the first two bins
+        if ( bin<freq_step-1 && bin>1 ) {
 
-                    phase = Vphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vphase[bin][angle_bin]-360.-Vphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-                }
+            slope_t1 = (tempPhase[bin-1][angle_bin] - tempPhase[bin-2][angle_bin]) / (Freq[bin-1] - Freq[bin-2]);
+            slope_t2 = (tempPhase[bin+1][angle_bin] - tempPhase[bin][angle_bin]) / (Freq[bin+1] - Freq[bin]);
 
-                // up going case
-                else if ( slope_t1 * slope_t2 > 0. && Vphase[bin][angle_bin] - Vphase[bin-1][angle_bin] < -180. ) {
-                    phase = Vphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vphase[bin][angle_bin]+360.-Vphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-                }
+            // down going case
+            if ( slope_t1 * slope_t2 > 0. && tempPhase[bin][angle_bin] - tempPhase[bin-1][angle_bin] > 180. ) {
 
-                // neither case
-                else {
-                    phase = Vphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vphase[bin][angle_bin]-Vphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-                }
+                phase = tempPhase[bin-1][angle_bin] + (freq-Freq[bin-1])*(tempPhase[bin][angle_bin]-360.-tempPhase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+            }
 
-                // if outside the range, put inside
-                if ( phase > 180. ) {
-                    while ( phase > 180. ) {
-                        phase = phase - 360.;
-                    }
-                }
-                else if ( phase < -180. ) {
-                    while ( phase < -180. ) {
-                        phase = phase + 360.;
-                    }
-                }
+            // up going case
+            else if ( slope_t1 * slope_t2 > 0. && tempPhase[bin][angle_bin] - tempPhase[bin-1][angle_bin] < -180. ) {
+                phase = tempPhase[bin-1][angle_bin] + (freq-Freq[bin-1])*(tempPhase[bin][angle_bin]+360.-tempPhase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+            }
 
-            }// not first two bins
-
+            // neither case
             else {
-                phase = Vphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vphase[bin][angle_bin]-Vphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+                phase = tempPhase[bin-1][angle_bin] + (freq-Freq[bin-1])*(tempPhase[bin][angle_bin]-tempPhase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
             }
 
             // if outside the range, put inside
@@ -3032,107 +3031,25 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
                 }
             }
 
-        } // not outside the Freq[] range
-    
-    } // Vpol case
-
-    // Hpol
-    else if ( ant_m == 1 ) {
-
-        slope_1 = (Hphase[1][angle_bin] - Hphase[0][angle_bin]) / (Freq[1] - Freq[0]);
-        slope_2 = (Hphase[freq_step-1][angle_bin] - Hphase[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
-
-
-        // if freq is lower than freq_init
-        if ( freq < freq_init ) {
-
-            phase = slope_1 * (freq - Freq[0]) + Hphase[0][angle_bin];
-
-            if ( phase > 180. ) {
-                while ( phase > 180. ) {
-                    phase = phase - 360.;
-                }
-            }
-            else if ( phase < -180. ) {
-                while ( phase < -180. ) {
-                    phase = phase + 360.;
-                }
-            }
-        }
-        // if freq is higher than last freq
-        else if ( freq > Freq[freq_step-1] ) {
-
-            phase = slope_2 * (freq - Freq[freq_step-1]) + Hphase[freq_step-1][angle_bin];
-
-            if ( phase > 180. ) {
-                while ( phase > 180. ) {
-                    phase = phase - 360.;
-                }
-            }
-            else if ( phase < -180. ) {
-                while ( phase < -180. ) {
-                    phase = phase + 360.;
-                }
-            }
-        }
+        }// not first two bins
 
         else {
+            phase = tempPhase[bin-1][angle_bin] + (freq-Freq[bin-1])*(tempPhase[bin][angle_bin]-tempPhase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        }
 
-            // not at the first two bins
-            if ( bin<freq_step-1 && bin>1 ) {
-
-                slope_t1 = (Hphase[bin-1][angle_bin] - Hphase[bin-2][angle_bin]) / (Freq[bin-1] - Freq[bin-2]);
-                slope_t2 = (Hphase[bin+1][angle_bin] - Hphase[bin][angle_bin]) / (Freq[bin+1] - Freq[bin]);
-
-                // down going case
-                if ( slope_t1 * slope_t2 > 0. && Hphase[bin][angle_bin] - Hphase[bin-1][angle_bin] > 180. ) {
-
-                    phase = Hphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hphase[bin][angle_bin]-360.-Hphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-                }
-
-                // up going case
-                else if ( slope_t1 * slope_t2 > 0. && Hphase[bin][angle_bin] - Hphase[bin-1][angle_bin] < -180. ) {
-                    phase = Hphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hphase[bin][angle_bin]+360.-Hphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-                }
-
-                // neither case
-                else {
-                    phase = Hphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hphase[bin][angle_bin]-Hphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-                }
-
-                // if outside the range, put inside
-                if ( phase > 180. ) {
-                    while ( phase > 180. ) {
-                        phase = phase - 360.;
-                    }
-                }
-                else if ( phase < -180. ) {
-                    while ( phase < -180. ) {
-                        phase = phase + 360.;
-                    }
-                }
-
-            }// not first two bins
-
-            else {
-                phase = Hphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hphase[bin][angle_bin]-Hphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        // if outside the range, put inside
+        if ( phase > 180. ) {
+            while ( phase > 180. ) {
+                phase = phase - 360.;
             }
-
-            // if outside the range, put inside
-            if ( phase > 180. ) {
-                while ( phase > 180. ) {
-                    phase = phase - 360.;
-                }
+        }
+        else if ( phase < -180. ) {
+            while ( phase < -180. ) {
+                phase = phase + 360.;
             }
-            else if ( phase < -180. ) {
-                while ( phase < -180. ) {
-                    phase = phase + 360.;
-                }
-            }
+        }
 
-        } // not outside the Freq[] range
-    
-    } // Hpol case
+    } // not outside the Freq[] range
 
 
     return phase;

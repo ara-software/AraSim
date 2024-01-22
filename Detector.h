@@ -368,7 +368,7 @@ class Detector {
 
         double GetAntPhase(double freq, double theta, double phi, int ant_m); // return antenna phase with 2-D interpolation
 
-        double GetAntPhase_1D(double freq, double theta, double phi, int ant_m); // return antenna phase with 1-D interpolation
+        double GetAntPhase_1D(double freq, double theta, double phi, int ant_m, bool useInTransmitterMode=false); // return antenna phase with 1-D interpolation
 
 
         double GetFilterGain(int bin) { return FilterGain[bin]; }   // same bin with Vgain, Hgain
