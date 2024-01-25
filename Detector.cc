@@ -2210,8 +2210,15 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
 }
 //Defining function that reads in TX antenna impedances
 inline void Detector::ReadAllAntennaImpedanceTx(Settings *settings1) {
+    //Read in Rx impedances
+    //Vpol
+    ReadImpedance("./data/antennas/ARA_Impedance_SimpleApproximation.txt", settings1, 0);
+    //Hpol
+    ReadImpedance("./data/antennas/ARA_Impedance_SimpleApproximation.txt", settings1, 1);
+    
+    
     if (settings1->TX_ANTENNA_IMPEDANCE == 0){
-        ReadImpedance("./data/antennas/PVA_Impedance_2023.txt", settings1);
+        ReadImpedance("./data/antennas/PVA_Impedance_2023.txt", settings1, 0, true);
     }
 }//ReadAllAntennaImpedanceTx
 
@@ -6760,7 +6767,11 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
     }
 }
 
-inline void Detector::ReadImpedance(string filename, Settings *settings1) {
+inline void Detector::ReadImpedance(string filename, Settings *settings1, int ant_m, bool useInTransmitterMode) {
+    //Initialize temp Impedance array to allow for dynamic importing of impedances for Tx and Rx
+    double TempRealImpedance[freq_step_max];
+    double TempImagImpedance[freq_step_max];    
+    
     ifstream NecOut( filename.c_str() );
     const int N = freq_step;
     string line;
@@ -6769,15 +6780,30 @@ inline void Detector::ReadImpedance(string filename, Settings *settings1) {
             getline (NecOut, line); //Gets first line to skip header
             for (int i=0; i<freq_step; i++){
                 getline (NecOut, line, '\t');
-                RealImpedanceTx[i] = line[1];
-                ImagImpedanceTx[i] = line[2];
+                TempRealImpedance[i] = line[1];
+                TempImagImpedance[i] = line[2];
             } //end frep_step
         }// end while NecOut.good
         NecOut.close();
     }// end if file open    
     
+    //VPol Rx
+    if ( ant_m == 0 and not useInTransmitterMode) {
+        memcpy(RealImpedanceV, TempRealImpedance, sizeof(RealImpedanceV));
+        memcpy(ImagImpedanceV, TempImagImpedance, sizeof(ImagImpedanceV));
+    }
+    //HPol Rx
+    else if ( ant_m == 1 and not useInTransmitterMode) {
+        memcpy(RealImpedanceH, TempRealImpedance, sizeof(RealImpedanceH));
+        memcpy(ImagImpedanceH, TempImagImpedance, sizeof(ImagImpedanceH));        
+    }
+    //VPol Tx
+    else if ( ant_m == 0 and useInTransmitterMode) {
+        memcpy(RealImpedanceTx, TempRealImpedance, sizeof(RealImpedanceTx));
+        memcpy(ImagImpedanceTx, TempImagImpedance, sizeof(ImagImpedanceTx));        
+    }    
     
-}//ReadRealImpedance
+}//ReadImpedance
 
 Detector::~Detector() {
   //cout<<"Destruct class Detector"<<endl;

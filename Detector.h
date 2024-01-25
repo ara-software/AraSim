@@ -243,7 +243,7 @@ class Detector {
         double VphaseTx[freq_step_max][ang_step_max];
         double HgainTx[freq_step_max][ang_step_max];
         double HphaseTx[freq_step_max][ang_step_max];
-        void ReadImpedance(string filename, Settings *settings1);
+        void ReadImpedance(string filename, Settings *settings1, int ant_m, bool useInTransmitterMode=false);
         void ReadAllAntennaImpedanceTx(Settings *settings1);
 
 
