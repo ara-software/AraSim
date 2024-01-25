@@ -230,6 +230,12 @@ class Detector {
         double Hphase[freq_step_max][ang_step_max];
         double Freq[freq_step_max];
     
+        //Define impedance and gain for receiving antenna
+        double RealImpedanceV[freq_step_max];
+        double ImagImpedanceV[freq_step_max];   
+        double RealImpedanceH[freq_step_max];
+        double ImagImpedanceH[freq_step_max];       
+    
         //Define impedance and gain for transmitting antenna
         double RealImpedanceTx[freq_step_max];
         double ImagImpedanceTx[freq_step_max];
@@ -362,6 +368,8 @@ class Detector {
 
         double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, int ant_number=0, bool useInTransmitterMode=false);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
 
+        //Creating function to interpolate antenna impedance to frequency binning.
+        double GetImpedance(double freq, int ant_m, int ant_number, bool useInTransmitterMode=false);
 	
 	int GetTrigOffset( int ch, Settings *settings1 );
         int GetTrigMasking( int ch );

@@ -2822,11 +2822,6 @@ double Detector::GetGain_1D( double freq, double theta, double phi, int ant_m ) 
 }
 
 double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int ant_number, bool useInTransmitterMode) {
-
-    // find nearest theta, phi bin
-    //
-    //int i = (int)(theta/5.);
-    //int j = (int)(phi/5.);
     
     //Define local array for tempGain to allow for dynamic usage of different gains for different antennas.
     double tempGain[freq_step_max][ang_step_max];
@@ -2834,27 +2829,22 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     //VPol Rx
     if ( ant_m == 0 and not useInTransmitterMode) {
         if (ant_number == 0) {
-            // tempGain = Vgain;
             memcpy(tempGain, Vgain, sizeof(tempGain));
         }
         else if (ant_number == 2) {
-            // tempGain = VgainTop;
             memcpy(tempGain, VgainTop, sizeof(tempGain));
         }
     }
     //HPol Rx
     else if ( ant_m == 1 and not useInTransmitterMode) {
-        // tempGain = Hgain;
         memcpy(tempGain, Hgain, sizeof(tempGain));
     }
     //VPol Tx
     else if ( ant_m == 0 and useInTransmitterMode) {
-        // tempGain = VgainTx;
         memcpy(tempGain, VgainTx, sizeof(tempGain));
     }
     //HPol Tx
     else if ( ant_m == 1 and useInTransmitterMode) {
-        // tempGain = HgainTx;
         memcpy(tempGain, HgainTx, sizeof(tempGain));
     }    
         
@@ -2905,6 +2895,64 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
     return Gout;
 
+}
+
+//Creating function to interpolate antenna impedance to frequency binning.
+double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useInTransmitterMode ) {
+    //Define local array for tempImpedance to allow for usage of different impedances for different antennas
+    double tempImpedance[freq_step_max];
+    //VPol Rx
+    if ( ant_m == 0 and not useInTransmitterMode) {
+        memcpy(tempImpedance, RealImpedanceV, sizeof(tempImpedance));
+    }
+    //HPol Rx
+    else if ( ant_m == 1 and not useInTransmitterMode) {
+        memcpy(tempImpedance, RealImpedanceH, sizeof(tempImpedance));
+    }
+    //VPol Tx
+    else if ( ant_m == 0 and useInTransmitterMode) {
+        memcpy(tempImpedance, RealImpedanceTx, sizeof(tempImpedance));
+    }
+    // //HPol Tx
+    // else if ( ant_m == 1 and useInTransmitterMode) {
+    //     memcpy(tempImpedance, HimpedanceTx, sizeof(tempImpedance));
+    // }      
+   
+    //The following is a simplified form of the interpolation used in GetGain_1D_OutZero, where we only interpolate over freuqnecy bins and ignore angle bins.
+    double slope_1; // slope of init part
+
+    double ZOut;
+
+    int bin = (int)( (freq - freq_init) / freq_width )+1;
+
+     //Interpolation of tempGain
+    slope_1 = (tempImpedance[1] - tempImpedance[0]) / (Freq[1] - Freq[0]);
+
+
+    // if freq is lower than freq_init
+    if ( freq < freq_init ) {
+
+        ZOut = slope_1 * (freq - Freq[0]) + tempImpedance[0];
+    }
+    // if freq is higher than last freq
+    else if ( freq > Freq[freq_step-1] ) {
+        ZOut = 0.;
+    }
+
+    else {
+
+        ZOut = tempImpedance[bin-1] + (freq-Freq[bin-1])*(tempImpedance[bin]-tempImpedance[bin-1])/(Freq[bin]-Freq[bin-1]);
+    } // not outside the Freq[] range    
+    
+
+
+    if ( ZOut < 0. ){ // impedance can not go below 0
+    	ZOut = 0.;
+    }
+
+    return ZOut;
+    
+    
 }
 
 
