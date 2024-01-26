@@ -2830,32 +2830,37 @@ double Detector::GetGain_1D( double freq, double theta, double phi, int ant_m ) 
 
 double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int ant_number, bool useInTransmitterMode) {
     
-    //Define local array for tempGain to allow for dynamic usage of different gains for different antennas.
-    double tempGain[freq_step_max][ang_step_max];
+    /*
+    The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, VgainTx, and HgainTx)
+    to match the frequency binning dictated by NFOUR in the setup file.  - JCF 1/26/2024
+    */
     
+    //Initialize pointer to dynamically point to the gain for chosen antenna.  The structure of this pointer matches that of the global gain arrays defined in Detector.h.
+    double (*tempGain)[freq_step_max][ang_step_max] = nullptr;
+    
+    //Assign local pointer to gain array specified in the function argument
     //VPol Rx
     if ( ant_m == 0 and not useInTransmitterMode) {
         if (ant_number == 0) {
-            memcpy(tempGain, Vgain, sizeof(tempGain));
+            tempGain = &Vgain;
         }
         else if (ant_number == 2) {
-            memcpy(tempGain, VgainTop, sizeof(tempGain));
+            tempGain = &VgainTop;
         }
     }
     //HPol Rx
     else if ( ant_m == 1 and not useInTransmitterMode) {
-        memcpy(tempGain, Hgain, sizeof(tempGain));
+        tempGain = &Hgain;
     }
     //VPol Tx
     else if ( ant_m == 0 and useInTransmitterMode) {
-        memcpy(tempGain, VgainTx, sizeof(tempGain));
+        tempGain = &VgainTx;
     }
     //HPol Tx
     else if ( ant_m == 1 and useInTransmitterMode) {
-        memcpy(tempGain, HgainTx, sizeof(tempGain));
+        tempGain = &HgainTx;
     }    
-        
-
+    
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
     int j = (int)( (phi+2.5)/5. );
@@ -2865,7 +2870,6 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     int angle_bin = 37*j+i;
 
     // now just do linear interpolation at that angle
-    //
 
     double slope_1; // slope of init part
 
@@ -2874,28 +2878,22 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     int bin = (int)( (freq - freq_init) / freq_width )+1;
 
      //Interpolation of tempGain
-    slope_1 = (tempGain[1][angle_bin] - tempGain[0][angle_bin]) / (Freq[1] - Freq[0]);
-
+    slope_1 = ((*tempGain)[1][angle_bin] - (*tempGain)[0][angle_bin]) / (Freq[1] - Freq[0]);
 
     // if freq is lower than freq_init
     if ( freq < freq_init ) {
-
-        Gout = slope_1 * (freq - Freq[0]) + tempGain[0][angle_bin];
+        Gout = slope_1 * (freq - Freq[0]) + (*tempGain)[0][angle_bin];
     }
     // if freq is higher than last freq
     else if ( freq > Freq[freq_step-1] ) {
-
         //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
         Gout = 0.;
     }
 
     else {
-
-        Gout = tempGain[bin-1][angle_bin] + (freq-Freq[bin-1])*(tempGain[bin][angle_bin]-tempGain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        Gout = (*tempGain)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
     } // not outside the Freq[] range    
     
-
-
     if ( Gout < 0. ){ // gain can not go below 0
     	Gout = 0.;
     }
