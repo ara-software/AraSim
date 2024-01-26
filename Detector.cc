@@ -2904,24 +2904,20 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
 //Creating function to interpolate antenna impedance to frequency binning.
 double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useInTransmitterMode ) {
-    //Define local array for tempImpedance to allow for usage of different impedances for different antennas
-    double tempImpedance[freq_step_max];
+    //Initialize pointer to dynamically point to the impedance for the chosen antenna.
+    double (*tempImpedance)[freq_step_max] = nullptr;
     //VPol Rx
     if ( ant_m == 0 and not useInTransmitterMode) {
-        memcpy(tempImpedance, RealImpedanceV, sizeof(tempImpedance));
+        tempImpedance = &RealImpedanceV;
     }
     //HPol Rx
     else if ( ant_m == 1 and not useInTransmitterMode) {
-        memcpy(tempImpedance, RealImpedanceH, sizeof(tempImpedance));
+        tempImpedance = &RealImpedanceH;
     }
-    //VPol Tx
+    //Tx
     else if ( ant_m == 0 and useInTransmitterMode) {
-        memcpy(tempImpedance, RealImpedanceTx, sizeof(tempImpedance));
+        tempImpedance = &RealImpedanceTx;
     }
-    // //HPol Tx
-    // else if ( ant_m == 1 and useInTransmitterMode) {
-    //     memcpy(tempImpedance, HimpedanceTx, sizeof(tempImpedance));
-    // }      
    
     //The following is a simplified form of the interpolation used in GetGain_1D_OutZero, where we only interpolate over freuqnecy bins and ignore angle bins.
     double slope_1; // slope of init part
@@ -2931,13 +2927,13 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
     int bin = (int)( (freq - freq_init) / freq_width )+1;
 
      //Interpolation of tempGain
-    slope_1 = (tempImpedance[1] - tempImpedance[0]) / (Freq[1] - Freq[0]);
+    slope_1 = ((*tempImpedance)[1] - (*tempImpedance)[0]) / (Freq[1] - Freq[0]);
 
 
     // if freq is lower than freq_init
     if ( freq < freq_init ) {
 
-        ZOut = slope_1 * (freq - Freq[0]) + tempImpedance[0];
+        ZOut = slope_1 * (freq - Freq[0]) + (*tempImpedance)[0];
     }
     // if freq is higher than last freq
     else if ( freq > Freq[freq_step-1] ) {
@@ -2946,7 +2942,7 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
 
     else {
 
-        ZOut = tempImpedance[bin-1] + (freq-Freq[bin-1])*(tempImpedance[bin]-tempImpedance[bin-1])/(Freq[bin]-Freq[bin-1]);
+        ZOut = (*tempImpedance)[bin-1] + (freq-Freq[bin-1])*((*tempImpedance)[bin]-(*tempImpedance)[bin-1])/(Freq[bin]-Freq[bin-1]);
     } // not outside the Freq[] range    
     
 
@@ -2966,31 +2962,25 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
 
 
 double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m, bool useInTransmitterMode ) {
-
-
-    // find nearest theta, phi bin
-    //
-    //int i = (int)(theta/5.);
-    //int j = (int)(phi/5.);
     
     //Creating tempPhase array to make this function more dynamic for Rx and Tx mode.
-    double tempPhase[freq_step_max][ang_step_max];
+    double (*tempPhase)[freq_step_max][ang_step_max] = nullptr;
     
     //VPol Rx
     if ( ant_m == 0 and not useInTransmitterMode) {
-        memcpy(tempPhase, Vphase, sizeof(tempPhase));
+        tempPhase = &Vphase;
     }
     //HPol Rx
     else if ( ant_m == 1 and not useInTransmitterMode) {
-        memcpy(tempPhase, Hphase, sizeof(tempPhase));
+        tempPhase = &Hphase;
     }
     //VPol Tx
     else if ( ant_m == 0 and useInTransmitterMode) {
-        memcpy(tempPhase, VphaseTx, sizeof(tempPhase));
+        tempPhase = &VphaseTx;
     }
     //HPol Tx
     else if ( ant_m == 1 and useInTransmitterMode) {
-        memcpy(tempPhase, HphaseTx, sizeof(tempPhase));
+        tempPhase = &HphaseTx;
     }        
 
     // check if angles range actually theta 0-180, phi 0-360
@@ -3011,14 +3001,14 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
 
     int bin = (int)( (freq - freq_init) / freq_width )+1;
 
-    slope_1 = (tempPhase[1][angle_bin] - tempPhase[0][angle_bin]) / (Freq[1] - Freq[0]);
-    slope_2 = (tempPhase[freq_step-1][angle_bin] - tempPhase[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
+    slope_1 = ((*tempPhase)[1][angle_bin] - (*tempPhase)[0][angle_bin]) / (Freq[1] - Freq[0]);
+    slope_2 = ((*tempPhase)[freq_step-1][angle_bin] - (*tempPhase)[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
 
 
     // if freq is lower than freq_init
     if ( freq < freq_init ) {
 
-        phase = slope_1 * (freq - Freq[0]) + tempPhase[0][angle_bin];
+        phase = slope_1 * (freq - Freq[0]) + (*tempPhase)[0][angle_bin];
 
         if ( phase > 180. ) {
             while ( phase > 180. ) {
@@ -3034,7 +3024,7 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
     // if freq is higher than last freq
     else if ( freq > Freq[freq_step-1] ) {
 
-        phase = slope_2 * (freq - Freq[freq_step-1]) + tempPhase[freq_step-1][angle_bin];
+        phase = slope_2 * (freq - Freq[freq_step-1]) + (*tempPhase)[freq_step-1][angle_bin];
 
         if ( phase > 180. ) {
             while ( phase > 180. ) {
@@ -3053,23 +3043,23 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
         // not at the first two bins
         if ( bin<freq_step-1 && bin>1 ) {
 
-            slope_t1 = (tempPhase[bin-1][angle_bin] - tempPhase[bin-2][angle_bin]) / (Freq[bin-1] - Freq[bin-2]);
-            slope_t2 = (tempPhase[bin+1][angle_bin] - tempPhase[bin][angle_bin]) / (Freq[bin+1] - Freq[bin]);
+            slope_t1 = ((*tempPhase)[bin-1][angle_bin] - (*tempPhase)[bin-2][angle_bin]) / (Freq[bin-1] - Freq[bin-2]);
+            slope_t2 = ((*tempPhase)[bin+1][angle_bin] - (*tempPhase)[bin][angle_bin]) / (Freq[bin+1] - Freq[bin]);
 
             // down going case
-            if ( slope_t1 * slope_t2 > 0. && tempPhase[bin][angle_bin] - tempPhase[bin-1][angle_bin] > 180. ) {
+            if ( slope_t1 * slope_t2 > 0. && (*tempPhase)[bin][angle_bin] - (*tempPhase)[bin-1][angle_bin] > 180. ) {
 
-                phase = tempPhase[bin-1][angle_bin] + (freq-Freq[bin-1])*(tempPhase[bin][angle_bin]-360.-tempPhase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+                phase = (*tempPhase)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempPhase)[bin][angle_bin]-360.-(*tempPhase)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
             }
 
             // up going case
-            else if ( slope_t1 * slope_t2 > 0. && tempPhase[bin][angle_bin] - tempPhase[bin-1][angle_bin] < -180. ) {
-                phase = tempPhase[bin-1][angle_bin] + (freq-Freq[bin-1])*(tempPhase[bin][angle_bin]+360.-tempPhase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+            else if ( slope_t1 * slope_t2 > 0. && (*tempPhase)[bin][angle_bin] - (*tempPhase)[bin-1][angle_bin] < -180. ) {
+                phase = (*tempPhase)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempPhase)[bin][angle_bin]+360.-(*tempPhase)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
             }
 
             // neither case
             else {
-                phase = tempPhase[bin-1][angle_bin] + (freq-Freq[bin-1])*(tempPhase[bin][angle_bin]-tempPhase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+                phase = (*tempPhase)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
             }
 
             // if outside the range, put inside
@@ -3087,7 +3077,7 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
         }// not first two bins
 
         else {
-            phase = tempPhase[bin-1][angle_bin] + (freq-Freq[bin-1])*(tempPhase[bin][angle_bin]-tempPhase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+            phase = (*tempPhase)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
         }
 
         // if outside the range, put inside
@@ -6767,8 +6757,24 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
 
 inline void Detector::ReadImpedance(string filename, Settings *settings1, int ant_m, bool useInTransmitterMode) {
     //Initialize temp Impedance array to allow for dynamic importing of impedances for Tx and Rx
-    double TempRealImpedance[freq_step_max];
-    double TempImagImpedance[freq_step_max];    
+    double (*TempRealImpedance)[freq_step_max] = nullptr;
+    double (*TempImagImpedance)[freq_step_max] = nullptr;  
+    
+    //VPol Rx
+    if ( ant_m == 0 and not useInTransmitterMode) {
+        TempRealImpedance = &RealImpedanceV;
+        TempImagImpedance = &ImagImpedanceV;
+    }
+    //HPol Rx
+    else if ( ant_m == 1 and not useInTransmitterMode) {
+        TempRealImpedance = &RealImpedanceH;
+        TempImagImpedance = &ImagImpedanceH;     
+    }
+    //VPol Tx
+    else if ( ant_m == 0 and useInTransmitterMode) {
+        TempRealImpedance = &RealImpedanceTx;
+        TempImagImpedance = &ImagImpedanceTx;   
+    }       
     
     ifstream NecOut( filename.c_str() );
     const int N = freq_step;
@@ -6778,29 +6784,13 @@ inline void Detector::ReadImpedance(string filename, Settings *settings1, int an
             getline (NecOut, line); //Gets first line to skip header
             for (int i=0; i<freq_step; i++){
                 getline (NecOut, line, '\t');
-                TempRealImpedance[i] = line[1];
-                TempImagImpedance[i] = line[2];
+                (*TempRealImpedance)[i] = line[1];
+                (*TempImagImpedance)[i] = line[2];
             } //end frep_step
         }// end while NecOut.good
         NecOut.close();
     }// end if file open    
-    
-    //VPol Rx
-    if ( ant_m == 0 and not useInTransmitterMode) {
-        memcpy(RealImpedanceV, TempRealImpedance, sizeof(RealImpedanceV));
-        memcpy(ImagImpedanceV, TempImagImpedance, sizeof(ImagImpedanceV));
-    }
-    //HPol Rx
-    else if ( ant_m == 1 and not useInTransmitterMode) {
-        memcpy(RealImpedanceH, TempRealImpedance, sizeof(RealImpedanceH));
-        memcpy(ImagImpedanceH, TempImagImpedance, sizeof(ImagImpedanceH));        
-    }
-    //VPol Tx
-    else if ( ant_m == 0 and useInTransmitterMode) {
-        memcpy(RealImpedanceTx, TempRealImpedance, sizeof(RealImpedanceTx));
-        memcpy(ImagImpedanceTx, TempImagImpedance, sizeof(ImagImpedanceTx));        
-    }    
-    
+
 }//ReadImpedance
 
 Detector::~Detector() {
