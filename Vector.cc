@@ -66,7 +66,23 @@ double Vector::Mag() const {
 } //Vector::Mag
 
 double Vector::Angle(const Vector &vec) const {
-    return acos(((*this)*vec) / (this->Mag() * vec.Mag()));
+    double to_acos = ((*this)*vec) / (this->Mag() * vec.Mag());
+    double angle = acos(to_acos);
+    if ( angle == angle ){
+        return angle;
+    }
+    else { // `angle` is `nan`. Gracefully catch error.
+        if ( (to_acos >= 0.999999999) && ( to_acos <= 1.000000001 ) ){
+            return 0.0;
+        }
+        else if ( (to_acos <= -0.999999999) && ( to_acos >= -1.000000001 ) ){
+            return PI;
+        }
+        else {
+            cout<<"Warning, angle not calcaulable between provided vectors."<<endl;
+            return angle;
+        }
+    }
 } //Vector::Angle
 
 Vector Vector::ChangeCoord(const Vector &new_x_axis,const Vector &new_y_axis) const {

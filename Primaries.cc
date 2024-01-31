@@ -2394,7 +2394,6 @@ void Interaction::PickNear_Cylinder_AboveIce (IceModel *antarctica, Detector *de
  */
 
 void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings *settings1, double thisR, double thisTheta, double thisPhi) {
-    
     double range = settings1->POSNU_RADIUS;   // test value, 2km radius. can be changed to read from Settings
     
     //thisphi=gRandom->Rndm()*(maxphi-minphi)+minphi;

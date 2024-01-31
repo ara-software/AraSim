@@ -1874,3 +1874,15 @@ Added a new setting DETECTOR_STATION_ARAROOT which is used in functions involvin
 Full documentation of this work is available on https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2869
 
 ==============================================================================
+
+2023/11/21 Alan Salcedo
+
+
+This update adds the capability to model birefringence in AraSim.
+
+We activate birefringence with BIREFRINGENCE=1. Then, we can model the uniaxial case with BIAXIAL=0 or the biaxial case with BIAXIAL=1.
+
+An introduction is here: https://aradocs.wipac.wisc.edu/0029/002928/001/Birefringence%20Analysis%2011-06-23.pdf
+
+==============================================================================
+

@@ -39,10 +39,10 @@ GLIBS	= $(ROOTGLIBS) $(SYSLIBS)
 
 ROOT_LIBRARY = libAra.${DLLSUF}
 
-OBJS = Vector.o EarthModel.o IceModel.o Trigger.o Ray.o Tools.o Efficiencies.o Event.o Detector.o Position.o Spectra.o RayTrace.o RayTrace_IceModels.o signal.o secondaries.o Settings.o Primaries.o counting.o RaySolver.o Report.o eventSimDict.o AraSim.o
-OBJS2 = Vector.o EarthModel.o IceModel.o Trigger.o Ray.o Tools.o Efficiencies.o Event.o Detector.o Position.o Spectra.o RayTrace.o RayTrace_IceModels.o signal.o secondaries.o Settings.o Primaries.o counting.o RaySolver.o Report.o eventSimDict.o deconvolveWaveform.o
-CCFILE = Vector.cc EarthModel.cc IceModel.cc Trigger.cc Ray.cc Tools.cc Efficiencies.cc Event.cc Detector.cc Spectra.cc Position.cc RayTrace.cc signal.cc secondaries.cc RayTrace_IceModels.cc Settings.cc Primaries.cc counting.cc RaySolver.cc Report.cc AraSim.cc
-CLASS_HEADERS = Trigger.h Detector.h Settings.h Spectra.h IceModel.h Primaries.h Report.h Event.h #need to add headers which added to Tree Branch
+OBJS = Vector.o EarthModel.o IceModel.o Birefringence.o Trigger.o Ray.o Tools.o Efficiencies.o Event.o Detector.o Position.o Spectra.o RayTrace.o RayTrace_IceModels.o signal.o secondaries.o Settings.o Primaries.o counting.o RaySolver.o Report.o eventSimDict.o AraSim.o
+OBJS2 = Vector.o EarthModel.o IceModel.o Birefringence.o Trigger.o Ray.o Tools.o Efficiencies.o Event.o Detector.o Position.o Spectra.o RayTrace.o RayTrace_IceModels.o signal.o secondaries.o Settings.o Primaries.o counting.o RaySolver.o Report.o eventSimDict.o deconvolveWaveform.o
+CCFILE = Vector.cc EarthModel.cc IceModel.cc Birefringence.cc Trigger.cc Ray.cc Tools.cc Efficiencies.cc Event.cc Detector.cc Spectra.cc Position.cc RayTrace.cc signal.cc secondaries.cc RayTrace_IceModels.cc Settings.cc Primaries.cc counting.cc RaySolver.cc Report.cc AraSim.cc
+CLASS_HEADERS = Trigger.h Detector.h Settings.h Spectra.h IceModel.h Birefringence.h Primaries.h Report.h Event.h #need to add headers which added to Tree Branch
 
 PROGRAMS = AraSim
 
