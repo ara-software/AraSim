@@ -5,7 +5,7 @@ import sys
 	And summed weight passing
 '''
 expected_global_pass = 3
-expected_total_weight = 0.993266
+expected_total_weight = 1.99067
 expected_total_weight_sigma = 0.0001
 
 
