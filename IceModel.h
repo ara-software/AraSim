@@ -172,9 +172,16 @@ public:
   void GetFresnel_pokey (double i_ang, double n1, double n2, double &r, double &t);
 void GetFresnel (
         double launch_angle, double rec_angle,
-        double refl_angle, Position &posnu, Vector &launch_vector, Vector &rec_vector, Settings *settings1, double &fresnel, double &mag,
+        double refl_angle, Position &posnu, Vector &launch_vector, Vector &rec_vector, Settings *settings1, double &fresnel, 
         Vector &Pol // will read the polarization at the source and return polarization at the target antenna
         );
+  void GetMag(    
+      double &mag, double ray_path_length, 
+      double launch_angle, double rec_angle, int ray_sol_cnt,
+      Position &posnu, Position &posant,
+      double antshift,
+      IceModel *icemodel, Settings *settings1
+  );
 
   // new ARA ice attenuation measurement values (at 300 MHz)
   //
