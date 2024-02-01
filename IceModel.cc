@@ -6,6 +6,7 @@
 #include "EarthModel.h"
 #include "Vector.h"
 #include "Ray.h"
+#include "RaySolver.h"
 #include "Settings.h"
 //#include "icemodel.hh"
 //#include "earthmodel.hh"
@@ -1807,20 +1808,13 @@ void IceModel::GetFresnel_pokey (double i_ang, double n1, double n2, double &r, 
 
 void IceModel::GetFresnel (
         double launch_angle, double rec_angle,
-        double refl_angle, Position &posnu, Vector &launch_vector, Vector &rec_vector, Settings *settings1, double &fresnel, double &mag,
+        double refl_angle, Position &posnu, Vector &launch_vector, Vector &rec_vector, Settings *settings1, double &fresnel,
         Vector &Pol // will read the polarization at the source and return polarization at the target antenna
         ) {
 
-    double n1 = 1.35;   // index of refraction at the firn
+    // double n1 = 1.35;   // index of refraction at the firn
     double n2 = 1.;     // index of refraction at the air
-
-    // calculate the magnification factor for plane / spherical wave case
-    if (settings1->WAVE_TYPE == 0) { // plane wave
-        mag = sqrt( abs(tan(rec_angle)) / abs(tan (launch_angle)) );
-    }
-    else if (settings1->WAVE_TYPE == 1) { // spherical wave
-        mag = sqrt( abs(tan (launch_angle)) / abs(tan (rec_angle)) );
-    }
+    double nL = GetN(posnu);
 
     /*
       * BAC, AC, JT on 2020/11/3
@@ -1852,14 +1846,22 @@ void IceModel::GetFresnel (
 
         double r_coeff_pokey, r_coeff_slappy;
 
-        if (n1/n2 * sin(launch_angle) >= 1.) {  // total internal reflection case
+        if (nL/n2 * sin(launch_angle) >= 1.) {  // total internal reflection case
             r_coeff_pokey = 1.;
             r_coeff_slappy = 1.;
         }
 
+        else if (launch_angle == 0.0) {
+
+            // Use the limit as launch_angle -> 0 to avoid divide-by-zeros
+            r_coeff_pokey = ( 1 - (nL/n2) ) / ( 1 + (nL/n2) );
+            r_coeff_slappy = ( 1 - (nL/n2) ) / ( 1 + (nL/n2) );
+
+        }
+
         else {  // there is refracted ray to air
 
-            double t_angle = asin( n1/n2 * sin(launch_angle) ); // transmitted ray (which we don't care) angle
+            double t_angle = asin( nL/n2 * sin(launch_angle) ); // transmitted ray (which we don't care) angle
 
             r_coeff_pokey = tan(launch_angle - t_angle) / tan(launch_angle + t_angle);  // only reflected ray can be a signal
             r_coeff_slappy = sin(launch_angle - t_angle) / sin(launch_angle + t_angle);
@@ -1882,6 +1884,80 @@ void IceModel::GetFresnel (
 
 }
 
+
+void IceModel::GetMag (
+    double &mag, double ray_path_length, 
+    double launch_angle, double rec_angle, int ray_sol_cnt,
+    Position &posnu, Position &posant,
+    double antshift,
+    IceModel *icemodel, Settings *settings1
+) { // Calculates magnification factor (aka focusing factor/correction)
+    // Reference: NuRadioMC paper, equation 19 (https://arxiv.org/abs/1906.01670)
+  
+    // Calculate (easy) variables needed
+    double launch_index = GetN(posnu);
+    double rec_index = GetN(posant);
+    double rec_depth = posant.GetZ();
+
+    // Prepare the Ray for the shifted antenna
+    Position posant_shifted;
+    posant_shifted.SetXYZ(posant.GetX(), posant.GetY(), posant.GetZ() + antshift);
+    vector<vector < double>> shifted_ray_output; // Initialize shifted ray output
+    RaySolver *shiftedraysolver = new RaySolver();
+    std::vector < std::vector < std::vector <double> > > ShiftedRayStep;
+    shiftedraysolver->Solve_Ray( // solve shifted ray from neutrino to shifted antenna
+        posnu, posant_shifted, 
+        icemodel, shifted_ray_output, settings1, ShiftedRayStep
+    );  
+
+    // If there is no ray solution for the shifted antenna, 
+    // shift it in the opposite direction
+    if ( shifted_ray_output.size() == 0 ){
+        ShiftedRayStep.clear();
+        posant_shifted.SetXYZ(posant.GetX(), posant.GetY(), posant.GetZ() - antshift);
+        shiftedraysolver->Solve_Ray( // solve shifted ray from neutrino to shifted antenna
+            posnu, posant_shifted, 
+            icemodel, shifted_ray_output, settings1, ShiftedRayStep
+        );  
+    }
+
+    // If there is a ray solution for the shifted antenna, 
+    //   calculate the magnification factor with the full equation. 
+    //   Otherwise, use the ratio of index_of_refractions approximation
+    if ( shifted_ray_output.size() > 0 ) {
+        double shifted_rec_depth = posant_shifted.GetZ();
+        double shifted_launch_angle = shifted_ray_output[1][ray_sol_cnt];
+        mag = sqrt(
+            ( ray_path_length / sin(rec_angle) ) * 
+            abs( (launch_angle - shifted_launch_angle) / 
+                (rec_depth - shifted_rec_depth)          ) *
+            ( launch_index / rec_index )
+        );
+    }
+    else {
+        if (settings1->WAVE_TYPE==0) { // plane wave
+            mag = launch_index / rec_index ;
+        }
+        else if (settings1->WAVE_TYPE==1) { // spherical wave
+            mag = rec_index / launch_index ;
+        }   
+    }
+
+    // Gently catch and adjust for issues in calculation
+    if ( (mag==0) or !( mag==mag ) ){ // If mag is 0 or nan, approximate
+        if (settings1->WAVE_TYPE==0) { // plane wave
+            mag = launch_index / rec_index ;
+        }
+        else if (settings1->WAVE_TYPE==1) { // spherical wave
+            mag = rec_index / launch_index ;
+        } 
+    }
+    if ( mag > 2) mag=2; // Set a cap, inspired from NuRadioMC
+
+    // Clean up
+    delete shiftedraysolver;
+
+}
 
 //void IceModel::FillArraysforTree(double icethck[1200][1000],double elev[1068][869],double lon_ground[1068][869],double lat_ground[1068][869],double lon_ice[1200][1000],double lat_ice[1200][1000],double h20_depth[1200][1000],double lon_water[1200][1000],double lat_water[1200][1000]) {
 // void IceModel::FillArraysforTree(double lon_ground[1068][869],double lat_ground[1068][869],double lon_ice[1200][1000],double lat_ice[1200][1000],double lon_water[1200][1000],double lat_water[1200][1000]) {
