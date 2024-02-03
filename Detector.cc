@@ -2918,6 +2918,8 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
     else if ( ant_m == 0 and useInTransmitterMode) {
         tempImpedance = &RealImpedanceTx;
     }
+    
+    
    
     //The following is a simplified form of the interpolation used in GetGain_1D_OutZero, where we only interpolate over freuqnecy bins and ignore angle bins.
     double slope_1; // slope of init part
@@ -2928,27 +2930,40 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
 
      //Interpolation of tempGain
     slope_1 = ((*tempImpedance)[1] - (*tempImpedance)[0]) / (Freq[1] - Freq[0]);
-
+    
+    // cout << "*tempImpedance[0] = " << *tempImpedance[0] << endl;
+    // cout << "*tempImpedance[1] = " << *tempImpedance[1] << endl;
+    // cout << "slope_1 = " << slope_1 << endl;
+    // cout << "freq = " << freq << endl;
+    // cout << "freq_step-1 = " << freq_step-1 << endl;
+    // cout << "Freq[freq_step-1] = " << Freq[freq_step-1] << endl;
 
     // if freq is lower than freq_init
     if ( freq < freq_init ) {
 
         ZOut = slope_1 * (freq - Freq[0]) + (*tempImpedance)[0];
+        // cout << "ZOut1 = " << ZOut << endl;
     }
     // if freq is higher than last freq
     else if ( freq > Freq[freq_step-1] ) {
         ZOut = 0.;
+        // cout << "freq = " << freq << endl;
+        // cout << "freq_step-1 = " << freq_step-1 << endl;
+        // cout << "Freq[freq_step-1] = " << Freq[freq_step-1] << endl;
+        // cout << "ZOut2 = " << ZOut << endl;
     }
 
     else {
 
         ZOut = (*tempImpedance)[bin-1] + (freq-Freq[bin-1])*((*tempImpedance)[bin]-(*tempImpedance)[bin-1])/(Freq[bin]-Freq[bin-1]);
+        // cout << "ZOut3 = " << ZOut << endl;
     } // not outside the Freq[] range    
     
 
 
     if ( ZOut < 0. ){ // impedance can not go below 0
     	ZOut = 0.;
+        // cout << "ZOut4 = " << ZOut << endl;
     }
 
     return ZOut;
@@ -6779,13 +6794,27 @@ inline void Detector::ReadImpedance(string filename, Settings *settings1, int an
     ifstream NecOut( filename.c_str() );
     const int N = freq_step;
     string line;
+    cout << "N = " << N << endl;
+    cout << "freq_step = " << freq_step << endl;
     if ( NecOut.is_open() ) {
         while (NecOut.good() ) {
             getline (NecOut, line); //Gets first line to skip header
             for (int i=0; i<freq_step; i++){
-                getline (NecOut, line, '\t');
-                (*TempRealImpedance)[i] = line[1];
-                (*TempImagImpedance)[i] = line[2];
+                // getline (NecOut, line, '\t');
+                getline (NecOut, line);
+                if (not line.empty()) {
+                    cout << line << endl;
+                    // cout << "atof(line.substr(0,6).c_str())  = " << atof(line.substr(0,6).c_str()) << endl;
+                    // cout << "atof(line.substr(13,21).c_str())  = " << atof(line.substr(13,21).c_str()) << endl;
+                    // cout << "atof(line.substr(25,32).c_str())  = " << atof(line.substr(25,32).c_str()) << endl;               
+                    // cout << "line[0] = " << line[0] << endl;
+                    // cout << "line[1] = " << line[1] << endl;
+                    // cout << "line[2] = " << line[2] << endl;
+                    // cout << "i = " << i << endl;
+                    // cout << "Real Z = " << line[1] << endl;
+                    (*TempRealImpedance)[i] = atof(line.substr(13,21).c_str());
+                    (*TempImagImpedance)[i] = atof(line.substr(25,32).c_str());
+                }
             } //end frep_step
         }// end while NecOut.good
         NecOut.close();
