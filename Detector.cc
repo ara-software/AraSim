@@ -832,7 +832,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         #endif
 
         ReadAllAntennaGains(settings1);
-        ReadAllAntennaImpedanceTx(settings1);
+        ReadAllAntennaImpedance(settings1);
 
         //	if (settings1->NOISE == 2){
         ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
@@ -1220,7 +1220,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         max_number_of_antennas_station = params.number_of_strings_station * params.number_of_antennas_string;
 
         ReadAllAntennaGains(settings1);
-        ReadAllAntennaImpedanceTx(settings1);
+        ReadAllAntennaImpedance(settings1);
 
         //	if (settings1->NOISE==2){
         ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
@@ -1461,7 +1461,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         }
 
         ReadAllAntennaGains(settings1);
-        ReadAllAntennaImpedanceTx(settings1);
+        ReadAllAntennaImpedance(settings1);
 
         ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 
@@ -1704,7 +1704,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         }
 
         ReadAllAntennaGains(settings1);
-        ReadAllAntennaImpedanceTx(settings1);
+        ReadAllAntennaImpedance(settings1);
 
         //	    if (settings1->NOISE == 2){
         //Read the noise figures
@@ -2082,7 +2082,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         } // if idealized geometry
         
         ReadAllAntennaGains(settings1);
-        ReadAllAntennaImpedanceTx(settings1);
+        ReadAllAntennaImpedance(settings1);
 
         //	    if (settings1->NOISE == 2){
         //Read the noise figures
@@ -2209,7 +2209,9 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     }
 }
 //Defining function that reads in TX antenna impedances
-inline void Detector::ReadAllAntennaImpedanceTx(Settings *settings1) {
+inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
+    
+    //Maybe loop over the settings for the antenna ID, then grab the filename based on the ID?
     //Read in Rx impedances
     //Vpol
     ReadImpedance("./data/antennas/ARA_Impedance_SimpleApproximation.txt", settings1, 0);
@@ -2217,10 +2219,10 @@ inline void Detector::ReadAllAntennaImpedanceTx(Settings *settings1) {
     ReadImpedance("./data/antennas/ARA_Impedance_SimpleApproximation.txt", settings1, 1);
     
     
-    if (settings1->TX_ANTENNA_IMPEDANCE == 0){
+    if (settings1->IMPEDANCE_TX == 4){
         ReadImpedance("./data/antennas/PVA_Impedance_2023.txt", settings1, 0, true);
     }
-}//ReadAllAntennaImpedanceTx
+}//ReadAllAntennaImpedance
 
 // convert the swr into a transmission coefficient
 inline double Detector::SWRtoTransCoeff(double swr){
@@ -6770,12 +6772,13 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
     }
 }
 
+//TODO:  Need to retool the arguments of this to use the Settings parameters for Vpol, Vpol_top, HPol, and Tx.
 inline void Detector::ReadImpedance(string filename, Settings *settings1, int ant_m, bool useInTransmitterMode) {
     //Initialize temp Impedance array to allow for dynamic importing of impedances for Tx and Rx
     double (*TempRealImpedance)[freq_step_max] = nullptr;
     double (*TempImagImpedance)[freq_step_max] = nullptr;  
     
-    //VPol Rx
+    //VPol Rx  TODO:  Add Top and bottom Vpol
     if ( ant_m == 0 and not useInTransmitterMode) {
         TempRealImpedance = &RealImpedanceV;
         TempImagImpedance = &ImagImpedanceV;

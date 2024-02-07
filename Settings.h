@@ -312,7 +312,21 @@ class Settings
                        // 4: use the chiba in-situ models (treats top and bottom as the same)
                        // The related wiki page for antenna models description:http://ara.icecube.wisc.edu/wiki/index.php/Antenna_model
                        
-   int TX_ANTENNA_IMPEDANCE; // 0: Default: impedance for PVA antenna provided by Mohammad Ful Hossain Seikh from Kansas.
+   //Impedances of RX and TX antennas.  All use the numbering scheme below:
+                       // 0: Simple 50 Ohm impedance model that matches the Zr=50 that's been historically used in AraSim
+                       // 1: Bottom VPol impedance model measured by Mohammad at Kansas
+                       // 2: Top Vpol impedance model measured by Mohammad at Kansas
+                       // 3: Hpol impedance model measured by Mohammad at Kansas
+                       // 4: PVA Antennna impedance (SPICE) measured by Mohammad at Kansas
+                       // 5: Custom impedance model dictated by data/antenna/Impedance_custom.txt
+   int IMPEDANCE_RX_VPOL; // 0: Default: See above
+   int IMPEDANCE_RX_VPOL_TOP; // 0: Default: See above
+   int IMPEDANCE_RX_HPOL; // 0: Default: see above
+   int IMPEDANCE_TX; //4: Default: see above
+   
+   
+   int RX_ANTENNA_IMPEDANCE; // 0: Default: Simple impedance model of constant 50 Ohms across all frequencies for VPol and HPol Rx (Historical Standard)
+                             // 1: Using per-antenna impedance model provided by Mohammad Ful Hossain Seikh from Kansas, with impedances for Hpol, Top Vpol, and Bottom VPol.
 
 	int APPLY_NOISE_FIGURE; // 0: do not apply new noise figure from Thomas Meures 2016
 	                        // 1: apply new noise figure to data

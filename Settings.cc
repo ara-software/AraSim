@@ -303,7 +303,10 @@ outputdir="outputs"; // directory where outputs go
     EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: event mode
     //    EVENT_NUM = 10;//read in event number in EVENT_GENERATION_MODE=1, no more than 100 events
     ANTENNA_MODE=0; //default: 0 - old antenna model information
-    TX_ANTENNA_IMPEDANCE=0; //default: PVA antenna impedance for Tx model.
+    IMPEDANCE_RX_VPOL=0;
+    IMPEDANCE_RX_VPOL_TOP=0;
+    IMPEDANCE_RX_HPOL=0;
+    IMPEDANCE_TX=4;
     APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
 
     CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.csv"
@@ -706,6 +709,18 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "ANTENNA_MODE"){
                   ANTENNA_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
+              else if (label == "IMPEDANCE_RX_VPOL"){
+                  IMPEDANCE_RX_VPOL = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }              
+              else if (label == "IMPEDANCE_RX_VPOL_TOP"){
+                  IMPEDANCE_RX_VPOL_TOP = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }              
+              else if (label == "IMPEDANCE_RX_HPOL"){
+                  IMPEDANCE_RX_HPOL = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }              
+              else if (label == "IMPEDANCE_TX"){
+                  IMPEDANCE_TX = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }              
               else if (label == "APPLY_NOISE_FIGURE"){
                   APPLY_NOISE_FIGURE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
