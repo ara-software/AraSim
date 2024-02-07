@@ -318,15 +318,12 @@ class Settings
                        // 2: Top Vpol impedance model measured by Mohammad at Kansas
                        // 3: Hpol impedance model measured by Mohammad at Kansas
                        // 4: PVA Antennna impedance (SPICE) measured by Mohammad at Kansas
-                       // 5: Custom impedance model dictated by data/antenna/Impedance_custom.txt
+                       // 5-9: Custom impedance model dictated by data/antenna/Impedance_Custom<1-4>.txt
    int IMPEDANCE_RX_VPOL; // 0: Default: See above
    int IMPEDANCE_RX_VPOL_TOP; // 0: Default: See above
    int IMPEDANCE_RX_HPOL; // 0: Default: see above
    int IMPEDANCE_TX; //4: Default: see above
    
-   
-   int RX_ANTENNA_IMPEDANCE; // 0: Default: Simple impedance model of constant 50 Ohms across all frequencies for VPol and HPol Rx (Historical Standard)
-                             // 1: Using per-antenna impedance model provided by Mohammad Ful Hossain Seikh from Kansas, with impedances for Hpol, Top Vpol, and Bottom VPol.
 
 	int APPLY_NOISE_FIGURE; // 0: do not apply new noise figure from Thomas Meures 2016
 	                        // 1: apply new noise figure to data

@@ -2212,11 +2212,15 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
 inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
     
     //Initialize array of impedance filepaths, where the indices correcspond to the IMPEDANCE_<> flag in the setup file.
-    std::string impedanceFileArray[5] = {"./data/antennas/impedance/ARA_Impedance_SimpleApproximation.txt",
+    std::string impedanceFileArray[9] = {"./data/antennas/impedance/ARA_Impedance_SimpleApproximation.txt",
                                          "./data/antennas/impedance/ARA_BVpol_MohammadData_2024.txt",
                                          "./data/antennas/impedance/ARA_TVpol_MohammadData_2024.txt",
                                          "./data/antennas/impedance/ARA_Hpol_MohammadData_2024.txt",
-                                         "./data/antennas/impedance/PVA_Impedance_2023.txt"};
+                                         "./data/antennas/impedance/PVA_Impedance_2023.txt",
+                                         "./data/antennas/impedance/Impedance_Custom1.txt",
+                                         "./data/antennas/impedance/Impedance_Custom2.txt",
+                                         "./data/antennas/impedance/Impedance_Custom3.txt",
+                                         "./data/antennas/impedance/Impedance_Custom4.txt"};
     //Read in impedances
     //Vpol
     ReadImpedance(impedanceFileArray[settings1->IMPEDANCE_RX_VPOL], &RealImpedanceV, &ImagImpedanceV);
