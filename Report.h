@@ -304,7 +304,7 @@ class Report {
 
         void GetParameters (Position &src, Position &trg, Vector &nnu, double &viewangle, double receive_angle, Vector &launch_vector, Vector &receive_vector, Vector &n_trg_slappy, Vector &n_trg_pokey );    // get viewangle, launch, receive vectors  (it reads launch angle as a viewangle and returns actual viewangle)
 
-        double GaintoHeight(double gain, double freq, double n_medium, double Z_A=50, int ant_m=0, int ant_number=0, bool useInTransmitterMode=false);
+        double GaintoHeight(double gain, double freq, double n_medium, double Z_A=50);
         
         double calculatePolFactor(Vector &Pol_vector, int ant_type, double antenna_theta, double antenna_phi);
 

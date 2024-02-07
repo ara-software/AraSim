@@ -2211,7 +2211,7 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
 //Defining function that reads in TX antenna impedances
 inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
     
-    //Initialize array of impedance filepaths, where the indices correcspond to the IMPEDANCE_<> flag in the setup file.
+    //Initialize array of impedance filepaths, where the indices correspond to the IMPEDANCE_<> flag in the setup file.
     std::string impedanceFileArray[9] = {"./data/antennas/impedance/ARA_Impedance_SimpleApproximation.txt",
                                          "./data/antennas/impedance/ARA_BVpol_MohammadData_2024.txt",
                                          "./data/antennas/impedance/ARA_TVpol_MohammadData_2024.txt",
@@ -2383,6 +2383,52 @@ inline void Detector::ReadHgain(string filename, Settings *settings1) {
         transH_databin.push_back(trans_databin[i]); // from Hz to MHz
     }
 }// end ReadHgain
+
+inline void Detector::ReadTxgain(string filename, Settings *settings1) {
+    ifstream NecOut( filename.c_str() );    
+    string line;
+    const int N = freq_step;
+    double Transm[N]; 
+    if ( NecOut.is_open() ) {
+        while (NecOut.good() ) {
+            for (int i=0; i<freq_step; i++) {
+                getline (NecOut, line);
+                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
+                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
+                    getline (NecOut, line); //read SWR
+                    double swr = atof(line.substr(5,11).c_str());
+                    Transm[i] = SWRtoTransCoeff(swr);
+                    getline (NecOut, line); //read names
+                    for (int j=0; j<ang_step; j++) {
+                        getline (NecOut, line); //read data line
+                        Txgain[i][j] = atof( line.substr( 20, 33 ).c_str() );
+                        Txphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
+                    }// end ang_step
+                }// end check freq label
+            }// end freq_step
+        }// end while NecOut.good
+        NecOut.close();
+    }// end if file open
+//     double xfreq[N];
+//     double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+//     double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+//     double df_fft;
+    
+//     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
+    
+//     // now below are values that shared in all channels
+//     for (int i=0;i<freq_step;i++) { // copy values
+//         xfreq[i] = Freq[i];
+
+//     }
+//     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+//         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+//     }
+//     Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
+//     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+//         transH_databin.push_back(trans_databin[i]); // from Hz to MHz
+//     }
+}// end ReadTxgain
 
 
 double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
@@ -2842,7 +2888,7 @@ double Detector::GetGain_1D( double freq, double theta, double phi, int ant_m ) 
 double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int ant_number, bool useInTransmitterMode) {
     
     /*
-    The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, VgainTx, and HgainTx)
+    The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, Txgain)
     to match the frequency binning dictated by NFOUR in the setup file.  - JCF 1/26/2024
     */
     
@@ -2863,14 +2909,10 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     else if ( ant_m == 1 and not useInTransmitterMode) {
         tempGain = &Hgain;
     }
-    //VPol Tx
-    else if ( ant_m == 0 and useInTransmitterMode) {
-        tempGain = &VgainTx;
-    }
-    //HPol Tx
-    else if ( ant_m == 1 and useInTransmitterMode) {
-        tempGain = &HgainTx;
-    }    
+    //Tx
+    else if (useInTransmitterMode) {
+        tempGain = &Txgain;
+    } 
     
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
@@ -3000,14 +3042,10 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
     else if ( ant_m == 1 and not useInTransmitterMode) {
         tempPhase = &Hphase;
     }
-    //VPol Tx
-    else if ( ant_m == 0 and useInTransmitterMode) {
-        tempPhase = &VphaseTx;
+    //Tx
+    else if (useInTransmitterMode) {
+        tempPhase = &Txphase;
     }
-    //HPol Tx
-    else if ( ant_m == 1 and useInTransmitterMode) {
-        tempPhase = &HphaseTx;
-    }        
 
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );

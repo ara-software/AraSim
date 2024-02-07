@@ -222,6 +222,7 @@ class Detector {
         void ReadVgain(string filename, Settings *settings1);
         void ReadVgainTop(string filename, Settings *settings1);
     	void ReadHgain(string filename, Settings *settings1);
+    	void ReadTxgain(string filename, Settings *settings1);    
         double Vgain[freq_step_max][ang_step_max];
         double Vphase[freq_step_max][ang_step_max];
         double VgainTop[freq_step_max][ang_step_max];
@@ -241,10 +242,8 @@ class Detector {
         //Define impedance and gain for transmitting antenna
         double RealImpedanceTx[freq_step_max];
         double ImagImpedanceTx[freq_step_max];
-        double VgainTx[freq_step_max][ang_step_max];
-        double VphaseTx[freq_step_max][ang_step_max];
-        double HgainTx[freq_step_max][ang_step_max];
-        double HphaseTx[freq_step_max][ang_step_max];
+        double Txgain[freq_step_max][ang_step_max];
+        double Txphase[freq_step_max][ang_step_max];
         void ReadImpedance(string filename, double (*TempRealImpedance)[freq_step_max], double (*TempImagImpedance)[freq_step_max]);
         void ReadAllAntennaImpedance(Settings *settings1);
 
