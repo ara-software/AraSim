@@ -2211,17 +2211,19 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
 //Defining function that reads in TX antenna impedances
 inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
     
+    //Need to loop over the following settings: IMPEDANCE_RX_VPOL, IMPEDANCE_RX_VPOL_TOP, IMPEDANCE_RX_HPOL, IMPEDANCE_TX.
+    
     //Maybe loop over the settings for the antenna ID, then grab the filename based on the ID?
     //Read in Rx impedances
     //Vpol
-    ReadImpedance("./data/antennas/ARA_Impedance_SimpleApproximation.txt", settings1, 0);
+    ReadImpedance("./data/antennas/ARA_Impedance_SimpleApproximation.txt", &RealImpedanceV, &ImagImpedanceV);
     //Hpol
-    ReadImpedance("./data/antennas/ARA_Impedance_SimpleApproximation.txt", settings1, 1);
+    ReadImpedance("./data/antennas/ARA_Impedance_SimpleApproximation.txt", &RealImpedanceH, &ImagImpedanceH);
     
     
-    if (settings1->IMPEDANCE_TX == 4){
-        ReadImpedance("./data/antennas/PVA_Impedance_2023.txt", settings1, 0, true);
-    }
+//     if (settings1->IMPEDANCE_TX == 4){
+//         ReadImpedance("./data/antennas/PVA_Impedance_2023.txt", settings1, 0, true);
+//     }
 }//ReadAllAntennaImpedance
 
 // convert the swr into a transmission coefficient
@@ -6773,26 +6775,26 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
 }
 
 //TODO:  Need to retool the arguments of this to use the Settings parameters for Vpol, Vpol_top, HPol, and Tx.
-inline void Detector::ReadImpedance(string filename, Settings *settings1, int ant_m, bool useInTransmitterMode) {
+inline void Detector::ReadImpedance(string filename, double (*TempRealImpedance)[freq_step_max], double (*TempImagImpedance)[freq_step_max]) {
     //Initialize temp Impedance array to allow for dynamic importing of impedances for Tx and Rx
-    double (*TempRealImpedance)[freq_step_max] = nullptr;
-    double (*TempImagImpedance)[freq_step_max] = nullptr;  
+    // double (*TempRealImpedance)[freq_step_max] = nullptr;
+    // double (*TempImagImpedance)[freq_step_max] = nullptr;  
     
-    //VPol Rx  TODO:  Add Top and bottom Vpol
-    if ( ant_m == 0 and not useInTransmitterMode) {
-        TempRealImpedance = &RealImpedanceV;
-        TempImagImpedance = &ImagImpedanceV;
-    }
-    //HPol Rx
-    else if ( ant_m == 1 and not useInTransmitterMode) {
-        TempRealImpedance = &RealImpedanceH;
-        TempImagImpedance = &ImagImpedanceH;     
-    }
-    //VPol Tx
-    else if ( ant_m == 0 and useInTransmitterMode) {
-        TempRealImpedance = &RealImpedanceTx;
-        TempImagImpedance = &ImagImpedanceTx;   
-    }       
+    // //VPol Rx  TODO:  Add Top and bottom Vpol
+    // if ( ant_m == 0 and not useInTransmitterMode) {
+    //     TempRealImpedance = &RealImpedanceV;
+    //     TempImagImpedance = &ImagImpedanceV;
+    // }
+    // //HPol Rx
+    // else if ( ant_m == 1 and not useInTransmitterMode) {
+    //     TempRealImpedance = &RealImpedanceH;
+    //     TempImagImpedance = &ImagImpedanceH;     
+    // }
+    // //VPol Tx
+    // else if ( ant_m == 0 and useInTransmitterMode) {
+    //     TempRealImpedance = &RealImpedanceTx;
+    //     TempImagImpedance = &ImagImpedanceTx;   
+    // }       
     
     ifstream NecOut( filename.c_str() );
     const int N = freq_step;
@@ -6807,14 +6809,6 @@ inline void Detector::ReadImpedance(string filename, Settings *settings1, int an
                 getline (NecOut, line);
                 if (not line.empty()) {
                     cout << line << endl;
-                    // cout << "atof(line.substr(0,6).c_str())  = " << atof(line.substr(0,6).c_str()) << endl;
-                    // cout << "atof(line.substr(13,21).c_str())  = " << atof(line.substr(13,21).c_str()) << endl;
-                    // cout << "atof(line.substr(25,32).c_str())  = " << atof(line.substr(25,32).c_str()) << endl;               
-                    // cout << "line[0] = " << line[0] << endl;
-                    // cout << "line[1] = " << line[1] << endl;
-                    // cout << "line[2] = " << line[2] << endl;
-                    // cout << "i = " << i << endl;
-                    // cout << "Real Z = " << line[1] << endl;
                     (*TempRealImpedance)[i] = atof(line.substr(13,21).c_str());
                     (*TempImagImpedance)[i] = atof(line.substr(25,32).c_str());
                 }
