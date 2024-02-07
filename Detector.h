@@ -233,6 +233,8 @@ class Detector {
         //Define impedance and gain for receiving antenna
         double RealImpedanceV[freq_step_max];
         double ImagImpedanceV[freq_step_max];   
+        double RealImpedanceVTop[freq_step_max];
+        double ImagImpedanceVTop[freq_step_max];       
         double RealImpedanceH[freq_step_max];
         double ImagImpedanceH[freq_step_max];       
     

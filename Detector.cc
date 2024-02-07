@@ -2211,19 +2211,22 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
 //Defining function that reads in TX antenna impedances
 inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
     
-    //Need to loop over the following settings: IMPEDANCE_RX_VPOL, IMPEDANCE_RX_VPOL_TOP, IMPEDANCE_RX_HPOL, IMPEDANCE_TX.
-    
-    //Maybe loop over the settings for the antenna ID, then grab the filename based on the ID?
-    //Read in Rx impedances
+    //Initialize array of impedance filepaths, where the indices correcspond to the IMPEDANCE_<> flag in the setup file.
+    std::string impedanceFileArray[5] = {"./data/antennas/impedance/ARA_Impedance_SimpleApproximation.txt",
+                                         "./data/antennas/impedance/ARA_BVpol_MohammadData_2024.txt",
+                                         "./data/antennas/impedance/ARA_TVpol_MohammadData_2024.txt",
+                                         "./data/antennas/impedance/ARA_Hpol_MohammadData_2024.txt",
+                                         "./data/antennas/impedance/PVA_Impedance_2023.txt"};
+    //Read in impedances
     //Vpol
-    ReadImpedance("./data/antennas/ARA_Impedance_SimpleApproximation.txt", &RealImpedanceV, &ImagImpedanceV);
+    ReadImpedance(impedanceFileArray[settings1->IMPEDANCE_RX_VPOL], &RealImpedanceV, &ImagImpedanceV);
+    //Vpol Top
+    ReadImpedance(impedanceFileArray[settings1->IMPEDANCE_RX_VPOL_TOP], &RealImpedanceVTop, &ImagImpedanceVTop);    
     //Hpol
-    ReadImpedance("./data/antennas/ARA_Impedance_SimpleApproximation.txt", &RealImpedanceH, &ImagImpedanceH);
+    ReadImpedance(impedanceFileArray[settings1->IMPEDANCE_RX_HPOL], &RealImpedanceH, &ImagImpedanceH);
+    //Tx
+    ReadImpedance(impedanceFileArray[settings1->IMPEDANCE_TX], &RealImpedanceTx, &ImagImpedanceTx);    
     
-    
-//     if (settings1->IMPEDANCE_TX == 4){
-//         ReadImpedance("./data/antennas/PVA_Impedance_2023.txt", settings1, 0, true);
-//     }
 }//ReadAllAntennaImpedance
 
 // convert the swr into a transmission coefficient
