@@ -376,7 +376,9 @@ static const double banana_signal_fluct;//Turn off noise for banana plots (setti
 // void setCurrent(Primaries *primary1);
   void setCurrent(Primaries *primary1, Settings *settings1);
   Position posnu;
-  Position posnu_from_antcen; ///< Nu position (x,y,z,r,theta,phi) from antenna center. MK added -2023-05-19-
+
+  Position posnu_from_antcen; ///< Nu position (x,y,z,r,theta,phi) from antenna center. MK added -2023-05-19-    
+
   Position posnu_down;
 //--------------------------------------------------
 // string  nuflavor;                   // neutrino flavor

@@ -222,6 +222,7 @@ class Detector {
         void ReadVgain(string filename, Settings *settings1);
         void ReadVgainTop(string filename, Settings *settings1);
     	void ReadHgain(string filename, Settings *settings1);
+    	void ReadTxgain(string filename, Settings *settings1);    
         double Vgain[freq_step_max][ang_step_max];
         double Vphase[freq_step_max][ang_step_max];
         double VgainTop[freq_step_max][ang_step_max];
@@ -229,6 +230,22 @@ class Detector {
         double Hgain[freq_step_max][ang_step_max];
         double Hphase[freq_step_max][ang_step_max];
         double Freq[freq_step_max];
+    
+        //Define impedance and gain for receiving antenna
+        double RealImpedanceV[freq_step_max];
+        double ImagImpedanceV[freq_step_max];   
+        double RealImpedanceVTop[freq_step_max];
+        double ImagImpedanceVTop[freq_step_max];       
+        double RealImpedanceH[freq_step_max];
+        double ImagImpedanceH[freq_step_max];       
+    
+        //Define impedance and gain for transmitting antenna
+        double RealImpedanceTx[freq_step_max];
+        double ImagImpedanceTx[freq_step_max];
+        double Txgain[freq_step_max][ang_step_max];
+        double Txphase[freq_step_max][ang_step_max];
+        void ReadImpedance(string filename, double (*TempRealImpedance)[freq_step_max], double (*TempImagImpedance)[freq_step_max]);
+        void ReadAllAntennaImpedance(Settings *settings1);
 
 
 	
@@ -350,15 +367,17 @@ class Detector {
 
         double GetGain_1D(double freq, double theta, double phi, int ant_m);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain
 
-        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, int ant_number=0);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
+        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, int ant_number=0, bool useInTransmitterMode=false);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
 
+        //Creating function to interpolate antenna impedance to frequency binning.
+        double GetImpedance(double freq, int ant_m=0, int ant_number=0, bool useInTransmitterMode=false);
 	
 	int GetTrigOffset( int ch, Settings *settings1 );
         int GetTrigMasking( int ch );
 
         double GetAntPhase(double freq, double theta, double phi, int ant_m); // return antenna phase with 2-D interpolation
 
-        double GetAntPhase_1D(double freq, double theta, double phi, int ant_m); // return antenna phase with 1-D interpolation
+        double GetAntPhase_1D(double freq, double theta, double phi, int ant_m, bool useInTransmitterMode=false); // return antenna phase with 1-D interpolation
 
 
         double GetFilterGain(int bin) { return FilterGain[bin]; }   // same bin with Vgain, Hgain

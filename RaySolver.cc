@@ -1517,4 +1517,3 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 
 
 
-

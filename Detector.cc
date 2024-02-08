@@ -832,6 +832,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         #endif
 
         ReadAllAntennaGains(settings1);
+        ReadAllAntennaImpedance(settings1);
 
         //	if (settings1->NOISE == 2){
         ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
@@ -1219,6 +1220,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         max_number_of_antennas_station = params.number_of_strings_station * params.number_of_antennas_string;
 
         ReadAllAntennaGains(settings1);
+        ReadAllAntennaImpedance(settings1);
 
         //	if (settings1->NOISE==2){
         ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
@@ -1459,6 +1461,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         }
 
         ReadAllAntennaGains(settings1);
+        ReadAllAntennaImpedance(settings1);
 
         ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
 
@@ -1701,6 +1704,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         }
 
         ReadAllAntennaGains(settings1);
+        ReadAllAntennaImpedance(settings1);
 
         //	    if (settings1->NOISE == 2){
         //Read the noise figures
@@ -2078,6 +2082,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         } // if idealized geometry
         
         ReadAllAntennaGains(settings1);
+        ReadAllAntennaImpedance(settings1);
 
         //	    if (settings1->NOISE == 2){
         //Read the noise figures
@@ -2203,6 +2208,30 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         ReadHgain("./data/antennas/In_situ_HPol_Model.txt", settings1);
     }
 }
+//Defining function that reads in TX antenna impedances
+inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
+    
+    //Initialize array of impedance filepaths, where the indices correspond to the IMPEDANCE_<> flag in the setup file.
+    std::string impedanceFileArray[9] = {"./data/antennas/impedance/ARA_Impedance_SimpleApproximation.txt",
+                                         "./data/antennas/impedance/ARA_BVpol_MohammadData_2024.txt",
+                                         "./data/antennas/impedance/ARA_TVpol_MohammadData_2024.txt",
+                                         "./data/antennas/impedance/ARA_Hpol_MohammadData_2024.txt",
+                                         "./data/antennas/impedance/PVA_Impedance_2023.txt",
+                                         "./data/antennas/impedance/Impedance_Custom1.txt",
+                                         "./data/antennas/impedance/Impedance_Custom2.txt",
+                                         "./data/antennas/impedance/Impedance_Custom3.txt",
+                                         "./data/antennas/impedance/Impedance_Custom4.txt"};
+    //Read in impedances
+    //Vpol
+    ReadImpedance(impedanceFileArray[settings1->IMPEDANCE_RX_VPOL], &RealImpedanceV, &ImagImpedanceV);
+    //Vpol Top
+    ReadImpedance(impedanceFileArray[settings1->IMPEDANCE_RX_VPOL_TOP], &RealImpedanceVTop, &ImagImpedanceVTop);    
+    //Hpol
+    ReadImpedance(impedanceFileArray[settings1->IMPEDANCE_RX_HPOL], &RealImpedanceH, &ImagImpedanceH);
+    //Tx
+    ReadImpedance(impedanceFileArray[settings1->IMPEDANCE_TX], &RealImpedanceTx, &ImagImpedanceTx);    
+    
+}//ReadAllAntennaImpedance
 
 // convert the swr into a transmission coefficient
 inline double Detector::SWRtoTransCoeff(double swr){
@@ -2354,6 +2383,52 @@ inline void Detector::ReadHgain(string filename, Settings *settings1) {
         transH_databin.push_back(trans_databin[i]); // from Hz to MHz
     }
 }// end ReadHgain
+
+inline void Detector::ReadTxgain(string filename, Settings *settings1) {
+    ifstream NecOut( filename.c_str() );    
+    string line;
+    const int N = freq_step;
+    double Transm[N]; 
+    if ( NecOut.is_open() ) {
+        while (NecOut.good() ) {
+            for (int i=0; i<freq_step; i++) {
+                getline (NecOut, line);
+                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
+                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
+                    getline (NecOut, line); //read SWR
+                    double swr = atof(line.substr(5,11).c_str());
+                    Transm[i] = SWRtoTransCoeff(swr);
+                    getline (NecOut, line); //read names
+                    for (int j=0; j<ang_step; j++) {
+                        getline (NecOut, line); //read data line
+                        Txgain[i][j] = atof( line.substr( 20, 33 ).c_str() );
+                        Txphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
+                    }// end ang_step
+                }// end check freq label
+            }// end freq_step
+        }// end while NecOut.good
+        NecOut.close();
+    }// end if file open
+//     double xfreq[N];
+//     double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+//     double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+//     double df_fft;
+    
+//     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
+    
+//     // now below are values that shared in all channels
+//     for (int i=0;i<freq_step;i++) { // copy values
+//         xfreq[i] = Freq[i];
+
+//     }
+//     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+//         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+//     }
+//     Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
+//     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+//         transH_databin.push_back(trans_databin[i]); // from Hz to MHz
+//     }
+}// end ReadTxgain
 
 
 double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
@@ -2810,14 +2885,35 @@ double Detector::GetGain_1D( double freq, double theta, double phi, int ant_m ) 
 
 }
 
-double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int ant_number) {
-
-
-    // find nearest theta, phi bin
-    //
-    //int i = (int)(theta/5.);
-    //int j = (int)(phi/5.);
-
+double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int ant_number, bool useInTransmitterMode) {
+    
+    /*
+    The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, Txgain)
+    to match the frequency binning dictated by NFOUR in the setup file.  - JCF 1/26/2024
+    */
+    
+    //Initialize pointer to dynamically point to the gain for chosen antenna.  The structure of this pointer matches that of the global gain arrays defined in Detector.h.
+    double (*tempGain)[freq_step_max][ang_step_max] = nullptr;
+    
+    //Assign local pointer to gain array specified in the function argument
+    //VPol Rx
+    if ( ant_m == 0 and not useInTransmitterMode) {
+        if (ant_number == 0) {
+            tempGain = &Vgain;
+        }
+        else if (ant_number == 2) {
+            tempGain = &VgainTop;
+        }
+    }
+    //HPol Rx
+    else if ( ant_m == 1 and not useInTransmitterMode) {
+        tempGain = &Hgain;
+    }
+    //Tx
+    else if (useInTransmitterMode) {
+        tempGain = &Txgain;
+    } 
+    
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
     int j = (int)( (phi+2.5)/5. );
@@ -2827,7 +2923,6 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     int angle_bin = 37*j+i;
 
     // now just do linear interpolation at that angle
-    //
 
     double slope_1; // slope of init part
 
@@ -2835,81 +2930,23 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
     int bin = (int)( (freq - freq_init) / freq_width )+1;
 
-    // Vpol
-    if ( ant_m == 0 ) {
+     //Interpolation of tempGain
+    slope_1 = ((*tempGain)[1][angle_bin] - (*tempGain)[0][angle_bin]) / (Freq[1] - Freq[0]);
 
-      if(ant_number==0){//bottom Vpol
-        slope_1 = (Vgain[1][angle_bin] - Vgain[0][angle_bin]) / (Freq[1] - Freq[0]);
+    // if freq is lower than freq_init
+    if ( freq < freq_init ) {
+        Gout = slope_1 * (freq - Freq[0]) + (*tempGain)[0][angle_bin];
+    }
+    // if freq is higher than last freq
+    else if ( freq > Freq[freq_step-1] ) {
+        //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
+        Gout = 0.;
+    }
 
-
-        // if freq is lower than freq_init
-        if ( freq < freq_init ) {
-
-            Gout = slope_1 * (freq - Freq[0]) + Vgain[0][angle_bin];
-        }
-        // if freq is higher than last freq
-        else if ( freq > Freq[freq_step-1] ) {
-
-            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
-            Gout = 0.;
-        }
-
-        else {
-
-            Gout = Vgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vgain[bin][angle_bin]-Vgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-        } // not outside the Freq[] range
-      }//bottom Vpol
-      else if(ant_number==2){//Top Vpol
-//	cerr << "Does it happen: yes it happens! " << ant_number << endl;
-        slope_1 = (VgainTop[1][angle_bin] - VgainTop[0][angle_bin]) / (Freq[1] - Freq[0]);
-
-
-        // if freq is lower than freq_init
-        if ( freq < freq_init ) {
-
-            Gout = slope_1 * (freq - Freq[0]) + VgainTop[0][angle_bin];
-        }
-        // if freq is higher than last freq
-        else if ( freq > Freq[freq_step-1] ) {
-
-            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
-            Gout = 0.;
-        }
-
-        else {
-
-            Gout = VgainTop[bin-1][angle_bin] + (freq-Freq[bin-1])*(VgainTop[bin][angle_bin]-VgainTop[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-	}
-      }//Top Vpol
+    else {
+        Gout = (*tempGain)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+    } // not outside the Freq[] range    
     
-    } // Vpol case
-
-    // Hpol
-    else if ( ant_m == 1 ) {
-
-        slope_1 = (Hgain[1][angle_bin] - Hgain[0][angle_bin]) / (Freq[1] - Freq[0]);
-
-
-        // if freq is lower than freq_init
-        if ( freq < freq_init ) {
-
-            Gout = slope_1 * (freq - Freq[0]) + Hgain[0][angle_bin];
-        }
-        // if freq is higher than last freq
-        else if ( freq > Freq[freq_step-1] ) {
-
-            //Gout = slope_2 * (freq - Freq[freq_step-1]) + Hgain[freq_step-1][angle_bin];
-            Gout = 0.;
-        }
-
-        else {
-
-            Gout = Hgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hgain[bin][angle_bin]-Hgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-        } // not outside the Freq[] range
-    
-    } // Hpol case
-
-
     if ( Gout < 0. ){ // gain can not go below 0
     	Gout = 0.;
     }
@@ -2918,18 +2955,97 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
 }
 
+//Creating function to interpolate antenna impedance to frequency binning.
+double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useInTransmitterMode ) {
+    //Initialize pointer to dynamically point to the impedance for the chosen antenna.
+    double (*tempImpedance)[freq_step_max] = nullptr;
+    //VPol Rx
+    if ( ant_m == 0 and not useInTransmitterMode) {
+        tempImpedance = &RealImpedanceV;
+    }
+    //HPol Rx
+    else if ( ant_m == 1 and not useInTransmitterMode) {
+        tempImpedance = &RealImpedanceH;
+    }
+    //Tx
+    else if ( ant_m == 0 and useInTransmitterMode) {
+        tempImpedance = &RealImpedanceTx;
+    }
+    
+    
+   
+    //The following is a simplified form of the interpolation used in GetGain_1D_OutZero, where we only interpolate over freuqnecy bins and ignore angle bins.
+    double slope_1; // slope of init part
+
+    double ZOut;
+
+    int bin = (int)( (freq - freq_init) / freq_width )+1;
+
+     //Interpolation of tempGain
+    slope_1 = ((*tempImpedance)[1] - (*tempImpedance)[0]) / (Freq[1] - Freq[0]);
+    
+    // cout << "*tempImpedance[0] = " << *tempImpedance[0] << endl;
+    // cout << "*tempImpedance[1] = " << *tempImpedance[1] << endl;
+    // cout << "slope_1 = " << slope_1 << endl;
+    // cout << "freq = " << freq << endl;
+    // cout << "freq_step-1 = " << freq_step-1 << endl;
+    // cout << "Freq[freq_step-1] = " << Freq[freq_step-1] << endl;
+
+    // if freq is lower than freq_init
+    if ( freq < freq_init ) {
+
+        ZOut = slope_1 * (freq - Freq[0]) + (*tempImpedance)[0];
+        // cout << "ZOut1 = " << ZOut << endl;
+    }
+    // if freq is higher than last freq
+    else if ( freq > Freq[freq_step-1] ) {
+        ZOut = 0.;
+        // cout << "freq = " << freq << endl;
+        // cout << "freq_step-1 = " << freq_step-1 << endl;
+        // cout << "Freq[freq_step-1] = " << Freq[freq_step-1] << endl;
+        // cout << "ZOut2 = " << ZOut << endl;
+    }
+
+    else {
+
+        ZOut = (*tempImpedance)[bin-1] + (freq-Freq[bin-1])*((*tempImpedance)[bin]-(*tempImpedance)[bin-1])/(Freq[bin]-Freq[bin-1]);
+        // cout << "ZOut3 = " << ZOut << endl;
+    } // not outside the Freq[] range    
+    
+
+
+    if ( ZOut < 0. ){ // impedance can not go below 0
+    	ZOut = 0.;
+        // cout << "ZOut4 = " << ZOut << endl;
+    }
+
+    return ZOut;
+    
+    
+}
 
 
 
 
 
-double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m ) {
 
-
-    // find nearest theta, phi bin
-    //
-    //int i = (int)(theta/5.);
-    //int j = (int)(phi/5.);
+double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m, bool useInTransmitterMode ) {
+    
+    //Creating tempPhase array to make this function more dynamic for Rx and Tx mode.
+    double (*tempPhase)[freq_step_max][ang_step_max] = nullptr;
+    
+    //VPol Rx
+    if ( ant_m == 0 and not useInTransmitterMode) {
+        tempPhase = &Vphase;
+    }
+    //HPol Rx
+    else if ( ant_m == 1 and not useInTransmitterMode) {
+        tempPhase = &Hphase;
+    }
+    //Tx
+    else if (useInTransmitterMode) {
+        tempPhase = &Txphase;
+    }
 
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
@@ -2949,86 +3065,65 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
 
     int bin = (int)( (freq - freq_init) / freq_width )+1;
 
-    // Vpol
-    if ( ant_m == 0 ) {
-
-        slope_1 = (Vphase[1][angle_bin] - Vphase[0][angle_bin]) / (Freq[1] - Freq[0]);
-        slope_2 = (Vphase[freq_step-1][angle_bin] - Vphase[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
+    slope_1 = ((*tempPhase)[1][angle_bin] - (*tempPhase)[0][angle_bin]) / (Freq[1] - Freq[0]);
+    slope_2 = ((*tempPhase)[freq_step-1][angle_bin] - (*tempPhase)[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
 
 
-        // if freq is lower than freq_init
-        if ( freq < freq_init ) {
+    // if freq is lower than freq_init
+    if ( freq < freq_init ) {
 
-            phase = slope_1 * (freq - Freq[0]) + Vphase[0][angle_bin];
+        phase = slope_1 * (freq - Freq[0]) + (*tempPhase)[0][angle_bin];
 
-            if ( phase > 180. ) {
-                while ( phase > 180. ) {
-                    phase = phase - 360.;
-                }
-            }
-            else if ( phase < -180. ) {
-                while ( phase < -180. ) {
-                    phase = phase + 360.;
-                }
+        if ( phase > 180. ) {
+            while ( phase > 180. ) {
+                phase = phase - 360.;
             }
         }
-        // if freq is higher than last freq
-        else if ( freq > Freq[freq_step-1] ) {
-
-            phase = slope_2 * (freq - Freq[freq_step-1]) + Vphase[freq_step-1][angle_bin];
-
-            if ( phase > 180. ) {
-                while ( phase > 180. ) {
-                    phase = phase - 360.;
-                }
-            }
-            else if ( phase < -180. ) {
-                while ( phase < -180. ) {
-                    phase = phase + 360.;
-                }
+        else if ( phase < -180. ) {
+            while ( phase < -180. ) {
+                phase = phase + 360.;
             }
         }
+    }
+    // if freq is higher than last freq
+    else if ( freq > Freq[freq_step-1] ) {
 
-        else {
+        phase = slope_2 * (freq - Freq[freq_step-1]) + (*tempPhase)[freq_step-1][angle_bin];
 
-            // not at the first two bins
-            if ( bin<freq_step-1 && bin>1 ) {
+        if ( phase > 180. ) {
+            while ( phase > 180. ) {
+                phase = phase - 360.;
+            }
+        }
+        else if ( phase < -180. ) {
+            while ( phase < -180. ) {
+                phase = phase + 360.;
+            }
+        }
+    }
 
-                slope_t1 = (Vphase[bin-1][angle_bin] - Vphase[bin-2][angle_bin]) / (Freq[bin-1] - Freq[bin-2]);
-                slope_t2 = (Vphase[bin+1][angle_bin] - Vphase[bin][angle_bin]) / (Freq[bin+1] - Freq[bin]);
+    else {
 
-                // down going case
-                if ( slope_t1 * slope_t2 > 0. && Vphase[bin][angle_bin] - Vphase[bin-1][angle_bin] > 180. ) {
+        // not at the first two bins
+        if ( bin<freq_step-1 && bin>1 ) {
 
-                    phase = Vphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vphase[bin][angle_bin]-360.-Vphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-                }
+            slope_t1 = ((*tempPhase)[bin-1][angle_bin] - (*tempPhase)[bin-2][angle_bin]) / (Freq[bin-1] - Freq[bin-2]);
+            slope_t2 = ((*tempPhase)[bin+1][angle_bin] - (*tempPhase)[bin][angle_bin]) / (Freq[bin+1] - Freq[bin]);
 
-                // up going case
-                else if ( slope_t1 * slope_t2 > 0. && Vphase[bin][angle_bin] - Vphase[bin-1][angle_bin] < -180. ) {
-                    phase = Vphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vphase[bin][angle_bin]+360.-Vphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-                }
+            // down going case
+            if ( slope_t1 * slope_t2 > 0. && (*tempPhase)[bin][angle_bin] - (*tempPhase)[bin-1][angle_bin] > 180. ) {
 
-                // neither case
-                else {
-                    phase = Vphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vphase[bin][angle_bin]-Vphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-                }
+                phase = (*tempPhase)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempPhase)[bin][angle_bin]-360.-(*tempPhase)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+            }
 
-                // if outside the range, put inside
-                if ( phase > 180. ) {
-                    while ( phase > 180. ) {
-                        phase = phase - 360.;
-                    }
-                }
-                else if ( phase < -180. ) {
-                    while ( phase < -180. ) {
-                        phase = phase + 360.;
-                    }
-                }
+            // up going case
+            else if ( slope_t1 * slope_t2 > 0. && (*tempPhase)[bin][angle_bin] - (*tempPhase)[bin-1][angle_bin] < -180. ) {
+                phase = (*tempPhase)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempPhase)[bin][angle_bin]+360.-(*tempPhase)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+            }
 
-            }// not first two bins
-
+            // neither case
             else {
-                phase = Vphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vphase[bin][angle_bin]-Vphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+                phase = (*tempPhase)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
             }
 
             // if outside the range, put inside
@@ -3043,107 +3138,25 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
                 }
             }
 
-        } // not outside the Freq[] range
-    
-    } // Vpol case
-
-    // Hpol
-    else if ( ant_m == 1 ) {
-
-        slope_1 = (Hphase[1][angle_bin] - Hphase[0][angle_bin]) / (Freq[1] - Freq[0]);
-        slope_2 = (Hphase[freq_step-1][angle_bin] - Hphase[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
-
-
-        // if freq is lower than freq_init
-        if ( freq < freq_init ) {
-
-            phase = slope_1 * (freq - Freq[0]) + Hphase[0][angle_bin];
-
-            if ( phase > 180. ) {
-                while ( phase > 180. ) {
-                    phase = phase - 360.;
-                }
-            }
-            else if ( phase < -180. ) {
-                while ( phase < -180. ) {
-                    phase = phase + 360.;
-                }
-            }
-        }
-        // if freq is higher than last freq
-        else if ( freq > Freq[freq_step-1] ) {
-
-            phase = slope_2 * (freq - Freq[freq_step-1]) + Hphase[freq_step-1][angle_bin];
-
-            if ( phase > 180. ) {
-                while ( phase > 180. ) {
-                    phase = phase - 360.;
-                }
-            }
-            else if ( phase < -180. ) {
-                while ( phase < -180. ) {
-                    phase = phase + 360.;
-                }
-            }
-        }
+        }// not first two bins
 
         else {
+            phase = (*tempPhase)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        }
 
-            // not at the first two bins
-            if ( bin<freq_step-1 && bin>1 ) {
-
-                slope_t1 = (Hphase[bin-1][angle_bin] - Hphase[bin-2][angle_bin]) / (Freq[bin-1] - Freq[bin-2]);
-                slope_t2 = (Hphase[bin+1][angle_bin] - Hphase[bin][angle_bin]) / (Freq[bin+1] - Freq[bin]);
-
-                // down going case
-                if ( slope_t1 * slope_t2 > 0. && Hphase[bin][angle_bin] - Hphase[bin-1][angle_bin] > 180. ) {
-
-                    phase = Hphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hphase[bin][angle_bin]-360.-Hphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-                }
-
-                // up going case
-                else if ( slope_t1 * slope_t2 > 0. && Hphase[bin][angle_bin] - Hphase[bin-1][angle_bin] < -180. ) {
-                    phase = Hphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hphase[bin][angle_bin]+360.-Hphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-                }
-
-                // neither case
-                else {
-                    phase = Hphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hphase[bin][angle_bin]-Hphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-                }
-
-                // if outside the range, put inside
-                if ( phase > 180. ) {
-                    while ( phase > 180. ) {
-                        phase = phase - 360.;
-                    }
-                }
-                else if ( phase < -180. ) {
-                    while ( phase < -180. ) {
-                        phase = phase + 360.;
-                    }
-                }
-
-            }// not first two bins
-
-            else {
-                phase = Hphase[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hphase[bin][angle_bin]-Hphase[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        // if outside the range, put inside
+        if ( phase > 180. ) {
+            while ( phase > 180. ) {
+                phase = phase - 360.;
             }
-
-            // if outside the range, put inside
-            if ( phase > 180. ) {
-                while ( phase > 180. ) {
-                    phase = phase - 360.;
-                }
+        }
+        else if ( phase < -180. ) {
+            while ( phase < -180. ) {
+                phase = phase + 360.;
             }
-            else if ( phase < -180. ) {
-                while ( phase < -180. ) {
-                    phase = phase + 360.;
-                }
-            }
+        }
 
-        } // not outside the Freq[] range
-    
-    } // Hpol case
+    } // not outside the Freq[] range
 
 
     return phase;
@@ -6805,6 +6818,51 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
         }
     }
 }
+
+//TODO:  Need to retool the arguments of this to use the Settings parameters for Vpol, Vpol_top, HPol, and Tx.
+inline void Detector::ReadImpedance(string filename, double (*TempRealImpedance)[freq_step_max], double (*TempImagImpedance)[freq_step_max]) {
+    //Initialize temp Impedance array to allow for dynamic importing of impedances for Tx and Rx
+    // double (*TempRealImpedance)[freq_step_max] = nullptr;
+    // double (*TempImagImpedance)[freq_step_max] = nullptr;  
+    
+    // //VPol Rx  TODO:  Add Top and bottom Vpol
+    // if ( ant_m == 0 and not useInTransmitterMode) {
+    //     TempRealImpedance = &RealImpedanceV;
+    //     TempImagImpedance = &ImagImpedanceV;
+    // }
+    // //HPol Rx
+    // else if ( ant_m == 1 and not useInTransmitterMode) {
+    //     TempRealImpedance = &RealImpedanceH;
+    //     TempImagImpedance = &ImagImpedanceH;     
+    // }
+    // //VPol Tx
+    // else if ( ant_m == 0 and useInTransmitterMode) {
+    //     TempRealImpedance = &RealImpedanceTx;
+    //     TempImagImpedance = &ImagImpedanceTx;   
+    // }       
+    
+    ifstream NecOut( filename.c_str() );
+    const int N = freq_step;
+    string line;
+    cout << "N = " << N << endl;
+    cout << "freq_step = " << freq_step << endl;
+    if ( NecOut.is_open() ) {
+        while (NecOut.good() ) {
+            getline (NecOut, line); //Gets first line to skip header
+            for (int i=0; i<freq_step; i++){
+                // getline (NecOut, line, '\t');
+                getline (NecOut, line);
+                if (not line.empty()) {
+                    cout << line << endl;
+                    (*TempRealImpedance)[i] = atof(line.substr(13,21).c_str());
+                    (*TempImagImpedance)[i] = atof(line.substr(25,32).c_str());
+                }
+            } //end frep_step
+        }// end while NecOut.good
+        NecOut.close();
+    }// end if file open    
+
+}//ReadImpedance
 
 Detector::~Detector() {
   //cout<<"Destruct class Detector"<<endl;
