@@ -1,0 +1,200 @@
+
+
+ // Setup file with basic notation. Please report any issues or mistakes: (guy.nir@weizmann.ac.il) Date: February 28, 2014// 
+ 
+
+// neutrino energies (user guide: see section 3.1 page 6) //
+ 
+EXPONENT=224 // (DEFAULT=19) the energy spectrum of the neutrinos. 
+ 
+
+// number of neutrinos (user guide: see section 3.2 page 7) //
+ 
+ONLY_PASSED_EVENTS=0 // (DEFAULT=0) 0: runs NNU neutrinos. 1: runs until NNU_PASSED neutrinos globally trigger. 
+ 
+NNU=100 // (DEFAULT=100) The total number of neutrinos thrown. 
+ 
+NNU_PASSED=10 // (DEFAULT=10) when using ONLY_PASSED_EVENTS this determines how many events will pass the trigger. 
+ 
+
+// generating noise (user guide: see section 3.3 page 8) //
+ 
+NOISE_EVENTS=16 // (DEFAULT=16) the number of noise wf generated. 
+ 
+NOISE_WAVEFORM_GENERATE_MODE=0 // (DEFAULT=0) new noise wf are generated for each event. 1: old mode all noise wf are made beforehand. 
+ 
+NOISE=0 // (DEFAULT=0) 0: flat thermal distribution. 1: calibrated Rayleigh noise 
+ 
+NOISE_TEMP_MODE=0 // (DEFAULT=0) 0: same noise wf for all channels. 1: different temperatures for each channel. 2: diff temps for first 8 channels. 
+ 
+NOISE_TEMP=325 // (DEFAULT=325) if using thermal distribution, use this temperature (in Kelvins). 
+ 
+DATA_BIN_SIZE=16384 // (DEFAULT=16384) size of noise wf used to get noise floor (or to make all noise wf’s before simulation when NOISE_WAVEFORM_GENERATE_MODE =1. must be power of 2. 
+ 
+
+// neutrino position (user guide: see section 3.4 page 9) //
+ 
+INTERACTION_MODE=5 // (DEFAULT=1) 0: make nu’s all over antarctica. 1: pick near (a cylinder around detector). 2: exact location at (353.55, 612.37, 707.1). 3: pick near-unbiased (a sphere around detector)
+
+SOURCE_LATITUDE=-89.97953 //Defaults to lat=-89.98953 from 2023 SpiceCore Survey
+
+SOURCE_LONGITUDE=-100.78595 //Defaults to long=-100.78595 from 2023 SpiceCore Survey
+
+SOURCE_DEPTH=-1000 //Defaults to depth of -1000m
+ 
+POSNU_RADIUS=3000 // (DEFAULT=3000) radius around detector in pick near mode.
+
+CLOCK_ANGLE=90
+
+BIREFRINGENCE=0
+ 
+PICKNEARUNBIASED_R=5000 // (DEFAULT=5000) spherical radius around detector in pick near-unbiased mode. 
+ 
+PICK_POSNU_DEPTH=0 // (DEFAULT=0) 0: use all ice down to bedrock. 1: choose maximum depth yourself. 
+ 
+MAX_POSNU_DEPTH=0 // (DEFAULT=0) the maximum depth when PICK_POSNU_DEPTH =1. 
+ 
+NNU_THIS_THETA=0 // (DEFAULT=0) 0: choose nutrino incident angle at random. 1: choose specfic angle range. 
+ 
+NNU_THETA=0 // (DEFAULT=0) the angle chosen when NNU_THIS_THETA =1 is chosen. Use radians! 
+ 
+NNU_D_THETA=0 // (DEFAULT=0) the range around NNU_THETA (up and down). 
+ 
+SECONDARIES=0 // (DEFAULT=0) 0: no secondary interactions. 1: future release. 
+ 
+TAUDECAY=0 // (DEFAULT=0) 0: do not allow secondary tau decay. 1: allow secondary decay of tau’s, only works when SECONDARIES =1 in future release. 
+ 
+
+// ray solving (user guide: see section 3.5 page 10) //
+ 
+RAYSOL_RANGE=5000 // (DEFAULT=5000) distance from detector above which we do not attempt a ray solution (there is no trigger check beyond this). 
+ 
+
+// triggering (user guide: see section 3.7 page 12) //
+ 
+USE_INSTALLED_TRIGGER_SETTINGS=0 // (DEFAULT=0) 0: ideal detector trigger settings. 1: use triggering as implemented in real stations (testbed only!). 
+ 
+TRIG_ANALYSIS_MODE=0 // (DEFAULT=0) 0: signal+noise. 1: signal only. 2: noise only 
+ 
+POWERTHRESHOLD=-6.15 // (DEFAULT=-6.15) the trigger threshold (the closer to zero the weaker the threshold. measured in sigmas above the noise floor. 
+  
+TRIG_WINDOW=1.1E-7 // (DEFAULT=1.1E-7) time window in which several channels must trigger to pass global trigger test. 
+ 
+TRIG_TIMEOUT=1E-6 // (DEFAULT=1E-6) dead time for detector. 
+ 
+TRIG_MODE=1 // (DEFAULT=1) 0: trigger for N antennas of any kind. 1: trigger on either Nh Hpol or Nv Vpol antennas. 
+ 
+N_TRIG=3 // (DEFAULT=3) number of total antennas required for a global trigger (if TRIG_MODE =0). 
+ 
+N_TRIG_V=3 // (DEFAULT=3) number of Vpol required for a global trigger (if TRIG_MODE =1). 
+ 
+N_TRIG_H=3 // (DEFAULT=3) number of Hpol required for a global trigger (if TRIG_MODE =1). 
+ 
+TRIG_SCAN_MODE=0 // (DEFAULT=0) triggering algorithm. 0: old code. 1: new, faster code. 2: scan all powerthreshold values. 
+ 
+TRIG_ONLY_BH_ON=0 // (DEFAULT=0) 0: check trigger on all channels. 1: check only borehole antennas. 
+ 
+TRIG_THRES_MODE=0 // (DEFAULT=0) 0: use same threshold for all channels. 1: use seperate thershold for each channel using ’data/thresholdoffset.csv’. 
+ 
+USE_MANUAL_GAINOFFSET=0 // (DEFAULT=0) 0: pass control to USE_CH_GAINOFFSET below. 1: add a single value to the offset of all channels. 
+ 
+MANUAL_GAINOFFSET_VALUE=0 // (DEFAULT=0) is the offset to the threshold when using USE_ MANUAL_GAINOFFSET =1 
+ 
+USE_CH_GAINOFFSET=0 // (DEFAULT=0) 0: use no gain offsets. 1: use specfic gain offsets for each channel using ’data/preampgainoffsets.csv’ (testbed only!) 
+ 
+USE_TESTBED_RFCM_ON=0 // (DEFAULT=0) 0: don’t apply specific amplification offsets. 1: use measured TB data to cancel amplification gain. 
+ 
+RFCM_OFFSET=80 // (DEFAULT=80) when USE_TESTBED_RFCM_ON =0 use this value to cancel the amplification gain of electronic components. 
+ 
+// ice and earth (user guide: see section 3.8 page 14) //
+ 
+CONSTANTCRUST=0 // (DEFAULT=0) This is a left over parameter, do not change these settings. 
+ 
+CONSTANTICETHICKNESS=0 // (DEFAULT=0) This is a left over parameter, do not change these settings. 
+ 
+FIXEDELEVATION=0 // (DEFAULT=0) Elevation fixed to the thickness of the ice. Don’t change this setting. 
+ 
+MOOREBAY=0 // (DEFAULT=0) which attenuation length measurements to use. 0: south pole data. 1: Moore’s Bay measurements. 
+ 
+ATMOSPHERE=1 // (DEFAULT=1) 0: no atmosphere (not recommended). 1: use atmosphere (default). 
+ 
+ICE_MODEL=0 // (DEFAULT=0) 0: Crust 2.0 or 1: bedmap (old ice model). 
+ 
+NOFZ=1 // (DEFAULT=1) 0: constant index of refraction (not recommended). 1: n changes with depth (default). 
+ 
+//GETCHORD_MODE=0 // (DEFAULT=0) which code to use for weights of nu’s passing the earth / atmosphere. 0: old code. 1: new untested code. 
+ 
+taumodes=0 // (DEFAULT=0) 0: no tau modes. 1: allow tau nu’s interaction in bedrock to create tau’s. works only when GETCHORD_MODE =1. 
+ 
+
+// detector layout (user guide: see section 3.9 page 15) //
+ 
+DETECTOR=4 // (DEFAULT=1) 0: unused. 1: ideal ARA station. can choose 1 to 7 stations. 2: large array in hexagonal design. 3: testbed.
+
+DETECTOR_STATION=2
+
+DETECTOR_STATION_LIVETIME_CONFIG=6
+ 
+number_of_stations=1 // (DEFAULT=1) number of stations used in DETECTOR =1 mode. 
+ 
+station_spacing=2000 // (DEFAULT=2000) separation between stations in modes 1 and 2. in meters. 
+ 
+stations_per_side=4 // (DEFAULT=4) number of stations on a side of the hexagon in DETECTOR =2 mode. for N on a side get 3N(N-1)+1 stations. 
+ 
+core_x=10000 // (DEFAULT=10000) location of array in global coordinates, used to avoid the bin crossing of 2degree bins. 
+ 
+core_y=10000 // (DEFAULT=10000) same as above. 
+ 
+number_of_strings_per_station=4 // (DEFAULT=4) number of strings on an ideal station. 
+ 
+R_string=10 // (DEFAULT=10) distance of string poisitions from center of station. in meters. 
+ 
+BORE_HOLE_ANTENNA_LAYOUT=0 // (DEFAULT=0) order of antennas on the string. 0: HVHV. 1: VHV. 2: VVHV. 3: HHHV. 4: HHV. 
+  
+z_max=200 // (DEFAULT=200) lowest antenna position on the string. in meters depth 
+ 
+BH_ANT_SEP_DIST_ON=1 // (DEFAULT=1) 0: all distances are the same (choose z_btw ). 1: choose each distance youself (use z_btwAB ). 
+ 
+z_btw=10 // (DEFAULT=10) single distance for all BH antennas, used when BH_ANT_SEP_DIST_ ON = 0 
+ 
+z_btw01=2 // (DEFAULT=2) distance between lowest antenna and next one. in meters 
+ 
+z_btw12=15 // (DEFAULT=15) distance between second and third antenna. 
+ 
+z_btw23=2 // (DEFAULT=2) distance between third and last (uppermost) antenna. 
+ 
+READGEOM=0 // (DEFAULT=0) 0: use idealized detector layout. 1: read from sqlite file. TB ONLY! 
+ 
+CALPULSER_ON=0 // (DEFAULT=0) 0: no calpulser. 1: use 2012 pulser. 2: use 2011 Vpol. 3: use 2011 Hpol. 4: use both V and H pol, average location of pulser. TB ONLY! 
+ 
+CALPUL_AMP=0.15 // (DEFAULT=0.15) amplitude modifier for the calpulser, to match the power of real pulser 
+
+// writing events (user guide: see section 3.10 page 17) //
+ 
+DATA_SAVE_MODE=0 // (DEFAULT=0) 0: save waveforms and primitive spectra to AraTree2 (include spectra at different stages of simulation). 1: save only waveforms after trigger. 2: save just physics data per event. 
+ 
+DATA_LIKE_OUTPUT=1 // (DEFAULT=0) 0: write nothing (leave eventTree empty) 1: save only triggered events to eventTree (realistic case). 2: fill eventTree with all events (untriggered give zero wf graphs) 
+ 
+FILL_TREE_MODE=2 // (DEFAULT=0) 0: save all events to AraTree2 (triggered or not) 1: don’t save events outside of ice (in pick unbiased mode) 2: save just triggered events. 
+ 
+V_MIMIC_MODE=0 // (DEFAULT=0) 0: save wavforms using standard time window. 1: use offsets from data to get real time windows (TB ONLY!). 2: add manual offsets to thos in 1 (TB ONLY!). 
+ 
+
+// other parameters (user guide: see section 3.11 page 19) //
+ 
+RANDOM_MODE=0 // (DEFAULT=1) 0: same random seed (debugging). 1: new random seed for simulations 
+ 
+SIMULATION_MODE=1 // (DEFAULT=0) 0: frequency domain. 1: time domain simulation 
+ 
+EVENT_TYPE=12 // (DEFAULT=0) 0: neutrinos. other modes in future release. 
+ 
+LPM=1 // (DEFAULT=1) 0: don’t use LPM effect. 1: use LPM (default) 
+ 
+NFOUR=1024 // (DEFAULT=1024) Fourier space sample size. Twice the number of bins in time domain wf. must be power of 2. 
+ 
+TIMESTEP=5E-10 // (DEFAULT=5E-10) sample rate for digitizer. decides the time difference between data points in wf. 
+
+ALL_ANT_V_ON = 1
+  
+DEBUG_MODE_ON = 0 // 0 : off (do as usual), 1 : on (skip most of intensive computational process which don't have random generations)
+

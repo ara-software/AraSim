@@ -2171,6 +2171,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
 
 inline void Detector::ReadAllAntennaGains(Settings *settings1){
+    //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
+    ReadTxgain("./data/antennas/PVA_MohammadData_2023.txt", settings1);    
+    
     if (settings1->ANTENNA_MODE == 0){
         // use the orignal Vpol/Hpol gains
         ReadVgain("./data/antennas/ARA_bicone6in_output.txt", settings1);
@@ -2207,6 +2210,8 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         ReadVgainTop("./data/antennas/In_situ_VPol_Model.txt", settings1);
         ReadHgain("./data/antennas/In_situ_HPol_Model.txt", settings1);
     }
+    
+
 }
 //Defining function that reads in TX antenna impedances
 inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
@@ -2388,7 +2393,7 @@ inline void Detector::ReadTxgain(string filename, Settings *settings1) {
     ifstream NecOut( filename.c_str() );    
     string line;
     const int N = freq_step;
-    double Transm[N]; 
+    double Transm[N];
     if ( NecOut.is_open() ) {
         while (NecOut.good() ) {
             for (int i=0; i<freq_step; i++) {
@@ -2401,6 +2406,9 @@ inline void Detector::ReadTxgain(string filename, Settings *settings1) {
                     getline (NecOut, line); //read names
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
+                        // cout << line << endl;
+                        // cout << atof( line.substr( 20, 33 ).c_str() ) << endl;
+                        // cout << atof( line.substr( 34 ).c_str() ) << endl;
                         Txgain[i][j] = atof( line.substr( 20, 33 ).c_str() );
                         Txphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
                     }// end ang_step
@@ -6853,7 +6861,6 @@ inline void Detector::ReadImpedance(string filename, double (*TempRealImpedance)
                 // getline (NecOut, line, '\t');
                 getline (NecOut, line);
                 if (not line.empty()) {
-                    cout << line << endl;
                     (*TempRealImpedance)[i] = atof(line.substr(13,21).c_str());
                     (*TempImagImpedance)[i] = atof(line.substr(25,32).c_str());
                 }
