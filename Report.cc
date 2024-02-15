@@ -781,7 +781,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                     icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                     detector->GetImpedance(freq_tmp*1.E-6, detector->stations[i].strings[j].antennas[k].type));
                                             }
-                                            if (settings1->ANTENNA_MODE == 1)
+                                            if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                             {
                                                 heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta,  antenna_phi,  detector->stations[i].strings[j].antennas[k].type, k),
                                                                     freq_tmp, 
@@ -798,7 +798,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                     icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                     detector->GetImpedance(freq_tmp*1.E-6, 0));
                                             }
-                                            if (settings1->ANTENNA_MODE == 1)
+                                            if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                             {
                                                 heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, 0, k),
                                                                     freq_tmp, 
@@ -1014,7 +1014,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                             icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                             detector->GetImpedance(freq_tmp*1.E-6, detector->stations[i].strings[j].antennas[k].type));
                                                     		}
-                                                    		if (settings1->ANTENNA_MODE == 1)
+                                                    		if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                     		{
                                                         		heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k),
                                                                                             freq_tmp, 
@@ -1031,7 +1031,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                             icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                             detector->GetImpedance(freq_tmp*1.E-6, 0));
                                                     		}
-                                                    		if (settings1->ANTENNA_MODE == 1)
+                                                    		if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                     		{
                                                         		heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, 0, k),
                                                                                             freq_tmp, 
@@ -1054,7 +1054,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                         detector->GetImpedance(freq_tmp*1.E-6, detector->stations[i].strings[j].antennas[k].type));
                                                         		}
 
-                                                        		if (settings1->ANTENNA_MODE == 1)
+                                                        		if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                         		{
                                                                     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta,  antenna_phi,  detector->stations[i].strings[j].antennas[k].type, k),
                                                                                         freq_tmp, 
@@ -1071,7 +1071,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                         icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                         detector->GetImpedance(freq_tmp*1.E-6, 0));
                                                                 }
-                                                                if (settings1->ANTENNA_MODE == 1)
+                                                                if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                                 {
                                                                     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, 0, k),
                                                                                         freq_tmp, 
@@ -1381,7 +1381,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                             icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                             detector->GetImpedance(freq_tmp*1.E-6, detector->stations[i].strings[j].antennas[k].type));
                                                     }
-                                                    if (settings1->ANTENNA_MODE == 1)
+                                                    if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                     {
                                                         heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta,  antenna_phi,  detector->stations[i].strings[j].antennas[k].type, k),
                                                                             freq_tmp, 
@@ -1398,7 +1398,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                             icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                             detector->GetImpedance(freq_tmp*1.E-6, 0));
                                                     }
-                                                    if (settings1->ANTENNA_MODE == 1)
+                                                    if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                     {
                                                         heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, 0, k),
                                                                             freq_tmp, 
@@ -1589,7 +1589,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                         icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                         detector->GetImpedance(freq_tmp*1.E-6, detector->stations[i].strings[j].antennas[k].type));
                                                         }
-                                                        if (settings1->ANTENNA_MODE == 1)
+                                                        if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                         {
                                                             heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k),
                                                                                         freq_tmp, 
@@ -1606,7 +1606,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                         icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                         detector->GetImpedance(freq_tmp*1.E-6, 0));
                                                         }
-                                                        if (settings1->ANTENNA_MODE == 1)
+                                                        if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                         {
                                                             heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, 0, k),
                                                                                         freq_tmp, 
@@ -1654,7 +1654,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                 icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                 detector->GetImpedance(freq_tmp*1.E-6, detector->stations[i].strings[j].antennas[k].type));
                                                         }
-                                                        if (settings1->ANTENNA_MODE == 1)
+                                                        if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                         {
                                                             heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta,  antenna_phi,  detector->stations[i].strings[j].antennas[k].type, k),
                                                                                 freq_tmp, 
@@ -1671,7 +1671,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                 icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                 detector->GetImpedance(freq_tmp*1.E-6, 0));
                                                         }
-                                                        if (settings1->ANTENNA_MODE == 1)
+                                                        if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                         {
                                                             heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, 0, k),
                                                                                 freq_tmp, 
@@ -1846,7 +1846,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                            icemodel->GetN(detector->stations[i].strings[j].antennas[k]),  //TODO: This ice model needs to be for the location of Tx, but it's currently Rx.
                                                                                            detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));
                                                 	}
-                                                	if (settings1->ANTENNA_MODE == 1)
+                                                	if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                 	{
                                                     		heff_Tx_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, true),
                                                                                            freq_tmp, 
@@ -1863,7 +1863,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                            icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                            detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));
                                                 	}
-                                                	if (settings1->ANTENNA_MODE == 1)
+                                                	if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                 	{
                                                     		heff_Tx_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, true),
                                                                                            freq_tmp, 
@@ -1889,7 +1889,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                         icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                         detector->GetImpedance(freq_tmp*1.E-6, detector->stations[i].strings[j].antennas[k].type));
                                                         }
-                                                        if (settings1->ANTENNA_MODE == 1)
+                                                        if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                         {
                                                             heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k),
                                                                                         freq_tmp, 
@@ -1906,7 +1906,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                         icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                         detector->GetImpedance(freq_tmp*1.E-6, 0));
                                                         }
-                                                        if (settings1->ANTENNA_MODE == 1)
+                                                        if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                         {
                                                             heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, 0, k),
                                                                                         freq_tmp, 
@@ -1947,7 +1947,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                        icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                        detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));
                                                     		}
-                                                    		if (settings1->ANTENNA_MODE == 1)
+                                                    		if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                     		{
                                                         		heff_Tx = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, true),
                                                                                        freq_tmp, 
@@ -1964,7 +1964,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                        icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                        detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));
                                                     		}
-                                                    		if (settings1->ANTENNA_MODE == 1)
+                                                    		if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                     		{
                                                         		heff_Tx = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, true),
                                                                                        freq_tmp, 
@@ -1984,7 +1984,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                     icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                     detector->GetImpedance(freq_tmp*1.E-6, detector->stations[i].strings[j].antennas[k].type));
                                                     		}
-                                                    		if (settings1->ANTENNA_MODE == 1)
+                                                    		if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                     		{
                                                         		heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k),
                                                                                     freq_tmp, 
@@ -2001,7 +2001,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                     icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                                     detector->GetImpedance(freq_tmp*1.E-6, 0));
                                                     		}
-                                                    		if (settings1->ANTENNA_MODE == 1)
+                                                    		if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                     		{
                                                         		heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, 0, k),
                                                                                     freq_tmp, 
@@ -2191,7 +2191,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                   freq_tmp, 
                                                                                   icemodel->GetN(event->Nu_Interaction[0].posnu));
                                             }
-                                            if (settings1->ANTENNA_MODE == 1)
+                                            if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                             {
                                                 heff_lastbin_trans = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, // to MHz
                                                         ant_theta_trans, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k),
@@ -2206,7 +2206,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                         ant_theta_trans, antenna_phi, 0),
                                                     freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu));
                                             }
-                                            if (settings1->ANTENNA_MODE == 1)
+                                            if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                             {
                                                 heff_lastbin_trans = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, // to MHz
                                                         ant_theta_trans, antenna_phi, 0, k),
@@ -2230,7 +2230,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                         antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
                                                     freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
                                             }
-                                            if (settings1->ANTENNA_MODE == 1)
+                                            if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                             {
                                                 heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
                                                         antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k),
@@ -2245,7 +2245,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                         antenna_theta, antenna_phi, 0),
                                                     freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
                                             }
-                                            if (settings1->ANTENNA_MODE == 1)
+                                            if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                             {
                                                 heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
                                                         antenna_theta, antenna_phi, 0, k),
@@ -2294,7 +2294,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                             ant_theta_trans, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
                                                         freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu));
                                                 }
-                                                if (settings1->ANTENNA_MODE == 1)
+                                                if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                 {
                                                     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
                                                             ant_theta_trans, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k),
@@ -2309,7 +2309,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                             ant_theta_trans, antenna_phi, 0),
                                                         freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu));
                                                 }
-                                                if (settings1->ANTENNA_MODE == 1)
+                                                if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                 {
                                                     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
                                                             ant_theta_trans, antenna_phi, 0, k),
@@ -2354,7 +2354,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                             antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
                                                         freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
                                                 }
-                                                if (settings1->ANTENNA_MODE == 1)
+                                                if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                 {
                                                     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
                                                             antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, k),
@@ -2369,7 +2369,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                             antenna_theta, antenna_phi, 0),
                                                         freq_tmp, icemodel->GetN(detector->stations[i].strings[j].antennas[k]));
                                                 }
-                                                if (settings1->ANTENNA_MODE == 1)
+                                                if (settings1->ANTENNA_MODE == 1 or settings1->ANTENNA_MODE == 5)
                                                 {
                                                     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6,   // to MHz
                                                             antenna_theta, antenna_phi, 0, k),

@@ -2177,6 +2177,7 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     if (settings1->ANTENNA_MODE == 0){
         // use the orignal Vpol/Hpol gains
         ReadVgain("./data/antennas/ARA_bicone6in_output.txt", settings1);
+        ReadVgainTop("./data/antennas/ARA_bicone6in_output.txt", settings1);
         ReadHgain("./data/antennas/ARA_dipoletest1_output.txt", settings1);
     }
     else if (settings1->ANTENNA_MODE == 1) {
@@ -2194,6 +2195,7 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     else if (settings1->ANTENNA_MODE == 2){
         // pull a "trick" and substitue the ARIANNA LPDAs for the antennas
         ReadVgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
+        ReadVgainTop("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
         ReadHgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
     }
     else if(settings1->ANTENNA_MODE == 3){
@@ -2209,6 +2211,11 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         ReadVgain("./data/antennas/In_situ_VPol_Model.txt", settings1);
         ReadVgainTop("./data/antennas/In_situ_VPol_Model.txt", settings1);
         ReadHgain("./data/antennas/In_situ_HPol_Model.txt", settings1);
+    }
+    else if (settings1->ANTENNA_MODE == 5) { //Adding antenna mode for Kansas lab measurements.
+        ReadVgain("./data/antennas/ARA_BVpol_Kansas2024.txt", settings1);
+        ReadVgainTop("./data/antennas/ARA_TVpol_Kansas2024.txt", settings1);
+        ReadHgain("./data/antennas/ARA_HPol_Kansas2024.txt", settings1);        
     }
     
 
