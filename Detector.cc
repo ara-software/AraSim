@@ -2176,8 +2176,9 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     
     if (settings1->ANTENNA_MODE == 0){
         // use the orignal Vpol/Hpol gains
-        ReadVgain("./data/antennas/ARA_bicone6in_output.txt", settings1);
-        ReadHgain("./data/antennas/ARA_dipoletest1_output.txt", settings1);
+        ReadVgain("./data/antennas/realizedGain/ARA_bicone6in_output.txt", settings1);
+        ReadVgainTop("./data/antennas/realizedGain/ARA_bicone6in_output.txt", settings1);
+        ReadHgain("./data/antennas/realizedGain/ARA_dipoletest1_output.txt", settings1);
     }
     else if (settings1->ANTENNA_MODE == 1) {
         // use the gains as Thomas had them circa 2016
@@ -2187,30 +2188,40 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         // is actually SWR (previously they were transmission coefficient, as identified by MYL in Jan 2020).
         // To calculate the SWR, brian did reflection_coefficient = sqrt(1-transmission_coefficient^2)
         // and then SWR = (1+reflection_coefficient)/(1-reflection_coefficient).
-        ReadVgain("./data/antennas/ARA_bicone6in_output_updated2020.txt", settings1);
-        ReadVgainTop("./data/antennas/ARA_VPresult_topTrec_updated2020.txt", settings1);
-        ReadHgain("./data/antennas/ARA_dipoletest1_output_updated2020.txt", settings1);
+        ReadVgain("./data/antennas/realizedGain/ARA_bicone6in_output_updated2020.txt", settings1);
+        ReadVgainTop("./data/antennas/realizedGain/ARA_VPresult_topTrec_updated2020.txt", settings1);
+        ReadHgain("./data/antennas/realizedGain/ARA_dipoletest1_output_updated2020.txt", settings1);
     }
     else if (settings1->ANTENNA_MODE == 2){
         // pull a "trick" and substitue the ARIANNA LPDAs for the antennas
-        ReadVgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
-        ReadHgain("./data/antennas/Arianna_WIPLD_hpol.dat", settings1);
+        ReadVgain("./data/antennas/realizedGain/Arianna_WIPLD_hpol.dat", settings1);
+        ReadVgainTop("./data/antennas/realizedGain/Arianna_WIPLD_hpol.dat", settings1);
+        ReadHgain("./data/antennas/realizedGain/Arianna_WIPLD_hpol.dat", settings1);
     }
     else if(settings1->ANTENNA_MODE == 3){
         // load the Chiba XFDTD models
         // same gain for top and bottom
-        ReadVgain("./data/antennas/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt", settings1);
-        ReadVgainTop("./data/antennas/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt", settings1);
-        ReadHgain("./data/antennas/Hpol_original_150mmHole_Ice_ARASim.txt", settings1);
+        ReadVgain("./data/antennas/realizedGain/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt", settings1);
+        ReadVgainTop("./data/antennas/realizedGain/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt", settings1);
+        ReadHgain("./data/antennas/realizedGain/Hpol_original_150mmHole_Ice_ARASim.txt", settings1);
     }
     else if (settings1->ANTENNA_MODE == 4){
         // load the Chiba in-situ models
         // same gain for top and bottom
-        ReadVgain("./data/antennas/In_situ_VPol_Model.txt", settings1);
-        ReadVgainTop("./data/antennas/In_situ_VPol_Model.txt", settings1);
-        ReadHgain("./data/antennas/In_situ_HPol_Model.txt", settings1);
+        ReadVgain("./data/antennas/realizedGain/In_situ_VPol_Model.txt", settings1);
+        ReadVgainTop("./data/antennas/realizedGain/In_situ_VPol_Model.txt", settings1);
+        ReadHgain("./data/antennas/realizedGain/In_situ_HPol_Model.txt", settings1);
     }
-    
+    else if (settings1->ANTENNA_MODE == 5) { //Adding antenna mode for Kansas lab measurements.
+        ReadVgain("./data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Kansas2024.txt", settings1);
+        ReadVgainTop("./data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Kansas2024.txt", settings1);
+        ReadHgain("./data/antennas/realizedGain/ARA_HPol_RealizedGainAndPhase_Copol_Kansas2024.txt", settings1);        
+    }
+    else if (settings1->ANTENNA_MODE == 6) { //Adding antenna mode for custom gains.
+        ReadVgain("./data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Custom.txt", settings1);
+        ReadVgainTop("./data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Custom.txt", settings1);
+        ReadHgain("./data/antennas/realizedGain/ARA_HPol_RealizedGainAndPhase_Copol_Custom.txt", settings1);        
+    }   
 
 }
 //Defining function that reads in TX antenna impedances
