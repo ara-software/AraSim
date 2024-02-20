@@ -189,7 +189,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
 
     }
     //Creating pulser event type that will be modelled after arbitrary event type (EVENT_TYPE=10). - JCF 4/6/2023
-    if (Event_type == 11) { // if only arbitrary events exist
+    if (Event_type == 11 or Event_type == 12) { // if only arbitrary events exist
         
   
         pnu = 0;
@@ -237,6 +237,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         */
 
     }
+    
 
     IsCalpulser = primary1->IsCalpulser;
 
@@ -266,8 +267,11 @@ void Event::Choose_Evt_Type (Settings *settings1) {
     else if (settings1->EVENT_TYPE == 11){
         Event_type = 11;
     }
+    else if (settings1->EVENT_TYPE == 12){
+        Event_type = 12;
+    }    
     else {
-        cout<<"Currently, only neutrino (EVENT_TYPE=0), arbitrary (EVENT_TYPE=10), and pulser (EVENT_TYPE=11) events possible!"<<endl;
+        cout<<"Currently, only neutrino (EVENT_TYPE=0), arbitrary (EVENT_TYPE=10), and pulser (EVENT_TYPE=11 or 12) events possible!"<<endl;
         cout<<"Change Evt_type from "<<settings1->EVENT_TYPE<<" to 0"<<endl;
         Event_type = 0;
     }

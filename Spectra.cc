@@ -614,4 +614,3 @@ int Spectra::IsMonoenergetic() {
     }
     return out;
 }
-

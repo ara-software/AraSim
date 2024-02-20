@@ -865,7 +865,7 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
 // input data is not vector but double array
 void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdiode, vector <double> &diodeconv) {
     
-    
+    // cout << "Trigger::myconvlv" << endl;
     const int length=DATA_BIN_SIZE;
 //    double data_copy[length];
     //double fdiode_real[length];
