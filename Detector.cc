@@ -77,7 +77,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
     params.number_of_antennas = 0;
 
     //initialize few params values.
-    params.freq_step = 60;
+    params.freq_step = 60;  //The hard-coding of this seems unnecessary, as it limits forces us to have our gain files go beyond 1000 MHz in data, which is out of band for us. - JCF 2/22/2024
     params.ang_step = 2664;
     params.freq_width = 16.667;
     params.freq_init = 83.333;
@@ -92,6 +92,10 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         params.freq_width = 5; //16.667;
         params.freq_init = 15; //83.333;
         params.DeployedStations = 4;
+    }
+    
+    if (settings1->ANTENNA_MODE == 5 or settings1->ANTENNA_MODE == 6) {
+        params.freq_step = 56; //This is a stop-gap measure to allow the Kansas models ot work in AraSim, which only have data up to 1000 MHz rather than 1066.66 MHz. - JCF 2/22/2024
     }
 
     //copy freq_width, freq_init in params to Detector freq_width, freq_init
