@@ -311,6 +311,7 @@ class Settings
                        // 3: use the chiba xfdtd models (treats top and bottom as the same)
                        // 4: use the chiba in-situ models (treats top and bottom as the same)
                        // 5: use the Kansas lab measurements that treat top and bottom vpol separately.
+                       // 6: Uses custom antenna models that the user can specify with the custom files in data/antennas/realizedGain
                        // The related wiki page for antenna models description:http://ara.icecube.wisc.edu/wiki/index.php/Antenna_model
                        
    //Impedances of RX and TX antennas.  All use the numbering scheme below:
