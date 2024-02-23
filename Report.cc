@@ -5054,16 +5054,15 @@ void Report::GetParameters( Position &src, Position &trg, Vector &nnu, double &v
 double Report::GaintoHeight(double gain, double freq, double n_medium, double Z_A) {
 
 
+    // Note:  The comments below reflect past derivation of effective height that uses IDEAL gain, whereas we use REALIZED gain. - JCF 2/23/2024
     // from gain=4*pi*A_eff/lambda^2
     // and h_eff=2*sqrt(A_eff*Z_rx/Z_air)
     // gain is unitless value
     
-    // cout << "freq = " << freq << endl;
-    // cout << "Z_A = " << Z_A << endl;
-    // cout << "freq = " << freq << endl;
-    // cout << "n_medium = " << n_medium << endl;
+    // return sqrt(gain/4/PI*CLIGHT*CLIGHT/(freq*freq*n_medium*n_medium)*Z_A/(Z0/n_medium));  // n_medium parts are changed from icemc(I believe this is correct one; E. Hong)
     
-    return 2*sqrt(gain/4/PI*CLIGHT*CLIGHT/(freq*freq*n_medium*n_medium)*Z_A/(Z0/n_medium));  // n_medium parts are changed from icemc(I believe this is correct one; E. Hong)
+    return sqrt((gain*CLIGHT*CLIGHT*Zr)/(4*PI*n_medium*freq*freq*Z0));
+
 }
 
 double Report::calculatePolFactor(Vector &Pol_vector, int ant_type, double antenna_theta, double antenna_phi){
