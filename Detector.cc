@@ -2973,15 +2973,6 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     if ( Gout < 0. ){ // gain can not go below 0
     	Gout = 0.;
     }
-    // cout << "************************" << endl;
-    // cout << "Gout = " << Gout << endl;
-    // cout << "freq = " << freq << endl;
-    // cout << "freq_init = " << freq_init << endl;
-    // cout << "Freq[0] = " << Freq[0] << endl;
-    // cout << "Freq[1] = " << Freq[1] << endl;
-    // cout << "slope_1 = " << slope_1 << endl;
-    // cout << "(*tempGain)[1][angle_bin] = " << (*tempGain)[1][angle_bin] << endl;
-    // cout << "(*tempGain)[0][angle_bin] = " << (*tempGain)[0][angle_bin] << endl;
 
     return Gout;
 
