@@ -1546,7 +1546,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 	}
                                                 	else
                                                     		V_forfft[n] = 0.;
-
                                             	}                                         
 
                                             	// just get peak from the array
@@ -1832,9 +1831,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 
                                                 //Apply transmitting antenna effective height and impedance to calculate electric field at 1m from Tx.
                                                 
-                                                //Defining the launch angles using the polarization vector calculations above.
-                                                Tx_theta = theta;
-                                                Tx_phi = phi;
+                                                //Defining the launch angles using the polarization vector calculations above, converted to degrees.
+                                                Tx_theta = theta*180/PI;
+                                                Tx_phi = phi*180/PI;
                                                 
                                                 //Tx effective height for last bin.  Currently locked to standard ARA Vpol and HPol antennas.  Need to add selection mode.
                                             	if (settings1->ALL_ANT_V_ON == 0)
@@ -1929,13 +1928,14 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 //End Fresnel application
 
                                                 //Apply birefringence.
-                                                birefringence->Principal_axes_polarization(Pol_vector, bire_ray_cnt, max_bire_ray_cnt, settings1); //For birefringence, modify the polarization at the antennas                                            
+                                                birefringence->Principal_axes_polarization(Pol_vector, bire_ray_cnt, max_bire_ray_cnt, settings1); //For birefringence, modify the polarization at the antennas       
+                                                
+                                                //Debugging
+                                                int testN = 100;
 
                                                 //Begin frequency binning
                                             	for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2; n++)
                                             	{
-
-                                                	freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
 
                                                     // Calculate effective height for transmitting antenna in current frequency bin
                                                 	if (settings1->ALL_ANT_V_ON == 0)
@@ -1973,7 +1973,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     		}
                                                 	}
                                                     // End Tx effective height calculation                                                    
-                                                    
+                                            
                                                     // Calculate effective height for receiving antenna in current frequency bin
                                                 	if (settings1->ALL_ANT_V_ON == 0)
                                                 	{
@@ -2013,6 +2013,17 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                                 	stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(heff);
                                                     
+                                                	freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
+                                                    if (n == testN) {
+                                                        cout << "***********Before Tx factors************" << endl;
+                                                        cout << "freq_tmp (MHz) = " << freq_tmp*1e-6 << endl;
+                                                        cout << "Gain = " << detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, true) << endl;
+                                                        cout << "IceModel n = " << icemodel->GetN(detector->stations[i].strings[j].antennas[k]) << endl;
+                                                        cout << "Impedance = " << detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true) << endl;
+                                                        cout << "heff_Tx = " << heff_Tx << endl;
+                                                        cout << "V_forfft[2n], V_forfft[2n+1] = " << V_forfft[2*n] << ",\t" << V_forfft[2*n+1] << endl;
+                                                    }                                                         
+                                                    
                                                     //Apply Tx antenna factors
                                                     if (n > 0)
                                                 	{
@@ -2036,6 +2047,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     
                                                 	}
                                                     //End Tx antenna factors
+                                                    
+                                                	freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
+                                                    if (n == testN) {
+                                                        cout << "***********After Tx/Before Rx factors************" << endl;
+                                                        cout << "V_forfft[2n], V_forfft[2n+1] = " << V_forfft[2*n] << ",\t" << V_forfft[2*n+1] << endl;
+                                                    }                                                    
                                            		
                                                     //Apply Rx antenna factors
                                                     if (n > 0)
@@ -2060,6 +2077,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     
                                                 	}
                                                     //End Rx antenna factors
+                                                    
+                                                    if (n == testN) {
+                                                        cout << "***********After Rx/Before Electronics factors************" << endl;
+                                                        cout << "V_forfft[2n], V_forfft[2n+1] = " << V_forfft[2*n] << ",\t" << V_forfft[2*n+1] << endl;
+                                                    }                                                            
 
                                                 	//
                                                 	// apply entire elect chain gain, phase
@@ -2072,11 +2094,24 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 	{
                                                     		ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
                                                 	}
+                                                    
+                                                    if (n == testN) {
+                                                        cout << "***********After Electronics factors************" << endl;
+                                                        cout << "V_forfft[2n], V_forfft[2n+1] = " << V_forfft[2*n] << ",\t" << V_forfft[2*n+1] << endl;
+                                                    }                                                         
 
                                             	}   // end for freq bin
                                                 //End amplification at receiving antenna
                                                 
-
+                                                //Debugging print statements
+                                                // cout << "V_forfft (after electronics) = ";
+                                                // for (int n = 0; n < settings1->NFOUR / 2; n++) {
+                                                //     cout << V_forfft[n] << ", ";
+                                                // }
+                                                // cout << endl;
+                                                
+                                                // cout << "max(V_forfft) after electronics = " << *std::max_element(V_forfft, V_forfft + stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]) << endl;
+                                                //End debugging print statements.
 
                                             	Tools::realft(V_forfft, -1, stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);                                                 
                         
@@ -5059,9 +5094,9 @@ double Report::GaintoHeight(double gain, double freq, double n_medium, double Z_
     // and h_eff=2*sqrt(A_eff*Z_rx/Z_air)
     // gain is unitless value
     
-    // return sqrt(gain/4/PI*CLIGHT*CLIGHT/(freq*freq*n_medium*n_medium)*Z_A/(Z0/n_medium));  // n_medium parts are changed from icemc(I believe this is correct one; E. Hong)
+    return sqrt(gain/4/PI*CLIGHT*CLIGHT/(freq*freq*n_medium*n_medium)*Z_A/(Z0/n_medium));  // n_medium parts are changed from icemc(I believe this is correct one; E. Hong)
     
-    return sqrt((gain*CLIGHT*CLIGHT*Zr)/(4*PI*n_medium*freq*freq*Z0));
+    // return sqrt((gain*CLIGHT*CLIGHT*Zr)/(4*PI*n_medium*freq*freq*Z0));
 
 }
 
@@ -5143,7 +5178,12 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
         if(useInTransmitterMode==true){ phase_current += PI/2;};
         // V amplitude
         double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
-        if(useInTransmitterMode==true){ v_amp *= freq/CLIGHT*(2*Z0/(Zr + Z_A));};
+        if(useInTransmitterMode==true){ 
+            // cout << "V_amp before impedance correction = " << v_amp << endl;
+            // v_amp *= freq/CLIGHT*(2*Z0/Zr);// I might need to reduce this by a factor of two. - JCF 2/25/2024
+            v_amp *= freq/CLIGHT*(Z0/Zr)/2;// Testing factor of two reduction - JCF 2/27/2024
+            // cout << "V_amp after impedance correction = " << v_amp << endl;
+        }  
         // real, img terms with phase shift
         vm_real = v_amp * cos( phase_current + (sign * AntPhase*RADDEG) );
         vm_img =  v_amp * sin( phase_current + (sign * AntPhase*RADDEG) );
@@ -5166,8 +5206,8 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin,
     vm_bin1 = vm_bin1 / sqrt(2.) * 0.5 * heff_lastbin * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
     
     if (useInTransmitterMode) {
-        vm_bin0 *= freq/CLIGHT*(2*Z0/(Zr + Z_A));
-        vm_bin1 *= freq/CLIGHT*(2*Z0/(Zr + Z_A));
+        vm_bin0 *= freq/CLIGHT*(2*Z0/(Zr))/4;
+        vm_bin1 *= freq/CLIGHT*(2*Z0/(Zr))/4;
     }
 
 }

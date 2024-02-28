@@ -5,7 +5,7 @@ import sys
 	And summed weight passing
 '''
 expected_global_pass = 2 #Updated this from 3 after changing the effective height calculation and number of events thrown - JCF 2/23/20242
-expected_total_weight = 0.999199  #1.99067
+expected_total_weight = 0.998305  #1.99067
 expected_total_weight_sigma = 0.0001
 
 
