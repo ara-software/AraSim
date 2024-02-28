@@ -2,7 +2,7 @@
 // for this test, we want to always be able to reproduce the same run
 // to eliminate statistical noise, and make the test stable
 RANDOM_MODE=0
-SEED=101 //Changing from 100 to get a better event pass rate for the new effective height modeling. - JCF 2/23/2024
+SEED=100
 
 //the neutrinos
 NNU=500 //allow this many neutrinos
@@ -39,3 +39,5 @@ RAYSOL_RANGE=9000 // radius of the cylinder in ray tracer will look for solution
 //the output
 DATA_SAVE_MODE=2 // 2: save only physics data
 DATA_LIKE_OUTPUT=0 //don't try to save anything to event tree
+
+FILL_TREE_MODE=0
