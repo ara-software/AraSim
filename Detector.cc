@@ -2932,7 +2932,6 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     //Tx
     else if (useInTransmitterMode) {
         tempGain = &Txgain;
-        cout << "Using Tx mode" << endl;
     } 
     
     // check if angles range actually theta 0-180, phi 0-360
@@ -2954,58 +2953,23 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
      //Interpolation of tempGain
     slope_1 = ((*tempGain)[1][angle_bin] - (*tempGain)[0][angle_bin]) / (Freq[1] - Freq[0]);
 
-    if (useInTransmitterMode) {
-        cout << "#################################" << endl;
-    }
-
     // if freq is lower than freq_init
     if ( freq < freq_init ) {
         Gout = slope_1 * (freq - Freq[0]) + (*tempGain)[0][angle_bin];
-        if (useInTransmitterMode) {
-            cout << "Condition A" << endl;
-        }
     }
     // if freq is higher than last freq
     else if ( freq > Freq[freq_step-1] ) {
         //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
         Gout = 0.;
-        if (useInTransmitterMode) {
-            cout << "Condition B" << endl;
-        }
     }
 
     else {
         Gout = (*tempGain)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-        if (useInTransmitterMode) {
-            cout << "Condition C" << endl;
-        }
 
     } // not outside the Freq[] range    
     
     if ( Gout < 0. ){ // gain can not go below 0
     	Gout = 0.;
-        if (useInTransmitterMode) {
-            cout << "Condition D" << endl;
-        }
-    }
-    
-    if (useInTransmitterMode) {
-        cout << "slope_1 = " << slope_1 << endl;
-        cout << "theta = " << theta << endl;
-        cout << "phi = " << phi << endl;
-        cout << "freq = " << freq << endl;
-        cout << "freq_init = " << freq_init << endl;
-        cout << "freq_step = " << freq_step << endl;
-        cout << "Freq[freq_step-1] = " << Freq[freq_step-1] << endl;
-        cout << "Gout = " << Gout << endl;
-        cout << "bin = " << bin << endl;
-        cout << "angle_bin = " << angle_bin << endl;
-        cout << "(*tempGain)[bin-1][angle_bin] = " << (*tempGain)[bin-1][angle_bin] << endl;
-        cout << "(freq-Freq[bin-1]) = " << (freq-Freq[bin-1]) << endl;
-        cout << "(*tempGain)[bin][angle_bin] = " << (*tempGain)[bin][angle_bin] << endl;
-        cout << "(*tempGain)[bin-1][angle_bin] = " << (*tempGain)[bin-1][angle_bin] << endl;
-        cout << "Freq[bin] = " << Freq[bin] << endl;
-        cout << "Freq[bin-1] = " << Freq[bin-1] << endl;        
     }
 
     return Gout;

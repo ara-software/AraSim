@@ -39,5 +39,3 @@ RAYSOL_RANGE=9000 // radius of the cylinder in ray tracer will look for solution
 //the output
 DATA_SAVE_MODE=2 // 2: save only physics data
 DATA_LIKE_OUTPUT=0 //don't try to save anything to event tree
-
-FILL_TREE_MODE=0
