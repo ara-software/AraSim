@@ -1886,3 +1886,12 @@ An introduction is here: https://aradocs.wipac.wisc.edu/0029/002928/001/Birefrin
 
 ==============================================================================
 
+2024/03/02 Justin Flaherty
+
+Updated a few aspects to our antenna modeling:
+
+    -Our antenna effective heights were being over-estimated by a factor of two, so they now have been reduced.
+    -The functions that read in the antenna gains (ReadVGain, ReadHGain, ReadVTopGain) were importing the linear gain from XF files, which are limited to two decimal places.  It's been changed to import the dB Gain and convert to linear gain in order to maintain significant figures.
+    -Pulser simulations for antennas in Tx mode have been introduced for the PVA antenna (SPICE).  At present it only works for Co-pol (the desired polarization of an antenna, perpendicular to cross-pol), and there are some factors of two that need to be addressed in the electric field amplitude.  This will be iterated upon in future updates, along with the inclusion of cross-pol for the Tx antenna as well as the Rx antennas.
+
+==============================================================================
