@@ -2076,16 +2076,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                             	}   // end for freq bin
                                                 //End amplification at receiving antenna
-                                                
-                                                //Debugging print statements
-                                                // cout << "V_forfft (after electronics) = ";
-                                                // for (int n = 0; n < settings1->NFOUR / 2; n++) {
-                                                //     cout << V_forfft[n] << ", ";
-                                                // }
-                                                // cout << endl;
-                                                
-                                                // cout << "max(V_forfft) after electronics = " << *std::max_element(V_forfft, V_forfft + stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]) << endl;
-                                                //End debugging print statements.
 
                                             	Tools::realft(V_forfft, -1, stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);                                                 
                         
@@ -5145,8 +5135,7 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
         if (useInTransmitterMode==true){ 
             phase_current += PI/2;
             v_amp *= heff * pol_factor;
-            // v_amp *= freq/CLIGHT*(2*Z0/Zr);// I might need to reduce this by a factor of two. - JCF 2/25/2024
-            v_amp *= freq/CLIGHT*(Z0/Zr)/4/sqrt(2.);// Testing factor of two reduction - JCF 2/27/2024           
+            v_amp *= freq/CLIGHT*(Z0/Zr)/4/sqrt(2.);// The factors of two in this line are currently up for debate.  Will be cleaned up in future push - JCF 3/2/2024           
         }
         else {
             // V amplitude
@@ -5175,7 +5164,7 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin,
     vm_bin1 *= heff_lastbin * pol_factor;
     
     if (useInTransmitterMode) {
-        // The factors of two are currently being explored in this. - JCF 2/29/2024
+        // The factors of two in these two lines are currently up for debate.  Will be cleaned up in future push - JCF 3/2/2024  
         vm_bin0 *= freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.);
         vm_bin1 *= freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.);
     }
@@ -5199,7 +5188,7 @@ void Report::InvertAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol
      // ApplyAntFactors_Tdomain and ApplyAntFactors_Tdomain_Transmitter when
      // Brian merged the two functions in Nov 2020
      double sign = 1.;
-     // if(useInTransmitterMode==true){ sign=-1.;}; //commenting out for debugging -JCF 7/05/2023
+     if(useInTransmitterMode==true){ sign=-1.;};
 
     //double pol_factor;
     pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
