@@ -1546,7 +1546,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 	}
                                                 	else
                                                     		V_forfft[n] = 0.;
-
                                             	}                                         
 
                                             	// just get peak from the array
@@ -1832,9 +1831,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 
                                                 //Apply transmitting antenna effective height and impedance to calculate electric field at 1m from Tx.
                                                 
-                                                //Defining the launch angles using the polarization vector calculations above.
-                                                Tx_theta = theta;
-                                                Tx_phi = phi;
+                                                //Defining the launch angles using the polarization vector calculations above, converted to degrees.
+                                                Tx_theta = theta*180/PI;
+                                                Tx_phi = phi*180/PI;
                                                 
                                                 //Tx effective height for last bin.  Currently locked to standard ARA Vpol and HPol antennas.  Need to add selection mode.
                                             	if (settings1->ALL_ANT_V_ON == 0)
@@ -1929,13 +1928,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 //End Fresnel application
 
                                                 //Apply birefringence.
-                                                birefringence->Principal_axes_polarization(Pol_vector, bire_ray_cnt, max_bire_ray_cnt, settings1); //For birefringence, modify the polarization at the antennas                                            
+                                                birefringence->Principal_axes_polarization(Pol_vector, bire_ray_cnt, max_bire_ray_cnt, settings1); //For birefringence, modify the polarization at the antennas       
 
                                                 //Begin frequency binning
                                             	for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2; n++)
                                             	{
-
-                                                	freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
 
                                                     // Calculate effective height for transmitting antenna in current frequency bin
                                                 	if (settings1->ALL_ANT_V_ON == 0)
@@ -1973,7 +1970,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     		}
                                                 	}
                                                     // End Tx effective height calculation                                                    
-                                                    
+                                            
                                                     // Calculate effective height for receiving antenna in current frequency bin
                                                 	if (settings1->ALL_ANT_V_ON == 0)
                                                 	{
@@ -2013,6 +2010,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                                 	stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(heff);
                                                     
+                                                	freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq                                                      
+                                                    
                                                     //Apply Tx antenna factors
                                                     if (n > 0)
                                                 	{
@@ -2020,22 +2019,24 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     
                                                     		if (settings1->ALL_ANT_V_ON == 0)
                                                     		{
-                                                        		ApplyAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, detector->stations[i].strings[j].antennas[k].type),
-                                                            		heff_Tx, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], settings1, Tx_theta, Tx_phi, freq_tmp, detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true), true);
+                                                        		ApplyAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0),
+                                                            		heff_Tx, n_trg_pokey, n_trg_slappy, Pol_vector, 0, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], settings1, Tx_theta, Tx_phi, freq_tmp, detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true), true);
                                                     		}
                                                     		else if (settings1->ALL_ANT_V_ON == 1)
                                                     		{
 
                                                         		ApplyAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0),
-                                                            		heff_Tx, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], settings1, Tx_theta, Tx_phi, freq_tmp, detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true), true);                                  
+                                                            		heff_Tx, n_trg_pokey, n_trg_slappy, Pol_vector, 0, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], settings1, Tx_theta, Tx_phi, freq_tmp, detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true), true);                                  
                                                     		}
                                                 	}
                                                 	else
                                                 	{
-                                                    		ApplyAntFactors_Tdomain_FirstTwo(heff_Tx, heff_Tx_lastbin, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], Tx_theta, Tx_phi, freq_tmp);
+                                                    		ApplyAntFactors_Tdomain_FirstTwo(heff_Tx, heff_Tx_lastbin, n_trg_pokey, n_trg_slappy, Pol_vector, 0, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], Tx_theta, Tx_phi, freq_tmp);
                                                     
                                                 	}
                                                     //End Tx antenna factors
+                                                    
+                                                	freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq                                                 
                                            		
                                                     //Apply Rx antenna factors
                                                     if (n > 0)
@@ -2059,7 +2060,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     		ApplyAntFactors_Tdomain_FirstTwo(heff, heff_lastbin, n_trg_pokey, n_trg_slappy, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi, freq_tmp);
                                                     
                                                 	}
-                                                    //End Rx antenna factors
+                                                    //End Rx antenna factors                                                        
 
                                                 	//
                                                 	// apply entire elect chain gain, phase
@@ -2071,12 +2072,10 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 	else
                                                 	{
                                                     		ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no);
-                                                	}
+                                                	}                                                   
 
                                             	}   // end for freq bin
                                                 //End amplification at receiving antenna
-                                                
-
 
                                             	Tools::realft(V_forfft, -1, stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]);                                                 
                         
@@ -5052,16 +5051,8 @@ void Report::GetParameters( Position &src, Position &trg, Vector &nnu, double &v
 
 
 double Report::GaintoHeight(double gain, double freq, double n_medium, double Z_A) {
-
-
-    // Note:  The comments below reflect past derivation of effective height that uses IDEAL gain, whereas we use REALIZED gain. - JCF 2/23/2024
-    // from gain=4*pi*A_eff/lambda^2
-    // and h_eff=2*sqrt(A_eff*Z_rx/Z_air)
-    // gain is unitless value
     
-    // return sqrt(gain/4/PI*CLIGHT*CLIGHT/(freq*freq*n_medium*n_medium)*Z_A/(Z0/n_medium));  // n_medium parts are changed from icemc(I believe this is correct one; E. Hong)
-    
-    return sqrt((gain*CLIGHT*CLIGHT*Zr)/(4*PI*n_medium*freq*freq*Z0));
+    return sqrt((gain*CLIGHT*CLIGHT*Zr) / (4*PI*n_medium*freq*freq*Z0));
 
 }
 
@@ -5140,10 +5131,16 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
             else if (vm_img<0.) phase_current = -PI;
             else phase_current = 0.;
         }
-        if(useInTransmitterMode==true){ phase_current += PI/2;};
-        // V amplitude
-        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
-        if(useInTransmitterMode==true){ v_amp *= freq/CLIGHT*(2*Z0/(Zr + Z_A));};
+        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img);
+        if (useInTransmitterMode==true){ 
+            phase_current += PI/2;
+            v_amp *= heff * pol_factor;
+            v_amp *= freq/CLIGHT*(Z0/Zr)/4/sqrt(2.);// The factors of two in this line are currently up for debate.  Will be cleaned up in future push - JCF 3/2/2024           
+        }
+        else {
+            // V amplitude
+            v_amp *= 1 / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
+        }
         // real, img terms with phase shift
         vm_real = v_amp * cos( phase_current + (sign * AntPhase*RADDEG) );
         vm_img =  v_amp * sin( phase_current + (sign * AntPhase*RADDEG) );
@@ -5162,12 +5159,18 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin,
     //double pol_factor;
     pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
 
-    vm_bin0 = vm_bin0 / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
-    vm_bin1 = vm_bin1 / sqrt(2.) * 0.5 * heff_lastbin * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
+    //First step in the voltage calculation.  Both Tx and Rx mode use this.
+    vm_bin0 *= heff * pol_factor;
+    vm_bin1 *= heff_lastbin * pol_factor;
     
     if (useInTransmitterMode) {
-        vm_bin0 *= freq/CLIGHT*(2*Z0/(Zr + Z_A));
-        vm_bin1 *= freq/CLIGHT*(2*Z0/(Zr + Z_A));
+        // The factors of two in these two lines are currently up for debate.  Will be cleaned up in future push - JCF 3/2/2024  
+        vm_bin0 *= freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.);
+        vm_bin1 *= freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.);
+    }
+    else {
+        vm_bin0 *= 1 /sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
+        vm_bin1 *= 1 / sqrt(2.) * 0.5 * heff_lastbin * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
     }
 
 }
@@ -5185,7 +5188,7 @@ void Report::InvertAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol
      // ApplyAntFactors_Tdomain and ApplyAntFactors_Tdomain_Transmitter when
      // Brian merged the two functions in Nov 2020
      double sign = 1.;
-     // if(useInTransmitterMode==true){ sign=-1.;}; //commenting out for debugging -JCF 7/05/2023
+     if(useInTransmitterMode==true){ sign=-1.;};
 
     //double pol_factor;
     pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
@@ -5205,45 +5208,16 @@ void Report::InvertAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol
             else if (vm_img<0.) phase_current = -PI;
             else phase_current = 0.;
         }
-        // cout << "dddddddddd" << endl;
-        // V amplitude
-        // cout << "ant_type = " << ant_type << endl;
-        // cout << "vm_real = " << vm_real << endl;
-        // cout << "vm_img = " << vm_img << endl;
-        // cout << "phase_current = " << phase_current << endl;
-        // cout << "heff = " << heff << endl;
-        // cout << "AntPhase = " << AntPhase << endl;
-        // cout << "antenna_theta = " << antenna_theta << endl;
-        // cout << "antenna_phi = " << antenna_phi << endl;
-        // cout << "RADDEG = " << RADDEG << endl;
         double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / (1 / sqrt(2.) * 0.5 * heff * pol_factor); // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
 
-        // real, img terms with phase shift
-        // cout << "eeeeeeee" << endl;
         vm_real = v_amp * cos( phase_current - (sign * AntPhase*RADDEG) );
         vm_img =  v_amp * sin( phase_current - (sign * AntPhase*RADDEG) );
-        // cout << "ffffffff" << endl;
-        //vm_real = v_amp * cos( phase_current - AntPhase*RADDEG ); // subtract AntPhase for four1 function's equation definition (inverse in img values)
-        //vm_img = v_amp * sin( phase_current - AntPhase*RADDEG );
-        // cout << "v_amp = " << v_amp << endl;
-        // cout << "vm_real = " << vm_real << endl;
-        // cout << "vm_img = " << vm_img << endl;
-        // cout << "(sign * AntPhase*RADDEG) = " << (sign * AntPhase*RADDEG) << endl;
-        // cout << "phase_current - (sign * AntPhase*RADDEG) = " << phase_current - (sign * AntPhase*RADDEG) << endl;
-        // cout << "cos( phase_current - (sign * AntPhase*RADDEG)) = " << cos( phase_current - (sign * AntPhase*RADDEG)) << endl;
-        // cout << "sin( phase_current - (sign * AntPhase*RADDEG)) = " << sin( phase_current - (sign * AntPhase*RADDEG)) << endl;
     }
 
     else { // only amplitude
         vm_real = vm_real / (1 / sqrt(2.) * 0.5 * heff * pol_factor); // only amplitude
         vm_img = vm_img / (1 / sqrt(2.) * 0.5 * heff * pol_factor); // only amplitude
     }
-    // if (std::isnan(vm_real)) {
-    //     vm_real = 0.0;
-    // }
-    // if (std::isnan(vm_img)) {
-    //     vm_img = 0.0;
-    // }    
 
 }
 
@@ -5255,14 +5229,7 @@ void Report::InvertAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin
     pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
 
     vm_bin0 = vm_bin0 / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
-    vm_bin1 = vm_bin1 / sqrt(2.) * 0.5 * heff_lastbin * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
-    
-    // if (std::isnan(vm_bin0)) {
-    //     vm_bin0 = 0.0;
-    // }
-    // if (std::isnan(vm_bin1)) {
-    //     vm_bin1 = 0.0;      
-    // }    
+    vm_bin1 = vm_bin1 / sqrt(2.) * 0.5 * heff_lastbin * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff  
 
 }
 //End new inverse functions
@@ -5380,11 +5347,6 @@ void Report::InvertElect_Tdomain(double freq, Detector *detector, double &vm_rea
             else if (vm_img<0.) phase_current = -PI;
             else phase_current = 0.;
         }
-        // cout << "vm_real = " << vm_real << endl;
-        // cout << "vm_img = " << vm_img << endl;
-        // cout << "phase_current = " << phase_current << endl;
-        // cout << "freq = " << freq << endl;
-        // cout << "gain_ch_no = " << gain_ch_no << endl;
 
         // V amplitude
         double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / detector->GetElectGain_1D_OutZero( freq, gain_ch_no ); // apply gain (unitless) to amplitude
@@ -5395,16 +5357,7 @@ void Report::InvertElect_Tdomain(double freq, Detector *detector, double &vm_rea
 
         vm_real = v_amp * cos( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no) );
         vm_img = v_amp * sin( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no ) );
-        
-        //Debugging statements:
-        // cout << "detector->GetElectGain_1D_OutZero( freq, gain_ch_no ) = " << detector->GetElectGain_1D_OutZero( freq, gain_ch_no ) << endl;
-        // cout << "v_amp = " << v_amp << endl;
-        // cout << "detector->GetElectPhase_1D(freq, gain_ch_no) = " << detector->GetElectPhase_1D(freq, gain_ch_no) << endl;
-        // cout << "phase_current + detector->GetElectPhase_1D(freq, gain_ch_no) = " << phase_current + detector->GetElectPhase_1D(freq, gain_ch_no) << endl;
-        // cout << "cos( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no) = " << cos( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no)) << endl;
-        // cout << "sin( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no ) = " << sin( phase_current + detector->GetElectPhase_1D(freq, gain_ch_no )) << endl;
-        // cout << "vm_real = " << vm_real << endl;
-        // cout << "vm_img = " << vm_img << endl;
+
     }
 
     else {
@@ -5413,12 +5366,7 @@ void Report::InvertElect_Tdomain(double freq, Detector *detector, double &vm_rea
 
         vm_img = vm_img * detector->GetElectGain_1D_OutZero( freq, gain_ch_no); // only amplitude
     }
-    // if (std::isnan(vm_real) or std::isinf(vm_real)) {
-    //     vm_real = 0.0;
-    // }
-    // if (std::isnan(vm_img) or std::isinf(vm_img)) {
-    //     vm_img = 0.0;
-    // }    
+  
 }
 
 
@@ -5429,12 +5377,6 @@ void Report::InvertElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *
     vm_bin0 = vm_bin0 / detector->GetElectGain_1D_OutZero( freq0 , gain_ch_no);
     vm_bin1 = vm_bin1 / detector->GetElectGain_1D_OutZero( freq1 , gain_ch_no);
     
-    // if (std::isnan(vm_bin0) or std::isinf(vm_bin0)) {
-    //     vm_bin0 = 0.0;
-    // }
-    // if (std::isnan(vm_bin1) or std::isinf(vm_bin1)) {
-    //     vm_bin1 = 0.0;
-    // }   
 }
 //End new inverse functions
 

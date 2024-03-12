@@ -2,7 +2,7 @@
 // for this test, we want to always be able to reproduce the same run
 // to eliminate statistical noise, and make the test stable
 RANDOM_MODE=0
-SEED=101 //Changing from 100 to get a better event pass rate for the new effective height modeling. - JCF 2/23/2024
+SEED=100
 
 //the neutrinos
 NNU=500 //allow this many neutrinos
