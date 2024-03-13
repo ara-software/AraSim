@@ -1,4 +1,4 @@
-t#include "Detector.h"
+#include "Detector.h"
 #include "Report.h"
 #include "Event.h"
 #include "RaySolver.h"
@@ -66,7 +66,7 @@ void Report::delete_all() {
     noise_phase.clear();    // random noise phase generated in GetNoisePhase()
     signal_bin.clear();      // the center of bin where signal should locate
     signal_dbin.clear();     // the bin difference between signal bins
-    tt_signals.clear();    // if ray_sol time delay is small enough to connect each other
+    connect_signals.clear();    // if ray_sol time delay is small enough to connect each other
     Passed_chs.clear();
 
 
