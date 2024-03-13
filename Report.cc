@@ -1,4 +1,4 @@
-#include "Detector.h"
+t#include "Detector.h"
 #include "Report.h"
 #include "Event.h"
 #include "RaySolver.h"
@@ -66,7 +66,7 @@ void Report::delete_all() {
     noise_phase.clear();    // random noise phase generated in GetNoisePhase()
     signal_bin.clear();      // the center of bin where signal should locate
     signal_dbin.clear();     // the bin difference between signal bins
-    connect_signals.clear();    // if ray_sol time delay is small enough to connect each other
+    tt_signals.clear();    // if ray_sol time delay is small enough to connect each other
     Passed_chs.clear();
 
 
@@ -5139,7 +5139,7 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
         }
         else {
             // V amplitude
-            v_amp *= 1 / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
+            v_amp *= heff * pol_factor; 
         }
         // real, img terms with phase shift
         vm_real = v_amp * cos( phase_current + (sign * AntPhase*RADDEG) );
@@ -5147,8 +5147,8 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &n_tr
     }
 
     else { // only amplitude
-        vm_real = vm_real / sqrt(2.) * 0.5 * heff * pol_factor; // only amplitude
-        vm_img = vm_img / sqrt(2.) * 0.5 * heff * pol_factor; // only amplitude
+        vm_real *= heff * pol_factor; // only amplitude
+        vm_img *= heff * pol_factor; // only amplitude
     }
 }
 
