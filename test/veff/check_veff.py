@@ -4,8 +4,8 @@ import sys
 	Expected number of global events passing
 	And summed weight passing
 '''
-expected_global_pass = 2
-expected_total_weight = 0.998305
+expected_global_pass = 4
+expected_total_weight = 2.94955
 expected_total_weight_sigma = 0.0001
 
 
