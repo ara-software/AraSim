@@ -1895,3 +1895,11 @@ Updated a few aspects to our antenna modeling:
     -Pulser simulations for antennas in Tx mode have been introduced for the PVA antenna (SPICE).  At present it only works for Co-pol (the desired polarization of an antenna, perpendicular to cross-pol), and there are some factors of two that need to be addressed in the electric field amplitude.  This will be iterated upon in future updates, along with the inclusion of cross-pol for the Tx antenna as well as the Rx antennas.
 
 ==============================================================================
+
+2024/03/13 Justin Flaherty
+
+Updating the antenna effective height calculation.  Calculation was double-counting two factors: a factor of 1/2 that cor
+rected an issue with a previous definition of the effective height, and a factor of 1/sqrt(2) that accounted for a 3 dB splitter in the electronics chain.  That 3 dB splitt
+er only applied to A1-3, whereas A4-5 followed a different setup.  This split in power is now folded into the electronics gain files.
+
+==============================================================================
