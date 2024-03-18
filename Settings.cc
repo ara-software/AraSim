@@ -306,7 +306,7 @@ outputdir="outputs"; // directory where outputs go
     IMPEDANCE_RX_VPOL=0;
     IMPEDANCE_RX_VPOL_TOP=0;
     IMPEDANCE_RX_HPOL=0;
-    IMPEDANCE_TX=4;
+    IMPEDANCE_TX=0;
     APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
 
     CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.csv"
