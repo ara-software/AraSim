@@ -4760,7 +4760,7 @@ void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *d
 }
 
 void Report::ApplySplitterFactor(double &vm_real, double &vm_img, Settings *settings1) {
-    // Apply splitter/attenuation factor based on station.
+    // Apply splitter/attenuation factor in the digitizer path based on station.
     // AraSim default had factor of 1/sqrt(2), as does A1-3.  A4-5 have either a 1.4 dB or 10 dB factor, which is being checked.
     // See talk by Brian discussing splitter factors: https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2751
     
