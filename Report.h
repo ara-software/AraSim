@@ -327,7 +327,7 @@ class Report {
 
         void InvertElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, int gain_ch_no);
     
-        void GetSplitterFactor(double &vm_real, double &vm_img, Settings *settings1);
+        void ApplySplitterFactor(double &vm_real, double &vm_img, Settings *settings1);
 
 
 

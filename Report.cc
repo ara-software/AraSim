@@ -4742,7 +4742,7 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
     }
     
     //Apply power splitter/attenuator based on station.
-    GetSplitterFactor(vm_real, vm_img, settings1);
+    ApplySplitterFactor(vm_real, vm_img, settings1);
 
 }
 
@@ -4755,11 +4755,11 @@ void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *d
     vm_bin1 = vm_bin1 * detector->GetElectGain_1D_OutZero( freq1 , gain_ch_no);
 
     //Apply power splitter/attenuator based on station.
-    GetSplitterFactor(vm_bin0, vm_bin1, settings1);
+    ApplySplitterFactor(vm_bin0, vm_bin1, settings1);
 
 }
 
-void Report::GetSplitterFactor(double &vm_real, double &vm_img, Settings *settings1) {
+void Report::ApplySplitterFactor(double &vm_real, double &vm_img, Settings *settings1) {
     // Apply splitter/attenuation factor based on station.
     // AraSim default had factor of 1/sqrt(2), as does A1-3.  A4-5 have either a 1.4 dB or 10 dB factor, which is being checked.
     // See talk by Brian discussing splitter factors: https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2751
