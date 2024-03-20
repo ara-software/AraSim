@@ -4770,7 +4770,7 @@ void Report::ApplySplitterFactor(double &vm_real, double &vm_img, Settings *sett
         vm_img *= 1/sqrt(pow(10,-0.34));
     }
     //Case for simulating real ARA Stations A4 and A5 (non phased array).
-    else if (settings1->DETECTOR == 4 and settings1->DETECTOR_STATION > 4) {
+    else if (settings1->DETECTOR == 4 and settings1->DETECTOR_STATION >= 4) {
         vm_real *= 1/sqrt(pow(10,-0.14));
         vm_img *= 1/sqrt(pow(10,-0.14));
     }
