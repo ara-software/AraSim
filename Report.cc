@@ -4774,18 +4774,18 @@ void Report::ApplySplitterFactor(double &vm_real, double &vm_img, Settings *sett
         vm_real *= 1/sqrt(pow(10,-0.14));
         vm_img *= 1/sqrt(pow(10,-0.14));
     }
-    //Case for Phased Array implementation by Abby Bishop.  Will use placeholders of 1/sqrt(2) for now.
+    //Case for Phased Array implementation by Abby Bishop.  Will use placeholders of 1 for now.
     else if (settings1->DETECTOR == 5 and settings1->DETECTOR_STATION == 1) {
-        vm_real *= 1/sqrt(2);
-        vm_img *= 1/sqrt(2);    
+        vm_real *= 1;
+        vm_img *= 1;    
     }
     else if (settings1->DETECTOR == 5 and settings1->DETECTOR_STATION == 2) {
-        vm_real *= 1/sqrt(2);
-        vm_img *= 1/sqrt(2);    
+        vm_real *= 1;
+        vm_img *= 1;    
     }
     else if (settings1->DETECTOR == 5 and settings1->DETECTOR_STATION == 3) {
-        vm_real *= 1/sqrt(2);
-        vm_img *= 1/sqrt(2);    
+        vm_real *= 1;
+        vm_img *= 1;    
     }    
     //Final case where if none of the above are satisfied, it defaults to the historical 1/sqrt(2)
     else {
