@@ -2287,16 +2287,38 @@ inline void Detector::ReadVgain(string filename, Settings *settings1) {
         while (NecOut.good() ) {
             for (int i=0; i<freq_step; i++) {
                 getline (NecOut, line);
-                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
-                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-                    getline (NecOut, line); //read SWR
-                    double swr = atof(line.substr(5,11).c_str());
+                stringstream ss(line);
+                string buff;
+                vector<string> words;
+                while(ss >> buff)
+                  words.push_back(buff);
+                if (words.size() > 0 && words[0] == "freq") {
+                    if(words.size() != 4 || words[3] != "MHz")
+                      throw runtime_error("V antenna gain file frequency not properly formatted!");
+                    Freq[i] = stof( words[2] );
+                    // read SWR info
+                    getline (NecOut, line);
+                    words.clear();
+                    ss.clear();
+                    ss.str(line);
+                    while(ss >> buff)
+                      words.push_back(buff);
+                    if(words.size() != 3 || words[0] != "SWR")
+                      throw runtime_error("V antenna gain file SWR not properly formatted!");
+                    double swr = stof(words[2]);
                     Transm[i] = SWRtoTransCoeff(swr);
-                    getline (NecOut, line); //read names
+                    getline (NecOut, line); //read names (ie column names)
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
-                        Vgain[i][j] = pow(10, atof( line.substr( 7, 17 ).c_str() )/10);  //Importing gain in dB, then converting to linear gain
-                        Vphase[i][j] = atof( line.substr( 34 ).c_str() );  
+                        words.clear();
+                        ss.clear();
+                        ss.str(line);
+                        while(ss >> buff)
+                          words.push_back(buff);
+                        if(words.size() != 5)
+                          throw runtime_error("V antenna gain file data line not properly formatted!");
+                        Vgain[i][j] = pow(10, stof( words[2] )/10);  //Importing gain in dB, then converting to linear gain
+                        Vphase[i][j] = stof( words[4] );
                     }// end ang_step
                 }// end check freq label
             }// end freq_step
@@ -2334,16 +2356,38 @@ inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
         while (NecOut.good() ) {
             for (int i=0; i<freq_step; i++) {
                 getline (NecOut, line);
-                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
-                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-                    getline (NecOut, line); //read SWR
-                    double swr = atof(line.substr(5,11).c_str());
+                stringstream ss(line);
+                string buff;
+                vector<string> words;
+                while(ss >> buff)
+                  words.push_back(buff);
+                if (words.size() > 0 && words[0] == "freq") {
+                    if(words.size() != 4 || words[3] != "MHz")
+                      throw runtime_error("VTop antenna gain file frequency not properly formatted!");
+                    Freq[i] = stof( words[2] );
+                    // read SWR info
+                    getline (NecOut, line);
+                    words.clear();
+                    ss.clear();
+                    ss.str(line);
+                    while(ss >> buff)
+                      words.push_back(buff);
+                    if(words.size() != 3 || words[0] != "SWR")
+                      throw runtime_error("VTop antenna gain file SWR not properly formatted!");
+                    double swr = stof(words[2]);
                     Transm[i] = SWRtoTransCoeff(swr);
-                    getline (NecOut, line); //read names
+                    getline (NecOut, line); //read names (ie column names)
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
-                        VgainTop[i][j] = pow(10, atof( line.substr( 7, 17 ).c_str() )/10);  //Importing gain in dB, then converting to linear gain
-                        VphaseTop[i][j] = atof( line.substr( 34 ).c_str() ); 
+                        words.clear();
+                        ss.clear();
+                        ss.str(line);
+                        while(ss >> buff)
+                          words.push_back(buff);
+                        if(words.size() != 5)
+                          throw runtime_error("VTop antenna gain file data line not properly formatted!");
+                        VgainTop[i][j] = pow(10, stof( words[2] )/10);  //Importing gain in dB, then converting to linear gain
+                        VphaseTop[i][j] = stof( words[4] );  
                     }// end ang_step
                 }// end check freq label
             }// end freq_step
@@ -2385,16 +2429,38 @@ inline void Detector::ReadHgain(string filename, Settings *settings1) {
         while (NecOut.good() ) {
             for (int i=0; i<freq_step; i++) {
                 getline (NecOut, line);
-                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
-                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-                    getline (NecOut, line); //read SWR
-                    double swr = atof(line.substr(5,11).c_str());
+                stringstream ss(line);
+                string buff;
+                vector<string> words;
+                while(ss >> buff)
+                  words.push_back(buff);
+                if (words.size() > 0 && words[0] == "freq") {
+                    if(words.size() != 4 || words[3] != "MHz")
+                      throw runtime_error("H antenna gain file frequency not properly formatted!");
+                    Freq[i] = stof( words[2] );
+                    // read SWR info
+                    getline (NecOut, line);
+                    words.clear();
+                    ss.clear();
+                    ss.str(line);
+                    while(ss >> buff)
+                      words.push_back(buff);
+                    if(words.size() != 3 || words[0] != "SWR")
+                      throw runtime_error("H antenna gain file SWR not properly formatted!");
+                    double swr = stof(words[2]);
                     Transm[i] = SWRtoTransCoeff(swr);
-                    getline (NecOut, line); //read names
+                    getline (NecOut, line); //read names (ie column names)
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
-                        Hgain[i][j] = pow(10, atof( line.substr( 7, 17 ).c_str() )/10);  //Importing gain in dB, then converting to linear gain                       
-                        Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
+                        words.clear();
+                        ss.clear();
+                        ss.str(line);
+                        while(ss >> buff)
+                          words.push_back(buff);
+                        if(words.size() != 5)
+                          throw runtime_error("H antenna gain file data line not properly formatted!");
+                        Hgain[i][j] = pow(10, stof( words[2] )/10);  //Importing gain in dB, then converting to linear gain
+                        Hphase[i][j] = stof( words[4] );  
                     }// end ang_step
                 }// end check freq label
             }// end freq_step
@@ -2431,16 +2497,38 @@ inline void Detector::ReadTxgain(string filename, Settings *settings1) {
         while (NecOut.good() ) {
             for (int i=0; i<freq_step; i++) {
                 getline (NecOut, line);
-                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
-                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-                    getline (NecOut, line); //read SWR
-                    double swr = atof(line.substr(5,11).c_str());
+                stringstream ss(line);
+                string buff;
+                vector<string> words;
+                while(ss >> buff)
+                  words.push_back(buff);
+                if (words.size() > 0 && words[0] == "freq") {
+                    if(words.size() != 4 || words[3] != "MHz")
+                      throw runtime_error("Tx antenna gain file frequency not properly formatted!");
+                    Freq[i] = stof( words[2] );
+                    // read SWR info
+                    getline (NecOut, line);
+                    words.clear();
+                    ss.clear();
+                    ss.str(line);
+                    while(ss >> buff) 
+                      words.push_back(buff);
+                    if(words.size() != 3 || words[0] != "SWR")
+                      throw runtime_error("Tx antenna gain file SWR not properly formatted!");
+                    double swr = stof(words[2]);
                     Transm[i] = SWRtoTransCoeff(swr);
-                    getline (NecOut, line); //read names
+                    getline (NecOut, line); //read names (ie column names)
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
-                        Txgain[i][j] = pow(10, atof( line.substr( 7, 17 ).c_str() )/10);  //Importing gain in dB, then converting to linear gain
-                        Txphase[i][j] = atof( line.substr( 34 ).c_str() );  
+                        words.clear();
+                        ss.clear();
+                        ss.str(line);
+                        while(ss >> buff)
+                          words.push_back(buff);
+                        if(words.size() != 5)
+                          throw runtime_error("Tx antenna gain file data line not properly formatted!");
+                        Txgain[i][j] = pow(10, stof( words[2] )/10);  //Importing gain in dB, then converting to linear gain
+                        Txphase[i][j] = stof( words[4] );  
                     }// end ang_step
                 }// end check freq label
             }// end freq_step
