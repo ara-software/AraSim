@@ -2240,10 +2240,10 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     }
     
     //Read in antenna gain files.
-    ReadVgain(VgainFile, settings1);
-    ReadVgainTop(VgainTopFile, settings1);
-    ReadHgain(HgainFile, settings1);
-    ReadTxgain(TxgainFile, settings1);    
+    ReadAntennaGain(VgainFile, settings1, eVPol);
+    ReadAntennaGain(VgainTopFile, settings1, eVPolTop);
+    ReadAntennaGain(HgainFile, settings1, eHPol);
+    ReadAntennaGain(TxgainFile, settings1, eTx);
 
 }
 //Defining function that reads in TX antenna impedances
@@ -2278,53 +2278,99 @@ inline double Detector::SWRtoTransCoeff(double swr){
     return transmission_coefficient;
 }
 
-inline void Detector::ReadVgain(string filename, Settings *settings1) {
+inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAntennaType type) {
+
+    // make sure data is being read into the right variables
+    double (*gain)[freq_step_max][ang_step_max];
+    double (*phase)[freq_step_max][ang_step_max];
+    vector<double>* transAnt_databin;
+
+    switch(type) {
+      case(eVPol) :
+        gain = &Vgain;
+        phase = &Vphase;
+        transAnt_databin = &transV_databin;
+        break;
+      case(eVPolTop) :
+        gain = &VgainTop;
+        phase = &VphaseTop;
+        transAnt_databin = &transVTop_databin;
+        break;
+      case(eHPol) :
+        gain = &Hgain;
+        phase = &Hphase;
+        transAnt_databin = &transH_databin;
+        break;
+      case(eTx) :
+        gain = &Txgain;
+        phase = &Txphase;
+        break;
+      default :
+        throw runtime_error("Unknown antenna type!");
+    }
+
     ifstream NecOut( filename.c_str() );
     const int N = freq_step;
     double Transm[N];
     string line;
-    if ( NecOut.is_open() ) {
-        while (NecOut.good() ) {
-            for (int i=0; i<freq_step; i++) {
+    if (! NecOut.is_open() ) 
+      throw runtime_error("Antenna gain file could not be opened: "+filename);
+    while (NecOut.good() ) {
+        for (int i=0; i<freq_step; i++) {
+            getline (NecOut, line);
+            stringstream ss(line);
+            string buff;
+            vector<string> words;
+            while(ss >> buff)
+              words.push_back(buff);
+            if (words.size() > 0 && words[0] == "freq") {
+                if(words.size() != 4 || words[3] != "MHz")
+                  throw runtime_error("Antenna gain file frequency not properly formatted! "+filename);
+                double thisFreq = stof(words[2]);
+                if(!std::isfinite(thisFreq))
+                  throw runtime_error("Non-finite frequency value found! "+filename);
+                Freq[i] = thisFreq;
+                // read SWR info
                 getline (NecOut, line);
-                stringstream ss(line);
-                string buff;
-                vector<string> words;
+                words.clear();
+                ss.clear();
+                ss.str(line);
                 while(ss >> buff)
                   words.push_back(buff);
-                if (words.size() > 0 && words[0] == "freq") {
-                    if(words.size() != 4 || words[3] != "MHz")
-                      throw runtime_error("V antenna gain file frequency not properly formatted!");
-                    Freq[i] = stof( words[2] );
-                    // read SWR info
-                    getline (NecOut, line);
+                if(words.size() != 3 || words[0] != "SWR")
+                  throw runtime_error("Antenna gain file SWR not properly formatted! "+filename);
+                double swr = stof(words[2]);
+                if(!std::isfinite(swr))
+                  throw runtime_error("Non-finite SWR value found! "+filename);
+                Transm[i] = SWRtoTransCoeff(swr);
+                getline (NecOut, line); //read names (ie column names)
+                for (int j=0; j<ang_step; j++) {
+                    getline (NecOut, line); //read data line
                     words.clear();
                     ss.clear();
                     ss.str(line);
                     while(ss >> buff)
                       words.push_back(buff);
-                    if(words.size() != 3 || words[0] != "SWR")
-                      throw runtime_error("V antenna gain file SWR not properly formatted!");
-                    double swr = stof(words[2]);
-                    Transm[i] = SWRtoTransCoeff(swr);
-                    getline (NecOut, line); //read names (ie column names)
-                    for (int j=0; j<ang_step; j++) {
-                        getline (NecOut, line); //read data line
-                        words.clear();
-                        ss.clear();
-                        ss.str(line);
-                        while(ss >> buff)
-                          words.push_back(buff);
-                        if(words.size() != 5)
-                          throw runtime_error("V antenna gain file data line not properly formatted!");
-                        Vgain[i][j] = pow(10, stof( words[2] )/10);  //Importing gain in dB, then converting to linear gain
-                        Vphase[i][j] = stof( words[4] );
-                    }// end ang_step
-                }// end check freq label
-            }// end freq_step
-        }// end while NecOut.good
-        NecOut.close();
-    }// end if file open
+                    if(words.size() != 5)
+                      throw runtime_error("Antenna gain file data line not properly formatted! "+filename);
+                    double thisdBGain = stof(words[2]);
+                    double thisPhase = stof(words[4]);
+                    if(!std::isfinite(thisdBGain))
+                      throw runtime_error("Non-finite dB gain value found! "+filename);
+                    if(!std::isfinite(thisPhase))
+                      throw runtime_error("Non-finite phase value found! "+filename);
+                    (*gain)[i][j] = pow(10, thisdBGain/10);  //Importing gain in dB, then converting to linear gain
+                    (*phase)[i][j] = thisPhase;
+                }// end ang_step
+            }// end check freq label
+        }// end freq_step
+    }// end while NecOut.good
+    NecOut.close();
+  
+    // skip this for the transmitter case 
+    if(type == eTx)
+      return;
+    
     double xfreq[N];
     double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
     double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
@@ -2342,220 +2388,12 @@ inline void Detector::ReadVgain(string filename, Settings *settings1) {
     
     Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        transV_databin.push_back(trans_databin[i]); // from Hz to MHz
-    }
-}// end ReadVgain
-
-
-inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
-    ifstream NecOut( filename.c_str() );
-    const int N = freq_step;
-    double Transm[N]; 
-    string line;
-    if ( NecOut.is_open() ) {
-        while (NecOut.good() ) {
-            for (int i=0; i<freq_step; i++) {
-                getline (NecOut, line);
-                stringstream ss(line);
-                string buff;
-                vector<string> words;
-                while(ss >> buff)
-                  words.push_back(buff);
-                if (words.size() > 0 && words[0] == "freq") {
-                    if(words.size() != 4 || words[3] != "MHz")
-                      throw runtime_error("VTop antenna gain file frequency not properly formatted!");
-                    Freq[i] = stof( words[2] );
-                    // read SWR info
-                    getline (NecOut, line);
-                    words.clear();
-                    ss.clear();
-                    ss.str(line);
-                    while(ss >> buff)
-                      words.push_back(buff);
-                    if(words.size() != 3 || words[0] != "SWR")
-                      throw runtime_error("VTop antenna gain file SWR not properly formatted!");
-                    double swr = stof(words[2]);
-                    Transm[i] = SWRtoTransCoeff(swr);
-                    getline (NecOut, line); //read names (ie column names)
-                    for (int j=0; j<ang_step; j++) {
-                        getline (NecOut, line); //read data line
-                        words.clear();
-                        ss.clear();
-                        ss.str(line);
-                        while(ss >> buff)
-                          words.push_back(buff);
-                        if(words.size() != 5)
-                          throw runtime_error("VTop antenna gain file data line not properly formatted!");
-                        VgainTop[i][j] = pow(10, stof( words[2] )/10);  //Importing gain in dB, then converting to linear gain
-                        VphaseTop[i][j] = stof( words[4] );  
-                    }// end ang_step
-                }// end check freq label
-            }// end freq_step
-        }// end while NecOut.good
-        NecOut.close();
-    }// end if file open
-    double xfreq[N];
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-    double df_fft;
-    
-    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
-    
-    // now below are values that shared in all channels
-    for (int i=0;i<freq_step;i++) { // copy values
-        xfreq[i] = Freq[i];
-
-    }
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-    
-
-        Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        transVTop_databin.push_back(trans_databin[i]); // from Hz to MHz
+        if(!std::isfinite(trans_databin[i]))
+          throw runtime_error("Non-finite FFT gain value found! "+filename);
+        transAnt_databin->push_back(trans_databin[i]); // from Hz to MHz
     }
 
-
-
-}// end ReadVgainTop
-
-inline void Detector::ReadHgain(string filename, Settings *settings1) {
-    ifstream NecOut( filename.c_str() );    
-    string line;
-    const int N = freq_step;
-    double Transm[N]; 
-    if ( NecOut.is_open() ) {
-        while (NecOut.good() ) {
-            for (int i=0; i<freq_step; i++) {
-                getline (NecOut, line);
-                stringstream ss(line);
-                string buff;
-                vector<string> words;
-                while(ss >> buff)
-                  words.push_back(buff);
-                if (words.size() > 0 && words[0] == "freq") {
-                    if(words.size() != 4 || words[3] != "MHz")
-                      throw runtime_error("H antenna gain file frequency not properly formatted!");
-                    Freq[i] = stof( words[2] );
-                    // read SWR info
-                    getline (NecOut, line);
-                    words.clear();
-                    ss.clear();
-                    ss.str(line);
-                    while(ss >> buff)
-                      words.push_back(buff);
-                    if(words.size() != 3 || words[0] != "SWR")
-                      throw runtime_error("H antenna gain file SWR not properly formatted!");
-                    double swr = stof(words[2]);
-                    Transm[i] = SWRtoTransCoeff(swr);
-                    getline (NecOut, line); //read names (ie column names)
-                    for (int j=0; j<ang_step; j++) {
-                        getline (NecOut, line); //read data line
-                        words.clear();
-                        ss.clear();
-                        ss.str(line);
-                        while(ss >> buff)
-                          words.push_back(buff);
-                        if(words.size() != 5)
-                          throw runtime_error("H antenna gain file data line not properly formatted!");
-                        Hgain[i][j] = pow(10, stof( words[2] )/10);  //Importing gain in dB, then converting to linear gain
-                        Hphase[i][j] = stof( words[4] );  
-                    }// end ang_step
-                }// end check freq label
-            }// end freq_step
-        }// end while NecOut.good
-        NecOut.close();
-    }// end if file open
-    double xfreq[N];
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-    double df_fft;
-    
-    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
-    
-    // now below are values that shared in all channels
-    for (int i=0;i<freq_step;i++) { // copy values
-        xfreq[i] = Freq[i];
-
-    }
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-    Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        transH_databin.push_back(trans_databin[i]); // from Hz to MHz
-    }
-}// end ReadHgain
-
-inline void Detector::ReadTxgain(string filename, Settings *settings1) {
-    ifstream NecOut( filename.c_str() );    
-    string line;
-    const int N = freq_step;
-    double Transm[N];
-    if ( NecOut.is_open() ) {
-        while (NecOut.good() ) {
-            for (int i=0; i<freq_step; i++) {
-                getline (NecOut, line);
-                stringstream ss(line);
-                string buff;
-                vector<string> words;
-                while(ss >> buff)
-                  words.push_back(buff);
-                if (words.size() > 0 && words[0] == "freq") {
-                    if(words.size() != 4 || words[3] != "MHz")
-                      throw runtime_error("Tx antenna gain file frequency not properly formatted!");
-                    Freq[i] = stof( words[2] );
-                    // read SWR info
-                    getline (NecOut, line);
-                    words.clear();
-                    ss.clear();
-                    ss.str(line);
-                    while(ss >> buff) 
-                      words.push_back(buff);
-                    if(words.size() != 3 || words[0] != "SWR")
-                      throw runtime_error("Tx antenna gain file SWR not properly formatted!");
-                    double swr = stof(words[2]);
-                    Transm[i] = SWRtoTransCoeff(swr);
-                    getline (NecOut, line); //read names (ie column names)
-                    for (int j=0; j<ang_step; j++) {
-                        getline (NecOut, line); //read data line
-                        words.clear();
-                        ss.clear();
-                        ss.str(line);
-                        while(ss >> buff)
-                          words.push_back(buff);
-                        if(words.size() != 5)
-                          throw runtime_error("Tx antenna gain file data line not properly formatted!");
-                        Txgain[i][j] = pow(10, stof( words[2] )/10);  //Importing gain in dB, then converting to linear gain
-                        Txphase[i][j] = stof( words[4] );  
-                    }// end ang_step
-                }// end check freq label
-            }// end freq_step
-        }// end while NecOut.good
-        NecOut.close();
-    }// end if file open
-//     double xfreq[N];
-//     double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-//     double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-//     double df_fft;
-    
-//     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
-    
-//     // now below are values that shared in all channels
-//     for (int i=0;i<freq_step;i++) { // copy values
-//         xfreq[i] = Freq[i];
-
-//     }
-//     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-//         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-//     }
-//     Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
-//     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-//         transH_databin.push_back(trans_databin[i]); // from Hz to MHz
-//     }
-}// end ReadTxgain
-
+} 
 
 double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
     //double GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!

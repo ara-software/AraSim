@@ -1901,3 +1901,9 @@ Updated a few aspects to our antenna modeling:
 Updating the antenna effective height calculation.  Calculation was double-counting two factors: a factor of 1/2 that corrected an issue with a previous definition of the effective height, and a factor of 1/sqrt(2) that accounted for a 3 dB splitter in the electronics chain.  That 3 dB splitter only applied to A1-3, whereas A4-5 followed a different setup.  This split in power is now folded into the electronics gain step via the new function Report::ApplySplitterFactor(), which figures out the appropriate power reduction based on the station being simulated.
 
 ==============================================================================
+
+2024/3/21 Marco Muzio
+
+Removed ReadVgain, ReadVgainTop, ReadHgain, and ReadTxgain functions and replaced them with a single read-in function: ReadAntennaGain. This read-in function is identical to the others but removes the redundancy, improves the read-in's robustness to varying whitespace to separate values, and does some basic checks for errors so they aren't silent. Also added enum to specify these antenna types.
+
+==============================================================================

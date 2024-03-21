@@ -212,6 +212,13 @@ class IdealStation{
 	ClassDef(IdealStation, 1);
 	
 };
+
+enum EAntennaType {
+  eVPol, // (bottom) Vpol
+  eVPolTop, // top Vpol
+  eHPol, // Hpol
+  eTx // transmitter 
+};
   
 class Detector {
     private:
@@ -219,10 +226,7 @@ class Detector {
         static const int ang_step_max = 2664;
         void ReadAllAntennaGains(Settings *settings1);
         double SWRtoTransCoeff(double swr);
-        void ReadVgain(string filename, Settings *settings1);
-        void ReadVgainTop(string filename, Settings *settings1);
-    	void ReadHgain(string filename, Settings *settings1);
-    	void ReadTxgain(string filename, Settings *settings1);    
+        void ReadAntennaGain(string filename, Settings *settings1, EAntennaType type);
         double Vgain[freq_step_max][ang_step_max];
         double Vphase[freq_step_max][ang_step_max];
         double VgainTop[freq_step_max][ang_step_max];
@@ -274,13 +278,13 @@ class Detector {
 
         void ReadElectChain(string filename, Settings *settings1);
         int gain_ch; // Number of channels used for gain model array population in ReadElectChain()
-	std::vector< std::vector <double> > ElectGain; //Elect chain gain (unitless) for Detector freq bin array
-	std::vector< std::vector <double> > ElectPhase; // Elect chain phase (rad) for Detector freq bin array 
+        std::vector< std::vector <double> > ElectGain; //Elect chain gain (unitless) for Detector freq bin array
+        std::vector< std::vector <double> > ElectPhase; // Elect chain phase (rad) for Detector freq bin array 
 
-	void ReadTrig_Delays_Masking(string filename, Settings *settings1);
-	std::vector<double> triggerDelay; //trigger delay for a given channel (seconds?)
-	std::vector<int> triggerMask;  //trigger masking decision value (either 0 or 1)
-	std::vector<int> activeDelay;  //decision value to activate delay (either 0 or 1)
+        void ReadTrig_Delays_Masking(string filename, Settings *settings1);
+        std::vector<double> triggerDelay; //trigger delay for a given channel (seconds?)
+        std::vector<int> triggerMask;  //trigger masking decision value (either 0 or 1)
+        std::vector<int> activeDelay;  //decision value to activate delay (either 0 or 1)
 
         void ReadGainOffset_TestBed(string filename, Settings *settings1);
         vector <double> GainOffset_TB_ch;   // constant gain offset for the TestBed chs 
@@ -326,14 +330,14 @@ class Detector {
         void ReadRayleighFit_DeepStation(string filename, Settings *settings1);
 
 
-	void ReadNoiseFigure(string filename, Settings *settings1); 
-	double NoiseFig_ch[16][freq_step_max];
-	vector < vector < double > > NoiseFig_databin_ch;
+        void ReadNoiseFigure(string filename, Settings *settings1); 
+        double NoiseFig_ch[16][freq_step_max];
+        vector < vector < double > > NoiseFig_databin_ch;
 
 
-	vector <double> transV_databin;
-	vector <double> transVTop_databin;
-	vector <double> transH_databin;
+        vector <double> transV_databin;
+        vector <double> transVTop_databin;
+        vector <double> transH_databin;
 
 
         void FlattoEarth_ARA(IceModel *icesurface);
@@ -358,7 +362,7 @@ class Detector {
         vector <ARA_station> stations;
         vector <Antenna_string> strings;
 
-	int NoiseFig_numCh;
+        int NoiseFig_numCh;
 
         vector <double> freq_forfft;
 
@@ -397,7 +401,7 @@ class Detector {
         double GetFOAMGain_1D_OutZero(double freq);
 
 	
-	double GetElectGain(int bin, int gain_ch_no) { return ElectGain[gain_ch_no][bin]; }   // same bin with Vgain, Hgain
+        double GetElectGain(int bin, int gain_ch_no) { return ElectGain[gain_ch_no][bin]; }   // same bin with Vgain, Hgain
         double GetElectGain_1D_OutZero(double freq, int gain_ch_no);
         double GetElectPhase_1D(double freq, int gain_ch_no);
 
