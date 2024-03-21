@@ -2225,12 +2225,12 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     else if (settings1->ANTENNA_MODE == 5) { //Adding antenna mode for Kansas lab measurements.
         VgainFile = "./data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Kansas2024.txt";
         VgainTopFile = "./data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Kansas2024.txt";
-        HgainFile = "./data/antennas/realizedGain/ARA_HPol_RealizedGainAndPhase_Copol_Kansas2024.txt";         
+        HgainFile = "./data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Kansas2024.txt";         
     }
     else if (settings1->ANTENNA_MODE == 6) { //Adding antenna mode for custom gains.
         VgainFile = "./data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Custom.txt";
         VgainTopFile = "./data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Custom.txt";
-        HgainFile = "./data/antennas/realizedGain/ARA_HPol_RealizedGainAndPhase_Copol_Custom.txt";         
+        HgainFile = "./data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Custom.txt";         
     }
     
     // Check for ALL_ANT_V_ON, then set all antennas to VPol if true
