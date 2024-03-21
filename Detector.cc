@@ -2175,14 +2175,20 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
 
 inline void Detector::ReadAllAntennaGains(Settings *settings1){
+    //Initialize strings for gain file names.
+    std::string VgainFile;
+    std::string VgainTopFile;
+    std::string HgainFile;
+    std::string TxgainFile;    
+    
     //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
-    ReadTxgain("./data/antennas/PVA_MohammadData_2023.txt", settings1);    
+    TxgainFile = "./data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";     
     
     if (settings1->ANTENNA_MODE == 0){
         // use the orignal Vpol/Hpol gains
-        ReadVgain("./data/antennas/realizedGain/ARA_bicone6in_output.txt", settings1);
-        ReadVgainTop("./data/antennas/realizedGain/ARA_bicone6in_output.txt", settings1);
-        ReadHgain("./data/antennas/realizedGain/ARA_dipoletest1_output.txt", settings1);
+        VgainFile = "./data/antennas/realizedGain/ARA_bicone6in_output.txt";
+        VgainTopFile = "./data/antennas/realizedGain/ARA_bicone6in_output.txt";
+        HgainFile = "./data/antennas/realizedGain/ARA_dipoletest1_output.txt";    
     }
     else if (settings1->ANTENNA_MODE == 1) {
         // use the gains as Thomas had them circa 2016
@@ -2192,40 +2198,52 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         // is actually SWR (previously they were transmission coefficient, as identified by MYL in Jan 2020).
         // To calculate the SWR, brian did reflection_coefficient = sqrt(1-transmission_coefficient^2)
         // and then SWR = (1+reflection_coefficient)/(1-reflection_coefficient).
-        ReadVgain("./data/antennas/realizedGain/ARA_bicone6in_output_updated2020.txt", settings1);
-        ReadVgainTop("./data/antennas/realizedGain/ARA_VPresult_topTrec_updated2020.txt", settings1);
-        ReadHgain("./data/antennas/realizedGain/ARA_dipoletest1_output_updated2020.txt", settings1);
+        VgainFile = "./data/antennas/realizedGain/ARA_bicone6in_output_updated2020.txt";
+        VgainTopFile = "./data/antennas/realizedGain/ARA_VPresult_topTrec_updated2020.txt";
+        HgainFile = "./data/antennas/realizedGain/ARA_dipoletest1_output_updated2020.txt";        
     }
     else if (settings1->ANTENNA_MODE == 2){
         // pull a "trick" and substitue the ARIANNA LPDAs for the antennas
-        ReadVgain("./data/antennas/realizedGain/Arianna_WIPLD_hpol.dat", settings1);
-        ReadVgainTop("./data/antennas/realizedGain/Arianna_WIPLD_hpol.dat", settings1);
-        ReadHgain("./data/antennas/realizedGain/Arianna_WIPLD_hpol.dat", settings1);
+        VgainFile = "./data/antennas/realizedGain/Arianna_WIPLD_hpol.dat";
+        VgainTopFile = "./data/antennas/realizedGain/Arianna_WIPLD_hpol.dat";
+        HgainFile = "./data/antennas/realizedGain/Arianna_WIPLD_hpol.dat";         
     }
     else if(settings1->ANTENNA_MODE == 3){
         // load the Chiba XFDTD models
         // same gain for top and bottom
-        ReadVgain("./data/antennas/realizedGain/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt", settings1);
-        ReadVgainTop("./data/antennas/realizedGain/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt", settings1);
-        ReadHgain("./data/antennas/realizedGain/Hpol_original_150mmHole_Ice_ARASim.txt", settings1);
+        VgainFile = "./data/antennas/realizedGain/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt";
+        VgainTopFile = "./data/antennas/realizedGain/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt";
+        HgainFile = "./data/antennas/realizedGain/Hpol_original_150mmHole_Ice_ARASim.txt";         
     }
     else if (settings1->ANTENNA_MODE == 4){
         // load the Chiba in-situ models
         // same gain for top and bottom
-        ReadVgain("./data/antennas/realizedGain/In_situ_VPol_Model.txt", settings1);
-        ReadVgainTop("./data/antennas/realizedGain/In_situ_VPol_Model.txt", settings1);
-        ReadHgain("./data/antennas/realizedGain/In_situ_HPol_Model.txt", settings1);
+        VgainFile = "./data/antennas/realizedGain/In_situ_VPol_Model.txt";
+        VgainTopFile = "./data/antennas/realizedGain/In_situ_VPol_Model.txt";
+        HgainFile = "./data/antennas/realizedGain/In_situ_HPol_Model.txt";         
     }
     else if (settings1->ANTENNA_MODE == 5) { //Adding antenna mode for Kansas lab measurements.
-        ReadVgain("./data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Kansas2024.txt", settings1);
-        ReadVgainTop("./data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Kansas2024.txt", settings1);
-        ReadHgain("./data/antennas/realizedGain/ARA_HPol_RealizedGainAndPhase_Copol_Kansas2024.txt", settings1);        
+        VgainFile = "./data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Kansas2024.txt";
+        VgainTopFile = "./data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Kansas2024.txt";
+        HgainFile = "./data/antennas/realizedGain/ARA_HPol_RealizedGainAndPhase_Copol_Kansas2024.txt";         
     }
     else if (settings1->ANTENNA_MODE == 6) { //Adding antenna mode for custom gains.
-        ReadVgain("./data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Custom.txt", settings1);
-        ReadVgainTop("./data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Custom.txt", settings1);
-        ReadHgain("./data/antennas/realizedGain/ARA_HPol_RealizedGainAndPhase_Copol_Custom.txt", settings1);        
-    }   
+        VgainFile = "./data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Custom.txt";
+        VgainTopFile = "./data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Custom.txt";
+        HgainFile = "./data/antennas/realizedGain/ARA_HPol_RealizedGainAndPhase_Copol_Custom.txt";         
+    }
+    
+    // Check for ALL_ANT_V_ON, then set all antennas to VPol if true
+    if (settings1->ALL_ANT_V_ON == 1) {
+        HgainFile = VgainFile;
+        VgainTopFile = VgainFile;
+    }
+    
+    //Read in antenna gain files.
+    ReadVgain(VgainFile, settings1);
+    ReadVgainTop(VgainTopFile, settings1);
+    ReadHgain(HgainFile, settings1);
+    ReadTxgain(TxgainFile, settings1);    
 
 }
 //Defining function that reads in TX antenna impedances
@@ -2277,8 +2295,8 @@ inline void Detector::ReadVgain(string filename, Settings *settings1) {
                     getline (NecOut, line); //read names
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
-                        Vgain[i][j] = atof( line.substr( 20, 33 ).c_str() );
-                        Vphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
+                        Vgain[i][j] = pow(10, atof( line.substr( 7, 17 ).c_str() )/10);  //Importing gain in dB, then converting to linear gain
+                        Vphase[i][j] = atof( line.substr( 34 ).c_str() );  
                     }// end ang_step
                 }// end check freq label
             }// end freq_step
@@ -2324,8 +2342,8 @@ inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
                     getline (NecOut, line); //read names
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
-                        VgainTop[i][j] = /*Transm[i]**/atof( line.substr( 20, 33 ).c_str() ) ; //Transm[i] commented for in the antenna gain files "realized gain" is provided and so the transmission coefficient does not need to be multiplied one more time - MLY 01/23/20
-                        VphaseTop[i][j] = atof( line.substr( 34 ).c_str() );    // + 180.0/TMath::Pi()*TMath::ATan(-Freq[i]/500.0);  // read gain (not dB)
+                        VgainTop[i][j] = pow(10, atof( line.substr( 7, 17 ).c_str() )/10);  //Importing gain in dB, then converting to linear gain
+                        VphaseTop[i][j] = atof( line.substr( 34 ).c_str() ); 
                     }// end ang_step
                 }// end check freq label
             }// end freq_step
@@ -2375,7 +2393,7 @@ inline void Detector::ReadHgain(string filename, Settings *settings1) {
                     getline (NecOut, line); //read names
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
-                        Hgain[i][j] = atof( line.substr( 20, 33 ).c_str() );
+                        Hgain[i][j] = pow(10, atof( line.substr( 7, 17 ).c_str() )/10);  //Importing gain in dB, then converting to linear gain                       
                         Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
                     }// end ang_step
                 }// end check freq label
@@ -2421,11 +2439,8 @@ inline void Detector::ReadTxgain(string filename, Settings *settings1) {
                     getline (NecOut, line); //read names
                     for (int j=0; j<ang_step; j++) {
                         getline (NecOut, line); //read data line
-                        // cout << line << endl;
-                        // cout << atof( line.substr( 20, 33 ).c_str() ) << endl;
-                        // cout << atof( line.substr( 34 ).c_str() ) << endl;
-                        Txgain[i][j] = atof( line.substr( 20, 33 ).c_str() );
-                        Txphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
+                        Txgain[i][j] = pow(10, atof( line.substr( 7, 17 ).c_str() )/10);  //Importing gain in dB, then converting to linear gain
+                        Txphase[i][j] = atof( line.substr( 34 ).c_str() );  
                     }// end ang_step
                 }// end check freq label
             }// end freq_step
@@ -2968,6 +2983,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
     else {
         Gout = (*tempGain)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+
     } // not outside the Freq[] range    
     
     if ( Gout < 0. ){ // gain can not go below 0
@@ -3006,40 +3022,26 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
 
      //Interpolation of tempGain
     slope_1 = ((*tempImpedance)[1] - (*tempImpedance)[0]) / (Freq[1] - Freq[0]);
-    
-    // cout << "*tempImpedance[0] = " << *tempImpedance[0] << endl;
-    // cout << "*tempImpedance[1] = " << *tempImpedance[1] << endl;
-    // cout << "slope_1 = " << slope_1 << endl;
-    // cout << "freq = " << freq << endl;
-    // cout << "freq_step-1 = " << freq_step-1 << endl;
-    // cout << "Freq[freq_step-1] = " << Freq[freq_step-1] << endl;
 
     // if freq is lower than freq_init
     if ( freq < freq_init ) {
 
         ZOut = slope_1 * (freq - Freq[0]) + (*tempImpedance)[0];
-        // cout << "ZOut1 = " << ZOut << endl;
     }
     // if freq is higher than last freq
     else if ( freq > Freq[freq_step-1] ) {
         ZOut = 0.;
-        // cout << "freq = " << freq << endl;
-        // cout << "freq_step-1 = " << freq_step-1 << endl;
-        // cout << "Freq[freq_step-1] = " << Freq[freq_step-1] << endl;
-        // cout << "ZOut2 = " << ZOut << endl;
     }
 
     else {
 
         ZOut = (*tempImpedance)[bin-1] + (freq-Freq[bin-1])*((*tempImpedance)[bin]-(*tempImpedance)[bin-1])/(Freq[bin]-Freq[bin-1]);
-        // cout << "ZOut3 = " << ZOut << endl;
     } // not outside the Freq[] range    
     
 
 
     if ( ZOut < 0. ){ // impedance can not go below 0
     	ZOut = 0.;
-        // cout << "ZOut4 = " << ZOut << endl;
     }
 
     return ZOut;
