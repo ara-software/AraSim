@@ -115,6 +115,8 @@ class Settings
 
         double NOISE_TEMP;          // noise temperature (default : 325 K = 230K (ice) + 95K (receiver), from Peter's spreadsheet)
 
+        double ANT_SIGNAL_THRESHOLD; // Threshold over which the signal-only waveforms for all antennas in a station must be for that antenna to check for a science event trigger
+
         int TRIG_ANALYSIS_MODE; // trigger mode 0 : signal + noise, 1 : only pure signal, 2 : only pure noise, default : 0
 
         double TRIG_TIMEOUT;    // time out after the trigger (we have to wait this amount of time to trig next event), default : 1us = 1.E-6

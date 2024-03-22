@@ -33,6 +33,7 @@ class Tools {
     static double dMinNotZero(const double*,int);
     static double dMin(double,double);
     static double getMaxMagnitude(vector<double> v);
+    static double getMaxAbsoluteMagnitude(vector<double> v);
     static int Getifreq(double freq,double freq_low,double freq_high,int n);
     static void InterpolateComplex(double *array, const int n);
 

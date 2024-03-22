@@ -399,6 +399,7 @@ class Report {
 	vector<double> getHitTimesVectorVpol(Detector *detector, int station_i=0);
 	vector<double> getHitTimesVectorHpol(Detector *detector, int station_i=0);
 
+       int getNumOfSignalledAnts(Station_r station, double ant_signal_threshold);
 	
         vector <double> Vfft_noise_after;   // noise Vfft after get_random_rician
         vector <double> Vfft_noise_before;   // noise Vfft before get_random_rician

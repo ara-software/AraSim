@@ -1949,7 +1949,35 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
         stations[i].Global_Pass  = 0;
         int check_passed_global_trigger = 0;    // this switch determines if station globally triggers (in all TRIG_SCAN_MODEs)
 
-        if (stations[i].Total_ray_sol)
+        // If we're looking to trigger on signal, check that there 
+        //  is enough signal that reached the station. 
+        // Otherwise, don't worry about checking for a trigger
+        int ants_with_nonzero_signal = 0;
+        if (settings1->TRIG_ANALYSIS_MODE != 2) { // Check that we want to trigger on signal
+        
+            // If rays connected to the station, count how many antennas 
+            //   have sufficient signal from the signal-only waveform
+            if (stations[i].Total_ray_sol) { 
+                ants_with_nonzero_signal = getNumOfSignalledAnts(
+                    stations[i], 
+                    settings1->ANT_SIGNAL_THRESHOLD*1000. // Convert from V to mV since antenna_r.V
+                                                          //  is stored in mV at this point
+                );
+            } // Check that rays connected to the station)   
+
+        }
+        else { 
+            // TRIG_ANALYSIS_MODE=2 is the noise-only mode, 
+            //   say all antennas have good signal
+            ants_with_nonzero_signal = 16;
+        }
+
+        if (stations[i].Total_ray_sol && (ants_with_nonzero_signal==0) ){
+            cout<<"Skipping!";
+        }
+
+        // if (stations[i].Total_ray_sol )
+        if (stations[i].Total_ray_sol && ants_with_nonzero_signal)
         {
             // if there is any ray_sol (don't check trigger if there is no ray_sol at all)
 
@@ -6082,6 +6110,71 @@ vector<double> Report::getHitTimesVector(Detector *detector, int station_i, int 
   }
   
   return times;
+  
+}
+
+int Report::getNumOfSignalledAnts(Station_r station, double ant_signal_threshold){
+    // Count and return the number of antennas in the provided station that 
+    //   have waveforms, from signal only, that exceed the 
+    //   provided ant_signal_threshold.
+    // Beware: This function checks antenna_r.V 
+    //   (e.g. stations[0].strings[0].antennas[0].V), whose units change 
+    //   throughout the course of Report.cc. Please make sure you
+    //   provide ant_signal_threshold in the appropriate units.
+
+    int ants_with_good_signal = 0;
+    vector <double> summary;
+
+    // cout<<endl<<"Checking antenna signals: "<<endl;
+
+    for ( // loop over each string in the station
+        int s = 0; s < station.strings.size(); s++
+    ) { 
+        for ( // loop over each antenna on the string
+            int a = 0; a < station.strings[s].antennas.size(); a++
+        ) { 
+
+            double max_signal = 0.0; 
+
+            // If there are ray solutions to this antenna, get the max 
+            //   (of the absolute) value of their signal-only waveforms
+            if ( station.strings[s].antennas[a].ray_sol_cnt > 0 ){
+
+                for ( // Loop over ray solutions
+                    int ray=0; ray<station.strings[s].antennas[a].ray_sol_cnt; ray++
+                ){
+                    // Get max (of the absolute) value in waveform
+                    double ray_max_signal = Tools::getMaxAbsoluteMagnitude(
+                        station.strings[s].antennas[a].V[ray]
+                    );
+                    // Check if the max (abs) value is greater than 
+                    //   the signals from the other rays
+                    if ( ray_max_signal > max_signal ){
+                        max_signal = ray_max_signal;
+                    }
+                } // End loop over ray solutions
+
+            } // end if (ray solutions exist)
+
+            // If this antenna had a strong signal-only signal, add it to the tracker
+            if ( max_signal > ant_signal_threshold){ 
+                ants_with_good_signal++;
+                summary.push_back(max_signal);
+            }
+            // cout<<"    "<<s<<" "<<a<<" "<<max_signal<<endl;
+
+        } // end loop over antennas on string
+    } // end loop over strings on the antenna
+
+    // if (ants_with_good_signal){
+    //     cout<<endl<<" "<<ants_with_good_signal<<" - "<<ant_signal_threshold<<": ";
+    //     for (int a=0; a<ants_with_good_signal; a++){
+    //         cout<<summary[a]<<" ";
+    //     }
+    //     cout<<endl;
+    // }
+
+    return ants_with_good_signal;
   
 }
 
