@@ -2280,11 +2280,13 @@ inline double Detector::SWRtoTransCoeff(double swr){
 
 inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAntennaType type) {
 
-    // make sure data is being read into the right variables
+    // define some dummy variables that will point to the real variables
+    // where values are stored
     double (*gain)[freq_step_max][ang_step_max];
     double (*phase)[freq_step_max][ang_step_max];
     vector<double>* transAnt_databin;
 
+    // make sure dummy variables point to the right variables 
     switch(type) {
       case(eVPol) :
         gain = &Vgain;
@@ -2309,56 +2311,100 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         throw runtime_error("Unknown antenna type!");
     }
 
+    // open the requested file
     ifstream NecOut( filename.c_str() );
+  
+    // initialize some variables used for read-in
     const int N = freq_step;
     double Transm[N];
     string line;
+    
+    // check the file opened successfully
     if (! NecOut.is_open() ) 
       throw runtime_error("Antenna gain file could not be opened: "+filename);
+   
+    // start reading the file 
     while (NecOut.good() ) {
+        // iterate over expected number of frequencies
+        // MSM 3/28/24 - this is not ideal but will keep it for now 
         for (int i=0; i<freq_step; i++) {
+
+            // readline
             getline (NecOut, line);
+            //put line into a string stream
             stringstream ss(line);
+
+            // break line up into each of its words (i.e. strings separated by whitespace)
             string buff;
             vector<string> words;
-            while(ss >> buff)
+            while(ss >> buff) // >> skips whitespace and just goes to the next word
               words.push_back(buff);
+
+            // check the line is what we expected (start of frequency section)
             if (words.size() > 0 && words[0] == "freq") {
                 if(words.size() != 4 || words[3] != "MHz")
                   throw runtime_error("Antenna gain file frequency not properly formatted! "+filename);
+
+                // save frequency and check its sensible
                 double thisFreq = stof(words[2]);
                 if(!std::isfinite(thisFreq))
                   throw runtime_error("Non-finite frequency value found! "+filename);
                 Freq[i] = thisFreq;
-                // read SWR info
+
+                // read SWR info line
                 getline (NecOut, line);
+  
+                // reset the string stream and words vector
                 words.clear();
                 ss.clear();
+
+                // put new line into string stream and break up line into its words
                 ss.str(line);
                 while(ss >> buff)
                   words.push_back(buff);
+
+                // check the line is what we expected (SWR info)
                 if(words.size() != 3 || words[0] != "SWR")
                   throw runtime_error("Antenna gain file SWR not properly formatted! "+filename);
+
+                // save SWR value, check that its sensible, and calculate corresponding transmittance
                 double swr = stof(words[2]);
                 if(!std::isfinite(swr))
                   throw runtime_error("Non-finite SWR value found! "+filename);
                 Transm[i] = SWRtoTransCoeff(swr);
+
+                // read in next line but we won't do anything with it
                 getline (NecOut, line); //read names (ie column names)
+
+                // iterate over the expected number of angles 
+                // MSM 3/28/24 - this is not ideal but will keep it for now 
                 for (int j=0; j<ang_step; j++) {
+        
+                    // read the data for this theta/phi
                     getline (NecOut, line); //read data line
+
+                    // reset the string stream and words vector
                     words.clear();
                     ss.clear();
+
+                    // put new line into string stream and break up line into its words
                     ss.str(line);
                     while(ss >> buff)
                       words.push_back(buff);
+
+                    // check the line is what we expected (gain for a particular theta/phi)
                     if(words.size() != 5)
                       throw runtime_error("Antenna gain file data line not properly formatted! "+filename);
+                    
+                    // save dB gain and phase and check they are sensible
                     double thisdBGain = stof(words[2]);
                     double thisPhase = stof(words[4]);
                     if(!std::isfinite(thisdBGain))
                       throw runtime_error("Non-finite dB gain value found! "+filename);
                     if(!std::isfinite(thisPhase))
                       throw runtime_error("Non-finite phase value found! "+filename);
+
+                    // save the (linear) gain and phase into real vectors
                     (*gain)[i][j] = pow(10, thisdBGain/10);  //Importing gain in dB, then converting to linear gain
                     (*phase)[i][j] = thisPhase;
                 }// end ang_step
