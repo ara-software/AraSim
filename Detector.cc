@@ -2240,10 +2240,10 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     }
     
     //Read in antenna gain files.
-    ReadVgain(VgainFile, settings1);
-    ReadVgainTop(VgainTopFile, settings1);
-    ReadHgain(HgainFile, settings1);
-    ReadTxgain(TxgainFile, settings1);    
+    ReadAntennaGain(VgainFile, settings1, eVPol);
+    ReadAntennaGain(VgainTopFile, settings1, eVPolTop);
+    ReadAntennaGain(HgainFile, settings1, eHPol);
+    ReadAntennaGain(TxgainFile, settings1, eTx);
 
 }
 //Defining function that reads in TX antenna impedances
@@ -2278,31 +2278,145 @@ inline double Detector::SWRtoTransCoeff(double swr){
     return transmission_coefficient;
 }
 
-inline void Detector::ReadVgain(string filename, Settings *settings1) {
+inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAntennaType type) {
+
+    // define some dummy variables that will point to the real variables
+    // where values are stored
+    double (*gain)[freq_step_max][ang_step_max];
+    double (*phase)[freq_step_max][ang_step_max];
+    vector<double>* transAnt_databin;
+
+    // make sure dummy variables point to the right variables 
+    switch(type) {
+      case(eVPol) :
+        gain = &Vgain;
+        phase = &Vphase;
+        transAnt_databin = &transV_databin;
+        break;
+      case(eVPolTop) :
+        gain = &VgainTop;
+        phase = &VphaseTop;
+        transAnt_databin = &transVTop_databin;
+        break;
+      case(eHPol) :
+        gain = &Hgain;
+        phase = &Hphase;
+        transAnt_databin = &transH_databin;
+        break;
+      case(eTx) :
+        gain = &Txgain;
+        phase = &Txphase;
+        break;
+      default :
+        throw runtime_error("Unknown antenna type!");
+    }
+
+    // open the requested file
     ifstream NecOut( filename.c_str() );
+  
+    // initialize some variables used for read-in
     const int N = freq_step;
     double Transm[N];
     string line;
-    if ( NecOut.is_open() ) {
-        while (NecOut.good() ) {
-            for (int i=0; i<freq_step; i++) {
+    
+    // check the file opened successfully
+    if (! NecOut.is_open() ) 
+      throw runtime_error("Antenna gain file could not be opened: "+filename);
+   
+    // start reading the file 
+    while (NecOut.good() ) {
+        // iterate over expected number of frequencies
+        // MSM 3/28/24 - this is not ideal but will keep it for now 
+        for (int i=0; i<freq_step; i++) {
+
+            // readline
+            getline (NecOut, line);
+            //put line into a string stream
+            stringstream ss(line);
+
+            // break line up into each of its words (i.e. strings separated by whitespace)
+            string buff;
+            vector<string> words;
+            while(ss >> buff) // >> skips whitespace and just goes to the next word
+              words.push_back(buff);
+
+            // check the line is what we expected (start of frequency section)
+            if (words.size() > 0 && words[0] == "freq") {
+                if(words.size() != 4 || words[3] != "MHz")
+                  throw runtime_error("Antenna gain file frequency not properly formatted! "+filename);
+
+                // save frequency and check its sensible
+                double thisFreq = stof(words[2]);
+                if(!std::isfinite(thisFreq))
+                  throw runtime_error("Non-finite frequency value found! "+filename);
+                Freq[i] = thisFreq;
+
+                // read SWR info line
                 getline (NecOut, line);
-                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
-                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-                    getline (NecOut, line); //read SWR
-                    double swr = atof(line.substr(5,11).c_str());
-                    Transm[i] = SWRtoTransCoeff(swr);
-                    getline (NecOut, line); //read names
-                    for (int j=0; j<ang_step; j++) {
-                        getline (NecOut, line); //read data line
-                        Vgain[i][j] = pow(10, atof( line.substr( 7, 17 ).c_str() )/10);  //Importing gain in dB, then converting to linear gain
-                        Vphase[i][j] = atof( line.substr( 34 ).c_str() );  
-                    }// end ang_step
-                }// end check freq label
-            }// end freq_step
-        }// end while NecOut.good
-        NecOut.close();
-    }// end if file open
+  
+                // reset the string stream and words vector
+                words.clear();
+                ss.clear();
+
+                // put new line into string stream and break up line into its words
+                ss.str(line);
+                while(ss >> buff)
+                  words.push_back(buff);
+
+                // check the line is what we expected (SWR info)
+                if(words.size() != 3 || words[0] != "SWR")
+                  throw runtime_error("Antenna gain file SWR not properly formatted! "+filename);
+
+                // save SWR value, check that its sensible, and calculate corresponding transmittance
+                double swr = stof(words[2]);
+                if(!std::isfinite(swr))
+                  throw runtime_error("Non-finite SWR value found! "+filename);
+                Transm[i] = SWRtoTransCoeff(swr);
+
+                // read in next line but we won't do anything with it
+                getline (NecOut, line); //read names (ie column names)
+
+                // iterate over the expected number of angles 
+                // MSM 3/28/24 - this is not ideal but will keep it for now 
+                for (int j=0; j<ang_step; j++) {
+        
+                    // read the data for this theta/phi
+                    getline (NecOut, line); //read data line
+
+                    // reset the string stream and words vector
+                    words.clear();
+                    ss.clear();
+
+                    // put new line into string stream and break up line into its words
+                    ss.str(line);
+                    while(ss >> buff)
+                      words.push_back(buff);
+
+                    // check the line is what we expected (gain for a particular theta/phi)
+                    if(words.size() != 5)
+                      throw runtime_error("Antenna gain file data line not properly formatted! "+filename);
+                    
+                    // save dB gain and phase and check they are sensible
+                    double thisdBGain = stof(words[2]);
+                    double thisPhase = stof(words[4]);
+                    if(!std::isfinite(thisdBGain))
+                      throw runtime_error("Non-finite dB gain value found! "+filename);
+                    if(!std::isfinite(thisPhase))
+                      throw runtime_error("Non-finite phase value found! "+filename);
+
+                    // save the (linear) gain and phase into real vectors
+                    (*gain)[i][j] = pow(10, thisdBGain/10);  //Importing gain in dB, then converting to linear gain
+                    (*phase)[i][j] = thisPhase;
+                }// end ang_step
+            }// end check freq label
+        }// end freq_step
+    }// end while NecOut.good
+    NecOut.close();
+  
+    // skip this for the transmitter case 
+    if(type == eTx)
+      return;
+    
     double xfreq[N];
     double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
     double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
@@ -2320,154 +2434,12 @@ inline void Detector::ReadVgain(string filename, Settings *settings1) {
     
     Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        transV_databin.push_back(trans_databin[i]); // from Hz to MHz
-    }
-}// end ReadVgain
-
-
-inline void Detector::ReadVgainTop(string filename, Settings *settings1) {
-    ifstream NecOut( filename.c_str() );
-    const int N = freq_step;
-    double Transm[N]; 
-    string line;
-    if ( NecOut.is_open() ) {
-        while (NecOut.good() ) {
-            for (int i=0; i<freq_step; i++) {
-                getline (NecOut, line);
-                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
-                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-                    getline (NecOut, line); //read SWR
-                    double swr = atof(line.substr(5,11).c_str());
-                    Transm[i] = SWRtoTransCoeff(swr);
-                    getline (NecOut, line); //read names
-                    for (int j=0; j<ang_step; j++) {
-                        getline (NecOut, line); //read data line
-                        VgainTop[i][j] = pow(10, atof( line.substr( 7, 17 ).c_str() )/10);  //Importing gain in dB, then converting to linear gain
-                        VphaseTop[i][j] = atof( line.substr( 34 ).c_str() ); 
-                    }// end ang_step
-                }// end check freq label
-            }// end freq_step
-        }// end while NecOut.good
-        NecOut.close();
-    }// end if file open
-    double xfreq[N];
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-    double df_fft;
-    
-    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
-    
-    // now below are values that shared in all channels
-    for (int i=0;i<freq_step;i++) { // copy values
-        xfreq[i] = Freq[i];
-
-    }
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-    
-
-        Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        transVTop_databin.push_back(trans_databin[i]); // from Hz to MHz
+        if(!std::isfinite(trans_databin[i]))
+          throw runtime_error("Non-finite FFT gain value found! "+filename);
+        transAnt_databin->push_back(trans_databin[i]); // from Hz to MHz
     }
 
-
-
-}// end ReadVgainTop
-
-inline void Detector::ReadHgain(string filename, Settings *settings1) {
-    ifstream NecOut( filename.c_str() );    
-    string line;
-    const int N = freq_step;
-    double Transm[N]; 
-    if ( NecOut.is_open() ) {
-        while (NecOut.good() ) {
-            for (int i=0; i<freq_step; i++) {
-                getline (NecOut, line);
-                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
-                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-                    getline (NecOut, line); //read SWR
-                    double swr = atof(line.substr(5,11).c_str());
-                    Transm[i] = SWRtoTransCoeff(swr);
-                    getline (NecOut, line); //read names
-                    for (int j=0; j<ang_step; j++) {
-                        getline (NecOut, line); //read data line
-                        Hgain[i][j] = pow(10, atof( line.substr( 7, 17 ).c_str() )/10);  //Importing gain in dB, then converting to linear gain                       
-                        Hphase[i][j] = atof( line.substr( 34 ).c_str() );  // read gain (not dB)
-                    }// end ang_step
-                }// end check freq label
-            }// end freq_step
-        }// end while NecOut.good
-        NecOut.close();
-    }// end if file open
-    double xfreq[N];
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-    double df_fft;
-    
-    df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
-    
-    // now below are values that shared in all channels
-    for (int i=0;i<freq_step;i++) { // copy values
-        xfreq[i] = Freq[i];
-
-    }
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    }
-    Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        transH_databin.push_back(trans_databin[i]); // from Hz to MHz
-    }
-}// end ReadHgain
-
-inline void Detector::ReadTxgain(string filename, Settings *settings1) {
-    ifstream NecOut( filename.c_str() );    
-    string line;
-    const int N = freq_step;
-    double Transm[N];
-    if ( NecOut.is_open() ) {
-        while (NecOut.good() ) {
-            for (int i=0; i<freq_step; i++) {
-                getline (NecOut, line);
-                if ( line.substr(0, line.find_first_of(":")) == "freq ") {
-                    Freq[i] = atof( line.substr(6, line.find_first_of("M")).c_str() );
-                    getline (NecOut, line); //read SWR
-                    double swr = atof(line.substr(5,11).c_str());
-                    Transm[i] = SWRtoTransCoeff(swr);
-                    getline (NecOut, line); //read names
-                    for (int j=0; j<ang_step; j++) {
-                        getline (NecOut, line); //read data line
-                        Txgain[i][j] = pow(10, atof( line.substr( 7, 17 ).c_str() )/10);  //Importing gain in dB, then converting to linear gain
-                        Txphase[i][j] = atof( line.substr( 34 ).c_str() );  
-                    }// end ang_step
-                }// end check freq label
-            }// end freq_step
-        }// end while NecOut.good
-        NecOut.close();
-    }// end if file open
-//     double xfreq[N];
-//     double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-//     double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
-//     double df_fft;
-    
-//     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
-    
-//     // now below are values that shared in all channels
-//     for (int i=0;i<freq_step;i++) { // copy values
-//         xfreq[i] = Freq[i];
-
-//     }
-//     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-//         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-//     }
-//     Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
-//     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-//         transH_databin.push_back(trans_databin[i]); // from Hz to MHz
-//     }
-}// end ReadTxgain
-
+} 
 
 double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
     //double GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
