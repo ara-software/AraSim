@@ -4742,7 +4742,7 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
     }
     
     //Apply power splitter/attenuator based on station.
-    ApplySplitterFactor(vm_real, vm_img, settings1);
+    ApplySplitterFactor(vm_real, vm_img, detector, settings1);
 
 }
 
@@ -4755,43 +4755,19 @@ void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *d
     vm_bin1 = vm_bin1 * detector->GetElectGain_1D_OutZero( freq1 , gain_ch_no);
 
     //Apply power splitter/attenuator based on station.
-    ApplySplitterFactor(vm_bin0, vm_bin1, settings1);
+    ApplySplitterFactor(vm_bin0, vm_bin1, detector, settings1);
 
 }
 
-void Report::ApplySplitterFactor(double &vm_real, double &vm_img, Settings *settings1) {
+void Report::ApplySplitterFactor(double &vm_real, double &vm_img, Detector* detector, Settings *settings1) {
     // Apply splitter/attenuation factor in the digitizer path based on station.
-    // AraSim default had factor of 1/sqrt(2), whereas A1-3 have a 3.4 dB factor and A4-5 have a 1.4 dB factor.
-    // See talk by Brian discussing splitter factors: https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2751
-    
-    //Case for simulating real ARA Stations 0 (testbed), A1, A2, and A3.
-    if (settings1->DETECTOR == 4 and settings1->DETECTOR_STATION < 4) {
-        vm_real *= 1/sqrt(pow(10,-0.34));
-        vm_img *= 1/sqrt(pow(10,-0.34));
-    }
-    //Case for simulating real ARA Stations A4 and A5 (non phased array).
-    else if (settings1->DETECTOR == 4 and settings1->DETECTOR_STATION >= 4) {
-        vm_real *= 1/sqrt(pow(10,-0.14));
-        vm_img *= 1/sqrt(pow(10,-0.14));
-    }
-    //Case for Phased Array implementation by Abby Bishop.  Will use placeholders of 1 for now.
-    else if (settings1->DETECTOR == 5 and settings1->DETECTOR_STATION == 1) {
-        vm_real *= 1;
-        vm_img *= 1;    
-    }
-    else if (settings1->DETECTOR == 5 and settings1->DETECTOR_STATION == 2) {
-        vm_real *= 1;
-        vm_img *= 1;    
-    }
-    else if (settings1->DETECTOR == 5 and settings1->DETECTOR_STATION == 3) {
-        vm_real *= 1;
-        vm_img *= 1;    
-    }    
-    //Final case where if none of the above are satisfied, it defaults to the historical 1/sqrt(2)
-    else {
-        vm_real *= 1/sqrt(2);
-        vm_img *= 1/sqrt(2);    
-    }      
+  
+    const double factor = detector->GetSplitterFactor(settings1);
+
+    vm_real *= factor;
+    vm_img *= factor;
+
+    return;
 }
 
 //Create inverse operators of ApplyElect_Tdomain - JCF 6/29/2023
