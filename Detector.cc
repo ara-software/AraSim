@@ -78,6 +78,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
     //initialize few params values.
     params.freq_step = 60;  //The hard-coding of this seems unnecessary, as it limits forces us to have our gain files go beyond 1000 MHz in data, which is out of band for us. - JCF 2/22/2024
+                            //In addition to the hardcoding issue, I think this (potentially) conflicts with the max size of arrays which is set by freq_step_max = 60 in Detector.h - MSM 4/10/2024
     params.ang_step = 2664;
     params.freq_width = 16.667;
     params.freq_init = 83.333;
@@ -1771,11 +1772,11 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
             if(settings1->NOISE==1){
                 cout <<"Reading in situ ARA noise for this station and configuration from file: " <<endl;
-		char the_rayleigh_filename[500];
+                char the_rayleigh_filename[500];
                 sprintf(the_rayleigh_filename, "./data/noise/sigmavsfreq_A_%d_config_%d.csv", 
                     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
                 cout << the_rayleigh_filename << endl;
-		ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
+                ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
             }
         }
 
@@ -1799,6 +1800,18 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
               ReadElectChain(std::string(the_gain_filename), settings1);
               //ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
               //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+              if(settings1->ELECTRONICS_ANTENNA_CONSISTENCY==1) {
+                if(settings1->NOISE==1) {
+                  cout << " Recalculating in situ electronic response amplitude to ensure consistency with antenna model used here." << endl;
+                  ReadAmplifierNoiseFigure(settings1); // load amplifier noise figure
+                  CalculateElectChain(settings1); // calculate consistent electronics chain gain amplitude
+                }
+                else {
+                  cerr << "WARNING - Antenna model used to calculate in situ gain model may not match that used in this simulation!" << endl;
+                  cerr << "\t To ensure consistency load an in-situ noise model with NOISE = 1." << endl;
+                } 
+              }
+  
             }
           }
           else{ // testbed only
@@ -2138,6 +2151,17 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
               cout << the_gain_filename <<endl;
             }
             ReadElectChain(std::string(the_gain_filename), settings1);
+            if(settings1->ELECTRONICS_ANTENNA_CONSISTENCY==1) {
+              if(settings1->NOISE==1) {
+                cout << " Recalculating in situ electronic response amplitude to ensure consistency with antenna model used here." << endl;
+                ReadAmplifierNoiseFigure(settings1); // load amplifier noise figure
+                CalculateElectChain(settings1); // calculate consistent electronics chain gain amplitude
+              }
+              else {
+                cerr << "WARNING - Antenna model used to calculate in situ gain model may not match that used in this simulation!" << endl;
+                cerr << "\t To ensure consistency load an in-situ noise model with NOISE = 1." << endl;
+              } 
+            }
         } else if (settings1 -> CUSTOM_ELECTRONICS == 1) {
             //read a custom user defined electronics gain
             cout << "     Reading custom PA electronics response" << endl;
@@ -4066,6 +4090,162 @@ cout<<"number of f bins: "<<settings1->DATA_BIN_SIZE/2<<endl;
     }
 }
 
+// read-in amplifier noise figure for this station -- stored in dB
+void Detector::ReadAmplifierNoiseFigure(Settings *settings) {
+
+  amplifierNoiseFig_ch.resize(16);
+
+  const int detector = settings->DETECTOR;
+  const int station = settings->DETECTOR_STATION;
+
+  // select correct file to read-in
+  string filename;
+  if(detector == 4) { // ARA case
+
+    if(station == 1)
+      filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_A1.csv";
+    else if(station == 2)
+      filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_A2.csv";
+    else if(station == 3)
+      filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_A3.csv";
+    else if(station == 4)
+      filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_A4.csv";
+    else if(station == 5)
+      filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_A5.csv";
+    else
+      throw runtime_error("Unsupported station for amplifier noise figure!");
+  
+  }
+  else if(detector == 5) // PA case
+    filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_PA.csv";
+  else
+    throw runtime_error("Unsupported detector setting for amplifier noise figure!");
+
+  // initialize vectors to store raw values
+  vector<double> rawFreqs;
+  vector< vector<double> > rawNf(16);
+
+  // read-in noise figure data
+  {
+    ifstream noiseFigFile(filename);
+    if(!noiseFigFile.is_open())
+      throw runtime_error("Amplifier noise figure file cannot be opened: "+filename);
+
+    string line;
+    while(getline(noiseFigFile, line)) {
+    
+      stringstream ss(line);
+      if(line[0] == '#') // comment, skip line
+        continue;
+
+      // actually read the line
+      string buff;
+      vector<double> words;
+      while(getline(ss, buff, ',')) {
+        words.push_back(stof(buff));
+        if(!std::isfinite(words.back()))
+          throw runtime_error("Non-finite value found in amplifier noise file: "+filename);
+      }
+
+      // check that things are looking okay
+      if(words.size() != 17)
+        throw runtime_error("Amplifier noise figure file not properly formatted!");
+
+      // actually put data into data arrays
+      rawFreqs.push_back(words[0]); // expected to be in MHz
+      for(int chan = 0; chan < 16; ++chan)
+        rawNf[chan].push_back(words[chan+1]); // expected to be in dB
+    }
+    noiseFigFile.close();
+  } 
+   
+  // annoying but we need to give special treatment to A5 channels merged into the PA 
+  if(detector == 5) {
+    
+    // define PA channels to be replaced
+    vector<int> chans = {5, 10, 11, 12, 13, 14, 15};
+    // define corresponding A5 RF channels  
+    vector<int> srcChans = {7, 6, 3, 5, 1, 4, 0};
+  
+    if(chans.size() != srcChans.size())
+      throw runtime_error("Mismatch in A5-PA channel mapping for amplifier noise!"); 
+
+    // read in the data 
+    filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_A5.csv";    
+
+    ifstream noiseFigFile(filename);
+    if(!noiseFigFile.is_open())
+      throw runtime_error("Amplifier noise figure file cannot be opened: "+filename);
+
+    int idx = 0; 
+    string line;
+    while(getline(noiseFigFile, line)) {
+    
+      stringstream ss(line);
+      if(line[0] == '#') // comment, skip line
+        continue;
+
+      // actually read the line
+      string buff;
+      vector<double> words;
+      while(getline(ss, buff, ',')) {
+        words.push_back(stof(buff));
+        if(!std::isfinite(words.back()))
+          throw runtime_error("Non-finite value found in amplifier noise file: "+filename);
+      }
+
+      // check that things are looking okay
+      if(words.size() != 17)
+        throw runtime_error("Amplifier noise figure file not properly formatted!");
+
+      // check that the frequency binnings are aligned as expected -- could do an interpolation on PA binning
+      // but let's save that for another day...
+      if(words[0] != rawFreqs[idx])
+        throw runtime_error("A5 and PA amplifier noise figures are not aligned properly!");
+      
+      // actually put data into data arrays
+      for(unsigned int i = 0; i < chans.size(); ++i) { 
+        
+        const int paChan = chans[i];
+        const int a5Chan = srcChans[i];      
+  
+        rawNf[paChan][idx] = words[a5Chan+1]; // replace PA noise figure by corresponding A5 noise figure
+
+      }
+
+      idx++;
+
+    }
+    noiseFigFile.close();
+
+  }
+
+  // set up the output frequency spacing for this event's specific DATA_BIN_SIZE 
+  const double dt = settings->TIMESTEP; // seconds 
+  const double df_fft = 1./ ( (double)(settings->DATA_BIN_SIZE) * dt ); // the frequency step
+  const int nFreqs = settings->DATA_BIN_SIZE/2.;
+  double interp_frequencies_databin[nFreqs];   // array for interpolated FFT frequencies
+  for(int i=0; i < nFreqs; i++){
+      // set the frequencies
+      interp_frequencies_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+  }
+
+  // interpolate raw values onto the frequency spacing in use here 
+  for(int chan = 0; chan < 16; ++chan) {
+
+    const int nFreqsRaw = rawFreqs.size();
+
+    amplifierNoiseFig_ch[chan].resize(nFreqs);   
+
+    // interpolate onto requested frequencies 
+    Tools::SimpleLinearInterpolation(nFreqsRaw, (double*)&rawFreqs[0], (double*)&rawNf[chan][0], 
+                                     nFreqs, interp_frequencies_databin, (double*)&amplifierNoiseFig_ch[chan][0]); 
+
+  }
+
+  return;
+}
+
 
 void Detector::ReadFOAM_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
 
@@ -4286,16 +4466,16 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
     	(which goes first and which goes second is arbitrary; 
     	the TestBed version does it in this order, so replicate here)
 	*/
-	std::vector< std::vector <double> > gains;
-	std::vector< std::vector <double> > phases;
+      std::vector< std::vector <double> > gains;
+      std::vector< std::vector <double> > phases;
     	gains.resize(gain_ch); // resize to account for number of channels
     	phases.resize(gain_ch); // resize to account for number of channels
     	for(int iCh=0; iCh<gain_ch; iCh++){
-		gains[iCh].resize(numFreqBins); // resize to account for number of freq bins
-		phases[iCh].resize(numFreqBins); //resize to account for number of freq bins
-	}
+        gains[iCh].resize(numFreqBins); // resize to account for number of freq bins
+        phases[iCh].resize(numFreqBins); //resize to account for number of freq bins
+      }
 
-	theLineNo = 0; // reset this counter
+        theLineNo = 0; // reset this counter
 	if (gainFile.is_open()){
 		while(gainFile.peek()!=EOF){
 
@@ -4446,6 +4626,139 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 		
 //This is the end of PART 2. Done interpolating gain and phase values to the binning of "Freq" array. 
 
+}
+
+// calculate the signal chain gain based on a data-driven noise model
+inline void Detector::CalculateElectChain(Settings *settings) {
+  
+  const int detector = settings->DETECTOR;
+  const int station = settings->DETECTOR_STATION;
+    
+  // set up the output frequency spacing for this event's specific DATA_BIN_SIZE -- matches frequency binning of Hmeas below
+  const double dt = settings->TIMESTEP; // seconds 
+  const double df_fft = 1./ ( (double)(settings->DATA_BIN_SIZE) * dt ); // the frequency step
+  const int nFreqs = settings->DATA_BIN_SIZE/2.;
+  double interp_frequencies_databin[nFreqs];   // array for interpolated FFT frequencies
+  for(int i=0; i < nFreqs; i++){
+      // set the frequencies
+      interp_frequencies_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+  }
+  
+  // get thermal noise level from data for this station & livetime config 
+  std::vector< std::vector<double> > Hmeas = GetRayleighFitVector_databin(station, settings);
+
+  // calculate theoretical expectation for thermal noise
+
+  const double splitterFactor = GetSplitterFactor(settings);
+  
+  std::vector< std::vector<double> > Htot(16, std::vector<double>(nFreqs, 0));
+  const double Z0 = 50; // ohms - characteristic impedance
+  const double Tamp = 220; // K - amplifier temp
+  const double Tice = 247; // K - ice temp
+  
+  // get correct bandwidth for ARA vs PA DAQs
+  const double bandWidth = (detector < 5)?  850e6-150e6 : 720e6-130e6; // Hz
+
+  for(int rfChan = 0; rfChan < 16; ++rfChan) {
+  
+    std::vector<double> Ttot(nFreqs, 0);
+  
+    // get appropriate trasmittances (antenna-type specific)
+    {
+      // choose correct antenna type for this channel
+      EAntennaType type;
+      if(detector == 4) { // A1-5 case
+
+        if(rfChan < 4)
+          type = eVPolTop;      
+        else if(rfChan < 8)
+          type = eVPol;
+        else
+          type = eHPol;
+      
+      }
+      else if(detector == 5) { // PA case
+        
+        if(rfChan < 8) // even channel 5 is a bottom Vpol
+          type = eVPol;
+        else if(rfChan < 10)
+          type = eHPol;
+        else if(rfChan%2 == 0)
+          type = eVPol;
+        else
+          type = eVPolTop;
+      }
+      else
+        throw runtime_error("Detector type unsupported for automated data-driven gain model calculation!");
+
+      // calculate ice contribution to Ttot at each frequency for this channel 
+      // uses loaded antenna model for transmittance
+      for(int i = 0; i < nFreqs; ++i) {
+
+        // trans*_databin vectors store the sqrt of the trasmittance, so we need to square them
+        if(type == eVPol)
+          Ttot[i] = pow(transV_databin[i], 2)*Tice;
+        else if(type == eVPolTop)
+          Ttot[i] = pow(transVTop_databin[i], 2)*Tice;
+        else if(type == eHPol)
+          Ttot[i] = pow(transH_databin[i], 2)*Tice;
+        else
+          throw runtime_error("Unsupported antenna type, transmittance unknown!"); 
+
+      } 
+    }
+  
+    // get appropriate noise figure of LNA (station-specific)  
+    {
+      // calculate amplifier contribution to Ttot at each frequency for this channel 
+      for(int i = 0; i < nFreqs; ++i) { 
+        const double thisNF = amplifierNoiseFig_ch[rfChan][i];
+        const double thisLinearNF = min(1e100, pow(10, thisNF/10.)); // avoid getting infs 
+        Ttot[i] += (thisLinearNF-1)*Tamp;
+      }
+    }
+
+    // calculate Htot
+    {
+      for(int i = 0; i < nFreqs; ++i) { 
+        // theoretical expectation
+        Htot[rfChan][i] = sqrt(KBOLTZ * Ttot[i] * Z0 * bandWidth * dt);
+
+        // account for fraction of power going to digitizer path
+        Htot[rfChan][i] *= splitterFactor;
+      }
+    }
+
+  }
+  
+  // finally calculate the gain and replace previous gain values (retain phase values)
+  ElectGain.clear(); // clear previous values 
+  ElectGain.resize(16, vector<double>(freq_step, 0));
+
+  // parameters for bandpass [MHz]
+  const int loFreq = (detector < 5)? 150 : 130;
+  const int hiFreq = (detector < 5)? 850 : 720;
+  const int width = 10;
+ 
+  for(int rfChan = 0; rfChan < 16; ++rfChan) {
+
+    vector<double> buffGain(nFreqs, 0);
+    for(int i = 0; i < nFreqs; ++i) { 
+      buffGain[i] = Hmeas[rfChan][i]/Htot[rfChan][i];
+
+      // apply basic bandpass to make sure we don't get any surprises out of band 
+      // (this is equivalent to the quality control done for the tabulated models)
+      const double thisFreq = interp_frequencies_databin[i];
+      buffGain[i] *= (tanh((thisFreq - loFreq)/width) + 1)/2.;
+      buffGain[i] *= (tanh((hiFreq - thisFreq)/width) + 1)/2.;
+    }
+ 
+    // interpolate back onto the original frequency binning for the gain
+    Tools::SimpleLinearInterpolation(nFreqs, interp_frequencies_databin, (double*)&buffGain[0],
+                                     freq_step, Freq, (double*)&ElectGain[rfChan][0]);
+  }
+
+  return;
 }
 
 
@@ -6275,26 +6588,26 @@ int Detector::GetChannelfromStringAntenna ( int stationNum, int stringnum, int a
       //      cout << settings1->DETECTOR << endl;
       //      int stationId=stationNum;
       if (stationId < int(InstalledStations.size())){
-	if (stringnum < int(InstalledStations[stationId].VHChannel.size())){
-	  if (antennanum < int(InstalledStations[stationId].VHChannel[stringnum].size())){
-	    ChannelNum = InstalledStations[stationId].VHChannel[stringnum][antennanum];
-	    return ChannelNum+1;
-	  }
-	  else {
-	    cerr << "Invalid request for station channel map: antenna number - 4" << endl;
-	    //cerr << stationId << " : " << stringnum << " : " << antennanum << endl;
-	    return -1;
-	  }
-	}
-	else {
-	  cerr << "Invalid request for station channel map: string number" << endl;
-	  return -1;
-	}
+        if (stringnum < int(InstalledStations[stationId].VHChannel.size())){
+          if (antennanum < int(InstalledStations[stationId].VHChannel[stringnum].size())){
+            ChannelNum = InstalledStations[stationId].VHChannel[stringnum][antennanum];
+            return ChannelNum+1;
+          }
+          else {
+            cerr << "Invalid request for station channel map: antenna number - 4" << endl;
+            //cerr << stationId << " : " << stringnum << " : " << antennanum << endl;
+            return -1;
+          }
+        }
+        else {
+          cerr << "Invalid request for station channel map: string number" << endl;
+          return -1;
+        }
       }
       else {
-	cerr << "Invalid request for station channel map: station number" << endl;
-	cout << stationNum << " : " <<  int(InstalledStations.size()) << endl;
-	return -1;
+        cerr << "Invalid request for station channel map: station number" << endl;
+        cout << stationNum << " : " <<  int(InstalledStations.size()) << endl;
+        return -1;
       }
 
 
@@ -6859,6 +7172,31 @@ inline void Detector::ReadImpedance(string filename, double (*TempRealImpedance)
     }// end if file open    
 
 }//ReadImpedance
+
+
+double Detector::GetSplitterFactor(Settings *settings) {
+  // Get splitter/attenutation factor for the digitizer path for this station
+  // AraSim default had factor of 1/sqrt(2), whereas A1-3 have a 3.4 dB factor and A4-5 have a 1.4 dB factor.
+  // See talk by Brian discussing splitter factors: https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2751
+
+  double factor; 
+ 
+  //Case for simulating real ARA Stations 0 (testbed), A1, A2, and A3.
+  if (settings->DETECTOR == 4 and settings->DETECTOR_STATION < 4) 
+      factor = 1/sqrt(pow(10,-0.34));
+  //Case for simulating real ARA Stations A4 and A5 (non phased array).
+  else if (settings->DETECTOR == 4 and settings->DETECTOR_STATION >= 4) 
+      factor = 1/sqrt(pow(10,-0.14));
+  //Case for Phased Array implementation by Abby Bishop. 
+  else if (settings->DETECTOR == 5) 
+      factor = 1;
+  //Final case where if none of the above are satisfied, it defaults to the historical 1/sqrt(2)
+  else 
+      factor = 1/sqrt(2);
+
+  return factor;
+}
+
 
 Detector::~Detector() {
   //cout<<"Destruct class Detector"<<endl;
