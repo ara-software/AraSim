@@ -1910,6 +1910,6 @@ Removed ReadVgain, ReadVgainTop, ReadHgain, and ReadTxgain functions and replace
 
 2024/4/11 Marco Muzio
 
-Added new option ELECTRONICS_ANTENNA_CONSISTENCY and corresponding functionality to ensure antenna gain model and electronics gain model are self-consistent within a simulation. This is done by calculating the electronics gain model amplitude on-the-fly from the in situ noise model, antenna gain model, and amplifier noise figure. The default (ELECTRONICS_ANTENNA_CONSISTENCY=1) is to ensure these are self-consistent whenever an in-situ electronics gain model is requested and a corresponding in-situ noise model is used. 
+Added new option ELECTRONICS_ANTENNA_CONSISTENCY and corresponding functionality to ensure antenna gain model and electronics gain model are self-consistent within a simulation. This is done by calculating the electronics gain model amplitude on-the-fly from the in situ noise model, antenna gain model, and amplifier noise figure. The default (ELECTRONICS_ANTENNA_CONSISTENCY=1) is to ensure these are self-consistent whenever an in-situ electronics gain model is requested and a corresponding in-situ noise model is used. The electronics gain phase read-in from the in situ model file is left unchanged. 
 
 ==============================================================================
