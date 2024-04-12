@@ -4090,7 +4090,7 @@ cout<<"number of f bins: "<<settings1->DATA_BIN_SIZE/2<<endl;
     }
 }
 
-// read-in amplifier noise figure for this station -- stored in dB
+// read-in amplifier noise figure for this station -- stored in linear units
 void Detector::ReadAmplifierNoiseFigure(Settings *settings) {
 
   amplifierNoiseFig_ch.resize(16);
@@ -4154,7 +4154,7 @@ void Detector::ReadAmplifierNoiseFigure(Settings *settings) {
       // actually put data into data arrays
       rawFreqs.push_back(words[0]); // expected to be in MHz
       for(int chan = 0; chan < 16; ++chan)
-        rawNf[chan].push_back(words[chan+1]); // expected to be in dB
+        rawNf[chan].push_back(words[chan+1]); // expected to be in linear units  
     }
     noiseFigFile.close();
   } 
@@ -4713,8 +4713,7 @@ inline void Detector::CalculateElectChain(Settings *settings) {
       // calculate amplifier contribution to Ttot at each frequency for this channel 
       for(int i = 0; i < nFreqs; ++i) { 
         const double thisNF = amplifierNoiseFig_ch[rfChan][i];
-        const double thisLinearNF = min(1e100, pow(10, thisNF/10.)); // avoid getting infs 
-        Ttot[i] += (thisLinearNF-1)*Tamp;
+        Ttot[i] += (thisNF-1)*Tamp;
       }
     }
 
