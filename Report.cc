@@ -4598,8 +4598,8 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin,
         vm_bin1 *= freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.);
     }
     else {
-        vm_bin0 *= 1 /sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
-        vm_bin1 *= 1 / sqrt(2.) * 0.5 * heff_lastbin * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
+        vm_bin0 *= heff * pol_factor;
+        vm_bin1 *= heff_lastbin * pol_factor;
     }
 
 }
@@ -4637,15 +4637,15 @@ void Report::InvertAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol
             else if (vm_img<0.) phase_current = -PI;
             else phase_current = 0.;
         }
-        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / (1 / sqrt(2.) * 0.5 * heff * pol_factor); // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
+        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) / (heff * pol_factor); // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
 
         vm_real = v_amp * cos( phase_current - (sign * AntPhase*RADDEG) );
         vm_img =  v_amp * sin( phase_current - (sign * AntPhase*RADDEG) );
     }
 
     else { // only amplitude
-        vm_real = vm_real / (1 / sqrt(2.) * 0.5 * heff * pol_factor); // only amplitude
-        vm_img = vm_img / (1 / sqrt(2.) * 0.5 * heff * pol_factor); // only amplitude
+        vm_real = vm_real / (heff * pol_factor); // only amplitude
+        vm_img = vm_img / (heff * pol_factor); // only amplitude
     }
 
 }
@@ -4657,8 +4657,8 @@ void Report::InvertAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin
     //double pol_factor;
     pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
 
-    vm_bin0 = vm_bin0 / sqrt(2.) * 0.5 * heff * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
-    vm_bin1 = vm_bin1 / sqrt(2.) * 0.5 * heff_lastbin * pol_factor; // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff  
+    vm_bin0 = vm_bin0 / (heff * pol_factor); // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff
+    vm_bin1 = vm_bin1 / (heff_lastbin * pol_factor); // sqrt(2) for 3dB splitter for TURF, SURF, 0.5 to calculate power with heff  
 
 }
 //End new inverse functions
