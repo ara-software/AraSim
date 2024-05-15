@@ -874,7 +874,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     // if event is not calpulser
                                     if (event->IsCalpulser == 0)
                                     {
-
+                                        // MACHTAY adding for unit testing
+                                        cout << "Just before specifying EVENT_TYPE" << endl;
                                         if (settings1->EVENT_TYPE == 0)
                                         {
                                             // see if integrated shower profile LQ is non-zero
@@ -1089,7 +1090,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     }
                                                     stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(0.);
                                                 }
-																								
                                                 stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = settings1->NFOUR / 2;
                                                 // just get peak from the array
                                                 stations[i].strings[j].antennas[k].PeakV.push_back(0.);
@@ -1110,19 +1110,28 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 //                                             //Justin's Method
                                             
                                         } // neutrino events
-                                        // To start clean up, check if it's 10 or 11 and unify
                                         else if (settings1->EVENT_TYPE == 10 || settings1->EVENT_TYPE == 11)
                                         {
-                                                    /*
-                                                    NB: This has not be "cleaned up" in the way that the neutrino mode (EVENT_TYPE==10) has above
-                                                    (BAC June 2022)
-                                                    */
+                                          // MACHTAY adding this for unit testing
+                                          cout << "Beginning EVENT_TYPE == 10 || 11" << endl;
+                                                /*
+                                                NB: This has not be "cleaned up" in the way that the neutrino mode (EVENT_TYPE==10) has above
+                                                (BAC June 2022)
+                                                */
 
-                                                    // initially give raysol has actual signal
+                                                // initially give raysol has actual signal
                                                 stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] = 1;
+                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
+                                                // cout << "Nnew = " << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
+                                                double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
+                                                double T_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
+                                                    
+
                                                 if (settings1->EVENT_TYPE == 10)
                                                 {
 
+                                                // MACHTAY adding this for unit testing
+                                                cout << "Beginning EVENT_TYPE == 10" << endl;
                                                     int waveform_bin = (int) signal->ArbitraryWaveform_V.size();
                                                     // cout << waveform_bin << endl;
 
@@ -1131,8 +1140,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     // cout << "dT_forfft: " << dT_forfft << endl;
                                                     int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
                                                     // cout << "Ntmp = " << Ntmp << endl;
-
-                                                    stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
+                                                    
                                                     while (Ntmp > 1)
                                                     {
                                                         Ntmp = Ntmp / 2;
@@ -1144,10 +1152,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     // now we have to make NFOUR/2 number of bins with random init time
                                                     //
                                                     // as a test, make first as it is and zero pad
-
-                                                    double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
-                                                    double T_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
-
+                                                
                                                     for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]; n++)
                                                     {
                                                         //cout << n << endl;
@@ -1248,12 +1253,16 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                             stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(0.);
                                                         }
                                                     }
+                                                    // MACHTAY adding this for unit testing
+                                                    cout << "End of EVENT_TYPE == 10" << endl;
                                                 }   // Arbitrary Events
                                                 
                                                 //Attempting to create pulser events using arbitrary events as a framework. - JCF 4/6/2023
                                                 else if (settings1->EVENT_TYPE == 11)
                                                 {
-
+                                                // MACHTAY adding for unit testing
+                                                cout << "Beginning EVENT_TYPE == 11" << endl;
+                                                    // Begin unique to EVENT_TYPE 11
                                                     int waveform_bin = (int) signal->PulserWaveform_V.size();
                                                     // cout << waveform_bin << endl;
 
@@ -1262,14 +1271,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     // cout << "dT_forfft: " << dT_forfft << endl;
                                                     int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
                                                     // cout << "Ntmp = " << Ntmp << endl;
-                                                    
-                                                    stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
-                                                    // cout << "Nnew = " << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
                                                     while (Ntmp > 1)
                                                     {
                                                         Ntmp = Ntmp / 2;
                                                         stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *2;
                                                     }
+
                                                     // cout << "Ntmp = " << Ntmp << endl;
                                                     stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2;
                                                     // cout << "Nnew = " << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
@@ -1278,10 +1285,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     // now we have to make NFOUR/2 number of bins with random init time
                                                     //
                                                     // as a test, make first as it is and zero pad
+                                                
 
-                                                    double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
-                                                    double T_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
-                                                    
                                                     cout << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
                                                     cout << waveform_bin << endl;
 
@@ -1438,6 +1443,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                             stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(0.);
                                                         }
                                                     }
+                                                    // MACHYAY adding for unit testing
+                                                    cout << "End of EVENT_TYPE == 11" << endl;
                                                 } // Simple Pulser Simulation
                                         } // End group 10 and 11
                                         
@@ -5351,7 +5358,7 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
                 //      cout << "ifour, vsignal is " << ifour << " " << vsignal_e_forfft[2*ifour] << "\n";
                 
                 vsignal_forfft[2*ifour+1]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // phase is 90 deg.
-                // the 2/(nfour/2) needs to be included since were using Tools::realft with the -1 setting
+                // the 2/(NFOUR/2) needs to be included since were using Tools::realft with the -1 setting
                 
                 // how about we interpolate instead of doing a box average
                 
@@ -5524,7 +5531,7 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
                 //      cout << "ifour, vsignal is " << ifour << " " << vsignal_e_forfft[2*ifour] << "\n";
                 
                 vsignal_forfft[2*ifour+1]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // phase is 90 deg.
-                // the 2/(nfour/2) needs to be included since were using Tools::realft with the -1 setting
+                // the 2/(NFOUR/2) needs to be included since were using Tools::realft with the -1 setting
                 
                 // how about we interpolate instead of doing a box average
                 
@@ -5695,7 +5702,7 @@ void Report::MakeArraysforFFT_noise(Settings *settings1, Detector *detector, int
 	    //      cout << "ifour, vsignal is " << ifour << " " << vsignal_e_forfft[2*ifour] << "\n";
 	    
 	    vsignal_forfft[2*ifour+1]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // phase is 90 deg.
-	    // the 2/(nfour/2) needs to be included since were using Tools::realft with the -1 setting
+	    // the 2/(NFOUR/2) needs to be included since were using Tools::realft with the -1 setting
 	    
 	    // how about we interpolate instead of doing a box average
 	    
