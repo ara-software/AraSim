@@ -1122,6 +1122,19 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 // initially give raysol has actual signal
                                                 stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] = 1;
                                                 stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
+                                                // One of the most common differences is that we have
+                                                // two different signal names:
+                                                //   In EVENT_TYPE == 10 we have signal->ArbitraryWaveform_V
+                                                //   In EVENT_TYPE == 11 we have signals->PulserWaveform_V
+                                                // Let's make things more similar by making another variables
+                                                //   which will take the signal name based on the event type
+/*                                                if (settings1->EVENT_TYPE == 10){
+                                                vector<double> WaveformType_V = signal->ArbitraryWaveform_V;
+                                                }
+                                                else if (settings1->EVENT_TYPE == 11){
+                                                vector<double> WaveformType_V = signal->PulserWaveform_V;
+                                                }
+*/
                                                 if (settings1->EVENT_TYPE == 10)
                                                 {
                                                     // MACHTAY adding this for unit testing
@@ -1156,7 +1169,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                             (n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 + waveform_bin / 2))
                                                         {
                                                             V_forfft[n] = signal->ArbitraryWaveform_V[n - (stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - waveform_bin / 2)];
-                                                        }
+																												} 
                                                         else
                                                             V_forfft[n] = 0.;
                                                     }
@@ -1222,24 +1235,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     // skip linear interpolation for now
                                                     // changed to sinc interpolation Dec 2020 by BAC
                                                     Tools::SincInterpolation(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR / 2, T_forint, volts_forint);
-
-                                                    // check what we save as V[], volts_forint? or volts_forfft
-
-                                                    for (int n = 0; n < settings1->NFOUR / 2; n++)
-                                                    {
-
-                                                        if (settings1->TRIG_ANALYSIS_MODE != 2)
-                                                        {
-                                                            // not pure noise mode (we need signal)
-                                                            stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(settings1->ARBITRARY_EVENT_ATTENUATION *volts_forint[n] *2. / (double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]));  // 2/N for inverse FFT normalization factor
-                                                        }
-                                                        else if (settings1->TRIG_ANALYSIS_MODE == 2)
-                                                        {
-                                                            // pure noise mode (set signal to 0)
-                                                            stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(0.);
-                                                        }
-                                                    }
-                                                    // MACHTAY adding this for unit testing
                                                     cout << "End of EVENT_TYPE == 10" << endl;
                                                 }   // Arbitrary Events
                                                 
@@ -1405,27 +1400,23 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                       birefringence->Two_rays_interference(V_forfft, V_forfft_bire[0], V_forfft_bire[1], stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], max_bire_ray_cnt, settings1); //Apply interference of two rays from birefringence            
 
                       Tools::SincInterpolation(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR / 2, T_forint, volts_forint);
-
-                                                    for (int n = 0; n < settings1->NFOUR / 2; n++)
-                                                    {
-
-                                                        if (settings1->TRIG_ANALYSIS_MODE != 2)
-                                                        {
-                                                            // not pure noise mode (we need signal)
-                                                            stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(settings1->ARBITRARY_EVENT_ATTENUATION *volts_forint[n] *2. / (double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]));  // 2/N for inverse FFT normalization factor
-
-                                                            
-                                                            
-                                                        }
-                                                        else if (settings1->TRIG_ANALYSIS_MODE == 2)
-                                                        {
-                                                            // pure noise mode (set signal to 0)
-                                                            stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(0.);
-                                                        }
-                                                    }
                                                     // MACHYAY adding for unit testing
                                                     cout << "End of EVENT_TYPE == 11" << endl;
                                                 } // Simple Pulser Simulation
+																								// Moved this loop outside of the if statements
+                                                for (int n = 0; n < settings1->NFOUR / 2; n++)
+                                                {
+                                                  if (settings1->TRIG_ANALYSIS_MODE != 2)
+                                                  {
+                                                    // not pure noise mode (we need signal)
+                                                    stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(settings1->ARBITRARY_EVENT_ATTENUATION *volts_forint[n] *2. / (double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]));  // 2/N for inverse FFT normalization factor
+                                                  }
+                                                  else if (settings1->TRIG_ANALYSIS_MODE == 2)
+                                                  {
+                                                  // pure noise mode (set signal to 0)
+                                                  stations[i].strings[j].antennas[k].V[ray_sol_cnt].push_back(0.);
+                                                  }
+                                                }
                                         } // End group 10 and 11
                                         //Attempting to simulate PVA pulser.  Starting separate from previous pulser event type to avoid breaking things. - JCF 1/9/2024
                                         else if (settings1->EVENT_TYPE == 12)
