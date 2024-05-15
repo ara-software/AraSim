@@ -1122,37 +1122,24 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 // initially give raysol has actual signal
                                                 stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] = 1;
                                                 stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
-                                                // cout << "Nnew = " << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
-                                                double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
-                                                double T_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
-                                                    
-
                                                 if (settings1->EVENT_TYPE == 10)
                                                 {
-
-                                                // MACHTAY adding this for unit testing
-                                                cout << "Beginning EVENT_TYPE == 10" << endl;
+                                                    // MACHTAY adding this for unit testing
+                                                    cout << "Beginning EVENT_TYPE == 10" << endl;
                                                     int waveform_bin = (int) signal->ArbitraryWaveform_V.size();
-                                                    // cout << waveform_bin << endl;
-
                                                     dT_forfft = signal->ArbitraryWaveform_T[1] - signal->ArbitraryWaveform_T[0];    // step in ns
-
-                                                    // cout << "dT_forfft: " << dT_forfft << endl;
                                                     int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
-                                                    // cout << "Ntmp = " << Ntmp << endl;
-                                                    
                                                     while (Ntmp > 1)
                                                     {
                                                         Ntmp = Ntmp / 2;
                                                         stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *2;
                                                     }
                                                     stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2;
-                                                    // now new NFOUR for zero padding
-
+                                                    double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
+                                                    double T_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
                                                     // now we have to make NFOUR/2 number of bins with random init time
                                                     //
                                                     // as a test, make first as it is and zero pad
-                                                
                                                     for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]; n++)
                                                     {
                                                         //cout << n << endl;
@@ -1161,7 +1148,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                             stations[i].strings[j].antennas[k].Vm_zoom[ray_sol_cnt].push_back(signal->ArbitraryWaveform_V[n]);
                                                             stations[i].strings[j].antennas[k].Vm_zoom_T[ray_sol_cnt].push_back(signal->ArbitraryWaveform_T[n]);
                                                         }
-
                                                         // make Tarray, Earray located at the center of Nnew array
 
                                                         T_forfft[n] = signal->ArbitraryWaveform_T[waveform_bin / 2] - (dT_forfft *(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - n));
@@ -1260,24 +1246,16 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 //Attempting to create pulser events using arbitrary events as a framework. - JCF 4/6/2023
                                                 else if (settings1->EVENT_TYPE == 11)
                                                 {
-                                                // MACHTAY adding for unit testing
-                                                cout << "Beginning EVENT_TYPE == 11" << endl;
-                                                    // Begin unique to EVENT_TYPE 11
+                                                    // MACHTAY adding for unit testing
+                                                    cout << "Beginning EVENT_TYPE == 11" << endl;
                                                     int waveform_bin = (int) signal->PulserWaveform_V.size();
-                                                    // cout << waveform_bin << endl;
-
                                                     dT_forfft = signal->PulserWaveform_T[1] - signal->PulserWaveform_T[0];    // step in ns
-
-                                                    // cout << "dT_forfft: " << dT_forfft << endl;
                                                     int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
-                                                    // cout << "Ntmp = " << Ntmp << endl;
                                                     while (Ntmp > 1)
                                                     {
                                                         Ntmp = Ntmp / 2;
                                                         stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *2;
                                                     }
-
-                                                    // cout << "Ntmp = " << Ntmp << endl;
                                                     stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2;
                                                     // cout << "Nnew = " << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
                                                     // now new NFOUR for zero padding
@@ -1285,6 +1263,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     // now we have to make NFOUR/2 number of bins with random init time
                                                     //
                                                     // as a test, make first as it is and zero pad
+                                                    double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
+                                                    double T_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
                                                 
 
                                                     cout << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
@@ -1447,8 +1427,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     cout << "End of EVENT_TYPE == 11" << endl;
                                                 } // Simple Pulser Simulation
                                         } // End group 10 and 11
-                                        
-                                        
                                         //Attempting to simulate PVA pulser.  Starting separate from previous pulser event type to avoid breaking things. - JCF 1/9/2024
                                         else if (settings1->EVENT_TYPE == 12)
                                         {
