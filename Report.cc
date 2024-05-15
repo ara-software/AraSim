@@ -1128,47 +1128,55 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 //   In EVENT_TYPE == 11 we have signals->PulserWaveform_V
                                                 // Let's make things more similar by making another variables
                                                 //   which will take the signal name based on the event type
-/*                                                if (settings1->EVENT_TYPE == 10){
-                                                vector<double> WaveformType_V = signal->ArbitraryWaveform_V;
+                                                std::vector<double> WaveformType_V;
+                                                std::vector<double> WaveformType_T;
+                                                if (settings1->EVENT_TYPE == 10){
+                                                  WaveformType_V = signal->ArbitraryWaveform_V;
+                                                  WaveformType_T = signal->ArbitraryWaveform_T;
                                                 }
                                                 else if (settings1->EVENT_TYPE == 11){
-                                                vector<double> WaveformType_V = signal->PulserWaveform_V;
+                                                  WaveformType_V = signal->PulserWaveform_V;
+                                                  WaveformType_T = signal->PulserWaveform_T;
                                                 }
-*/
+                                                int waveform_bin = (int) WaveformType_V.size();
+                                                dT_forfft = WaveformType_T[1] - WaveformType_T[0];    // step in ns
+                                                int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
+                                                while (Ntmp > 1)
+                                                {
+                                                    Ntmp = Ntmp / 2;
+                                                    stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *2;
+                                                }
+                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2;
+                                                double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
+                                                double T_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
                                                 if (settings1->EVENT_TYPE == 10)
                                                 {
-                                                    // MACHTAY adding this for unit testing
-                                                    cout << "Beginning EVENT_TYPE == 10" << endl;
-                                                    int waveform_bin = (int) signal->ArbitraryWaveform_V.size();
-                                                    dT_forfft = signal->ArbitraryWaveform_T[1] - signal->ArbitraryWaveform_T[0];    // step in ns
-                                                    int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
-                                                    while (Ntmp > 1)
-                                                    {
-                                                        Ntmp = Ntmp / 2;
-                                                        stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *2;
-                                                    }
-                                                    stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2;
-                                                    double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
-                                                    double T_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
-                                                    // now we have to make NFOUR/2 number of bins with random init time
-                                                    //
-                                                    // as a test, make first as it is and zero pad
+                                                   // MACHTAY adding this for unit testing
+                                                   cout << "Beginning EVENT_TYPE == 10" << endl;
+                                                   // as a test, make first as it is and zero pad
                                                     for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]; n++)
                                                     {
                                                         //cout << n << endl;
                                                         if (n < waveform_bin)
                                                         {
-                                                            stations[i].strings[j].antennas[k].Vm_zoom[ray_sol_cnt].push_back(signal->ArbitraryWaveform_V[n]);
+/*                                                            stations[i].strings[j].antennas[k].Vm_zoom[ray_sol_cnt].push_back(signal->ArbitraryWaveform_V[n]);
                                                             stations[i].strings[j].antennas[k].Vm_zoom_T[ray_sol_cnt].push_back(signal->ArbitraryWaveform_T[n]);
+																														*/
+                                                            stations[i].strings[j].antennas[k].Vm_zoom[ray_sol_cnt].push_back(WaveformType_V[n]);
+                                                            stations[i].strings[j].antennas[k].Vm_zoom_T[ray_sol_cnt].push_back(WaveformType_T[n]);
+
                                                         }
                                                         // make Tarray, Earray located at the center of Nnew array
 
-                                                        T_forfft[n] = signal->ArbitraryWaveform_T[waveform_bin / 2] - (dT_forfft *(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - n));
+//                                                        T_forfft[n] = signal->ArbitraryWaveform_T[waveform_bin / 2] - (dT_forfft *(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - n));
+                                                        T_forfft[n] = WaveformType_T[waveform_bin / 2] - (dT_forfft *(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - n));
 
                                                         if ((n >= stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - waveform_bin / 2) &&
                                                             (n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 + waveform_bin / 2))
                                                         {
-                                                            V_forfft[n] = signal->ArbitraryWaveform_V[n - (stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - waveform_bin / 2)];
+//                                                            V_forfft[n] = signal->ArbitraryWaveform_V[n - (stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - waveform_bin / 2)];
+                                                            V_forfft[n] = WaveformType_V[n - (stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - waveform_bin / 2)];
+
 																												} 
                                                         else
                                                             V_forfft[n] = 0.;
@@ -1243,25 +1251,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 {
                                                     // MACHTAY adding for unit testing
                                                     cout << "Beginning EVENT_TYPE == 11" << endl;
-                                                    int waveform_bin = (int) signal->PulserWaveform_V.size();
-                                                    dT_forfft = signal->PulserWaveform_T[1] - signal->PulserWaveform_T[0];    // step in ns
-                                                    int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
-                                                    while (Ntmp > 1)
-                                                    {
-                                                        Ntmp = Ntmp / 2;
-                                                        stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *2;
-                                                    }
-                                                    stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2;
-                                                    // cout << "Nnew = " << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
-                                                    // now new NFOUR for zero padding
-
-                                                    // now we have to make NFOUR/2 number of bins with random init time
-                                                    //
-                                                    // as a test, make first as it is and zero pad
-                                                    double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
-                                                    double T_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
-                                                
-
                                                     cout << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
                                                     cout << waveform_bin << endl;
 
@@ -1277,18 +1266,18 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                           //cout << n << endl;
                                                           if (n < waveform_bin)
                                                           {
-                                                                stations[i].strings[j].antennas[k].Vm_zoom[ray_sol_cnt].push_back(signal->PulserWaveform_V[n]);
-                                                                stations[i].strings[j].antennas[k].Vm_zoom_T[ray_sol_cnt].push_back(signal->PulserWaveform_T[n]);
+                                                                stations[i].strings[j].antennas[k].Vm_zoom[ray_sol_cnt].push_back(WaveformType_V[n]);
+                                                                stations[i].strings[j].antennas[k].Vm_zoom_T[ray_sol_cnt].push_back(WaveformType_T[n]);
                                                           }
 
                                                           // make Tarray, Earray located at the center of Nnew array
 
-                                                          T_forfft[n] = signal->PulserWaveform_T[waveform_bin / 2] - (dT_forfft *(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - n));
+                                                          T_forfft[n] = WaveformType_T[waveform_bin / 2] - (dT_forfft *(double)(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - n));
 
                                                           if ((n >= stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - waveform_bin / 2) &&
                                                                  (n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 + waveform_bin / 2))
                                                           {
-                                                                V_forfft[n] = signal->PulserWaveform_V[n - (stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - waveform_bin / 2)];
+                                                                V_forfft[n] = WaveformType_V[n - (stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2 - waveform_bin / 2)];
                                                           }
                                                           else
                                                                 V_forfft[n] = 0.;
@@ -6555,5 +6544,3 @@ double Report::interpolate(double *xdata,double *ydata, double xi, int numData)
 }
 
 //Adding function for padding waveforms to take FFT
-
-

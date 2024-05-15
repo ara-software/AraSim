@@ -287,6 +287,12 @@ Signal::~Signal() {
 }
 
 
+// MACHTAY LOOK HERE
+// What is really the material difference between the 
+//   two functions below?
+//   That is, why bother defining both an ArbitraryWaveform and
+//   a PulserWaveform as different variables, rather than just
+//   reading in the different files?
  void Signal::ReadArbitraryWaveform(string target){
    double e_field;
    double time_tmp;
