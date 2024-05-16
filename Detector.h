@@ -277,6 +277,7 @@ class Detector {
 
 
         void ReadElectChain(string filename, Settings *settings1);
+        void CalculateElectChain(Settings *settings1); // calculate data-driven noise model
         int gain_ch; // Number of channels used for gain model array population in ReadElectChain()
         std::vector< std::vector <double> > ElectGain; //Elect chain gain (unitless) for Detector freq bin array
         std::vector< std::vector <double> > ElectPhase; // Elect chain phase (rad) for Detector freq bin array 
@@ -339,6 +340,10 @@ class Detector {
         vector <double> transVTop_databin;
         vector <double> transH_databin;
 
+      
+        void ReadAmplifierNoiseFigure(Settings *settings1);
+        vector< vector<double> > amplifierNoiseFig_ch;
+
 
         void FlattoEarth_ARA(IceModel *icesurface);
         void FlattoEarth_ARA_sharesurface(IceModel *icesurface);  // each station share the lowest surface
@@ -362,6 +367,8 @@ class Detector {
         vector <ARA_station> stations;
         vector <Antenna_string> strings;
 
+        double GetSplitterFactor(Settings *settings1); // get splitter factor for digitizer path of station
+
         int NoiseFig_numCh;
 
         vector <double> freq_forfft;
@@ -376,7 +383,7 @@ class Detector {
         //Creating function to interpolate antenna impedance to frequency binning.
         double GetImpedance(double freq, int ant_m=0, int ant_number=0, bool useInTransmitterMode=false);
 	
-	int GetTrigOffset( int ch, Settings *settings1 );
+        int GetTrigOffset( int ch, Settings *settings1 );
         int GetTrigMasking( int ch );
 
         double GetAntPhase(double freq, double theta, double phi, int ant_m); // return antenna phase with 2-D interpolation
