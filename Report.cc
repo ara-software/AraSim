@@ -4774,7 +4774,7 @@ void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *d
     vm_bin1 = vm_bin1 * pow(detector->GetElectGain_1D_OutZero( freq1 , gain_ch_no),amplitudeSign);
 
     //Apply power splitter/attenuator based on station.
-    ApplySplitterFactor(vm_bin0, vm_bin1, settings1, detector, applyInverse);
+    ApplySplitterFactor(vm_bin0, vm_bin1, detector, settings1, applyInverse);
 }
 
 void Report::ApplySplitterFactor(double &vm_real, double &vm_img, Detector* detector, Settings *settings1, bool applyInverse) {
