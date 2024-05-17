@@ -4750,7 +4750,7 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
     }
     
     //Apply power splitter/attenuator based on station.
-    ApplySplitterFactor(vm_real, vm_img, settings1, applyInverse);
+    ApplySplitterFactor(vm_real, vm_img, detector, settings1, applyInverse);
 
 }
 
@@ -4774,45 +4774,22 @@ void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *d
     vm_bin1 = vm_bin1 * pow(detector->GetElectGain_1D_OutZero( freq1 , gain_ch_no),amplitudeSign);
 
     //Apply power splitter/attenuator based on station.
-    ApplySplitterFactor(vm_bin0, vm_bin1, settings1, applyInverse);
-
+    ApplySplitterFactor(vm_bin0, vm_bin1, settings1, detector, applyInverse);
 }
 
-void Report::ApplySplitterFactor(double &vm_real, double &vm_img, Settings *settings1, bool applyInverse) {
+void Report::ApplySplitterFactor(double &vm_real, double &vm_img, Detector* detector, Settings *settings1, bool applyInverse) {
     // Apply splitter/attenuation factor in the digitizer path based on station.
-    // AraSim default had factor of 1/sqrt(2), whereas A1-3 have a 3.4 dB factor and A4-5 have a 1.4 dB factor.
-    // See talk by Brian discussing splitter factors: https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2751
     
     //If we wish to invert the splitter factor, we must divide the factor out rather than multiply.  To accomplish this, we simply raise the factor to the -1 power in the multiplication step.
     double amplitudeSign=1;
-    if (applyInverse==true){amplitudeSign*=-1;};
-    
-    double splitterFactor;
-    
-    //Case for simulating real ARA Stations 0 (testbed), A1, A2, and A3.
-    if (settings1->DETECTOR == 4 and settings1->DETECTOR_STATION < 4) {
-        splitterFactor = 1/sqrt(pow(10,-0.34));
-    }
-    //Case for simulating real ARA Stations A4 and A5 (non phased array).
-    else if (settings1->DETECTOR == 4 and settings1->DETECTOR_STATION >= 4) {
-        splitterFactor = 1/sqrt(pow(10,-0.14));
-    }
-    //Case for Phased Array implementation by Abby Bishop.  Will use placeholders of 1 for now.
-    else if (settings1->DETECTOR == 5 and settings1->DETECTOR_STATION == 1) {
-        splitterFactor = 1;    
-    }
-    else if (settings1->DETECTOR == 5 and settings1->DETECTOR_STATION == 2) {
-        splitterFactor = 1;    
-    }
-    else if (settings1->DETECTOR == 5 and settings1->DETECTOR_STATION == 3) {
-        splitterFactor = 1;    
-    }    
-    //Final case where if none of the above are satisfied, it defaults to the historical 1/sqrt(2)
-    else {
-        splitterFactor = 1/sqrt(2);   
-    }
-    vm_real *= pow(splitterFactor, amplitudeSign);
-    vm_img *= pow(splitterFactor, amplitudeSign);
+    if (applyInverse==true){amplitudeSign*=-1;};    
+  
+    const double factor = detector->GetSplitterFactor(settings1);
+
+    vm_real *= pow(factor, amplitudeSign);
+    vm_img *= pow(factor, amplitudeSign);
+
+    return;
 }
 
 void Report::InvertElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, int gain_ch_no, Settings *settings1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
