@@ -1971,10 +1971,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
             ants_with_nonzero_signal = 16;
         }
 
-        if (stations[i].Total_ray_sol && (ants_with_nonzero_signal==0) ){
-            cout<<"Skipping!";
-        }
-
         // if (stations[i].Total_ray_sol )
         if (stations[i].Total_ray_sol && ants_with_nonzero_signal)
         {
