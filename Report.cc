@@ -1960,8 +1960,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
             if (stations[i].Total_ray_sol) { 
                 ants_with_nonzero_signal = getNumOfSignalledAnts(
                     stations[i], 
-                    settings1->ANT_SIGNAL_THRESHOLD*1000. // Convert from V to mV since antenna_r.V
-                                                          //  is stored in mV at this point
+                    settings1->ANT_SIGNAL_THRESHOLD
                 );
             } // Check that rays connected to the station)   
 
