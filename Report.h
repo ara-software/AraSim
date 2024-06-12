@@ -278,7 +278,9 @@ class Report {
         Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
         int trig_search_init, int max_total_bin);    
     double interpolate(double *xdata,double *ydata, double xi, int numData);
-    
+    // MACHTAY LOOK HERE
+		// Adding function for solution appending here
+		void append_ray_sol(Settings *settings1, vector<double>& Voltages, int Nnew, double* volts_forint);
 #ifdef ARA_UTIL_EXISTS
 
     void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulIcrrStationEvent *theUsefulEvent);
