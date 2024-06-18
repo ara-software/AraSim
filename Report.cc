@@ -6173,6 +6173,52 @@ int Report::getNumOfSignalledAnts(Station_r station, double ant_signal_threshold
   
 }
 
+double Report::get_SNR(vector<double> signal_array, vector<double> noise_array){
+    // Usually signal array and noise array will be the same array.
+
+    // if signal_array or noise_array have a size of 0, tell stderr
+    if ( signal_array.size() == 0 ){
+        cerr<<"Signal array provided to Report::get_SNR has size 0. ";
+        cerr<<"Function will return inaccurate values."<<endl;
+    }
+    if ( noise_array.size() == 0 ){
+        cerr<<"Noise array provided to Report::get_SNR has size 0. ";
+        cerr<<"Function will return inaccurate values."<<endl;
+    }
+
+    // Get peak-to-peak
+    double min_value =  10000000.;
+    double max_value = -10000000.;
+    for (int i=0; i<signal_array.size(); i++){
+        if ( signal_array[i] < min_value ) min_value = signal_array[i];
+        else if ( signal_array[i] > max_value ) max_value = signal_array[i];
+    }
+    double p2p = max_value - min_value;
+
+    // Get RMS
+    double rms = 0;
+    for (int i=0; i<noise_array.size(); i++){
+        rms += noise_array[i] * noise_array[i];
+    }
+    rms = sqrt( rms / noise_array.size() );
+
+    // Catch potential errors
+    if ( (p2p==-20000000.) || (p2p!=p2p) ){ // if p2p is original value or nan
+        cerr<<"In Report::get_SNR, peak-to-peak not calculated correctly. ";
+        cerr<<"Will set peak-to-peak to 0."<<endl;
+        p2p = 0;
+    }
+    if ( (rms==0.) || (rms!=rms) ){ // if RMS is 0 or nan
+        cerr<<"In Report::get_SNR, RMS was not calculated properly. ";
+        cerr<<"Will set RMS to 1 to avoid divide-by-zero."<<endl;
+        rms = 1;
+    }
+
+    // Calculate and return SNR
+    double snr = p2p / 2. / rms;
+    return snr;
+}
+
 vector<double> Report::getHitTimesVectorVpol(Detector *detector, int station_i){
 
   return getHitTimesVector(detector, station_i, 0);
