@@ -287,6 +287,10 @@ class Report {
     
     void ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger);
 
+        void Convolve_Signals(    
+            int debugmode,int i, int j, int k,
+            Settings *settings1, Trigger *trigger, Detector *detector
+        );
     
         void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
         
