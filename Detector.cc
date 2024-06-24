@@ -2919,7 +2919,7 @@ double Detector::GetGain_1D( double freq, double theta, double phi, int ant_m ) 
 
 }
 
-double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int ant_number, bool useInTransmitterMode) {
+double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int string_number, int ant_number, bool useInTransmitterMode) {
     
     /*
     The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, Txgain)
@@ -2931,22 +2931,38 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     
     //Assign local pointer to gain array specified in the function argument
     //VPol Rx
-    if ( ant_m == 0 and not useInTransmitterMode) {
-        if (ant_number == 0) {
-            tempGain = &Vgain;
-        }
-        else if (ant_number == 2) {
-            tempGain = &VgainTop;
+    if ( Detector_mode == 5 ){ // Phased Array mode
+        if ( useInTransmitterMode ) tempGain = &Txgain; // Transmitter mode
+        else if ( ant_m == 1 ) tempGain = &Hgain; // PA Hpols
+        else {
+            if ( string_number == 0 ) tempGain = &Vgain; // PA Vpols
+            else {
+                if ( ant_number == 1 ) tempGain = &VgainTop; // A5 Top VPols
+                else tempGain = &Vgain; // A5 Bottom Vpols
+            }
         }
     }
-    //HPol Rx
-    else if ( ant_m == 1 and not useInTransmitterMode) {
-        tempGain = &Hgain;
+    else { // Traditional Station mode
+        if ( ant_m == 0 and not useInTransmitterMode) {
+            if (ant_number == 0) {
+                tempGain = &Vgain;
+            }
+            else if (ant_number == 2) {
+                tempGain = &VgainTop;
+            }
+        }
+        //HPol Rx
+        else if ( ant_m == 1 and not useInTransmitterMode) {
+            tempGain = &Hgain;
+        }
+        //Tx
+        else if (useInTransmitterMode) {
+            tempGain = &Txgain;
+        } 
+        else {
+            throw runtime_error("In GetGain_1D_OutZero: No appropriate gain model for this simulation setup.");
+        }
     }
-    //Tx
-    else if (useInTransmitterMode) {
-        tempGain = &Txgain;
-    } 
     
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
