@@ -288,8 +288,7 @@ class Report {
     void ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger);
 
         void Convolve_Signals(    
-            int debugmode, int ch_ID, 
-            int station_number, int string_number, int antenna_number,
+            int debugmode, Antenna_r *antenna, int ch_ID, int station_number,
             Settings *settings1, Trigger *trigger, Detector *detector
         );
     

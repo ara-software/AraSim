@@ -2030,7 +2030,10 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                     // cout<<"done filling noise diode arrays for trigger!"<<endl;
 
-                    Convolve_Signals(debugmode, ch_ID, i, j, k, settings1, trigger, detector);
+                    Convolve_Signals(
+                        debugmode, &stations[i].strings[j].antennas[k], ch_ID, i,
+                        settings1, trigger, detector
+                    );
 
                     if (debugmode == 0)
                     {
@@ -3802,8 +3805,7 @@ void Report::ClearUselessfromConnect(Detector *detector, Settings *settings1, Tr
 
 
 void Report::Convolve_Signals(
-    int debugmode, int channel_number, 
-    int station_number, int string_number, int antenna_number,
+    int debugmode, Antenna_r *antenna, int channel_number, int station_number, 
     Settings *settings1, Trigger *trigger, Detector *detector
 ){
 
@@ -3821,13 +3823,13 @@ void Report::Convolve_Signals(
     if (debugmode == 0)
     {
 
-        for (int m = 0; m < stations[station_number].strings[string_number].antennas[antenna_number].ray_sol_cnt; m++)
+        for (int m = 0; m < antenna->ray_sol_cnt; m++)
         {
             // loop over raysol numbers
-            signal_bin.push_back((stations[station_number].strings[string_number].antennas[antenna_number].arrival_time[m] - stations[station_number].min_arrival_time) / (settings1->TIMESTEP) + settings1->NFOUR *2 + trigger->maxt_diode_bin);
+            signal_bin.push_back((antenna->arrival_time[m] - stations[station_number].min_arrival_time) / (settings1->TIMESTEP) + settings1->NFOUR *2 + trigger->maxt_diode_bin);
 
             // store signal located bin
-            stations[station_number].strings[string_number].antennas[antenna_number].SignalBin.push_back(signal_bin[m]);
+            antenna->SignalBin.push_back(signal_bin[m]);
 
             if (m > 0)
             {
@@ -3844,7 +3846,7 @@ void Report::Convolve_Signals(
                     connect_signals.push_back(0);
                 }
             }
-            else if (stations[station_number].strings[string_number].antennas[antenna_number].ray_sol_cnt == 1 && m == 0)
+            else if (antenna->ray_sol_cnt == 1 && m == 0)
             {
                 // if only one solution
                 connect_signals.push_back(0);
@@ -3855,7 +3857,7 @@ void Report::Convolve_Signals(
         // cout<<"done calculating signal bins / connect or not"<<endl;
 
         // grab noise waveform (NFOUR/2 bins or NFOUR) for diode convlv
-        for (int m = 0; m < stations[station_number].strings[string_number].antennas[antenna_number].ray_sol_cnt; m++)
+        for (int m = 0; m < antenna->ray_sol_cnt; m++)
         {
             // loop over raysol numbers
             // when ray_sol_cnt == 0, this loop inside codes will not run
@@ -3869,20 +3871,20 @@ void Report::Convolve_Signals(
 
                     // do two convlv with double array m, m+1
 
-                    Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], stations[station_number].strings[string_number].antennas[antenna_number].V[m], stations[station_number].strings[string_number].antennas[antenna_number].V[m + 1], noise_ID, channel_number, station_number, &stations[station_number].strings[string_number].antennas[antenna_number].V_noise[m]);
+                    Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], antenna->V[m], antenna->V[m + 1], noise_ID, channel_number, station_number, &antenna->V_noise[m]);
                 }
                 else if (connect_signals[m] == 0)
                 {
                     // cout << noise_ID << " : " << channel_number << " : " << i << " : " << endl;
                     // do NFOUR/2 size array convlv (m)
-                    Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[station_number].strings[string_number].antennas[antenna_number].V[m], noise_ID, channel_number, station_number, &stations[station_number].strings[string_number].antennas[antenna_number].V_noise[m]);
+                    Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], antenna->V[m], noise_ID, channel_number, station_number, &antenna->V_noise[m]);
                 }
             }
             else
             {
                 // if it's not the first sol
 
-                if (m + 1 < stations[station_number].strings[string_number].antennas[antenna_number].ray_sol_cnt)
+                if (m + 1 < antenna->ray_sol_cnt)
                 {
                     // if there is next raysol
 
@@ -3896,7 +3898,7 @@ void Report::Convolve_Signals(
 
                             // double size array with m-1, m, m+1 raysols all added
                             //
-                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m - 1], signal_bin[m], signal_bin[m + 1], stations[station_number].strings[string_number].antennas[antenna_number].V[m - 1], stations[station_number].strings[string_number].antennas[antenna_number].V[m], stations[station_number].strings[string_number].antennas[antenna_number].V[m + 1], noise_ID, channel_number, station_number, &stations[station_number].strings[string_number].antennas[antenna_number].V_noise[m]);
+                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m - 1], signal_bin[m], signal_bin[m + 1], antenna->V[m - 1], antenna->V[m], antenna->V[m + 1], noise_ID, channel_number, station_number, &antenna->V_noise[m]);
                         }
                         else if (connect_signals[m - 1] == 0)
                         {
@@ -3904,7 +3906,7 @@ void Report::Convolve_Signals(
 
                             // double size array with m, m+1 raysols
                             //
-                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], stations[station_number].strings[string_number].antennas[antenna_number].V[m], stations[station_number].strings[string_number].antennas[antenna_number].V[m + 1], noise_ID, channel_number, station_number, &stations[station_number].strings[string_number].antennas[antenna_number].V_noise[m]);
+                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], antenna->V[m], antenna->V[m + 1], noise_ID, channel_number, station_number, &antenna->V_noise[m]);
                         }
                     }
                     else if (connect_signals[m] == 0)
@@ -3925,7 +3927,7 @@ void Report::Convolve_Signals(
 
                             // single size array with only m raysol
                             //
-                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[station_number].strings[string_number].antennas[antenna_number].V[m], noise_ID, channel_number, station_number, &stations[station_number].strings[string_number].antennas[antenna_number].V_noise[m]);
+                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], antenna->V[m], noise_ID, channel_number, station_number, &antenna->V_noise[m]);
                         }
                     }
                 }
@@ -3947,7 +3949,7 @@ void Report::Convolve_Signals(
 
                         // single size array with only m raysol
                         //
-                        Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[station_number].strings[string_number].antennas[antenna_number].V[m], noise_ID, channel_number, station_number, &stations[station_number].strings[string_number].antennas[antenna_number].V_noise[m]);
+                        Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], antenna->V[m], noise_ID, channel_number, station_number, &antenna->V_noise[m]);
                     }
                 }
             }   // if not the first raysol (all other raysols)
