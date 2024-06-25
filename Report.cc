@@ -3981,7 +3981,12 @@ void Report::Convolve_Signals(
 
 
 // this one is for single signal
-void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise) {
+void Report::Select_Wave_Convlv_Exchange(
+    Settings *settings1, Trigger *trigger, Detector *detector, 
+    int signalbin, 
+    vector <double> &V, 
+    int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise
+) {
 
     int BINSIZE = settings1->NFOUR/2;
 
@@ -4047,7 +4052,12 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 
 
 // this one is for two connected signals 
-void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin1, int signalbin2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise) {
+void Report::Select_Wave_Convlv_Exchange(
+    Settings *settings1, Trigger *trigger, Detector *detector, 
+    int signalbin1, int signalbin2, 
+    vector <double> &V1, vector <double> &V2, 
+    int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise
+) {
 
     int BINSIZE = settings1->NFOUR/2;
 
@@ -4128,7 +4138,12 @@ void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, 
 
 
 // this one is for three connected signals 
-void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin0, int signalbin1, int signalbin2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise) {
+void Report::Select_Wave_Convlv_Exchange(
+    Settings *settings1, Trigger *trigger, Detector *detector, 
+    int signalbin0, int signalbin1, int signalbin2, 
+    vector <double> &V0, vector <double> &V1, vector <double> &V2, 
+    int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise
+) {
 
     int BINSIZE = settings1->NFOUR/2;
 
