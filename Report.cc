@@ -2024,199 +2024,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 for (int k = 0; k < detector->stations[i].strings[j].antennas.size(); k++)
                 {
 
-                    // select noise waveform from trigger class
-                    for (int l = 0; l < N_noise; l++)
-                    {
-
-                        // if we are sharing same noise waveform for all chs, make sure diff chs use diff noise waveforms
-                        if (settings1->NOISE_CHANNEL_MODE == 0)
-                        {
-
-                            // get random noise_ID and check if there are same noise_ID in different ch.
-                            // if there's same noise_ID, get noise_ID again until no noise_ID are same between chs
-                            noise_pass_nogo = 1;
-                            while (noise_pass_nogo)
-                            {
-                                noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
-                                noise_pass_nogo = 0;
-                                for (int j_sub = 0; j_sub < j + 1; j_sub++)
-                                {
-                                    for (int k_sub = 0; k_sub < detector->stations[i].strings[j].antennas.size(); k_sub++)
-                                    {
-                                        if (j_sub == j)
-                                        {
-                                            // if we are checking current string
-                                            if (k_sub < k)
-                                            {
-                                                // check antennas before current antenna
-                                                if (noise_ID[l] == stations[i].strings[j_sub].antennas[k_sub].noise_ID[0])
-                                                {
-                                                    // check only first one for now;;;
-                                                    noise_pass_nogo = 1;
-                                                }
-                                            }
-                                        }
-                                        else // if we are checking previous string, check upto entire antennas
-                                        {
-                                            // Avoids segfault from string 2 having 1 antenna for PA DETECTOR_STATION 3
-                                            if (
-                                                settings1->DETECTOR==5 && // Phased Array detector mode
-                                                settings1->DETECTOR_STATION==3 && // second PA detector configuration (PA + 7 ARA VPols)
-                                                j_sub==2 && // String 2
-                                                k_sub==1 // 2nd antenna that doesn't exist but this block of code expects it to
-                                            ) {
-                                                continue;
-                                            } 
-
-                                            // check only first one for now;;;
-                                            if (noise_ID[l] == stations[i].strings[j_sub].antennas[k_sub].noise_ID[0])
-                                            {
-                                                noise_pass_nogo = 1;
-                                            }
-                                        }
-                                    }
-                                }
-                            }   // while noise_pass_nogo
-                        }   // if NOISE_CHANNEL_MODE = 0
-
-                        // if we are using diff noise waveform for diff chs, just pick any noise waveform
-                        else if (settings1->NOISE_CHANNEL_MODE == 1)
-                        {
-                            noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
-                            // cout << "picking noise waveform" << endl;
-                            // cout << noise_ID[l]<< endl;
-                        }   // if NOISE_CHANNEL_MODE = 1
-
-                        // if we are using diff noise waveform for diff chs, just pick any noise waveform
-                        else if (settings1->NOISE_CHANNEL_MODE == 2)
-                        {
-                            noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
-                        }   // if NOISE_CHANNEL_MODE = 2
-
-                        // save noise ID
-                        stations[i].strings[j].antennas[k].noise_ID.push_back(noise_ID[l]);
-
-                        // cout<<"noise_ID for "<<l<<"th noisewaveform is : "<<noise_ID[l]<<"  N_noise : "<<N_noise<<" ray_sol_cnt : "<<stations[i].strings[j].antennas[k].ray_sol_cnt<<endl;
-
-                        // do only if it's not in debugmode
-                        if (debugmode == 0)
-                        {
-
-                            // cout << l << " : " << N_noise-1 << " : " << ch_ID << endl;
-                            // if we are sharing same noise waveform for all chs, make sure diff chs use diff noise waveforms
-                            if (settings1->NOISE_CHANNEL_MODE == 0)
-                            {
-                                if (l == N_noise - 1)
-                                {
-                                    // when it's final noise waveform
-                                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                    {
-                                        // test for full window
-                                        trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode[noise_ID[l]][bin]);
-                                        trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain[noise_ID[l]][bin]);
-                                    }
-                                    // cout<<"last noise filled in Full_window!"<<endl;
-                                }
-                                else
-                                {
-                                    // when it's not final noise waveform
-                                    // cout<<"full noise will fill in Full_window!"<<endl;
-                                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                    {
-                                        trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode[noise_ID[l]][bin]);
-                                        trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain[noise_ID[l]][bin]);
-                                    }
-                                }
-                            }
-
-                            // if we are sharing same noise waveform for all chs, make sure diff chs use diff noise waveforms
-                            else if (settings1->NOISE_CHANNEL_MODE == 1)
-                            {
-                                if (l == N_noise - 1)
-                                {
-                                    // when it's final noise waveform
-                                    //for (int bin=0; bin < remain_bin; bin++) {
-                                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                    {
-                                        // test for full window
-                                        //                  cout << GetChNumFromArbChID(detector,ch_ID,i,settings1)-1 << " : " << noise_ID[l] << " : " << ch_ID << endl;
-                                        trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                        trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                    }
-                                    //                      cout << "getting full window: " << ch_ID << endl;
-                                    //cout<<"last noise filled in Full_window!"<<endl;
-                                }
-                                else
-                                {
-                                    // when it's not final noise waveform
-                                    //cout<<"full noise will fill in Full_window!"<<endl;
-                                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                    {
-
-                                        trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                        trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                    }
-                                }
-                            }
-
-                            // if we are sharing same noise waveform for first 8 chs and share same noisewaveforms for others, make sure diff chs use diff noise waveforms
-                            else if (settings1->NOISE_CHANNEL_MODE == 2)
-                            {
-
-                                if ((GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1) < 8)
-                                {
-
-                                    if (l == N_noise - 1)
-                                    {
-                                        // when it's final noise waveform
-                                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                        {
-                                            // test for full window
-                                            trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                            trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                        }
-                                        // cout<<"last noise filled in Full_window!"<<endl;
-                                    }
-                                    else
-                                    {
-                                        // when it's not final noise waveform
-                                        // cout<<"full noise will fill in Full_window!"<<endl;
-                                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                        {
-                                            trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                            trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                        }
-                                    }
-                                }
-                                else
-                                {
-
-                                    if (l == N_noise - 1)
-                                    {
-                                        // when it's final noise waveform
-                                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                        {
-                                            // test for full window
-                                            trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[8][noise_ID[l]][bin]);
-                                            trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[8][noise_ID[l]][bin]);
-                                        }
-                                        // cout<<"last noise filled in Full_window!"<<endl;
-                                    }
-                                    else
-                                    {
-                                        // when it's not final noise waveform
-                                        // cout<<"full noise will fill in Full_window!"<<endl;
-                                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                        {
-                                            trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[8][noise_ID[l]][bin]);
-                                            trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[8][noise_ID[l]][bin]);
-                                        }
-                                    }
-                                }
-                            }
-                        }   // if we are not in debug mode
-
-                    }
+                    Add_Antenna_Noise(debugmode, i, j, k, settings1, trigger, detector);
 
                     // currently there is a initial spoiled bins (maxt_diode_bin) at the initial Full_window "AND" at the initial of connected noisewaveform (we can fix this by adding values but not accomplished yet)
 
@@ -5287,6 +5095,207 @@ void Report::GetNoisePhase(Settings *settings1) {
     //for (int i=0; i<settings1->NFOUR/4; i++) {
     for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {  // noise with DATA_BIN_SIZE bin array
         noise_phase.push_back(2*PI*gRandom->Rndm());  // get random phase for flat thermal noise
+    }
+}
+
+
+void Report::Add_Antenna_Noise(
+    int debugmode, int i, int j, int k,
+    Settings *settings1, Trigger *trigger, Detector *detector
+){
+
+    // select noise waveform from trigger class
+    for (int l = 0; l < N_noise; l++)
+    {
+
+        // if we are sharing same noise waveform for all chs, make sure diff chs use diff noise waveforms
+        if (settings1->NOISE_CHANNEL_MODE == 0)
+        {
+
+            // get random noise_ID and check if there are same noise_ID in different ch.
+            // if there's same noise_ID, get noise_ID again until no noise_ID are same between chs
+            noise_pass_nogo = 1;
+            while (noise_pass_nogo)
+            {
+                noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
+                noise_pass_nogo = 0;
+                for (int j_sub = 0; j_sub < j + 1; j_sub++)
+                {
+                    for (int k_sub = 0; k_sub < detector->stations[i].strings[j].antennas.size(); k_sub++)
+                    {
+                        if (j_sub == j)
+                        {
+                            // if we are checking current string
+                            if (k_sub < k)
+                            {
+                                // check antennas before current antenna
+                                if (noise_ID[l] == stations[i].strings[j_sub].antennas[k_sub].noise_ID[0])
+                                {
+                                    // check only first one for now;;;
+                                    noise_pass_nogo = 1;
+                                }
+                            }
+                        }
+                        else // if we are checking previous string, check upto entire antennas
+                        {
+                            // Avoids segfault from string 2 having 1 antenna for PA DETECTOR_STATION 3
+                            if (
+                                settings1->DETECTOR==5 && // Phased Array detector mode
+                                settings1->DETECTOR_STATION==3 && // second PA detector configuration (PA + 7 ARA VPols)
+                                j_sub==2 && // String 2
+                                k_sub==1 // 2nd antenna that doesn't exist but this block of code expects it to
+                            ) {
+                                continue;
+                            } 
+
+                            // check only first one for now;;;
+                            if (noise_ID[l] == stations[i].strings[j_sub].antennas[k_sub].noise_ID[0])
+                            {
+                                noise_pass_nogo = 1;
+                            }
+                        }
+                    }
+                }
+            }   // while noise_pass_nogo
+        }   // if NOISE_CHANNEL_MODE = 0
+
+        // if we are using diff noise waveform for diff chs, just pick any noise waveform
+        else if (settings1->NOISE_CHANNEL_MODE == 1)
+        {
+            noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
+            // cout << "picking noise waveform" << endl;
+            // cout << noise_ID[l]<< endl;
+        }   // if NOISE_CHANNEL_MODE = 1
+
+        // if we are using diff noise waveform for diff chs, just pick any noise waveform
+        else if (settings1->NOISE_CHANNEL_MODE == 2)
+        {
+            noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
+        }   // if NOISE_CHANNEL_MODE = 2
+
+        // save noise ID
+        stations[i].strings[j].antennas[k].noise_ID.push_back(noise_ID[l]);
+
+        // cout<<"noise_ID for "<<l<<"th noisewaveform is : "<<noise_ID[l]<<"  N_noise : "<<N_noise<<" ray_sol_cnt : "<<stations[i].strings[j].antennas[k].ray_sol_cnt<<endl;
+
+        // do only if it's not in debugmode
+        if (debugmode == 0)
+        {
+
+            // cout << l << " : " << N_noise-1 << " : " << ch_ID << endl;
+            // if we are sharing same noise waveform for all chs, make sure diff chs use diff noise waveforms
+            if (settings1->NOISE_CHANNEL_MODE == 0)
+            {
+                if (l == N_noise - 1)
+                {
+                    // when it's final noise waveform
+                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                    {
+                        // test for full window
+                        trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode[noise_ID[l]][bin]);
+                        trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain[noise_ID[l]][bin]);
+                    }
+                    // cout<<"last noise filled in Full_window!"<<endl;
+                }
+                else
+                {
+                    // when it's not final noise waveform
+                    // cout<<"full noise will fill in Full_window!"<<endl;
+                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                    {
+                        trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode[noise_ID[l]][bin]);
+                        trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain[noise_ID[l]][bin]);
+                    }
+                }
+            }
+
+            // if we are sharing same noise waveform for all chs, make sure diff chs use diff noise waveforms
+            else if (settings1->NOISE_CHANNEL_MODE == 1)
+            {
+                if (l == N_noise - 1)
+                {
+                    // when it's final noise waveform
+                    //for (int bin=0; bin < remain_bin; bin++) {
+                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                    {
+                        // test for full window
+                        //                  cout << GetChNumFromArbChID(detector,ch_ID,i,settings1)-1 << " : " << noise_ID[l] << " : " << ch_ID << endl;
+                        trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
+                        trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
+                    }
+                    //                      cout << "getting full window: " << ch_ID << endl;
+                    //cout<<"last noise filled in Full_window!"<<endl;
+                }
+                else
+                {
+                    // when it's not final noise waveform
+                    //cout<<"full noise will fill in Full_window!"<<endl;
+                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                    {
+
+                        trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
+                        trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
+                    }
+                }
+            }
+
+            // if we are sharing same noise waveform for first 8 chs and share same noisewaveforms for others, make sure diff chs use diff noise waveforms
+            else if (settings1->NOISE_CHANNEL_MODE == 2)
+            {
+
+                if ((GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1) < 8)
+                {
+
+                    if (l == N_noise - 1)
+                    {
+                        // when it's final noise waveform
+                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                        {
+                            // test for full window
+                            trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
+                            trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
+                        }
+                        // cout<<"last noise filled in Full_window!"<<endl;
+                    }
+                    else
+                    {
+                        // when it's not final noise waveform
+                        // cout<<"full noise will fill in Full_window!"<<endl;
+                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                        {
+                            trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
+                            trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
+                        }
+                    }
+                }
+                else
+                {
+
+                    if (l == N_noise - 1)
+                    {
+                        // when it's final noise waveform
+                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                        {
+                            // test for full window
+                            trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[8][noise_ID[l]][bin]);
+                            trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[8][noise_ID[l]][bin]);
+                        }
+                        // cout<<"last noise filled in Full_window!"<<endl;
+                    }
+                    else
+                    {
+                        // when it's not final noise waveform
+                        // cout<<"full noise will fill in Full_window!"<<endl;
+                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                        {
+                            trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[8][noise_ID[l]][bin]);
+                            trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[8][noise_ID[l]][bin]);
+                        }
+                    }
+                }
+            }
+        }   // if we are not in debug mode
+
     }
 }
 

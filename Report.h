@@ -368,6 +368,11 @@ class Report {
 
         void GetNoisePhase(Settings *settings1);
 
+        void Add_Antenna_Noise(    
+            int debugmode,int i, int j, int k,
+            Settings *settings1, Trigger *trigger, Detector *detector
+        );
+
         void MakeArraysforFFT(Settings *settings1, Detector *detector, int StationIndex, vector <double> &vsignal_array, double *vsignal_forfft);
         void MakeArraysforFFT(Settings *settings1, Detector *detector, int StationIndex, double *vsignal_array, double *vsignal_forfft);
 
