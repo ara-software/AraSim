@@ -287,16 +287,25 @@ class Report {
     
     void ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger);
 
+        // Signal convolution functions
         void Convolve_Signals(    
             int debugmode, Antenna_r *antenna, int ch_ID, int station_number,
-            Settings *settings1, Trigger *trigger, Detector *detector
-        );
-    
-        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
-        
-        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin_1, int signalbin_2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
-
-        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin_0, int signalbin_1, int signalbin_2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
+            Settings *settings1, Trigger *trigger, Detector *detector);
+        void Select_Wave_Convlv_Exchange(
+            Settings *settings1, Trigger *trigger, Detector *detector, 
+            int signalbin, 
+            vector <double> &V, 
+            int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise); // Convolve a single ray with noise
+        void Select_Wave_Convlv_Exchange(
+            Settings *settings1, Trigger *trigger, Detector *detector, 
+            int signalbin_1, int signalbin_2, 
+            vector <double> &V1, vector <double> &V2, 
+            int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise); // Convolve 2 rays with noise
+        void Select_Wave_Convlv_Exchange( 
+            Settings *settings1, Trigger *trigger, Detector *detector, 
+            int signalbin_0, int signalbin_1, int signalbin_2, 
+            vector <double> &V0, vector <double> &V1, vector <double> &V2, 
+            int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise); // Convolve 3 rays with noise
 
         void Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *detector, int ID, int StationIndex); // we need to apply a gain offset to the basic waveforms.
 
@@ -363,11 +372,10 @@ class Report {
 
         void GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_theta, double &ant_phi);
 
+        // Noise Functions
         void GetNoiseWaveforms(Settings *settings1, Detector *detector, double vhz_noise, double *vnoise);
         void GetNoiseWaveforms_ch(Settings *settings1, Detector *detector, double vhz_noise, double *vnoise, int ch);
-
         void GetNoisePhase(Settings *settings1);
-
         void Add_Antenna_Noise(    
             int debugmode, int ch_ID, 
             int station_number, int string_number, int antenna_number,
