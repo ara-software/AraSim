@@ -173,6 +173,8 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
 
     time.clear();
     time_mimic.clear();
+    V_noise.clear();
+    V_convolved.clear();
     V_mimic.clear();
     Ax.clear();
     Ay.clear();
@@ -267,6 +269,8 @@ void Antenna_r::clear_useless(Settings *settings1) {   // to reduce the size of 
     // clear global trigger waveform info also
     time.clear();
     time_mimic.clear();
+    V_convolved.clear();
+    V_noise.clear();
     V_mimic.clear();
 
 
@@ -625,7 +629,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 stations[i].strings[j].antennas[k].Vfft.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].Vfft_noise.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].V.resize(ray_sol_cnt + 1);
-                                stations[i].strings[j].antennas[k].V_noise.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].SignalExt.resize(ray_sol_cnt + 1);
 
                                 // calculate the polarization vector at the source
@@ -3859,6 +3862,8 @@ void Report::Convolve_Signals(
         }
 
         // grab noise waveform (NFOUR/2 bins or NFOUR) for diode convlv
+        vector <double> V_noise;
+        vector <double> V_signal;
         for (int m = 0; m < antenna->ray_sol_cnt; m++)
         {
             // loop over raysol numbers
@@ -3875,7 +3880,8 @@ void Report::Convolve_Signals(
                         settings1, trigger, detector, 
                         signal_bin[m], signal_bin[m + 1], 
                         antenna->V[m], antenna->V[m + 1], 
-                        noise_ID, channel_number, station_number, &antenna->V_noise[m]);
+                        noise_ID, channel_number, station_number, 
+                        &V_signal, &V_noise);
                 }
                 else if (connect_signals[m] == 0)
                 {
@@ -3884,7 +3890,8 @@ void Report::Convolve_Signals(
                         settings1, trigger, detector, 
                         signal_bin[m], 
                         antenna->V[m], 
-                        noise_ID, channel_number, station_number, &antenna->V_noise[m]);
+                        noise_ID, channel_number, station_number, 
+                        &V_signal, &V_noise);
                 }
             }
             else
@@ -3908,7 +3915,8 @@ void Report::Convolve_Signals(
                                 settings1, trigger, detector, 
                                 signal_bin[m - 1], signal_bin[m], signal_bin[m + 1], 
                                 antenna->V[m - 1], antenna->V[m], antenna->V[m + 1], 
-                                noise_ID, channel_number, station_number, &antenna->V_noise[m]);
+                                noise_ID, channel_number, station_number,
+                                &V_signal, &V_noise);
                         }
                         else if (connect_signals[m - 1] == 0)
                         {
@@ -3919,7 +3927,8 @@ void Report::Convolve_Signals(
                                 settings1, trigger, detector, 
                                 signal_bin[m], signal_bin[m + 1], 
                                 antenna->V[m], antenna->V[m + 1], 
-                                noise_ID, channel_number, station_number, &antenna->V_noise[m]);
+                                noise_ID, channel_number, station_number, 
+                                &V_signal, &V_noise);
                         }
                     }
                     else if (connect_signals[m] == 0)
@@ -3942,7 +3951,8 @@ void Report::Convolve_Signals(
                                 settings1, trigger, detector, 
                                 signal_bin[m], 
                                 antenna->V[m], 
-                                noise_ID, channel_number, station_number, &antenna->V_noise[m]);
+                                noise_ID, channel_number, station_number, 
+                                &V_signal, &V_noise);
                         }
                     }
                 }
@@ -3966,13 +3976,23 @@ void Report::Convolve_Signals(
                             settings1, trigger, detector, 
                             signal_bin[m], 
                             antenna->V[m], 
-                            noise_ID, channel_number, station_number, &antenna->V_noise[m]);
+                            noise_ID, channel_number, station_number, 
+                            &V_signal, &V_noise);
                     }
                 }
 
             }   // if not the first raysol (all other raysols)
 
         }   // end loop over raysols
+
+        // Save the convolved signal-only waveform and the noise-only waveform
+        for (int bin=0; bin<V_signal.size(); bin++){
+            antenna->V_convolved.push_back(V_signal[bin]);
+        } 
+        for (int bin=0; bin<V_noise.size(); bin++){
+            antenna->V_noise.push_back(V_noise[bin]);
+        } 
+
 
     } // end if debugmode
 
@@ -3985,7 +4005,8 @@ void Report::Select_Wave_Convlv_Exchange(
     Settings *settings1, Trigger *trigger, Detector *detector, 
     int signalbin, 
     vector <double> &V, 
-    int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise
+    int *noise_ID, int ID, int StationIndex, 
+    vector <double> *V_signal_only, vector <double> *V_noise_only
 ) {
 
     // Initialize bin-related variables
@@ -3993,50 +4014,50 @@ void Report::Select_Wave_Convlv_Exchange(
     
     // Clear previous waveform data
     V_total_forconvlv.clear();
+    V_signal_only->clear();
+    V_noise_only->clear();
     
     // Save the noise + signal voltage waveform
     int bin_value;
     int noise_ID_index;
     int noise_wf_index;
+    double noise_voltage = 0.;
+    double signal_voltage = 0.;
     for (int bin=0; bin<BINSIZE; bin++) {
 
         bin_value = signalbin - BINSIZE/2 + bin;
         noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
         noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
                            
+        // Get the voltage of noise at this bin
         if ( settings1->NOISE_CHANNEL_MODE==0) {
-            V_total_forconvlv.push_back( 
-                trigger->v_noise_timedomain[ noise_ID[noise_ID_index] ][ noise_wf_index ]  
-                + V[bin] );
-            V_with_noise->push_back(V_total_forconvlv[-1]);
+            noise_voltage = trigger->v_noise_timedomain[ noise_ID[noise_ID_index] ][ noise_wf_index ];
         }
         else if ( settings1->NOISE_CHANNEL_MODE==1) {
-            V_total_forconvlv.push_back( 
-                trigger->v_noise_timedomain_ch[ 
+            noise_voltage = trigger->v_noise_timedomain_ch[ 
                     GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
-                ][ noise_ID[noise_ID_index] ][ noise_wf_index ]  
-                + V[bin] );
-            V_with_noise->push_back(V_total_forconvlv[-1]);
+                ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
         }
         else if ( settings1->NOISE_CHANNEL_MODE==2) {
             if ( (GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1) < 8) {
-                V_total_forconvlv.push_back( 
-                    trigger->v_noise_timedomain_ch[ 
+                noise_voltage = trigger->v_noise_timedomain_ch[ 
                         GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
-                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ]  
-                    + V[bin] );
-                V_with_noise->push_back(V_total_forconvlv[-1]);
+                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
             }
             else {
-                V_total_forconvlv.push_back( 
-                    trigger->v_noise_timedomain_ch[
+                noise_voltage = trigger->v_noise_timedomain_ch[
                         8
-                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ]  
-                    + V[bin] );
-                V_with_noise->push_back(V_total_forconvlv[-1]);
+                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
             }
         }
 
+        // Get the voltage of signal at this bin
+        signal_voltage = V[bin];
+
+        // Save noise and signal only waveforms, then add signal to noise waveform
+        V_signal_only->push_back( signal_voltage );
+        V_noise_only->push_back( noise_voltage );
+        V_total_forconvlv.push_back( signal_voltage + noise_voltage );
 
     } // end loop over bins for saving the noise+signal waveforms to V_total_forconvlv
 
@@ -4070,7 +4091,8 @@ void Report::Select_Wave_Convlv_Exchange(
     Settings *settings1, Trigger *trigger, Detector *detector, 
     int signalbin1, int signalbin2, 
     vector <double> &V1, vector <double> &V2, 
-    int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise
+    int *noise_ID, int ID, int StationIndex, 
+    vector <double> *V_signal_only, vector <double> *V_noise_only
 ) {
 
     int BINSIZE = settings1->NFOUR/2;
@@ -4083,60 +4105,59 @@ void Report::Select_Wave_Convlv_Exchange(
     
     // Clear previous waveform data
     V_total_forconvlv.clear();
+    V_signal_only->clear();
+    V_noise_only->clear();
     
     // Save the noise + signal voltage waveform
     int bin_value;
     int noise_ID_index;
     int noise_wf_index;
     int signal_dbin = signalbin2 - signalbin1;
+    double noise_voltage = 0.;
+    double signal_voltage = 0.;
     for (int bin=0; bin<BINSIZE*2; bin++) {
 
         bin_value = signalbin1 - BINSIZE/2 + bin;
         noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
         noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
 
-        // save the noise waveform
+        // Get the voltage of noise at this bin
         if ( settings1->NOISE_CHANNEL_MODE==0) {
-            V_total_forconvlv.push_back( 
-                trigger->v_noise_timedomain[ noise_ID[noise_ID_index] ][ noise_wf_index ] );
+            noise_voltage = trigger->v_noise_timedomain[ noise_ID[noise_ID_index] ][ noise_wf_index ];
         }
         else if ( settings1->NOISE_CHANNEL_MODE==1) {
-            V_total_forconvlv.push_back( 
-                trigger->v_noise_timedomain_ch[ 
+            noise_voltage = trigger->v_noise_timedomain_ch[ 
                     GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
-                ][ noise_ID[noise_ID_index] ][ noise_wf_index ] );
+                ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
         }
         else if ( settings1->NOISE_CHANNEL_MODE==2) {
             if ( (GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1) < 8) {
-                V_total_forconvlv.push_back( 
-                    trigger->v_noise_timedomain_ch[ 
+                noise_voltage = trigger->v_noise_timedomain_ch[ 
                         GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
-                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ] );
+                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
             }
             else {
-                V_total_forconvlv.push_back( 
-                    trigger->v_noise_timedomain_ch[
+                noise_voltage = trigger->v_noise_timedomain_ch[
                         8
-                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ] );
+                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
             }
         }
 
-        // Save signal-only and noise-only waveforms then add signal to noise waveform
+        // Get the voltage of signal at this bin
         if (bin < signal_dbin) {  // bins where only first signal is shown
-            V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin];
-            V_tmp[bin] = V1[bin];
-            V_with_noise->push_back(V_total_forconvlv[-1]);
+            signal_voltage = V1[bin];
         }
         else if (bin < BINSIZE) { // bins where first + second signal is shown
-            V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V2[bin - signal_dbin];
-            V_tmp[bin] = V1[bin] + V2[bin - signal_dbin];
-            V_with_noise->push_back(V_total_forconvlv[-1]);
+            signal_voltage = V1[bin] + V2[bin - signal_dbin];
         }
         else if (bin < BINSIZE + signal_dbin) { // bins where only second signal is shown
-            V_total_forconvlv[bin] = V_total_forconvlv[bin] + V2[bin - signal_dbin];
-            V_tmp[bin] = V2[bin - signal_dbin];
-            V_with_noise->push_back(V_total_forconvlv[-1]);
+            signal_voltage = V2[bin - signal_dbin];
         }
+
+        // Save signal-only and noise-only waveforms then add signal to noise waveform
+        V_signal_only->push_back( signal_voltage );
+        V_noise_only->push_back( noise_voltage );
+        V_total_forconvlv.push_back( signal_voltage + noise_voltage );
 
     } // end loop over bins for saving the noise+signal waveforms to V_total_forconvlv
 
@@ -4170,7 +4191,8 @@ void Report::Select_Wave_Convlv_Exchange(
     Settings *settings1, Trigger *trigger, Detector *detector, 
     int signalbin0, int signalbin1, int signalbin2, 
     vector <double> &V0, vector <double> &V1, vector <double> &V2, 
-    int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise
+    int *noise_ID, int ID, int StationIndex,
+    vector <double> *V_signal_only, vector <double> *V_noise_only
 ) {
 
     int BINSIZE = settings1->NFOUR/2;
@@ -4183,6 +4205,8 @@ void Report::Select_Wave_Convlv_Exchange(
     
     // Clear previous waveform data   
     V_total_forconvlv.clear();
+    V_signal_only->clear();
+    V_noise_only->clear();
     
     // Save the noise + signal voltage waveform
     int bin_value;
@@ -4190,68 +4214,61 @@ void Report::Select_Wave_Convlv_Exchange(
     int noise_wf_index;
     int signal_dbin = signalbin2 - signalbin1;
     int signal_dbin0 = signalbin1 - signalbin0;
+    double noise_voltage = 0.;
+    double signal_voltage = 0.;
     for (int bin=0; bin<BINSIZE*2; bin++) {
 
         bin_value = signalbin1 - BINSIZE/2 + bin;
         noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
         noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
 
-        // save the noise waveform
+        // Get the voltage of noise at this bin
         if ( settings1->NOISE_CHANNEL_MODE==0) {
-            V_total_forconvlv.push_back( 
-                trigger->v_noise_timedomain[ noise_ID[noise_ID_index] ][ noise_wf_index ] );
+            noise_voltage = trigger->v_noise_timedomain[ noise_ID[noise_ID_index] ][ noise_wf_index ];
         }
         else if ( settings1->NOISE_CHANNEL_MODE==1) {
-            V_total_forconvlv.push_back( 
-                trigger->v_noise_timedomain_ch[ 
+            noise_voltage = trigger->v_noise_timedomain_ch[ 
                     GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
-                ][ noise_ID[noise_ID_index] ][ noise_wf_index ] );
+                ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
         }
         else if ( settings1->NOISE_CHANNEL_MODE==2) {
             if ( (GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1) < 8) {
-                V_total_forconvlv.push_back( 
-                    trigger->v_noise_timedomain_ch[ 
+                noise_voltage = trigger->v_noise_timedomain_ch[ 
                         GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
-                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ] );
+                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
             }
             else {
-                V_total_forconvlv.push_back( 
-                    trigger->v_noise_timedomain_ch[
+                noise_voltage = trigger->v_noise_timedomain_ch[
                         8
-                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ] );
+                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
             }
         }
 
-        // Save signal-only and noise-only waveforms then add signal to noise waveform
+        // Get the voltage of signal at this bin
         if (bin < signal_dbin) {  // bins where no second signal is shown
             if ( signal_dbin0 + bin < BINSIZE ) {   // previous signal is also here!
-                V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V0[ signal_dbin0 + bin];
-                V_tmp[bin] = V1[bin] + V0[ signal_dbin0 + bin];
-                V_with_noise->push_back(V_total_forconvlv[-1]);
+                signal_voltage = V0[ signal_dbin0 + bin];
             }
             else {  // no previous signal, and next signal
-                V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin];
-                V_tmp[bin] = V1[bin];
-                V_with_noise->push_back(V_total_forconvlv[-1]);
+                signal_voltage = V1[bin];
             }
         }
         else if (bin < BINSIZE) { // bins where first + second signal is shown
             if ( signal_dbin0 + bin < BINSIZE ) {   // previous signal is also here!
-                V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V0[ signal_dbin0 + bin] + V2[bin - signal_dbin];
-                V_tmp[bin] = V1[bin] + V0[ signal_dbin0 + bin] + V2[bin - signal_dbin];
-                V_with_noise->push_back(V_total_forconvlv[-1]);
+                signal_voltage = V1[bin] + V0[ signal_dbin0 + bin] + V2[bin - signal_dbin];
             }
             else {  // no previous signal, and next signal
-                V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V2[bin - signal_dbin];
-                V_tmp[bin] = V1[bin] + V2[bin - signal_dbin];
-                V_with_noise->push_back(V_total_forconvlv[-1]);
+                signal_voltage = V1[bin] + V2[bin - signal_dbin];
             }
         }
         else if (bin < BINSIZE + signal_dbin) { // bins where only second signal is shown
-            V_total_forconvlv[bin] = V_total_forconvlv[bin] + V2[bin - signal_dbin];
-            V_tmp[bin] = V2[bin - signal_dbin];
-            V_with_noise->push_back(V_total_forconvlv[-1]);
+            signal_voltage = V2[bin - signal_dbin];
         }
+
+        // Save signal-only and noise-only waveforms then add signal to noise waveform
+        V_signal_only->push_back( signal_voltage );
+        V_noise_only->push_back( noise_voltage );
+        V_total_forconvlv.push_back( signal_voltage + noise_voltage );
 
     } // end loop over bins for saving the noise+signal waveforms to V_total_forconvlv
 
@@ -6171,10 +6188,10 @@ double Report::getAverageSNR2(int raysolnum, int station_i, int trig_analysis_mo
         else if (trig_analysis_mode==1) // Noise + signal triggers
             // Estimate average SNR in topmost vpol
             if(stations[station_i].strings[0].antennas[ant_num].V.size()>raysolnum) {
-                int total_bins = stations[station_i].strings[0].antennas[ant_num].V_noise[raysolnum].size();
+                int total_bins = stations[station_i].strings[0].antennas[ant_num].V_noise.size();
                 for (int bin=0; bin<total_bins; bin++){
-                    if(TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V_noise[raysolnum][bin])>peak){
-                        peak = TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V_noise[raysolnum][bin]);
+                    if(TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V_noise[bin])>peak){
+                        peak = TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V_noise[bin]);
 
                     }
                 }
@@ -6287,7 +6304,7 @@ void Report::checkPATrigger(
         // else if (settings1->TRIG_ANALYSIS_MODE==1) // Noise + signal triggers
         //     // Estimate average SNR in topmost vpol
         //     if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
-        //         avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V_noise[raySolNum]);
+        //         avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V_noise);
         //         // avgSnr = getAverageSNR2(raySolNum, i, settings1->TRIG_ANALYSIS_MODE);
         //     }
         //     else {

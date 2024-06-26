@@ -108,8 +108,9 @@ class Antenna_r {
         vector < vector <double> > Ax;     // vector potential x component
         vector < vector <double> > Ay;
         vector < vector <double> > Az;
-        vector < vector <double> > V;   // volt signal with all factors applied (as far as we can) (from fft)
-        vector < vector <double> > V_noise;   // volt signal with all factors applied (as far as we can) (from fft)
+        vector < vector <double> > V;   // For each ray individually, volt signal with all factors applied (from fft, excludes gain offse)
+        vector <double> V_convolved;    // After convolution of all rays, volt signal with all factors applied (from Convolve_Signal, excludes gain offset)
+        vector <double> V_noise;        // noise voltage waveform with all factors applied (from Convolve_Signal, excludes gain offset)
 
         vector <int> SignalExt; // flag if actual signal exist for the ray trace solution
 
@@ -295,17 +296,20 @@ class Report {
             Settings *settings1, Trigger *trigger, Detector *detector, 
             int signalbin, 
             vector <double> &V, 
-            int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise); // Convolve a single ray with noise
+            int *noise_ID, int ID, int StationIndex,
+            vector <double> *V_signal_only, vector <double> *V_noise_only); // Convolve a single ray with noise
         void Select_Wave_Convlv_Exchange(
             Settings *settings1, Trigger *trigger, Detector *detector, 
             int signalbin_1, int signalbin_2, 
             vector <double> &V1, vector <double> &V2, 
-            int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise); // Convolve 2 rays with noise
+            int *noise_ID, int ID, int StationIndex,
+            vector <double> *V_signal_only, vector <double> *V_noise_only); // Convolve 2 rays with noise
         void Select_Wave_Convlv_Exchange( 
             Settings *settings1, Trigger *trigger, Detector *detector, 
             int signalbin_0, int signalbin_1, int signalbin_2, 
             vector <double> &V0, vector <double> &V1, vector <double> &V2, 
-            int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise); // Convolve 3 rays with noise
+            int *noise_ID, int ID, int StationIndex, 
+            vector <double> *V_signal_only, vector <double> *V_noise_only); // Convolve 3 rays with noise
 
         void Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *detector, int ID, int StationIndex); // we need to apply a gain offset to the basic waveforms.
 
