@@ -2837,89 +2837,7 @@ double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m )
 }
 
 
-
-
-double Detector::GetGain_1D( double freq, double theta, double phi, int ant_m ) {
-    // find nearest theta, phi bin
-    //
-    //int i = (int)(theta/5.);
-    //int j = (int)(phi/5.);
-
-    // check if angles range actually theta 0-180, phi 0-360
-    int i = (int)( (theta+2.5)/5. );
-    int j = (int)( (phi+2.5)/5. );
-
-    if ( j == 72 ) j = 0;
-
-    int angle_bin = 37*j+i;
-
-    // now just do linear interpolation at that angle
-    //
-
-    double slope_1, slope_2; // slope of init, final part
-
-    double Gout;
-
-    int bin = (int)( (freq - freq_init) / freq_width )+1;
-
-    // Vpol
-    if ( ant_m == 0 ) {
-
-        slope_1 = (Vgain[1][angle_bin] - Vgain[0][angle_bin]) / (Freq[1] - Freq[0]);
-        slope_2 = (Vgain[freq_step-1][angle_bin] - Vgain[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
-
-
-        // if freq is lower than freq_init
-        if ( freq < freq_init ) {
-
-            Gout = slope_1 * (freq - Freq[0]) + Vgain[0][angle_bin];
-        }
-        // if freq is higher than last freq
-        else if ( freq > Freq[freq_step-1] ) {
-
-            Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
-        }
-
-        else {
-
-            Gout = Vgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Vgain[bin][angle_bin]-Vgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-        } // not outside the Freq[] range
-    
-    } // Vpol case
-
-    // Hpol
-    else if ( ant_m == 1 ) {
-
-        slope_1 = (Hgain[1][angle_bin] - Hgain[0][angle_bin]) / (Freq[1] - Freq[0]);
-        slope_2 = (Hgain[freq_step-1][angle_bin] - Hgain[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
-
-
-        // if freq is lower than freq_init
-        if ( freq < freq_init ) {
-
-            Gout = slope_1 * (freq - Freq[0]) + Hgain[0][angle_bin];
-        }
-        // if freq is higher than last freq
-        else if ( freq > Freq[freq_step-1] ) {
-
-            Gout = slope_2 * (freq - Freq[freq_step-1]) + Hgain[freq_step-1][angle_bin];
-        }
-
-        else {
-
-            Gout = Hgain[bin-1][angle_bin] + (freq-Freq[bin-1])*(Hgain[bin][angle_bin]-Hgain[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
-        } // not outside the Freq[] range
-    
-    } // Hpol case
-
-    if ( Gout < 0. ){ // gain can not go below 0
-    	Gout = 0.;
-    }
-    return Gout;
-
-}
-
-double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int ant_number, bool useInTransmitterMode) {
+double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int string_number, int ant_number, bool useInTransmitterMode) {
     
     /*
     The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, Txgain)
@@ -2931,22 +2849,38 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     
     //Assign local pointer to gain array specified in the function argument
     //VPol Rx
-    if ( ant_m == 0 and not useInTransmitterMode) {
-        if (ant_number == 0) {
-            tempGain = &Vgain;
-        }
-        else if (ant_number == 2) {
-            tempGain = &VgainTop;
+    if ( Detector_mode == 5 ){ // Phased Array mode
+        if ( useInTransmitterMode ) tempGain = &Txgain; // Transmitter mode
+        else if ( ant_m == 1 ) tempGain = &Hgain; // PA Hpols
+        else {
+            if ( string_number == 0 ) tempGain = &Vgain; // PA Vpols
+            else {
+                if ( ant_number == 1 ) tempGain = &VgainTop; // A5 Top VPols
+                else tempGain = &Vgain; // A5 Bottom Vpols
+            }
         }
     }
-    //HPol Rx
-    else if ( ant_m == 1 and not useInTransmitterMode) {
-        tempGain = &Hgain;
+    else { // Traditional Station mode
+        if ( ant_m == 0 and not useInTransmitterMode) {
+            if (ant_number == 0) {
+                tempGain = &Vgain;
+            }
+            else if (ant_number == 2) {
+                tempGain = &VgainTop;
+            }
+        }
+        //HPol Rx
+        else if ( ant_m == 1 and not useInTransmitterMode) {
+            tempGain = &Hgain;
+        }
+        //Tx
+        else if (useInTransmitterMode) {
+            tempGain = &Txgain;
+        } 
+        else {
+            throw runtime_error("In GetGain_1D_OutZero: No appropriate gain model for this simulation setup.");
+        }
     }
-    //Tx
-    else if (useInTransmitterMode) {
-        tempGain = &Txgain;
-    } 
     
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
