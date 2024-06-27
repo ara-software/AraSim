@@ -4023,7 +4023,7 @@ void Report::Convolve_Signals(
 
                         // Get Noise waveform
                         GetAntenaNoiseWF(
-                            2*BINSIZE, this_signalbin, &V_noise,
+                            BINSIZE, this_signalbin, &V_noise,
                             station_number, channel_number,
                             settings1, trigger, detector);
 
