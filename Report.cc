@@ -3863,6 +3863,7 @@ void Report::Convolve_Signals(
 
         // grab noise waveform (NFOUR/2 bins or NFOUR) for diode convlv
         int BINSIZE = settings1->NFOUR/2;
+        int this_signalbin = 0;
         vector <double> V_noise;
         vector <double> V_signal;
         for (int m = 0; m < antenna->ray_sol_cnt; m++)
@@ -3876,6 +3877,15 @@ void Report::Convolve_Signals(
 
                 if (connect_signals[m] == 1)
                 {
+                    // Save the signalbin for this event
+                    this_signalbin = signal_bin[m];
+
+                    // Get Noise waveform
+                    GetAntenaNoiseWF(
+                        2*BINSIZE, this_signalbin, &V_noise,
+                        station_number, channel_number,
+                        settings1, trigger, detector);
+
                     // Convovle m and m+1 ray in NFOUR size array
                     Select_Wave_Convlv_Exchange(
                         settings1, trigger, detector, 
@@ -3886,6 +3896,15 @@ void Report::Convolve_Signals(
                 }
                 else if (connect_signals[m] == 0)
                 {
+                    // Save the signalbin for this event
+                    this_signalbin = signal_bin[m];
+
+                    // Get Noise waveform
+                    GetAntenaNoiseWF(
+                        BINSIZE, this_signalbin, &V_noise,
+                        station_number, channel_number,
+                        settings1, trigger, detector);
+
                     // do NFOUR/2 size array convlv with just this (m) ray
                     Select_Wave_Convlv_Exchange(
                         settings1, trigger, detector, 
@@ -3911,6 +3930,15 @@ void Report::Convolve_Signals(
                         {
                             // and previous raysol also connected
 
+                            // Save the signalbin for this event
+                            this_signalbin = signal_bin[m];
+
+                            // Get Noise waveform
+                            GetAntenaNoiseWF(
+                                2*BINSIZE, this_signalbin, &V_noise,
+                                station_number, channel_number,
+                                settings1, trigger, detector);
+
                             // Convolve all 3 rays in a NFOUR size array
                             Select_Wave_Convlv_Exchange(
                                 settings1, trigger, detector, 
@@ -3922,6 +3950,15 @@ void Report::Convolve_Signals(
                         else if (connect_signals[m - 1] == 0)
                         {
                             // and previous raysol not connected
+                            
+                            // Save the signalbin for this event
+                            this_signalbin = signal_bin[m];
+
+                            // Get Noise waveform
+                            GetAntenaNoiseWF(
+                                2*BINSIZE, this_signalbin, &V_noise,
+                                station_number, channel_number,
+                                settings1, trigger, detector);
 
                             // Convovle m and m+1 ray in NFOUR size array
                             Select_Wave_Convlv_Exchange(
@@ -3946,6 +3983,15 @@ void Report::Convolve_Signals(
                         else if (connect_signals[m - 1] == 0)
                         {
                             // and previous raysol not connected
+                            
+                            // Save the signalbin for this event
+                            this_signalbin = signal_bin[m];
+
+                            // Get Noise waveform
+                            GetAntenaNoiseWF(
+                                BINSIZE, this_signalbin, &V_noise,
+                                station_number, channel_number,
+                                settings1, trigger, detector);
 
                             // NFOUR/2 size array with only this (m) raysol
                             Select_Wave_Convlv_Exchange(
@@ -3971,6 +4017,15 @@ void Report::Convolve_Signals(
                     else if (connect_signals[m - 1] == 0)
                     {
                         // and previous raysol is not connected
+                            
+                        // Save the signalbin for this event
+                        this_signalbin = signal_bin[m];
+
+                        // Get Noise waveform
+                        GetAntenaNoiseWF(
+                            2*BINSIZE, this_signalbin, &V_noise,
+                            station_number, channel_number,
+                            settings1, trigger, detector);
 
                         // NFOUR/2 size array with only this (m) raysol
                         Select_Wave_Convlv_Exchange(
@@ -4000,6 +4055,65 @@ void Report::Convolve_Signals(
 }
 
 
+// Choose waveforms from the trigger class to use for this event
+void Report::GetAntenaNoiseWF(
+    int BINSIZE, int signalbin, vector <double> *V_noise_only,
+    int StationIndex, int ID, 
+    Settings *settings1, Trigger *trigger, Detector *detector
+){
+
+    // Clear old noise waveforms
+    V_noise_only->clear();
+
+    // Loop over bins and get noise voltage value for each
+    int bin_value;
+    int noise_ID_index;
+    int noise_wf_index;
+    for (int bin=0; bin<BINSIZE; bin++) {
+
+        bin_value = signalbin - BINSIZE/2 + bin;
+        noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
+        noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
+                            
+        // Use same temperature to generate noise for all channels
+        if ( settings1->NOISE_CHANNEL_MODE==0) {
+            V_noise_only->push_back(
+                trigger->v_noise_timedomain[ noise_ID[noise_ID_index] ][ noise_wf_index ]
+            );
+        }
+        // Use channel-by-channel temperatures to generate noise
+        else if ( settings1->NOISE_CHANNEL_MODE==1) {
+            V_noise_only->push_back(
+                trigger->v_noise_timedomain_ch[ 
+                    GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
+                ][ noise_ID[noise_ID_index] ][ noise_wf_index ]
+            );
+        }
+        // Only use channel-by-channel temperatures to generate noise for the first 8 channels. 
+        // Use the same temperature for the remaining 8.
+        else if ( settings1->NOISE_CHANNEL_MODE==2) {
+            // If this channel is one of the first 8
+            if ( (GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1) < 8) {
+                V_noise_only->push_back(
+                    trigger->v_noise_timedomain_ch[ 
+                            GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
+                        ][ noise_ID[noise_ID_index] ][ noise_wf_index ]
+                );
+            }
+            // This channel is NOT one of the first 8
+            else {
+                V_noise_only->push_back(
+                    trigger->v_noise_timedomain_ch[
+                            8
+                        ][ noise_ID[noise_ID_index] ][ noise_wf_index ]
+                );
+            }
+        }
+
+    } // end loop over bins
+
+}
+
 
 // Convolve a single signal with noise
 void Report::Select_Wave_Convlv_Exchange(
@@ -4013,49 +4127,17 @@ void Report::Select_Wave_Convlv_Exchange(
     // Clear previous waveform data
     V_total_forconvlv.clear();
     V_signal_only->clear();
-    V_noise_only->clear();
     
     // Save the noise + signal voltage waveform
-    int bin_value;
-    int noise_ID_index;
-    int noise_wf_index;
-    double noise_voltage = 0.;
     double signal_voltage = 0.;
     for (int bin=0; bin<BINSIZE; bin++) {
-
-        bin_value = signalbin - BINSIZE/2 + bin;
-        noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
-        noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
-                           
-        // Get the voltage of noise at this bin
-        if ( settings1->NOISE_CHANNEL_MODE==0) {
-            noise_voltage = trigger->v_noise_timedomain[ noise_ID[noise_ID_index] ][ noise_wf_index ];
-        }
-        else if ( settings1->NOISE_CHANNEL_MODE==1) {
-            noise_voltage = trigger->v_noise_timedomain_ch[ 
-                    GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
-                ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
-        }
-        else if ( settings1->NOISE_CHANNEL_MODE==2) {
-            if ( (GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1) < 8) {
-                noise_voltage = trigger->v_noise_timedomain_ch[ 
-                        GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
-                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
-            }
-            else {
-                noise_voltage = trigger->v_noise_timedomain_ch[
-                        8
-                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
-            }
-        }
 
         // Get the voltage of signal at this bin
         signal_voltage = V[bin];
 
         // Save noise and signal only waveforms, then add signal to noise waveform
         V_signal_only->push_back( signal_voltage );
-        V_noise_only->push_back( noise_voltage );
-        V_total_forconvlv.push_back( signal_voltage + noise_voltage );
+        V_total_forconvlv.push_back( signal_voltage + V_noise_only->at(bin) );
 
     } // end loop over bins for saving the noise+signal waveforms to V_total_forconvlv
 
@@ -4102,42 +4184,11 @@ void Report::Select_Wave_Convlv_Exchange(
     // Clear previous waveform data
     V_total_forconvlv.clear();
     V_signal_only->clear();
-    V_noise_only->clear();
     
     // Save the noise + signal voltage waveform
-    int bin_value;
-    int noise_ID_index;
-    int noise_wf_index;
     int signal_dbin = signalbin2 - signalbin1;
-    double noise_voltage = 0.;
     double signal_voltage = 0.;
     for (int bin=0; bin<BINSIZE*2; bin++) {
-
-        bin_value = signalbin1 - BINSIZE/2 + bin;
-        noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
-        noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
-
-        // Get the voltage of noise at this bin
-        if ( settings1->NOISE_CHANNEL_MODE==0) {
-            noise_voltage = trigger->v_noise_timedomain[ noise_ID[noise_ID_index] ][ noise_wf_index ];
-        }
-        else if ( settings1->NOISE_CHANNEL_MODE==1) {
-            noise_voltage = trigger->v_noise_timedomain_ch[ 
-                    GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
-                ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
-        }
-        else if ( settings1->NOISE_CHANNEL_MODE==2) {
-            if ( (GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1) < 8) {
-                noise_voltage = trigger->v_noise_timedomain_ch[ 
-                        GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
-                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
-            }
-            else {
-                noise_voltage = trigger->v_noise_timedomain_ch[
-                        8
-                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
-            }
-        }
 
         // Get the voltage of signal at this bin
         if (bin < signal_dbin) {  // bins where only first signal is shown
@@ -4152,8 +4203,7 @@ void Report::Select_Wave_Convlv_Exchange(
 
         // Save signal-only and noise-only waveforms then add signal to noise waveform
         V_signal_only->push_back( signal_voltage );
-        V_noise_only->push_back( noise_voltage );
-        V_total_forconvlv.push_back( signal_voltage + noise_voltage );
+        V_total_forconvlv.push_back( signal_voltage + V_noise_only->at(bin) );
 
     } // end loop over bins for saving the noise+signal waveforms to V_total_forconvlv
 
@@ -4200,43 +4250,12 @@ void Report::Select_Wave_Convlv_Exchange(
     // Clear previous waveform data   
     V_total_forconvlv.clear();
     V_signal_only->clear();
-    V_noise_only->clear();
     
     // Save the noise + signal voltage waveform
-    int bin_value;
-    int noise_ID_index;
-    int noise_wf_index;
     int signal_dbin = signalbin2 - signalbin1;
     int signal_dbin0 = signalbin1 - signalbin0;
-    double noise_voltage = 0.;
     double signal_voltage = 0.;
     for (int bin=0; bin<BINSIZE*2; bin++) {
-
-        bin_value = signalbin1 - BINSIZE/2 + bin;
-        noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
-        noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
-
-        // Get the voltage of noise at this bin
-        if ( settings1->NOISE_CHANNEL_MODE==0) {
-            noise_voltage = trigger->v_noise_timedomain[ noise_ID[noise_ID_index] ][ noise_wf_index ];
-        }
-        else if ( settings1->NOISE_CHANNEL_MODE==1) {
-            noise_voltage = trigger->v_noise_timedomain_ch[ 
-                    GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
-                ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
-        }
-        else if ( settings1->NOISE_CHANNEL_MODE==2) {
-            if ( (GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1) < 8) {
-                noise_voltage = trigger->v_noise_timedomain_ch[ 
-                        GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 
-                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
-            }
-            else {
-                noise_voltage = trigger->v_noise_timedomain_ch[
-                        8
-                    ][ noise_ID[noise_ID_index] ][ noise_wf_index ];
-            }
-        }
 
         // Get the voltage of signal at this bin
         if (bin < signal_dbin) {  // bins where no second signal is shown
@@ -4261,8 +4280,7 @@ void Report::Select_Wave_Convlv_Exchange(
 
         // Save signal-only and noise-only waveforms then add signal to noise waveform
         V_signal_only->push_back( signal_voltage );
-        V_noise_only->push_back( noise_voltage );
-        V_total_forconvlv.push_back( signal_voltage + noise_voltage );
+        V_total_forconvlv.push_back( signal_voltage + V_noise_only->at(bin));
 
     } // end loop over bins for saving the noise+signal waveforms to V_total_forconvlv
 
