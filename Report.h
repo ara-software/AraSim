@@ -296,19 +296,19 @@ class Report {
             Settings *settings1, Trigger *trigger, Detector *detector, 
             int signalbin, 
             vector <double> &V, 
-            int *noise_ID, int ID, int StationIndex,
+            int BINSIZE, int *noise_ID, int ID, int StationIndex,
             vector <double> *V_signal_only, vector <double> *V_noise_only); // Convolve a single ray with noise
         void Select_Wave_Convlv_Exchange(
             Settings *settings1, Trigger *trigger, Detector *detector, 
             int signalbin_1, int signalbin_2, 
             vector <double> &V1, vector <double> &V2, 
-            int *noise_ID, int ID, int StationIndex,
+            int BINSIZE, int *noise_ID, int ID, int StationIndex,
             vector <double> *V_signal_only, vector <double> *V_noise_only); // Convolve 2 rays with noise
         void Select_Wave_Convlv_Exchange( 
             Settings *settings1, Trigger *trigger, Detector *detector, 
             int signalbin_0, int signalbin_1, int signalbin_2, 
             vector <double> &V0, vector <double> &V1, vector <double> &V2, 
-            int *noise_ID, int ID, int StationIndex, 
+            int BINSIZE, int *noise_ID, int ID, int StationIndex, 
             vector <double> *V_signal_only, vector <double> *V_noise_only); // Convolve 3 rays with noise
 
         void Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *detector, int ID, int StationIndex); // we need to apply a gain offset to the basic waveforms.

@@ -3862,6 +3862,7 @@ void Report::Convolve_Signals(
         }
 
         // grab noise waveform (NFOUR/2 bins or NFOUR) for diode convlv
+        int BINSIZE = settings1->NFOUR/2;
         vector <double> V_noise;
         vector <double> V_signal;
         for (int m = 0; m < antenna->ray_sol_cnt; m++)
@@ -3880,7 +3881,7 @@ void Report::Convolve_Signals(
                         settings1, trigger, detector, 
                         signal_bin[m], signal_bin[m + 1], 
                         antenna->V[m], antenna->V[m + 1], 
-                        noise_ID, channel_number, station_number, 
+                        BINSIZE, noise_ID, channel_number, station_number, 
                         &V_signal, &V_noise);
                 }
                 else if (connect_signals[m] == 0)
@@ -3890,7 +3891,7 @@ void Report::Convolve_Signals(
                         settings1, trigger, detector, 
                         signal_bin[m], 
                         antenna->V[m], 
-                        noise_ID, channel_number, station_number, 
+                        BINSIZE, noise_ID, channel_number, station_number, 
                         &V_signal, &V_noise);
                 }
             }
@@ -3915,7 +3916,7 @@ void Report::Convolve_Signals(
                                 settings1, trigger, detector, 
                                 signal_bin[m - 1], signal_bin[m], signal_bin[m + 1], 
                                 antenna->V[m - 1], antenna->V[m], antenna->V[m + 1], 
-                                noise_ID, channel_number, station_number,
+                                BINSIZE, noise_ID, channel_number, station_number,
                                 &V_signal, &V_noise);
                         }
                         else if (connect_signals[m - 1] == 0)
@@ -3927,7 +3928,7 @@ void Report::Convolve_Signals(
                                 settings1, trigger, detector, 
                                 signal_bin[m], signal_bin[m + 1], 
                                 antenna->V[m], antenna->V[m + 1], 
-                                noise_ID, channel_number, station_number, 
+                                BINSIZE, noise_ID, channel_number, station_number, 
                                 &V_signal, &V_noise);
                         }
                     }
@@ -3951,7 +3952,7 @@ void Report::Convolve_Signals(
                                 settings1, trigger, detector, 
                                 signal_bin[m], 
                                 antenna->V[m], 
-                                noise_ID, channel_number, station_number, 
+                                BINSIZE, noise_ID, channel_number, station_number, 
                                 &V_signal, &V_noise);
                         }
                     }
@@ -3976,7 +3977,7 @@ void Report::Convolve_Signals(
                             settings1, trigger, detector, 
                             signal_bin[m], 
                             antenna->V[m], 
-                            noise_ID, channel_number, station_number, 
+                            BINSIZE, noise_ID, channel_number, station_number, 
                             &V_signal, &V_noise);
                     }
                 }
@@ -4005,12 +4006,9 @@ void Report::Select_Wave_Convlv_Exchange(
     Settings *settings1, Trigger *trigger, Detector *detector, 
     int signalbin, 
     vector <double> &V, 
-    int *noise_ID, int ID, int StationIndex, 
+    int BINSIZE, int *noise_ID, int ID, int StationIndex, 
     vector <double> *V_signal_only, vector <double> *V_noise_only
 ) {
-
-    // Initialize bin-related variables
-    int BINSIZE = settings1->NFOUR/2;
     
     // Clear previous waveform data
     V_total_forconvlv.clear();
@@ -4091,11 +4089,9 @@ void Report::Select_Wave_Convlv_Exchange(
     Settings *settings1, Trigger *trigger, Detector *detector, 
     int signalbin1, int signalbin2, 
     vector <double> &V1, vector <double> &V2, 
-    int *noise_ID, int ID, int StationIndex, 
+    int BINSIZE, int *noise_ID, int ID, int StationIndex, 
     vector <double> *V_signal_only, vector <double> *V_noise_only
 ) {
-
-    int BINSIZE = settings1->NFOUR/2;
 
     // Initialize array containing convolution from signal (rays) only 
     double V_tmp[BINSIZE*2];
@@ -4191,11 +4187,9 @@ void Report::Select_Wave_Convlv_Exchange(
     Settings *settings1, Trigger *trigger, Detector *detector, 
     int signalbin0, int signalbin1, int signalbin2, 
     vector <double> &V0, vector <double> &V1, vector <double> &V2, 
-    int *noise_ID, int ID, int StationIndex,
+    int BINSIZE, int *noise_ID, int ID, int StationIndex,
     vector <double> *V_signal_only, vector <double> *V_noise_only
 ) {
-
-    int BINSIZE = settings1->NFOUR/2;
 
     // Initialize array containing convolution from signal (rays) only 
     double V_tmp[BINSIZE*2];
