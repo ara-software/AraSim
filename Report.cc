@@ -3883,12 +3883,6 @@ void Report::Convolve_Signals(
                     // Save the signalbin for this event
                     this_signalbin = signal_bin[m];
 
-                    // Get Noise waveform
-                    GetAntenaNoiseWF(
-                        2*BINSIZE, this_signalbin, &V_noise,
-                        station_number, channel_number,
-                        settings1, trigger, detector);
-
                     // Convovle m and m+1 ray in NFOUR size array
                     Select_Wave_Convlv_Exchange(
                         settings1, trigger, detector, 
@@ -3903,12 +3897,6 @@ void Report::Convolve_Signals(
                     
                     // Save the signalbin for this event
                     this_signalbin = signal_bin[m];
-
-                    // Get Noise waveform
-                    GetAntenaNoiseWF(
-                        BINSIZE, this_signalbin, &V_noise,
-                        station_number, channel_number,
-                        settings1, trigger, detector);
 
                     // do NFOUR/2 size array convlv with just this (m) ray
                     Select_Wave_Convlv_Exchange(
@@ -3940,12 +3928,6 @@ void Report::Convolve_Signals(
                             // Save the signalbin for this event
                             this_signalbin = signal_bin[m];
 
-                            // Get Noise waveform
-                            GetAntenaNoiseWF(
-                                2*BINSIZE, this_signalbin, &V_noise,
-                                station_number, channel_number,
-                                settings1, trigger, detector);
-
                             // Convolve all 3 rays in a NFOUR size array
                             Select_Wave_Convlv_Exchange(
                                 settings1, trigger, detector, 
@@ -3962,12 +3944,6 @@ void Report::Convolve_Signals(
                             
                             // Save the signalbin for this event
                             this_signalbin = signal_bin[m];
-
-                            // Get Noise waveform
-                            GetAntenaNoiseWF(
-                                2*BINSIZE, this_signalbin, &V_noise,
-                                station_number, channel_number,
-                                settings1, trigger, detector);
 
                             // Convovle m and m+1 ray in NFOUR size array
                             Select_Wave_Convlv_Exchange(
@@ -3997,12 +3973,6 @@ void Report::Convolve_Signals(
                             
                             // Save the signalbin for this event
                             this_signalbin = signal_bin[m];
-
-                            // Get Noise waveform
-                            GetAntenaNoiseWF(
-                                BINSIZE, this_signalbin, &V_noise,
-                                station_number, channel_number,
-                                settings1, trigger, detector);
 
                             // NFOUR/2 size array with only this (m) raysol
                             Select_Wave_Convlv_Exchange(
@@ -4034,12 +4004,6 @@ void Report::Convolve_Signals(
                         // Save the signalbin for this event
                         this_signalbin = signal_bin[m];
 
-                        // Get Noise waveform
-                        GetAntenaNoiseWF(
-                            BINSIZE, this_signalbin, &V_noise,
-                            station_number, channel_number,
-                            settings1, trigger, detector);
-
                         // NFOUR/2 size array with only this (m) raysol
                         Select_Wave_Convlv_Exchange(
                             settings1, trigger, detector, 
@@ -4053,6 +4017,33 @@ void Report::Convolve_Signals(
             }   // if not the first raysol (all other raysols)
 
         }   // end loop over raysols
+
+        // Get Noise waveforms then make noise+signal wf
+        V_total_forconvlv.clear();
+        if ( n_connected_rays > 1 ) {
+
+            GetAntenaNoiseWF(
+                2*BINSIZE, this_signalbin, &V_noise,
+                station_number, channel_number,
+                settings1, trigger, detector);
+                
+            for (int bin=0; bin<2*BINSIZE; bin++){
+                V_total_forconvlv.push_back( V_signal[bin] + V_noise[bin]);
+            }
+
+        }
+        else {
+
+            GetAntenaNoiseWF(
+                BINSIZE, this_signalbin, &V_noise,
+                station_number, channel_number,
+                settings1, trigger, detector);
+                
+            for (int bin=0; bin<BINSIZE; bin++){
+                V_total_forconvlv.push_back( V_signal[bin] + V_noise[bin]);
+            }
+
+        }
 
         // Pass the signals through the tunnel diode
         LoadTunnelDiodeResponse(
@@ -4145,7 +4136,6 @@ void Report::Select_Wave_Convlv_Exchange(
 ) {
     
     // Clear previous waveform data
-    V_total_forconvlv.clear();
     V_signal_only->clear();
     
     // Save the noise + signal voltage waveform
@@ -4155,15 +4145,12 @@ void Report::Select_Wave_Convlv_Exchange(
         // Get the voltage of signal at this bin
         signal_voltage = V[bin];
 
-        // Save noise and signal only waveforms, then add signal to noise waveform
+        // Save signal-only waveform
         V_signal_only->push_back( signal_voltage );
-        V_total_forconvlv.push_back( signal_voltage + V_noise_only->at(bin) );
 
     } // end loop over bins for saving the noise+signal waveforms to V_total_forconvlv
 
 }
-
-
 
 
 // Convolve 2 signals and noise
@@ -4174,15 +4161,8 @@ void Report::Select_Wave_Convlv_Exchange(
     int BINSIZE, int *noise_ID, int ID, int StationIndex, 
     vector <double> *V_signal_only, vector <double> *V_noise_only
 ) {
-
-    // Initialize array containing convolution from signal (rays) only 
-    double V_tmp[BINSIZE*2];
-    for(int bin_tmp=0; bin_tmp<BINSIZE*2; bin_tmp++) {
-        V_tmp[bin_tmp] = 0.;
-    }
     
     // Clear previous waveform data
-    V_total_forconvlv.clear();
     V_signal_only->clear();
     
     // Save the noise + signal voltage waveform
@@ -4201,15 +4181,12 @@ void Report::Select_Wave_Convlv_Exchange(
             signal_voltage = V2[bin - signal_dbin];
         }
 
-        // Save signal-only and noise-only waveforms then add signal to noise waveform
+        // Save signal-only waveform
         V_signal_only->push_back( signal_voltage );
-        V_total_forconvlv.push_back( signal_voltage + V_noise_only->at(bin) );
 
     } // end loop over bins for saving the noise+signal waveforms to V_total_forconvlv
 
 }
-
-
 
 
 // Convolve 3 signals and noise
@@ -4220,15 +4197,8 @@ void Report::Select_Wave_Convlv_Exchange(
     int BINSIZE, int *noise_ID, int ID, int StationIndex,
     vector <double> *V_signal_only, vector <double> *V_noise_only
 ) {
-
-    // Initialize array containing convolution from signal (rays) only 
-    double V_tmp[BINSIZE*2];
-    for(int bin_tmp=0; bin_tmp<BINSIZE*2; bin_tmp++) {
-        V_tmp[bin_tmp] = 0.;
-    }
     
-    // Clear previous waveform data   
-    V_total_forconvlv.clear();
+    // Clear previous waveform data  
     V_signal_only->clear();
     
     // Save the noise + signal voltage waveform
@@ -4258,9 +4228,8 @@ void Report::Select_Wave_Convlv_Exchange(
             signal_voltage = V2[bin - signal_dbin];
         }
 
-        // Save signal-only and noise-only waveforms then add signal to noise waveform
+        // Save waveform
         V_signal_only->push_back( signal_voltage );
-        V_total_forconvlv.push_back( signal_voltage + V_noise_only->at(bin));
 
     } // end loop over bins for saving the noise+signal waveforms to V_total_forconvlv
 
