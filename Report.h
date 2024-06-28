@@ -290,11 +290,16 @@ class Report {
 
         // Signal+noise convolution functions
         void Convolve_Signals(    
-            int debugmode, Antenna_r *antenna, int ch_ID, int station_number,
+            Antenna_r *antenna, int ch_ID, int station_number,
             Settings *settings1, Trigger *trigger, Detector *detector);
         void GetAntenaNoiseWF(
             int BINSIZE, int signalbin, vector <double> *V_noise_only,
             int StationIndex, int ID, 
+            Settings *settings1, Trigger *trigger, Detector *detector);
+        void GetAntennaSignalWF(
+            int *n_connected_rays, int *this_signalbin,
+            int BINSIZE, int channel_number, int station_number, 
+            Antenna_r *antenna, vector <double> *V_signal,
             Settings *settings1, Trigger *trigger, Detector *detector);
         void Select_Wave_Convlv_Exchange(
             Settings *settings1, Trigger *trigger, Detector *detector, 
