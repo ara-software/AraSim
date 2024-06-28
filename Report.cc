@@ -3861,7 +3861,7 @@ void Report::Convolve_Signals(
 
         }
 
-        // grab noise waveform (NFOUR/2 bins or NFOUR) for diode convlv
+        // grab signal waveform (NFOUR/2 bins or NFOUR) for diode convlv
         int BINSIZE = settings1->NFOUR/2;
         int this_signalbin = 0;
         int n_connected_rays = 0;
@@ -4018,48 +4018,56 @@ void Report::Convolve_Signals(
 
         }   // end loop over raysols
 
-        // Get Noise waveforms then make noise+signal wf
-        V_total_forconvlv.clear();
+        // Extend waveform length for events with more than 1 connected ray
+        int wf_length = 0;
+        int min_wf_bin = this_signalbin-BINSIZE/2+(trigger->maxt_diode_bin);
+        int max_wf_bin = 0;
+        vector <double> diode_response;
         if ( n_connected_rays > 1 ) {
-
-            GetAntenaNoiseWF(
-                2*BINSIZE, this_signalbin, &V_noise,
-                station_number, channel_number,
-                settings1, trigger, detector);
-                
-            for (int bin=0; bin<2*BINSIZE; bin++){
-                V_total_forconvlv.push_back( V_signal[bin] + V_noise[bin]);
-            }
-
+            wf_length = BINSIZE * 2;
+            max_wf_bin = this_signalbin + BINSIZE/2 + BINSIZE;
+            diode_response = detector->fdiode_real_double;
         }
         else {
-
-            GetAntenaNoiseWF(
-                BINSIZE, this_signalbin, &V_noise,
-                station_number, channel_number,
-                settings1, trigger, detector);
-                
-            for (int bin=0; bin<BINSIZE; bin++){
-                V_total_forconvlv.push_back( V_signal[bin] + V_noise[bin]);
-            }
-
+            wf_length = BINSIZE;
+            max_wf_bin = this_signalbin + BINSIZE/2;
+            diode_response = detector->fdiode_real;
         }
 
-        // Pass the signals through the tunnel diode
-        LoadTunnelDiodeResponse(
-            n_connected_rays, channel_number, this_signalbin, BINSIZE,
-            &V_signal,
-            settings1->V_SATURATION, trigger, detector
-        );
+        // Get noise-only waveforms
+        GetAntenaNoiseWF(
+            wf_length, this_signalbin, &V_noise, 
+            station_number, channel_number,
+            settings1, trigger, detector);
 
-        // Save the convolved signal-only waveform and the noise-only waveform
-        for (int bin=0; bin<V_signal.size(); bin++){
-            antenna->V_convolved.push_back(V_signal[bin]);
-        } 
-        for (int bin=0; bin<V_noise.size(); bin++){
+        // Save noise-only and signal-only waveforms
+        // Create noise+signal waveforms
+        V_total_forconvlv.clear();
+        for (int bin=0; bin<wf_length; bin++){
             antenna->V_noise.push_back(V_noise[bin]);
-        } 
+            antenna->V_convolved.push_back(V_signal[bin]);
+            V_total_forconvlv.push_back( V_signal[bin] + V_noise[bin]);
+        }
 
+        // Push noise+signal waveform through the tunnel diode
+        trigger->myconvlv( V_total_forconvlv, wf_length, diode_response, V_total_forconvlv);
+
+        // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
+        for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
+
+            // Export raw values to trigger->Full_window and trigger->Full_window_V
+            trigger->Full_window[channel_number][bin] = V_total_forconvlv[bin - this_signalbin + BINSIZE/2];
+            trigger->Full_window_V[channel_number][bin] += V_signal[bin - this_signalbin + BINSIZE/2];
+
+            // Add electronics saturation effect
+            if ( trigger->Full_window_V[channel_number][bin] > settings1->V_SATURATION ) {
+                trigger->Full_window_V[channel_number][bin] = settings1->V_SATURATION;
+            }
+            else if ( trigger->Full_window_V[channel_number][bin] < -1.*settings1->V_SATURATION ) {
+                trigger->Full_window_V[channel_number][bin] = -1.*settings1->V_SATURATION;
+            }
+
+        } // end loop over bins for updating trigger->Full_window and trigger->Full_window_V
 
     } // end if debugmode
 
@@ -4241,14 +4249,6 @@ void Report::LoadTunnelDiodeResponse(
     vector <double> *V_signal,
     double V_saturation, Trigger *trigger, Detector *detector
 ){
-
-    // do myconvlv which puts the signal through the tunnel diode and replaces the diode response array
-    if ( n_connected_rays > 1 ){
-        trigger->myconvlv( V_total_forconvlv, 2*BINSIZE, detector->fdiode_real_double, V_total_forconvlv);
-    }
-    else{
-        trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv);
-    }
 
     // Get the minimum and maximum index of waveform values to save
     int min_wf_bin = signal_bin-BINSIZE/2+(trigger->maxt_diode_bin);
