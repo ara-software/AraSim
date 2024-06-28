@@ -288,7 +288,7 @@ class Report {
     
     void ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger);
 
-        // Signal+ noise  convolution functions
+        // Signal+noise convolution functions
         void Convolve_Signals(    
             int debugmode, Antenna_r *antenna, int ch_ID, int station_number,
             Settings *settings1, Trigger *trigger, Detector *detector);
@@ -314,6 +314,13 @@ class Report {
             vector <double> &V0, vector <double> &V1, vector <double> &V2, 
             int BINSIZE, int *noise_ID, int ID, int StationIndex, 
             vector <double> *V_signal_only, vector <double> *V_noise_only); // Convolve 3 rays with noise
+        
+        // Tunnel diode convolution
+        void LoadTunnelDiodeResponse(
+            int n_connected_rays, int channel_number, int signal_bin, int BINSIZE,
+            vector <double> *V_signal,
+            double V_saturation, Trigger *trigger, Detector *detector
+        );
 
         void Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *detector, int ID, int StationIndex); // we need to apply a gain offset to the basic waveforms.
 

@@ -3864,6 +3864,7 @@ void Report::Convolve_Signals(
         // grab noise waveform (NFOUR/2 bins or NFOUR) for diode convlv
         int BINSIZE = settings1->NFOUR/2;
         int this_signalbin = 0;
+        int n_connected_rays = 0;
         vector <double> V_noise;
         vector <double> V_signal;
         for (int m = 0; m < antenna->ray_sol_cnt; m++)
@@ -3877,6 +3878,8 @@ void Report::Convolve_Signals(
 
                 if (connect_signals[m] == 1)
                 {
+                    n_connected_rays = 2;
+
                     // Save the signalbin for this event
                     this_signalbin = signal_bin[m];
 
@@ -3896,6 +3899,8 @@ void Report::Convolve_Signals(
                 }
                 else if (connect_signals[m] == 0)
                 {
+                    n_connected_rays = 1;
+                    
                     // Save the signalbin for this event
                     this_signalbin = signal_bin[m];
 
@@ -3930,6 +3935,8 @@ void Report::Convolve_Signals(
                         {
                             // and previous raysol also connected
 
+                            n_connected_rays = 3;
+
                             // Save the signalbin for this event
                             this_signalbin = signal_bin[m];
 
@@ -3950,6 +3957,8 @@ void Report::Convolve_Signals(
                         else if (connect_signals[m - 1] == 0)
                         {
                             // and previous raysol not connected
+
+                            n_connected_rays = 2;
                             
                             // Save the signalbin for this event
                             this_signalbin = signal_bin[m];
@@ -3983,6 +3992,8 @@ void Report::Convolve_Signals(
                         else if (connect_signals[m - 1] == 0)
                         {
                             // and previous raysol not connected
+
+                            n_connected_rays = 1;
                             
                             // Save the signalbin for this event
                             this_signalbin = signal_bin[m];
@@ -4017,6 +4028,8 @@ void Report::Convolve_Signals(
                     else if (connect_signals[m - 1] == 0)
                     {
                         // and previous raysol is not connected
+
+                        n_connected_rays = 1;
                             
                         // Save the signalbin for this event
                         this_signalbin = signal_bin[m];
@@ -4040,6 +4053,13 @@ void Report::Convolve_Signals(
             }   // if not the first raysol (all other raysols)
 
         }   // end loop over raysols
+
+        // Pass the signals through the tunnel diode
+        LoadTunnelDiodeResponse(
+            n_connected_rays, channel_number, this_signalbin, BINSIZE,
+            &V_signal,
+            settings1->V_SATURATION, trigger, detector
+        );
 
         // Save the convolved signal-only waveform and the noise-only waveform
         for (int bin=0; bin<V_signal.size(); bin++){
@@ -4141,26 +4161,6 @@ void Report::Select_Wave_Convlv_Exchange(
 
     } // end loop over bins for saving the noise+signal waveforms to V_total_forconvlv
 
-    // do myconvlv which puts the signal through the tunnel diode and replaces the diode response array
-    trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv);
-
-    // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
-    for (int bin=signalbin-BINSIZE/2+(trigger->maxt_diode_bin); bin<signalbin+BINSIZE/2; bin++) {
-
-        // Export raw values to trigger->Full_window and trigger->Full_window_V
-        trigger->Full_window[ID][bin] = V_total_forconvlv[bin - signalbin + BINSIZE/2];
-        trigger->Full_window_V[ID][bin] += V[bin - signalbin + BINSIZE/2];
-
-        // Add electronics saturation effect
-        if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) {
-            trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;
-        }
-        else if ( trigger->Full_window_V[ID][bin] < -1.*settings1->V_SATURATION ) {
-            trigger->Full_window_V[ID][bin] = -1.*settings1->V_SATURATION;
-        }
-
-    } // end loop over bins for updating trigger->Full_window and trigger->Full_window_V
-
 }
 
 
@@ -4206,26 +4206,6 @@ void Report::Select_Wave_Convlv_Exchange(
         V_total_forconvlv.push_back( signal_voltage + V_noise_only->at(bin) );
 
     } // end loop over bins for saving the noise+signal waveforms to V_total_forconvlv
-
-    // do myconvlv which puts the signal through the tunnel diode and replaces the diode response array
-    trigger->myconvlv( V_total_forconvlv, BINSIZE*2, detector->fdiode_real_double, V_total_forconvlv);
-
-    // Replace the part we get from noise + signal
-    for (int bin=signalbin1-BINSIZE/2+(trigger->maxt_diode_bin); bin<signalbin1+BINSIZE/2+BINSIZE; bin++) {
-
-        // Export raw values to trigger->Full_window and trigger->Full_window_V
-        trigger->Full_window[ID][bin] = V_total_forconvlv[bin - signalbin1 + BINSIZE/2];
-        trigger->Full_window_V[ID][bin] += V_tmp[bin - signalbin1 + BINSIZE/2];
-
-        // Add electronics saturation effect
-        if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) {
-            trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;
-        }
-        else if ( trigger->Full_window_V[ID][bin] < -1.*settings1->V_SATURATION ) {
-            trigger->Full_window_V[ID][bin] = -1.*settings1->V_SATURATION;
-        }
-    
-    } // end loop over bins for updating trigger->Full_window and trigger->Full_window_V
 
 }
 
@@ -4284,30 +4264,47 @@ void Report::Select_Wave_Convlv_Exchange(
 
     } // end loop over bins for saving the noise+signal waveforms to V_total_forconvlv
 
-    // do myconvlv which puts the signal through the tunnel diode and replaces the diode response array
-    trigger->myconvlv( V_total_forconvlv, BINSIZE*2, detector->fdiode_real_double, V_total_forconvlv);
+}
 
-    // Replace the part we get from noise + signal
-    for (int bin=signalbin1-BINSIZE/2+(trigger->maxt_diode_bin); bin<signalbin1+BINSIZE/2+BINSIZE; bin++) {
+
+void Report::LoadTunnelDiodeResponse(
+    int n_connected_rays, int channel_number, int signal_bin, int BINSIZE,
+    vector <double> *V_signal,
+    double V_saturation, Trigger *trigger, Detector *detector
+){
+
+    // do myconvlv which puts the signal through the tunnel diode and replaces the diode response array
+    if ( n_connected_rays > 1 ){
+        trigger->myconvlv( V_total_forconvlv, 2*BINSIZE, detector->fdiode_real_double, V_total_forconvlv);
+    }
+    else{
+        trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv);
+    }
+
+    // Get the minimum and maximum index of waveform values to save
+    int min_wf_bin = signal_bin-BINSIZE/2+(trigger->maxt_diode_bin);
+    int max_wf_bin = 0;
+    if ( n_connected_rays > 1) max_wf_bin = signal_bin + BINSIZE/2 + BINSIZE;
+    else max_wf_bin = signal_bin + BINSIZE/2;
+
+    // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
+    for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
 
         // Export raw values to trigger->Full_window and trigger->Full_window_V
-        trigger->Full_window[ID][bin] = V_total_forconvlv[bin - signalbin1 + BINSIZE/2];
-        trigger->Full_window_V[ID][bin] += V_tmp[bin - signalbin1 + BINSIZE/2];
+        trigger->Full_window[channel_number][bin] = V_total_forconvlv[bin - signal_bin + BINSIZE/2];
+        trigger->Full_window_V[channel_number][bin] += V_signal->at(bin - signal_bin + BINSIZE/2);
 
         // Add electronics saturation effect
-        if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) {
-            trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;
+        if ( trigger->Full_window_V[channel_number][bin] > V_saturation ) {
+            trigger->Full_window_V[channel_number][bin] = V_saturation;
         }
-        else if ( trigger->Full_window_V[ID][bin] < -1.*settings1->V_SATURATION ) {
-            trigger->Full_window_V[ID][bin] = -1.*settings1->V_SATURATION;
+        else if ( trigger->Full_window_V[channel_number][bin] < -1.*V_saturation ) {
+            trigger->Full_window_V[channel_number][bin] = -1.*V_saturation;
         }
 
     } // end loop over bins for updating trigger->Full_window and trigger->Full_window_V
 
 }
-
-
-
 
 
 void Report::Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *detector, int ID, int StationIndex ) {
