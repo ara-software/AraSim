@@ -290,42 +290,28 @@ class Report {
 
         // Signal+noise convolution functions
         void Convolve_Signals(    
-            Antenna_r *antenna, int ch_ID, int station_number,
-            Settings *settings1, Trigger *trigger, Detector *detector);
-        void GetAntenaNoiseWF(
-            int BINSIZE, int signalbin, vector <double> *V_noise_only,
-            int StationIndex, int ID, 
+            Antenna_r *antenna, int channel_number, int station_number,
             Settings *settings1, Trigger *trigger, Detector *detector);
         void GetAntennaSignalWF(
-            int *n_connected_rays, int *this_signalbin,
-            int BINSIZE, int channel_number, int station_number, 
+            int *n_connected_rays, int *this_signalbin, int BINSIZE, 
             Antenna_r *antenna, vector <double> *V_signal,
             Settings *settings1, Trigger *trigger, Detector *detector);
-        void Select_Wave_Convlv_Exchange(
-            Settings *settings1, Trigger *trigger, Detector *detector, 
-            int signalbin, 
+        void Select_Wave_Convlv_Exchange( // Convolve the signal from 1 ray
             vector <double> &V, 
-            int BINSIZE, int *noise_ID, int ID, int StationIndex,
-            vector <double> *V_signal_only); // Convolve a single ray with noise
-        void Select_Wave_Convlv_Exchange(
-            Settings *settings1, Trigger *trigger, Detector *detector, 
+            int BINSIZE, vector <double> *V_signal); 
+        void Select_Wave_Convlv_Exchange( // Convolve the signal from 2 rays
             int signalbin_1, int signalbin_2, 
             vector <double> &V1, vector <double> &V2, 
-            int BINSIZE, int *noise_ID, int ID, int StationIndex,
-            vector <double> *V_signal_only); // Convolve 2 rays with noise
-        void Select_Wave_Convlv_Exchange( 
-            Settings *settings1, Trigger *trigger, Detector *detector, 
+            int BINSIZE, vector <double> *V_signal); 
+        void Select_Wave_Convlv_Exchange( // Convolve the signal from 3 rays
             int signalbin_0, int signalbin_1, int signalbin_2, 
             vector <double> &V0, vector <double> &V1, vector <double> &V2, 
-            int BINSIZE, int *noise_ID, int ID, int StationIndex, 
-            vector <double> *V_signal_only); // Convolve 3 rays with noise
-        
-        // Tunnel diode convolution
-        void LoadTunnelDiodeResponse(
-            int n_connected_rays, int channel_number, int signal_bin, int BINSIZE,
-            vector <double> *V_signal,
-            double V_saturation, Trigger *trigger, Detector *detector
-        );
+            int BINSIZE, vector <double> *V_signal);
+        void GetAntennaNoiseWF(
+            int signalbin, 
+            int BINSIZE, int ID, int StationIndex, vector <double> *V_noise_only,
+            Settings *settings1, Trigger *trigger, Detector *detector);
+
 
         void Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *detector, int ID, int StationIndex); // we need to apply a gain offset to the basic waveforms.
 
@@ -396,7 +382,7 @@ class Report {
         void GetNoiseWaveforms(Settings *settings1, Detector *detector, double vhz_noise, double *vnoise);
         void GetNoiseWaveforms_ch(Settings *settings1, Detector *detector, double vhz_noise, double *vnoise, int ch);
         void GetNoisePhase(Settings *settings1);
-        void Add_Antenna_Noise(    
+        void Prepare_Antenna_Noise(    
             int debugmode, int ch_ID, 
             int station_number, int string_number, int antenna_number,
             Settings *settings1, Trigger *trigger, Detector *detector
