@@ -3874,12 +3874,18 @@ void Report::Convolve_Signals(
     int min_wf_bin = this_signalbin-BINSIZE/2+(trigger->maxt_diode_bin);
     int max_wf_bin = 0;
     vector <double> diode_response;
-    if ( n_connected_rays > 1 ) {
+    if ( n_connected_rays > 1 ) { // multiple ray solutions in one window
         wf_length = BINSIZE * 2;
         max_wf_bin = this_signalbin + BINSIZE/2 + BINSIZE;
         diode_response = detector->fdiode_real_double;
     }
-    else {
+    else if ( antenna->ray_sol_cnt == 0 ){ // No rays connected to this antenna
+        wf_length = BINSIZE;
+        min_wf_bin = 0;
+        max_wf_bin = BINSIZE;
+        diode_response = detector->fdiode_real;
+    }
+    else { // Only one ray signal in the window
         wf_length = BINSIZE;
         max_wf_bin = this_signalbin + BINSIZE/2;
         diode_response = detector->fdiode_real;
@@ -3926,6 +3932,10 @@ void Report::GetAntennaSignalWF(
     int BINSIZE, Antenna_r *antenna, vector <double> *V_signal,
     Settings *settings1, Trigger *trigger, Detector *detector
 ){
+
+    if ( antenna->ray_sol_cnt == 0 ){
+        for (int bin=0; bin<BINSIZE; bin++) V_signal->push_back(0.);
+    }
     
     for (int m = 0; m < antenna->ray_sol_cnt; m++)
     {
