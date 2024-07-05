@@ -3865,8 +3865,9 @@ void Report::Convolve_Signals(
     int BINSIZE = settings1->NFOUR/2;
     int this_signalbin = 0;
     int n_connected_rays = 0;
+    vector <double> V_signal;
     GetAntennaSignalWF(
-        &n_connected_rays, &this_signalbin, BINSIZE, antenna, &antenna->V_convolved,
+        &n_connected_rays, &this_signalbin, BINSIZE, antenna, &V_signal,
         settings1, trigger, detector);
 
     // Extend the length of this waveform we're constructing if more than 1 ray connected
@@ -3892,15 +3893,18 @@ void Report::Convolve_Signals(
     }
 
     // Get noise-only waveform
+    vector <double> V_noise;
     GetAntennaNoiseWF(
-        this_signalbin, wf_length, channel_index, station_number, &antenna->V_noise, 
+        this_signalbin, wf_length, channel_index, station_number, &V_noise, 
         settings1, trigger, detector);
 
     // Save noise-only and signal-only waveforms
     // Create noise+signal waveforms
     V_total_forconvlv.clear();
     for (int bin=0; bin<wf_length; bin++){
-        V_total_forconvlv.push_back( antenna->V_convolved[bin] + antenna->V_noise[bin]);
+        antenna->V_noise.push_back(V_noise[bin]);
+        antenna->V_convolved.push_back(V_signal[bin]);
+        V_total_forconvlv.push_back( V_signal[bin] + V_noise[bin]);
     }
 
     // Push noise+signal waveform through the tunnel diode
@@ -3911,7 +3915,7 @@ void Report::Convolve_Signals(
 
         // Export raw values to trigger->Full_window and trigger->Full_window_V
         trigger->Full_window[channel_index][bin] = V_total_forconvlv[bin - this_signalbin + BINSIZE/2];
-        trigger->Full_window_V[channel_index][bin] += antenna->V_convolved[bin - this_signalbin + BINSIZE/2];
+        trigger->Full_window_V[channel_index][bin] += V_signal[bin - this_signalbin + BINSIZE/2];
 
         // Add electronics saturation effect
         if ( trigger->Full_window_V[channel_index][bin] > settings1->V_SATURATION ) {
