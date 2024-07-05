@@ -293,7 +293,7 @@ class Report {
             Antenna_r *antenna, int channel_number, int station_number,
             Settings *settings1, Trigger *trigger, Detector *detector);
         void GetAntennaSignalWF(
-            int *n_connected_rays, int *this_signalbin, int BINSIZE, 
+            int raysol, int *n_connected_rays, int *this_signalbin, int BINSIZE, 
             Antenna_r *antenna, vector <double> *V_signal,
             Settings *settings1, Trigger *trigger, Detector *detector);
         void Select_Wave_Convlv_Exchange( // Convolve the signal from 1 ray
@@ -307,6 +307,11 @@ class Report {
             int signalbin_0, int signalbin_1, int signalbin_2, 
             vector <double> &V0, vector <double> &V1, vector <double> &V2, 
             int BINSIZE, vector <double> *V_signal);
+        void GetNoiseThenConvolve(
+            Antenna_r *antenna, 
+            int BINSIZE, int this_signalbin, int n_connected_rays, 
+            int channel_index, int station_number, 
+            Settings *settings1, Trigger *trigger, Detector *detector);
         void GetAntennaNoiseWF(
             int signalbin, 
             int BINSIZE, int ID, int StationIndex, vector <double> *V_noise_only,

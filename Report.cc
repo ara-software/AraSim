@@ -2035,6 +2035,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                     // (we can fix this by adding values but not accomplished yet)
 
                     // Combine signals from all rays, add noise, and convolve them through the tunnel diode
+                    // cout<<"    "<<i<<" "<<j<<" "<<k<<" :"<<endl;
                     if (debugmode == 0) Convolve_Signals(
                         &stations[i].strings[j].antennas[k], ch_ID, i,
                         settings1, trigger, detector
@@ -3859,211 +3860,175 @@ void Report::Convolve_Signals(
 
     }
 
-    // Grab signal-only waveform 
-    // V_signal will have a length of BINSIZE if only 1 ray exists in a waveform
-    //   array with length NFOUR/2 and BINSIZE*2 if 2 or more fit into one waveform.
+    // Set default signal wf length
     int BINSIZE = settings1->NFOUR/2;
-    int this_signalbin = 0;
-    int n_connected_rays = 0;
-    vector <double> V_signal;
-    GetAntennaSignalWF(
-        &n_connected_rays, &this_signalbin, BINSIZE, antenna, &V_signal,
-        settings1, trigger, detector);
 
-    // Extend the length of this waveform we're constructing if more than 1 ray connected
-    int wf_length = 0;
-    int min_wf_bin = this_signalbin-BINSIZE/2+(trigger->maxt_diode_bin);
-    int max_wf_bin = 0;
-    vector <double> diode_response;
-    if ( n_connected_rays > 1 ) { // multiple ray solutions in one window
-        wf_length = BINSIZE * 2;
-        max_wf_bin = this_signalbin + BINSIZE/2 + BINSIZE;
-        diode_response = detector->fdiode_real_double;
+    // If there are no ray solutions to this antenna, fill all the arrays with 0s
+    if ( antenna->ray_sol_cnt == 0 ){
+        
+        // Save signal wf as array of 0s
+        for (int bin=0; bin<BINSIZE; bin++) antenna->V_convolved.push_back(0.);
+
+        // Add noise and send through tunnel diode
+        GetNoiseThenConvolve(
+            antenna, 
+            BINSIZE, 0, 0, // BINSIZE, this_signalbin, n_connected_rays
+            channel_index, station_number, 
+            settings1, trigger, detector);
+            
     }
-    else if ( antenna->ray_sol_cnt == 0 ){ // No rays connected to this antenna
-        wf_length = BINSIZE;
-        min_wf_bin = 0;
-        max_wf_bin = BINSIZE;
-        diode_response = detector->fdiode_real;
-    }
-    else { // Only one ray signal in the window
-        wf_length = BINSIZE;
-        max_wf_bin = this_signalbin + BINSIZE/2;
-        diode_response = detector->fdiode_real;
-    }
+    
+    // Loop over ray solutions and get signals from each
+    // Loop does not run if there are no ray solutions
+    for (int m = 0; m < antenna->ray_sol_cnt; m++)
+    {
 
-    // Get noise-only waveform
-    vector <double> V_noise;
-    GetAntennaNoiseWF(
-        this_signalbin, wf_length, channel_index, station_number, &V_noise, 
-        settings1, trigger, detector);
+        // Grab signal-only waveform 
+        // V_signal will have a length of BINSIZE if only 1 ray exists in a waveform
+        //   array with length NFOUR/2 and BINSIZE*2 if 2 or more fit into one waveform.
+        int this_signalbin = 0;
+        int n_connected_rays = 0;
+        GetAntennaSignalWF(
+            m, &n_connected_rays, &this_signalbin, BINSIZE, antenna, &antenna->V_convolved,
+            settings1, trigger, detector);
 
-    // Save noise-only and signal-only waveforms
-    // Create noise+signal waveforms
-    V_total_forconvlv.clear();
-    for (int bin=0; bin<wf_length; bin++){
-        antenna->V_noise.push_back(V_noise[bin]);
-        antenna->V_convolved.push_back(V_signal[bin]);
-        V_total_forconvlv.push_back( V_signal[bin] + V_noise[bin]);
-    }
+        if (n_connected_rays>0) GetNoiseThenConvolve(
+            antenna, 
+            BINSIZE, this_signalbin, n_connected_rays, 
+            channel_index, station_number, 
+            settings1, trigger, detector);
 
-    // Push noise+signal waveform through the tunnel diode
-    trigger->myconvlv( V_total_forconvlv, wf_length, diode_response, V_total_forconvlv);
-
-    // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
-    for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
-
-        // Export raw values to trigger->Full_window and trigger->Full_window_V
-        trigger->Full_window[channel_index][bin] = V_total_forconvlv[bin - this_signalbin + BINSIZE/2];
-        trigger->Full_window_V[channel_index][bin] += V_signal[bin - this_signalbin + BINSIZE/2];
-
-        // Add electronics saturation effect
-        if ( trigger->Full_window_V[channel_index][bin] > settings1->V_SATURATION ) {
-            trigger->Full_window_V[channel_index][bin] = settings1->V_SATURATION;
-        }
-        else if ( trigger->Full_window_V[channel_index][bin] < -1.*settings1->V_SATURATION ) {
-            trigger->Full_window_V[channel_index][bin] = -1.*settings1->V_SATURATION;
-        }
-
-    } 
+    }   // end loop over ray solutions
 
 }
 
 
 // Combine the signal from connected rays into one signal waveform
 void Report::GetAntennaSignalWF(
-    int *n_connected_rays, int *this_signalbin,
+    int raysol, int *n_connected_rays, int *this_signalbin,
     int BINSIZE, Antenna_r *antenna, vector <double> *V_signal,
     Settings *settings1, Trigger *trigger, Detector *detector
 ){
 
-    if ( antenna->ray_sol_cnt == 0 ){
-        for (int bin=0; bin<BINSIZE; bin++) V_signal->push_back(0.);
-    }
-    
-    for (int m = 0; m < antenna->ray_sol_cnt; m++)
+    // loop over raysol numbers
+    // when ray_sol_cnt == 0, this loop inside codes will not run
+
+    if (raysol == 0)
     {
-        // loop over raysol numbers
-        // when ray_sol_cnt == 0, this loop inside codes will not run
+        // if it's first sol
 
-        if (m == 0)
+        if (connect_signals[raysol] == 1)
         {
-            // if it's first sol
+            *n_connected_rays = 2;
+            *this_signalbin = signal_bin[raysol];
 
-            if (connect_signals[m] == 1)
-            {
-                *n_connected_rays = 2;
-                *this_signalbin = signal_bin[m];
-
-                // Convovle m and m+1 ray in double sized (NFOUR) array
-                Select_Wave_Convlv_Exchange( 
-                    signal_bin[m], signal_bin[m + 1], 
-                    antenna->V[m], antenna->V[m + 1], 
-                    BINSIZE, V_signal);
-            }
-            else if (connect_signals[m] == 0)
-            {
-                *n_connected_rays = 1;
-                *this_signalbin = signal_bin[m];
-
-                // Make a normally sized (NFOUR/2) array with just this ray 
-                Select_Wave_Convlv_Exchange(
-                    antenna->V[m], 
-                    BINSIZE, V_signal);
-            }
+            // Convovle m and m+1 ray in double sized (NFOUR) array
+            Select_Wave_Convlv_Exchange( 
+                signal_bin[raysol], signal_bin[raysol + 1], 
+                antenna->V[raysol], antenna->V[raysol + 1], 
+                BINSIZE, V_signal);
         }
-        else
+        else if (connect_signals[raysol] == 0)
         {
-            // if it's not the first sol
+            *n_connected_rays = 1;
+            *this_signalbin = signal_bin[raysol];
 
-            if (m + 1 < antenna->ray_sol_cnt)
+            // Make a normally sized (NFOUR/2) array with just this ray 
+            Select_Wave_Convlv_Exchange(
+                antenna->V[raysol], 
+                BINSIZE, V_signal);
+        }
+    }
+    else
+    {
+        // if it's not the first sol
+
+        if (raysol + 1 < antenna->ray_sol_cnt)
+        {
+            // if there is next raysol
+
+            if (connect_signals[raysol] == 1)
             {
-                // if there is next raysol
+                // next raysol is connected
 
-                if (connect_signals[m] == 1)
+                if (connect_signals[raysol - 1] == 1)
                 {
-                    // next raysol is connected
+                    // and previous raysol also connected
 
-                    if (connect_signals[m - 1] == 1)
-                    {
-                        // and previous raysol also connected
+                    *n_connected_rays = 3;
+                    *this_signalbin = signal_bin[raysol];
 
-                        *n_connected_rays = 3;
-                        *this_signalbin = signal_bin[m];
-
-                        // Convolve all 3 rays in a double sized (NFOUR) array
-                        Select_Wave_Convlv_Exchange(
-                            signal_bin[m - 1], signal_bin[m], signal_bin[m + 1], 
-                            antenna->V[m - 1], antenna->V[m], antenna->V[m + 1], 
-                            BINSIZE, V_signal);
-                    }
-                    else if (connect_signals[m - 1] == 0)
-                    {
-                        // and previous raysol not connected
-
-                        *n_connected_rays = 2;
-                        *this_signalbin = signal_bin[m];
-
-                        // Convovle m and m+1 ray in a double sized (NFOUR) array
-                        Select_Wave_Convlv_Exchange(
-                            signal_bin[m], signal_bin[m + 1], 
-                            antenna->V[m], antenna->V[m + 1], 
-                            BINSIZE, V_signal);
-                    }
+                    // Convolve all 3 rays in a double sized (NFOUR) array
+                    Select_Wave_Convlv_Exchange(
+                        signal_bin[raysol - 1], signal_bin[raysol], signal_bin[raysol + 1], 
+                        antenna->V[raysol - 1], antenna->V[raysol], antenna->V[raysol + 1], 
+                        BINSIZE, V_signal);
                 }
-                else if (connect_signals[m] == 0)
+                else if (connect_signals[raysol - 1] == 0)
                 {
-                    // next raysol is not connected
+                    // and previous raysol not connected
 
-                    if (connect_signals[m - 1] == 1)
-                    {
-                        // and previous raysol is connected
+                    *n_connected_rays = 2;
+                    *this_signalbin = signal_bin[raysol];
 
-                        // skip the process as this should have done before
-
-                    }
-                    else if (connect_signals[m - 1] == 0)
-                    {
-                        // and previous raysol not connected
-
-                        *n_connected_rays = 1;
-                        *this_signalbin = signal_bin[m];
-
-                        // Make a normally sized (NFOUR/2) array with just this ray 
-                        Select_Wave_Convlv_Exchange(
-                            antenna->V[m], 
-                            BINSIZE, V_signal);
-                    }
+                    // Convovle m and m+1 ray in a double sized (NFOUR) array
+                    Select_Wave_Convlv_Exchange(
+                        signal_bin[raysol], signal_bin[raysol + 1], 
+                        antenna->V[raysol], antenna->V[raysol + 1], 
+                        BINSIZE, V_signal);
                 }
             }
-            else
+            else if (connect_signals[raysol] == 0)
             {
-                // there is no next raysol (this "m" is the last raysol)
+                // next raysol is not connected
 
-                if (connect_signals[m - 1] == 1)
+                if (connect_signals[raysol - 1] == 1)
                 {
                     // and previous raysol is connected
 
                     // skip the process as this should have done before
 
                 }
-                else if (connect_signals[m - 1] == 0)
+                else if (connect_signals[raysol - 1] == 0)
                 {
-                    // and previous raysol is not connected
+                    // and previous raysol not connected
 
                     *n_connected_rays = 1;
-                    *this_signalbin = signal_bin[m];
+                    *this_signalbin = signal_bin[raysol];
 
                     // Make a normally sized (NFOUR/2) array with just this ray 
                     Select_Wave_Convlv_Exchange(
-                        antenna->V[m], 
+                        antenna->V[raysol], 
                         BINSIZE, V_signal);
                 }
             }
+        }
+        else
+        {
+            // there is no next raysol (this "m" is the last raysol)
 
-        }   // if not the first raysol (all other raysols)
+            if (connect_signals[raysol - 1] == 1)
+            {
+                // and previous raysol is connected
 
-    }   // end loop over raysols
+                // skip the process as this should have done before
+
+            }
+            else if (connect_signals[raysol - 1] == 0)
+            {
+                // and previous raysol is not connected
+
+                *n_connected_rays = 1;
+                *this_signalbin = signal_bin[raysol];
+
+                // Make a normally sized (NFOUR/2) array with just this ray 
+                Select_Wave_Convlv_Exchange(
+                    antenna->V[raysol], 
+                    BINSIZE, V_signal);
+            }
+        }
+
+    }   // if not the first raysol (all other raysols)
 
 }
 
@@ -4154,6 +4119,75 @@ void Report::Select_Wave_Convlv_Exchange(
 }
 
 
+void Report::GetNoiseThenConvolve(
+    Antenna_r *antenna, 
+    int BINSIZE, int this_signalbin, int n_connected_rays, 
+    int channel_index, int station_number, 
+    Settings *settings1, Trigger *trigger, Detector *detector
+){
+    
+    // Extend the length of this waveform we're constructing if more than 1 ray connected
+    int wf_length = 0;
+    int min_wf_bin = this_signalbin-BINSIZE/2+(trigger->maxt_diode_bin);
+    int max_wf_bin = 0;
+    vector <double> diode_response;
+    if ( n_connected_rays > 1 ) { // multiple ray solutions in one window
+        wf_length = BINSIZE * 2;
+        max_wf_bin = this_signalbin + BINSIZE/2 + BINSIZE;
+        diode_response = detector->fdiode_real_double;
+    }
+    else if ( antenna->ray_sol_cnt == 0 ){ // No rays connected to this antenna
+        this_signalbin = BINSIZE/2;
+        wf_length = BINSIZE;
+        min_wf_bin = 0;
+        max_wf_bin = BINSIZE;
+        diode_response = detector->fdiode_real;
+    }
+    else { // Only one ray signal in the window
+        wf_length = BINSIZE;
+        max_wf_bin = this_signalbin + BINSIZE/2;
+        diode_response = detector->fdiode_real;
+    }
+
+    // Get noise-only waveform
+    GetAntennaNoiseWF(
+        this_signalbin, wf_length, channel_index, station_number, &antenna->V_noise, 
+        settings1, trigger, detector);    // Save noise-only and signal-only waveforms
+
+    // Create noise+signal waveforms
+    V_total_forconvlv.clear();
+    for (int bin=0; bin<wf_length; bin++){
+        V_total_forconvlv.push_back( antenna->V_convolved[bin] + antenna->V_noise[bin]);
+    }
+
+    // cout<<"    "<<"{"<<n_connected_rays<<" "<<antenna->ray_sol_cnt<<"} ";
+    // cout<<this_signalbin<<"("<<min_wf_bin<<"->"<<max_wf_bin<<") ";
+    // cout<<wf_length<<" "<<BINSIZE<<" ";
+    // cout<<"["<<V_total_forconvlv.size()<<" "<<antenna->V_noise.size()<<" "<<antenna->V_convolved.size()<<"]"<<endl;
+
+    // Push noise+signal waveform through the tunnel diode
+    trigger->myconvlv( V_total_forconvlv, wf_length, diode_response, V_total_forconvlv);
+
+    // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
+    for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
+
+        // Export raw values to trigger->Full_window and trigger->Full_window_V
+        trigger->Full_window[channel_index][bin] = V_total_forconvlv[bin - this_signalbin + BINSIZE/2];
+        trigger->Full_window_V[channel_index][bin] += antenna->V_convolved[bin - this_signalbin + BINSIZE/2];
+
+        // Add electronics saturation effect
+        if ( trigger->Full_window_V[channel_index][bin] > settings1->V_SATURATION ) {
+            trigger->Full_window_V[channel_index][bin] = settings1->V_SATURATION;
+        }
+        else if ( trigger->Full_window_V[channel_index][bin] < -1.*settings1->V_SATURATION ) {
+            trigger->Full_window_V[channel_index][bin] = -1.*settings1->V_SATURATION;
+        }
+
+    } 
+
+}
+
+
 // Choose waveforms from the trigger class to use for this event
 void Report::GetAntennaNoiseWF(
     int signalbin, 
@@ -4212,6 +4246,36 @@ void Report::GetAntennaNoiseWF(
     } // end loop over bins
 
 }
+
+// void Report::DoTunnelDiode(
+//     int channel_index, int this_signalbin, int BINSIZE, 
+//     int min_wf_bin, int max_wf_bin, int wf_length, 
+//     vector <double> *V_total_forconvlv, vector <double> *diode_response, 
+//     Antenna_r *antenna,
+//     Settings *settings1, Trigger *trigger
+// ){
+    
+//     // Push noise+signal waveform through the tunnel diode
+//     trigger->myconvlv( V_total_forconvlv, wf_length, diode_response, V_total_forconvlv);
+
+//     // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
+//     for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
+
+//         // Export raw values to trigger->Full_window and trigger->Full_window_V
+//         trigger->Full_window[channel_index][bin] = V_total_forconvlv[bin - this_signalbin + BINSIZE/2];
+//         trigger->Full_window_V[channel_index][bin] += antenna->V_convolved[bin - this_signalbin + BINSIZE/2];
+
+//         // Add electronics saturation effect
+//         if ( trigger->Full_window_V[channel_index][bin] > settings1->V_SATURATION ) {
+//             trigger->Full_window_V[channel_index][bin] = settings1->V_SATURATION;
+//         }
+//         else if ( trigger->Full_window_V[channel_index][bin] < -1.*settings1->V_SATURATION ) {
+//             trigger->Full_window_V[channel_index][bin] = -1.*settings1->V_SATURATION;
+//         }
+
+//     } 
+
+// }
 
 
 void Report::Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *detector, int ID, int StationIndex ) {
