@@ -4939,7 +4939,8 @@ void Report::GetAngleLaunch(Vector &launch_vector, double &launch_theta, double 
     /*
     2024-07-01 JCF
     Takes the launch vector of the signal and calculates the theta and phi of the launch vector in the 
-    receiveing antenna's coordinate system.
+    station-centric coordinates and returns them in degrees; where theta=0 is along the upward vertical axis,
+    theta=90 is along the horizon, and theta=180 is along the downward vertical axis.
     
     This is necessary because for source reconstruction, we need the launch vector of the RF signal in 
     conjunction with the polarization to find the neutrino trajectory.
