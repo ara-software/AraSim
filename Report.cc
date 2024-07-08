@@ -4198,51 +4198,52 @@ void Report::GetAntennaNoiseWF(
     // Clear old noise waveforms
     V_noise_only->clear();
 
+    // Pick noise waveform
+    vector< vector <double> > *noise_wf;
+    // vector< vector <double> > &noise_wf = *noise_wf_ptr;
+    if ( settings1->NOISE_CHANNEL_MODE==0) {
+        noise_wf = &trigger->v_noise_timedomain;
+    }
+    // Use channel-by-channel temperatures to generate noise
+    else if ( settings1->NOISE_CHANNEL_MODE==1) {
+        noise_wf = &trigger->v_noise_timedomain_ch[ 
+            GetChNumFromArbChID(detector, channel_index, StationIndex, settings1) - 1 
+        ];
+    }
+    // Only use channel-by-channel temperatures to generate noise for the first 8 channels. 
+    // Use the same temperature for the remaining 8.
+    else if ( settings1->NOISE_CHANNEL_MODE==2) {
+        // If this channel is one of the first 8, use channel specific noise
+        if ( ( GetChNumFromArbChID(detector, channel_index, StationIndex, settings1) - 1 ) < 8) {
+            noise_wf = &trigger->v_noise_timedomain_ch[ 
+                GetChNumFromArbChID(detector, channel_index, StationIndex, settings1) - 1 
+            ];
+        }
+        // This channel is NOT one of the first 8, use same noise for these channels
+        else {
+            noise_wf = &trigger->v_noise_timedomain_ch[
+                8
+            ];
+        }
+    }
+    else{
+        cout<<"Cannot find noise waveform for channel "<<channel_index;
+        cout<<" on station "<<StationIndex;
+        cout<<" for requested NOISE_CHANNEL_MODE "<<settings1->NOISE_CHANNEL_MODE<<endl;
+        throw std::runtime_error("");
+    }
+
     // Loop over bins and get noise voltage value for each
     int bin_value;
     int noise_ID_index;
     int noise_wf_index;
     for (int bin=0; bin<BINSIZE; bin++) {
-
         bin_value = signalbin - BINSIZE/2 + bin;
         noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
         noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
-                            
-        // Use same temperature to generate noise for all channels
-        if ( settings1->NOISE_CHANNEL_MODE==0) {
-            V_noise_only->push_back(
-                trigger->v_noise_timedomain[ noise_ID[noise_ID_index] ][ noise_wf_index ]
-            );
-        }
-        // Use channel-by-channel temperatures to generate noise
-        else if ( settings1->NOISE_CHANNEL_MODE==1) {
-            V_noise_only->push_back(
-                trigger->v_noise_timedomain_ch[ 
-                    GetChNumFromArbChID(detector,channel_index,StationIndex,settings1)-1 
-                ][ noise_ID[noise_ID_index] ][ noise_wf_index ]
-            );
-        }
-        // Only use channel-by-channel temperatures to generate noise for the first 8 channels. 
-        // Use the same temperature for the remaining 8.
-        else if ( settings1->NOISE_CHANNEL_MODE==2) {
-            // If this channel is one of the first 8
-            if ( (GetChNumFromArbChID(detector,channel_index,StationIndex,settings1)-1) < 8) {
-                V_noise_only->push_back(
-                    trigger->v_noise_timedomain_ch[ 
-                            GetChNumFromArbChID(detector,channel_index,StationIndex,settings1)-1 
-                        ][ noise_ID[noise_ID_index] ][ noise_wf_index ]
-                );
-            }
-            // This channel is NOT one of the first 8
-            else {
-                V_noise_only->push_back(
-                    trigger->v_noise_timedomain_ch[
-                            8
-                        ][ noise_ID[noise_ID_index] ][ noise_wf_index ]
-                );
-            }
-        }
-
+        V_noise_only->push_back(
+            noise_wf->at( noise_ID[noise_ID_index] ).at( noise_wf_index )
+        );
     } // end loop over bins
 
 }
