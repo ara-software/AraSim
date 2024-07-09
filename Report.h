@@ -308,7 +308,7 @@ class Report {
             vector <double> &V0, vector <double> &V1, vector <double> &V2, 
             int BINSIZE, vector <double> *V_signal);
         void GetNoiseThenConvolve(
-            Antenna_r *antenna, 
+            Antenna_r *antenna, vector <double> V_signal,
             int BINSIZE, int this_signalbin, int n_connected_rays, 
             int channel_index, int station_number, 
             Settings *settings1, Trigger *trigger, Detector *detector);
