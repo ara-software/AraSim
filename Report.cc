@@ -2043,7 +2043,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
             // now, check the number of bins we need for portion of noise waveforms
             remain_bin = max_total_bin % settings1->DATA_BIN_SIZE;
             ch_ID = 0;
-
+            int ants_with_sufficient_SNR = 0;
             for (int j = 0; j < detector->stations[i].strings.size(); j++)
             {
                 // cout << j << endl;
@@ -2064,6 +2064,59 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         settings1, trigger, detector
                     );
 
+                    // Check that the SNR is high enough to consider this antenna
+                    double ant_SNR = 0.;
+                    if (settings1->TRIG_ANALYSIS_MODE==1){
+
+                        // If analyzing signal-only, load antenna's noise WF since that hasn't been done yet
+
+                        // Load noise wf for this antenna
+                        double v_noise_array[settings1->DATA_BIN_SIZE];
+                        if ( settings1->NOISE_CHANNEL_MODE==0 ){ 
+                            // Use same noise wf for all antennas
+                            GetNoiseWaveforms(
+                                settings1, detector, 
+                                trigger->V_noise_freqbin, v_noise_array);
+                        }
+                        else if ( settings1->NOISE_CHANNEL_MODE==1 ){ 
+                            // Use channel-specific noise wfs
+                            GetNoiseWaveforms_ch(
+                                settings1, detector, 
+                                trigger->V_noise_freqbin_ch[ch_ID], v_noise_array, ch_ID);
+                        }
+                        else if ( settings1->NOISE_CHANNEL_MODE==2 ){ 
+                            // Use channel-specific noise wfs for first 8 channels only
+                            // The remaining 8 use the same noise wf
+                            if ( ch_ID < 8 ){
+                                GetNoiseWaveforms_ch(
+                                    settings1, detector, 
+                                    trigger->V_noise_freqbin_ch[ch_ID], v_noise_array, ch_ID);
+                            }
+                            else{ 
+                                GetNoiseWaveforms_ch(
+                                    settings1, detector, 
+                                    trigger->V_noise_freqbin_ch[8], v_noise_array, 8);
+                            }
+                        }
+
+                        // Convert noise wf to vector and get SNR
+                        vector <double> v_noise_vector; 
+                        for (int bin=0; bin<settings1->DATA_BIN_SIZE; bin++) {
+                            v_noise_vector.push_back(v_noise_array[bin]);
+                        }
+                        ant_SNR = get_SNR( 
+                            stations[i].strings[j].antennas[k].V_convolved, 
+                            v_noise_vector);
+
+                    }
+                    else {
+                        // For signal+noise and noise-only simulations, just use existing noise WF
+                        ant_SNR = get_SNR( 
+                            stations[i].strings[j].antennas[k].V_convolved, 
+                            stations[i].strings[j].antennas[k].V_noise);
+                    }
+                    if ( ant_SNR > 0.01 ) ants_with_sufficient_SNR++;
+
                     // Apply gain factors
                     if ((debugmode == 0) && (settings1->USE_MANUAL_GAINOFFSET == 1) )
                     {
@@ -2078,7 +2131,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
             }   // for strings
 
             // do only if it's not in debugmode
-            if (debugmode == 0)
+            if ( (debugmode == 0) && (ants_with_sufficient_SNR) )
             {
 
                 // before we move to next station, do trigger check here!!!
@@ -6268,7 +6321,6 @@ int Report::getNumOfSignalledAnts(Station_r station, double ant_signal_threshold
 }
 
 double Report::get_SNR(vector<double> signal_array, vector<double> noise_array){
-    // Usually signal array and noise array will be the same array.
 
     // if signal_array or noise_array have a size of 0, tell stderr
     if ( signal_array.size() == 0 ){
@@ -6280,7 +6332,7 @@ double Report::get_SNR(vector<double> signal_array, vector<double> noise_array){
         cerr<<"Function will return inaccurate values."<<endl;
     }
 
-    // Get peak-to-peak
+    // Get peak-to-peak of signal
     double min_value =  10000000.;
     double max_value = -10000000.;
     for (int i=0; i<signal_array.size(); i++){
@@ -6310,7 +6362,9 @@ double Report::get_SNR(vector<double> signal_array, vector<double> noise_array){
 
     // Calculate and return SNR
     double snr = p2p / 2. / rms;
+    cout<<"    P2P: "<<p2p<<"  RMS: "<<rms<<"  SNR: "<<snr<<endl;
     return snr;
+
 }
 
 vector<double> Report::getHitTimesVectorVpol(Detector *detector, int station_i){
