@@ -1953,11 +1953,15 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
         int check_passed_global_trigger = 0;    // this switch determines if station globally triggers (in all TRIG_SCAN_MODEs)
 
         // If we're looking to trigger on signal, check that there 
-        //  is enough signal that reached the station. 
+        //   is enough signal that reached the station. 
         // Otherwise, don't worry about checking for a trigger
         int ants_with_nonzero_signal = 0;
-        if (settings1->TRIG_ANALYSIS_MODE != 2) { // Check that we want to trigger on signal
-        
+        if (settings1->TRIG_ANALYSIS_MODE == 2) { 
+            // TRIG_ANALYSIS_MODE=2 is the noise-only mode, 
+            //   say that all antennas have good signal
+            ants_with_nonzero_signal = 16; 
+        }
+        else {
             // If rays connected to the station, count how many antennas 
             //   have sufficient signal from the signal-only waveform
             if (stations[i].Total_ray_sol) { 
@@ -1965,16 +1969,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                     stations[i], 
                     settings1->ANT_SIGNAL_THRESHOLD
                 );
-            } // Check that rays connected to the station)   
-
-        }
-        else { 
-            // TRIG_ANALYSIS_MODE=2 is the noise-only mode, 
-            //   say all antennas have good signal
-            ants_with_nonzero_signal = 16;
+            } 
         }
 
-        // if (stations[i].Total_ray_sol )
         if (stations[i].Total_ray_sol && ants_with_nonzero_signal)
         {
             // if there is any ray_sol (don't check trigger if there is no ray_sol at all)
@@ -2058,22 +2055,21 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                     // (we can fix this by adding values but not accomplished yet)
 
                     // Combine signals from all rays, add noise, and convolve them through the tunnel diode
-                    // cout<<"    "<<i<<" "<<j<<" "<<k<<" :"<<endl;
                     if (debugmode == 0) Convolve_Signals(
                         &stations[i].strings[j].antennas[k], ch_ID, i,
                         settings1, trigger, detector
                     );
 
-                    // Check that the SNR is high enough to consider this antenna
+                    // Get the SNR from this antenna
                     double ant_SNR = 0.;
                     if (settings1->TRIG_ANALYSIS_MODE==1){
 
-                        // If analyzing signal-only, load antenna's noise WF since that hasn't been done yet
+                        // TRIG_ANALYSIS_MODE=1 is the signal-only mode
 
-                        // Load noise wf for this antenna
+                        // Load noise wf for this antenna since that hasn't been done yet
                         double v_noise_array[settings1->DATA_BIN_SIZE];
                         if ( settings1->NOISE_CHANNEL_MODE==0 ){ 
-                            // Use same noise wf for all antennas
+                            // Use the same noise wf for all antennas
                             GetNoiseWaveforms(
                                 settings1, detector, 
                                 trigger->V_noise_freqbin, v_noise_array);
@@ -2099,7 +2095,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             }
                         }
 
-                        // Convert noise wf to vector and get SNR
+                        // Convert noise wf to a vector and get the SNR
                         vector <double> v_noise_vector; 
                         for (int bin=0; bin<settings1->DATA_BIN_SIZE; bin++) {
                             v_noise_vector.push_back(v_noise_array[bin]);
@@ -2109,12 +2105,20 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             v_noise_vector);
 
                     }
+                    else if (settings1->TRIG_ANALYSIS_MODE==2){
+                        // TRIG_ANALYSIS_MODE=2 is the noise-only mode
+                        // Set the SNR to an arbitarily high number so it passes
+                        //   the coming insufficient signal check
+                        ant_SNR = 100.;
+                    }
                     else {
-                        // For signal+noise and noise-only simulations, just use existing noise WF
+                        // For all other simulations, just use previously calculated noise WF
                         ant_SNR = get_SNR( 
                             stations[i].strings[j].antennas[k].V_convolved, 
                             stations[i].strings[j].antennas[k].V_noise);
                     }
+
+                    // Log if this antenna has a strong SNR or not
                     if ( ant_SNR > 0.01 ) ants_with_sufficient_SNR++;
 
                     // Apply gain factors
@@ -2130,7 +2134,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
             }   // for strings
 
+            // Check for a trigger on this event
             // do only if it's not in debugmode
+            //   and if at least 1 antenna has sufficient signal
             if ( (debugmode == 0) && (ants_with_sufficient_SNR) )
             {
 
@@ -6267,8 +6273,6 @@ int Report::getNumOfSignalledAnts(Station_r station, double ant_signal_threshold
     int ants_with_good_signal = 0;
     vector <double> summary;
 
-    // cout<<endl<<"Checking antenna signals: "<<endl;
-
     for ( // loop over each string in the station
         int s = 0; s < station.strings.size(); s++
     ) { 
@@ -6294,33 +6298,26 @@ int Report::getNumOfSignalledAnts(Station_r station, double ant_signal_threshold
                     if ( ray_max_signal > max_signal ){
                         max_signal = ray_max_signal;
                     }
-                } // End loop over ray solutions
+                } 
 
             } // end if (ray solutions exist)
 
-            // If this antenna had a strong signal-only signal, add it to the tracker
+            // If this antenna had a strong signal-only signal, 
+            //   increment the good antenna tracker
             if ( max_signal > ant_signal_threshold){ 
                 ants_with_good_signal++;
                 summary.push_back(max_signal);
             }
-            // cout<<"    "<<s<<" "<<a<<" "<<max_signal<<endl;
 
         } // end loop over antennas on string
     } // end loop over strings on the antenna
-
-    // if (ants_with_good_signal){
-    //     cout<<endl<<" "<<ants_with_good_signal<<" - "<<ant_signal_threshold<<": ";
-    //     for (int a=0; a<ants_with_good_signal; a++){
-    //         cout<<summary[a]<<" ";
-    //     }
-    //     cout<<endl;
-    // }
 
     return ants_with_good_signal;
   
 }
 
 double Report::get_SNR(vector<double> signal_array, vector<double> noise_array){
+    // Returns the SNR of the provided signal compared to the provided noise
 
     // if signal_array or noise_array have a size of 0, tell stderr
     if ( signal_array.size() == 0 ){
@@ -6349,12 +6346,14 @@ double Report::get_SNR(vector<double> signal_array, vector<double> noise_array){
     rms = sqrt( rms / noise_array.size() );
 
     // Catch potential errors
-    if ( (p2p==-20000000.) || (p2p!=p2p) ){ // if p2p is original value or nan
+    if ( (p2p==-20000000.) || (p2p!=p2p) ){ 
+        // if p2p is original value or nan
         cerr<<"In Report::get_SNR, peak-to-peak not calculated correctly. ";
         cerr<<"Will set peak-to-peak to 0."<<endl;
         p2p = 0;
     }
-    if ( (rms==0.) || (rms!=rms) ){ // if RMS is 0 or nan
+    if ( (rms==0.) || (rms!=rms) ){ 
+        // if RMS is 0 or nan
         cerr<<"In Report::get_SNR, RMS was not calculated properly. ";
         cerr<<"Will set RMS to 1 to avoid divide-by-zero."<<endl;
         rms = 1;
@@ -6362,7 +6361,6 @@ double Report::get_SNR(vector<double> signal_array, vector<double> noise_array){
 
     // Calculate and return SNR
     double snr = p2p / 2. / rms;
-    cout<<"    P2P: "<<p2p<<"  RMS: "<<rms<<"  SNR: "<<snr<<endl;
     return snr;
 
 }
