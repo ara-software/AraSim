@@ -3890,12 +3890,6 @@ void Report::Convolve_Signals(
         // Make array of 0s for array we're saving all ray signals to
         for (int i=0; i<array_length; i++) antenna->V_convolved.push_back(0.);
 
-        // Fill the antenna's noise-only waveform
-        GetAntennaNoiseWF(
-            (int) array_length/2, array_length, // signalbin, array length
-            channel_index, station_number, &antenna->V_noise,
-            settings1, trigger, detector);
-
     }
     
     // Loop over ray solutions and get signals from each
