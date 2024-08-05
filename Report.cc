@@ -3872,12 +3872,6 @@ void Report::Convolve_Signals(
         for (int bin=0; bin<BINSIZE; bin++) V_signal.push_back(0.);
         for (int bin=0; bin<BINSIZE; bin++) antenna->V_convolved.push_back(0.);
 
-        // Save the noise-only waveform to the antenna
-        GetAntennaNoiseWF(
-            BINSIZE/2, BINSIZE, // signalbin, array length
-            channel_index, station_number, &antenna->V_noise, 
-            settings1, trigger, detector);
-
         // Convolve the noise signal and add to the array used for triggering
         GetNoiseThenConvolve(
             antenna, V_signal,
