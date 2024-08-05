@@ -314,7 +314,7 @@ class Report {
             Settings *settings1, Trigger *trigger, Detector *detector);
         void GetAntennaNoiseWF(
             int signalbin, 
-            int BINSIZE, int ID, int StationIndex, vector <double> *V_noise_only,
+            int wf_length, int BINSIZE, int ID, int StationIndex, vector <double> *V_noise_only,
             Settings *settings1, Trigger *trigger, Detector *detector);
 
 

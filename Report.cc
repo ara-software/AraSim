@@ -4176,7 +4176,7 @@ void Report::GetNoiseThenConvolve(
     // Get noise-only waveform
     vector <double> V_noise;
     GetAntennaNoiseWF(
-        this_signalbin, wf_length, channel_index, station_number, &V_noise, 
+        this_signalbin, wf_length, BINSIZE, channel_index, station_number, &V_noise, 
         settings1, trigger, detector);
 
     // cout<<"    "<<"{"<<n_connected_rays<<" "<<antenna->ray_sol_cnt<<"} ";
@@ -4218,7 +4218,7 @@ void Report::GetNoiseThenConvolve(
 // Choose waveforms from the trigger class to use for this event
 void Report::GetAntennaNoiseWF(
     int signalbin, 
-    int BINSIZE, int channel_index, int StationIndex, vector <double> *V_noise_only,
+    int wf_length, int BINSIZE, int channel_index, int StationIndex, vector <double> *V_noise_only,
     Settings *settings1, Trigger *trigger, Detector *detector
 ){
 
@@ -4264,7 +4264,7 @@ void Report::GetAntennaNoiseWF(
     int bin_value;
     int noise_ID_index;
     int noise_wf_index;
-    for (int bin=0; bin<BINSIZE; bin++) {
+    for (int bin=0; bin<wf_length; bin++) {
         bin_value = signalbin - BINSIZE/2 + bin;
         noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
         noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
