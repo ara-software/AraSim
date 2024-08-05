@@ -53,7 +53,7 @@ class Antenna_r {
         //
 
         int ray_sol_cnt;    // number of RaySolver solutions
-
+				double psi_at_transmitter; // the rotation angle from CLOCK_ANGLE at the transmitter in EVENT_TYPE == 11
         //vector <int> trg;    // if antenna recieved any signal or not. 0 : no signal,  1 : yes signal
 
         vector <double> view_ang;    //viewing angle

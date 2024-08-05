@@ -423,6 +423,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
 
     int ray_sol_cnt;
+		double psi_at_transmitter; 
     double viewangle;
     Position launch_vector; // direction of ray at the source
     Position receive_vector;    // direction of ray at the target antenna
@@ -1343,6 +1344,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             	double newPol_vectorZ = cos(psi)*sin(theta);
                                             
                                             	Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);                                            
+                                              if(bire_ray_cnt == 1){
+                                                  Vector init_pol_vector = Pol_vector;
+                                                  psi_at_transmitter = DEGRAD * acos(Pol_vector[2]/sin(theta));
+                                              }
+
 
 
 						int T_shift_bire = int(time_diff_birefringence/dT_forfft); //time shift for birefringence
