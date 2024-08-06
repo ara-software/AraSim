@@ -447,7 +447,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
     double phi_rec;
     double theta_rec;
 
-    double freq_tmp, heff, antenna_theta, antenna_phi;  // values needed for apply antenna gain factor and prepare fft, trigger
+    double freq_tmp, heff, antenna_theta, antenna_phi, launch_theta, launch_phi;  // values needed for apply antenna gain factor and prepare fft, trigger
     double heff_Tx, Tx_theta, Tx_phi, heff_Tx_lastbin; // Values for transmitting antenna mode.
     double volts_forfft[settings1->NFOUR / 2];  // array for fft
     double dT_forfft;
@@ -675,6 +675,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                 // get the arrival angle at the antenna, and store the relevant polarization factors
                                 GetAngleAnt(receive_vector, detector->stations[i].strings[j].antennas[k], antenna_theta, antenna_phi);  // get theta, phi for signal ray arrived at antenna
+                                GetAngleLaunch(launch_vector, launch_theta, launch_phi);
 
                                 Vector thetaHat = Vector(cos(antenna_theta *(PI / 180)) *cos(antenna_phi *(PI / 180)),
                                     cos(antenna_theta *(PI / 180)) *sin(antenna_phi *(PI / 180)),
@@ -687,6 +688,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 stations[i].strings[j].antennas[k].Pol_factorV.push_back(abs(thetaHat *Pol_vector));
                                 stations[i].strings[j].antennas[k].phi_rec.push_back(antenna_phi *(PI / 180));
                                 stations[i].strings[j].antennas[k].theta_rec.push_back(antenna_theta *(PI / 180));
+                                stations[i].strings[j].antennas[k].phi_launch.push_back(launch_phi *(PI / 180));
+                                stations[i].strings[j].antennas[k].theta_launch.push_back(launch_theta *(PI / 180));                                
 
                                 // old freq domain signal mode (AVZ model)
                                 if (settings1->SIMULATION_MODE == 0)
@@ -2871,6 +2874,13 @@ void Report::rerun_event(Event *event, Detector *detector,
                         detector->stations[0].strings[j].antennas[k],
                         antenna_theta, antenna_phi
                         );
+                        
+                    // get launch angle of signal
+                    double launch_theta, launch_phi;
+                    GetAngleLaunch(
+                        launch_vector, 
+                        launch_theta, launch_phi
+                        );                        
                     
                     // this is the 1/R and fresnel and focusing effect
                     double atten_factor = 1. / ray_output[0][ray_sol_cnt] * mag * fresnel;
@@ -4820,6 +4830,23 @@ void Report::GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_thet
     Vector flip_receive_vector = -1. * rec_vector;
     ant_theta = flip_receive_vector.Theta() * TMath::RadToDeg(); // return in degrees
     ant_phi = flip_receive_vector.Phi() * TMath::RadToDeg();
+
+}
+
+void Report::GetAngleLaunch(Vector &launch_vector, double &launch_theta, double &launch_phi) {
+    
+    /*
+    2024-07-01 JCF
+    Takes the launch vector of the signal and calculates the theta and phi of the launch vector in the 
+    station-centric coordinates and returns them in degrees; where theta=0 is along the upward vertical axis,
+    theta=90 is along the horizon, and theta=180 is along the downward vertical axis.
+    
+    This is necessary because for source reconstruction, we need the launch vector of the RF signal in 
+    conjunction with the polarization to find the neutrino trajectory.
+    */
+    
+    launch_theta = launch_vector.Theta() * TMath::RadToDeg();
+    launch_phi = launch_vector.Phi() * TMath::RadToDeg();
 
 }
 

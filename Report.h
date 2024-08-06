@@ -61,6 +61,8 @@ class Antenna_r {
         vector <double> rec_ang;     //receiving angle phi (in radians)
         vector <double> phi_rec;     // receiving phi angle,in antenna's coord system.
         vector <double> theta_rec;     // receiving theta angle, in antenna's coord system.
+        vector <double> phi_launch;     // launch phi angle,in antenna's coord system.
+        vector <double> theta_launch;     // launch theta angle, in antenna's coord system.    
         vector <double> reflect_ang; // surface reflection angle (if 100 : no reflection case)
         vector <double> Dist;        //Distance between posnu and antenna
         vector <double> L_att;        //Attenuation factor
@@ -382,6 +384,7 @@ class Report {
 
 
         void GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_theta, double &ant_phi);
+        void GetAngleLaunch(Vector &launch_vector, double &launch_theta, double &launch_phi);
 
         // Noise Functions
         void GetNoiseWaveforms(Settings *settings1, Detector *detector, double vhz_noise, double *vnoise);
