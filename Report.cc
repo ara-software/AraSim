@@ -447,7 +447,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
     double phi_rec;
     double theta_rec;
 
-    double freq_tmp, heff, antenna_theta, antenna_phi;  // values needed for apply antenna gain factor and prepare fft, trigger
+    double freq_tmp, heff, antenna_theta, antenna_phi, launch_theta, launch_phi;  // values needed for apply antenna gain factor and prepare fft, trigger
     double heff_Tx, Tx_theta, Tx_phi, heff_Tx_lastbin; // Values for transmitting antenna mode.
     double volts_forfft[settings1->NFOUR / 2];  // array for fft
     double dT_forfft;
@@ -675,6 +675,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                 // get the arrival angle at the antenna, and store the relevant polarization factors
                                 GetAngleAnt(receive_vector, detector->stations[i].strings[j].antennas[k], antenna_theta, antenna_phi);  // get theta, phi for signal ray arrived at antenna
+                                GetAngleLaunch(launch_vector, launch_theta, launch_phi);
 
                                 Vector thetaHat = Vector(cos(antenna_theta *(PI / 180)) *cos(antenna_phi *(PI / 180)),
                                     cos(antenna_theta *(PI / 180)) *sin(antenna_phi *(PI / 180)),
@@ -687,6 +688,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 stations[i].strings[j].antennas[k].Pol_factorV.push_back(abs(thetaHat *Pol_vector));
                                 stations[i].strings[j].antennas[k].phi_rec.push_back(antenna_phi *(PI / 180));
                                 stations[i].strings[j].antennas[k].theta_rec.push_back(antenna_theta *(PI / 180));
+                                stations[i].strings[j].antennas[k].phi_launch.push_back(launch_phi *(PI / 180));
+                                stations[i].strings[j].antennas[k].theta_launch.push_back(launch_theta *(PI / 180));                                
 
                                 // old freq domain signal mode (AVZ model)
                                 if (settings1->SIMULATION_MODE == 0)
@@ -2055,10 +2058,13 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                     // (we can fix this by adding values but not accomplished yet)
 
                     // Combine signals from all rays, add noise, and convolve them through the tunnel diode
-                    if (debugmode == 0) Convolve_Signals(
-                        &stations[i].strings[j].antennas[k], ch_ID, i,
-                        settings1, trigger, detector
-                    );
+
+                    if (debugmode == 0) {
+                        Convolve_Signals(
+                            &stations[i].strings[j].antennas[k], ch_ID, i,
+                            settings1, trigger, detector
+                        );
+                    }
 
                     // Get the SNR from this antenna
                     double ant_SNR = 0.;
@@ -2951,6 +2957,13 @@ void Report::rerun_event(Event *event, Detector *detector,
                         detector->stations[0].strings[j].antennas[k],
                         antenna_theta, antenna_phi
                         );
+                        
+                    // get launch angle of signal
+                    double launch_theta, launch_phi;
+                    GetAngleLaunch(
+                        launch_vector, 
+                        launch_theta, launch_phi
+                        );                        
                     
                     // this is the 1/R and fresnel and focusing effect
                     double atten_factor = 1. / ray_output[0][ray_sol_cnt] * mag * fresnel;
@@ -3889,15 +3902,16 @@ void Report::ClearUselessfromConnect(Detector *detector, Settings *settings1, Tr
 }
 
 
-// For the provided antenna: 
-// Calculate bin values for the signal and determine if how many rays fit in the readout window
-// Combine signals from rays and load noise waveforms
-// Pass the noise+signal waveform through the tunnel diode
-// Enforce voltage saturation
+
 void Report::Convolve_Signals(
     Antenna_r *antenna, int channel_index, int station_number, 
     Settings *settings1, Trigger *trigger, Detector *detector
 ){
+    // For the provided antenna: 
+    // Calculate bin values for the signal and determine if how many rays fit in the readout window
+    // Combine signals from rays and load noise waveforms
+    // Pass the noise+signal waveform through the tunnel diode
+    // Enforce voltage saturation
 
     // init : bin + maxt_diode_bin, fin : bin + NFOUR/2
 
@@ -3953,12 +3967,7 @@ void Report::Convolve_Signals(
         vector <double> V_signal;
         for (int bin=0; bin<BINSIZE; bin++) V_signal.push_back(0.);
         for (int bin=0; bin<BINSIZE; bin++) antenna->V_convolved.push_back(0.);
-
-        // Save the noise-only waveform to the antenna
-        GetAntennaNoiseWF(
-            BINSIZE/2, BINSIZE, // signalbin, array length
-            channel_index, station_number, &antenna->V_noise, 
-            settings1, trigger, detector);
+        for (int bin=0; bin<BINSIZE; bin++) antenna->V_noise.push_back(0.);
 
         // Convolve the noise signal and add to the array used for triggering
         GetNoiseThenConvolve(
@@ -3977,12 +3986,7 @@ void Report::Convolve_Signals(
 
         // Make array of 0s for array we're saving all ray signals to
         for (int i=0; i<array_length; i++) antenna->V_convolved.push_back(0.);
-
-        // Fill the antenna's noise-only waveform
-        GetAntennaNoiseWF(
-            (int) array_length/2, array_length, // signalbin, array length
-            channel_index, station_number, &antenna->V_noise,
-            settings1, trigger, detector);
+        for (int i=0; i<array_length; i++) antenna->V_noise.push_back(0.);
 
     }
     
@@ -4004,23 +4008,26 @@ void Report::Convolve_Signals(
 
         // Get the noise-only wf from just this signal-window then convolve 
         //   through the tunnel diode
-        if (n_connected_rays>0) GetNoiseThenConvolve(
-            antenna, V_signal,
-            BINSIZE, this_signalbin, n_connected_rays, 
-            channel_index, station_number, 
-            settings1, trigger, detector);
+        if (n_connected_rays>0) {
+            GetNoiseThenConvolve(
+                antenna, V_signal,
+                BINSIZE, this_signalbin, n_connected_rays, 
+                channel_index, station_number, 
+                settings1, trigger, detector);
+        }
 
     }   // end loop over ray solutions
 
 }
 
 
-// Combine the signal from connected rays into one signal waveform
 void Report::GetAntennaSignalWF(
     int raysol, int *n_connected_rays, int *this_signalbin,
     int BINSIZE, Antenna_r *antenna, vector <double> *V_signal,
     Settings *settings1, Trigger *trigger, Detector *detector
 ){
+    // Determine which rays fall within the same trigger bin (BINSIZE) 
+    //   and combine them if so
 
     // loop over raysol numbers
     // when ray_sol_cnt == 0, this loop inside codes will not run
@@ -4034,7 +4041,7 @@ void Report::GetAntennaSignalWF(
             *n_connected_rays = 2;
             *this_signalbin = signal_bin[raysol];
 
-            // Convovle m and m+1 ray in double sized (NFOUR) array
+            // Combine signals from m and m+1 ray in double sized (NFOUR) signal array
             Select_Wave_Convlv_Exchange( 
                 signal_bin[raysol], signal_bin[raysol + 1], 
                 antenna->V[raysol], antenna->V[raysol + 1], 
@@ -4045,7 +4052,7 @@ void Report::GetAntennaSignalWF(
             *n_connected_rays = 1;
             *this_signalbin = signal_bin[raysol];
 
-            // Make a normally sized (NFOUR/2) array with just this ray 
+            // Make a normally sized (NFOUR/2) signal array with just this ray 
             Select_Wave_Convlv_Exchange(
                 antenna->V[raysol], 
                 BINSIZE, V_signal);
@@ -4070,7 +4077,7 @@ void Report::GetAntennaSignalWF(
                     *n_connected_rays = 3;
                     *this_signalbin = signal_bin[raysol];
 
-                    // Convolve all 3 rays in a double sized (NFOUR) array
+                    // Combine signals from all 3 rays in a double sized (NFOUR) signal array
                     Select_Wave_Convlv_Exchange(
                         signal_bin[raysol - 1], signal_bin[raysol], signal_bin[raysol + 1], 
                         antenna->V[raysol - 1], antenna->V[raysol], antenna->V[raysol + 1], 
@@ -4083,7 +4090,7 @@ void Report::GetAntennaSignalWF(
                     *n_connected_rays = 2;
                     *this_signalbin = signal_bin[raysol];
 
-                    // Convovle m and m+1 ray in a double sized (NFOUR) array
+                    // Combine signals from m and m+1 ray in a double sized (NFOUR) signal array
                     Select_Wave_Convlv_Exchange(
                         signal_bin[raysol], signal_bin[raysol + 1], 
                         antenna->V[raysol], antenna->V[raysol + 1], 
@@ -4108,7 +4115,7 @@ void Report::GetAntennaSignalWF(
                     *n_connected_rays = 1;
                     *this_signalbin = signal_bin[raysol];
 
-                    // Make a normally sized (NFOUR/2) array with just this ray 
+                    // Make a normally sized (NFOUR/2) signal array with just this ray 
                     Select_Wave_Convlv_Exchange(
                         antenna->V[raysol], 
                         BINSIZE, V_signal);
@@ -4133,7 +4140,7 @@ void Report::GetAntennaSignalWF(
                 *n_connected_rays = 1;
                 *this_signalbin = signal_bin[raysol];
 
-                // Make a normally sized (NFOUR/2) array with just this ray 
+                // Make a normally sized (NFOUR/2) signal array with just this ray 
                 Select_Wave_Convlv_Exchange(
                     antenna->V[raysol], 
                     BINSIZE, V_signal);
@@ -4145,11 +4152,11 @@ void Report::GetAntennaSignalWF(
 }
 
 
-// Convolve a single signal into the signal array
 void Report::Select_Wave_Convlv_Exchange(
     vector <double> &V, 
     int BINSIZE, vector <double> *V_signal
 ) {
+    // Convolve a single signal into the signal array
     
     // Clear previous waveform data
     V_signal->clear();
@@ -4162,12 +4169,12 @@ void Report::Select_Wave_Convlv_Exchange(
 }
 
 
-// Convolve 2 signals into one signal array
 void Report::Select_Wave_Convlv_Exchange(
     int signalbin_1, int signalbin_2, 
     vector <double> &V1, vector <double> &V2, 
     int BINSIZE, vector <double> *V_signal
 ) {
+    // Convolve 2 signals into one signal array
     
     // Clear previous waveform data
     V_signal->clear();
@@ -4194,12 +4201,12 @@ void Report::Select_Wave_Convlv_Exchange(
 }
 
 
-// Convolve 3 signals into one signal array
 void Report::Select_Wave_Convlv_Exchange(
     int signalbin_0, int signalbin_1, int signalbin_2, 
     vector <double> &V0, vector <double> &V1, vector <double> &V2, 
     int BINSIZE, vector <double> *V_signal
 ) {
+    // Convolve 3 signals into one signal array
     
     // Clear previous waveform data  
     V_signal->clear();
@@ -4243,6 +4250,10 @@ void Report::GetNoiseThenConvolve(
     int channel_index, int station_number, 
     Settings *settings1, Trigger *trigger, Detector *detector
 ){
+    // Get noise waveform, signal waveform, combine them, 
+    //   convolve them through the tunnel diode, apply voltage saturation,
+    //   then save the noise and signals to the 
+    //   `Antenna_r` object and the `trigger` class
     
     // Extend the length of this waveform we're constructing if more than 1 ray connected
     int wf_length = 0;
@@ -4270,14 +4281,8 @@ void Report::GetNoiseThenConvolve(
     // Get noise-only waveform
     vector <double> V_noise;
     GetAntennaNoiseWF(
-        this_signalbin, wf_length, channel_index, station_number, &V_noise, 
+        this_signalbin, wf_length, BINSIZE, channel_index, station_number, &V_noise, 
         settings1, trigger, detector);
-
-    // cout<<"    "<<"{"<<n_connected_rays<<" "<<antenna->ray_sol_cnt<<"} ";
-    // cout<<this_signalbin<<" ("<<min_wf_bin<<"->"<<max_wf_bin<<") ";
-    // cout<<wf_length<<" "<<BINSIZE<<" ";
-    // cout<<"["<<V_total_forconvlv.size()<<" "<<antenna->V_noise.size()<<" "<<antenna->V_convolved.size()<<"] ";
-    // cout<<"["<<V_noise.size()<<" "<<V_signal.size()<<"]"<<endl;
 
     // Create noise+signal waveforms
     V_total_forconvlv.clear();
@@ -4295,6 +4300,7 @@ void Report::GetNoiseThenConvolve(
         trigger->Full_window[channel_index][bin] = V_total_forconvlv[bin - this_signalbin + BINSIZE/2];
         trigger->Full_window_V[channel_index][bin] += V_signal[bin - this_signalbin + BINSIZE/2];
         antenna->V_convolved[bin] += V_signal[bin - this_signalbin + BINSIZE/2];
+        antenna->V_noise[bin] += V_noise[bin - this_signalbin + BINSIZE/2];
 
         // Add electronics saturation effect to WF we'll perform trigger check on
         if ( trigger->Full_window_V[channel_index][bin] > settings1->V_SATURATION ) {
@@ -4309,42 +4315,37 @@ void Report::GetNoiseThenConvolve(
 }
 
 
-// Choose waveforms from the trigger class to use for this event
 void Report::GetAntennaNoiseWF(
     int signalbin, 
-    int BINSIZE, int channel_index, int StationIndex, vector <double> *V_noise_only,
+    int wf_length, int BINSIZE, int channel_index, int StationIndex, vector <double> *V_noise_only,
     Settings *settings1, Trigger *trigger, Detector *detector
 ){
+    // Save a `wf_length` long noise waveform to the provided `V_noise_only` array
+    //   with the signal bin located at index `BINSIZE/2`
 
     // Clear old noise waveforms
     V_noise_only->clear();
 
     // Pick noise waveform
     vector< vector <double> > *noise_wf;
-    // vector< vector <double> > &noise_wf = *noise_wf_ptr;
+    int channel_number = GetChNumFromArbChID(detector, channel_index, StationIndex, settings1) - 1;
     if ( settings1->NOISE_CHANNEL_MODE==0) {
         noise_wf = &trigger->v_noise_timedomain;
     }
     // Use channel-by-channel temperatures to generate noise
     else if ( settings1->NOISE_CHANNEL_MODE==1) {
-        noise_wf = &trigger->v_noise_timedomain_ch[ 
-            GetChNumFromArbChID(detector, channel_index, StationIndex, settings1) - 1 
-        ];
+        noise_wf = &trigger->v_noise_timedomain_ch[ channel_number ];
     }
     // Only use channel-by-channel temperatures to generate noise for the first 8 channels. 
     // Use the same temperature for the remaining 8.
     else if ( settings1->NOISE_CHANNEL_MODE==2) {
         // If this channel is one of the first 8, use channel specific noise
-        if ( ( GetChNumFromArbChID(detector, channel_index, StationIndex, settings1) - 1 ) < 8) {
-            noise_wf = &trigger->v_noise_timedomain_ch[ 
-                GetChNumFromArbChID(detector, channel_index, StationIndex, settings1) - 1 
-            ];
+        if ( channel_number < 8) {
+            noise_wf = &trigger->v_noise_timedomain_ch[ channel_number ];
         }
         // This channel is NOT one of the first 8, use same noise for these channels
         else {
-            noise_wf = &trigger->v_noise_timedomain_ch[
-                8
-            ];
+            noise_wf = &trigger->v_noise_timedomain_ch[ 8 ];
         }
     }
     else{
@@ -4358,7 +4359,7 @@ void Report::GetAntennaNoiseWF(
     int bin_value;
     int noise_ID_index;
     int noise_wf_index;
-    for (int bin=0; bin<BINSIZE; bin++) {
+    for (int bin=0; bin<wf_length; bin++) {
         bin_value = signalbin - BINSIZE/2 + bin;
         noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
         noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
@@ -4368,36 +4369,6 @@ void Report::GetAntennaNoiseWF(
     } // end loop over bins
 
 }
-
-// void Report::DoTunnelDiode(
-//     int channel_index, int this_signalbin, int BINSIZE, 
-//     int min_wf_bin, int max_wf_bin, int wf_length, 
-//     vector <double> *V_total_forconvlv, vector <double> *diode_response, 
-//     Antenna_r *antenna,
-//     Settings *settings1, Trigger *trigger
-// ){
-    
-//     // Push noise+signal waveform through the tunnel diode
-//     trigger->myconvlv( V_total_forconvlv, wf_length, diode_response, V_total_forconvlv);
-
-//     // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
-//     for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
-
-//         // Export raw values to trigger->Full_window and trigger->Full_window_V
-//         trigger->Full_window[channel_index][bin] = V_total_forconvlv[bin - this_signalbin + BINSIZE/2];
-//         trigger->Full_window_V[channel_index][bin] += antenna->V_convolved[bin - this_signalbin + BINSIZE/2];
-
-//         // Add electronics saturation effect
-//         if ( trigger->Full_window_V[channel_index][bin] > settings1->V_SATURATION ) {
-//             trigger->Full_window_V[channel_index][bin] = settings1->V_SATURATION;
-//         }
-//         else if ( trigger->Full_window_V[channel_index][bin] < -1.*settings1->V_SATURATION ) {
-//             trigger->Full_window_V[channel_index][bin] = -1.*settings1->V_SATURATION;
-//         }
-
-//     } 
-
-// }
 
 
 void Report::Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *detector, int ID, int StationIndex ) {
@@ -4942,6 +4913,23 @@ void Report::GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_thet
     Vector flip_receive_vector = -1. * rec_vector;
     ant_theta = flip_receive_vector.Theta() * TMath::RadToDeg(); // return in degrees
     ant_phi = flip_receive_vector.Phi() * TMath::RadToDeg();
+
+}
+
+void Report::GetAngleLaunch(Vector &launch_vector, double &launch_theta, double &launch_phi) {
+    
+    /*
+    2024-07-01 JCF
+    Takes the launch vector of the signal and calculates the theta and phi of the launch vector in the 
+    station-centric coordinates and returns them in degrees; where theta=0 is along the upward vertical axis,
+    theta=90 is along the horizon, and theta=180 is along the downward vertical axis.
+    
+    This is necessary because for source reconstruction, we need the launch vector of the RF signal in 
+    conjunction with the polarization to find the neutrino trajectory.
+    */
+    
+    launch_theta = launch_vector.Theta() * TMath::RadToDeg();
+    launch_phi = launch_vector.Phi() * TMath::RadToDeg();
 
 }
 
