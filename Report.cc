@@ -3809,15 +3809,16 @@ void Report::ClearUselessfromConnect(Detector *detector, Settings *settings1, Tr
 }
 
 
-// For the provided antenna: 
-// Calculate bin values for the signal and determine if how many rays fit in the readout window
-// Combine signals from rays and load noise waveforms
-// Pass the noise+signal waveform through the tunnel diode
-// Enforce voltage saturation
+
 void Report::Convolve_Signals(
     Antenna_r *antenna, int channel_index, int station_number, 
     Settings *settings1, Trigger *trigger, Detector *detector
 ){
+    // For the provided antenna: 
+    // Calculate bin values for the signal and determine if how many rays fit in the readout window
+    // Combine signals from rays and load noise waveforms
+    // Pass the noise+signal waveform through the tunnel diode
+    // Enforce voltage saturation
 
     // init : bin + maxt_diode_bin, fin : bin + NFOUR/2
 
@@ -3927,12 +3928,13 @@ void Report::Convolve_Signals(
 }
 
 
-// Combine the signal from connected rays into one signal waveform
 void Report::GetAntennaSignalWF(
     int raysol, int *n_connected_rays, int *this_signalbin,
     int BINSIZE, Antenna_r *antenna, vector <double> *V_signal,
     Settings *settings1, Trigger *trigger, Detector *detector
 ){
+    // Determine which rays fall within the same trigger bin (BINSIZE) 
+    //   and combine them if so
 
     // loop over raysol numbers
     // when ray_sol_cnt == 0, this loop inside codes will not run
@@ -4057,11 +4059,11 @@ void Report::GetAntennaSignalWF(
 }
 
 
-// Convolve a single signal into the signal array
 void Report::Select_Wave_Convlv_Exchange(
     vector <double> &V, 
     int BINSIZE, vector <double> *V_signal
 ) {
+    // Convolve a single signal into the signal array
     
     // Clear previous waveform data
     V_signal->clear();
@@ -4074,12 +4076,12 @@ void Report::Select_Wave_Convlv_Exchange(
 }
 
 
-// Convolve 2 signals into one signal array
 void Report::Select_Wave_Convlv_Exchange(
     int signalbin_1, int signalbin_2, 
     vector <double> &V1, vector <double> &V2, 
     int BINSIZE, vector <double> *V_signal
 ) {
+    // Convolve 2 signals into one signal array
     
     // Clear previous waveform data
     V_signal->clear();
@@ -4106,12 +4108,12 @@ void Report::Select_Wave_Convlv_Exchange(
 }
 
 
-// Convolve 3 signals into one signal array
 void Report::Select_Wave_Convlv_Exchange(
     int signalbin_0, int signalbin_1, int signalbin_2, 
     vector <double> &V0, vector <double> &V1, vector <double> &V2, 
     int BINSIZE, vector <double> *V_signal
 ) {
+    // Convolve 3 signals into one signal array
     
     // Clear previous waveform data  
     V_signal->clear();
@@ -4155,6 +4157,10 @@ void Report::GetNoiseThenConvolve(
     int channel_index, int station_number, 
     Settings *settings1, Trigger *trigger, Detector *detector
 ){
+    // Get noise waveform, signal waveform, combine them, 
+    //   convolve them through the tunnel diode, apply voltage saturation,
+    //   then save the noise and signals to the 
+    //   `Antenna_r` object and the `trigger` class
     
     // Extend the length of this waveform we're constructing if more than 1 ray connected
     int wf_length = 0;
@@ -4216,12 +4222,13 @@ void Report::GetNoiseThenConvolve(
 }
 
 
-// Choose waveforms from the trigger class to use for this event
 void Report::GetAntennaNoiseWF(
     int signalbin, 
     int wf_length, int BINSIZE, int channel_index, int StationIndex, vector <double> *V_noise_only,
     Settings *settings1, Trigger *trigger, Detector *detector
 ){
+    // Save a `wf_length` long noise waveform to the provided `V_noise_only` array
+    //   with the signal bin located at index `BINSIZE/2`
 
     // Clear old noise waveforms
     V_noise_only->clear();
