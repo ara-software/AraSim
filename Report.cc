@@ -3873,6 +3873,7 @@ void Report::Convolve_Signals(
         vector <double> V_signal;
         for (int bin=0; bin<BINSIZE; bin++) V_signal.push_back(0.);
         for (int bin=0; bin<BINSIZE; bin++) antenna->V_convolved.push_back(0.);
+        for (int bin=0; bin<BINSIZE; bin++) antenna->V_noise.push_back(0.);
 
         // Convolve the noise signal and add to the array used for triggering
         GetNoiseThenConvolve(
@@ -3891,6 +3892,7 @@ void Report::Convolve_Signals(
 
         // Make array of 0s for array we're saving all ray signals to
         for (int i=0; i<array_length; i++) antenna->V_convolved.push_back(0.);
+        for (int i=0; i<array_length; i++) antenna->V_noise.push_back(0.);
 
     }
     
@@ -4199,6 +4201,7 @@ void Report::GetNoiseThenConvolve(
         trigger->Full_window[channel_index][bin] = V_total_forconvlv[bin - this_signalbin + BINSIZE/2];
         trigger->Full_window_V[channel_index][bin] += V_signal[bin - this_signalbin + BINSIZE/2];
         antenna->V_convolved[bin] += V_signal[bin - this_signalbin + BINSIZE/2];
+        antenna->V_noise[bin] += V_noise[bin - this_signalbin + BINSIZE/2];
 
         // Add electronics saturation effect to WF we'll perform trigger check on
         if ( trigger->Full_window_V[channel_index][bin] > settings1->V_SATURATION ) {
