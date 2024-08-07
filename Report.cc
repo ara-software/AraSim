@@ -173,6 +173,8 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
 
     time.clear();
     time_mimic.clear();
+    V_noise.clear();
+    V_convolved.clear();
     V_mimic.clear();
     Ax.clear();
     Ay.clear();
@@ -267,6 +269,8 @@ void Antenna_r::clear_useless(Settings *settings1) {   // to reduce the size of 
     // clear global trigger waveform info also
     time.clear();
     time_mimic.clear();
+    V_convolved.clear();
+    V_noise.clear();
     V_mimic.clear();
 
 
@@ -625,7 +629,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 stations[i].strings[j].antennas[k].Vfft.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].Vfft_noise.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].V.resize(ray_sol_cnt + 1);
-                                stations[i].strings[j].antennas[k].V_noise.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].SignalExt.resize(ray_sol_cnt + 1);
 
                                 // calculate the polarization vector at the source
@@ -2027,357 +2030,28 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 for (int k = 0; k < detector->stations[i].strings[j].antennas.size(); k++)
                 {
 
-                    // select noise waveform from trigger class
-                    for (int l = 0; l < N_noise; l++)
-                    {
+                    // Fill trigger->Full_window and trigger->Full_window_V with noise waveforms
+                    Prepare_Antenna_Noise(debugmode, ch_ID, i, j, k, settings1, trigger, detector);
 
-                        // if we are sharing same noise waveform for all chs, make sure diff chs use diff noise waveforms
-                        if (settings1->NOISE_CHANNEL_MODE == 0)
-                        {
+                    // currently there is a initial spoiled bins (maxt_diode_bin) 
+                    // at the initial Full_window "AND" at the initial of connected noisewaveform 
+                    // (we can fix this by adding values but not accomplished yet)
 
-                            // get random noise_ID and check if there are same noise_ID in different ch.
-                            // if there's same noise_ID, get noise_ID again until no noise_ID are same between chs
-                            noise_pass_nogo = 1;
-                            while (noise_pass_nogo)
-                            {
-                                noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
-                                noise_pass_nogo = 0;
-                                for (int j_sub = 0; j_sub < j + 1; j_sub++)
-                                {
-                                    for (int k_sub = 0; k_sub < detector->stations[i].strings[j].antennas.size(); k_sub++)
-                                    {
-                                        if (j_sub == j)
-                                        {
-                                            // if we are checking current string
-                                            if (k_sub < k)
-                                            {
-                                                // check antennas before current antenna
-                                                if (noise_ID[l] == stations[i].strings[j_sub].antennas[k_sub].noise_ID[0])
-                                                {
-                                                    // check only first one for now;;;
-                                                    noise_pass_nogo = 1;
-                                                }
-                                            }
-                                        }
-                                        else // if we are checking previous string, check upto entire antennas
-                                        {
-                                            // Avoids segfault from string 2 having 1 antenna for PA DETECTOR_STATION 3
-                                            if (
-                                                settings1->DETECTOR==5 && // Phased Array detector mode
-                                                settings1->DETECTOR_STATION==3 && // second PA detector configuration (PA + 7 ARA VPols)
-                                                j_sub==2 && // String 2
-                                                k_sub==1 // 2nd antenna that doesn't exist but this block of code expects it to
-                                            ) {
-                                                continue;
-                                            } 
-
-                                            // check only first one for now;;;
-                                            if (noise_ID[l] == stations[i].strings[j_sub].antennas[k_sub].noise_ID[0])
-                                            {
-                                                noise_pass_nogo = 1;
-                                            }
-                                        }
-                                    }
-                                }
-                            }   // while noise_pass_nogo
-                        }   // if NOISE_CHANNEL_MODE = 0
-
-                        // if we are using diff noise waveform for diff chs, just pick any noise waveform
-                        else if (settings1->NOISE_CHANNEL_MODE == 1)
-                        {
-                            noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
-                            // cout << "picking noise waveform" << endl;
-                            // cout << noise_ID[l]<< endl;
-                        }   // if NOISE_CHANNEL_MODE = 1
-
-                        // if we are using diff noise waveform for diff chs, just pick any noise waveform
-                        else if (settings1->NOISE_CHANNEL_MODE == 2)
-                        {
-                            noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
-                        }   // if NOISE_CHANNEL_MODE = 2
-
-                        // save noise ID
-                        stations[i].strings[j].antennas[k].noise_ID.push_back(noise_ID[l]);
-
-                        // cout<<"noise_ID for "<<l<<"th noisewaveform is : "<<noise_ID[l]<<"  N_noise : "<<N_noise<<" ray_sol_cnt : "<<stations[i].strings[j].antennas[k].ray_sol_cnt<<endl;
-
-                        // do only if it's not in debugmode
-                        if (debugmode == 0)
-                        {
-
-                            // cout << l << " : " << N_noise-1 << " : " << ch_ID << endl;
-                            // if we are sharing same noise waveform for all chs, make sure diff chs use diff noise waveforms
-                            if (settings1->NOISE_CHANNEL_MODE == 0)
-                            {
-                                if (l == N_noise - 1)
-                                {
-                                    // when it's final noise waveform
-                                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                    {
-                                        // test for full window
-                                        trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode[noise_ID[l]][bin]);
-                                        trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain[noise_ID[l]][bin]);
-                                    }
-                                    // cout<<"last noise filled in Full_window!"<<endl;
-                                }
-                                else
-                                {
-                                    // when it's not final noise waveform
-                                    // cout<<"full noise will fill in Full_window!"<<endl;
-                                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                    {
-                                        trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode[noise_ID[l]][bin]);
-                                        trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain[noise_ID[l]][bin]);
-                                    }
-                                }
-                            }
-
-                            // if we are sharing same noise waveform for all chs, make sure diff chs use diff noise waveforms
-                            else if (settings1->NOISE_CHANNEL_MODE == 1)
-                            {
-                                if (l == N_noise - 1)
-                                {
-                                    // when it's final noise waveform
-                                    //for (int bin=0; bin < remain_bin; bin++) {
-                                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                    {
-                                        // test for full window
-                                        //                  cout << GetChNumFromArbChID(detector,ch_ID,i,settings1)-1 << " : " << noise_ID[l] << " : " << ch_ID << endl;
-                                        trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                        trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                    }
-                                    //                      cout << "getting full window: " << ch_ID << endl;
-                                    //cout<<"last noise filled in Full_window!"<<endl;
-                                }
-                                else
-                                {
-                                    // when it's not final noise waveform
-                                    //cout<<"full noise will fill in Full_window!"<<endl;
-                                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                    {
-
-                                        trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                        trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                    }
-                                }
-                            }
-
-                            // if we are sharing same noise waveform for first 8 chs and share same noisewaveforms for others, make sure diff chs use diff noise waveforms
-                            else if (settings1->NOISE_CHANNEL_MODE == 2)
-                            {
-
-                                if ((GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1) < 8)
-                                {
-
-                                    if (l == N_noise - 1)
-                                    {
-                                        // when it's final noise waveform
-                                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                        {
-                                            // test for full window
-                                            trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                            trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                        }
-                                        // cout<<"last noise filled in Full_window!"<<endl;
-                                    }
-                                    else
-                                    {
-                                        // when it's not final noise waveform
-                                        // cout<<"full noise will fill in Full_window!"<<endl;
-                                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                        {
-                                            trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                            trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1][noise_ID[l]][bin]);
-                                        }
-                                    }
-                                }
-                                else
-                                {
-
-                                    if (l == N_noise - 1)
-                                    {
-                                        // when it's final noise waveform
-                                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                        {
-                                            // test for full window
-                                            trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[8][noise_ID[l]][bin]);
-                                            trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[8][noise_ID[l]][bin]);
-                                        }
-                                        // cout<<"last noise filled in Full_window!"<<endl;
-                                    }
-                                    else
-                                    {
-                                        // when it's not final noise waveform
-                                        // cout<<"full noise will fill in Full_window!"<<endl;
-                                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
-                                        {
-                                            trigger->Full_window[ch_ID][bin] = (trigger->v_noise_timedomain_diode_ch[8][noise_ID[l]][bin]);
-                                            trigger->Full_window_V[ch_ID][bin] = (trigger->v_noise_timedomain_ch[8][noise_ID[l]][bin]);
-                                        }
-                                    }
-                                }
-                            }
-                        }   // if we are not in debug mode
-
+                    // Combine signals from all rays, add noise, and convolve them through the tunnel diode
+                    // cout<<"    "<<i<<" "<<j<<" "<<k<<" :"<<endl;
+                    if (debugmode == 0) {
+                        Convolve_Signals(
+                            &stations[i].strings[j].antennas[k], ch_ID, i,
+                            settings1, trigger, detector
+                        );
                     }
 
-                    // currently there is a initial spoiled bins (maxt_diode_bin) at the initial Full_window "AND" at the initial of connected noisewaveform (we can fix this by adding values but not accomplished yet)
-
-                    // cout<<"done filling noise diode arrays for trigger!"<<endl;
-
-                    // now we need to calculate bin values for the signal
-                    // with the bin values, grap noise voltage waveform (NFOUR/2) and do myconvlv
-                    // and replace by init : bin + maxt_diode_bin, fin : bin + NFOUR/2
-                    // after we do this for all channels, do trigger check
-
-                    // calculate the bin values for the signal
-                    signal_bin.clear();
-                    signal_dbin.clear();
-                    connect_signals.clear();
-
-                    // do only if it's not in debugmode
-                    if (debugmode == 0)
+                    // Apply gain factors
+                    if ((debugmode == 0) && (settings1->USE_MANUAL_GAINOFFSET == 1) )
                     {
+                        Apply_Gain_Offset(settings1, trigger, detector, ch_ID, i);
 
-                        for (int m = 0; m < stations[i].strings[j].antennas[k].ray_sol_cnt; m++)
-                        {
-                            // loop over raysol numbers
-                            signal_bin.push_back((stations[i].strings[j].antennas[k].arrival_time[m] - stations[i].min_arrival_time) / (settings1->TIMESTEP) + settings1->NFOUR *2 + trigger->maxt_diode_bin);
-
-                            // store signal located bin
-                            stations[i].strings[j].antennas[k].SignalBin.push_back(signal_bin[m]);
-
-                            if (m > 0)
-                            {
-                                signal_dbin.push_back(signal_bin[m] - signal_bin[m - 1]);
-                                // cout<<"  signal_dbin["<<m-1<<"] : "<<signal_dbin[m-1];
-                                if (signal_dbin[m - 1] < settings1->NFOUR / 2)
-                                {
-                                    // if two ray_sol time delay is smaller than time window
-                                    connect_signals.push_back(1);
-                                    // cout<<"need two signal connection!!"<<endl;
-                                }
-                                else
-                                {
-                                    connect_signals.push_back(0);
-                                }
-                            }
-                            else if (stations[i].strings[j].antennas[k].ray_sol_cnt == 1 && m == 0)
-                            {
-                                // if only one solution
-                                connect_signals.push_back(0);
-                            }
-                            // cout<<"\n";
-                        }
-
-                        // cout<<"done calculating signal bins / connect or not"<<endl;
-
-                        // grab noise waveform (NFOUR/2 bins or NFOUR) for diode convlv
-                        for (int m = 0; m < stations[i].strings[j].antennas[k].ray_sol_cnt; m++)
-                        {
-                            // loop over raysol numbers
-                            // when ray_sol_cnt == 0, this loop inside codes will not run
-
-                            if (m == 0)
-                            {
-                                // if it's first sol
-
-                                if (connect_signals[m] == 1)
-                                {
-
-                                    // do two convlv with double array m, m+1
-
-                                    Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i, &stations[i].strings[j].antennas[k].V_noise[m]);
-                                }
-                                else if (connect_signals[m] == 0)
-                                {
-                                    // cout << noise_ID << " : " << ch_ID << " : " << i << " : " << endl;
-                                    // do NFOUR/2 size array convlv (m)
-                                    Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, &stations[i].strings[j].antennas[k].V_noise[m]);
-                                }
-                            }
-                            else
-                            {
-                                // if it's not the first sol
-
-                                if (m + 1 < stations[i].strings[j].antennas[k].ray_sol_cnt)
-                                {
-                                    // if there is next raysol
-
-                                    if (connect_signals[m] == 1)
-                                    {
-                                        // next raysol is connected
-
-                                        if (connect_signals[m - 1] == 1)
-                                        {
-                                            // and previous raysol also connected
-
-                                            // double size array with m-1, m, m+1 raysols all added
-                                            //
-                                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m - 1], signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m - 1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i, &stations[i].strings[j].antennas[k].V_noise[m]);
-                                        }
-                                        else if (connect_signals[m - 1] == 0)
-                                        {
-                                            // and previous raysol not connected
-
-                                            // double size array with m, m+1 raysols
-                                            //
-                                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], signal_bin[m + 1], stations[i].strings[j].antennas[k].V[m], stations[i].strings[j].antennas[k].V[m + 1], noise_ID, ch_ID, i, &stations[i].strings[j].antennas[k].V_noise[m]);
-                                        }
-                                    }
-                                    else if (connect_signals[m] == 0)
-                                    {
-                                        // next raysol is not connected
-
-                                        if (connect_signals[m - 1] == 1)
-                                        {
-                                            // and previous raysol is connected
-
-                                            // skip the process as this should have done before
-                                            //
-
-                                        }
-                                        else if (connect_signals[m - 1] == 0)
-                                        {
-                                            // and previous raysol not connected
-
-                                            // single size array with only m raysol
-                                            //
-                                            Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, &stations[i].strings[j].antennas[k].V_noise[m]);
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    // there is no next raysol (this "m" is the last raysol)
-
-                                    if (connect_signals[m - 1] == 1)
-                                    {
-                                        // and previous raysol is connected
-
-                                        // skip the process as this should have done before
-                                        //
-
-                                    }
-                                    else if (connect_signals[m - 1] == 0)
-                                    {
-                                        // and previous raysol is not connected
-
-                                        // single size array with only m raysol
-                                        //
-                                        Select_Wave_Convlv_Exchange(settings1, trigger, detector, signal_bin[m], stations[i].strings[j].antennas[k].V[m], noise_ID, ch_ID, i, &stations[i].strings[j].antennas[k].V_noise[m]);
-                                    }
-                                }
-                            }   // if not the first raysol (all other raysols)
-
-                        }   // end loop over raysols
-
-                        // cout<<"done convlv for signal + noise"<<endl;
-                        // I think I have to apply gain difference factors in here...
-                        if (settings1->USE_MANUAL_GAINOFFSET == 1)
-                            Apply_Gain_Offset(settings1, trigger, detector, ch_ID, i);  // last i for stationID
-
-                    }   // if it's not debugmode
+                    } 
 
                     ch_ID++;    // now to next channel
 
@@ -4146,249 +3820,472 @@ void Report::ClearUselessfromConnect(Detector *detector, Settings *settings1, Tr
 
 
 
+void Report::Convolve_Signals(
+    Antenna_r *antenna, int channel_index, int station_number, 
+    Settings *settings1, Trigger *trigger, Detector *detector
+){
+    // For the provided antenna: 
+    // Calculate bin values for the signal and determine if how many rays fit in the readout window
+    // Combine signals from rays and load noise waveforms
+    // Pass the noise+signal waveform through the tunnel diode
+    // Enforce voltage saturation
 
-// this one is for single signal
-void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise) {
+    // init : bin + maxt_diode_bin, fin : bin + NFOUR/2
 
+    // Clear old signals
+    signal_bin.clear();
+    signal_dbin.clear();
+    connect_signals.clear();
+
+    // Determine the bin (index) where the signal will arrive in output waveforms
+    //   and flag which signals will fit into the same time window
+    for (int m = 0; m < antenna->ray_sol_cnt; m++)
+    {
+        // loop over raysol numbers
+
+        // Store the bin where the singal is located
+        signal_bin.push_back(
+            (antenna->arrival_time[m] - stations[station_number].min_arrival_time) / (settings1->TIMESTEP) 
+            + settings1->NFOUR *2 + trigger->maxt_diode_bin);
+        antenna->SignalBin.push_back(signal_bin[m]);
+
+        // Determine if any rays are connected to each other
+        // If connect_signals[m] == 1, signal from the ray at index `m` is 
+        //   readout in the same waveform as the signal from the ray at index `m-1`.
+        if (m > 0)
+        {
+            signal_dbin.push_back(signal_bin[m] - signal_bin[m - 1]);
+            if (signal_dbin[m - 1] < settings1->NFOUR / 2)
+            {
+                // if two ray_sol time delay is smaller than time window
+                connect_signals.push_back(1);
+            }
+            else
+            {
+                connect_signals.push_back(0);
+            }
+        }
+        else if (antenna->ray_sol_cnt == 1 && m == 0)
+        {
+            // if there's only one solution
+            connect_signals.push_back(0);
+        }
+
+    }
+
+    // Set default signal wf length
     int BINSIZE = settings1->NFOUR/2;
 
-//    int BINSIZE = detector->stations[StationIndex].NFOUR/2;
-    int bin_value;
-    //vector <double> V_total_forconvlv;   // total time domain waveform (noise + signal)
-    
-    V_total_forconvlv.clear();
-    
-    // first, fill the noise values
-    for (int bin=0; bin<BINSIZE; bin++) {   //BINSIZE should be NFOUR/2
-        bin_value = signalbin - BINSIZE/2 + bin;
+    // If there are no ray solutions to this antenna, fill all the arrays with 0s
+    //   then get noise and convolve
+    if ( antenna->ray_sol_cnt == 0 ){
+        
+        // Save signal wf as array of 0s
+        vector <double> V_signal;
+        for (int bin=0; bin<BINSIZE; bin++) V_signal.push_back(0.);
+        for (int bin=0; bin<BINSIZE; bin++) antenna->V_convolved.push_back(0.);
+        for (int bin=0; bin<BINSIZE; bin++) antenna->V_noise.push_back(0.);
 
-        // save the noise + signal waveform
-                           
-        if ( settings1->NOISE_CHANNEL_MODE==0) {
-            V_total_forconvlv.push_back( trigger->v_noise_timedomain[ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
-            V_with_noise->push_back(V_total_forconvlv[-1]);
-        }
-        else if ( settings1->NOISE_CHANNEL_MODE==1) {
-            V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[ GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 ][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
-            V_with_noise->push_back(V_total_forconvlv[-1]);
-        }
+        // Convolve the noise signal and add to the array used for triggering
+        GetNoiseThenConvolve(
+            antenna, V_signal,
+            BINSIZE, BINSIZE/2, 0, // waveform_length, this_signalbin, n_connected_rays
+            channel_index, station_number, 
+            settings1, trigger, detector);
+            
+    }
+    // If there are ray solutions, prepare signal wf array with 0s 
+    //   and save an array with the full noise-only waveform to the antenna
+    else {
 
-        else if ( settings1->NOISE_CHANNEL_MODE==2) {
-            if ( (GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1) < 8) {
-                V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[ GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 ][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
-                V_with_noise->push_back(V_total_forconvlv[-1]);
-            }
-            else {
-                V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[8][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ]  + V[bin] );
-                V_with_noise->push_back(V_total_forconvlv[-1]);
-            }
-        }
+        // Initialize waveform length as 2 BINSIZES longer than the last ray's signal bin
+        int array_length = signal_bin[antenna->ray_sol_cnt-1] + 2*BINSIZE;
 
+        // Make array of 0s for array we're saving all ray signals to
+        for (int i=0; i<array_length; i++) antenna->V_convolved.push_back(0.);
+        for (int i=0; i<array_length; i++) antenna->V_noise.push_back(0.);
 
     }
+    
+    // Loop over ray solutions and get signals from each
+    // Loop does not run if there are no ray solutions
+    for (int m = 0; m < antenna->ray_sol_cnt; m++)
+    {
 
-    // do myconvlv and replace the diode response array
-//    trigger->myconvlv( V_total_forconvlv, detector->stations[StationIndex].NFOUR, detector->stations[StationIndex].TIMESTEP, detector->fdiode_real, V_total_forconvlv);
-//    trigger->myconvlv( V_total_forconvlv, detector->stations[StationIndex].NFOUR, detector->fdiode_real, V_total_forconvlv);
-//
-    trigger->myconvlv( V_total_forconvlv, BINSIZE, detector->fdiode_real, V_total_forconvlv);
+        // Grab signal-only waveform, what the signal bin of the main ray is, 
+        //   and the number of rays in this tunnel diode window (connected rays)
+        // V_signal will have a length of BINSIZE if only 1 ray exists in a waveform
+        //   array with length NFOUR/2 and BINSIZE*2 if 2 or more fit into one tunnel diode window.
+        int this_signalbin = 0;
+        int n_connected_rays = 0;
+        vector <double> V_signal;
+        GetAntennaSignalWF(
+            m, &n_connected_rays, &this_signalbin, BINSIZE, antenna, &V_signal,
+            settings1, trigger, detector);
 
-    // do replace the part we get from noise + signal
-    for (int bin=signalbin-BINSIZE/2+(trigger->maxt_diode_bin); bin<signalbin+BINSIZE/2; bin++) {
-        trigger->Full_window[ID][bin] = V_total_forconvlv[bin - signalbin + BINSIZE/2];
-        trigger->Full_window_V[ID][bin] += V[bin - signalbin + BINSIZE/2];
+        // Get the noise-only wf from just this signal-window then convolve 
+        //   through the tunnel diode
+        if (n_connected_rays>0) {
+            GetNoiseThenConvolve(
+                antenna, V_signal,
+                BINSIZE, this_signalbin, n_connected_rays, 
+                channel_index, station_number, 
+                settings1, trigger, detector);
+        }
 
-        //
-        // electronics saturation effect
-        if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;
-        else if ( trigger->Full_window_V[ID][bin] < -1.*settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = -1.*settings1->V_SATURATION;
-
-    }
-
-
-    //V_total_forconvlv.clear();
+    }   // end loop over ray solutions
 
 }
 
 
+void Report::GetAntennaSignalWF(
+    int raysol, int *n_connected_rays, int *this_signalbin,
+    int BINSIZE, Antenna_r *antenna, vector <double> *V_signal,
+    Settings *settings1, Trigger *trigger, Detector *detector
+){
+    // Determine which rays fall within the same trigger bin (BINSIZE) 
+    //   and combine them if so
 
+    // loop over raysol numbers
+    // when ray_sol_cnt == 0, this loop inside codes will not run
 
-// this one is for two connected signals 
-void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin1, int signalbin2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise) {
+    if (raysol == 0)
+    {
+        // if it's first sol
 
-    int BINSIZE = settings1->NFOUR/2;
+        if (connect_signals[raysol] == 1)
+        {
+            *n_connected_rays = 2;
+            *this_signalbin = signal_bin[raysol];
 
-//    int BINSIZE = detector->stations[StationIndex].NFOUR/2;
-    int bin_value;
-    int signal_dbin = signalbin2 - signalbin1;
-    //vector <double> V_total_forconvlv;   // total time domain waveform (noise + signal)
-    double V_tmp[BINSIZE*2];
-    for(int bin_tmp=0; bin_tmp<BINSIZE*2; bin_tmp++) {
-        V_tmp[bin_tmp] = 0.;
+            // Combine signals from m and m+1 ray in double sized (NFOUR) signal array
+            Select_Wave_Convlv_Exchange( 
+                signal_bin[raysol], signal_bin[raysol + 1], 
+                antenna->V[raysol], antenna->V[raysol + 1], 
+                BINSIZE, V_signal);
+        }
+        else if (connect_signals[raysol] == 0)
+        {
+            *n_connected_rays = 1;
+            *this_signalbin = signal_bin[raysol];
+
+            // Make a normally sized (NFOUR/2) signal array with just this ray 
+            Select_Wave_Convlv_Exchange(
+                antenna->V[raysol], 
+                BINSIZE, V_signal);
+        }
     }
+    else
+    {
+        // if it's not the first sol
+
+        if (raysol + 1 < antenna->ray_sol_cnt)
+        {
+            // if there is next raysol
+
+            if (connect_signals[raysol] == 1)
+            {
+                // next raysol is connected
+
+                if (connect_signals[raysol - 1] == 1)
+                {
+                    // and previous raysol also connected
+
+                    *n_connected_rays = 3;
+                    *this_signalbin = signal_bin[raysol];
+
+                    // Combine signals from all 3 rays in a double sized (NFOUR) signal array
+                    Select_Wave_Convlv_Exchange(
+                        signal_bin[raysol - 1], signal_bin[raysol], signal_bin[raysol + 1], 
+                        antenna->V[raysol - 1], antenna->V[raysol], antenna->V[raysol + 1], 
+                        BINSIZE, V_signal);
+                }
+                else if (connect_signals[raysol - 1] == 0)
+                {
+                    // and previous raysol not connected
+
+                    *n_connected_rays = 2;
+                    *this_signalbin = signal_bin[raysol];
+
+                    // Combine signals from m and m+1 ray in a double sized (NFOUR) signal array
+                    Select_Wave_Convlv_Exchange(
+                        signal_bin[raysol], signal_bin[raysol + 1], 
+                        antenna->V[raysol], antenna->V[raysol + 1], 
+                        BINSIZE, V_signal);
+                }
+            }
+            else if (connect_signals[raysol] == 0)
+            {
+                // next raysol is not connected
+
+                if (connect_signals[raysol - 1] == 1)
+                {
+                    // and previous raysol is connected
+
+                    // skip the process as this should have done before
+
+                }
+                else if (connect_signals[raysol - 1] == 0)
+                {
+                    // and previous raysol not connected
+
+                    *n_connected_rays = 1;
+                    *this_signalbin = signal_bin[raysol];
+
+                    // Make a normally sized (NFOUR/2) signal array with just this ray 
+                    Select_Wave_Convlv_Exchange(
+                        antenna->V[raysol], 
+                        BINSIZE, V_signal);
+                }
+            }
+        }
+        else
+        {
+            // there is no next raysol (this "m" is the last raysol)
+
+            if (connect_signals[raysol - 1] == 1)
+            {
+                // and previous raysol is connected
+
+                // skip the process as this should have done before
+
+            }
+            else if (connect_signals[raysol - 1] == 0)
+            {
+                // and previous raysol is not connected
+
+                *n_connected_rays = 1;
+                *this_signalbin = signal_bin[raysol];
+
+                // Make a normally sized (NFOUR/2) signal array with just this ray 
+                Select_Wave_Convlv_Exchange(
+                    antenna->V[raysol], 
+                    BINSIZE, V_signal);
+            }
+        }
+
+    }   // if not the first raysol (all other raysols)
+
+}
+
+
+void Report::Select_Wave_Convlv_Exchange(
+    vector <double> &V, 
+    int BINSIZE, vector <double> *V_signal
+) {
+    // Convolve a single signal into the signal array
     
-    V_total_forconvlv.clear();
+    // Clear previous waveform data
+    V_signal->clear();
     
-    // first, fill the noise values
+    // Save the signal voltage waveform
+    for (int bin=0; bin<BINSIZE; bin++) {
+        V_signal->push_back( V[bin] );
+    }
+
+}
+
+
+void Report::Select_Wave_Convlv_Exchange(
+    int signalbin_1, int signalbin_2, 
+    vector <double> &V1, vector <double> &V2, 
+    int BINSIZE, vector <double> *V_signal
+) {
+    // Convolve 2 signals into one signal array
+    
+    // Clear previous waveform data
+    V_signal->clear();
+    
+    // Save the signal voltage waveform
+    int signal_dbin = signalbin_2 - signalbin_1;
     for (int bin=0; bin<BINSIZE*2; bin++) {
-        bin_value = signalbin1 - BINSIZE/2 + bin;
 
-        // save the noise waveform
-        if ( settings1->NOISE_CHANNEL_MODE==0) {
-            V_total_forconvlv.push_back( trigger->v_noise_timedomain[ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ] );
-        }
-        else if ( settings1->NOISE_CHANNEL_MODE==1) {
-            V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[ GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 ][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ] );
-        }
-        else if ( settings1->NOISE_CHANNEL_MODE==2) {
-            if ( (GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1) < 8) {
-                V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[ GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 ][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ] );
-            }
-            else {
-                V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[8][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ] );
-            }
-        }
-
-
-        // exchange from pure noise to noise + signal
         if (bin < signal_dbin) {  // bins where only first signal is shown
-            V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin];
-            V_tmp[bin] = V1[bin];
-            V_with_noise->push_back(V_total_forconvlv[-1]);
+            V_signal->push_back( V1[bin] );
         }
         else if (bin < BINSIZE) { // bins where first + second signal is shown
-            V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V2[bin - signal_dbin];
-            V_tmp[bin] = V1[bin] + V2[bin - signal_dbin];
-            V_with_noise->push_back(V_total_forconvlv[-1]);
+            V_signal->push_back( V1[bin] + V2[bin - signal_dbin] );
         }
         else if (bin < BINSIZE + signal_dbin) { // bins where only second signal is shown
-            V_total_forconvlv[bin] = V_total_forconvlv[bin] + V2[bin - signal_dbin];
-            V_tmp[bin] = V2[bin - signal_dbin];
-            V_with_noise->push_back(V_total_forconvlv[-1]);
+            V_signal->push_back( V2[bin - signal_dbin] );
+        }
+        else {
+            V_signal->push_back(0.);
         }
 
     }
-
-    // do myconvlv and replace the diode response array
-//    trigger->myconvlv( V_total_forconvlv, detector->stations[StationIndex].NFOUR, detector->stations[StationIndex].TIMESTEP, detector->fdiode_real_double, V_total_forconvlv);
-//    trigger->myconvlv( V_total_forconvlv, detector->stations[StationIndex].NFOUR, detector->fdiode_real_double, V_total_forconvlv);
-//
-    trigger->myconvlv( V_total_forconvlv, BINSIZE*2, detector->fdiode_real_double, V_total_forconvlv);
-
-    // do replace the part we get from noise + signal
-    for (int bin=signalbin1-BINSIZE/2+(trigger->maxt_diode_bin); bin<signalbin1+BINSIZE/2+BINSIZE; bin++) {
-        trigger->Full_window[ID][bin] = V_total_forconvlv[bin - signalbin1 + BINSIZE/2];
-        trigger->Full_window_V[ID][bin] += V_tmp[bin - signalbin1 + BINSIZE/2];
-        //
-        // electronics saturation effect
-        if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;
-        else if ( trigger->Full_window_V[ID][bin] < -1.*settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = -1.*settings1->V_SATURATION;
-    }
-
-
-    //V_total_forconvlv.clear();
-
 
 }
 
 
-
-
-// this one is for three connected signals 
-void Report::Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin0, int signalbin1, int signalbin2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise) {
-
-    int BINSIZE = settings1->NFOUR/2;
-
-//    int BINSIZE = detector->stations[StationIndex].NFOUR/2;
-    int bin_value;
-    int signal_dbin = signalbin2 - signalbin1;
-    int signal_dbin0 = signalbin1 - signalbin0;
-    //vector <double> V_total_forconvlv;   // total time domain waveform (noise + signal)
-    double V_tmp[BINSIZE*2];
-    for(int bin_tmp=0; bin_tmp<BINSIZE*2; bin_tmp++) {
-        V_tmp[bin_tmp] = 0.;
-    }
+void Report::Select_Wave_Convlv_Exchange(
+    int signalbin_0, int signalbin_1, int signalbin_2, 
+    vector <double> &V0, vector <double> &V1, vector <double> &V2, 
+    int BINSIZE, vector <double> *V_signal
+) {
+    // Convolve 3 signals into one signal array
     
-    V_total_forconvlv.clear();
+    // Clear previous waveform data  
+    V_signal->clear();
     
-    // first, fill the noise values
+    // Save the signal voltage waveform
+    int signal_dbin = signalbin_2 - signalbin_1;
+    int signal_dbin0 = signalbin_1 - signalbin_0;
     for (int bin=0; bin<BINSIZE*2; bin++) {
-        bin_value = signalbin1 - BINSIZE/2 + bin;
 
-        // save the noise waveform
-        if ( settings1->NOISE_CHANNEL_MODE==0) {
-            V_total_forconvlv.push_back( trigger->v_noise_timedomain[ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ] );
-        }
-        else if ( settings1->NOISE_CHANNEL_MODE==1) {
-            V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[ GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 ][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ] );
-        }
-        else if ( settings1->NOISE_CHANNEL_MODE==2) {
-            if ( (GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1) < 8) {
-                V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[ GetChNumFromArbChID(detector,ID,StationIndex,settings1)-1 ][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ] );
-            }
-            else {
-                V_total_forconvlv.push_back( trigger->v_noise_timedomain_ch[8][ noise_ID[ (int)( bin_value / settings1->DATA_BIN_SIZE) ] ][ (int)( bin_value % settings1->DATA_BIN_SIZE ) ] );
-            }
-        }
-
-
-        // exchange from pure noise to noise + signal
         if (bin < signal_dbin) {  // bins where no second signal is shown
             if ( signal_dbin0 + bin < BINSIZE ) {   // previous signal is also here!
-                V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V0[ signal_dbin0 + bin];
-                V_tmp[bin] = V1[bin] + V0[ signal_dbin0 + bin];
-                V_with_noise->push_back(V_total_forconvlv[-1]);
+                V_signal->push_back( V0[ signal_dbin0 + bin] );
             }
             else {  // no previous signal, and next signal
-                V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin];
-                V_tmp[bin] = V1[bin];
-                V_with_noise->push_back(V_total_forconvlv[-1]);
+                V_signal->push_back( V1[bin] );
             }
         }
         else if (bin < BINSIZE) { // bins where first + second signal is shown
             if ( signal_dbin0 + bin < BINSIZE ) {   // previous signal is also here!
-                V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V0[ signal_dbin0 + bin] + V2[bin - signal_dbin];
-                V_tmp[bin] = V1[bin] + V0[ signal_dbin0 + bin] + V2[bin - signal_dbin];
-                V_with_noise->push_back(V_total_forconvlv[-1]);
+                V_signal->push_back( V1[bin] + V0[ signal_dbin0 + bin] + V2[bin - signal_dbin] );
             }
             else {  // no previous signal, and next signal
-                V_total_forconvlv[bin] = V_total_forconvlv[bin] + V1[bin] + V2[bin - signal_dbin];
-                V_tmp[bin] = V1[bin] + V2[bin - signal_dbin];
-                V_with_noise->push_back(V_total_forconvlv[-1]);
+                V_signal->push_back( V1[bin] + V2[bin - signal_dbin] );
             }
         }
         else if (bin < BINSIZE + signal_dbin) { // bins where only second signal is shown
-            V_total_forconvlv[bin] = V_total_forconvlv[bin] + V2[bin - signal_dbin];
-            V_tmp[bin] = V2[bin - signal_dbin];
-            V_with_noise->push_back(V_total_forconvlv[-1]);
+            V_signal->push_back( V2[bin - signal_dbin] );
+        }
+        else {
+            V_signal->push_back(0.);
         }
 
     }
-
-    // do myconvlv and replace the diode response array
-//    trigger->myconvlv( V_total_forconvlv, detector->stations[StationIndex].NFOUR, detector->stations[StationIndex].TIMESTEP, detector->fdiode_real_double, V_total_forconvlv);
-//    trigger->myconvlv( V_total_forconvlv, detector->stations[StationIndex].NFOUR, detector->fdiode_real_double, V_total_forconvlv);
-//
-    trigger->myconvlv( V_total_forconvlv, BINSIZE*2, detector->fdiode_real_double, V_total_forconvlv);
-
-    // do replace the part we get from noise + signal
-    for (int bin=signalbin1-BINSIZE/2+(trigger->maxt_diode_bin); bin<signalbin1+BINSIZE/2+BINSIZE; bin++) {
-        trigger->Full_window[ID][bin] = V_total_forconvlv[bin - signalbin1 + BINSIZE/2];
-        trigger->Full_window_V[ID][bin] += V_tmp[bin - signalbin1 + BINSIZE/2];
-        //
-        // electronics saturation effect
-        if ( trigger->Full_window_V[ID][bin] > settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = settings1->V_SATURATION;
-        else if ( trigger->Full_window_V[ID][bin] < -1.*settings1->V_SATURATION ) trigger->Full_window_V[ID][bin] = -1.*settings1->V_SATURATION;
-    }
-
-
-    //V_total_forconvlv.clear();
-
 
 }
 
 
+void Report::GetNoiseThenConvolve(
+    Antenna_r *antenna, vector <double> V_signal,
+    int BINSIZE, int this_signalbin, int n_connected_rays, 
+    int channel_index, int station_number, 
+    Settings *settings1, Trigger *trigger, Detector *detector
+){
+    // Get noise waveform, signal waveform, combine them, 
+    //   convolve them through the tunnel diode, apply voltage saturation,
+    //   then save the noise and signals to the 
+    //   `Antenna_r` object and the `trigger` class
+    
+    // Extend the length of this waveform we're constructing if more than 1 ray connected
+    int wf_length = 0;
+    int min_wf_bin = this_signalbin-BINSIZE/2+(trigger->maxt_diode_bin);
+    int max_wf_bin = 0;
+    vector <double> diode_response;
+    if ( n_connected_rays > 1 ) { // multiple ray solutions in one window
+        wf_length = BINSIZE * 2;
+        max_wf_bin = this_signalbin + BINSIZE/2 + BINSIZE;
+        diode_response = detector->fdiode_real_double;
+    }
+    else if ( antenna->ray_sol_cnt == 0 ){ // No rays connected to this antenna
+        this_signalbin = BINSIZE/2;
+        wf_length = BINSIZE;
+        min_wf_bin = 0;
+        max_wf_bin = BINSIZE;
+        diode_response = detector->fdiode_real;
+    }
+    else { // Only one ray signal in the window
+        wf_length = BINSIZE;
+        max_wf_bin = this_signalbin + BINSIZE/2;
+        diode_response = detector->fdiode_real;
+    }
 
+    // Get noise-only waveform
+    vector <double> V_noise;
+    GetAntennaNoiseWF(
+        this_signalbin, wf_length, BINSIZE, channel_index, station_number, &V_noise, 
+        settings1, trigger, detector);
+
+    // Create noise+signal waveforms
+    V_total_forconvlv.clear();
+    for (int bin=0; bin<wf_length; bin++){
+        V_total_forconvlv.push_back( V_signal.at(bin) + V_noise[bin]);
+    }
+
+    // Push noise+signal waveform through the tunnel diode
+    trigger->myconvlv( V_total_forconvlv, wf_length, diode_response, V_total_forconvlv);
+
+    // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
+    for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
+
+        // Export WFs with newly-processed signals
+        trigger->Full_window[channel_index][bin] = V_total_forconvlv[bin - this_signalbin + BINSIZE/2];
+        trigger->Full_window_V[channel_index][bin] += V_signal[bin - this_signalbin + BINSIZE/2];
+        antenna->V_convolved[bin] += V_signal[bin - this_signalbin + BINSIZE/2];
+        antenna->V_noise[bin] += V_noise[bin - this_signalbin + BINSIZE/2];
+
+        // Add electronics saturation effect to WF we'll perform trigger check on
+        if ( trigger->Full_window_V[channel_index][bin] > settings1->V_SATURATION ) {
+            trigger->Full_window_V[channel_index][bin] = settings1->V_SATURATION;
+        }
+        else if ( trigger->Full_window_V[channel_index][bin] < -1.*settings1->V_SATURATION ) {
+            trigger->Full_window_V[channel_index][bin] = -1.*settings1->V_SATURATION;
+        }
+
+    } 
+
+}
+
+
+void Report::GetAntennaNoiseWF(
+    int signalbin, 
+    int wf_length, int BINSIZE, int channel_index, int StationIndex, vector <double> *V_noise_only,
+    Settings *settings1, Trigger *trigger, Detector *detector
+){
+    // Save a `wf_length` long noise waveform to the provided `V_noise_only` array
+    //   with the signal bin located at index `BINSIZE/2`
+
+    // Clear old noise waveforms
+    V_noise_only->clear();
+
+    // Pick noise waveform
+    vector< vector <double> > *noise_wf;
+    int channel_number = GetChNumFromArbChID(detector, channel_index, StationIndex, settings1) - 1;
+    if ( settings1->NOISE_CHANNEL_MODE==0) {
+        noise_wf = &trigger->v_noise_timedomain;
+    }
+    // Use channel-by-channel temperatures to generate noise
+    else if ( settings1->NOISE_CHANNEL_MODE==1) {
+        noise_wf = &trigger->v_noise_timedomain_ch[ channel_number ];
+    }
+    // Only use channel-by-channel temperatures to generate noise for the first 8 channels. 
+    // Use the same temperature for the remaining 8.
+    else if ( settings1->NOISE_CHANNEL_MODE==2) {
+        // If this channel is one of the first 8, use channel specific noise
+        if ( channel_number < 8) {
+            noise_wf = &trigger->v_noise_timedomain_ch[ channel_number ];
+        }
+        // This channel is NOT one of the first 8, use same noise for these channels
+        else {
+            noise_wf = &trigger->v_noise_timedomain_ch[ 8 ];
+        }
+    }
+    else{
+        cout<<"Cannot find noise waveform for channel "<<channel_index;
+        cout<<" on station "<<StationIndex;
+        cout<<" for requested NOISE_CHANNEL_MODE "<<settings1->NOISE_CHANNEL_MODE<<endl;
+        throw std::runtime_error("");
+    }
+
+    // Loop over bins and get noise voltage value for each
+    int bin_value;
+    int noise_ID_index;
+    int noise_wf_index;
+    for (int bin=0; bin<wf_length; bin++) {
+        bin_value = signalbin - BINSIZE/2 + bin;
+        noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
+        noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
+        V_noise_only->push_back(
+            noise_wf->at( noise_ID[noise_ID_index] ).at( noise_wf_index )
+        );
+    } // end loop over bins
+
+}
 
 
 void Report::Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *detector, int ID, int StationIndex ) {
@@ -5304,6 +5201,236 @@ void Report::GetNoisePhase(Settings *settings1) {
 }
 
 
+void Report::Prepare_Antenna_Noise(
+    int debugmode, int channel_index, 
+    int station_number, int string_number, int antenna_number,
+    Settings *settings1, Trigger *trigger, Detector *detector
+){
+
+    // Determine which noise waveforms from the trigger class we'd like to use
+    //   for each antenna then export said waveforms into trigger->Full_window
+    //   and trigger->Full_window_V 
+
+    for (int l = 0; l < N_noise; l++)
+    {
+
+        // select noise waveform/ID from trigger class
+        // if we are sharing same noise waveform for all chs, make sure diff chs use diff noise waveforms
+        if (settings1->NOISE_CHANNEL_MODE == 0)
+        {
+
+            // get random noise_ID and check if there are same noise_ID in different ch.
+            // if there's same noise_ID, get noise_ID again until no noise_ID are same between chs
+            noise_pass_nogo = 1;
+            while (noise_pass_nogo)
+            {
+                noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
+                noise_pass_nogo = 0;
+                for (int j_sub = 0; j_sub < string_number + 1; j_sub++)
+                {
+                    for (int k_sub = 0; k_sub < detector->stations[station_number].strings[string_number].antennas.size(); k_sub++)
+                    {
+                        if (j_sub == string_number)
+                        {
+                            // if we are checking current string
+                            if (k_sub < antenna_number)
+                            {
+                                // check antennas before current antenna
+                                if (noise_ID[l] == stations[station_number].strings[j_sub].antennas[k_sub].noise_ID[0])
+                                {
+                                    // check only first one for now;;;
+                                    noise_pass_nogo = 1;
+                                }
+                            }
+                        }
+                        else // if we are checking previous string, check upto entire antennas
+                        {
+                            // Avoids segfault from string 2 having 1 antenna for PA DETECTOR_STATION 3
+                            if (
+                                settings1->DETECTOR==5 && // Phased Array detector mode
+                                settings1->DETECTOR_STATION==3 && // second PA detector configuration (PA + 7 ARA VPols)
+                                j_sub==2 && // String 2
+                                k_sub==1 // 2nd antenna that doesn't exist but this block of code expects it to
+                            ) {
+                                continue;
+                            } 
+
+                            // check only first one for now;;;
+                            if (noise_ID[l] == stations[station_number].strings[j_sub].antennas[k_sub].noise_ID[0])
+                            {
+                                noise_pass_nogo = 1;
+                            }
+                        }
+                    } // end loop over k_sub (antennas)
+                } // end loop over j_sub (strings)
+            }   // end while noise_pass_nogo
+
+        }   // end if NOISE_CHANNEL_MODE = 0
+
+        // if we are using diff noise waveform for diff chs, just pick any noise waveform
+        else if (settings1->NOISE_CHANNEL_MODE == 1)
+        {
+            noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
+        }   // end if NOISE_CHANNEL_MODE = 1
+
+        // if we are sharing same noise waveform for first 8 chs and share same noisewaveforms for others,  just pick any noise waveform
+        else if (settings1->NOISE_CHANNEL_MODE == 2)
+        {
+            noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
+        }   // end if NOISE_CHANNEL_MODE = 2
+
+        // save noise ID
+        stations[station_number].strings[string_number].antennas[antenna_number].noise_ID.push_back(noise_ID[l]);
+
+        // Export noise waveforms to trigger->Full_window and Full_window_V, only if it's not in debugmode
+        if (debugmode == 0)
+        {
+
+            // Export noise generated from a single temperature
+            if (settings1->NOISE_CHANNEL_MODE == 0)
+            {
+                if (l == N_noise - 1)
+                {
+                    // when it's final noise waveform
+                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                    {
+                        // test for full window
+                        trigger->Full_window[channel_index][bin] = (trigger->v_noise_timedomain_diode[noise_ID[l]][bin]);
+                        trigger->Full_window_V[channel_index][bin] = (trigger->v_noise_timedomain[noise_ID[l]][bin]);
+                    }
+                    // cout<<"last noise filled in Full_window!"<<endl;
+                }
+                else
+                {
+                    // when it's not final noise waveform
+                    // cout<<"full noise will fill in Full_window!"<<endl;
+                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                    {
+                        trigger->Full_window[channel_index][bin] = (trigger->v_noise_timedomain_diode[noise_ID[l]][bin]);
+                        trigger->Full_window_V[channel_index][bin] = (trigger->v_noise_timedomain[noise_ID[l]][bin]);
+                    }
+                }
+            } // end NOISE_CHANNEL_MODE 0
+
+            // Export noise generated from different temperatures for each antenna
+            else if (settings1->NOISE_CHANNEL_MODE == 1)
+            {
+                if (l == N_noise - 1)
+                {
+                    // when it's final noise waveform
+                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                    {
+                        // test for full window
+                        trigger->Full_window[channel_index][bin] = (
+                            trigger->v_noise_timedomain_diode_ch[
+                                GetChNumFromArbChID(detector, channel_index, station_number, settings1) - 1
+                            ][ noise_ID[l] ][ bin ] );
+                        trigger->Full_window_V[channel_index][bin] = (
+                            trigger->v_noise_timedomain_ch[
+                                GetChNumFromArbChID(detector, channel_index, station_number, settings1) - 1
+                            ][ noise_ID[l] ][ bin ] );
+                    }
+                    //cout<<"last noise filled in Full_window!"<<endl;
+                }
+                else
+                {
+                    // when it's not final noise waveform
+                    //cout<<"full noise will fill in Full_window!"<<endl;
+                    for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                    {
+                        trigger->Full_window[channel_index][bin] = (
+                            trigger->v_noise_timedomain_diode_ch[
+                                GetChNumFromArbChID(detector, channel_index, station_number, settings1) - 1
+                            ][ noise_ID[l] ][ bin ] );
+                        trigger->Full_window_V[channel_index][bin] = (
+                            trigger->v_noise_timedomain_ch[
+                                GetChNumFromArbChID(detector, channel_index, station_number, settings1) - 1
+                            ][ noise_ID[l] ][ bin ] );
+                    }
+                }
+                
+            } // end NOISE_CHANNEL_MODE 1
+
+            // Export noise generated where first 8 channels have their own temperatures and the remaining 8 share one temperature
+            else if (settings1->NOISE_CHANNEL_MODE == 2)
+            {
+
+                if ((GetChNumFromArbChID(detector, channel_index, station_number, settings1) - 1) < 8)
+                {
+
+                    if (l == N_noise - 1)
+                    {
+                        // when it's final noise waveform
+                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                        {
+                            // test for full window
+                            trigger->Full_window[channel_index][bin] = (
+                                trigger->v_noise_timedomain_diode_ch[
+                                    GetChNumFromArbChID(detector, channel_index, station_number, settings1) - 1
+                                ][ noise_ID[l] ][ bin ]);
+                            trigger->Full_window_V[channel_index][bin] = (
+                                trigger->v_noise_timedomain_ch[
+                                    GetChNumFromArbChID(detector, channel_index, station_number, settings1) - 1
+                                ][ noise_ID[l] ][ bin ] );
+                        }
+                        // cout<<"last noise filled in Full_window!"<<endl;
+                    }
+                    else
+                    {
+                        // when it's not final noise waveform
+                        // cout<<"full noise will fill in Full_window!"<<endl;
+                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                        {
+                            trigger->Full_window[channel_index][bin] = (
+                                trigger->v_noise_timedomain_diode_ch[
+                                    GetChNumFromArbChID(detector, channel_index, station_number, settings1) - 1
+                                ][ noise_ID[l] ][ bin ] );
+                            trigger->Full_window_V[channel_index][bin] = (
+                                trigger->v_noise_timedomain_ch[
+                                    GetChNumFromArbChID(detector, channel_index, station_number, settings1) - 1
+                                ][ noise_ID[l] ][ bin ] );
+                        }
+                    }
+
+                } // end NOISE_CHANNEL_MODE 2
+
+                // Export noise generated from the same temperature for all antennas
+                else
+                {
+
+                    if (l == N_noise - 1)
+                    {
+                        // when it's final noise waveform
+                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                        {
+                            // test for full window
+                            trigger->Full_window[channel_index][bin] = (trigger->v_noise_timedomain_diode_ch[8][noise_ID[l]][bin]);
+                            trigger->Full_window_V[channel_index][bin] = (trigger->v_noise_timedomain_ch[8][noise_ID[l]][bin]);
+                        }
+                        // cout<<"last noise filled in Full_window!"<<endl;
+                    }
+                    else
+                    {
+                        // when it's not final noise waveform
+                        // cout<<"full noise will fill in Full_window!"<<endl;
+                        for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
+                        {
+                            trigger->Full_window[channel_index][bin] = (trigger->v_noise_timedomain_diode_ch[8][noise_ID[l]][bin]);
+                            trigger->Full_window_V[channel_index][bin] = (trigger->v_noise_timedomain_ch[8][noise_ID[l]][bin]);
+                        }
+                    }
+
+                } 
+
+            } // end consideration for all other NOISE_CHANNEL_MODE options
+
+        }   // if we are not in debug mode
+
+    } // end loop for l over N_noise
+
+}
+
+
     
 
 void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int StationIndex, vector <double> &vsignal_array, double *vsignal_forfft) {
@@ -6068,10 +6195,10 @@ double Report::getAverageSNR2(int raysolnum, int station_i, int trig_analysis_mo
         else if (trig_analysis_mode==1) // Noise + signal triggers
             // Estimate average SNR in topmost vpol
             if(stations[station_i].strings[0].antennas[ant_num].V.size()>raysolnum) {
-                int total_bins = stations[station_i].strings[0].antennas[ant_num].V_noise[raysolnum].size();
+                int total_bins = stations[station_i].strings[0].antennas[ant_num].V_noise.size();
                 for (int bin=0; bin<total_bins; bin++){
-                    if(TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V_noise[raysolnum][bin])>peak){
-                        peak = TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V_noise[raysolnum][bin]);
+                    if(TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V_noise[bin])>peak){
+                        peak = TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V_noise[bin]);
 
                     }
                 }
@@ -6184,7 +6311,7 @@ void Report::checkPATrigger(
         // else if (settings1->TRIG_ANALYSIS_MODE==1) // Noise + signal triggers
         //     // Estimate average SNR in topmost vpol
         //     if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
-        //         avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V_noise[raySolNum]);
+        //         avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V_noise);
         //         // avgSnr = getAverageSNR2(raySolNum, i, settings1->TRIG_ANALYSIS_MODE);
         //     }
         //     else {
