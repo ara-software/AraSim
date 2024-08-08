@@ -2068,60 +2068,27 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                     // Get the SNR from this antenna
                     double ant_SNR = 0.;
-                    if (settings1->TRIG_ANALYSIS_MODE==1){
-
-                        // TRIG_ANALYSIS_MODE=1 is the signal-only mode
-
-                        // Load noise wf for this antenna since that hasn't been done yet
-                        double v_noise_array[settings1->DATA_BIN_SIZE];
-                        if ( settings1->NOISE_CHANNEL_MODE==0 ){ 
-                            // Use the same noise wf for all antennas
-                            GetNoiseWaveforms(
-                                settings1, detector, 
-                                trigger->V_noise_freqbin, v_noise_array);
-                        }
-                        else if ( settings1->NOISE_CHANNEL_MODE==1 ){ 
-                            // Use channel-specific noise wfs
-                            GetNoiseWaveforms_ch(
-                                settings1, detector, 
-                                trigger->V_noise_freqbin_ch[ch_ID], v_noise_array, ch_ID);
-                        }
-                        else if ( settings1->NOISE_CHANNEL_MODE==2 ){ 
-                            // Use channel-specific noise wfs for first 8 channels only
-                            // The remaining 8 use the same noise wf
-                            if ( ch_ID < 8 ){
-                                GetNoiseWaveforms_ch(
-                                    settings1, detector, 
-                                    trigger->V_noise_freqbin_ch[ch_ID], v_noise_array, ch_ID);
-                            }
-                            else{ 
-                                GetNoiseWaveforms_ch(
-                                    settings1, detector, 
-                                    trigger->V_noise_freqbin_ch[8], v_noise_array, 8);
-                            }
-                        }
-
-                        // Convert noise wf to a vector and get the SNR
-                        vector <double> v_noise_vector; 
-                        for (int bin=0; bin<settings1->DATA_BIN_SIZE; bin++) {
-                            v_noise_vector.push_back(v_noise_array[bin]);
-                        }
-                        ant_SNR = get_SNR( 
-                            stations[i].strings[j].antennas[k].V_convolved, 
-                            v_noise_vector);
-
-                    }
-                    else if (settings1->TRIG_ANALYSIS_MODE==2){
+                    if (settings1->TRIG_ANALYSIS_MODE==2){
                         // TRIG_ANALYSIS_MODE=2 is the noise-only mode
                         // Set the SNR to an arbitarily high number so it passes
                         //   the coming insufficient signal check
                         ant_SNR = 100.;
                     }
                     else {
-                        // For all other simulations, just use previously calculated noise WF
+                        // For all other simulations, use previously calculated noise RMS
+                        
+                        // Steal the noise RMS from the trigger class and pass 
+                        //   it as the noise WF to get_SNR() (since the RMS of an 
+                        //   array with one element is the absolute value of that element)
+                        vector <double> tmp_noise_RMS;
+                        int trigger_ch_ID = GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1;
+                        tmp_noise_RMS.push_back( trigger->rmsvoltage_ch[trigger_ch_ID] );
+
+                        // Calculate SNR in this antenna
                         ant_SNR = get_SNR( 
                             stations[i].strings[j].antennas[k].V_convolved, 
-                            stations[i].strings[j].antennas[k].V_noise);
+                            tmp_noise_RMS);
+
                     }
 
                     // Log if this antenna has a strong SNR or not
