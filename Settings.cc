@@ -134,8 +134,6 @@ outputdir="outputs"; // directory where outputs go
 
   NOISE_TEMP=325.;      // default : 325 K
 
-  ANT_SIGNAL_THRESHOLD=0.001;    // default : 0.001 volts (1 millivolt)
-
   TRIG_ANALYSIS_MODE=0;    // default : 0, signal + noise
 
   TRIG_TIMEOUT=1.E-6;       // default : 1us
@@ -456,9 +454,6 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "NOISE_TEMP") {
                   NOISE_TEMP = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-              }
-              else if (label == "ANT_SIGNAL_THRESHOLD") {
-                  ANT_SIGNAL_THRESHOLD = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "TRIG_ANALYSIS_MODE") {
                   TRIG_ANALYSIS_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );

@@ -1968,10 +1968,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
             // If rays connected to the station, count how many antennas 
             //   have sufficient signal from the signal-only waveform
             if (stations[i].Total_ray_sol) { 
-                ants_with_nonzero_signal = getNumOfSignalledAnts(
-                    stations[i], 
-                    settings1->ANT_SIGNAL_THRESHOLD
-                );
+                ants_with_nonzero_signal = getNumOfSignalledAnts(stations[i]);
             } 
         }
 
@@ -6000,14 +5997,9 @@ vector<double> Report::getHitTimesVector(Detector *detector, int station_i, int 
   
 }
 
-int Report::getNumOfSignalledAnts(Station_r station, double ant_signal_threshold){
+int Report::getNumOfSignalledAnts(Station_r station){
     // Count and return the number of antennas in the provided station that 
-    //   have waveforms, from signal only, that exceed the 
-    //   provided ant_signal_threshold.
-    // Beware: This function checks antenna_r.V 
-    //   (e.g. stations[0].strings[0].antennas[0].V), whose units change 
-    //   throughout the course of Report.cc. Please make sure you
-    //   provide ant_signal_threshold in the appropriate units.
+    //   have waveforms, from signal only, that exceed 0.0
 
     int ants_with_good_signal = 0;
     vector <double> summary;
@@ -6043,7 +6035,7 @@ int Report::getNumOfSignalledAnts(Station_r station, double ant_signal_threshold
 
             // If this antenna had a strong signal-only signal, 
             //   increment the good antenna tracker
-            if ( max_signal > ant_signal_threshold){ 
+            if ( max_signal > 0.0){ 
                 ants_with_good_signal++;
                 summary.push_back(max_signal);
             }

@@ -421,7 +421,7 @@ class Report {
 	vector<double> getHitTimesVectorVpol(Detector *detector, int station_i=0);
 	vector<double> getHitTimesVectorHpol(Detector *detector, int station_i=0);
 
-       int getNumOfSignalledAnts(Station_r station, double ant_signal_threshold);
+       int getNumOfSignalledAnts(Station_r station);
 
         double get_SNR(vector<double> signal_array, vector<double> noise_array);
 	
