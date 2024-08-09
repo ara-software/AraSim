@@ -80,6 +80,9 @@ class Trigger {
 
 
      void SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *report);
+     double GetAntNoise_diodeMean(int ch_ID, Settings *settings1);
+     double GetAntNoise_diodeRMS(int ch_ID, Settings *settings1);
+     double GetAntNoise_voltageRMS(int ch_ID, Settings *settings1);
 
      void GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Report *report);
 

@@ -24,7 +24,7 @@ EXPONENT : 18
 DETECTOR : 1
 POSNU_RADIUS : 5000
 EVENT_GENERATION_MODE: 0
-first random : 0.516399
+first random : 0.543405
 
 Surface at (log:0, lat:0) : 6.35973e+06
 SurfaceAboveGeoid at (log:0, lat:0) : 2977
@@ -146,8 +146,8 @@ Calculating noise waveforms RMS
 90% done
 100% done
 From pure noise waveforms, diode responses
-mean, rms diode are -4.63217e-15 9.54668e-14
-rms voltage is 0.0399784
+mean, rms diode are -4.7237e-15 9.54455e-14
+rms voltage is 0.0400107
  DATA_BIN_SIZE : 4096
 powerthreshold : -6.06
 begin looping events!!
@@ -172,70 +172,52 @@ station[0].strings[3].antennas[2] no_ch:15
 station[0].strings[3].antennas[3] no_ch:16
 *Thrown 0
 ****************************************************************************************************Thrown 100
-*************************************************
-trigger passed at bin 2216  passed ch : 2 (0type) Direct dist btw posnu : 1850.95 noiseID : 97 ViewAngle : 54.8633 LikelyTrigSignal : 1
-trigger passed at bin 2175  passed ch : 4 (0type) Direct dist btw posnu : 1843.96 noiseID : 7 ViewAngle : 53.5517 LikelyTrigSignal : 0
-trigger passed at bin 2173  passed ch : 6 (0type) Direct dist btw posnu : 1846.4 noiseID : 38 ViewAngle : 54.7566 LikelyTrigSignal : 1
-trigger passed at bin 2182  passed ch : 7 (1type) Direct dist btw posnu : 1846.7 noiseID : 77 ViewAngle : 54.9187 LikelyTrigSignal : 1
-Global_Pass : 2216 evt : 149 added weight : 0.999199
-0.999199 : 9
-**********************************depth negative! -4.40495
-depth negative! -4.40495
-depth negative! -4.40495
-depth negative! -4.40495
-depth negative! -4.40563
-depth negative! -4.40563
-depth negative! -4.40563
-depth negative! -4.40563
-depth negative! -4.41475
-depth negative! -4.41475
-depth negative! -4.41475
-depth negative! -4.41475
-depth negative! -4.41543
-depth negative! -4.41543
-depth negative! -4.41543
-depth negative! -4.41543
-*****************Thrown 200
-*depth negative! -0.870644
-depth negative! -0.870644
-depth negative! -0.870644
-depth negative! -0.870644
-depth negative! -0.875942
-depth negative! -0.875942
-depth negative! -0.875942
-depth negative! -0.875942
-depth negative! -0.879486
-depth negative! -0.879486
-depth negative! -0.879486
-depth negative! -0.879486
-depth negative! -0.884783
-depth negative! -0.884783
-depth negative! -0.884783
-depth negative! -0.884783
-***************************************************************************************************Thrown 300
-****************************************************************************************************Thrown 400
-***************************************************************
-trigger passed at bin 2173  passed ch : 0 (0type) Direct dist btw posnu : 769.785 noiseID : 12 ViewAngle : 58.6065 LikelyTrigSignal : 0
-trigger passed at bin 2183  passed ch : 1 (1type) Direct dist btw posnu : 769.606 noiseID : 55 ViewAngle : 58.1037 LikelyTrigSignal : 0
-trigger passed at bin 2284  passed ch : 4 (0type) Direct dist btw posnu : 783.381 noiseID : 97 ViewAngle : 57.4022 LikelyTrigSignal : 0
-trigger passed at bin 2210  passed ch : 8 (0type) Direct dist btw posnu : 773.612 noiseID : 35 ViewAngle : 58.4551 LikelyTrigSignal : 0
-trigger passed at bin 2215  passed ch : 9 (1type) Direct dist btw posnu : 773.434 noiseID : 6 ViewAngle : 57.8545 LikelyTrigSignal : 0
-Global_Pass : 2284 evt : 463 added weight : 4.63376e-38
-4.63376e-38 : 0
-************************************ end loop
+******************************************************************************************
+trigger passed at bin 3290  passed ch : 2 (0type) Direct dist btw posnu : 799.013 noiseID : 40 ViewAngle : 30.39 LikelyTrigSignal : 1
+trigger passed at bin 3240  passed ch : 6 (0type) Direct dist btw posnu : 791.886 noiseID : 86 ViewAngle : 30.6729 LikelyTrigSignal : 1
+trigger passed at bin 3324  passed ch : 14 (0type) Direct dist btw posnu : 803.599 noiseID : 31 ViewAngle : 30.5769 LikelyTrigSignal : 1
+Global_Pass : 3324 evt : 190 added weight : 0.99829
+0.99829 : 9
+**********Thrown 200
+****************************************************************************************************Thrown 300
+**********************************************************************************
+trigger passed at bin 2183  passed ch : 4 (0type) Direct dist btw posnu : 401.997 noiseID : 40 ViewAngle : 61.644 LikelyTrigSignal : 0
+trigger passed at bin 2194  passed ch : 5 (1type) Direct dist btw posnu : 402.727 noiseID : 60 ViewAngle : 61.9147 LikelyTrigSignal : 0
+trigger passed at bin 2178  passed ch : 12 (0type) Direct dist btw posnu : 401.589 noiseID : 75 ViewAngle : 62.075 LikelyTrigSignal : 0
+trigger passed at bin 2249  passed ch : 14 (0type) Direct dist btw posnu : 408.074 noiseID : 97 ViewAngle : 64.3299 LikelyTrigSignal : 0
+Global_Pass : 2249 evt : 382 added weight : 0.999149
+0.999149 : 9
+******************Thrown 400
+******************************************************************depth negative! -6.94865
+depth negative! -6.94865
+depth negative! -6.94865
+depth negative! -6.94865
+depth negative! -6.95658
+depth negative! -6.95658
+depth negative! -6.95658
+depth negative! -6.95658
+depth negative! -6.94438
+depth negative! -6.94438
+depth negative! -6.94438
+depth negative! -6.94438
+depth negative! -6.95231
+depth negative! -6.95231
+depth negative! -6.95231
+depth negative! -6.95231
+********************************* end loop
 Total Events Thrown: 500
 Total_Global_Pass : 2
-Total_Weight : 0.999199
-Total_Probability : 2101.18
-weight bin values : 1, 0, 0, 0, 0, 0, 0, 0, 0, 1
+Total_Weight : 1.99744
+Total_Probability : 3884.07
+weight bin values : 0, 0, 0, 0, 0, 0, 0, 0, 0, 2
 
 Radius: 5000 [m]
 IceVolume : 2.35619e+11
-test Veff(ice) : 5.91702e+09 m3sr, 5.91702 km3sr
-test Veff(water eq.) : 5.4259e+09 m3sr, 5.4259 km3sr
-And Veff(water eq.) error plus : 7.31506 km3sr and error minus : 2.42193 km3sr
-max_dt : 2.17402e-06
-rmsdiode= 9.54668e-14
+test Veff(ice) : 1.18284e+10 m3sr, 11.8284 km3sr
+test Veff(water eq.) : 1.08466e+10 m3sr, 10.8466 km3sr
+And Veff(water eq.) error plus : 9.11415 km3sr and error minus : 4.84385 km3sr
+max_dt : 2.16675e-06
+rmsdiode= 9.54455e-14
 Info in <TCanvas::Print>: pdf file sigmaCrossSection.pdf has been created
 outputdir= outputs/.
 test is 0
