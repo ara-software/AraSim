@@ -555,7 +555,89 @@ void Trigger::SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *r
     }// else if NOISE_CHANNEL_MODE = 2
 
 }
+
+double Trigger::GetAntNoise_diodeMean(int ch_ID, Settings *settings1){
+    // Return the mean value of noise in the diode for the requested antenna
+
+    if (settings1->NOISE_CHANNEL_MODE == 0){
+        // All antennas use the same noise WFs
+        return meandiode;
+    }
+    else if (settings1->NOISE_CHANNEL_MODE == 1){
+        // All antennas have their own noise WFs
+        return meandiode_ch[ch_ID];
+    }
+    else if (settings1->NOISE_CHANNEL_MODE == 2){
+        // Only deep channels (ch_ID<8) use their own noise WFs. The others share one.
+        if (ch_ID < 8){
+            return meandiode_ch[ch_ID];
+        }
+        else {
+            return meandiode_ch[8];
+        }
+    }
+    else{
+        cerr<<"Unsupported NOISE_CHANNEL_MODE of "<<settings1->NOISE_CHANNEL_MODE;
+        throw("Cannot return antenna's noise diode mean.");
+    }
+
+}
+
+double Trigger::GetAntNoise_diodeRMS(int ch_ID, Settings *settings1){
+    // Return the RMS value of noise in the diode for the requested antenna
+
+    if (settings1->NOISE_CHANNEL_MODE == 0){
+        // All antennas use the same noise WFs
+        return rmsdiode;
+    }
+    else if (settings1->NOISE_CHANNEL_MODE == 1){
+        // All antennas have their own noise WFs
+        return rmsdiode_ch[ch_ID];
+    }
+    else if (settings1->NOISE_CHANNEL_MODE == 2){
+        // Only deep channels (ch_ID<8) use their own noise WFs. The others share one.
+        if (ch_ID < 8){
+            return rmsdiode_ch[ch_ID];
+        }
+        else {
+            return rmsdiode_ch[8];
+        }
+    }
+    else{
+        cerr<<"Unsupported NOISE_CHANNEL_MODE of "<<settings1->NOISE_CHANNEL_MODE;
+        throw("Cannot return antenna's noise diode RMS.");
+    }
+
+}
+
+
+double Trigger::GetAntNoise_voltageRMS(int ch_ID, Settings *settings1){
+    // Return the RMS value of noise in volts for the requested antenna
+
+    if (settings1->NOISE_CHANNEL_MODE == 0){
+        // All antennas use the same noise WFs
+        return rmsdiode;
+    }
+    else if (settings1->NOISE_CHANNEL_MODE == 1){
+        // All antennas have their own noise WFs
+        return rmsdiode_ch[ch_ID];
+    }
+    else if (settings1->NOISE_CHANNEL_MODE == 2){
+        // Only deep channels (ch_ID<8) use their own noise WFs. The others share one.
+        if (ch_ID < 8){
+            return rmsdiode_ch[ch_ID];
+        }
+        else {
+            return rmsdiode_ch[8];
+        }
+    }
+    else{
+        cerr<<"Unsupported NOISE_CHANNEL_MODE of "<<settings1->NOISE_CHANNEL_MODE;
+        throw("Cannot return antenna's noise voltage RMS.");
+    }
     
+}
+
 
 void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Report *report)
 {
