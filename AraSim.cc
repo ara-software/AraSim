@@ -867,7 +867,7 @@ int main(int argc, char **argv) {   // read setup.txt file
     }
 
     cout<<"max_dt : "<<max_dt<<endl;
-    cout<<"rmsdiode= "<<trigger->rmsdiode<<endl;
+    cout<<"rmsdiode= "<<trigger->GetAntNoise_diodeRMS(0, settings1)<<endl;
 
     delete raysolver;
     delete icemodel;
