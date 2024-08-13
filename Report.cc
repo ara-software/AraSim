@@ -6223,9 +6223,9 @@ void Report::checkPATrigger(
 
         int signalbinPA = stations[i].strings[0].antennas[8].SignalBin[raySolNum]; //new kah
         int bin_value;
-        double avgSnr;
+        double ant_SNR;
         if(settings1->TRIG_ANALYSIS_MODE == 2) { // Noise only triggers
-            avgSnr = pa_force_trigger_snr; 
+            ant_SNR = pa_force_trigger_snr; 
         }
         // // ARB 7/7/23: 
         // //    I don't trust the signal+noise trigger estimator right now 
@@ -6241,20 +6241,32 @@ void Report::checkPATrigger(
         // else if (settings1->TRIG_ANALYSIS_MODE==1) // Noise + signal triggers
         //     // Estimate average SNR in topmost vpol
         //     if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
-        //         avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V_noise);
-        //         // avgSnr = getAverageSNR2(raySolNum, i, settings1->TRIG_ANALYSIS_MODE);
+        //         ant_SNR = getAverageSNR(stations[i].strings[0].antennas[8].V_noise);
+        //         // ant_SNR = getAverageSNR2(raySolNum, i, settings1->TRIG_ANALYSIS_MODE);
         //     }
         //     else {
-        //         avgSnr = 0.0;
+        //         ant_SNR = 0.0;
         //     }
         else { // signal only triggers
             // Estimate average SNR in topmost vpol
-            if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
-                avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V[raySolNum]);
-                // avgSnr = getAverageSNR2(raySolNum, i, settings1->TRIG_ANALYSIS_MODE);
+            if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {   
+
+                // Steal the noise RMS from the trigger class and pass 
+                //   it as the noise WF to get_SNR() (since the RMS of an 
+                //   array with one element is the absolute value of that element)
+                vector <double> tmp_noise_RMS;
+                int trigger_ch_ID = GetChNumFromArbChID(detector, 8, i, settings1) - 1;
+                double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
+                tmp_noise_RMS.push_back( ant_noise_voltage_RMS );
+
+                // Calculate SNR in this antenna
+                ant_SNR = get_SNR( 
+                    stations[i].strings[0].antennas[8].V_convolved, 
+                    tmp_noise_RMS);
+                
             }
             else {
-                avgSnr = 0.0;
+                ant_SNR = 0.0;
             }
         }
 
@@ -6265,20 +6277,20 @@ void Report::checkPATrigger(
             all_receive_ang[raySolNum], // x value to interpolate y value for
             (*(&trigger->angle_PA+1) - trigger->angle_PA) - 1 // len(ang_data) - 1
         );
-        avgSnr = avgSnr*2.0/snr_50;
+        ant_SNR = ant_SNR*2.0/snr_50;
 
         // Estimate the PA signal efficiency of for this SNR from curve of efficiency vs data
         double eff = interpolate(
             trigger->snr_PA, trigger->eff_PA, // x and y coordinates of curve to interpolate
-            avgSnr, // x value to interpolate y value for
+            ant_SNR, // x value to interpolate y value for
             (*(&trigger->snr_PA+1) - trigger->snr_PA) - 1 // len(snr_PA) - 1
         ); 
         
-        if(avgSnr > 0.5){
+        if(ant_SNR > 0.5){
                    
             if(isTrigger(eff)){ // if a randomly selected value is greater than the PA efficiency we calculated, this event triggers
                 cout<<endl<<"PA trigger ~~~ raySolNum: "<< raySolNum;
-                cout<<"  avgSNR: "<<avgSnr<<"  Event Number : "<<evt;
+                cout<<"  SNR: "<<ant_SNR<<"  Event Number : "<<evt;
                 cout<<"  PA efficiency : "<<eff<<endl;
 
                 if (hasTriggered) {
@@ -6286,7 +6298,7 @@ void Report::checkPATrigger(
                     break;
                 }
                 viewAngle = viewangle;
-                my_averageSNR = avgSnr;
+                my_averageSNR = ant_SNR;
                 my_raysol = raySolNum;
                 my_receive_ang = all_receive_ang[raySolNum];
                 int last_trig_bin = signalbinPA;
