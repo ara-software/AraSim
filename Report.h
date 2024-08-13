@@ -272,9 +272,7 @@ class Report {
         vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
         );
     
-    // Phased Array functions    
-    double getAverageSNR(const vector<double> & mysignal);
-    double getAverageSNR2(int raysolnum, int station_i, int trig_analysis_mode);
+    // Phased Array functions
     bool isTrigger(double eff);
     void checkPATrigger(
         int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,

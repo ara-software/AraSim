@@ -6108,76 +6108,6 @@ vector<double> Report::getHitTimesVectorHpol(Detector *detector, int station_i){
   
 }
 
-double Report::getAverageSNR2(int raysolnum, int station_i, int trig_analysis_mode){
-    double total_snr = 0.0;
-    double temp_snr = 0.0;
-    double peak;
-
-    // Collect max SNR values for all PAVpols 
-    int first_PAVPol_index = 2; // In detector object, on PA String (strings[0]), antenna index 0 and 1 are PA Hpols
-    int num_ants = 7;
-    for (int ant_num = first_PAVPol_index; ant_num<first_PAVPol_index+num_ants; ant_num++){
-        peak = 0.0;
-        
-        if(trig_analysis_mode == 2) { // Noise only triggers
-            peak = pa_force_trigger_snr * ara_noise_rms;
-        }
-        else if (trig_analysis_mode==1) // Noise + signal triggers
-            // Estimate average SNR in topmost vpol
-            if(stations[station_i].strings[0].antennas[ant_num].V.size()>raysolnum) {
-                int total_bins = stations[station_i].strings[0].antennas[ant_num].V_noise.size();
-                for (int bin=0; bin<total_bins; bin++){
-                    if(TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V_noise[bin])>peak){
-                        peak = TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V_noise[bin]);
-
-                    }
-                }
-            }
-            else {
-                peak = 0.0;
-            }
-        else { // signal only triggers
-            // Estimate average SNR in topmost vpol
-            if(stations[station_i].strings[0].antennas[ant_num].V.size()>raysolnum) {
-                int total_bins = stations[station_i].strings[0].antennas[ant_num].V[raysolnum].size();
-                for (int bin=0; bin<total_bins; bin++){
-                    if(TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V[raysolnum][bin])>peak){
-                        peak = TMath::Abs(stations[station_i].strings[0].antennas[ant_num].V[raysolnum][bin]);
-
-                    }
-                }
-            }
-            else {
-                peak = 0.0;
-            }
-        }
-
-        temp_snr = peak/ara_noise_rms;
-        if(temp_snr>pa_snr_cap) temp_snr = pa_snr_cap; // Cap SNR
-        total_snr = total_snr+temp_snr;
-
-    }
-
-    total_snr = total_snr/num_ants;
-
-    return total_snr;
-}
-
-double Report::getAverageSNR(const vector<double> & mysignal){
-    double peak =0.0;
-
-    for (int bin; bin<mysignal.size(); bin++){
-        if(TMath::Abs(mysignal[bin])>peak){
-            peak = TMath::Abs(mysignal[bin]);
-        }
-    }
-    
-    double snr = peak/ara_noise_rms;
-    if(snr>pa_snr_cap) snr = pa_snr_cap; // Cap SNR
-    
-    return snr;
-
-}
 
 bool Report::isTrigger(double eff){
   if (eff >= 1.0) return true;
@@ -6240,9 +6170,21 @@ void Report::checkPATrigger(
         // //    This is a project for the future. 
         // else if (settings1->TRIG_ANALYSIS_MODE==1) // Noise + signal triggers
         //     // Estimate average SNR in topmost vpol
-        //     if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
-        //         ant_SNR = getAverageSNR(stations[i].strings[0].antennas[8].V_noise);
-        //         // ant_SNR = getAverageSNR2(raySolNum, i, settings1->TRIG_ANALYSIS_MODE);
+        //     if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {   
+        //
+        //         // Steal the noise RMS from the trigger class and pass 
+        //         //   it as the noise WF to get_SNR() (since the RMS of an 
+        //         //   array with one element is the absolute value of that element)
+        //         vector <double> tmp_noise_RMS;
+        //         int trigger_ch_ID = GetChNumFromArbChID(detector, 8, i, settings1) - 1;
+        //         double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
+        //         tmp_noise_RMS.push_back( ant_noise_voltage_RMS );
+        //
+        //         // Calculate SNR in this antenna
+        //         ant_SNR = get_SNR( 
+        //             stations[i].strings[0].antennas[8].V_convolved, 
+        //             tmp_noise_RMS);
+        //
         //     }
         //     else {
         //         ant_SNR = 0.0;
