@@ -318,14 +318,6 @@ int main(int argc, char **argv) {   // read setup.txt file
         xbin[i] = i;
     }
 
-    double threshold_y[2];
-    double threshold_x[2];
-
-    threshold_x[0] = 0.;
-    threshold_x[1] = (double)settings1->DATA_BIN_SIZE-1.;
-    threshold_y[0] = (trigger->rmsdiode) * (trigger->powerthreshold);
-    threshold_y[1] = (trigger->rmsdiode) * (trigger->powerthreshold);
-
     cout<<"powerthreshold : "<<trigger->powerthreshold<<endl;
 
     int check_station_DC;
