@@ -616,19 +616,19 @@ double Trigger::GetAntNoise_voltageRMS(int ch_ID, Settings *settings1){
 
     if (settings1->NOISE_CHANNEL_MODE == 0){
         // All antennas use the same noise WFs
-        return rmsdiode;
+        return rmsvoltage;
     }
     else if (settings1->NOISE_CHANNEL_MODE == 1){
         // All antennas have their own noise WFs
-        return rmsdiode_ch[ch_ID];
+        return rmsvoltage_ch[ch_ID];
     }
     else if (settings1->NOISE_CHANNEL_MODE == 2){
         // Only deep channels (ch_ID<8) use their own noise WFs. The others share one.
         if (ch_ID < 8){
-            return rmsdiode_ch[ch_ID];
+            return rmsvoltage_ch[ch_ID];
         }
         else {
-            return rmsdiode_ch[8];
+            return rmsvoltage_ch[8];
         }
     }
     else{
