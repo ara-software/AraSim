@@ -6270,6 +6270,9 @@ void Report::checkPATrigger(
             }
         }
 
+        // Cap SNR
+        if(ant_SNR>pa_snr_cap) ant_SNR = pa_snr_cap;
+
         //scale snr to reflect the angle
         all_receive_ang[raySolNum] = all_receive_ang[raySolNum]*180.0/PI-90.0;
         double snr_50 = interpolate(
