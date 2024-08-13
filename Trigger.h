@@ -21,6 +21,15 @@ class Trigger {
  private:
 
 
+     double meandiode;
+     double rmsdiode;
+     double rmsvoltage;// rms voltage value without diode response
+
+     vector <double> meandiode_ch;
+     vector <double> rmsdiode_ch;
+     vector <double> rmsvoltage_ch;
+
+
 
  public:
 
@@ -42,15 +51,6 @@ class Trigger {
      double V_noise_freqbin;    // thermal noise freq bin value
 
      vector <double> V_noise_freqbin_ch;    // thermal noise freq bin value for chs
-
-
-     double meandiode;
-     double rmsdiode;
-     double rmsvoltage;// rms voltage value without diode response
-
-     vector <double> meandiode_ch;
-     vector <double> rmsdiode_ch;
-     vector <double> rmsvoltage_ch;
 
 
      vector < vector <double> > v_noise_timedomain;   // time domain noise waveform examples
