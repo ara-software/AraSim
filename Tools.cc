@@ -73,6 +73,16 @@ double Tools::getMaxMagnitude(vector<double> v) {
 
 }
 
+double Tools::getMaxAbsoluteMagnitude(vector<double> v) {
+    double mag=0.;
+    for (int i=0;i<(int)v.size();i++) {
+        if ( abs(v[i]) > mag ){
+            mag=abs(v[i]);
+        }
+    }
+    return mag;
+}
+
 void Tools::ShiftLeft(double *x,const int n,int ishift) {
 
     double x_temp[n];
