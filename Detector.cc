@@ -6854,7 +6854,7 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
         //GetSSAfromChannel(stationNum, chan, &antennaNum, &stringNum);
         GetSSAfromChannel(StationID, chan, &antennaNum, &stringNum, settings1);
 
-        if (araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].polType != AraAntPol::kSurface){
+        if (araGeom->getStationInfo(StationID_AraRoot, settings1->DETECTOR_YEAR)->fAntInfo[antId].polType != AraAntPol::kSurface){
 
             stations[StationIndex].strings[stringNum].antennas[antennaNum].SetX(stations[StationIndex].GetX()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[0]);
             stations[StationIndex].strings[stringNum].antennas[antennaNum].SetY(stations[StationIndex].GetY()+araGeom->getStationInfo(StationID_AraRoot)->fAntInfo[antId].antLocation[1]);
