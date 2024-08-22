@@ -6052,10 +6052,12 @@ double Report::get_SNR(vector<double> signal_array, vector<double> noise_array){
     if ( signal_array.size() == 0 ){
         cerr<<"Signal array provided to Report::get_SNR has size 0. ";
         cerr<<"Function will return inaccurate values."<<endl;
+        throw("Cancelling Simulation");
     }
     if ( noise_array.size() == 0 ){
         cerr<<"Noise array provided to Report::get_SNR has size 0. ";
         cerr<<"Function will return inaccurate values."<<endl;
+        throw("Cancelling Simulation");
     }
 
     // Get peak-to-peak of signal
