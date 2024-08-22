@@ -207,14 +207,12 @@ void Trigger::SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *r
 
             // Convolve signal through the tunnel diode
             myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin,v_noise_timedomain_diode[i]);
-            //myconvlv_new(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real,v_noise_timedomain_diode[i]);
 
             // Save noise waveform and determine mean noise value in this channel
             for (int m=0; m<settings1->DATA_BIN_SIZE; m++) {
                 
                 // Add contribution from this bin to the mean diode value we're calculating
                 if ( m>=(int)(maxt_diode/TIMESTEP) && m<settings1->DATA_BIN_SIZE ) {
-                    //bwslice_meandiode[j]+=timedomain_output_e[j][m]/((double)ngeneratedevents*((double)NFOUR/2-maxt_diode/TIMESTEP));
                     meandiode += (
                         v_noise_timedomain_diode[i][m]
                         / ( (double)ngeneratedevents * ( (double)settings1->DATA_BIN_SIZE - maxt_diode/TIMESTEP ) ) );
@@ -342,7 +340,6 @@ void Trigger::SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *r
 
                     // Add contribution from this bin to the mean diode value we're calculating
                     if ( m>=(int)(maxt_diode/TIMESTEP) && m<settings1->DATA_BIN_SIZE ) {
-                        //bwslice_meandiode[j]+=timedomain_output_e[j][m]/((double)ngeneratedevents*((double)NFOUR/2-maxt_diode/TIMESTEP));
                         meandiode_ch[ch] += (
                             v_noise_timedomain_diode_ch[ch][i][m]
                             /( (double)ngeneratedevents * ( (double)settings1->DATA_BIN_SIZE - maxt_diode/TIMESTEP ) ) );
@@ -477,7 +474,6 @@ void Trigger::SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *r
 
                     // Add contribution from this bin to the mean diode value we're calculating
                     if ( m>=(int)(maxt_diode/TIMESTEP) && m<settings1->DATA_BIN_SIZE ) {
-                        //bwslice_meandiode[j]+=timedomain_output_e[j][m]/((double)ngeneratedevents*((double)NFOUR/2-maxt_diode/TIMESTEP));
                         meandiode_ch[ch] += (
                             v_noise_timedomain_diode_ch[ch][i][m]
                             /( (double)ngeneratedevents * ( (double)settings1->DATA_BIN_SIZE - maxt_diode/TIMESTEP ) ) );
@@ -665,7 +661,6 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
                 Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise);
 
                 myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin, v_noise_timedomain_diode[i]);
-                //myconvlv_new(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real,v_noise_timedomain_diode[i]);
 
                 for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
                 {
