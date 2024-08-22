@@ -6031,7 +6031,7 @@ int Report::getNumOfSignalledAnts(Station_r station){
 
             } // end if (ray solutions exist)
 
-            // If this antenna had a strong signal-only signal, 
+            // If this antenna had a non-zero signal-only signal, 
             //   increment the good antenna tracker
             if ( max_signal > 0.0){ 
                 ants_with_good_signal++;
