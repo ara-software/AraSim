@@ -2182,11 +2182,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
 			    int offset = detector->GetTrigOffset(channel_num-1, settings1);
 
-                            // check if we want to use BH chs only for trigger analysis
-                            //if (settings1->TRIG_ONLY_BH_ON == 1) {
+                            // If Testbed simulation, check if we want to use BH chs only for trigger analysis
                             if ((settings1->TRIG_ONLY_BH_ON == 1) && (settings1->DETECTOR == 3))
                             {
-                                // trig by BH is only for TestBed case
 
                                 // check if this channel is BH ch (DAQchan)
                                 if (detector->stations[i].strings[string_i].antennas[antenna_i].DAQchan == 0)
@@ -2226,10 +2224,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 }
                             }
 
-                            // in this case just use first 8 chs' thres values
+                            // For non-Testbed simulations, check if we just want to use first/lower 8 chs' thres values
                             else if ((settings1->TRIG_ONLY_LOW_CH_ON == 1) && (settings1->DETECTOR != 3))
                             {
-                                // non-TestBed case, and only trig by lower 8 channels
 
                                 // reset channel numbers so that bottom antennas have ch 1-8
                                 channel_num = GetChannelNum8_LowAnt(string_i, antenna_i);
@@ -2274,9 +2271,10 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             }
 
                             //else if (settings1->TRIG_ONLY_BH_ON == 0) {
+                            // other cases: use all possible chs for trigger analysis
                             else
                             {
-                                // other cases, use all possible chs for trigger analysis
+                                
                                 trig_bin = 0;
                                 while (trig_bin < trig_window_bin)
                                 {
@@ -6033,7 +6031,7 @@ int Report::getNumOfSignalledAnts(Station_r station){
 
             } // end if (ray solutions exist)
 
-            // If this antenna had a strong signal-only signal, 
+            // If this antenna had a non-zero signal-only signal, 
             //   increment the good antenna tracker
             if ( max_signal > 0.0){ 
                 ants_with_good_signal++;
@@ -6054,10 +6052,12 @@ double Report::get_SNR(vector<double> signal_array, vector<double> noise_array){
     if ( signal_array.size() == 0 ){
         cerr<<"Signal array provided to Report::get_SNR has size 0. ";
         cerr<<"Function will return inaccurate values."<<endl;
+        throw("Cancelling Simulation");
     }
     if ( noise_array.size() == 0 ){
         cerr<<"Noise array provided to Report::get_SNR has size 0. ";
         cerr<<"Function will return inaccurate values."<<endl;
+        throw("Cancelling Simulation");
     }
 
     // Get peak-to-peak of signal
