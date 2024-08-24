@@ -89,6 +89,7 @@ outputdir="outputs"; // directory where outputs go
   DETECTOR_STATION=-1; // initiate this to negative -1, so it does nothing by default
   DETECTOR_STATION_ARAROOT=-1; // initiate this to negative -1, so it does nothing by default
   DETECTOR_STATION_LIVETIME_CONFIG=-1; // intiative this to negative -1, so it does nothing by default
+  DETECTOR_YEAR=2011;
 
   INTERACTION_MODE=1;   //PickNear mode (0: Aeff mode using sphere surface around station, 1: Veff mode using cylinder volume around station)
 
@@ -397,6 +398,9 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "DETECTOR_STATION_LIVETIME_CONFIG") {
                   DETECTOR_STATION_LIVETIME_CONFIG = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "DETECTOR_YEAR") {
+                  DETECTOR_YEAR = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "INTERACTION_MODE") {
                   INTERACTION_MODE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
