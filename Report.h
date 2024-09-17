@@ -307,6 +307,10 @@ class Report {
             int signalbin_0, int signalbin_1, int signalbin_2, 
             vector <double> &V0, vector <double> &V1, vector <double> &V2, 
             int BINSIZE, vector <double> *V_signal);
+        void Combine_Waveforms( // combine the signal from two vectors into single vector
+            int signalbin_0, int signalbin_1,
+            vector<double>& V0, vector<double>& V1,
+            int* signalbin_combined, vector<double>* V_combined);
         void GetNoiseThenConvolve(
             Antenna_r *antenna, vector <double> V_signal,
             int BINSIZE, int this_signalbin, int n_connected_rays, 

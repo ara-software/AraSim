@@ -3792,6 +3792,7 @@ void Report::GetAntennaSignalWF(
                 signal_bin[raysol], signal_bin[raysol + 1], 
                 antenna->V[raysol], antenna->V[raysol + 1], 
                 BINSIZE, V_signal);
+          
         }
         else if (connect_signals[raysol] == 0)
         {
@@ -3987,6 +3988,42 @@ void Report::Select_Wave_Convlv_Exchange(
 
     }
 
+}
+
+void Report::Combine_Waveforms(int signalbin_0, int signalbin_1, 
+    vector<double>& V0, vector<double>& V1, 
+    int* signalbin_combined, vector<double>* V_combined
+) {
+  // adds waveforms V0 & V1 into combined vector V_combined
+  // uses global signalbin indices to ensure vectors are properly combined
+  // V_combined is not guaranteed to have a length which is a multiple of BINSIZE
+  // signalbin_combined tracks global signalbin index of combined vector for use later
+
+  vector<double>& V = *V_combined;
+  int& signalbin = *signalbin_combined;
+
+  // ensure V_combined is a empty
+  V.clear();
+
+  // resize to necessary length to combine vectors 
+  signalbin = min(signalbin_0, signalbin_1); // starting index in terms of global index
+  const int maxsignalbin = max(signalbin_0+V0.size()-1, signalbin_1+V1.size()-1); // last index in terms of global index
+  const int len = maxsignalbin - signalbin + 1; // length needed to combine both signals
+  V.resize(len, 0);
+  
+  // add in the zeroth vector
+  for(unsigned int bin = 0; bin < V0.size(); ++bin) {
+    const int combined_bin = bin + (signalbin_0- signalbin);
+    V[combined_bin] += V0[bin];
+  }
+
+  // add in the first vector
+  for(unsigned int bin = 0; bin < V1.size(); ++bin) {
+    const int combined_bin = bin + (signalbin_1- signalbin);
+    V[combined_bin] += V1[bin];
+  }
+
+  return;
 }
 
 
