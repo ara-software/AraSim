@@ -3991,7 +3991,7 @@ void Report::Select_Wave_Convlv_Exchange(
 }
 
 void Report::Combine_Waveforms(int signalbin_0, int signalbin_1, 
-    vector<double>& V0, vector<double>& V1, 
+    vector<double> V0, vector<double> V1, 
     int* signalbin_combined, vector<double>* V_combined
 ) {
   // adds waveforms V0 & V1 into combined vector V_combined
@@ -4002,8 +4002,18 @@ void Report::Combine_Waveforms(int signalbin_0, int signalbin_1,
   vector<double>& V = *V_combined;
   int& signalbin = *signalbin_combined;
 
-  // ensure V_combined is a empty
+  // ensure V_combined is empty
   V.clear();
+
+  // check if both input vectors are empty
+  if(V0.empty() && V1.empty())
+    throw runtime_error("Cannot combine two empty signal vectors!");
+ 
+  // if one vector is empty, assign its signalbin to that of the other so nothing breaks 
+  if(V0.empty())
+    signalbin_0 = signalbin_1;
+  else if(V1.empty()) 
+    signalbin_1 = signalbin_0;
 
   // resize to necessary length to combine vectors 
   signalbin = min(signalbin_0, signalbin_1); // starting index in terms of global index
