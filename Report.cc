@@ -3666,11 +3666,12 @@ void Report::GetAntennaSignalWF(
             *n_connected_rays = 2;
             *this_signalbin = signal_bin[raysol];
 
-            // Combine signals from m and m+1 ray in double sized (NFOUR) signal array
-            Select_Wave_Convlv_Exchange( 
-                signal_bin[raysol], signal_bin[raysol + 1], 
-                antenna->V[raysol], antenna->V[raysol + 1], 
-                BINSIZE, V_signal);
+            // Combine signals from m and m+1 ray in a signal array
+            int buff;
+            Combine_Waveforms( 
+              signal_bin[raysol], signal_bin[raysol + 1],
+              antenna->V[raysol], antenna->V[raysol + 1],
+              &buff, V_signal);
           
         }
         else if (connect_signals[raysol] == 0)
@@ -3678,10 +3679,12 @@ void Report::GetAntennaSignalWF(
             *n_connected_rays = 1;
             *this_signalbin = signal_bin[raysol];
 
-            // Make a normally sized (NFOUR/2) signal array with just this ray 
+            // Make a normally sized (NFOUR/2) signal array with just this ray
             Select_Wave_Convlv_Exchange(
                 antenna->V[raysol], 
                 BINSIZE, V_signal);
+            
+            
         }
     }
     else
@@ -3703,11 +3706,18 @@ void Report::GetAntennaSignalWF(
                     *n_connected_rays = 3;
                     *this_signalbin = signal_bin[raysol];
 
-                    // Combine signals from all 3 rays in a double sized (NFOUR) signal array
-                    Select_Wave_Convlv_Exchange(
-                        signal_bin[raysol - 1], signal_bin[raysol], signal_bin[raysol + 1], 
-                        antenna->V[raysol - 1], antenna->V[raysol], antenna->V[raysol + 1], 
-                        BINSIZE, V_signal);
+                    // Combine signals from all 3 rays in a signal array
+                    int signalbin_combined;
+                    Combine_Waveforms(
+                      signal_bin[raysol - 1], signal_bin[raysol],
+                      antenna->V[raysol - 1], antenna->V[raysol],
+                      &signalbin_combined, V_signal);
+
+                    Combine_Waveforms(
+                      signal_bin[raysol + 1], signalbin_combined,
+                      antenna->V[raysol + 1], *V_signal,
+                      &signalbin_combined, V_signal);
+                      
                 }
                 else if (connect_signals[raysol - 1] == 0)
                 {
@@ -3716,11 +3726,12 @@ void Report::GetAntennaSignalWF(
                     *n_connected_rays = 2;
                     *this_signalbin = signal_bin[raysol];
 
-                    // Combine signals from m and m+1 ray in a double sized (NFOUR) signal array
-                    Select_Wave_Convlv_Exchange(
-                        signal_bin[raysol], signal_bin[raysol + 1], 
-                        antenna->V[raysol], antenna->V[raysol + 1], 
-                        BINSIZE, V_signal);
+                    // Combine signals from m and m+1 ray in a signal array
+                    int buff;
+                    Combine_Waveforms(
+                      signal_bin[raysol], signal_bin[raysol + 1],
+                      antenna->V[raysol], antenna->V[raysol + 1], 
+                      &buff, V_signal);
                 }
             }
             else if (connect_signals[raysol] == 0)
@@ -3929,24 +3940,30 @@ void Report::GetNoiseThenConvolve(
     
     // Extend the length of this waveform we're constructing if more than 1 ray connected
     int wf_length = 0;
-    int min_wf_bin = this_signalbin-BINSIZE/2+(trigger->maxt_diode_bin);
+    int min_wf_bin = 0;
     int max_wf_bin = 0;
+    int offset = 0;
     vector <double> diode_response;
     if ( n_connected_rays > 1 ) { // multiple ray solutions in one window
-        wf_length = BINSIZE * 2;
-        max_wf_bin = this_signalbin + BINSIZE/2 + BINSIZE;
+        wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is 2*BINSIZE
+        offset = trigger->maxt_diode_bin;
+        min_wf_bin = this_signalbin - wf_length/2/2 + offset;
+        max_wf_bin = this_signalbin + wf_length/2/2 + wf_length/2;
         diode_response = detector->fdiode_real_double;
     }
     else if ( antenna->ray_sol_cnt == 0 ){ // No rays connected to this antenna
-        this_signalbin = BINSIZE/2;
-        wf_length = BINSIZE;
+        this_signalbin = V_signal.size()/2;
+        wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is BINSIZE
+        offset = 0;
         min_wf_bin = 0;
-        max_wf_bin = BINSIZE;
+        max_wf_bin = V_signal.size();
         diode_response = detector->fdiode_real;
     }
     else { // Only one ray signal in the window
-        wf_length = BINSIZE;
-        max_wf_bin = this_signalbin + BINSIZE/2;
+        wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is BINSIZE
+        offset = trigger->maxt_diode_bin;
+        min_wf_bin = this_signalbin - wf_length/2 + offset;
+        max_wf_bin = this_signalbin + wf_length/2;
         diode_response = detector->fdiode_real;
     }
 
@@ -3969,10 +3986,11 @@ void Report::GetNoiseThenConvolve(
     for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
 
         // Export WFs with newly-processed signals
-        trigger->Full_window[channel_index][bin] = V_total_forconvlv[bin - this_signalbin + BINSIZE/2];
-        trigger->Full_window_V[channel_index][bin] += V_signal[bin - this_signalbin + BINSIZE/2];
-        antenna->V_convolved[bin] += V_signal[bin - this_signalbin + BINSIZE/2];
-        antenna->V_noise[bin] += V_noise[bin - this_signalbin + BINSIZE/2];
+        const int vBin = bin - min_wf_bin + offset;
+        trigger->Full_window[channel_index][bin] = V_total_forconvlv[vBin];
+        trigger->Full_window_V[channel_index][bin] += V_signal[vBin];
+        antenna->V_convolved[bin] += V_signal[vBin];
+        antenna->V_noise[bin] += V_noise[vBin];
 
         // Add electronics saturation effect to WF we'll perform trigger check on
         if ( trigger->Full_window_V[channel_index][bin] > settings1->V_SATURATION ) {
