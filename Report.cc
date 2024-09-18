@@ -427,17 +427,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
 
     int ray_sol_cnt;
-    double viewangle;
-    Position launch_vector; // direction of ray at the source
-    Position receive_vector;    // direction of ray at the target antenna
-    Vector n_trg_pokey; // unit pokey vector at the target
-    Vector n_trg_slappy;    // unit slappy vector at the target
     vector<vector < double>> ray_output;
     double noise_rms;
     double all_receive_ang[2];
 
     double vmmhz1m_tmp, vmmhz1m_sum, vmmhz1m_em;    // currently not using vmmhz1m_em
-    Position Pol_vector;    // polarization vector at the source
     double mag; // magnification factor. it can vary in case of plane / spherical wave
     double fresnel; // fresnel factor
     double Pol_factor;  // polarization factor
@@ -598,98 +592,28 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             if (debugmode == 0)
                             {
 
-                                // set viewangle, launch_vector, receive vectors
-                                viewangle = ray_output[1][ray_sol_cnt];
-                                GetParameters(event->Nu_Interaction[0].posnu,   // posnu
-                                    detector->stations[i].strings[j].antennas[k],   // trg antenna
-                                    event->Nu_Interaction[0].nnu,   // nnu
-                                    viewangle,  // inputs launch_angle, returns viewangle
-                                    ray_output[2][ray_sol_cnt], // receive_angle
-                                    launch_vector, receive_vector,
-                                    n_trg_slappy, n_trg_pokey);
+                                Vector n_trg_pokey; // unit pokey vector at the target
+                                Vector n_trg_slappy; // unit slappy vector at the target
+                                Vector Pol_vector_src; // Polarization at the source since Pol_vector is polarization vector at antenna
+                                Position launch_vector; // direction of ray at the source
+                                Position receive_vector; // direction of ray at the target antenna
+                                GetRayParameters(
+                                    &stations[i].strings[j].antennas[k],
+                                    &detector->stations[i].strings[j].antennas[k],
+                                    i, j, k, ray_sol_cnt, ray_output,
+                                    &n_trg_pokey, &n_trg_slappy, &Pol_vector_src,
+                                    &launch_vector, &receive_vector, 
+                                    event, icemodel, settings1
+                                );   
 
-                                // check viewangle that if ray in near Cherenkov cone
-                                if (viewangle * DEGRAD > 55. && viewangle * DEGRAD < 57.)
-                                {
-                                    // if viewangle is 56 deg +- 1 deg
-                                    //cout<<"near cone! view angle : "<<viewangle * DEGRAD <<"  station["<<i<<"].string["<<j<<"].antenna["<<k<<"] with  ray_sol_cnt : "<<ray_sol_cnt<<endl;
-                                }
-
-                                // store information to report
-                                stations[i].strings[j].antennas[k].view_ang.push_back(viewangle);
-                                stations[i].strings[j].antennas[k].launch_ang.push_back(ray_output[1][ray_sol_cnt]);
-                                stations[i].strings[j].antennas[k].rec_ang.push_back(ray_output[2][ray_sol_cnt]);
-                                stations[i].strings[j].antennas[k].Dist.push_back(ray_output[0][ray_sol_cnt]);
-                                stations[i].strings[j].antennas[k].L_att.push_back(icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0));
-                                stations[i].strings[j].antennas[k].reflect_ang.push_back(ray_output[3][ray_sol_cnt]);
-                                stations[i].strings[j].antennas[k].vmmhz.resize(ray_sol_cnt + 1);
-                                stations[i].strings[j].antennas[k].Heff.resize(ray_sol_cnt + 1);
-                                stations[i].strings[j].antennas[k].Vm_zoom.resize(ray_sol_cnt + 1);
-                                stations[i].strings[j].antennas[k].Vm_zoom_T.resize(ray_sol_cnt + 1);
-                                stations[i].strings[j].antennas[k].Vfft.resize(ray_sol_cnt + 1);
-                                stations[i].strings[j].antennas[k].Vfft_noise.resize(ray_sol_cnt + 1);
-                                stations[i].strings[j].antennas[k].V.resize(ray_sol_cnt + 1);
-                                stations[i].strings[j].antennas[k].SignalExt.resize(ray_sol_cnt + 1);
-
-                                // calculate the polarization vector at the source
-                                Pol_vector = GetPolarization(event->Nu_Interaction[0].nnu, launch_vector);
-
-				Vector Pol_vector_src = Pol_vector; //store the src Pol			
-
-                                icemodel->GetFresnel(ray_output[1][ray_sol_cnt],    // launch_angle
-                                    ray_output[2][ray_sol_cnt], // rec_angle
-                                    ray_output[3][ray_sol_cnt], // reflect_angle
-                                    event->Nu_Interaction[0].posnu,
-                                    launch_vector,
-                                    receive_vector,
-                                    settings1,
-                                    fresnel,
-                                    Pol_vector);    // input src Pol and return Pol at trg
-                                icemodel->GetMag(
-                                    mag, 
-                                    ray_output[0][ray_sol_cnt], // ray path length
-                                    ray_output[1][ray_sol_cnt], // zenith angle of ray at launch
-                                    ray_output[2][ray_sol_cnt], // zenith angle of ray upon receipt
-                                    ray_sol_cnt,
-                                    event->Nu_Interaction[0].posnu, // Neutrino
-                                    detector->stations[i].strings[j].antennas[k], // Antenna
-                                    -0.01, // 1cm antenna shift, inspired from NuRadioMC
-                                    icemodel, settings1
-                                );
-
-                                if (ray_output[3][ray_sol_cnt] < PI / 2.)
-                                {
-                                    // when not reflected at the surface, angle = 100
-                                    stations[i].strings[j].antennas[k].reflection.push_back(1); // say this is reflected ray
-                                }
-                                else
-                                {
-                                    stations[i].strings[j].antennas[k].reflection.push_back(0); // say this is not reflected ray
-                                }
-
-                                stations[i].strings[j].antennas[k].Pol_vector.push_back(Pol_vector);    // this Pol_vector is for the target antenna
-                                stations[i].strings[j].antennas[k].Mag.push_back(mag);  // magnification factor
-                                stations[i].strings[j].antennas[k].Fresnel.push_back(fresnel);  // Fresnel factor
-
-                                vmmhz1m_sum = 0;
-
-                                // get the arrival angle at the antenna, and store the relevant polarization factors
-                                GetAngleAnt(receive_vector, detector->stations[i].strings[j].antennas[k], antenna_theta, antenna_phi);  // get theta, phi for signal ray arrived at antenna
-                                GetAngleLaunch(launch_vector, launch_theta, launch_phi);
-
-                                Vector thetaHat = Vector(cos(antenna_theta *(PI / 180)) *cos(antenna_phi *(PI / 180)),
-                                    cos(antenna_theta *(PI / 180)) *sin(antenna_phi *(PI / 180)),
-                                    -sin(antenna_theta *(PI / 180)));
-
-                                Vector phiHat = Vector(-sin(antenna_phi *(PI / 180)),
-                                    cos(antenna_phi *(PI / 180)),
-                                    0);
-                                stations[i].strings[j].antennas[k].Pol_factorH.push_back(abs(phiHat *Pol_vector));
-                                stations[i].strings[j].antennas[k].Pol_factorV.push_back(abs(thetaHat *Pol_vector));
-                                stations[i].strings[j].antennas[k].phi_rec.push_back(antenna_phi *(PI / 180));
-                                stations[i].strings[j].antennas[k].theta_rec.push_back(antenna_theta *(PI / 180));
-                                stations[i].strings[j].antennas[k].phi_launch.push_back(launch_phi *(PI / 180));
-                                stations[i].strings[j].antennas[k].theta_launch.push_back(launch_theta *(PI / 180));                                
+                                double viewangle = stations[i].strings[j].antennas[k].view_ang[ray_sol_cnt];
+                                double mag = stations[i].strings[j].antennas[k].Mag[ray_sol_cnt];
+                                double fresnel = stations[i].strings[j].antennas[k].Fresnel[ray_sol_cnt];
+                                double antenna_theta = stations[i].strings[j].antennas[k].theta_rec[ray_sol_cnt] * 180 / PI;
+                                double antenna_phi = stations[i].strings[j].antennas[k].phi_rec[ray_sol_cnt] * 180 / PI;
+                                Vector Pol_vector = stations[i].strings[j].antennas[k].Pol_vector[ray_sol_cnt];
+                                
+                                vmmhz1m_sum = 0;                           
 
                                 // old freq domain signal mode (AVZ model)
                                 if (settings1->SIMULATION_MODE == 0)
@@ -2139,7 +2063,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                 if (settings1->TRIG_SCAN_MODE==5){ // Trigger mode for phased array
                     checkPATrigger(
-                        i, all_receive_ang, viewangle, ray_sol_cnt, 
+                        i, all_receive_ang, ray_sol_cnt, 
                         detector, event, evt, trigger, settings1, 
                         trig_search_init, max_total_bin
                     );
@@ -2874,6 +2798,102 @@ void Report::rerun_event(Event *event, Detector *detector,
             }
         }
     }
+}
+
+void Report::GetRayParameters(
+    Antenna_r *antenna_r, Antenna *antenna_d, 
+    int i, int j, int k, 
+    int ray_idx, vector<vector< double >> ray_output,
+    Vector *n_trg_pokey, Vector *n_trg_slappy, Vector *Pol_vector_src,
+    Position *launch_vector, Position *receive_vector, 
+    Event *event, IceModel *icemodel, Settings *settings1
+){
+
+    // set viewangle, launch_vector, receive vectors
+    double viewangle = ray_output[1][ray_idx];
+    GetParameters(event->Nu_Interaction[0].posnu,   // posnu
+        *antenna_d,   // trg antenna
+        event->Nu_Interaction[0].nnu,   // nnu
+        viewangle,  // inputs launch_angle, returns viewangle
+        ray_output[2][ray_idx], // receive_angle
+        *launch_vector, *receive_vector,
+        *n_trg_slappy, *n_trg_pokey);
+
+    // store information to report
+    antenna_r->view_ang.push_back(viewangle);
+    antenna_r->launch_ang.push_back(ray_output[1][ray_idx]);
+    antenna_r->rec_ang.push_back(ray_output[2][ray_idx]);
+    antenna_r->Dist.push_back(ray_output[0][ray_idx]);
+    antenna_r->L_att.push_back(icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0));
+    antenna_r->reflect_ang.push_back(ray_output[3][ray_idx]);
+    antenna_r->vmmhz.resize(ray_idx + 1);
+    antenna_r->Heff.resize(ray_idx + 1);
+    antenna_r->Vm_zoom.resize(ray_idx + 1);
+    antenna_r->Vm_zoom_T.resize(ray_idx + 1);
+    antenna_r->Vfft.resize(ray_idx + 1);
+    antenna_r->Vfft_noise.resize(ray_idx + 1);
+    antenna_r->V.resize(ray_idx + 1);
+    antenna_r->SignalExt.resize(ray_idx + 1);
+
+    // calculate the polarization vector at the source
+    Position Pol_vector = GetPolarization(event->Nu_Interaction[0].nnu, *launch_vector); // polarization vector at the source
+    *Pol_vector_src = Pol_vector; //store the src Pol			
+
+    double fresnel = 0;
+    icemodel->GetFresnel(ray_output[1][ray_idx],    // launch_angle
+        ray_output[2][ray_idx], // rec_angle
+        ray_output[3][ray_idx], // reflect_angle
+        event->Nu_Interaction[0].posnu,
+        *launch_vector,
+        *receive_vector,
+        settings1,
+        fresnel,
+        Pol_vector);    // input src Pol and return Pol at trg
+    double mag = 0;
+    icemodel->GetMag(
+        mag, 
+        ray_output[0][ray_idx], // ray path length
+        ray_output[1][ray_idx], // zenith angle of ray at launch
+        ray_output[2][ray_idx], // zenith angle of ray upon receipt
+        ray_idx,
+        event->Nu_Interaction[0].posnu, // Neutrino
+        *antenna_d, // Antenna
+        -0.01, // 1cm antenna shift, inspired from NuRadioMC
+        icemodel, settings1
+    );
+
+    if (ray_output[3][ray_idx] < PI / 2.) {
+        // when not reflected at the surface, angle = 100
+        antenna_r->reflection.push_back(1); // say this is reflected ray
+    }
+    else {
+        antenna_r->reflection.push_back(0); // say this is not reflected ray
+    }
+
+    antenna_r->Pol_vector.push_back(Pol_vector);    // this Pol_vector is for the target antenna
+    antenna_r->Mag.push_back(mag);  // magnification factor
+    antenna_r->Fresnel.push_back(fresnel);  // Fresnel factor
+
+    // get the arrival angle at the antenna, and store the relevant polarization factors
+    double antenna_theta = 0;
+    double antenna_phi = 0;
+    GetAngleAnt(*receive_vector, *antenna_d, antenna_theta, antenna_phi);  // get theta, phi for signal ray arrived at antenna
+    double launch_theta = 0;
+    double launch_phi = 0;
+    GetAngleLaunch(*launch_vector, launch_theta, launch_phi);
+    Vector thetaHat = Vector(cos(antenna_theta *(PI / 180)) *cos(antenna_phi *(PI / 180)),
+        cos(antenna_theta *(PI / 180)) *sin(antenna_phi *(PI / 180)),
+        -sin(antenna_theta *(PI / 180)));
+    Vector phiHat = Vector(-sin(antenna_phi *(PI / 180)),
+        cos(antenna_phi *(PI / 180)),
+        0);
+    antenna_r->Pol_factorH.push_back(abs(phiHat *Pol_vector));
+    antenna_r->Pol_factorV.push_back(abs(thetaHat *Pol_vector));
+    antenna_r->phi_rec.push_back(antenna_phi *(PI / 180));
+    antenna_r->theta_rec.push_back(antenna_theta *(PI / 180));
+    antenna_r->phi_launch.push_back(launch_phi *(PI / 180));
+    antenna_r->theta_launch.push_back(launch_theta *(PI / 180));  
+    
 }
 
 int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode ){
@@ -6164,7 +6184,7 @@ bool Report::isTrigger(double eff){
 }
 
 void Report::checkPATrigger(
-    int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,
+    int i, double all_receive_ang[2], int ray_sol_cnt,
     Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
     int trig_search_init, int max_total_bin
 ){
@@ -6187,6 +6207,7 @@ void Report::checkPATrigger(
     int waveformCenter = settings1->WAVEFORM_CENTER;
     int raySolNum = 0;
     int dsignalBin = 0;
+    double viewangle = stations[i].strings[0].antennas[8].view_ang[ray_sol_cnt];
     viewangle=viewangle*180.0/PI;
     bool searchSecondRay = true;
     if (ray_sol_cnt == 2){

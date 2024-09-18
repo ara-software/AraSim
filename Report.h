@@ -28,6 +28,7 @@ class AraGeomTool;
 
 class Birefringence;
 class Detector;
+class Antenna;
 class Event;
 class RaySolver;
 class Signal;
@@ -272,10 +273,17 @@ class Report {
         vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
         );
     
+    void GetRayParameters(
+        Antenna_r *antenna_r, Antenna *antenna_d, 
+        int i, int j, int k, int ray_idx, vector<vector< double > > ray_output,
+        Vector *n_trg_pokey, Vector *n_trg_slappy, Vector *Pol_vector_src,
+        Position *launch_vector, Position *receive_vector,
+        Event *event, IceModel *icemodel, Settings *settings1 );
+    
     // Phased Array functions
     bool isTrigger(double eff);
     void checkPATrigger(
-        int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,
+        int i, double all_receive_ang[2], int ray_sol_cnt,
         Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
         int trig_search_init, int max_total_bin);    
     double interpolate(double *xdata,double *ydata, double xi, int numData);
