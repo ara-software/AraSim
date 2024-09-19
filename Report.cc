@@ -972,6 +972,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             InitializeNNew(
                                                 &stations[i].strings[j].antennas[k], ray_sol_cnt, dT_forfft, settings1);
 
+                                            Pol_vector = n_trg_pokey;
+
                                             // now we have to make NFOUR/2 number of bins with random init time
                                             // as a test, make first as it is and zero pad
 
@@ -1009,8 +1011,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             freq_tmp = dF_Nnew *((double) stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2. + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
 
                                             freq_lastbin = freq_tmp;
-
-                                            Pol_vector = n_trg_pokey;
 
                                             for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2; n++) {
 
