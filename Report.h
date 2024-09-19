@@ -230,8 +230,6 @@ class Report {
            int max_total_bin;   // to save time, use only necessary number of bins
            int remain_bin;      // the bin number for not using entire DATA_BIN_SIZE array
            vector <int> signal_bin;      // the center of bin where signal should locate
-           vector <int> signal_dbin;     // the bin difference between signal bins
-           vector <int> connect_signals;    // if ray_sol time delay is small enough to connect each other
 
            int triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode=1);
 // 	   int triggerCheckLoopScan();
@@ -299,10 +297,6 @@ class Report {
         // Signal+noise convolution functions
         void Convolve_Signals(    
             Antenna_r *antenna, int channel_number, int station_number,
-            Settings *settings1, Trigger *trigger, Detector *detector);
-        void GetAntennaSignalWF(
-            int raysol, int *n_connected_rays, int *this_signalbin, int BINSIZE, 
-            Antenna_r *antenna, vector <double> *V_signal,
             Settings *settings1, Trigger *trigger, Detector *detector);
         void Select_Wave_Convlv_Exchange( // Convolve the signal from 1 ray
             vector <double> &V, 
