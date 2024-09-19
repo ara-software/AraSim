@@ -3617,31 +3617,23 @@ void Report::Convolve_Signals(
     
     // Loop over ray solutions and get signals from each
     // Loop does not run if there are no ray solutions
-    for (int m = 0; m < antenna->ray_sol_cnt; m++)
-    {
-
-        // Grab signal-only waveform, what the signal bin of the main ray is, 
-        //   and the number of rays in this tunnel diode window (connected rays)
-        // V_signal will have a length of BINSIZE if only 1 ray exists in a waveform
-        //   array with length NFOUR/2 and BINSIZE*2 if 2 or more fit into one tunnel diode window.
-        int this_signalbin = 0;
-        int n_connected_rays = 0;
-        vector <double> V_signal;
-        GetAntennaSignalWF(
-            m, &n_connected_rays, &this_signalbin, BINSIZE, antenna, &V_signal,
-            settings1, trigger, detector);
-
-        // Get the noise-only wf from just this signal-window then convolve 
-        //   through the tunnel diode
-        if (n_connected_rays>0) {
-            GetNoiseThenConvolve(
-                antenna, V_signal,
-                BINSIZE, this_signalbin, n_connected_rays, 
-                channel_index, station_number, 
-                settings1, trigger, detector);
-        }
-
-    }   // end loop over ray solutions
+    if(antenna->ray_sol_cnt > 0) {
+      int this_signalbin;
+      int n_connected_rays = 2; 
+      vector<double> V_signal;
+      for (int m = 0; m < antenna->ray_sol_cnt; ++m) {
+        Combine_Waveforms(
+          signal_bin[m], this_signalbin,
+          antenna->V[m], V_signal,
+          &this_signalbin, &V_signal);
+      }
+      
+      GetNoiseThenConvolve(
+          antenna, V_signal,
+          BINSIZE, this_signalbin, n_connected_rays, 
+          channel_index, station_number, 
+          settings1, trigger, detector);
+    }
 
 }
 
