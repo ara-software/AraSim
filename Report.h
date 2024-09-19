@@ -272,7 +272,8 @@ class Report {
     void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings, int which_solution,
         vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
         );
-    
+    void InitializeNNew(Antenna_r *antenna, int ray_idx, double dT, Settings *settings1);
+
     void GetRayParameters(
         Antenna_r *antenna_r, Antenna *antenna_d, 
         int i, int j, int k, int ray_idx, vector<vector< double > > ray_output,

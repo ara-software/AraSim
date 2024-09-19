@@ -739,8 +739,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             // see if integrated shower profile LQ is non-zero and near the cone viewangle
                                             if (event->Nu_Interaction[0].LQ > 0 && (fabs(viewangle - signal->CHANGLE_ICE) <= settings1->OFFCONE_LIMIT *RADDEG)) {
 
-                                                // initially give raysol has actual signal
-                                                stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] = 1;
 
                                                 // let's make NFOUR/2 bin of time domain pure signal part for now
                                                 // later once we understand how to apply antenna phase, total electronics with phase, apply those
@@ -759,15 +757,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     stations[i].strings[j].antennas[k].skip_bins[ray_sol_cnt]);
 
                                                 dT_forfft = Tarray[1] - Tarray[0];  // step in ns
-
-                                                int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
-                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
-                                                while (Ntmp > 1) {
-                                                    Ntmp = Ntmp / 2;
-                                                    stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *2;
-                                                }
-                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2;
-                                                // now new NFOUR for zero padding
+                                                InitializeNNew(
+                                                    &stations[i].strings[j].antennas[k], ray_sol_cnt, dT_forfft, settings1);
 
                                                 // now we have to make NFOUR/2 number of bins with random init time
                                                 // as a test, make first as it is and zero pad
@@ -974,22 +965,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             (BAC June 2022)
                                             */
 
-                                            // initially give raysol has actual signal
-                                            stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] = 1;
 
                                             int waveform_bin = (int) signal->ArbitraryWaveform_V.size();
 
                                             dT_forfft = signal->ArbitraryWaveform_T[1] - signal->ArbitraryWaveform_T[0]; // step in ns
-
-                                            int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
-
-                                            stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
-                                            while (Ntmp > 1) {
-                                                Ntmp = Ntmp / 2;
-                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *2;
-                                            }
-                                            stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2;
-                                            // now new NFOUR for zero padding
+                                            InitializeNNew(
+                                                &stations[i].strings[j].antennas[k], ray_sol_cnt, dT_forfft, settings1);
 
                                             // now we have to make NFOUR/2 number of bins with random init time
                                             // as a test, make first as it is and zero pad
@@ -1097,23 +1078,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             (BAC June 2022)
                                             */
 
-                                            // initially give raysol has actual signal
-                                            stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] = 1;
-
                                             int waveform_bin = (int) signal->PulserWaveform_V.size();
 
                                             dT_forfft = signal->PulserWaveform_T[1] - signal->PulserWaveform_T[0];    // step in ns
-
-                                            int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
-                                            
-                                            stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
-                                            while (Ntmp > 1) {
-                                                Ntmp = Ntmp / 2;
-                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *2;
-                                            }
-                                            
-                                            stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2;
-                                            // now new NFOUR for zero padding
+                                            InitializeNNew(
+                                                &stations[i].strings[j].antennas[k], ray_sol_cnt, dT_forfft, settings1);
 
                                             // now we have to make NFOUR/2 number of bins with random init time
                                             // as a test, make first as it is and zero pad
@@ -1283,17 +1252,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                         else if (settings1->EVENT_TYPE == 12) {
 
                                             // Import Voltage versus time fed into antenna (via data from Alisa in IDL2_InputVoltageVersusTime.txt)
-                                            stations[i].strings[j].antennas[k].SignalExt[ray_sol_cnt] = 1;
+                                            
                                             int waveform_bin = (int) signal->InputVoltage_V.size();
                                             dT_forfft = signal->InputVoltage_T[1] - signal->InputVoltage_T[0];    // step in ns
-                                            int Ntmp = settings1->TIMESTEP *1.e9 / dT_forfft;
-                                            stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = 1;
-                                            while (Ntmp > 1) {
-                                                Ntmp = Ntmp / 2;
-                                                stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *2;
-                                            }
-                                            stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] = stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] *settings1->NFOUR / 2;                                    
-
+                                            InitializeNNew(
+                                                &stations[i].strings[j].antennas[k], ray_sol_cnt, dT_forfft, settings1);
+                                            
                                             // Pad the input voltage and take the FFT
                                             double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
                                             double T_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
@@ -2753,6 +2717,19 @@ void Report::GetRayParameters(
     antenna_r->phi_launch.push_back(launch_phi *(PI / 180));
     antenna_r->theta_launch.push_back(launch_theta *(PI / 180));  
     
+}
+
+void Report::InitializeNNew(
+    Antenna_r *antenna, int ray_idx, double dT, Settings *settings1
+){
+    antenna->SignalExt[ray_idx] = 1;
+    int Ntmp = settings1->TIMESTEP *1.e9 / dT;
+    antenna->Nnew[ray_idx] = 1;
+    while (Ntmp > 1) {
+        Ntmp = Ntmp / 2;
+        antenna->Nnew[ray_idx] = antenna->Nnew[ray_idx] *2;
+    }
+    antenna->Nnew[ray_idx] = antenna->Nnew[ray_idx] *settings1->NFOUR / 2;
 }
 
 int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode ){
