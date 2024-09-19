@@ -1084,6 +1084,17 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             InitializeNNew(
                                                 &stations[i].strings[j].antennas[k], ray_sol_cnt, dT_forfft, settings1);
 
+                                            //Defining polarization at the source (using launch_vector)
+                                            double psi = TMath::DegToRad()*settings1->CLOCK_ANGLE;
+                                            double theta = acos(launch_vector[2]); //launch_vector is a unit vector
+                                            double phi = atan2(launch_vector[1],launch_vector[0]);
+                                                                            
+                                            //Justin's method
+                                            double newPol_vectorX = -cos(psi)*cos(theta)*cos(phi) + sin(psi)*sin(phi);
+                                            double newPol_vectorY = -cos(psi)*cos(theta)*sin(phi) - sin(psi)*cos(phi);
+                                            double newPol_vectorZ = cos(psi)*sin(theta);
+                                            Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);   
+
                                             // now we have to make NFOUR/2 number of bins with random init time
                                             // as a test, make first as it is and zero pad
 
@@ -1120,20 +1131,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             	}                                         
 
                                             	// just get peak from the array
-                                            	stations[i].strings[j].antennas[k].PeakV.push_back(FindPeak(V_forfft, waveform_bin));
-
-                                            	//Defining polarization at the source (using launch_vector)
-                                            
-                                            	double psi = TMath::DegToRad()*settings1->CLOCK_ANGLE;
-                                            	double theta = acos(launch_vector[2]); //launch_vector is a unit vector
-                                            	double phi = atan2(launch_vector[1],launch_vector[0]);
-                                                                             
-                                            	//Justin's method
-                                            	double newPol_vectorX = -cos(psi)*cos(theta)*cos(phi) + sin(psi)*sin(phi);
-                                            	double newPol_vectorY = -cos(psi)*cos(theta)*sin(phi) - sin(psi)*cos(phi);
-                                            	double newPol_vectorZ = cos(psi)*sin(theta);
-                                            
-                                            	Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);                                            
+                                            	stations[i].strings[j].antennas[k].PeakV.push_back(FindPeak(V_forfft, waveform_bin));                                         
 
                                                 int T_shift_bire = int(time_diff_birefringence/dT_forfft); //time shift for birefringence
                                                 double split_factor_bire = birefringence->Power_split_factor(
@@ -1257,6 +1255,19 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             dT_forfft = signal->InputVoltage_T[1] - signal->InputVoltage_T[0];    // step in ns
                                             InitializeNNew(
                                                 &stations[i].strings[j].antennas[k], ray_sol_cnt, dT_forfft, settings1);
+
+                                            //Defining polarization at the source (using launch_vector)
+                                            // double psi = TMath::DegToRad()*settings1->CLOCK_ANGLE;
+                                            double psi = 0;  // In the absence of cross-pol, the polarization angle is nominally zero for an antenna in the ice that is azimuthally symmetric. 
+                                                                // Cross pol is the next step in implementation. - JCF 2/9/2024
+                                            double theta = acos(launch_vector[2]); //launch_vector is a unit vector
+                                            double phi = atan2(launch_vector[1],launch_vector[0]);
+                                                                            
+                                            //Justin's method
+                                            double newPol_vectorX = -cos(psi)*cos(theta)*cos(phi) + sin(psi)*sin(phi);
+                                            double newPol_vectorY = -cos(psi)*cos(theta)*sin(phi) - sin(psi)*cos(phi);
+                                            double newPol_vectorZ = cos(psi)*sin(theta);
+                                            Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
                                             
                                             // Pad the input voltage and take the FFT
                                             double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
@@ -1293,21 +1304,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             	// just get peak from the array
                                                 //TODO: This needs to be the peak of the electric field at the source.
                                             	stations[i].strings[j].antennas[k].PeakV.push_back(FindPeak(V_forfft, waveform_bin));
-
-                                            	//Defining polarization at the source (using launch_vector)
-                                            
-                                            	// double psi = TMath::DegToRad()*settings1->CLOCK_ANGLE;
-                                                double psi = 0;  // In the absence of cross-pol, the polarization angle is nominally zero for an antenna in the ice that is azimuthally symmetric. 
-                                                                 // Cross pol is the next step in implementation. - JCF 2/9/2024
-                                            	double theta = acos(launch_vector[2]); //launch_vector is a unit vector
-                                            	double phi = atan2(launch_vector[1],launch_vector[0]);
-                                                                             
-                                            	//Justin's method
-                                            	double newPol_vectorX = -cos(psi)*cos(theta)*cos(phi) + sin(psi)*sin(phi);
-                                            	double newPol_vectorY = -cos(psi)*cos(theta)*sin(phi) - sin(psi)*cos(phi);
-                                            	double newPol_vectorZ = cos(psi)*sin(theta);
-                                            
-                                            	Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
                                                 
                                                 int T_shift_bire = int(time_diff_birefringence/dT_forfft); //time shift for birefringence
                                                 double split_factor_bire = birefringence->Power_split_factor(
