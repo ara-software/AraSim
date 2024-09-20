@@ -270,8 +270,12 @@ class Report {
     void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, Birefringence *birefringence, IceModel *icemodel, Settings *settings, int which_solution,
         vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
         );
+    void ModelRay(
+        int ray_idx, vector< vector< double > > ray_output, double *T_forint, 
+        Antenna_r *antenna_r, Antenna *antenna_d,  int i, int j, int k, 
+        int debugmode,  Birefringence *birefringence, Detector *detector, 
+        Event *event, IceModel *icemodel, Settings *settings, Signal *signal);
     void InitializeNNew(Antenna_r *antenna, int ray_idx, double dT, Settings *settings1);
-
     void GetRayParameters(
         Antenna_r *antenna_r, Antenna *antenna_d, 
         int i, int j, int k, int ray_idx, vector<vector< double > > ray_output,
@@ -453,13 +457,6 @@ class Report {
         vector <String_r> strings;
 
         double RandomTshift; // for t-domain signal, a factor for random init time shift
-
-
-        // test T domain waveform
-        //static const int outbin = 50;
-        static const int outbin = 64;
-        double Tarray[outbin];
-        double Earray[outbin];
 
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
 
