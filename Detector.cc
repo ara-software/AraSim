@@ -5913,6 +5913,78 @@ void Detector::getDiodeModel(Settings *settings1) {
     
 }
 
+vector<double> Detector::getDiodeModel(const int len, Settings *settings1) {
+    // creates diode model vector of length len
+    
+    
+    //  this is our homegrown diode response function which is a downgoing gaussian followed by an upward step function
+    TF1 *fdown1=new TF1("fl_down1","[3]+[0]*exp(-1.*(x-[1])*(x-[1])/(2*[2]*[2]))",-300.E-9,300.E-9);
+    fdown1->SetParameter(0,-0.8);
+    fdown1->SetParameter(1,15.E-9);
+    fdown1->SetParameter(2,2.3E-9);
+    fdown1->SetParameter(3,0.);
+    
+    TF1 *fdown2=new TF1("fl_down2","[3]+[0]*exp(-1.*(x-[1])*(x-[1])/(2*[2]*[2]))",-300.E-9,300.E-9);
+    fdown2->SetParameter(0,-0.2);
+    fdown2->SetParameter(1,15.E-9);
+    fdown2->SetParameter(2,4.0E-9);
+    fdown2->SetParameter(3,0.);
+    
+    maxt_diode= settings1->MAXT_DIODE;
+    
+    //fdown1->Copy(fdiode);
+    
+    TF1 *f_up=new TF1("f_up","[0]*([3]*(x-[1]))^2*exp(-(x-[1])/[2])",-200.E-9,100.E-9);
+    
+    f_up->SetParameter(2,7.0E-9);
+    f_up->SetParameter(0,1.);
+    f_up->SetParameter(1,18.E-9);
+    f_up->SetParameter(3,1.E9);
+    
+    
+    double sum=0.;
+	
+    f_up->SetParameter(0,-1.*sqrt(2.*PI)*(fdown1->GetParameter(0)*fdown1->GetParameter(2)+fdown2->GetParameter(0)*fdown2->GetParameter(2))/(2.*pow(f_up->GetParameter(2),3.)*1.E18));
+	
+    for (int i=0;i<NFOUR/2;i++) {
+        
+        diode_real.push_back(0.);   // first puchback 0. value  (this is actually not standard way though works fine)
+	    
+        if (i<(int)(maxt_diode/TIMESTEP)) { // think this is same with above commented if
+            
+            diode_real[i]=fdown1->Eval((double)i*TIMESTEP)+fdown2->Eval((double)i*TIMESTEP);
+            if (i>(int)(f_up->GetParameter(1)/TIMESTEP))
+                diode_real[i]+=f_up->Eval((double)i*TIMESTEP);
+            
+            sum+=diode_real[i];
+        }
+    }
+    
+    double diode_real_fft[len];  
+    
+    for (int i=0; i < len; i++) {  
+        if ( i<(int)(maxt_diode/TIMESTEP) ) {
+            diode_real_fft[i] = diode_real[i];
+        }
+        else {
+            diode_real_fft[i] = 0.;
+        }
+        
+    }
+    
+    // forward FFT
+    Tools::realft(diode_real_fft,1,len);
+    
+    vector<double> fdiode; 
+    
+    // save f domain diode response in fdiode
+    //for (int i=0; i<settings1->DATA_BIN_SIZE+512; i++) {
+    for (int i=0; i < len; i++) {
+        fdiode.push_back( diode_real_fft[i] );
+    }
+    
+    return fdiode;
+}
 
 
 // this is a test version for getting new noise waveforms for each event
