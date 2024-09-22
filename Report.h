@@ -267,16 +267,23 @@ class Report {
 //    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger);
     
     void Connect_Interaction_Detector_V2 (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Birefringence *birefringence, Settings *settings1, Trigger *trigger, int evt);     
-    void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings, int which_solution,
+    void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, Birefringence *birefringence, IceModel *icemodel, Settings *settings, int which_solution,
         vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
         );
-    
+    void InitializeNNew(Antenna_r *antenna, int ray_idx, double dT, Settings *settings1);
+
     void GetRayParameters(
         Antenna_r *antenna_r, Antenna *antenna_d, 
         int i, int j, int k, int ray_idx, vector<vector< double > > ray_output,
         Vector *n_trg_pokey, Vector *n_trg_slappy, Vector *Pol_vector_src,
         Position *launch_vector, Position *receive_vector,
         Event *event, IceModel *icemodel, Settings *settings1 );
+    void PropagateSignal(
+        double dT_forfft, int efield_length, vector< double > efield_time, vector< double > efield, double *T_forint,
+        int ray_idx, vector<vector< double > > ray_output, Position launch_vector, double time_diff_birefringence, 
+        Vector Pol_vector_src, Vector Pol_vector, Vector n_trg_slappy, Vector n_trg_pokey, 
+        Antenna_r *antenna_r, Antenna *antenna_d, int gain_ch_no, int j, int k,
+        Birefringence *birefringence, Detector *detector, Event *event, IceModel *icemodel, Settings *settings);
     
     // Phased Array functions
     bool isTrigger(double eff);
@@ -407,6 +414,7 @@ class Report {
 
 
         double FindPeak (double *waveform, int n);  // same with icemc; trigger->AntTrigger::FindPeak
+        double FindPeak(vector< double > waveform, int n);
 
         void SetRank(Detector *detector); // set rank (rank of strength of signal at each antenna)
 
