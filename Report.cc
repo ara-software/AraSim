@@ -3876,10 +3876,8 @@ void Report::GetAntennaNoiseWF(
     int noise_wf_index;
     for (int bin=0; bin<wf_length; bin++) {
         bin_value = signalbin - BINSIZE/2 + bin;
-        //bin_value = signalbin - wf_length/2 + bin;
         noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
         noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
-//        cout << noise_ID_index << " " << noise_wf_index << " " << settings1->DATA_BIN_SIZE << endl; 
         V_noise_only->push_back(
             noise_wf->at( noise_ID[noise_ID_index] ).at( noise_wf_index )
         );
