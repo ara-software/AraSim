@@ -142,10 +142,64 @@ void Report::Initialize(Detector *detector, Settings *settings1) {
 
 
 
+void Antenna_r::Prepare_Outputs(int n_interactions) {   // if any vector variable added in Antenna_r, need to be added here!
+    
+    view_ang.resize(n_interactions);
+    launch_ang.resize(n_interactions);
+    phi_launch.resize(n_interactions);
+    theta_launch.resize(n_interactions);
+    rec_ang.resize(n_interactions);
+    reflect_ang.resize(n_interactions);
+    Dist.resize(n_interactions);
+    L_att.resize(n_interactions);
+    arrival_time.resize(n_interactions);
+    reflection.resize(n_interactions);
+    Pol_vector.resize(n_interactions);
+    vmmhz.resize(n_interactions);
+    Heff.resize(n_interactions);
+    Mag.resize(n_interactions);
+    Fresnel.resize(n_interactions);
+    Pol_factor.resize(n_interactions);
+    Pol_factorH.resize(n_interactions);
+    Pol_factorV.resize(n_interactions);
+    phi_rec.resize(n_interactions);
+    theta_rec.resize(n_interactions);
+    //VHz_antfactor.resize(n_interactions);
+    //VHz_filter.resize(n_interactions);
+    Vfft.resize(n_interactions);
+    Vfft_noise.resize(n_interactions);
+
+    ray_step.resize(n_interactions);
+
+    Ax.resize(n_interactions);
+    Ay.resize(n_interactions);
+    Az.resize(n_interactions);
+
+    V.resize(n_interactions);
+
+    PeakV.resize(n_interactions);
+
+    Trig_Pass = 0;
+
+    // additional for before ant waveform
+    //Vm_wo_antfactor.resize(n_interactions);
+    Vm_zoom.resize(n_interactions);
+    Vm_zoom_T.resize(n_interactions);
+
+    SignalBin.resize(n_interactions);
+    SignalBinTime.resize(n_interactions);
+    SignalExt.resize(n_interactions); 
+    
+}
+
+
+
 void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need to be added here!
     
     view_ang.clear();
     launch_ang.clear();
+    phi_launch.clear();
+    theta_launch.clear();
     rec_ang.clear();
     reflect_ang.clear();
     Dist.clear();
@@ -425,7 +479,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
     int ray_sol_cnt;
     vector<vector < double>> ray_output;
     double noise_rms;
-    double all_receive_ang[2];
 
     double mag; // magnification factor. it can vary in case of plane / spherical wave
     double fresnel; // fresnel factor
@@ -482,81 +535,79 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 T_forint[n] = init_T + (double) n *settings1->TIMESTEP *1.e9;   // in ns
             }
 
-            for (int k = 0; k < detector->stations[i].strings[j].antennas.size(); k++)
-            {
-                // cout << i << " : " << j << " : " << k << endl;
+            for (int k = 0; k < detector->stations[i].strings[j].antennas.size(); k++) {
 
                 stations[i].strings[j].antennas[k].clear(); // clear data in antenna which stored in previous event
-		
-		        // run ray solver, see if solution exist
-                // if not, skip (set something like Sol_No = 0;
-                // if solution exist, calculate view angle and calculate TaperVmMHz
+                stations[i].strings[j].antennas[k].Prepare_Outputs(event->Nu_Interaction.size()); // Resize output arrays to the number of interactions
 
-                // added one more condition to run raysolver (direct distance is less than 3km)
-                //
+                for (int interaction_idx=0; interaction_idx<event->Nu_Interaction.size(); interaction_idx++) {
+            
+                    // run ray solver, see if solution exist
+                    // if not, skip (set something like Sol_No = 0;
+                    // if solution exist, calculate view angle and calculate TaperVmMHz
 
-                // cout << event->Nu_Interaction[0].posnu.GetX() << " : " << event->Nu_Interaction[0].posnu.GetY() << " : " << event->Nu_Interaction[0].posnu.GetZ() << endl;
-                // cout << event->Nu_Interaction[0].pickposnu << " : " << event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[j].antennas[k]) << " : " << settings1->RAYSOL_RANGE << endl; 
-                if (event->Nu_Interaction[0].pickposnu && event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[j].antennas[k]) <= settings1->RAYSOL_RANGE)
-                {
-                    // if posnu is selected inside the antarctic ice
-                    // cout << i << " : " << j << " : " << k << endl;
+                    // added one more condition to run raysolver (direct distance is less than 3km)
 
-                    RayStep.clear();    // remove previous values
-                    raysolver->Solve_Ray(
-                        event->Nu_Interaction[0].posnu, detector->stations[i].strings[j].antennas[k], 
-                        icemodel, ray_output, settings1, RayStep
-                    );   // solve ray between source and antenna
+                    if (  event->Nu_Interaction[interaction_idx].pickposnu && 
+                          event->Nu_Interaction[interaction_idx].posnu.Distance(detector->stations[i].strings[j].antennas[k]) <= settings1->RAYSOL_RANGE
+                    ) {
+                        // if posnu is selected inside the antarctic ice
 
-                    ray_sol_cnt = 0;
+                        RayStep.clear();    // remove previous values
+                        raysolver->Solve_Ray(
+                            event->Nu_Interaction[interaction_idx].posnu, detector->stations[i].strings[j].antennas[k], 
+                            icemodel, ray_output, settings1, RayStep
+                        );   // solve ray between source and antenna
 
-                    if (raysolver->solution_toggle) { // if there are solution from raysolver
+                        ray_sol_cnt = 0;
 
-                        while (ray_sol_cnt < ray_output[0].size()) {
+                        if (raysolver->solution_toggle) { // if there are solution from raysolver
 
-                            ModelRay(
-                                ray_sol_cnt, ray_output, T_forint,
-                                &stations[i].strings[j].antennas[k], 
-                                &detector->stations[i].strings[j].antennas[k],
-                                i, j, k, debugmode, 
-                                birefringence, detector, event, icemodel, settings1, signal
-                            );
+                            while (ray_sol_cnt < ray_output[0].size()) {
 
-                            // for number of soultions (could be 1 or 2)
+                                ModelRay(
+                                    ray_sol_cnt, ray_output, interaction_idx, T_forint,
+                                    &stations[i].strings[j].antennas[k], 
+                                    &detector->stations[i].strings[j].antennas[k],
+                                    i, j, k, debugmode, 
+                                    birefringence, detector, event, icemodel, settings1, signal
+                                );
 
-                            // check max_PeakV
-                            if ( debugmode == 0){
-                                if (max_PeakV_tmp < stations[i].strings[j].antennas[k].PeakV[ray_sol_cnt]) {
-                                    max_PeakV_tmp = stations[i].strings[j].antennas[k].PeakV[ray_sol_cnt];
+                                // for number of soultions (could be 1 or 2)
+
+                                // check max_PeakV
+                                if ( debugmode == 0){
+                                    if (max_PeakV_tmp < stations[i].strings[j].antennas[k].PeakV[interaction_idx][ray_sol_cnt]) {
+                                        max_PeakV_tmp = stations[i].strings[j].antennas[k].PeakV[interaction_idx][ray_sol_cnt];
+                                    }
                                 }
-                            }
-                            // check min_arrival_time
-                            if (min_arrival_time_tmp > stations[i].strings[j].antennas[k].arrival_time[ray_sol_cnt]) {
-                                min_arrival_time_tmp = stations[i].strings[j].antennas[k].arrival_time[ray_sol_cnt];
-                            }
+                                // check min_arrival_time
+                                if (min_arrival_time_tmp > stations[i].strings[j].antennas[k].arrival_time[interaction_idx][ray_sol_cnt]) {
+                                    min_arrival_time_tmp = stations[i].strings[j].antennas[k].arrival_time[interaction_idx][ray_sol_cnt];
+                                }
 
-                            // check max_arrival_time
-                            if (max_arrival_time_tmp < stations[i].strings[j].antennas[k].arrival_time[ray_sol_cnt]) {
-                                max_arrival_time_tmp = stations[i].strings[j].antennas[k].arrival_time[ray_sol_cnt];
-                            }
+                                // check max_arrival_time
+                                if (max_arrival_time_tmp < stations[i].strings[j].antennas[k].arrival_time[interaction_idx][ray_sol_cnt]) {
+                                    max_arrival_time_tmp = stations[i].strings[j].antennas[k].arrival_time[interaction_idx][ray_sol_cnt];
+                                }
 
-                            ray_sol_cnt++;
+                                ray_sol_cnt++;
 
-                        }   // end while number of solutions
+                            }   // end while number of solutions
 
-                    }   // end if solution exist
+                        }   // end if solution exist
 
-                }   // end if posnu selected
+                    }   // end if posnu selected
 
-                else
-                {
-                    //cout<<" No posnu!!!!!! No signals calculated at all!!"<<endl;
-                    ray_sol_cnt = 0;
+                    else {
+                        //cout<<" No posnu!!!!!! No signals calculated at all!!"<<endl;
+                        ray_sol_cnt = 0;
+                    }
+
+                    stations[i].strings[j].antennas[k].ray_sol_cnt += ray_sol_cnt;   // save number of RaySolver solutions
+                    stations[i].Total_ray_sol += ray_sol_cnt;   // add ray_sol_cnt to Total_ray_sol
+
                 }
-
-                stations[i].strings[j].antennas[k].ray_sol_cnt = ray_sol_cnt;   // save number of RaySolver solutions
-
-                stations[i].Total_ray_sol += ray_sol_cnt;   // add ray_sol_cnt to Total_ray_sol
 
             }   // for number_of_antennas_string
 
@@ -697,7 +748,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                     if (debugmode == 0) {
                         Convolve_Signals(
                             &stations[i].strings[j].antennas[k], ch_ID, i,
-                            settings1, trigger, detector
+                            event, settings1, trigger, detector
                         );
                     }
 
@@ -777,8 +828,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                 if (settings1->TRIG_SCAN_MODE==5){ // Trigger mode for phased array
                     checkPATrigger(
-                        i, all_receive_ang, ray_sol_cnt, 
-                        detector, event, evt, trigger, settings1, 
+                        i, detector, event, evt, trigger, settings1, 
                         trig_search_init, max_total_bin
                     );
                 }
@@ -971,33 +1021,17 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 int string_i = detector->getStringfromArbAntID(i, ch_loop);
                                 int antenna_i = detector->getAntennafromArbAntID(i, ch_loop);
                                 //          cout << "string:antenna: " << string_i << " : " << antenna_i << endl;
-                                stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = -1;  // no likely init
+                                stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0] = -1;  // no likely init
+                                stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1] = -1;  // no likely init
                                 if (ch_loop == Passed_chs[check_ch] && check_ch < N_pass)
                                 {
                                     // added one more condition (check_ch < N_Pass) for bug in vector Passed_chs.clear()???
 
                                     // store which ray sol is triggered based on trig time
-                                    //
 
-                                    int mindBin = 1.e9; // init big value
-                                    int dBin = 0;
-
-                                    for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++)
-                                    {
-                                        // loop over raysol numbers
-
-                                        if (stations[i].strings[string_i].antennas[antenna_i].SignalExt[m])
-                                        {
-
-                                            dBin = abs(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].Trig_Pass);
-
-                                            if (dBin < mindBin)
-                                            {
-                                                stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = m;   // store the ray sol number which is minimum difference between Trig_Pass bin
-                                                mindBin = dBin;
-                                            }
-                                        }
-                                    }
+                                    stations[i].strings[string_i].antennas[antenna_i].Find_Likely_Sol();
+                                    int likely_int = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
+                                    int likely_ray = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
 
                                     //skip this passed ch as it already has bin info
                                     //cout<<"trigger passed at bin "<<stations[i].strings[(int)((ch_loop)/4)].antennas[(int)((ch_loop)%4)].Trig_Pass<<"  passed ch : "<<ch_loop<<" Direct dist btw posnu : "<<event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[(int)((ch_loop)/4)].antennas[(int)((ch_loop)%4)])<<endl;
@@ -1007,17 +1041,21 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     if (settings1->TRIG_ONLY_LOW_CH_ON == 0)
                                     {
                                         cout << endl << "trigger passed at bin " << stations[i].strings[string_i].antennas[antenna_i].Trig_Pass << "  passed ch : " << ch_loop << " (" << detector->stations[i].strings[string_i].antennas[antenna_i].type << "type) Direct dist btw posnu : " << event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i]) << " noiseID : " << stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
-                                        if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol != -1)
+                                        if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0] != -1)
                                         {
-                                            cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[0] *DEGRAD << " LikelyTrigSignal : " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol;
+                                            cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[likely_int][likely_ray] *DEGRAD ;
+                                            cout << " LikelyTrigSignal : interaction " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
+                                            cout << ", ray " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
                                         }
                                     }
                                     else if (settings1->TRIG_ONLY_LOW_CH_ON == 1)
                                     {
                                         cout << endl << "trigger passed at bin " << stations[i].strings[string_i].antennas[antenna_i].Trig_Pass << "  passed ant: str[" << string_i << "].ant[" << antenna_i << "] (" << detector->stations[i].strings[string_i].antennas[antenna_i].type << "type) Direct dist btw posnu : " << event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i]) << " noiseID : " << stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
-                                        if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol != -1)
+                                        if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0] != -1)
                                         {
-                                            cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[0] *DEGRAD << " LikelyTrigSignal : " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol;
+                                            cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[likely_int][likely_ray] *DEGRAD ;
+                                            cout << " LikelyTrigSignal : interaction " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
+                                            cout << ", ray " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
                                         }
                                     }
 
@@ -1054,12 +1092,18 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9 + detector->params.TestBed_WFtime_offset_ns);    // save in ns
                                         }
                                         if (mimicbin == 0) {
-                                            for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) { ///< calculates time of center of each rays signal based on readout window time config
-                                                double signal_center_offset = (double)(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].time[0]) * settings1->TIMESTEP * 1.e9;
-                                                double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
-                                                //! signal_center_offset: time offset between beginning of readout window and center of signal
-                                                //! signal_center_time: time of center of signal based on readout window time config
-                                                stations[i].strings[string_i].antennas[antenna_i].SignalBinTime.push_back(signal_center_time);
+                                            ///< calculates time of center of each rays signal based on readout window time config
+                                            for (int interaction_idx=0; interaction_idx<stations[i].strings[string_i].antennas[antenna_i].SignalBin.size(); interaction_idx++){
+                                                for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].SignalBin[interaction_idx].size(); m++) { 
+                                                    double signal_center_offset = (double)(
+                                                        stations[i].strings[string_i].antennas[antenna_i].SignalBin[interaction_idx][m] - 
+                                                        stations[i].strings[string_i].antennas[antenna_i].time[0]
+                                                    ) * settings1->TIMESTEP * 1.e9;
+                                                    double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
+                                                    //! signal_center_offset: time offset between beginning of readout window and center of signal
+                                                    //! signal_center_time: time of center of signal based on readout window time config
+                                                    stations[i].strings[string_i].antennas[antenna_i].SignalBinTime[interaction_idx].push_back(signal_center_time);
+                                                }
                                             }
                                         }
                                     }
@@ -1113,12 +1157,18 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9 + detector->params.TestBed_WFtime_offset_ns);    // save in ns
                                         }
                                         if (mimicbin == 0) {
-                                            for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) { ///< calculates time of center of each rays signal based on readout window time config
-                                                double signal_center_offset = (double)(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].time[0]) * settings1->TIMESTEP * 1.e9;
-                                                double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
-                                                //! signal_center_offset: time offset between beginning of readout window and center of signal
-                                                //! signal_center_time: time of center of signal based on readout window time config
-                                                stations[i].strings[string_i].antennas[antenna_i].SignalBinTime.push_back(signal_center_time);
+                                            ///< calculates time of center of each rays signal based on readout window time config
+                                            for (int interaction_idx=0; interaction_idx<stations[i].strings[string_i].antennas[antenna_i].SignalBin.size(); interaction_idx++){
+                                                for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].SignalBin[interaction_idx].size(); m++) { 
+                                                    double signal_center_offset = (double)(
+                                                        stations[i].strings[string_i].antennas[antenna_i].SignalBin[interaction_idx][m] - 
+                                                        stations[i].strings[string_i].antennas[antenna_i].time[0]
+                                                    ) * settings1->TIMESTEP * 1.e9;
+                                                    double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
+                                                    //! signal_center_offset: time offset between beginning of readout window and center of signal
+                                                    //! signal_center_time: time of center of signal based on readout window time config
+                                                    stations[i].strings[string_i].antennas[antenna_i].SignalBinTime[interaction_idx].push_back(signal_center_time);
+                                                }
                                             }
                                         }
                                     }
@@ -1142,12 +1192,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                     // done V_mimic for non-triggered chs (done fixed V_mimic)
                                 }
-
-                                double arrivtime = stations[i].strings[string_i].antennas[antenna_i].arrival_time[0];
-                                double X = detector->stations[i].strings[string_i].antennas[antenna_i].GetX();
-                                double Y = detector->stations[i].strings[string_i].antennas[antenna_i].GetY();
-                                double Z = detector->stations[i].strings[string_i].antennas[antenna_i].GetZ();
-                                //std::cout << "Arrival time:X:Y:Z " << arrivtime << " : " << X << " : " << Y << " : " << Z << std::endl;
+                                
                                 /*
                                 int AraRootChannel = 0;
                                 AraRootChannel = detector->GetChannelfromStringAntenna (i, string_i, antenna_i, settings1);
@@ -1229,6 +1274,46 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
 }   // end Connect_Interaction_Detector
 
+void Antenna_r::Find_Likely_Sol(){
+
+    int mindBin = 1.e9; // init big value
+    int dBin = 0;
+
+    Likely_Sol[0] = -1;
+    Likely_Sol[1] = -1;
+
+    for (int n=0; n<SignalBin.size(); n++) {
+        for (int m = 0; m < SignalBin[n].size(); m++) { // loop over raysol numbers
+            if (SignalExt[n][m]) {
+                dBin = abs(SignalBin[n][m] - Trig_Pass);
+                if (dBin < mindBin) {
+                    // store the ray sol number which is minimum difference between Trig_Pass bin
+                    Likely_Sol[0] = n;
+                    Likely_Sol[1] = m;
+                    mindBin = dBin;
+                }
+            }
+        }
+    }
+
+}
+
+void Antenna_r::Get_Brightest_Interaction(int (*brightest_event)[2]){
+    *brightest_event[0] = -1;
+    *brightest_event[1] = -1;
+    double maxV = 0; 
+    for (int interaction_idx=0; interaction_idx<V.size(); interaction_idx++){
+        for (int ray=0; ray<V[interaction_idx].size(); ray++){
+            double this_maxV = Tools::getMaxAbsoluteMagnitude(V[interaction_idx][ray]);
+            if (this_maxV > maxV){
+                maxV = this_maxV;
+                *brightest_event[0] = interaction_idx;
+                *brightest_event[1] = ray;
+            }
+        }
+    }
+}
+
 
 void Report::rerun_event(Event *event, Detector *detector, 
     RaySolver *raysolver, Signal *signal, Birefringence *birefringence,
@@ -1282,103 +1367,107 @@ void Report::rerun_event(Event *event, Detector *detector,
 
             int idx = ((j*4)+k);
 
-            // redo the ray tracing
-            vector<vector<double> > ray_output;
-            vector<vector<vector<double> > > Ray_Step;
-            raysolver->Solve_Ray(event->Nu_Interaction[0].posnu,
-                detector->stations[0].strings[j].antennas[k],
-                icemodel, ray_output, settings, Ray_Step);
+            for (int interaction_idx=0; interaction_idx<event->Nu_Interaction.size(); interaction_idx++){
 
-            // if there is a solution
-            if (raysolver->solution_toggle){
+                // redo the ray tracing
+                vector<vector<double> > ray_output;
+                vector<vector<vector<double> > > Ray_Step;
+                raysolver->Solve_Ray(event->Nu_Interaction[0].posnu,
+                    detector->stations[0].strings[j].antennas[k],
+                    icemodel, ray_output, settings, Ray_Step);
 
-                // numSolutions[idx]=ray_output[0].size();
-                numSolutions[idx]=ray_output[0].size();
+                // if there is a solution
+                if (raysolver->solution_toggle){
 
-                int ray_sol_cnt=0;
-                while (ray_sol_cnt < ray_output[0].size()){
+                    // numSolutions[idx]=ray_output[0].size();
+                    numSolutions[idx]=ray_output[0].size();
 
-                    if(std::find(which_sols_to_search.begin(), which_sols_to_search.end(), ray_sol_cnt) == which_sols_to_search.end()){
-                        // if this solution is not meant to be searched, skip it
+                    int ray_sol_cnt=0;
+                    while (ray_sol_cnt < ray_output[0].size()){
+
+                        if(std::find(which_sols_to_search.begin(), which_sols_to_search.end(), ray_sol_cnt) == which_sols_to_search.end()){
+                            // if this solution is not meant to be searched, skip it
+                            ray_sol_cnt++;
+                            continue;
+                        }
+
+                        double time_diff_birefringence = birefringence->Time_Diff_TwoRays(
+                            RayStep[ray_sol_cnt][0], RayStep[ray_sol_cnt][1], ray_output[3][ray_sol_cnt], 
+                            event->Nu_Interaction[0].posnu_from_antcen, settings
+                        ); // calculate time differences for birefringence 
+
+                        Vector n_trg_pokey; // unit pokey vector at the target
+                        Vector n_trg_slappy; // unit slappy vector at the target
+                        Vector Pol_vector_src; // Polarization at the source since Pol_vector is polarization vector at antenna
+                        Position launch_vector; // direction of ray at the source
+                        Position receive_vector; // direction of ray at the target antenna
+                        GetRayParameters(
+                            &stations[0].strings[j].antennas[k],
+                            &detector->stations[0].strings[j].antennas[k],
+                            event->Nu_Interaction[interaction_idx], interaction_idx, 
+                            0, j, k, ray_sol_cnt, ray_output,
+                            &n_trg_pokey, &n_trg_slappy, &Pol_vector_src,
+                            &launch_vector, &receive_vector, 
+                            icemodel, settings
+                        );   
+
+                        double viewangle = stations[0].strings[j].antennas[k].view_ang[interaction_idx][ray_sol_cnt];
+                        double mag = stations[0].strings[j].antennas[k].Mag[interaction_idx][ray_sol_cnt];
+                        double fresnel = stations[0].strings[j].antennas[k].Fresnel[interaction_idx][ray_sol_cnt];
+                        double antenna_theta = stations[0].strings[j].antennas[k].theta_rec[interaction_idx][ray_sol_cnt] * 180 / PI;
+                        double antenna_phi = stations[0].strings[j].antennas[k].phi_rec[interaction_idx][ray_sol_cnt] * 180 / PI;
+                        Vector Pol_vector = stations[0].strings[j].antennas[k].Pol_vector[interaction_idx][ray_sol_cnt];
+
+                        // this is the 1/R and fresnel and focusing effect
+                        double atten_factor = 1. / ray_output[0][ray_sol_cnt] * mag * fresnel;
+
+                        // get the electric field
+                        int local_outbin=64;
+                        double local_Earray[local_outbin];
+                        double local_Tarray[local_outbin];
+                        int local_skipbins;
+                        signal->GetVm_FarField_Tarray(event, settings, viewangle,
+                            atten_factor, local_outbin, local_Tarray, local_Earray, local_skipbins
+                            );
+
+                        double dT_forfft = local_Tarray[1] - local_Tarray[0];
+
+                        InitializeNNew(&stations[0].strings[j].antennas[k], interaction_idx, ray_sol_cnt, dT_forfft, settings);
+
+                        // Convert the time array so it works with signal calculator
+                        vector< double > local_Tarray_vector;
+                        for (int bin=0; bin<local_outbin; bin++){
+                            local_Tarray_vector.push_back( local_Tarray[bin] );
+                        }
+                        vector< double > local_Earray_vector;
+                        for (int bin=0; bin<local_outbin; bin++){
+                            local_Earray_vector.push_back( local_Earray[bin] );
+                        }
+
+                        PropagateSignal( 
+                            dT_forfft, local_outbin, local_Tarray_vector, local_Earray_vector, T_forint,
+                            interaction_idx, ray_sol_cnt, ray_output, launch_vector, time_diff_birefringence, 
+                            Pol_vector_src, Pol_vector, n_trg_slappy, n_trg_pokey,
+                            &stations[0].strings[j].antennas[k], &detector->stations[0].strings[j].antennas[k],
+                            gain_ch_no, j, k, birefringence, detector, event, icemodel, settings);
+
+                        // store the result
+                        for(int n=0; n<settings->NFOUR/2; n++){
+                            traceTimes[idx][ray_sol_cnt][n] = T_forint[n];
+                            traceVoltages[idx][ray_sol_cnt][n] = stations[0].strings[j].antennas[k].V[interaction_idx][ray_sol_cnt][n];
+                        }
+
                         ray_sol_cnt++;
-                        continue;
                     }
-
-                    double time_diff_birefringence = birefringence->Time_Diff_TwoRays(
-                        RayStep[ray_sol_cnt][0], RayStep[ray_sol_cnt][1], ray_output[3][ray_sol_cnt], 
-                        event->Nu_Interaction[0].posnu_from_antcen, settings
-                    ); // calculate time differences for birefringence 
-
-                    Vector n_trg_pokey; // unit pokey vector at the target
-                    Vector n_trg_slappy; // unit slappy vector at the target
-                    Vector Pol_vector_src; // Polarization at the source since Pol_vector is polarization vector at antenna
-                    Position launch_vector; // direction of ray at the source
-                    Position receive_vector; // direction of ray at the target antenna
-                    GetRayParameters(
-                        &stations[0].strings[j].antennas[k],
-                        &detector->stations[0].strings[j].antennas[k],
-                        0, j, k, ray_sol_cnt, ray_output,
-                        &n_trg_pokey, &n_trg_slappy, &Pol_vector_src,
-                        &launch_vector, &receive_vector, 
-                        event, icemodel, settings
-                    );   
-
-                    double viewangle = stations[0].strings[j].antennas[k].view_ang[ray_sol_cnt];
-                    double mag = stations[0].strings[j].antennas[k].Mag[ray_sol_cnt];
-                    double fresnel = stations[0].strings[j].antennas[k].Fresnel[ray_sol_cnt];
-                    double antenna_theta = stations[0].strings[j].antennas[k].theta_rec[ray_sol_cnt] * 180 / PI;
-                    double antenna_phi = stations[0].strings[j].antennas[k].phi_rec[ray_sol_cnt] * 180 / PI;
-                    Vector Pol_vector = stations[0].strings[j].antennas[k].Pol_vector[ray_sol_cnt];
-
-                    // this is the 1/R and fresnel and focusing effect
-                    double atten_factor = 1. / ray_output[0][ray_sol_cnt] * mag * fresnel;
-
-                    // get the electric field
-                    int local_outbin=64;
-                    double local_Earray[local_outbin];
-                    double local_Tarray[local_outbin];
-                    int local_skipbins;
-                    signal->GetVm_FarField_Tarray(event, settings, viewangle,
-                        atten_factor, local_outbin, local_Tarray, local_Earray, local_skipbins
-                        );
-
-                    double dT_forfft = local_Tarray[1] - local_Tarray[0];
-
-                    InitializeNNew(
-                        &stations[0].strings[j].antennas[k], ray_sol_cnt, dT_forfft, settings);
-
-                    // Convert the time array so it works with signal calculator
-                    vector< double > local_Tarray_vector;
-                    for (int bin=0; bin<local_outbin; bin++){
-                        local_Tarray_vector.push_back( local_Tarray[bin] );
-                    }
-                    vector< double > local_Earray_vector;
-                    for (int bin=0; bin<local_outbin; bin++){
-                        local_Earray_vector.push_back( local_Earray[bin] );
-                    }
-
-                    PropagateSignal( 
-                        dT_forfft, local_outbin, local_Tarray_vector, local_Earray_vector, T_forint,
-                        ray_sol_cnt, ray_output, launch_vector, time_diff_birefringence, 
-                        Pol_vector_src, Pol_vector, n_trg_slappy, n_trg_pokey,
-                        &stations[0].strings[j].antennas[k], &detector->stations[0].strings[j].antennas[k],
-                        gain_ch_no, j, k, birefringence, detector, event, icemodel, settings);
-
-                    // store the result
-                    for(int n=0; n<settings->NFOUR/2; n++){
-                        traceTimes[idx][ray_sol_cnt][n] = T_forint[n];
-                        traceVoltages[idx][ray_sol_cnt][n] = stations[0].strings[j].antennas[k].V[ray_sol_cnt][n];
-                    }
-
-                    ray_sol_cnt++;
                 }
+
             }
         }
     }
 }
 
 void Report::ModelRay(
-    int ray_idx, vector< vector< double > > ray_output, double *T_forint, 
+    int ray_idx, vector< vector< double > > ray_output, int interaction_idx, double *T_forint, 
     Antenna_r *antenna_r, Antenna *antenna_d,  int i, int j, int k, 
     int debugmode,  Birefringence *birefringence, Detector *detector, 
     Event *event, IceModel *icemodel, Settings *settings, Signal *signal
@@ -1400,16 +1489,16 @@ void Report::ModelRay(
         event->Nu_Interaction[0].posnu_from_antcen, settings
     ); // calculate time differences for birefringence 
 
-    antenna_r->arrival_time.push_back(ray_output[4][ray_idx]);
+    antenna_r->arrival_time[interaction_idx].push_back(ray_output[4][ray_idx]);
 
     //! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
     //! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
-    antenna_r->ray_step.resize(ray_idx + 1);    ///< resize by number of ray solutions
-    antenna_r->ray_step[ray_idx].resize(2); ///< resize by xz values
+    antenna_r->ray_step[interaction_idx].resize(ray_idx + 1); ///< resize by number of ray solutions
+    antenna_r->ray_step[interaction_idx][ray_idx].resize(2); ///< resize by xz values
     for (int steps = 0; steps < (int) RayStep[ray_idx][0].size(); steps++) {
         ///< push back each ray step coordinates
-        antenna_r->ray_step[ray_idx][0].push_back(RayStep[ray_idx][0][steps]);
-        antenna_r->ray_step[ray_idx][1].push_back(RayStep[ray_idx][1][steps]);
+        antenna_r->ray_step[interaction_idx][ray_idx][0].push_back(RayStep[ray_idx][0][steps]);
+        antenna_r->ray_step[interaction_idx][ray_idx][1].push_back(RayStep[ray_idx][1][steps]);
     }
 
     // get ice attenuation factor
@@ -1447,30 +1536,29 @@ void Report::ModelRay(
         Position launch_vector; // direction of ray at the source
         Position receive_vector; // direction of ray at the target antenna
         GetRayParameters(
-            antenna_r,
-            antenna_d,
+            antenna_r, antenna_d, event->Nu_Interaction[interaction_idx], interaction_idx,
             i, j, k, ray_idx, ray_output,
             &n_trg_pokey, &n_trg_slappy, &Pol_vector_src,
             &launch_vector, &receive_vector, 
-            event, icemodel, settings
+            icemodel, settings
         );   
 
-        double viewangle = antenna_r->view_ang[ray_idx];
-        double mag = antenna_r->Mag[ray_idx];
-        double fresnel = antenna_r->Fresnel[ray_idx];
-        double antenna_theta = antenna_r->theta_rec[ray_idx] * 180 / PI;
-        double antenna_phi = antenna_r->phi_rec[ray_idx] * 180 / PI;
-        Vector Pol_vector = antenna_r->Pol_vector[ray_idx];
+        double viewangle = antenna_r->view_ang[interaction_idx][ray_idx];
+        double mag = antenna_r->Mag[interaction_idx][ray_idx];
+        double fresnel = antenna_r->Fresnel[interaction_idx][ray_idx];
+        double antenna_theta = antenna_r->theta_rec[interaction_idx][ray_idx] * 180 / PI;
+        double antenna_phi = antenna_r->phi_rec[interaction_idx][ray_idx] * 180 / PI;
+        Vector Pol_vector = antenna_r->Pol_vector[interaction_idx][ray_idx];
 
         double vmmhz1m_tmp = 0; 
         double vmmhz1m_sum = 0;  
-        double vmmhz1m_em  = 0;                         
+        double vmmhz1m_em  = 0;           
 
         // old freq domain signal mode (AVZ model)
         if (settings->SIMULATION_MODE == 0) {
 
             // initially give raysol has actual signal
-            antenna_r->SignalExt[ray_idx] = 1;
+            antenna_r->SignalExt[interaction_idx][ray_idx] = 1;
 
             double vmmhz_filter[(int)(detector->GetFreqBin())];
 
@@ -1517,7 +1605,7 @@ void Report::ModelRay(
 
                 vmmhz1m_sum += vmmhz1m_tmp;
 
-                antenna_r->vmmhz[ray_idx].push_back(vmmhz1m_tmp);
+                antenna_r->vmmhz[interaction_idx][ray_idx].push_back(vmmhz1m_tmp);
 
                 double freq_tmp = detector->GetFreq(l);    // freq in Hz
 
@@ -1530,7 +1618,7 @@ void Report::ModelRay(
                     icemodel->GetN(*antenna_d),
                     detector->GetImpedance(freq_tmp*1.E-6, antenna_d->type, j, k));                                        
 
-                antenna_r->Heff[ray_idx].push_back(heff);
+                antenna_r->Heff[interaction_idx][ray_idx].push_back(heff);
 
                 // apply pol factor, heff
                 if (event->IsCalpulser == 1) {
@@ -1561,30 +1649,30 @@ void Report::ModelRay(
                 
             }   // end for freq bin
 
-            antenna_r->Pol_factor.push_back(Pol_factor);
+            antenna_r->Pol_factor[interaction_idx].push_back(Pol_factor);
 
             double volts_forfft[settings->NFOUR / 2];  // array for fft
             MakeArraysforFFT(settings, detector, i, vmmhz_filter, volts_forfft);
 
             // save freq domain array which is prepaired for realft
             for (int n = 0; n < settings->NFOUR / 2; n++) {
-                antenna_r->Vfft[ray_idx].push_back(volts_forfft[n]);
+                antenna_r->Vfft[interaction_idx][ray_idx].push_back(volts_forfft[n]);
             }
 
             // now, after realft, volts_forfft is time domain signal at backend of antenna
             Tools::realft(volts_forfft, -1, settings->NFOUR / 2);
 
-            antenna_r->PeakV.push_back(FindPeak(volts_forfft, settings->NFOUR / 2));
+            antenna_r->PeakV[interaction_idx].push_back(FindPeak(volts_forfft, settings->NFOUR / 2));
 
             Tools::NormalTimeOrdering(settings->NFOUR / 2, volts_forfft);
 
             // time at 0 s is when ray started at the posnu
             for (int n = 0; n < settings->NFOUR / 2; n++) {
                 if (settings->TRIG_ANALYSIS_MODE != 2) { // not pure noise mode (we need signal)
-                    antenna_r->V[ray_idx].push_back(volts_forfft[n]);
+                    antenna_r->V[interaction_idx][ray_idx].push_back(volts_forfft[n]);
                 }
                 else if (settings->TRIG_ANALYSIS_MODE == 2) { // pure noise mode (set signal to 0)
-                    antenna_r->V[ray_idx].push_back(0.);
+                    antenna_r->V[interaction_idx][ray_idx].push_back(0.);
                 }
             }
 
@@ -1619,8 +1707,7 @@ void Report::ModelRay(
                             antenna_r->skip_bins[ray_idx]);
 
                         double dT_forfft = Tarray[1] - Tarray[0];  // step in ns
-                        InitializeNNew(
-                            antenna_r, ray_idx, dT_forfft, settings);
+                        InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                         // Convert the time array so it works with signal calculator
                         vector< double > Tarray_vector;
@@ -1634,7 +1721,7 @@ void Report::ModelRay(
 
                         PropagateSignal( 
                             dT_forfft, outbin, Tarray_vector, Earray_vector, T_forint,
-                            ray_idx, ray_output, launch_vector, time_diff_birefringence, 
+                            interaction_idx, ray_idx, ray_output, launch_vector, time_diff_birefringence, 
                             Pol_vector_src, Pol_vector, n_trg_slappy, n_trg_pokey,
                             antenna_r, antenna_d,
                             gain_ch_no, j, k, birefringence, detector, event, icemodel, settings);
@@ -1644,20 +1731,20 @@ void Report::ModelRay(
                         // no signal generating
 
                         // initially give raysol has actual signal
-                        antenna_r->SignalExt[ray_idx] = 0;
+                        antenna_r->SignalExt[interaction_idx][ray_idx] = 0;
 
                         // if no signal, push_back 0 values (otherwise the value inside will remain as old value)
                         for (int n = 0; n < settings->NFOUR / 2; n++) {
                             if (n < outbin) {
-                                antenna_r->Vm_zoom[ray_idx].push_back(0.);
-                                antenna_r->Vm_zoom_T[ray_idx].push_back(n);
+                                antenna_r->Vm_zoom[interaction_idx][ray_idx].push_back(0.);
+                                antenna_r->Vm_zoom_T[interaction_idx][ray_idx].push_back(n);
                             }
-                            antenna_r->V[ray_idx].push_back(0.);
+                            antenna_r->V[interaction_idx][ray_idx].push_back(0.);
                         }
 
                         antenna_r->Nnew[ray_idx] = settings->NFOUR / 2;
 
-                        antenna_r->PeakV.push_back(0.);
+                        antenna_r->PeakV[interaction_idx].push_back(0.);
 
                     }
                     
@@ -1680,8 +1767,7 @@ void Report::ModelRay(
 
                     int waveform_bin = (int) signal->ArbitraryWaveform_V.size();
                     double dT_forfft = signal->ArbitraryWaveform_T[1] - signal->ArbitraryWaveform_T[0]; // step in ns
-                    InitializeNNew(
-                        antenna_r, ray_idx, dT_forfft, settings);
+                    InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                     // Convert time array to vector double so it'll work with the signal calculator
                     vector< double > ArbitraryWaveform_T_vector;
@@ -1695,7 +1781,7 @@ void Report::ModelRay(
 
                     PropagateSignal(
                         dT_forfft, waveform_bin, ArbitraryWaveform_T_vector, ArbitraryWaveform_V_vector, T_forint,
-                        ray_idx, ray_output, launch_vector, time_diff_birefringence, 
+                        interaction_idx, ray_idx, ray_output, launch_vector, time_diff_birefringence, 
                         Pol_vector_src, Pol_vector, n_trg_slappy, n_trg_pokey,
                         antenna_r, antenna_d,
                         gain_ch_no, j, k, birefringence, detector, event, icemodel, settings);
@@ -1713,8 +1799,7 @@ void Report::ModelRay(
                     int waveform_bin = (int) signal->PulserWaveform_V.size();
 
                     double dT_forfft = signal->PulserWaveform_T[1] - signal->PulserWaveform_T[0];    // step in ns
-                    InitializeNNew(
-                        antenna_r, ray_idx, dT_forfft, settings);
+                    InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
                     
                     cout << antenna_r->Nnew[ray_idx] << endl;
                     cout << waveform_bin << endl;
@@ -1754,7 +1839,7 @@ void Report::ModelRay(
 
                     PropagateSignal(
                         dT_forfft, waveform_bin, signal->PulserWaveform_T, signal->PulserWaveform_V, T_forint,
-                        ray_idx, ray_output, launch_vector, time_diff_birefringence, 
+                        interaction_idx, ray_idx, ray_output, launch_vector, time_diff_birefringence, 
                         Pol_vector_src, Pol_vector, n_trg_slappy, n_trg_pokey,
                         antenna_r, antenna_d,
                         gain_ch_no, j, k, birefringence, detector, event, icemodel, settings);
@@ -1768,8 +1853,7 @@ void Report::ModelRay(
                     
                     int waveform_bin = (int) signal->InputVoltage_V.size();
                     double dT_forfft = signal->InputVoltage_T[1] - signal->InputVoltage_T[0];    // step in ns
-                    InitializeNNew(
-                        antenna_r, ray_idx, dT_forfft, settings);
+                    InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                     //Defining polarization at the source (using launch_vector)
                     // double psi = TMath::DegToRad()*settings->CLOCK_ANGLE;
@@ -1798,7 +1882,7 @@ void Report::ModelRay(
 
                     PropagateSignal(
                         dT_forfft, waveform_bin, signal->InputVoltage_T, signal->InputVoltage_V, T_forint,
-                        ray_idx, ray_output, launch_vector, time_diff_birefringence, 
+                        interaction_idx, ray_idx, ray_output, launch_vector, time_diff_birefringence, 
                         Pol_vector_src, Pol_vector, n_trg_slappy, n_trg_pokey,
                         antenna_r, antenna_d,
                         gain_ch_no, j, k, birefringence, detector, event, icemodel, settings);
@@ -1815,12 +1899,11 @@ void Report::ModelRay(
 
                 double dT_forfft = detector->CalPulserWF_ns[1] - detector->CalPulserWF_ns[0];  // step in ns
 
-                InitializeNNew(
-                    antenna_r, ray_idx, dT_forfft, settings);
+                InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                 PropagateSignal(
                     dT_forfft, CP_bin, detector->CalPulserWF_ns, detector->CalPulserWF_V, T_forint,
-                    ray_idx, ray_output, launch_vector, time_diff_birefringence, 
+                    interaction_idx, ray_idx, ray_output, launch_vector, time_diff_birefringence, 
                     Pol_vector_src, Pol_vector, n_trg_slappy, n_trg_pokey,
                     antenna_r, antenna_d,
                     gain_ch_no, j, k, birefringence, detector, event, icemodel, settings);
@@ -1835,48 +1918,51 @@ void Report::ModelRay(
 
 void Report::GetRayParameters(
     Antenna_r *antenna_r, Antenna *antenna_d, 
+    Interaction interaction, int interaction_idx,
     int i, int j, int k, 
     int ray_idx, vector<vector< double >> ray_output,
     Vector *n_trg_pokey, Vector *n_trg_slappy, Vector *Pol_vector_src,
     Position *launch_vector, Position *receive_vector, 
-    Event *event, IceModel *icemodel, Settings *settings1
+    IceModel *icemodel, Settings *settings1
 ){
 
     // set viewangle, launch_vector, receive vectors
     double viewangle = ray_output[1][ray_idx];
-    GetParameters(event->Nu_Interaction[0].posnu,   // posnu
+    GetParameters(
+        interaction.posnu,   // posnu
         *antenna_d,   // trg antenna
-        event->Nu_Interaction[0].nnu,   // nnu
+        interaction.nnu,   // nnu
         viewangle,  // inputs launch_angle, returns viewangle
         ray_output[2][ray_idx], // receive_angle
         *launch_vector, *receive_vector,
         *n_trg_slappy, *n_trg_pokey);
 
     // store information to report
-    antenna_r->view_ang.push_back(viewangle);
-    antenna_r->launch_ang.push_back(ray_output[1][ray_idx]);
-    antenna_r->rec_ang.push_back(ray_output[2][ray_idx]);
-    antenna_r->Dist.push_back(ray_output[0][ray_idx]);
-    antenna_r->L_att.push_back(icemodel->EffectiveAttenuationLength(settings1, event->Nu_Interaction[0].posnu, 0));
-    antenna_r->reflect_ang.push_back(ray_output[3][ray_idx]);
-    antenna_r->vmmhz.resize(ray_idx + 1);
-    antenna_r->Heff.resize(ray_idx + 1);
-    antenna_r->Vm_zoom.resize(ray_idx + 1);
-    antenna_r->Vm_zoom_T.resize(ray_idx + 1);
-    antenna_r->Vfft.resize(ray_idx + 1);
-    antenna_r->Vfft_noise.resize(ray_idx + 1);
-    antenna_r->V.resize(ray_idx + 1);
-    antenna_r->SignalExt.resize(ray_idx + 1);
+    antenna_r->view_ang[interaction_idx].push_back(viewangle);
+    antenna_r->launch_ang[interaction_idx].push_back(ray_output[1][ray_idx]);
+    antenna_r->rec_ang[interaction_idx].push_back(ray_output[2][ray_idx]);
+    antenna_r->Dist[interaction_idx].push_back(ray_output[0][ray_idx]);
+    antenna_r->L_att[interaction_idx].push_back(icemodel->EffectiveAttenuationLength(settings1, interaction.posnu, 0));
+    antenna_r->reflect_ang[interaction_idx].push_back(ray_output[3][ray_idx]);
+    antenna_r->vmmhz[interaction_idx].resize(ray_idx + 1);
+    antenna_r->Heff[interaction_idx].resize(ray_idx + 1);
+    antenna_r->Vm_zoom[interaction_idx].resize(ray_idx + 1);
+    antenna_r->Vm_zoom_T[interaction_idx].resize(ray_idx + 1);
+    antenna_r->Vfft[interaction_idx].resize(ray_idx + 1);
+    antenna_r->Vfft_noise[interaction_idx].resize(ray_idx + 1);
+    antenna_r->V[interaction_idx].resize(ray_idx + 1);
+    antenna_r->SignalExt[interaction_idx].resize(ray_idx + 1);
 
     // calculate the polarization vector at the source
-    Position Pol_vector = GetPolarization(event->Nu_Interaction[0].nnu, *launch_vector); // polarization vector at the source
+    Position Pol_vector = GetPolarization(interaction.nnu, *launch_vector); // polarization vector at the source
     *Pol_vector_src = Pol_vector; //store the src Pol			
 
     double fresnel = 0;
-    icemodel->GetFresnel(ray_output[1][ray_idx],    // launch_angle
+    icemodel->GetFresnel(
+        ray_output[1][ray_idx],    // launch_angle
         ray_output[2][ray_idx], // rec_angle
         ray_output[3][ray_idx], // reflect_angle
-        event->Nu_Interaction[0].posnu,
+        interaction.posnu,
         *launch_vector,
         *receive_vector,
         settings1,
@@ -1889,7 +1975,7 @@ void Report::GetRayParameters(
         ray_output[1][ray_idx], // zenith angle of ray at launch
         ray_output[2][ray_idx], // zenith angle of ray upon receipt
         ray_idx,
-        event->Nu_Interaction[0].posnu, // Neutrino
+        interaction.posnu, // Neutrino
         *antenna_d, // Antenna
         -0.01, // 1cm antenna shift, inspired from NuRadioMC
         icemodel, settings1
@@ -1897,15 +1983,15 @@ void Report::GetRayParameters(
 
     if (ray_output[3][ray_idx] < PI / 2.) {
         // when not reflected at the surface, angle = 100
-        antenna_r->reflection.push_back(1); // say this is reflected ray
+        antenna_r->reflection[interaction_idx].push_back(1); // say this is reflected ray
     }
     else {
-        antenna_r->reflection.push_back(0); // say this is not reflected ray
+        antenna_r->reflection[interaction_idx].push_back(0); // say this is not reflected ray
     }
 
-    antenna_r->Pol_vector.push_back(Pol_vector);    // this Pol_vector is for the target antenna
-    antenna_r->Mag.push_back(mag);  // magnification factor
-    antenna_r->Fresnel.push_back(fresnel);  // Fresnel factor
+    antenna_r->Pol_vector[interaction_idx].push_back(Pol_vector);    // this Pol_vector is for the target antenna
+    antenna_r->Mag[interaction_idx].push_back(mag);  // magnification factor
+    antenna_r->Fresnel[interaction_idx].push_back(fresnel);  // Fresnel factor
 
     // get the arrival angle at the antenna, and store the relevant polarization factors
     double antenna_theta = 0;
@@ -1920,19 +2006,19 @@ void Report::GetRayParameters(
     Vector phiHat = Vector(-sin(antenna_phi *(PI / 180)),
         cos(antenna_phi *(PI / 180)),
         0);
-    antenna_r->Pol_factorH.push_back(abs(phiHat *Pol_vector));
-    antenna_r->Pol_factorV.push_back(abs(thetaHat *Pol_vector));
-    antenna_r->phi_rec.push_back(antenna_phi *(PI / 180));
-    antenna_r->theta_rec.push_back(antenna_theta *(PI / 180));
-    antenna_r->phi_launch.push_back(launch_phi *(PI / 180));
-    antenna_r->theta_launch.push_back(launch_theta *(PI / 180));  
+    antenna_r->Pol_factorH[interaction_idx].push_back(abs(phiHat *Pol_vector));
+    antenna_r->Pol_factorV[interaction_idx].push_back(abs(thetaHat *Pol_vector));
+    antenna_r->phi_rec[interaction_idx].push_back(antenna_phi *(PI / 180));
+    antenna_r->theta_rec[interaction_idx].push_back(antenna_theta *(PI / 180));
+    antenna_r->phi_launch[interaction_idx].push_back(launch_phi *(PI / 180));
+    antenna_r->theta_launch[interaction_idx].push_back(launch_theta *(PI / 180));  
     
 }
 
 void Report::InitializeNNew(
-    Antenna_r *antenna, int ray_idx, double dT, Settings *settings1
+    Antenna_r *antenna, int interaction_idx, int ray_idx, double dT, Settings *settings1
 ){
-    antenna->SignalExt[ray_idx] = 1;
+    antenna->SignalExt[interaction_idx][ray_idx] = 1;
     int Ntmp = settings1->TIMESTEP *1.e9 / dT;
     antenna->Nnew[ray_idx] = 1;
     while (Ntmp > 1) {
@@ -1945,7 +2031,7 @@ void Report::InitializeNNew(
 
 void Report::PropagateSignal(
     double dT_forfft, int efield_length, vector< double > efield_time, vector< double > efield, double *T_forint,
-    int ray_idx, vector<vector< double > > ray_output, Position launch_vector, double time_diff_birefringence, 
+    int interaction_idx, int ray_idx, vector<vector< double > > ray_output, Position launch_vector, double time_diff_birefringence, 
     Vector Pol_vector_src, Vector Pol_vector, Vector n_trg_slappy, Vector n_trg_pokey, 
     Antenna_r *antenna_r, Antenna *antenna_d, int gain_ch_no, int j, int k,
     Birefringence *birefringence, Detector *detector, Event *event, IceModel *icemodel, Settings *settings
@@ -1957,8 +2043,8 @@ void Report::PropagateSignal(
     double V_forfft[antenna_r->Nnew[ray_idx]];
     double T_forfft[antenna_r->Nnew[ray_idx]];
 
-    double antenna_theta = antenna_r->theta_rec[ray_idx] * 180 / PI;
-    double antenna_phi = antenna_r->phi_rec[ray_idx] * 180 / PI;
+    double antenna_theta = antenna_r->theta_rec[interaction_idx][ray_idx] * 180 / PI;
+    double antenna_phi = antenna_r->phi_rec[interaction_idx][ray_idx] * 180 / PI;
 
     double Pol_factor;  // polarization factor
 
@@ -1974,8 +2060,8 @@ void Report::PropagateSignal(
         for (int n = 0; n < antenna_r->Nnew[ray_idx]; n++) {
 
             if (n < efield_length) {
-                antenna_r->Vm_zoom[ray_idx].push_back(efield[n]);
-                antenna_r->Vm_zoom_T[ray_idx].push_back(efield_time[n]);
+                antenna_r->Vm_zoom[interaction_idx][ray_idx].push_back(efield[n]);
+                antenna_r->Vm_zoom_T[interaction_idx][ray_idx].push_back(efield_time[n]);
             }
 
             // make efield_time, efield located at the center of Nnew array
@@ -1992,7 +2078,7 @@ void Report::PropagateSignal(
         }
 
         // just get peak from the array
-        antenna_r->PeakV.push_back(FindPeak(efield, (int)efield_length));
+        antenna_r->PeakV[interaction_idx].push_back(FindPeak(efield, (int)efield_length));
 
         int T_shift_bire = int(time_diff_birefringence/dT_forfft); //time shift for birefringence
         double split_factor_bire = birefringence->Power_split_factor(
@@ -2079,7 +2165,7 @@ void Report::PropagateSignal(
                 freq_tmp, 
                 icemodel->GetN(*antenna_d),
                 detector->GetImpedance(freq_tmp*1.E-6, antenna_d->type, k));                                                        
-            antenna_r->Heff[ray_idx].push_back(heff);
+            antenna_r->Heff[interaction_idx][ray_idx].push_back(heff);
 
             //apply freq dependent attenuation model if in neutrino mode
             if (settings->EVENT_TYPE == 0 && settings->USE_ARA_ICEATTENU == 2) {
@@ -2187,7 +2273,7 @@ void Report::PropagateSignal(
         V_forfft, V_forfft_bire[0], V_forfft_bire[1], antenna_r->Nnew[ray_idx], max_bire_ray_cnt, settings
     ); //Apply interference of two rays from birefringence
 
-    antenna_r->Pol_factor.push_back(Pol_factor);
+    antenna_r->Pol_factor[interaction_idx].push_back(Pol_factor);
 
     // we need to do normal time ordering as we did zero padding(?)
     // If signal is located at the center, we don't need to do NormalTimeOrdering???
@@ -2201,13 +2287,13 @@ void Report::PropagateSignal(
     for (int n = 0; n < settings->NFOUR / 2; n++) {
         if (settings->TRIG_ANALYSIS_MODE != 2) {
             // not pure noise mode (we need signal)
-            antenna_r->V[ray_idx].push_back(
+            antenna_r->V[interaction_idx][ray_idx].push_back(
                 volts_forint[n] *2. / (double)(antenna_r->Nnew[ray_idx])
             );  // 2/N for inverse FFT normalization factor
         }
         else if (settings->TRIG_ANALYSIS_MODE == 2) {
             // pure noise mode (set signal to 0)
-            antenna_r->V[ray_idx].push_back(0.);
+            antenna_r->V[interaction_idx][ray_idx].push_back(0.);
         }
     }
 
@@ -2694,51 +2780,28 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
     
     if(stations[i].strings[string_i].antennas[antenna_i].Trig_Pass){// if this channel triggered
     
-    stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = -1; // no likely init
-    
-    int mindBin = 1.e9; // init big values
-    int dBin = 0;
-    
-    for (int m=0; m<stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) {   // loop over raysol numbers
-
-      if ( stations[i].strings[string_i].antennas[antenna_i].SignalExt[m] ) {
-
-	dBin = abs( stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].Trig_Pass );
-               
-	if ( dBin < mindBin ) {
-    
-	  stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = m; // store the ray sol number which is minimum difference between Trig_Pass bin
-	  mindBin = dBin;
-        	
-	}
-      }
-      
-      
-    }// for m (ray sol numbers)
-    
-    
-    
-    
+    stations[i].strings[string_i].antennas[antenna_i].Find_Likely_Sol();
+    int likely_int = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
+    int likely_ray = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
     
       if ( settings1->TRIG_ONLY_LOW_CH_ON==0 ) {
 
 	cout<<endl<<"trigger passed at bin "<<stations[i].strings[string_i].antennas[antenna_i].Trig_Pass<<"  passed ch : "<<trig_j<<" ("<<detector->stations[i].strings[string_i].antennas[antenna_i].type<<"type) Direct dist btw posnu : "<<event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[string_i].antennas[antenna_i] )<<" noiseID : "<<stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
-        
-	if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol != -1) {
-        
-	  cout<<" ViewAngle : "<<stations[i].strings[string_i].antennas[antenna_i].view_ang[0]*DEGRAD<<" LikelyTrigSignal : "<<stations[i].strings[string_i].antennas[antenna_i].Likely_Sol;
-        	  
-	}
+        if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0] != -1) {
+            cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[likely_int][likely_ray] *DEGRAD ;
+            cout << " LikelyTrigSignal : interaction " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
+            cout << ", ray " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
+        }
       }
       else if ( settings1->TRIG_ONLY_LOW_CH_ON==1 ) {
       
 	cout<<endl<<"trigger passed at bin "<<stations[i].strings[string_i].antennas[antenna_i].Trig_Pass<<"  passed ant: str["<<string_i<<"].ant["<<antenna_i<<"] ("<<detector->stations[i].strings[string_i].antennas[antenna_i].type<<"type) Direct dist btw posnu : "<<event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[string_i].antennas[antenna_i] )<<" noiseID : "<<stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
-        
-	if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol != -1) {
-        
-	  cout<<" ViewAngle : "<<stations[i].strings[string_i].antennas[antenna_i].view_ang[0]*DEGRAD<<" LikelyTrigSignal : "<<stations[i].strings[string_i].antennas[antenna_i].Likely_Sol;
-          	  
-	}
+
+        if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0] != -1) {
+            cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[likely_int][likely_ray] *DEGRAD ;
+            cout << " LikelyTrigSignal : interaction " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
+            cout << ", ray " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
+        }
         
       }
       
@@ -2771,15 +2834,21 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( ( -(detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) - waveformLength/2 + waveformCenter + mimicbin) * settings1->TIMESTEP*1.e9 + detector->params.TestBed_WFtime_offset_ns );// save in ns
            	    
 	  }
-      if (mimicbin == 0) {
-        for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) { ///< calculates time of center of each rays signal based on readout window time config
-            double signal_center_offset = (double)(stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] - stations[i].strings[string_i].antennas[antenna_i].time[0]) * settings1->TIMESTEP * 1.e9;
-            double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
-            //! signal_center_offset: time offset between beginning of readout window and center of signal
-            //! signal_center_time: time of center of signal based on readout window time config
-            stations[i].strings[string_i].antennas[antenna_i].SignalBinTime.push_back(signal_center_time);
-        }
-      }      
+        if (mimicbin == 0) {
+            ///< calculates time of center of each rays signal based on readout window time config
+            for (int interaction_idx=0; interaction_idx<stations[i].strings[string_i].antennas[antenna_i].SignalBin.size(); interaction_idx++){
+                for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].SignalBin[interaction_idx].size(); m++) { 
+                    double signal_center_offset = (double)(
+                        stations[i].strings[string_i].antennas[antenna_i].SignalBin[interaction_idx][m] - 
+                        stations[i].strings[string_i].antennas[antenna_i].time[0]
+                    ) * settings1->TIMESTEP * 1.e9;
+                    double signal_center_time = signal_center_offset + stations[i].strings[string_i].antennas[antenna_i].time_mimic[0];
+                    //! signal_center_offset: time offset between beginning of readout window and center of signal
+                    //! signal_center_time: time of center of signal based on readout window time config
+                    stations[i].strings[string_i].antennas[antenna_i].SignalBinTime[interaction_idx].push_back(signal_center_time);
+                }
+            }
+        }    
   	
       }
       
@@ -2794,13 +2863,6 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
        else if (settings1->V_MIMIC_MODE == 2) { // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
           stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformLength/2 + waveformCenter ;
        }
-      
-      
-      double arrivtime = stations[i].strings[string_i].antennas[antenna_i].arrival_time[0];
-      double X = detector->stations[i].strings[string_i].antennas[antenna_i].GetX();
-      double Y = detector->stations[i].strings[string_i].antennas[antenna_i].GetY();
-      double Z = detector->stations[i].strings[string_i].antennas[antenna_i].GetZ();
-      
       
       stations[i].total_trig_search_bin = stations[i].Global_Pass + trig_window_bin - trig_search_init;
       
@@ -2988,7 +3050,7 @@ void Report::ClearUselessfromConnect(Detector *detector, Settings *settings1, Tr
 
 void Report::Convolve_Signals(
     Antenna_r *antenna, int channel_index, int station_number, 
-    Settings *settings1, Trigger *trigger, Detector *detector
+    Event *event, Settings *settings1, Trigger *trigger, Detector *detector
 ){
     // For the provided antenna: 
     // Calculate bin values for the signal and determine if how many rays fit in the readout window
@@ -3000,19 +3062,18 @@ void Report::Convolve_Signals(
 
     // Clear old signals
     signal_bin.clear();
+    signal_bin.resize(event->Nu_Interaction.size());
 
     // Determine the bin (index) where the signal will arrive in output waveforms
     //   and flag which signals will fit into the same time window
-    for (int m = 0; m < antenna->ray_sol_cnt; m++)
-    {
-        // loop over raysol numbers
-
-        // Store the bin where the singal is located
-        signal_bin.push_back(
-            (antenna->arrival_time[m] - stations[station_number].min_arrival_time) / (settings1->TIMESTEP) 
-            + settings1->NFOUR *2 + trigger->maxt_diode_bin);
-        antenna->SignalBin.push_back(signal_bin[m]);
-
+    for (int interaction_idx=0; interaction_idx<event->Nu_Interaction.size(); interaction_idx++) {
+        for (int m = 0; m < antenna->ray_sol_cnt; m++) { // loop over raysol numbers
+            // Store the bin where the singal is located
+            signal_bin[interaction_idx].push_back(
+                (antenna->arrival_time[interaction_idx][m] - stations[station_number].min_arrival_time) / (settings1->TIMESTEP) 
+                + settings1->NFOUR *2 + trigger->maxt_diode_bin);
+            antenna->SignalBin[interaction_idx].push_back(signal_bin[interaction_idx][m]);
+        }
     }
 
     // Set default signal wf length
@@ -3041,7 +3102,7 @@ void Report::Convolve_Signals(
     else {
 
         // Initialize waveform length as 2 BINSIZES longer than the last ray's signal bin
-        int array_length = signal_bin[antenna->ray_sol_cnt-1] + 2*BINSIZE;
+        int array_length = antenna->Get_Max_SignalBin() + 2*BINSIZE;
 
         // Make array of 0s for array we're saving all ray signals to
         for (int i=0; i<array_length; i++) antenna->V_convolved.push_back(0.);
@@ -3055,11 +3116,13 @@ void Report::Convolve_Signals(
       int this_signalbin;
       int n_connected_rays = 2; 
       vector<double> V_signal;
-      for (int m = 0; m < antenna->ray_sol_cnt; ++m) {
-        Combine_Waveforms(
-          signal_bin[m], this_signalbin,
-          antenna->V[m], V_signal,
-          &this_signalbin, &V_signal);
+      for (int interaction_idx=0; interaction_idx<antenna->V.size(); interaction_idx++){
+        for (int m = 0; m < antenna->ray_sol_cnt; ++m) {
+            Combine_Waveforms(
+                signal_bin[interaction_idx][m], this_signalbin,
+                antenna->V[interaction_idx][m], V_signal,
+                &this_signalbin, &V_signal);
+        }
       }
       
       GetNoiseThenConvolve(
@@ -3069,6 +3132,18 @@ void Report::Convolve_Signals(
           settings1, trigger, detector);
     }
 
+}
+
+int Antenna_r::Get_Max_SignalBin(){
+    int max_signal_bin = 0;
+    for (int interaction_idx=0; interaction_idx<SignalBin.size(); interaction_idx++) {
+        for (int ray_idx=0; ray_idx<SignalBin[interaction_idx].size(); ray_idx++) {
+            if (SignalBin[interaction_idx][ray_idx] > max_signal_bin) {
+                max_signal_bin = SignalBin[interaction_idx][ray_idx];
+            }
+        }
+    }
+    return max_signal_bin;
 }
 
 
@@ -4943,25 +5018,35 @@ void Report::SetRank(Detector *detector) {
     double maxpeak; // maxpeak value
     double pre_maxpeak; // maxpeak at previous round
 
+    for (int i = 0; i< detector->params.number_of_stations; i++) {
 
-    //cout<<"SetRank step1) : find all PeakV == 0"<<endl;
-        for (int i = 0; i< detector->params.number_of_stations; i++) {
+        for (int j=0; j< detector->stations[i].strings.size(); j++) {
 
-            for (int j=0; j< detector->stations[i].strings.size(); j++) {
+            for (int k=0; k< detector->stations[i].strings[j].antennas.size(); k++) {
 
-                for (int k=0; k< detector->stations[i].strings[j].antennas.size(); k++) {
+                if (stations[i].strings[j].antennas[k].ray_sol_cnt) {
 
-                    if (stations[i].strings[j].antennas[k].ray_sol_cnt) {
-                    if (stations[i].strings[j].antennas[k].PeakV[0] == 0.) {
+                    bool nonzero_peak = false; 
+                    
+                    for (int n=0; n<stations[i].strings[j].antennas[k].V.size(); n++){
+                        if (stations[i].strings[j].antennas[k].PeakV[n].size() > 0 &&
+                            stations[i].strings[j].antennas[k].PeakV[n][0] != 0.      ) {
+                            nonzero_peak = true;
+                            break;
+                        }
+                    }
+
+                    if (nonzero_peak){
+                        stations[i].strings[j].antennas[k].Rank.push_back(current+1);  // set Rank as 1 (for now)
+                    }
+                    else{
                         stations[i].strings[j].antennas[k].Rank.push_back(0);  // rank 0, PeakV is 0, non-countable rank.
                     }
-                    else {
-                        stations[i].strings[j].antennas[k].Rank.push_back(current+1);  // elses, if PeakV is not 0, set Rank as 1 (for now)
-                    }
-                    }   // if ray_sol_cnt != 0
-                }
+
+                }   // if ray_sol_cnt != 0
             }
         }
+    }
 
 
     //cout<<"Start while loop for Ranking!!"<<endl;
@@ -4983,21 +5068,21 @@ void Report::SetRank(Detector *detector) {
                     //
 
                     if (stations[i].strings[j].antennas[k].ray_sol_cnt) {
-                    if (stations[i].strings[j].antennas[k].Rank[0] != 0) {  // there is non-zero value! and ray_sol_cnt also non-zero!
-                    if (stations[i].strings[j].antennas[k].PeakV[0] < pre_maxpeak) {
+                        if (stations[i].strings[j].antennas[k].Rank[0] != 0) {  // there is non-zero value! and ray_sol_cnt also non-zero!
+                            if (stations[i].strings[j].antennas[k].PeakV[0][0] < pre_maxpeak) {
 
-                        if (maxpeak < stations[i].strings[j].antennas[k].PeakV[0] ) {
-                            maxpeak = stations[i].strings[j].antennas[k].PeakV[0];
+                                if (maxpeak < stations[i].strings[j].antennas[k].PeakV[0][0] ) {
+                                    maxpeak = stations[i].strings[j].antennas[k].PeakV[0][0];
 
-                            stations[i].strings[j].antennas[k].Rank[0] = current+1;
-                            check++;
-                        } // is maxpeak < PeakV
-                        else {
-                            stations[i].strings[j].antennas[k].Rank[0] = current + 2;
-                        } // else
+                                    stations[i].strings[j].antennas[k].Rank[0] = current+1;
+                                    check++;
+                                } // is maxpeak < PeakV
+                                else {
+                                    stations[i].strings[j].antennas[k].Rank[0] = current + 2;
+                                } // else
 
-                    } // if rank > current
-                    }
+                            } // if rank > current
+                        }
                     }
 
                 } // for antennas
@@ -5199,32 +5284,6 @@ vector<TGraph*> Report::getWaveformVectorHpol(Detector *detector, int station_i,
 }
 
 
-vector<double> Report::getHitTimesVector(Detector *detector, int station_i, int polarization){
-
-  vector<double> times;
-    
-  for(int ch=0;ch<detector->stations[station_i].number_of_antennas;ch++){
-    
-    int string_i = detector->getStringfromArbAntID( station_i, ch);
-    int antenna_i = detector->getAntennafromArbAntID( station_i, ch);
-    
-    if(polarization>=0 && detector->stations[station_i].strings[string_i].antennas[antenna_i].type!=polarization) continue; // jump to next channel if this isn't Hpol/Vpol
-
-    
-    if(stations[station_i].strings[string_i].antennas[antenna_i].arrival_time.size()){
-   
-      times.push_back(1e9*stations[station_i].strings[string_i].antennas[antenna_i].arrival_time[0]);// get the direct beam arrival time
-    
-    }
-  
-    else times.push_back(-1000); // if there's no ray-trace solution just put something in.
-  
-  }
-  
-  return times;
-  
-}
-
 int Report::getNumOfSignalledAnts(Station_r station){
     // Count and return the number of antennas in the provided station that 
     //   have waveforms, from signal only, that exceed 0.0
@@ -5245,19 +5304,24 @@ int Report::getNumOfSignalledAnts(Station_r station){
             //   (of the absolute) value of their signal-only waveforms
             if ( station.strings[s].antennas[a].ray_sol_cnt > 0 ){
 
-                for ( // Loop over ray solutions
-                    int ray=0; ray<station.strings[s].antennas[a].ray_sol_cnt; ray++
-                ){
-                    // Get max (of the absolute) value in waveform
-                    double ray_max_signal = Tools::getMaxAbsoluteMagnitude(
-                        station.strings[s].antennas[a].V[ray]
-                    );
-                    // Check if the max (abs) value is greater than 
-                    //   the signals from the other rays
-                    if ( ray_max_signal > max_signal ){
-                        max_signal = ray_max_signal;
+                for (int n=0; n<station.strings[s].antennas[a].V.size(); n++){ 
+                    // Loop over interactions
+
+                    for (int m=0; m<station.strings[s].antennas[a].V[n].size(); m++){
+                        // Loop over ray solutions from this interaction
+                        
+                        // Check if the max (abs) value is greater than 
+                        //   the signals from the other rays
+                        double ray_max_signal = Tools::getMaxAbsoluteMagnitude(
+                            station.strings[s].antennas[a].V[n][m]
+                        );
+                        if ( ray_max_signal > max_signal ){
+                            max_signal = ray_max_signal;
+                        }
+
                     }
-                } 
+                    
+                }
 
             } // end if (ray solutions exist)
 
@@ -5326,18 +5390,6 @@ double Report::get_SNR(vector<double> signal_array, vector<double> noise_array){
 
 }
 
-vector<double> Report::getHitTimesVectorVpol(Detector *detector, int station_i){
-
-  return getHitTimesVector(detector, station_i, 0);
-  
-}
-
-vector<double> Report::getHitTimesVectorHpol(Detector *detector, int station_i){
-   
-  return getHitTimesVector(detector, station_i, 1);
-  
-}
-
 
 bool Report::isTrigger(double eff){
   if (eff >= 1.0) return true;
@@ -5347,8 +5399,7 @@ bool Report::isTrigger(double eff){
 }
 
 void Report::checkPATrigger(
-    int i, double all_receive_ang[2], int ray_sol_cnt,
-    Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
+    int i, Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
     int trig_search_init, int max_total_bin
 ){
     // Calculates max SNR in topmost PA Vpol 
@@ -5369,24 +5420,19 @@ void Report::checkPATrigger(
     int waveformLength = settings1->WAVEFORM_LENGTH;
     int waveformCenter = settings1->WAVEFORM_CENTER;
     int raySolNum = 0;
-    int dsignalBin = 0;
-    double viewangle = stations[i].strings[0].antennas[8].view_ang[ray_sol_cnt];
-    viewangle=viewangle*180.0/PI;
     bool searchSecondRay = true;
-    if (ray_sol_cnt == 2){
-        dsignalBin = abs(signal_bin[0] - signal_bin[1]); //original kah
-        dsignalBin = abs(stations[i].strings[0].antennas[8].SignalBin[0]-stations[i].strings[0].antennas[8].SignalBin[1]);
-    }
     bool hasTriggered = false;
 
     //cout << "time to trigger " << endl;
     while(raySolNum < stations[i].strings[0].antennas[8].SignalBin.size()){
 
-        int signalbinPA = stations[i].strings[0].antennas[8].SignalBin[raySolNum]; //new kah
-        int bin_value;
-        double ant_SNR;
+        // Find and log the event and ray with the most signal
+        int brightest_event[2]; 
+        stations[i].strings[0].antennas[8].Get_Brightest_Interaction(&brightest_event);
+
+        double avgSnr;
         if(settings1->TRIG_ANALYSIS_MODE == 2) { // Noise only triggers
-            ant_SNR = pa_force_trigger_snr; 
+            avgSnr = pa_force_trigger_snr; 
         }
         // // ARB 7/7/23: 
         // //    I don't trust the signal+noise trigger estimator right now 
@@ -5401,30 +5447,15 @@ void Report::checkPATrigger(
         // //    This is a project for the future. 
         // else if (settings1->TRIG_ANALYSIS_MODE==1) // Noise + signal triggers
         //     // Estimate average SNR in topmost vpol
-        //     if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {   
-        //
-        //         // Steal the noise RMS from the trigger class and pass 
-        //         //   it as the noise WF to get_SNR() (since the RMS of an 
-        //         //   array with one element is the absolute value of that element)
-        //         vector <double> tmp_noise_RMS;
-        //         int trigger_ch_ID = GetChNumFromArbChID(detector, 8, i, settings1) - 1;
-        //         double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
-        //         tmp_noise_RMS.push_back( ant_noise_voltage_RMS );
-        //
-        //         // Calculate SNR in this antenna
-        //         ant_SNR = get_SNR( 
-        //             stations[i].strings[0].antennas[8].V_convolved, 
-        //             tmp_noise_RMS);
-        //
+        //     if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
+        //         avgSnr = getAverageSNR(stations[i].strings[0].antennas[8].V_noise);
         //     }
         //     else {
-        //         ant_SNR = 0.0;
+        //         avgSnr = 0.0;
         //     }
         else { // signal only triggers
             // Estimate average SNR in topmost vpol
-            if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {   
-
-                // Steal the noise RMS from the trigger class and pass 
+            if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {
                 //   it as the noise WF to get_SNR() (since the RMS of an 
                 //   array with one element is the absolute value of that element)
                 vector <double> tmp_noise_RMS;
@@ -5433,51 +5464,46 @@ void Report::checkPATrigger(
                 tmp_noise_RMS.push_back( ant_noise_voltage_RMS );
 
                 // Calculate SNR in this antenna
-                ant_SNR = get_SNR( 
+                avgSnr = get_SNR( 
                     stations[i].strings[0].antennas[8].V_convolved, 
                     tmp_noise_RMS);
-                
             }
             else {
-                ant_SNR = 0.0;
+                avgSnr = 0.0;
             }
         }
 
-        // Cap SNR
-        if(ant_SNR>pa_snr_cap) ant_SNR = pa_snr_cap;
-
         //scale snr to reflect the angle
-        all_receive_ang[raySolNum] = all_receive_ang[raySolNum]*180.0/PI-90.0;
+        double viewangle = stations[i].strings[0].antennas[8].view_ang[brightest_event[0]][brightest_event[1]];
+        viewangle = viewangle * 180.0/PI - 90.0;
         double snr_50 = interpolate(
             trigger->angle_PA, trigger->aSNR_PA, // x and y coordinates of curve to interpolate
-            all_receive_ang[raySolNum], // x value to interpolate y value for
+            viewangle, // x value to interpolate y value for
             (*(&trigger->angle_PA+1) - trigger->angle_PA) - 1 // len(ang_data) - 1
         );
-        ant_SNR = ant_SNR*2.0/snr_50;
+        avgSnr = avgSnr*2.0/snr_50;
 
         // Estimate the PA signal efficiency of for this SNR from curve of efficiency vs data
         double eff = interpolate(
             trigger->snr_PA, trigger->eff_PA, // x and y coordinates of curve to interpolate
-            ant_SNR, // x value to interpolate y value for
+            avgSnr, // x value to interpolate y value for
             (*(&trigger->snr_PA+1) - trigger->snr_PA) - 1 // len(snr_PA) - 1
         ); 
         
-        if(ant_SNR > 0.5){
+        if(avgSnr > 0.5){
                    
             if(isTrigger(eff)){ // if a randomly selected value is greater than the PA efficiency we calculated, this event triggers
                 cout<<endl<<"PA trigger ~~~ raySolNum: "<< raySolNum;
-                cout<<"  SNR: "<<ant_SNR<<"  Event Number : "<<evt;
+                cout<<"  avgSNR: "<<avgSnr<<"  Event Number : "<<evt;
                 cout<<"  PA efficiency : "<<eff<<endl;
 
                 if (hasTriggered) {
                     cout<<"Weight for Second Ray trigger is: "<<event->Nu_Interaction[0].weight<<endl;
                     break;
                 }
-                viewAngle = viewangle;
-                my_averageSNR = ant_SNR;
+                my_averageSNR = avgSnr;
                 my_raysol = raySolNum;
-                my_receive_ang = all_receive_ang[raySolNum];
-                int last_trig_bin = signalbinPA;
+                int last_trig_bin = stations[i].strings[0].antennas[8].SignalBin[brightest_event[0]][brightest_event[1]];
                 int my_ch_id = 0;
                 stations[i].Global_Pass = last_trig_bin;
                 for (size_t str = 0; str < detector->stations[i].strings.size(); str++) {
@@ -5485,7 +5511,7 @@ void Report::checkPATrigger(
                         double peakvalue = 0;
                         for (int bin=0; bin<BINSIZE; bin++) {
 
-                            bin_value = signalbinPA - BINSIZE/2 + bin;
+                            int bin_value = last_trig_bin - BINSIZE/2 + bin;
                             stations[i].strings[str].antennas[ant].V_mimic.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
                             stations[i].strings[str].antennas[ant].time.push_back( bin_value );
                             stations[i].strings[str].antennas[ant].time_mimic.push_back( ( bin) * settings1->TIMESTEP*1.e9 );// save in ns
@@ -5709,7 +5735,7 @@ void Report::checkPATrigger(
 
             } // end iteration over windows/bins
 
-            if ( bin_to_save_on == -1 ) bin_to_save_on = signalbinPA;
+            if ( bin_to_save_on == -1 ) bin_to_save_on = stations[i].strings[0].antennas[8].SignalBin[brightest_event[0]][brightest_event[1]];
             
             // Do what saveTriggeredEvent() does
             for(int trig_j=0; trig_j<numChan;trig_j++){
@@ -5717,23 +5743,7 @@ void Report::checkPATrigger(
                 int string_i = detector->getStringfromArbAntID( i, trig_j);
                 int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
                     
-                stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = -1; // no likely init
-                    
-                int mindBin = 1.e9; // init big values
-                int dBin = 0;
-                    
-                for (int m=0; m<stations[i].strings[string_i].antennas[antenna_i].ray_sol_cnt; m++) {   // loop over raysol numbers
-                    if ( stations[i].strings[string_i].antennas[antenna_i].SignalExt[m] ) {
-                        dBin = abs( 
-                            stations[i].strings[string_i].antennas[antenna_i].SignalBin[m] 
-                            - stations[i].strings[string_i].antennas[antenna_i].Trig_Pass 
-                        );
-                        if ( dBin < mindBin ) {
-                            stations[i].strings[string_i].antennas[antenna_i].Likely_Sol = m; // store the ray sol number which is minimum difference between Trig_Pass bin
-                            mindBin = dBin;    
-                        }
-                    }     
-                } // for m (ray sol numbers)
+                stations[i].strings[string_i].antennas[antenna_i].Find_Likely_Sol(); // no likely init
                         
                 // set global_trig_bin values
                 if (settings1->V_MIMIC_MODE == 0) { // Global passed bin is the center of the window
@@ -5745,11 +5755,6 @@ void Report::checkPATrigger(
                 else if (settings1->V_MIMIC_MODE == 2) { // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
                     stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformLength/2 + waveformCenter ;
                 }
-                
-                double arrivtime = stations[i].strings[string_i].antennas[antenna_i].arrival_time[0];
-                double X = detector->stations[i].strings[string_i].antennas[antenna_i].GetX();
-                double Y = detector->stations[i].strings[string_i].antennas[antenna_i].GetY();
-                double Z = detector->stations[i].strings[string_i].antennas[antenna_i].GetZ();
                 
                 stations[i].total_trig_search_bin = stations[i].Global_Pass + trig_window_bin - trig_search_init;
 
