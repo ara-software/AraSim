@@ -3113,8 +3113,8 @@ void Report::Convolve_Signals(
     // Loop over ray solutions and get signals from each
     // Loop does not run if there are no ray solutions
     if(antenna->ray_sol_cnt > 0) {
-      int this_signalbin;
-      int n_connected_rays = 2; 
+      int this_signalbin = 0;
+      int n_connected_rays = antenna->ray_sol_cnt; 
       vector<double> V_signal;
       for (int interaction_idx=0; interaction_idx<antenna->V.size(); interaction_idx++){
         for (int m = 0; m < antenna->ray_sol_cnt; ++m) {
@@ -3256,7 +3256,7 @@ void Report::Combine_Waveforms(int signalbin_0, int signalbin_1,
   // check if both input vectors are empty
   if(V0.empty() && V1.empty())
     throw runtime_error("Cannot combine two empty signal vectors!");
- 
+
   // if one vector is empty, assign its signalbin to that of the other so nothing breaks 
   if(V0.empty())
     signalbin_0 = signalbin_1;
@@ -3281,6 +3281,10 @@ void Report::Combine_Waveforms(int signalbin_0, int signalbin_1,
     V[combined_bin] += V1[bin];
   }
 
+  // if length is not a power of 2, zero pad
+  //while((V.size() & (V.size() - 1)) != 0) 
+  //  V.push_back(0.);
+
   return;
 }
 
@@ -3295,7 +3299,7 @@ void Report::GetNoiseThenConvolve(
     //   convolve them through the tunnel diode, apply voltage saturation,
     //   then save the noise and signals to the 
     //   `Antenna_r` object and the `trigger` class
-    
+
     // Extend the length of this waveform we're constructing if more than 1 ray connected
     int wf_length = 0;
     int min_wf_bin = 0;
@@ -3307,7 +3311,7 @@ void Report::GetNoiseThenConvolve(
         offset = trigger->maxt_diode_bin;
         min_wf_bin = this_signalbin - wf_length/2/2 + offset;
         max_wf_bin = this_signalbin + wf_length/2/2 + wf_length/2;
-        diode_response = detector->fdiode_real_double;
+        diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
     else if ( antenna->ray_sol_cnt == 0 ){ // No rays connected to this antenna
         this_signalbin = V_signal.size()/2;
@@ -3315,14 +3319,14 @@ void Report::GetNoiseThenConvolve(
         offset = 0;
         min_wf_bin = 0;
         max_wf_bin = V_signal.size();
-        diode_response = detector->fdiode_real;
+        diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
     else { // Only one ray signal in the window
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is BINSIZE
         offset = trigger->maxt_diode_bin;
         min_wf_bin = this_signalbin - wf_length/2 + offset;
         max_wf_bin = this_signalbin + wf_length/2;
-        diode_response = detector->fdiode_real;
+        diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
 
     // Get noise-only waveform

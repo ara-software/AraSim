@@ -866,10 +866,10 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
 
     // fill half of the array as power (actually energy) and another half (actually extanded part) with zero padding (Numerical Recipes 643 page)
     for (int i=0;i<length;i++) {
-	power_noise_copy[i]=(data[i]*data[i])/Zr*TIMESTEP;
+      power_noise_copy[i]=(data[i]*data[i])/Zr*TIMESTEP;
     }
     for (int i=length;i<length*2;i++) {
-	power_noise_copy[i]=0.;
+      power_noise_copy[i]=0.;
     }
     
     
@@ -883,10 +883,10 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
     
     // change the sign (from numerical recipes 648, 649 page)
     for (int j=1;j<length;j++) {
-	ans_copy[2*j]=(power_noise_copy[2*j]*fdiode[2*j]-power_noise_copy[2*j+1]*fdiode[2*j+1])/((double)length);
-	//ans_copy[2*j]=(power_noise_copy[2*j]*fdiode[2*j]+power_noise_copy[2*j+1]*fdiode[2*j+1])/((double)length/2);
-	ans_copy[2*j+1]=(power_noise_copy[2*j+1]*fdiode[2*j]+power_noise_copy[2*j]*fdiode[2*j+1])/((double)length);
-	//ans_copy[2*j+1]=(power_noise_copy[2*j+1]*fdiode[2*j]-power_noise_copy[2*j]*fdiode[2*j+1])/((double)length/2);
+      ans_copy[2*j]=(power_noise_copy[2*j]*fdiode[2*j]-power_noise_copy[2*j+1]*fdiode[2*j+1])/((double)length);
+      //ans_copy[2*j]=(power_noise_copy[2*j]*fdiode[2*j]+power_noise_copy[2*j+1]*fdiode[2*j+1])/((double)length/2);
+      ans_copy[2*j+1]=(power_noise_copy[2*j+1]*fdiode[2*j]+power_noise_copy[2*j]*fdiode[2*j+1])/((double)length);
+      //ans_copy[2*j+1]=(power_noise_copy[2*j+1]*fdiode[2*j]-power_noise_copy[2*j]*fdiode[2*j+1])/((double)length/2);
     }
     ans_copy[0]=power_noise_copy[0]*fdiode[0]/((double)length);
     ans_copy[1]=power_noise_copy[1]*fdiode[1]/((double)length);
@@ -901,9 +901,9 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
     // only save first half of convolution result as last half is result from zero padding (and some spoiled bins)
     //for (int i=0;i<length;i++) {
     for (int i=0;i<length+maxt_diode_bin;i++) {
-	//power_noise[i]=power_noise_copy[i];
-	//diodeconv[i]=ans_copy[i];
-	diodeconv.push_back( ans_copy[i] );
+      //power_noise[i]=power_noise_copy[i];
+      //diodeconv[i]=ans_copy[i];
+      diodeconv.push_back( ans_copy[i] );
     }
     
     
@@ -919,8 +919,8 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
     
     //  cout << "iminsamp, imaxsamp are " << iminsamp << " " << imaxsamp << "\n";
     if (imaxsamp<iminsamp) {
-	cout << "Noise waveform is not long enough for this diode response.\n";
-	exit(1);
+      cout << "Noise waveform is not long enough for this diode response.\n";
+      exit(1);
     }
     
     //int ibin=((iminsamp+imaxsamp)-(iminsamp+imaxsamp)%2)/2;
