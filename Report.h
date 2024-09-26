@@ -109,9 +109,6 @@ class Antenna_r {
 
         int global_trig_bin; // from V_mimic [0, NFOUR/2] bins, where global trigger occured
 
-        vector < vector < vector <double> > > Ax;     // vector potential x component
-        vector < vector < vector <double> > > Ay;
-        vector < vector < vector <double> > > Az;
         vector < vector < vector <double> > > V;   // For each ray individually, volt signal with all factors applied (from fft, excludes gain offse)
         vector <double> V_convolved;    // After convolution of all rays, volt signal with all factors applied (from Convolve_Signal, excludes gain offset)
         vector <double> V_noise;        // noise voltage waveform with all factors applied (from Convolve_Signal, excludes gain offset)

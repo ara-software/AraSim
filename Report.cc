@@ -171,10 +171,6 @@ void Antenna_r::Prepare_Outputs(int n_interactions) {   // if any vector variabl
 
     ray_step.resize(n_interactions);
 
-    Ax.resize(n_interactions);
-    Ay.resize(n_interactions);
-    Az.resize(n_interactions);
-
     V.resize(n_interactions);
 
     PeakV.resize(n_interactions);
@@ -228,9 +224,6 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     V_noise.clear();
     V_convolved.clear();
     V_mimic.clear();
-    Ax.clear();
-    Ay.clear();
-    Az.clear();
 
     V.clear();
 
@@ -269,10 +262,6 @@ void Antenna_r::clear_useless(Settings *settings1) {   // to reduce the size of 
     Vfft.clear();
     Vfft_noise.clear();
 
-    Ax.clear();
-    Ay.clear();
-    Az.clear();
-
     V.clear();
 
     //Trig_Pass.clear();
@@ -301,10 +290,6 @@ void Antenna_r::clear_useless(Settings *settings1) {   // to reduce the size of 
     //VHz_filter.clear();
     Vfft.clear();
     Vfft_noise.clear();
-
-    Ax.clear();
-    Ay.clear();
-    Az.clear();
 
     V.clear();
 
