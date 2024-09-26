@@ -233,8 +233,6 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     Rank.clear();
     TooMuch_Tdelay.clear();
 
-    Trig_Pass = 0;
-
 
     // additional for before ant waveform
     //Vm_wo_antfactor.clear();
@@ -246,6 +244,19 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     SignalExt.clear(); 
     
     SCT_threshold_pass.clear();
+
+    // Reset variables to values we've designated as "null" values
+    global_trig_bin = -1;
+    Likely_Sol[0] = -1;
+    Likely_Sol[1] = -1;
+    Nnew[0] = 1;
+    Nnew[1] = 1;
+    ray_sol_cnt = 0;
+    SingleChannelTriggers = 0;
+    skip_bins[0] = 1;
+    skip_bins[1] = 1;
+    TotalBinsScannedPerChannel = 0;
+    Trig_Pass = 0;
     
 }
 
