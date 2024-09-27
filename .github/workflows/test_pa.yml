@@ -1,4 +1,4 @@
-name: test_arasim
+name: test_pa_veff
 on: 
   push:
     branches:
