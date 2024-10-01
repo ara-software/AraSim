@@ -83,6 +83,11 @@ jobs:
           
       - name: Veff test
         run: |
+
+          ls 
+          echo "\n\n\n"
+          ls AraRoot
+          echo "\n\n\n"
           
           source root/bin/thisroot.sh
           export LD_LIBRARY_PATH="/home/runner/work/AraSim/AraSim/libRootFftwWrapper/build/:$LD_LIBRARY_PATH"
