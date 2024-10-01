@@ -57,6 +57,10 @@ jobs:
       - name: Install AraRoot
         run: |
 
+          # Initialize environment
+          source root/bin/thisroot.sh
+          export LD_LIBRARY_PATH="/home/runner/work/AraSim/AraSim/libRootFftwWrapper/build/:$LD_LIBRARY_PATH"
+
           # Download
           wget -q https://github.com/ara-software/AraRoot/archive/master.tar.gz -O araroot.tar.gz
           mkdir AraRoot
