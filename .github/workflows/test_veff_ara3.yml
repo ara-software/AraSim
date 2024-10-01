@@ -82,6 +82,8 @@ jobs:
           
           source root/bin/thisroot.sh
           export LD_LIBRARY_PATH="/home/runner/work/AraSim/AraSim/libRootFftwWrapper/build/:$LD_LIBRARY_PATH"
+          export ARA_UTIL_INSTALL_DIR=`pwd`/AraRoot/
+          export ARA_ROOT_DIR=`pwd`/AraRoot/
 
           bash test/veff_ara3/run_veff_ara3_test.sh
 
