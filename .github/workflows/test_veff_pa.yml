@@ -1,4 +1,4 @@
-name: test_arasim_arastation
+name: test_arasim_pa
 on: 
   push:
     branches:
