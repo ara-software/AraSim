@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - master
+      - more_tests
   pull_request:
     branches:
       - master
+      - more_tests
 
 jobs:
   build:
@@ -53,23 +55,6 @@ jobs:
           make -j2
           sudo make install
 
-
-      - name: Install AraRoot
-        run: |
-
-          # Download
-          wget -q https://github.com/ara-software/AraRoot/archive/master.tar.gz -O araroot.tar.gz
-          mkdir AraRoot
-          tar -xzf araroot.tar.gz -C AraRoot --strip-contents=1
-          rm araroot.tar.gz
-
-          # build
-          cd AraRoot
-          export ARA_UTIL_INSTALL_DIR=`pwd`
-          export ARA_ROOT_DIR=`pwd`
-          bash INSTALL.sh 1
-          cd ..
-
       - name: Build AraSim
         run: |
 
@@ -83,7 +68,7 @@ jobs:
           source root/bin/thisroot.sh
           export LD_LIBRARY_PATH="/home/runner/work/AraSim/AraSim/libRootFftwWrapper/build/:$LD_LIBRARY_PATH"
 
-          bash test/veff_pa/run_veff_pa_test.sh
+          bash test/veff_ara3/run_veff_ara3_test.sh
 
 
 
