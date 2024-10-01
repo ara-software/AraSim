@@ -60,7 +60,7 @@ jobs:
           # Download
           wget -q https://github.com/ara-software/AraRoot/archive/master.tar.gz -O araroot.tar.gz
           mkdir AraRoot
-          tar -xzf araroot.tar.gz -C AraRoot --strip-contents=1
+          tar -xzf araroot.tar.gz -C AraRoot --strip-components=1
           rm araroot.tar.gz
 
           # build
