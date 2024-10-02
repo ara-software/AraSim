@@ -357,6 +357,7 @@ class Settings
         vector<double> IND_NNU_THETA;
         vector<double> IND_NNU_PHI;
         vector<double> ELAST;
+        vector<int> INT_PER_NNU;
 
 
 

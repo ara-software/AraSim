@@ -818,10 +818,34 @@ void Settings::ReadEvtFile(string evtfile){
             }
         }
         evtFile.close();
-	if (NNU == 0 || NNU > EVID.size()){
-	  //	  EVENT_NUM = EVID.size();
-	  NNU = EVID.size();
-	}
+
+        //start counting the number of unique neutrinos
+        if (NNU == 0 || NNU > EVID.size()){
+            NNU = 0; //restart from zero
+
+            if (!EVID.empty()) {
+                int interactions_per_nnu_cnt = 1;  // Start the counter at 1 for the first occurrence
+
+                // Iterate through the EVID vector starting from the second element
+                for (size_t i = 1; i < EVID.size(); ++i) {
+                    if (EVID[i] == EVID[i - 1]) {
+                        interactions_per_nnu_cnt++;  // Increment the counter when the same event ID repeats
+                    } else {
+                        // Store the interactions per nnu count for the previous EVID
+                        INT_PER_NNU.push_back(interactions_per_nnu_cnt);
+                        // Reset the counter for the new EVID
+                        interactions_per_nnu_cnt = 1;
+                        // Increment the number of neutrinos
+                        NNU++;
+                    }
+                }
+                // Don't forget to store the count for the last EVID
+                INT_PER_NNU.push_back(interactions_per_nnu_cnt);
+
+                //Increment the number of neutrinos (adding the last neutrino)
+                NNU++;
+            }
+        }
 	
     }
     else
