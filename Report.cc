@@ -537,7 +537,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                 stations[i].strings[j].antennas[k].Prepare_Outputs(event->Nu_Interaction.size()); // Resize output arrays to the number of interactions
 
                 for (int interaction_idx=0; interaction_idx<event->Nu_Interaction.size(); interaction_idx++) {
-            
+                    
                     // run ray solver, see if solution exist
                     // if not, skip (set something like Sol_No = 0;
                     // if solution exist, calculate view angle and calculate TaperVmMHz
@@ -1485,7 +1485,7 @@ void Report::ModelRay(
         event->Nu_Interaction[0].posnu_from_antcen, settings
     ); // calculate time differences for birefringence 
 
-    antenna_r->arrival_time[interaction_idx].push_back(ray_output[4][ray_idx]);
+    antenna_r->arrival_time[interaction_idx].push_back(ray_output[4][ray_idx] + event->interactions_birth_time[interaction_idx]);
 
     //! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
     //! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()

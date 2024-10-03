@@ -33,6 +33,8 @@ class Event {
 
       int inu_passed; // event number. in case we save triggered events only, this event number could be useful
 
+      vector<double> interactions_birth_time; //time between interactions of a single event
+
     
       double pnu;   // energy of neutrino
       //Vector nnu;   // direction of neutrino
