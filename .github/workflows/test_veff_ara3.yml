@@ -57,10 +57,15 @@ jobs:
       - name: Install AraRoot
         run: |
 
+          # Initialize environment
+          pwd
+          source root/bin/thisroot.sh
+          export LD_LIBRARY_PATH="/home/runner/work/AraSim/AraSim/libRootFftwWrapper/build/:$LD_LIBRARY_PATH"
+
           # Download
           wget -q https://github.com/ara-software/AraRoot/archive/master.tar.gz -O araroot.tar.gz
           mkdir AraRoot
-          tar -xzf araroot.tar.gz -C AraRoot --strip-contents=1
+          tar -xzf araroot.tar.gz -C AraRoot --strip-components=1
           rm araroot.tar.gz
 
           # build
@@ -74,6 +79,8 @@ jobs:
         run: |
 
           source root/bin/thisroot.sh
+          export ARA_UTIL_INSTALL_DIR=`pwd`/AraRoot/
+          export ARA_ROOT_DIR=`pwd`/AraRoot/
           
           make -j2
           
@@ -81,7 +88,9 @@ jobs:
         run: |
           
           source root/bin/thisroot.sh
-          export LD_LIBRARY_PATH="/home/runner/work/AraSim/AraSim/libRootFftwWrapper/build/:$LD_LIBRARY_PATH"
+          export ARA_UTIL_INSTALL_DIR=`pwd`/AraRoot/
+          export ARA_ROOT_DIR=`pwd`/AraRoot/
+          export LD_LIBRARY_PATH="/home/runner/work/AraSim/AraSim/libRootFftwWrapper/build/:$ARA_UTIL_INSTALL_DIR/lib:$LD_LIBRARY_PATH"
 
           bash test/veff_ara3/run_veff_ara3_test.sh
 
