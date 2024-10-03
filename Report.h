@@ -457,8 +457,6 @@ class Report {
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
 
         // Phased Array variables
-        double my_averageSNR;
-        double my_raysol;
         double pa_force_trigger_snr = 3.5; 
             // SNR that should always trigger, 
             // used (eg) when triggering on noise only events

@@ -638,7 +638,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
         N_pass_H = 0;
 
         stations[i].Global_Pass  = 0;
-        int check_passed_global_trigger = 0;    // this switch determines if station globally triggers (in all TRIG_SCAN_MODEs)
 
         // If we're looking to trigger on signal, check that there 
         //   is enough signal that reached the station. 
@@ -835,7 +834,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                     // avoid really long trig_window_bin case (change trig_window to check upto max_total_bin)
                     if (max_total_bin - trig_window_bin <= trig_i) trig_window_bin = max_total_bin - trig_i - 1;
 
-                    //while (trig_i < settings1->DATA_BIN_SIZE - trig_window_bin) {
                     while (trig_i < max_total_bin - trig_window_bin)
                     {
 
@@ -845,26 +843,25 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         last_trig_bin = 0;
                         Passed_chs.clear();
 
-                        //for (trig_j=0; trig_j < ch_ID; trig_j++) {        // loop over all channels
                         trig_j = 0;
                         while (trig_j < ch_ID)
                         {
 
                             int string_i = detector->getStringfromArbAntID(i, trig_j);
                             int antenna_i = detector->getAntennafromArbAntID(i, trig_j);
-			    int channel_num = detector->GetChannelfromStringAntenna(i, string_i, antenna_i, settings1);
+                            int channel_num = detector->GetChannelfromStringAntenna(i, string_i, antenna_i, settings1);
 
-			    if (!(settings1->DETECTOR==4 || settings1->DETECTOR==5)){
- 			    	channel_num = channel_num+1; // Channel numbering is different for DETECTOR=(1,2,3) than for DETECTOR = 4 in GetChannelfromStringAntenna(), it needs that shift 
- 			    }
+                            if (!(settings1->DETECTOR==4 || settings1->DETECTOR==5)){
+                              channel_num = channel_num+1; // Channel numbering is different for DETECTOR=(1,2,3) than for DETECTOR = 4 in GetChannelfromStringAntenna(), it needs that shift 
+                            }
 
 
-			    if( detector->GetTrigMasking(channel_num-1)==0){ //Antenna Masking (masked_ant=0 means this antenna should be ignored from trigger)
-				trig_j++;
-				continue;	
-			    }
+                            if( detector->GetTrigMasking(channel_num-1)==0){ //Antenna Masking (masked_ant=0 means this antenna should be ignored from trigger)
+                              trig_j++;
+                              continue;	
+                            }
 
-			    int offset = detector->GetTrigOffset(channel_num-1, settings1);
+                            int offset = detector->GetTrigOffset(channel_num-1, settings1);
 
                             // If Testbed simulation, check if we want to use BH chs only for trigger analysis
                             if ((settings1->TRIG_ONLY_BH_ON == 1) && (settings1->DETECTOR == 3))
@@ -878,14 +875,11 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     while (trig_bin < trig_window_bin)
                                     {
 
-                                        //cout<<"trig_bin : "<<trig_bin<<endl;
-
                                         double diode_noise_RMS = trigger->GetAntNoise_diodeRMS(channel_num-1, settings1);
-                                        if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) * diode_noise_RMS *detector->GetThresOffset(i, channel_num - 1, settings1)))
+                                        if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) * diode_noise_RMS 
+                                                                                                *detector->GetThresOffset(i, channel_num - 1, settings1)))
                                         {
                                             // if this channel passed the trigger!
-                                            //cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
-                                            //stations[i].strings[(int)((trig_j)/4)].antennas[(int)((trig_j)%4)].Trig_Pass = trig_i+trig_bin;
                                             stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
                                             N_pass++;
                                             if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
@@ -898,7 +892,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 // Hpol
                                                 N_pass_H++;
                                             }
-                                            if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
+                                            if (last_trig_bin < trig_i + trig_bin) 
+                                              last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
                                             trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
                                             Passed_chs.push_back(trig_j);
                                         }
@@ -927,11 +922,10 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                         double diode_noise_RMS = trigger->GetAntNoise_diodeRMS(channel_num-1, settings1);
                                         // with threshold offset by chs
-                                        if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) * diode_noise_RMS *detector->GetThresOffset(i, channel_num - 1, settings1)))
+                                        if (trigger->Full_window[trig_j][trig_i + trig_bin] < (detector->GetThres(i, channel_num - 1, settings1) * diode_noise_RMS 
+                                                                                                *detector->GetThresOffset(i, channel_num - 1, settings1)))
                                         {
                                             // if this channel passed the trigger!
-                                            //cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
-                                            //stations[i].strings[(int)((trig_j)/4)].antennas[(int)((trig_j)%4)].Trig_Pass = trig_i+trig_bin;
                                             stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
                                             N_pass++;
                                             if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
@@ -944,7 +938,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 // Hpol
                                                 N_pass_H++;
                                             }
-                                            if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
+                                            if (last_trig_bin < trig_i + trig_bin) 
+                                              last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
                                             trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
                                             Passed_chs.push_back(trig_j);
                                         }
@@ -954,7 +949,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 }
                             }
 
-                            //else if (settings1->TRIG_ONLY_BH_ON == 0) {
                             // other cases: use all possible chs for trigger analysis
                             else
                             {
@@ -964,12 +958,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 {
 
                                     double diode_noise_RMS = trigger->GetAntNoise_diodeRMS(channel_num-1, settings1);
-                                    if( trig_i+offset+trig_bin >= settings1->DATA_BIN_SIZE ) break; //if trigger window hits wf end, cannot scan this channel further with this trig_i
-                                    if (trigger->Full_window[trig_j][trig_i + trig_bin + offset] < (detector->GetThres(i, channel_num - 1, settings1) * diode_noise_RMS *detector->GetThresOffset(i, channel_num - 1, settings1)))
+                                    if( trig_i+offset+trig_bin >= settings1->DATA_BIN_SIZE ) 
+                                      break; //if trigger window hits wf end, cannot scan this channel further with this trig_i
+                                    if (trigger->Full_window[trig_j][trig_i + trig_bin + offset] < (detector->GetThres(i, channel_num - 1, settings1) * diode_noise_RMS 
+                                                                                                     *detector->GetThresOffset(i, channel_num - 1, settings1)))
                                     {
                                         // if this channel passed the trigger!
-                                        //cout<<"trigger passed at bin "<<trig_i+trig_bin<<" ch : "<<trig_j<<endl;
-                                        //stations[i].strings[(int)((trig_j)/4)].antennas[(int)((trig_j)%4)].Trig_Pass = trig_i+trig_bin;
                                         stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin + offset;
                                         N_pass++;
                                         if (detector->stations[i].strings[string_i].antennas[antenna_i].type == 0)
@@ -982,7 +976,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             // Hpol
                                             N_pass_H++;
                                         }
-                                        if (last_trig_bin < trig_i + trig_bin) last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
+                                        if (last_trig_bin < trig_i + trig_bin) 
+                                          last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
                                         trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
                                         Passed_chs.push_back(trig_j);
                                     }
@@ -991,32 +986,25 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 }
                             }
 
-                            // check all triggered channels not just 3
-                            //if (N_pass > 2) trig_j += ch_ID;      // if the number of passed channels is 3 or more, no need to check other remaining channels as this station is trigged!
-                            //else trig_j++;    // if station not passed the trigger, just go to next channel
                             trig_j++;   // if station not passed the trigger, just go to next channel
 
                         }   // while trig_j < ch_ID
 
-                        //if (N_pass > settings1->N_TRIG-1) {   // now as global trigged!! = more or eq to N_TRIG triggered
                         if (((trig_mode == 0) && (N_pass > settings1->N_TRIG - 1))  // trig_mode = 0 case!
                             ||  // or
                             ((trig_mode == 1) && ((N_pass_V > settings1->N_TRIG_V - 1) || (N_pass_H > settings1->N_TRIG_H - 1)))    // trig_mode = 1 case!
-                       )
+                           )
                         {
 
                             check_ch = 0;
-                            //stations[i].Global_Pass = trig_i;
                             stations[i].Global_Pass = last_trig_bin;    // where actually global trigger occured
 
-                            //trig_i = settings1->DATA_BIN_SIZE;    // also if we know this station is trigged, don't need to check rest of time window
                             trig_i = max_total_bin; // also if we know this station is trigged, don't need to check rest of time window
                             for (int ch_loop = 0; ch_loop < ch_ID; ch_loop++)
                             {
-                                //cout << ch_loop << "/" << ch_ID << endl;
                                 int string_i = detector->getStringfromArbAntID(i, ch_loop);
                                 int antenna_i = detector->getAntennafromArbAntID(i, ch_loop);
-                                //          cout << "string:antenna: " << string_i << " : " << antenna_i << endl;
+                                
                                 stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0] = -1;  // no likely init
                                 stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1] = -1;  // no likely init
                                 if (ch_loop == Passed_chs[check_ch] && check_ch < N_pass)
@@ -1029,39 +1017,50 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     int likely_int = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
                                     int likely_ray = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
 
-                                    //skip this passed ch as it already has bin info
-                                    //cout<<"trigger passed at bin "<<stations[i].strings[(int)((ch_loop)/4)].antennas[(int)((ch_loop)%4)].Trig_Pass<<"  passed ch : "<<ch_loop<<" Direct dist btw posnu : "<<event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[(int)((ch_loop)/4)].antennas[(int)((ch_loop)%4)])<<endl;
-                                    //cout<<endl<<"trigger passed at bin "<<stations[i].strings[string_i].antennas[antenna_i].Trig_Pass<<"  passed ch : "<<ch_loop<<" ("<<detector->stations[i].strings[string_i].antennas[antenna_i].type<<"type) Direct dist btw posnu : "<<event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i])<<" noiseID : "<<stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
-                                    //cout<<endl<<"trigger passed at bin "<<stations[i].strings[string_i].antennas[antenna_i].Trig_Pass<<"  passed ch : "<<ch_loop<<" ("<<detector->stations[i].strings[string_i].antennas[antenna_i].type<<"type) Direct dist btw posnu : "<<event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i])<<" noiseID : "<<stations[i].strings[string_i].antennas[antenna_i].noise_ID[0]<<" ViewAngle : "<<stations[i].strings[string_i].antennas[antenna_i].view_ang[0]*DEGRAD;
-
                                     if (settings1->TRIG_ONLY_LOW_CH_ON == 0)
                                     {
-                                        cout << endl << "trigger passed at bin " << stations[i].strings[string_i].antennas[antenna_i].Trig_Pass << "  passed ch : " << ch_loop << " (" << detector->stations[i].strings[string_i].antennas[antenna_i].type << "type) Direct dist btw posnu : " << event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i]) << " noiseID : " << stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
+                                        cout << endl 
+                                             << "trigger passed at bin "
+                                             << stations[i].strings[string_i].antennas[antenna_i].Trig_Pass 
+                                             << "  passed ch : " << ch_loop 
+                                             << " (" << detector->stations[i].strings[string_i].antennas[antenna_i].type 
+                                             << "type) Direct dist btw posnu : " 
+                                             << event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i]) 
+                                             << " noiseID : " << stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
                                         if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0] != -1)
                                         {
-                                            cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[likely_int][likely_ray] *DEGRAD ;
-                                            cout << " LikelyTrigSignal : interaction " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
-                                            cout << ", ray " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
+                                            cout << " ViewAngle : " 
+                                                 << stations[i].strings[string_i].antennas[antenna_i].view_ang[likely_int][likely_ray] *DEGRAD ;
+                                            cout << " LikelyTrigSignal : interaction " 
+                                                 << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
+                                            cout << ", ray " 
+                                                 << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
                                         }
                                     }
                                     else if (settings1->TRIG_ONLY_LOW_CH_ON == 1)
                                     {
-                                        cout << endl << "trigger passed at bin " << stations[i].strings[string_i].antennas[antenna_i].Trig_Pass << "  passed ant: str[" << string_i << "].ant[" << antenna_i << "] (" << detector->stations[i].strings[string_i].antennas[antenna_i].type << "type) Direct dist btw posnu : " << event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i]) << " noiseID : " << stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
+                                        cout << endl 
+                                             << "trigger passed at bin " 
+                                             << stations[i].strings[string_i].antennas[antenna_i].Trig_Pass 
+                                             << "  passed ant: str[" << string_i << "].ant[" << antenna_i << "] (" 
+                                             << detector->stations[i].strings[string_i].antennas[antenna_i].type 
+                                             << "type) Direct dist btw posnu : " 
+                                             << event->Nu_Interaction[0].posnu.Distance(detector->stations[i].strings[string_i].antennas[antenna_i]) 
+                                             << " noiseID : " << stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
                                         if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0] != -1)
                                         {
-                                            cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[likely_int][likely_ray] *DEGRAD ;
-                                            cout << " LikelyTrigSignal : interaction " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
-                                            cout << ", ray " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
+                                            cout << " ViewAngle : " 
+                                                 << stations[i].strings[string_i].antennas[antenna_i].view_ang[likely_int][likely_ray] *DEGRAD ;
+                                            cout << " LikelyTrigSignal : interaction " 
+                                                 << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
+                                            cout << ", ray " 
+                                                 << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
                                         }
                                     }
 
-                                    //cout << "True station number: " << detector->InstalledStations[0].VHChannel[string_i][antenna_i] << endl;
-                                    //cout << event->Nu_Interaction[0].posnu[0] << " : " <<  event->Nu_Interaction[0].posnu[1] << " : " << event->Nu_Interaction[0].posnu[2] << endl;
                                     check_ch++;
 
                                     // now save the voltage waveform to V_mimic
-                                    //
-
                                     for (int mimicbin = 0; mimicbin < waveformLength; mimicbin++)
                                     {
 
@@ -1069,23 +1068,39 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                         if (V_mimic_mode == 0)
                                         {
                                             // Global passed bin is the center of the window
-                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);   // save in mV
-                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin + waveformCenter - waveformLength / 2 + mimicbin);
-                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9);    // save in ns
+                                            const int thisBin = last_trig_bin + waveformCenter - waveformLength / 2 + mimicbin;
+                                            const int thisTimeBin = waveformCenter - waveformLength / 2 + mimicbin;
+  
+                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][thisBin]) *1.e3);   // save in mV
+                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(thisBin);
+                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back(thisBin *settings1->TIMESTEP *1.e9);    // save in ns
                                         }
                                         else if (V_mimic_mode == 1)
                                         {
                                             // Global passed bin is the center of the window + delay to each chs from araGeom
-                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);   // save in mV
-                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin);
-                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9);   // save in ns
+                                            const int thisBin = last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] 
+                                                                - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin;
+                                            const int thisTimeBin = -1*(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) 
+                                                                    + waveformCenter - waveformLength / 2 + mimicbin;
+
+                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][thisBin]) *1.e3);   // save in mV
+                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(thisBin);
+                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back(thisTimeBin *settings1->TIMESTEP *1.e9);   // save in ns
                                         }
                                         else if (V_mimic_mode == 2)
                                         {
                                             // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
-                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);    // save in mV
-                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin);
-                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9 + detector->params.TestBed_WFtime_offset_ns);    // save in ns
+                                            const int thisBin = last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] 
+                                                                - detector->params.TestBed_BH_Mean_delay_bin 
+                                                                + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) 
+                                                                + waveformCenter - waveformLength / 2 + mimicbin;
+                                            const int thisTimeBin = -1*(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin 
+                                                                    + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) 
+                                                                    + waveformCenter - waveformLength / 2 + mimicbin;
+
+                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][thisBin]) *1.e3);    // save in mV
+                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(thisBin);
+                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back(thisTimeBin *settings1->TIMESTEP *1.e9 + detector->params.TestBed_WFtime_offset_ns);    // save in ns
                                         }
                                         if (mimicbin == 0) {
                                             ///< calculates time of center of each rays signal based on readout window time config
@@ -1113,18 +1128,20 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     else if (V_mimic_mode == 1)
                                     {
                                         // Global passed bin is the center of the window + delay to each chs from araGeom
-                                        stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) - waveformCenter + waveformLength / 2;
+                                        stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[ch_loop] 
+                                                                                                            - detector->params.TestBed_BH_Mean_delay_bin) - waveformCenter + waveformLength / 2;
                                     }
                                     else if (V_mimic_mode == 2)
                                     {
                                         // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
-                                        stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) - waveformCenter + waveformLength / 2;
+                                        stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[ch_loop] 
+                                                                                                              - detector->params.TestBed_BH_Mean_delay_bin 
+                                                                                                              + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) 
+                                                                                                              - waveformCenter + waveformLength / 2;
                                     }
                                 }
                                 else
                                 {
-                                    //stations[i].strings[(int)((ch_loop)/4)].antennas[(int)((ch_loop)%4)].Trig_Pass = stations[i].Global_Pass + settings1->NFOUR/4;    // so that global trig is 
-                                    //stations[i].strings[(int)((ch_loop)/4)].antennas[(int)((ch_loop)%4)].Trig_Pass = 0.;
                                     stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 0.;
 
                                     // new DAQ waveform writing mechanism test
@@ -1133,24 +1150,41 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                         if (V_mimic_mode == 0)
                                         {
                                             // Global passed bin is the center of the window
-                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);   // save in mV
-                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin + waveformCenter - waveformLength / 2 + mimicbin);
-                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9);    // save in ns
+                                            const int thisBin = last_trig_bin + waveformCenter - waveformLength / 2 + mimicbin;
+                                            const int thisTimeBin = waveformCenter - waveformLength / 2 + mimicbin;
+
+                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][thisBin]) *1.e3);   // save in mV
+                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(thisBin);
+                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back(thisTimeBin *settings1->TIMESTEP *1.e9);    // save in ns
                                         }
                                         else if (V_mimic_mode == 1)
                                         {
                                             // Global passed bin is the center of the window + delay to each chs from araGeom
-                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);   // save in mV
-                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin);
-                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9);   // save in ns
+                                            const int thisBin = last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] 
+                                                                - detector->params.TestBed_BH_Mean_delay_bin) 
+                                                                + waveformCenter - waveformLength / 2 + mimicbin;
+                                            const int thisTimeBin = -1*(detector->params.TestBed_Ch_delay_bin[ch_loop] 
+                                                                    - detector->params.TestBed_BH_Mean_delay_bin) 
+                                                                    + waveformCenter - waveformLength / 2 + mimicbin;
+
+                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][thisBin]) *1.e3);   // save in mV
+                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(thisBin);
+                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back(thisTimeBin *settings1->TIMESTEP *1.e9);   // save in ns
                                         }
                                         if (V_mimic_mode == 2)
                                         {
                                             // Global passed bin is the center of the window + delay to each chs from araGeom + fitted delay
-                                            //stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back(trigger->Full_window_V[ch_loop][ last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop]-detector->params.TestBed_BH_Mean_delay_bin) - settings1->NFOUR/4 + mimicbin ]);
-                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin]) *1.e3);    // save in mV
-                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin);
-                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back((-(detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformCenter - waveformLength / 2 + mimicbin) *settings1->TIMESTEP *1.e9 + detector->params.TestBed_WFtime_offset_ns);    // save in ns
+                                            const int thisBin = last_trig_bin - (detector->params.TestBed_Ch_delay_bin[ch_loop] 
+                                                                - detector->params.TestBed_BH_Mean_delay_bin 
+                                                                + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) 
+                                                                + waveformCenter - waveformLength / 2 + mimicbin;
+                                            const int thisTimeBin = -1*(detector->params.TestBed_Ch_delay_bin[ch_loop] 
+                                                                    - detector->params.TestBed_BH_Mean_delay_bin 
+                                                                    + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) 
+                                                                    + waveformCenter - waveformLength / 2 + mimicbin;
+                                            stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][thisBin]) *1.e3);    // save in mV
+                                            stations[i].strings[string_i].antennas[antenna_i].time.push_back(thisBin);
+                                            stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back(thisTimeBin *settings1->TIMESTEP *1.e9 + detector->params.TestBed_WFtime_offset_ns);    // save in ns
                                         }
                                         if (mimicbin == 0) {
                                             ///< calculates time of center of each rays signal based on readout window time config
@@ -1189,29 +1223,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                     // done V_mimic for non-triggered chs (done fixed V_mimic)
                                 }
                                 
-                                /*
-                                int AraRootChannel = 0;
-                                AraRootChannel = detector->GetChannelfromStringAntenna (i, string_i, antenna_i, settings1);
-
-                                int UsefulEventBin;
-                                if (settings1->NFOUR/2<EFFECTIVE_LAB3_SAMPLES*2) UsefulEventBin = settings1->NFOUR/2;
-                                else UsefulEventBin = EFFECTIVE_LAB3_SAMPLES*2;
-
-                                //for (int mimicbin=0; mimicbin<settings1->NFOUR/2; mimicbin++) {
-                                for (int mimicbin=0; mimicbin < UsefulEventBin; mimicbin++) {
-                                    theUsefulEvent->fVoltsRF[AraRootChannel-1][mimicbin] = stations[i].strings[string_i].antennas[antenna_i].V_mimic[mimicbin];
-                                    //theUsefulEvent->fTimesRF[AraRootChannel-1][mimicbin] = double(stations[i].strings[string_i].antennas[antenna_i].time[mimicbin])*settings1->TIMESTEP*1.0E9;
-                                    theUsefulEvent->fTimesRF[AraRootChannel-1][mimicbin] = stations[i].strings[string_i].antennas[antenna_i].time_mimic[mimicbin];
-                                    //cout << theUsefulEvent->fVoltsRF[ch_loop][mimicbin] << endl;
-                                    //cout << theUsefulEvent->fTimesRF[ch_loop][mimicbin] <<endl;
-                                }
-                                //theUsefulEvent->fNumPointsRF[ch_loop] = EFFECTIVE_SAMPLES * 2;
-                                theUsefulEvent->fNumPointsRF[ch_loop] = UsefulEventBin;
-                                //cout << " : " << theUsefulEvent->fNumPointsRF[ch_loop] << endl;
-                                 */
                             }
 
-                            //cout<<"Global trigger passed!!, N_pass : "<<N_pass<<endl;
                             Passed_chs.clear();
 
                             // save trig search bin info
@@ -1220,38 +1233,14 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                         else
                         {
                             trig_i++;   // also if station not passed the trigger, just go to next bin
-                            /*
-                            for (int ch_loop=0; ch_loop < ch_ID; ch_loop++) {
-                                int string_i = detector->getStringfromArbAntID(i, ch_loop);
-                                int antenna_i = detector->getAntennafromArbAntID(i, ch_loop);
-                                int AraRootChannel = 0;
-                                AraRootChannel = detector->GetChannelfromStringAntenna (i, string_i, antenna_i, settings1);
-
-                                int UsefulEventBin;
-                                if (settings1->NFOUR/2<EFFECTIVE_LAB3_SAMPLES*2) UsefulEventBin = settings1->NFOUR/2;
-                                else UsefulEventBin = EFFECTIVE_LAB3_SAMPLES*2;
-
-                                //for (int mimicbin=0; mimicbin<settings1->NFOUR/2; mimicbin++) {
-                                for (int mimicbin=0; mimicbin < UsefulEventBin; mimicbin++) {
-                                    theUsefulEvent->fVoltsRF[AraRootChannel-1][mimicbin] = 0;
-                                    theUsefulEvent->fTimesRF[AraRootChannel-1][mimicbin] = 0;
-                                    //cout << theUsefulEvent->fVoltsRF[ch_loop][mimicbin] << endl;
-                                    //cout << theUsefulEvent->fTimesRF[ch_loop][mimicbin] <<endl;
-                                }
-                                //theUsefulEvent->fNumPointsRF[ch_loop] = EFFECTIVE_SAMPLES * 2;
-                                theUsefulEvent->fNumPointsRF[ch_loop] = UsefulEventBin;
-                            }
-                            */
                         }
                     }   // while trig_i
 
                 }   // if TRIG_SCAN_MODE==0
 
-                else if (settings1->TRIG_SCAN_MODE > 0) triggerCheckLoop(settings1, detector, event, trigger, i, trig_search_init, max_total_bin, trig_window_bin, settings1->TRIG_SCAN_MODE);
+                else if (settings1->TRIG_SCAN_MODE > 0) 
+                  triggerCheckLoop(settings1, detector, event, trigger, i, trig_search_init, max_total_bin, trig_window_bin, settings1->TRIG_SCAN_MODE);
 
-                //         else if(settings1->TRIG_SCAN_MODE==2) triggerCheckLoopScan();
-
-                //         else if(settings1->TRIG_SCAN_MODE==3) triggerCheckLoopScanNumbers();
             }   // if it's not debugmode
 
             // delete noise waveforms 
@@ -2324,10 +2313,6 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
     stations[i].strings[string_i].antennas[antenna_i].SingleChannelTriggers=0;
     stations[i].strings[string_i].antennas[antenna_i].TotalBinsScannedPerChannel=0;
     
-//     int string_i = detector->getStringfromArbAntID( i, trig_j);
-//     int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
-//     stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 0.;
-    
   }// for trig_j
   
   double *TDR_all_sorted_temp;
@@ -2373,8 +2358,8 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       if (settings1->TRIG_ONLY_BH_ON==0
 	               || 
          (settings1->TRIG_ONLY_BH_ON==1 && settings1->DETECTOR==3 && detector->stations[i].strings[string_i].antennas[antenna_i].DAQchan==0)
-                       ||
-	 (settings1->TRIG_ONLY_LOW_CH_ON==1 && settings1->DETECTOR!=3 && antenna_i<2 ) ){ // channel filter: choose if to use lower/borehole channels or not
+                 ||
+         (settings1->TRIG_ONLY_LOW_CH_ON==1 && settings1->DETECTOR!=3 && antenna_i<2 ) ){ // channel filter: choose if to use lower/borehole channels or not
       
       int channel_num = detector->GetChannelfromStringAntenna ( i, string_i, antenna_i, settings1 );
 
@@ -2382,29 +2367,30 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       double diode_noise_RMS = trigger->GetAntNoise_diodeRMS(channel_num-1, settings1);
       Pthresh_value[trig_j]=trigger->Full_window[trig_j][trig_i]/(diode_noise_RMS * detector->GetThresOffset( i, channel_num-1,settings1) );
 
-	// this is to count how many local trigger clusters there are 
+      // this is to count how many local trigger clusters there are 
       if(Pthresh_value[trig_j]<powerthreshold){
 	
-	if(SCTR_cluster_bit[trig_j]==0) stations[i].strings[string_i].antennas[antenna_i].SingleChannelTriggers++;
+        if(SCTR_cluster_bit[trig_j]==0) stations[i].strings[string_i].antennas[antenna_i].SingleChannelTriggers++;
 		
-	// records all the different Pthresh values that caused local trigger.
+        // records all the different Pthresh values that caused local trigger.
         if(settings1->TRIG_SCAN_MODE>2){ 
-	  
-	  if(SCTR_cluster_bit[trig_j]==0){// if first trigger in cluster
-	    
-	    stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.push_back(Pthresh_value[trig_j]);
-	    
-	    
-	  }
-	  else{// choose the highest trigger value (most negative) in cluster
-	   
-	    if(Pthresh_value[trig_j]<stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back()) stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back()=Pthresh_value[trig_j];
-	    
-	  }
-	  
-	}// trig scan mode > 2
-	
-	SCTR_cluster_bit[trig_j]=1;
+          
+          if(SCTR_cluster_bit[trig_j]==0){// if first trigger in cluster
+            
+            stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.push_back(Pthresh_value[trig_j]);
+            
+            
+          }
+          else{// choose the highest trigger value (most negative) in cluster
+           
+            if(Pthresh_value[trig_j]<stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back()) 
+              stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back()=Pthresh_value[trig_j];
+            
+          }
+          
+        }// trig scan mode > 2
+        
+        SCTR_cluster_bit[trig_j]=1;
 	
       }// if local trigger
       else SCTR_cluster_bit[trig_j]=0;// if no local trigger, set zero to start a new cluster at next local trigger
@@ -2417,17 +2403,19 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       
       						    
       // fill the buffers (if any changes occur mark check_TDR_configuration as non-zero)
-      if(trig_i<trig_search_init+trig_window_bin) check_TDR_configuration+=buffer[trig_j]->fill(Pthresh_value[trig_j]);
-      else check_TDR_configuration+=buffer[trig_j]->add(Pthresh_value[trig_j]);
+      if(trig_i<trig_search_init+trig_window_bin) 
+        check_TDR_configuration+=buffer[trig_j]->fill(Pthresh_value[trig_j]);
+      else 
+        check_TDR_configuration+=buffer[trig_j]->add(Pthresh_value[trig_j]);
 	
       if(buffer[trig_j]->addToNPass>0){// if there is at least one value above threshold in the buffer, this is ++
 	  
-	N_pass++;
-	if(detector->stations[i].strings[string_i].antennas[antenna_i].type == 0) N_pass_V++;
-	if(detector->stations[i].strings[string_i].antennas[antenna_i].type == 1) N_pass_H++;
+        N_pass++;
+        if(detector->stations[i].strings[string_i].antennas[antenna_i].type == 0) 
+          N_pass_V++;
+        if(detector->stations[i].strings[string_i].antennas[antenna_i].type == 1) 
+          N_pass_H++;
 
-	  
-// 	  if(last_trig_bin<trig_i) last_trig_bin=trig_i;// not sure we need this variable in this mode... 
 	  
        }// if addToNPass>0
 	
@@ -2438,247 +2426,155 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
     // check if global trigger...
     
     if( (settings1->TRIG_MODE==0&&( N_pass >= settings1->N_TRIG )) || 
-	(settings1->TRIG_MODE==1&&( N_pass_V >= settings1->N_TRIG_V || 
-				    N_pass_H >= settings1->N_TRIG_H )
-	 ) 
-	//|| (settings1->TRIG_MODE==2&&( N_pass_0 >= settings1->N_TRIG_0 || N_pass_1 >= settings1->N_TRIG_1 ))
-	){ // if there's a trigger !
+        (settings1->TRIG_MODE==1&&( N_pass_V >= settings1->N_TRIG_V || 
+          N_pass_H >= settings1->N_TRIG_H ) ) 
+      ){ // if there's a trigger !
       
 
       global_pass_bit=1;  
       window_pass_bit=1;
       if(first_trigger==0){ // if this is the first trigger, mark this position and save event
 
-	first_trigger=1;
+        first_trigger=1;
 
-	for(int trig_j=0;trig_j<numChan;trig_j++){
-	 
-	  int string_i = detector->getStringfromArbAntID( i, trig_j);
-	  int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+        for(int trig_j=0;trig_j<numChan;trig_j++){
+         
+          int string_i = detector->getStringfromArbAntID( i, trig_j);
+          int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
 
-// 	  if(buffer[trig_j]->addToNPass>0) stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i-buffer[trig_j]->numBinsToLatestTrigger(); // mark the bin on which we triggered...
-	  if(buffer[trig_j]->addToNPass>0) stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i-buffer[trig_j]->numBinsToOldestTrigger(); // mark the bin on which we triggered...
-	  else stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 0.;
-	  
-	}// for trig_j
-	
-	saveTriggeredEvent(settings1, detector, event, trigger, stationID, trig_search_init, max_total_bin, trig_window_bin, trig_i);
-// 	cout<<"\nPthresh value=";
-// 	if(scan_mode==1) for(int trig_j=0;trig_j<numChan; trig_j++) cout<<" "<<Pthresh_value[trig_j];
-// 	if(scan_mode>1)  for(int trig_j=0;trig_j<numChan; trig_j++) cout<<" "<<buffer[trig_j]->best_value;
-// 	cout<<"\n";
+          if(buffer[trig_j]->addToNPass>0) 
+            stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i-buffer[trig_j]->numBinsToOldestTrigger(); // mark the bin on which we triggered...
+          else 
+            stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 0.;
+          
+        }// for trig_j
+        
+        saveTriggeredEvent(settings1, detector, event, trigger, stationID, trig_search_init, max_total_bin, trig_window_bin, trig_i);
 	
       }// first trigger
       
-//       if(scan_mode==1) return last_trig_bin; //  if we aren't going to scan all the Pthresh values, just return
-      if(scan_mode==1) return trig_i; //  if we aren't going to scan all the Pthresh values, just return
+      if(scan_mode==1) 
+        return trig_i; //  if we aren't going to scan all the Pthresh values, just return
     }
     
     // if there's a trigger and anything changes in the buffers, restock the TDR arrays
     if( scan_mode>1 && check_TDR_configuration && window_pass_bit ){
       	    
-      for(int trig_j=0;trig_j<numChan;trig_j++) TDR_all_sorted_temp[trig_j]=0;
-      for(int trig_j=0;trig_j<numChanVpol;trig_j++) TDR_Vpol_sorted_temp[trig_j]=0;
-      for(int trig_j=0;trig_j<numChanHpol;trig_j++) TDR_Hpol_sorted_temp[trig_j]=0;
+      for(int trig_j=0;trig_j<numChan;trig_j++) 
+        TDR_all_sorted_temp[trig_j]=0;
+      for(int trig_j=0;trig_j<numChanVpol;trig_j++) 
+        TDR_Vpol_sorted_temp[trig_j]=0;
+      for(int trig_j=0;trig_j<numChanHpol;trig_j++) 
+        TDR_Hpol_sorted_temp[trig_j]=0;
 
       for(int trig_j=0;trig_j<numChan;trig_j++){// fill the TDR (unsorted) arrays if they improved... 
 	
-	if(buffer[trig_j]->best_value<stations[i].TDR_all[trig_j]) stations[i].TDR_all[trig_j]=buffer[trig_j]->best_value;
+        if(buffer[trig_j]->best_value<stations[i].TDR_all[trig_j]) 
+          stations[i].TDR_all[trig_j]=buffer[trig_j]->best_value;
 
       }// for trig_j
 
       if(settings1->TRIG_MODE==0){ // for N out of all mode
       
-	if(N_pass>=settings1->N_TRIG) for(int ii=0;ii<N_pass; ii++){// find the N_pass best channel's TDR and store them.
-	 
-	  double best_thresh=0;
-	  int best_chan=0;
-	  
-	  for(int trig_j=0;trig_j<numChan;trig_j++) if(buffer[trig_j]->temp_value<best_thresh){ best_thresh=buffer[trig_j]->temp_value; best_chan=trig_j;}
-	  
-	  buffer[best_chan]->temp_value=0;
-	  
-	  TDR_all_sorted_temp[ii]=best_thresh;
-	  
-	}// for ii
-	
-	
-	// debug output:
-	if(TDR_all_sorted_temp[0]>TDR_all_sorted_temp[1]||TDR_all_sorted_temp[1]>TDR_all_sorted_temp[2]){
-	   
-	  cout<<"\n";
-	  for(int p=0;p<80;p++) cout<<"*";
-	  cout<<"\n  ordering problem: "<<TDR_all_sorted_temp[0]<<" "<<TDR_all_sorted_temp[1]<<" "<<TDR_all_sorted_temp[2]<<"\n";
-	  for(int p=0;p<80;p++) cout<<"*";
-	  cout<<"\n";
-	    
-	}
+        if(N_pass>=settings1->N_TRIG)
+          for(int ii=0;ii<N_pass; ii++){// find the N_pass best channel's TDR and store them.
+         
+            double best_thresh=0;
+            int best_chan=0;
+            
+            for(int trig_j=0;trig_j<numChan;trig_j++) 
+              if(buffer[trig_j]->temp_value<best_thresh){ 
+                best_thresh=buffer[trig_j]->temp_value; 
+                best_chan=trig_j;
+              }
+            
+            buffer[best_chan]->temp_value=0;
+            
+            TDR_all_sorted_temp[ii]=best_thresh;
+          
+          }// for ii
+        
+        
+        // debug output:
+        if(TDR_all_sorted_temp[0]>TDR_all_sorted_temp[1]||TDR_all_sorted_temp[1]>TDR_all_sorted_temp[2]){
+           
+          cout<<"\n";
+          for(int p=0;p<80;p++) cout<<"*";
+          cout<<"\n  ordering problem: "<<TDR_all_sorted_temp[0]<<" "<<TDR_all_sorted_temp[1]<<" "<<TDR_all_sorted_temp[2]<<"\n";
+          for(int p=0;p<80;p++) cout<<"*";
+          cout<<"\n";
+            
+        }
 	
       }// if trig_mode==0
       if(settings1->TRIG_MODE==1){ // for N out of either polarization
 
-	// for Vpol only:
-	if(N_pass_V>=settings1->N_TRIG_V) for(int ii=0;ii<N_pass_V; ii++){// find the N_pass best channel's TDR and store them.
+        // for Vpol only:
+        if(N_pass_V>=settings1->N_TRIG_V) for(int ii=0;ii<N_pass_V; ii++){// find the N_pass best channel's TDR and store them.
 
-	  double best_thresh=0;
-	  int best_chan=0;
-	  
-	  for(int trig_j=0;trig_j<numChan;trig_j++){
-	    
-	    int string_i = detector->getStringfromArbAntID( i, trig_j);
-	    int antenna_i = detector->getAntennafromArbAntID( i, trig_j);  
+          double best_thresh=0;
+          int best_chan=0;
+          
+          for(int trig_j=0;trig_j<numChan;trig_j++){
+            
+            int string_i = detector->getStringfromArbAntID( i, trig_j);
+            int antenna_i = detector->getAntennafromArbAntID( i, trig_j);  
 
-	    if(detector->stations[i].strings[string_i].antennas[antenna_i].type == 0&&buffer[trig_j]->temp_value<best_thresh){ 
-	      
-	      best_thresh=buffer[trig_j]->temp_value; 
-	      best_chan=trig_j;
-	      
-	    }// if best
-	  }// for trig_j
-	  buffer[best_chan]->temp_value=0;
-	  
-	  TDR_Vpol_sorted_temp[ii]=best_thresh;
-	  
-	}// for ii
-	  
-	  // debug output:
-// 	  if(TDR_Vpol_sorted_temp[0]>TDR_Vpol_sorted_temp[1]||TDR_Vpol_sorted_temp[1]>TDR_Vpol_sorted_temp[2]){
-// 	   
-// 	    cout<<"\n";
-// 	    for(int p=0;p<80;p++) cout<<"*";
-// 	    cout<<"\n  ordering problem, Vpol: "<<TDR_Vpol_sorted_temp[0]<<" "<<TDR_Vpol_sorted_temp[1]<<" "<<TDR_Vpol_sorted_temp[2]<<"\n";
-// 	    for(int p=0;p<80;p++) cout<<"*";
-// 	    cout<<"\n";
-// 	    
-// 	  }
-	// for Hpol only
-	if(N_pass_H>=settings1->N_TRIG_H) for(int ii=0;ii<N_pass_H; ii++){// find the N_pass best channel's TDR and store them.
+            if(detector->stations[i].strings[string_i].antennas[antenna_i].type == 0 && buffer[trig_j]->temp_value<best_thresh){ 
+              
+              best_thresh=buffer[trig_j]->temp_value; 
+              best_chan=trig_j;
+              
+            }// if best
+          }// for trig_j
+          buffer[best_chan]->temp_value=0;
+          
+          TDR_Vpol_sorted_temp[ii]=best_thresh;
+          
+        }// for ii
+          
+        // for Hpol only
+        if(N_pass_H>=settings1->N_TRIG_H) 
+          for(int ii=0;ii<N_pass_H; ii++){// find the N_pass best channel's TDR and store them.
 
-	  double best_thresh=0;
-	  int best_chan=0;
-	  
-	  for(int trig_j=0;trig_j<numChan;trig_j++){ 
-	    
-	    int string_i = detector->getStringfromArbAntID( i, trig_j);
-	    int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
-	 
-	    if(detector->stations[i].strings[string_i].antennas[antenna_i].type==1&&buffer[trig_j]->temp_value<best_thresh){ 
-	      
-	      best_thresh=buffer[trig_j]->temp_value; 
-	      best_chan=trig_j;
-	      
-	    }// if best
-	  }// for trig_j
-	
-	  buffer[best_chan]->temp_value=0;
-	  
-	  TDR_Hpol_sorted_temp[ii]=best_thresh;
-	  
-
-	  	  
-	}// for ii
-	
-//           // debug output:
-// 	  if(TDR_Hpol_sorted_temp[0]>TDR_Hpol_sorted_temp[1]||TDR_Hpol_sorted_temp[1]>TDR_Hpol_sorted_temp[2]){
-// 	   
-// 	    cout<<"\n";
-// 	    for(int p=0;p<80;p++) cout<<"*";
-// 	    cout<<"\n  ordering problem, Hpol: "<<TDR_Hpol_sorted_temp[0]<<" "<<TDR_Hpol_sorted_temp[1]<<" "<<TDR_Hpol_sorted_temp[2]<<"\n";
-// 	    for(int p=0;p<80;p++) cout<<"*";
-// 	    cout<<"\n";
-// 	    
-// 	  }
+            double best_thresh=0;
+            int best_chan=0;
+            
+            for(int trig_j=0;trig_j<numChan;trig_j++){ 
+              
+              int string_i = detector->getStringfromArbAntID( i, trig_j);
+              int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+           
+              if(detector->stations[i].strings[string_i].antennas[antenna_i].type==1&&buffer[trig_j]->temp_value<best_thresh){ 
+                
+                best_thresh=buffer[trig_j]->temp_value; 
+                best_chan=trig_j;
+                
+              }// if best
+            }// for trig_j
+          
+            buffer[best_chan]->temp_value=0;
+            
+            TDR_Hpol_sorted_temp[ii]=best_thresh;
+              
+        }// for ii
+        
       }// if trig_mode==1
 
-      /*          
-      if(settings1->TRIG_MODE==2){ // for N out of arbitrary sets of antennas
-
-	// for Set 0 only:
-	if(N_pass_0>=settings1->N_TRIG_0) for(int ii=0;ii<N_pass_0; ii++){// find the N_pass best channel's TDR and store them.
-
-	  double best_thresh=0;
-	  int best_chan=0;
-	  
-	  for(int trig_j=0;trig_j<numChan;trig_j++){
-	    
-	    int string_i = detector->getStringfromArbAntID( i, trig_j);
-	    int antenna_i = detector->getAntennafromArbAntID( i, trig_j);	 
-
-	    if((antenna_i == 0 || antenna_i == 2 ) && buffer[trig_j]->temp_value<best_thresh){ 
-	      
-	      best_thresh=buffer[trig_j]->temp_value; 
-	      best_chan=trig_j;
-	      
-	    }// if best
-	  }// for trig_j
-	  buffer[best_chan]->temp_value=0;
-	  
-	  TDR_Vpol_sorted_temp[ii]=best_thresh;
-	  
-	}// for ii
-	  
-	  // debug output:
-// 	  if(TDR_Vpol_sorted_temp[0]>TDR_Vpol_sorted_temp[1]||TDR_Vpol_sorted_temp[1]>TDR_Vpol_sorted_temp[2]){
-// 	   
-// 	    cout<<"\n";
-// 	    for(int p=0;p<80;p++) cout<<"*";
-// 	    cout<<"\n  ordering problem, Vpol: "<<TDR_Vpol_sorted_temp[0]<<" "<<TDR_Vpol_sorted_temp[1]<<" "<<TDR_Vpol_sorted_temp[2]<<"\n";
-// 	    for(int p=0;p<80;p++) cout<<"*";
-// 	    cout<<"\n";
-// 	    
-// 	  }
-	// for Hpol only
-	if(N_pass_1>=settings1->N_TRIG_1) for(int ii=0;ii<N_pass_1; ii++){// find the N_pass best channel's TDR and store them.
-
-	  double best_thresh=0;
-	  int best_chan=0;
-	  
-	  for(int trig_j=0;trig_j<numChan;trig_j++){ 
-	    
-	    int string_i = detector->getStringfromArbAntID( i, trig_j);
-	    int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
-	 
-	    if((antenna_i==1 || antenna_i == 3) && buffer[trig_j]->temp_value<best_thresh){ 
-	      
-	      best_thresh=buffer[trig_j]->temp_value; 
-	      best_chan=trig_j;
-	      
-	    }// if best
-	  }// for trig_j
-	
-	  buffer[best_chan]->temp_value=0;
-	  
-	  TDR_Hpol_sorted_temp[ii]=best_thresh;
-	  
-
-	  	  
-	}// for ii
-*/
-
     
-    // check if temp TDR arrays improved, if so update TDR arrays:
-    if(settings1->TRIG_MODE==0){
-      
-      if(N_pass>=settings1->N_TRIG) for(int ii=0;ii<N_pass;ii++) if(TDR_all_sorted_temp[ii]<stations[i].TDR_all_sorted[ii]) stations[i].TDR_all_sorted[ii]=TDR_all_sorted_temp[ii];
-      
-    }
-    if(settings1->TRIG_MODE==1){
-     
-      if(N_pass_V>=settings1->N_TRIG_V) for(int ii=0;ii<N_pass_V;ii++) if(TDR_Vpol_sorted_temp[ii]<stations[i].TDR_Vpol_sorted[ii]) stations[i].TDR_Vpol_sorted[ii]=TDR_Vpol_sorted_temp[ii];
-      if(N_pass_H>=settings1->N_TRIG_H) for(int ii=0;ii<N_pass_H;ii++) if(TDR_Hpol_sorted_temp[ii]<stations[i].TDR_Hpol_sorted[ii]) stations[i].TDR_Hpol_sorted[ii]=TDR_Hpol_sorted_temp[ii];
-      
-      // for this mode, can get TDR_all_sorted from these two arrays:
-    }
-
-    /*
-    if(settings1->TRIG_MODE==2){
-     
-      if(N_pass_0>=settings1->N_TRIG_0) for(int ii=0;ii<N_pass_0;ii++) if(TDR_Vpol_sorted_temp[ii]<stations[i].TDR_Vpol_sorted[ii]) stations[i].TDR_Vpol_sorted[ii]=TDR_Vpol_sorted_temp[ii];
-      if(N_pass_1>=settings1->N_TRIG_1) for(int ii=0;ii<N_pass_1;ii++) if(TDR_Hpol_sorted_temp[ii]<stations[i].TDR_Hpol_sorted[ii]) stations[i].TDR_Hpol_sorted[ii]=TDR_Hpol_sorted_temp[ii];
-      
-      // for this mode, can get TDR_all_sorted from these two arrays:
-    }
-    */
+      // check if temp TDR arrays improved, if so update TDR arrays:
+      if(settings1->TRIG_MODE==0){
+        
+        if(N_pass>=settings1->N_TRIG) for(int ii=0;ii<N_pass;ii++) if(TDR_all_sorted_temp[ii]<stations[i].TDR_all_sorted[ii]) stations[i].TDR_all_sorted[ii]=TDR_all_sorted_temp[ii];
+        
+      }
+      if(settings1->TRIG_MODE==1){
+       
+        if(N_pass_V>=settings1->N_TRIG_V) for(int ii=0;ii<N_pass_V;ii++) if(TDR_Vpol_sorted_temp[ii]<stations[i].TDR_Vpol_sorted[ii]) stations[i].TDR_Vpol_sorted[ii]=TDR_Vpol_sorted_temp[ii];
+        if(N_pass_H>=settings1->N_TRIG_H) for(int ii=0;ii<N_pass_H;ii++) if(TDR_Hpol_sorted_temp[ii]<stations[i].TDR_Hpol_sorted[ii]) stations[i].TDR_Hpol_sorted[ii]=TDR_Hpol_sorted_temp[ii];
+        
+        // for this mode, can get TDR_all_sorted from these two arrays:
+      }
 
     
     }// if trigger and buffer changed
@@ -2696,11 +2592,19 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
       // debug output:
       if(stations[i].TDR_all_sorted[0]>stations[i].TDR_all_sorted[1]||stations[i].TDR_all_sorted[1]>stations[i].TDR_all_sorted[2]){
 	   
-	cout<<"\n";
-	for(int p=0;p<80;p++) cout<<"*";
-	cout<<"\n  ordering problem: "<<stations[i].TDR_all_sorted[0]<<" "<<stations[i].TDR_all_sorted[1]<<" "<<stations[i].TDR_all_sorted[2]<<"\n";
-	for(int p=0;p<80;p++) cout<<"*";
-	cout<<"\n";
+        cout<<"\n";
+        for(int p=0;p<80;p++) 
+          cout<<"*";
+        cout<<"\n  ordering problem: "
+            <<stations[i].TDR_all_sorted[0]
+            <<" "
+            <<stations[i].TDR_all_sorted[1]
+            <<" "
+            <<stations[i].TDR_all_sorted[2]
+            <<"\n";
+        for(int p=0;p<80;p++) 
+          cout<<"*";
+        cout<<"\n";
 		
       }// ordering problem
       
@@ -2710,30 +2614,47 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
     
     if(settings1->TRIG_MODE==1){
       cout<<"\nPthresh best: ";
-      cout<<"  Vpol: "; for(int ii=0;ii<stations[i].TDR_Vpol_sorted.size();ii++) cout<<" "<<stations[i].TDR_Vpol_sorted[ii];
-      cout<<"  Hpol: "; for(int ii=0;ii<stations[i].TDR_Hpol_sorted.size();ii++) cout<<" "<<stations[i].TDR_Hpol_sorted[ii];
+      cout<<"  Vpol: "; 
+      for(int ii=0;ii<stations[i].TDR_Vpol_sorted.size();ii++) 
+        cout<<" "<<stations[i].TDR_Vpol_sorted[ii];
+      cout<<"  Hpol: "; 
+      for(int ii=0;ii<stations[i].TDR_Hpol_sorted.size();ii++) 
+        cout<<" "<<stations[i].TDR_Hpol_sorted[ii];
       cout<<"\n";
       
         
       // debug output:
-      if(stations[i].TDR_Vpol_sorted[0]>stations[i].TDR_Vpol_sorted[1]||stations[i].TDR_Vpol_sorted[1]>stations[i].TDR_Vpol_sorted[2]){
-	   
-	cout<<"\n";
-	for(int p=0;p<80;p++) cout<<"*";
-	cout<<"\n  ordering problem (final) Vpol: "<<stations[i].TDR_Vpol_sorted[0]<<" "<<stations[i].TDR_Vpol_sorted[1]<<" "<<stations[i].TDR_Vpol_sorted[2]<<"\n";
-	for(int p=0;p<80;p++) cout<<"*";
-	cout<<"\n";
+      if(stations[i].TDR_Vpol_sorted[0]>stations[i].TDR_Vpol_sorted[1]
+          || stations[i].TDR_Vpol_sorted[1]>stations[i].TDR_Vpol_sorted[2]){
+           
+        cout<<"\n";
+        for(int p=0;p<80;p++) cout<<"*";
+        cout<<"\n  ordering problem (final) Vpol: "
+            <<stations[i].TDR_Vpol_sorted[0]
+            <<" "<<stations[i].TDR_Vpol_sorted[1]
+            <<" "<<stations[i].TDR_Vpol_sorted[2]
+            <<"\n";
+        for(int p=0;p<80;p++) 
+          cout<<"*";
+        cout<<"\n";
 	
       }// ordering problem
 	  
       // debug output:
-      if(stations[i].TDR_Hpol_sorted[0]>stations[i].TDR_Hpol_sorted[1]||stations[i].TDR_Hpol_sorted[1]>stations[i].TDR_Hpol_sorted[2]){
+      if(stations[i].TDR_Hpol_sorted[0]>stations[i].TDR_Hpol_sorted[1]
+          || stations[i].TDR_Hpol_sorted[1]>stations[i].TDR_Hpol_sorted[2]){
 	   
-	cout<<"\n";
-	for(int p=0;p<80;p++) cout<<"*";
-	cout<<"\n  ordering problem (final), Hpol: "<<stations[i].TDR_Hpol_sorted[0]<<" "<<stations[i].TDR_Hpol_sorted[1]<<" "<<stations[i].TDR_Hpol_sorted[2]<<"\n";
-	for(int p=0;p<80;p++) cout<<"*";
-	cout<<"\n";
+        cout<<"\n";
+        for(int p=0;p<80;p++) 
+          cout<<"*";
+        cout<<"\n  ordering problem (final), Hpol: "
+            <<stations[i].TDR_Hpol_sorted[0]
+            <<" "<<stations[i].TDR_Hpol_sorted[1]
+            <<" "<<stations[i].TDR_Hpol_sorted[2]
+            <<"\n";
+        for(int p=0;p<80;p++) 
+          cout<<"*";
+        cout<<"\n";
 		
       }// ordering problem
          
@@ -2775,64 +2696,95 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
     int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
     
     if(stations[i].strings[string_i].antennas[antenna_i].Trig_Pass){// if this channel triggered
-    
-    stations[i].strings[string_i].antennas[antenna_i].Find_Likely_Sol();
-    int likely_int = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
-    int likely_ray = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
-    
-      if ( settings1->TRIG_ONLY_LOW_CH_ON==0 ) {
-
-	cout<<endl<<"trigger passed at bin "<<stations[i].strings[string_i].antennas[antenna_i].Trig_Pass<<"  passed ch : "<<trig_j<<" ("<<detector->stations[i].strings[string_i].antennas[antenna_i].type<<"type) Direct dist btw posnu : "<<event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[string_i].antennas[antenna_i] )<<" noiseID : "<<stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
-        if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0] != -1) {
-            cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[likely_int][likely_ray] *DEGRAD ;
-            cout << " LikelyTrigSignal : interaction " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
-            cout << ", ray " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
-        }
-      }
-      else if ( settings1->TRIG_ONLY_LOW_CH_ON==1 ) {
       
-	cout<<endl<<"trigger passed at bin "<<stations[i].strings[string_i].antennas[antenna_i].Trig_Pass<<"  passed ant: str["<<string_i<<"].ant["<<antenna_i<<"] ("<<detector->stations[i].strings[string_i].antennas[antenna_i].type<<"type) Direct dist btw posnu : "<<event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[string_i].antennas[antenna_i] )<<" noiseID : "<<stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
+      stations[i].strings[string_i].antennas[antenna_i].Find_Likely_Sol();
+      int likely_int = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
+      int likely_ray = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
+      
+        if ( settings1->TRIG_ONLY_LOW_CH_ON==0 ) {
 
-        if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0] != -1) {
-            cout << " ViewAngle : " << stations[i].strings[string_i].antennas[antenna_i].view_ang[likely_int][likely_ray] *DEGRAD ;
-            cout << " LikelyTrigSignal : interaction " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
-            cout << ", ray " << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
+          cout << endl
+               << "trigger passed at bin "
+               << stations[i].strings[string_i].antennas[antenna_i].Trig_Pass
+               << "  passed ch : "<<trig_j
+               << " ("<<detector->stations[i].strings[string_i].antennas[antenna_i].type
+               << "type) Direct dist btw posnu : "
+               << event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[string_i].antennas[antenna_i] )
+               << " noiseID : "
+               << stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
+          if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0] != -1) {
+              cout << " ViewAngle : " 
+                   << stations[i].strings[string_i].antennas[antenna_i].view_ang[likely_int][likely_ray] *DEGRAD ;
+              cout << " LikelyTrigSignal : interaction " 
+                   << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
+              cout << ", ray " 
+                   << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
+          }
         }
+        else if ( settings1->TRIG_ONLY_LOW_CH_ON==1 ) {
         
-      }
-      
-      
+          cout << endl
+               << "trigger passed at bin "
+               << stations[i].strings[string_i].antennas[antenna_i].Trig_Pass
+               <<"  passed ant: str[" << string_i << "].ant[" <<antenna_i<< "] (" 
+               << detector->stations[i].strings[string_i].antennas[antenna_i].type
+               << "type) Direct dist btw posnu : "
+               << event->Nu_Interaction[0].posnu.Distance( detector->stations[i].strings[string_i].antennas[antenna_i] )
+               << " noiseID : " 
+               << stations[i].strings[string_i].antennas[antenna_i].noise_ID[0];
 
-       
+          if (stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0] != -1) {
+              cout << " ViewAngle : " 
+                   << stations[i].strings[string_i].antennas[antenna_i].view_ang[likely_int][likely_ray] *DEGRAD ;
+              cout << " LikelyTrigSignal : interaction " 
+                   << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
+              cout << ", ray " 
+                   << stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
+          }
+          
+        }
+         
     }// if Trig_Pass
       
-// now save the voltage waveform to V_mimic
-      for (int mimicbin=0; mimicbin < waveformLength/2; mimicbin++) {
+    // now save the voltage waveform to V_mimic
+    for (int mimicbin=0; mimicbin < waveformLength/2; mimicbin++) {
 
-	// new DAQ waveform writing mechanism test
+        // new DAQ waveform writing mechanism test
         if (settings1->V_MIMIC_MODE == 0) { // Global passed bin is the center of the window
-        
-	  stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( ( trigger->Full_window_V[trig_j][ last_trig_bin - waveformLength/2 + waveformCenter + mimicbin ] )*1.e3 );// save in mV
-          stations[i].strings[string_i].antennas[antenna_i].time.push_back(  last_trig_bin - waveformLength/2 + waveformCenter + mimicbin );
-          stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( ( waveformLength/2 + waveformCenter + mimicbin) * settings1->TIMESTEP*1.e9  );// save in ns
+       
+          const int thisBin = last_trig_bin - waveformLength/2 + waveformCenter + mimicbin;
+          const int thisTimeBin = waveformLength/2 + waveformCenter + mimicbin; 
+          
+          stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( ( trigger->Full_window_V[trig_j][thisBin] )*1.e3 );// save in mV
+          stations[i].strings[string_i].antennas[antenna_i].time.push_back(thisBin);
+          stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( thisTimeBin * settings1->TIMESTEP*1.e9  );// save in ns
         }
         else if (settings1->V_MIMIC_MODE == 1) { // Global passed bin is the center of the window + delay to each chs from araGeom
-          stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( ( trigger->Full_window_V[trig_j][  last_trig_bin - (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) - waveformLength/2 + waveformCenter + mimicbin ] )*1.e3 );// save in mV
-          stations[i].strings[string_i].antennas[antenna_i].time.push_back(  last_trig_bin - (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) - waveformLength/2 + waveformCenter + mimicbin );
-          stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( ( -(detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) - waveformLength/2 + waveformCenter + mimicbin) * settings1->TIMESTEP*1.e9  );// save in ns
+         
+          const int thisBin = last_trig_bin - (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) - waveformLength/2 + waveformCenter + mimicbin;
+          const int thisTimeBin = -(detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) - waveformLength/2 + waveformCenter + mimicbin;
+          
+          stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( ( trigger->Full_window_V[trig_j][thisBin] )*1.e3 );// save in mV
+          stations[i].strings[string_i].antennas[antenna_i].time.push_back(thisBin);
+          stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( thisTimeBin * settings1->TIMESTEP*1.e9  );// save in ns
           	  
-	}
+        }
           
-          else if (settings1->V_MIMIC_MODE == 2) { // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
-          
-           stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( ( trigger->Full_window_V[trig_j][  last_trig_bin - (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) - waveformLength/2 + waveformCenter + mimicbin ] )*1.e3 );// save in mV
-	   stations[i].strings[string_i].antennas[antenna_i].time.push_back(  last_trig_bin - (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) - waveformLength/2 + waveformCenter + mimicbin );
-           stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( ( -(detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) - waveformLength/2 + waveformCenter + mimicbin) * settings1->TIMESTEP*1.e9 + detector->params.TestBed_WFtime_offset_ns );// save in ns
+        else if (settings1->V_MIMIC_MODE == 2) { // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
+
+          const int thisBin = last_trig_bin - (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin 
+                              + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) - waveformLength/2 + waveformCenter + mimicbin;         
+          const int thisTimeBin = -1*(detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin 
+                                  + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) - waveformLength/2 + waveformCenter + mimicbin;
+ 
+          stations[i].strings[string_i].antennas[antenna_i].V_mimic.push_back( ( trigger->Full_window_V[trig_j][thisBin] )*1.e3 );// save in mV
+          stations[i].strings[string_i].antennas[antenna_i].time.push_back(thisBin);
+          stations[i].strings[string_i].antennas[antenna_i].time_mimic.push_back( thisTimeBin * settings1->TIMESTEP*1.e9 + detector->params.TestBed_WFtime_offset_ns );// save in ns
            	    
-	  }
+        }
         if (mimicbin == 0) {
             ///< calculates time of center of each rays signal based on readout window time config
-            for (int interaction_idx=0; interaction_idx<stations[i].strings[string_i].antennas[antenna_i].SignalBin.size(); interaction_idx++){
+            for (int interaction_idx=0; interaction_idx < stations[i].strings[string_i].antennas[antenna_i].SignalBin.size(); interaction_idx++){
                 for (int m = 0; m < stations[i].strings[string_i].antennas[antenna_i].SignalBin[interaction_idx].size(); m++) { 
                     double signal_center_offset = (double)(
                         stations[i].strings[string_i].antennas[antenna_i].SignalBin[interaction_idx][m] - 
@@ -2844,35 +2796,31 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
                     stations[i].strings[string_i].antennas[antenna_i].SignalBinTime[interaction_idx].push_back(signal_center_time);
                 }
             }
-        }    
+         }    
   	
       }
       
             
-      // set global_trig_bin values
+       // set global_trig_bin values
        if (settings1->V_MIMIC_MODE == 0) { // Global passed bin is the center of the window
          stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = waveformLength/2 + waveformCenter ;
        }
        else if (settings1->V_MIMIC_MODE == 1) { // Global passed bin is the center of the window + delay to each chs from araGeom
-         stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) + waveformLength/2 + waveformCenter ;
+         stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) 
+                                                                             + waveformLength/2 + waveformCenter ;
        }
        else if (settings1->V_MIMIC_MODE == 2) { // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
-          stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformLength/2 + waveformCenter ;
+          stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin 
+                                                                              + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) 
+                                                                              + waveformLength/2 + waveformCenter ;
        }
       
-      stations[i].total_trig_search_bin = stations[i].Global_Pass + trig_window_bin - trig_search_init;
+       stations[i].total_trig_search_bin = stations[i].Global_Pass + trig_window_bin - trig_search_init;
       
-      
-      
-      
-      
-      
-      
-    
   }// for trig_j
   
   
-   if(settings1->OUTPUT_TDR_GRAPH>0){
+  if(settings1->OUTPUT_TDR_GRAPH>0){
      
      settings1->OUTPUT_TDR_GRAPH--;
      
@@ -2885,25 +2833,27 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
        int channel_num = detector->GetChannelfromStringAntenna ( i, string_i, antenna_i, settings1 );
        double thresh_value=0;
        
-      // assign Pthresh a value 
-      double diode_noise_RMS = trigger->GetAntNoise_diodeRMS(channel_num-1, settings1);
-      thresh_value=detector->GetThres(i, channel_num-1, settings1) * diode_noise_RMS * detector->GetThresOffset( i, channel_num-1,settings1);
+       // assign Pthresh a value 
+       double diode_noise_RMS = trigger->GetAntNoise_diodeRMS(channel_num-1, settings1);
+       thresh_value=detector->GetThres(i, channel_num-1, settings1) * diode_noise_RMS * detector->GetThresOffset( i, channel_num-1,settings1);
        
        gr[trig_j]=new TGraph();
-       for(int trig_i=0;trig_i<settings1->DATA_BIN_SIZE/2;trig_i++) gr[trig_j]->SetPoint(trig_i, (trig_search_init+trig_i), trigger->Full_window[trig_j][trig_i]);
-       gr[trig_j]->SetNameTitle(Form("TDR_waveform%dC%02d",  settings1->OUTPUT_TDR_GRAPH, trig_j), Form("Tunnel diode response waveform %d, channel %02d, trig_pass= %d, P_{th}= %le; time bins; power after convolution with tunnel diode", settings1->OUTPUT_TDR_GRAPH, trig_j, stations[i].strings[string_i].antennas[antenna_i].Trig_Pass, thresh_value));
-       gr[trig_j]->Write();
-       delete gr[trig_j];
-     }
+       for(int trig_i=0;trig_i<settings1->DATA_BIN_SIZE/2;trig_i++) 
+          gr[trig_j]->SetPoint(trig_i, (trig_search_init+trig_i), trigger->Full_window[trig_j][trig_i]);
+       
+        gr[trig_j]->SetNameTitle(Form("TDR_waveform%dC%02d",  settings1->OUTPUT_TDR_GRAPH, trig_j), 
+                                 Form("Tunnel diode response waveform %d, channel %02d, trig_pass= %d, P_{th}= %le; time bins; power after convolution with tunnel diode", 
+                                 settings1->OUTPUT_TDR_GRAPH, trig_j, stations[i].strings[string_i].antennas[antenna_i].Trig_Pass, thresh_value));
+        gr[trig_j]->Write();
+        delete gr[trig_j];
+       }
      
-     delete [] gr;
+       delete [] gr;
      
 	
-   }
+     }
   
   return 1;
-  
-  
   
 }// saveTriggeredEvent
 
@@ -5507,8 +5457,6 @@ void Report::checkPATrigger(
                     cout<<"Weight for Second Ray trigger is: "<<event->Nu_Interaction[0].weight<<endl;
                     break;
                 }
-                my_averageSNR = avgSnr;
-                my_raysol = raySolNum;
                 int last_trig_bin = stations[i].strings[0].antennas[8].SignalBin[brightest_event[0]][brightest_event[1]];
                 int my_ch_id = 0;
                 stations[i].Global_Pass = last_trig_bin;
@@ -5620,7 +5568,8 @@ void Report::checkPATrigger(
                                 stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.push_back(Pthresh_value[trig_j]);
                             }
                             else{// choose the highest trigger value (most negative) in cluster
-                                if(Pthresh_value[trig_j]<stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back()) stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back()=Pthresh_value[trig_j];
+                                if(Pthresh_value[trig_j]<stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back()) 
+                                  stations[i].strings[string_i].antennas[antenna_i].SCT_threshold_pass.back() = Pthresh_value[trig_j];
                             }
                         }// trig scan mode > 2
                         
@@ -5633,8 +5582,10 @@ void Report::checkPATrigger(
                     stations[i].strings[string_i].antennas[antenna_i].TotalBinsScannedPerChannel++;
 
                     // fill the buffers (if any changes occur mark check_TDR_configuration as non-zero)
-                    if(trig_i<trig_search_init+trig_window_bin) check_TDR_configuration+=buffer[trig_j]->fill(Pthresh_value[trig_j]);
-                    else check_TDR_configuration+=buffer[trig_j]->add(Pthresh_value[trig_j]);
+                    if(trig_i<trig_search_init+trig_window_bin) 
+                      check_TDR_configuration+=buffer[trig_j]->fill(Pthresh_value[trig_j]);
+                    else 
+                      check_TDR_configuration += buffer[trig_j]->add(Pthresh_value[trig_j]);
 
                     // if there is at least one value above threshold in the buffer, this is ++
                     if ( 
@@ -5659,8 +5610,10 @@ void Report::checkPATrigger(
                         for(int trig_j=0;trig_j<numChan;trig_j++){ // Set Trig_Pass for each ant
                             int string_i = detector->getStringfromArbAntID( i, trig_j);
                             int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
-                            if(buffer[trig_j]->addToNPass>0) stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i-buffer[trig_j]->numBinsToOldestTrigger(); // mark the bin on which we triggered...
-                            else stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 0.;
+                            if(buffer[trig_j]->addToNPass>0) 
+                              stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i-buffer[trig_j]->numBinsToOldestTrigger(); // mark the bin on which we triggered...
+                            else 
+                              stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 0.;
                         }// for trig_j
                         bin_to_save_on = trig_i;
                     }// first trigger
@@ -5669,12 +5622,16 @@ void Report::checkPATrigger(
 
                 if(settings1->TRIG_SCAN_MODE>1&&check_TDR_configuration&&window_pass_bit){// if there's a trigger and anything changes in the buffers, restock the TDR arrays
                         
-                    for(int trig_j=0;trig_j<numChan;trig_j++) TDR_all_sorted_temp[trig_j]=0;
-                    for(int trig_j=0;trig_j<numChanVpol;trig_j++) TDR_Vpol_sorted_temp[trig_j]=0;
-                    for(int trig_j=0;trig_j<numChanHpol;trig_j++) TDR_Hpol_sorted_temp[trig_j]=0;
+                    for(int trig_j=0;trig_j<numChan;trig_j++) 
+                      TDR_all_sorted_temp[trig_j]=0;
+                    for(int trig_j=0;trig_j<numChanVpol;trig_j++) 
+                      TDR_Vpol_sorted_temp[trig_j]=0;
+                    for(int trig_j=0;trig_j<numChanHpol;trig_j++) 
+                      TDR_Hpol_sorted_temp[trig_j]=0;
 
                     for(int trig_j=0;trig_j<numChan;trig_j++){// fill the TDR (unsorted) arrays if they improved... 
-                        if(buffer[trig_j]->best_value<stations[i].TDR_all[trig_j]) stations[i].TDR_all[trig_j]=buffer[trig_j]->best_value;
+                        if(buffer[trig_j]->best_value<stations[i].TDR_all[trig_j]) 
+                          stations[i].TDR_all[trig_j]=buffer[trig_j]->best_value;
                     }// for trig_j
 
                     // Changes TDR sorting and buffer[best_chan] for Vpol only:
@@ -5685,9 +5642,12 @@ void Report::checkPATrigger(
                         
                         // Pick a new best_thresh and best_chan
                         for(int trig_j=0;trig_j<numChan;trig_j++){
+                            
                             int string_i = detector->getStringfromArbAntID( i, trig_j);
                             int antenna_i = detector->getAntennafromArbAntID( i, trig_j);  
-                            if(detector->stations[i].strings[string_i].antennas[antenna_i].type == 0&&buffer[trig_j]->temp_value<best_thresh){ 
+                            if(detector->stations[i].strings[string_i].antennas[antenna_i].type == 0 
+                               && buffer[trig_j]->temp_value<best_thresh)
+                            { 
                                 best_thresh=buffer[trig_j]->temp_value; 
                                 best_chan=trig_j;
                             }// if best
@@ -5708,7 +5668,9 @@ void Report::checkPATrigger(
                         for(int trig_j=0;trig_j<numChan;trig_j++){ 
                             int string_i = detector->getStringfromArbAntID( i, trig_j);
                             int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
-                            if(detector->stations[i].strings[string_i].antennas[antenna_i].type==1&&buffer[trig_j]->temp_value<best_thresh){ 
+                            if(detector->stations[i].strings[string_i].antennas[antenna_i].type==1 
+                               && buffer[trig_j]->temp_value<best_thresh)
+                            { 
                                 best_thresh=buffer[trig_j]->temp_value; 
                                 best_chan=trig_j;
                             }// if best
@@ -5741,7 +5703,8 @@ void Report::checkPATrigger(
 
             } // end iteration over windows/bins
 
-            if ( bin_to_save_on == -1 ) bin_to_save_on = stations[i].strings[0].antennas[8].SignalBin[brightest_event[0]][brightest_event[1]];
+            if ( bin_to_save_on == -1 ) 
+              bin_to_save_on = stations[i].strings[0].antennas[8].SignalBin[brightest_event[0]][brightest_event[1]];
             
             // Do what saveTriggeredEvent() does
             for(int trig_j=0; trig_j<numChan;trig_j++){
@@ -5753,13 +5716,15 @@ void Report::checkPATrigger(
                         
                 // set global_trig_bin values
                 if (settings1->V_MIMIC_MODE == 0) { // Global passed bin is the center of the window
-                stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = waveformLength/2 + waveformCenter ;
+                  stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = waveformLength/2 + waveformCenter ;
                 }
                 else if (settings1->V_MIMIC_MODE == 1) { // Global passed bin is the center of the window + delay to each chs from araGeom
-                stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) + waveformLength/2 + waveformCenter ;
+                  stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) 
+                                                                                      + waveformLength/2 + waveformCenter ;
                 }
                 else if (settings1->V_MIMIC_MODE == 2) { // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
-                    stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformLength/2 + waveformCenter ;
+                  stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin 
+                                                                                      + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformLength/2 + waveformCenter ;
                 }
                 
                 stations[i].total_trig_search_bin = stations[i].Global_Pass + trig_window_bin - trig_search_init;
@@ -5770,10 +5735,11 @@ void Report::checkPATrigger(
         } // end if hasTriggered==true
         
         raySolNum++;
-        if(hasTriggered==true) break;
-        if(searchSecondRay == false) break;
+        if(hasTriggered) 
+          break;
+        if(!searchSecondRay) 
+          break;
 
-        //if(stations[i].Global_Pass > 0) break;
     }//while ray solve
 
 }
