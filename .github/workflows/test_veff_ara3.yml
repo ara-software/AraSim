@@ -79,6 +79,8 @@ jobs:
         run: |
 
           source root/bin/thisroot.sh
+          export ARA_UTIL_INSTALL_DIR=`pwd`/AraRoot/
+          export ARA_ROOT_DIR=`pwd`/AraRoot/
           
           make -j2
           
