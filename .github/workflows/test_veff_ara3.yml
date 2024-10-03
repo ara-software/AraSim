@@ -58,6 +58,7 @@ jobs:
         run: |
 
           # Initialize environment
+          pwd
           source root/bin/thisroot.sh
           export LD_LIBRARY_PATH="/home/runner/work/AraSim/AraSim/libRootFftwWrapper/build/:$LD_LIBRARY_PATH"
 
@@ -73,6 +74,8 @@ jobs:
           export ARA_ROOT_DIR=`pwd`
           bash INSTALL.sh 1
           cd ..
+          pwd
+          ls AraRoot
 
       - name: Build AraSim
         run: |
@@ -91,8 +94,8 @@ jobs:
           
           source root/bin/thisroot.sh
           export LD_LIBRARY_PATH="/home/runner/work/AraSim/AraSim/libRootFftwWrapper/build/:$LD_LIBRARY_PATH"
-          export ARA_UTIL_INSTALL_DIR=`pwd`/AraRoot/
-          export ARA_ROOT_DIR=`pwd`/AraRoot/
+          export ARA_UTIL_INSTALL_DIR=AraRoot/
+          export ARA_ROOT_DIR=AraRoot/
 
           bash test/veff_ara3/run_veff_ara3_test.sh
 
