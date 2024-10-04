@@ -3,6 +3,7 @@
 #include "Settings.h"
 #include "Spectra.h"
 #include "Primaries.h"
+#include "secondaries.hh"
 #include "TMath.h"
 #include "Report.h"
 #include "Constants.h"
@@ -94,14 +95,13 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
             }
 
             //ASG: Calculate the interactions birth time for secondaries
-            int first_vertex_idx;
             if (interaction_cnt == 1){
                 interactions_birth_time.clear();
                 interactions_birth_time.push_back(0.0);
                 first_vertex_idx == inu_thrown;
             }
             else{
-                double tmp_birth_time = (abs(settings1->IND_POSNU_R[first_vertex_idx] - settings1->IND_POSNU_R[inu_thrown])/CLIGHT) * 1e9;
+                double tmp_birth_time = (sec1->sec_nnu_interaction_distances(first_vertex_idx, inu_thrown, settings1)/CLIGHT) * 1e9;
                 interactions_birth_time.push_back(tmp_birth_time);
             }
             
