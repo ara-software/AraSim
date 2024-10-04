@@ -21,6 +21,15 @@ class Trigger {
  private:
 
 
+     double meandiode;
+     double rmsdiode;
+     double rmsvoltage;// rms voltage value without diode response
+
+     vector <double> meandiode_ch;
+     vector <double> rmsdiode_ch;
+     vector <double> rmsvoltage_ch;
+
+
 
  public:
 
@@ -42,15 +51,6 @@ class Trigger {
      double V_noise_freqbin;    // thermal noise freq bin value
 
      vector <double> V_noise_freqbin_ch;    // thermal noise freq bin value for chs
-
-
-     double meandiode;
-     double rmsdiode;
-     double rmsvoltage;// rms voltage value without diode response
-
-     vector <double> meandiode_ch;
-     vector <double> rmsdiode_ch;
-     vector <double> rmsvoltage_ch;
 
 
      vector < vector <double> > v_noise_timedomain;   // time domain noise waveform examples
@@ -80,6 +80,9 @@ class Trigger {
 
 
      void SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *report);
+     double GetAntNoise_diodeMean(int ch_ID, Settings *settings1);
+     double GetAntNoise_diodeRMS(int ch_ID, Settings *settings1);
+     double GetAntNoise_voltageRMS(int ch_ID, Settings *settings1);
 
      void GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Report *report);
 

@@ -89,6 +89,7 @@ outputdir="outputs"; // directory where outputs go
   DETECTOR_STATION=-1; // initiate this to negative -1, so it does nothing by default
   DETECTOR_STATION_ARAROOT=-1; // initiate this to negative -1, so it does nothing by default
   DETECTOR_STATION_LIVETIME_CONFIG=-1; // intiative this to negative -1, so it does nothing by default
+  DETECTOR_YEAR=2011;
 
   INTERACTION_MODE=1;   //PickNear mode (0: Aeff mode using sphere surface around station, 1: Veff mode using cylinder volume around station)
 
@@ -176,142 +177,146 @@ outputdir="outputs"; // directory where outputs go
 
   Z_TOLERANCE=0.2; // 0.2 : (default)   
  
-    CALPULSER_ON=0; // default : calpulsers off
-    
-    TESTBED_ON=0; // default : 0 stations[0] is ARA1 not Testbed
-    
-    READGEOM=0; // default : 0 : use idealized geometry and do not read in from sqlite database
-    
-    V_MIMIC_MODE = 0; // default : 0 - write out all chs where global triggered bin is center of the window
-                        // 1 - same as above 0 mode but apply TestBed ch delay - average BH ch delay
-                        // 2 - same as above 0 mode but apply TestBed ch delay - average BH ch delay + additional delay to match with actual TestBed data waveforms
-    
-    USE_INSTALLED_TRIGGER_SETTINGS = 0; // default : 0 - use idealized settings for the trigger
-    
-    NUM_INSTALLED_STATIONS = 6;
+  CALPULSER_ON=0; // default : calpulsers off
+  
+  TESTBED_ON=0; // default : 0 stations[0] is ARA1 not Testbed
+  
+  READGEOM=0; // default : 0 : use idealized geometry and do not read in from sqlite database
+  
+  V_MIMIC_MODE = 0; // default : 0 - write out all chs where global triggered bin is center of the window
+                      // 1 - same as above 0 mode but apply TestBed ch delay - average BH ch delay
+                      // 2 - same as above 0 mode but apply TestBed ch delay - average BH ch delay + additional delay to match with actual TestBed data waveforms
+  
+  USE_INSTALLED_TRIGGER_SETTINGS = 0; // default : 0 - use idealized settings for the trigger
+  
+  NUM_INSTALLED_STATIONS = 6;
 
-    CALPUL_OFFCONE_ANGLE = 35.;
+  CALPUL_OFFCONE_ANGLE = 35.;
 
-    CALPUL_AMP = 100.;
+  CALPUL_AMP = 100.;
 
-    TRIG_ONLY_BH_ON = 0;    // default trigger will occur with all chs (1 will do trigger analysis with BH chs only)
+  TRIG_ONLY_BH_ON = 0;    // default trigger will occur with all chs (1 will do trigger analysis with BH chs only)
 
-    TRIG_THRES_MODE = 0;    // default trigger threshold (0) will use 1 as offset (so no offset), (1) will use data/threshold_offset.csv as threshold off set factor
+  TRIG_THRES_MODE = 0;    // default trigger threshold (0) will use 1 as offset (so no offset), (1) will use data/threshold_offset.csv as threshold off set factor
 
-    NOISE_CHANNEL_MODE = 0;    //default noise temp setting (just same temp for all chs), 1 : all chs have different systemp, 2 : only first 8 chs have different systemp
+  NOISE_CHANNEL_MODE = 0;    //default noise temp setting (just same temp for all chs), 1 : all chs have different systemp, 2 : only first 8 chs have different systemp
 
-    USE_TESTBED_RFCM_ON = 0;    // use RFCM measurement for testbed or not
+  USE_TESTBED_RFCM_ON = 0;    // use RFCM measurement for testbed or not
 
-    RFCM_OFFSET = 80.;  // if above USE_TESTBED_RFCM_ON = 1, we need RFCM attenuator factor cancel
+  RFCM_OFFSET = 80.;  // if above USE_TESTBED_RFCM_ON = 1, we need RFCM attenuator factor cancel
 
-    CONST_MEANDIODE = -6.5e-15; // just from one run
+  CONST_MEANDIODE = -6.5e-15; // just from one run
 
-    CONST_RMSDIODE = 1.346e-13; // also from one run
+  CONST_RMSDIODE = 1.346e-13; // also from one run
 
-    USE_MANUAL_GAINOFFSET = 0; //if use gain offset file to read values or just use constant gain offset from setup file (default 0 : use file)
-            
-    MANUAL_GAINOFFSET_VALUE = 1.; // gain offset value
+  USE_MANUAL_GAINOFFSET = 0; //if use gain offset file to read values or just use constant gain offset from setup file (default 0 : use file)
+          
+  MANUAL_GAINOFFSET_VALUE = 1.; // gain offset value
 
-    NOISE_WAVEFORM_GENERATE_MODE = 0; // mode 0 (default) will generate noise waveforms newly for each events. other values will use first generated noise waveforms for later events (huge mem usage)
+  NOISE_WAVEFORM_GENERATE_MODE = 0; // mode 0 (default) will generate noise waveforms newly for each events. other values will use first generated noise waveforms for later events (huge mem usage)
 
-    USE_CH_GAINOFFSET = 0; // if use gain offset for different channels. (default 0 : not using gain offset). mode 1 is only availbale for installed TestBed so far.
+  USE_CH_GAINOFFSET = 0; // if use gain offset for different channels. (default 0 : not using gain offset). mode 1 is only availbale for installed TestBed so far.
 
-    // removed GETCHORD_MODE. This parameter is merged into INTERACTION_MODE
-    //GETCHORD_MODE = 0; // which Getchord function to use. default 0 : old Getchord function (not correct tau weight, weight don't have ice inside interaction probability in it). 1 : new Getchord from icemc. This has new tau weight calculation and ice interaction probability applied to weight factor.
+  // removed GETCHORD_MODE. This parameter is merged into INTERACTION_MODE
+  //GETCHORD_MODE = 0; // which Getchord function to use. default 0 : old Getchord function (not correct tau weight, weight don't have ice inside interaction probability in it). 1 : new Getchord from icemc. This has new tau weight calculation and ice interaction probability applied to weight factor.
 
-    taumodes = 0; // no tau created in the rock
+  taumodes = 0; // no tau created in the rock
 
-    BH_ANT_SEP_DIST_ON = 1; // 0 : use constant borehole antenna distance. default 1 : use separate antenna distance. use z_btw01, z_btw12, ... in ARA_N_info.txt or ARA37_info.txt
+  BH_ANT_SEP_DIST_ON = 1; // 0 : use constant borehole antenna distance. default 1 : use separate antenna distance. use z_btw01, z_btw12, ... in ARA_N_info.txt or ARA37_info.txt
 
-    TRIG_MODE = 1; // default 1 : if any antennas got passed N_TRIG or more, global trig. 1 : either Vpol or Hpol antennas got passed N_TRIG_V or N_TRIG_H respectively, global trig.
+  TRIG_MODE = 1; // default 1 : if any antennas got passed N_TRIG or more, global trig. 1 : either Vpol or Hpol antennas got passed N_TRIG_V or N_TRIG_H respectively, global trig.
 
-    N_TRIG_V=3;                 // default : 3 (3 out of Vpolchannels in a station)
+  N_TRIG_V=3;                 // default : 3 (3 out of Vpolchannels in a station)
 
-    N_TRIG_H=3;                 // default : 3 (3 out of Hpol channels in a station)
+  N_TRIG_H=3;                 // default : 3 (3 out of Hpol channels in a station)
 
-    FILL_TREE_MODE = 0; // default 0 : fill tree for all events, 1 : fill tree only usable posnu events, 2 : fill tree only trigger passed events
+  FILL_TREE_MODE = 0; // default 0 : fill tree for all events, 1 : fill tree only usable posnu events, 2 : fill tree only trigger passed events
 
-    ONLY_PASSED_EVENTS = 0;
-    NNU_PASSED = 0;
+  ONLY_PASSED_EVENTS = 0;
+  NNU_PASSED = 0;
 
-    //Defining source for INTERACTION_MODE == 5.
-    SOURCE_LATITUDE = -89.97953; //Latitude of SpiceCore (from 2023 survey data)
+  //Defining source for INTERACTION_MODE == 5.
+  SOURCE_LATITUDE = -89.97953; //Latitude of SpiceCore (from 2023 survey data)
 
-    SOURCE_LONGITUDE = -100.78595; //Longitude of SpiceCore (from 2023 survey data)
+  SOURCE_LONGITUDE = -100.78595; //Longitude of SpiceCore (from 2023 survey data)
 
-    SOURCE_DEPTH = -1000.0; //Default depth of 1000 meters below ice surface.    
-
-
-    SHOWER_MODE = 2; // EM (0) or HAD (1) shower in t-domain signal. or either one which is bigger (3) or both EM and HAD (2)  default : 2, both EM and HAD showers
-
-    SHOWER_STEP = 0.001; // step size in generating shower profile. default 0.001 m
-
-    SHOWER_PARAM_MODEL = 0; // choose shower profile parameters (by Jaime fit = 0, or Carl's fit = 1). default = 0
-
-    OFFCONE_LIMIT = 10.; // offcone angle (deg) limit to calculate time domain signal. Increasing this value will result in drametically increase computation time
-
-    ALL_ANT_V_ON = 0; // use Vpol antenna gain for both Vpol and Hpol = 1, use Hpol gain for Hpol model = 0
-
-    PHASE_SKIP_MODE = 0; // skip applying phase in t-domain mode (SIMULATION_MODE = 1). default 0 : don't skip (apply all phase), 1 : only upto Askaryan radiation, 2 : only upto antenna
+  SOURCE_DEPTH = -1000.0; //Default depth of 1000 meters below ice surface.    
 
 
+  SHOWER_MODE = 2; // EM (0) or HAD (1) shower in t-domain signal. or either one which is bigger (3) or both EM and HAD (2)  default : 2, both EM and HAD showers
 
-    DEBUG_MODE_ON = 0; // 0 : off (do as usual), 1 : on (skip most of intensive computational process which don't have random generations)
+  SHOWER_STEP = 0.001; // step size in generating shower profile. default 0.001 m
 
-    DEBUG_SKIP_EVT = 0; // when DEBUG_MODE_ON = 1, skip upto this number and then do as DEBUG_MODE_ON = 0
+  SHOWER_PARAM_MODEL = 0; // choose shower profile parameters (by Jaime fit = 0, or Carl's fit = 1). default = 0
 
+  OFFCONE_LIMIT = 10.; // offcone angle (deg) limit to calculate time domain signal. Increasing this value will result in drametically increase computation time
 
-    V_SATURATION = 1.; // saturated voltage +-V_SATURATION
+  ALL_ANT_V_ON = 0; // use Vpol antenna gain for both Vpol and Hpol = 1, use Hpol gain for Hpol model = 0
 
-    ADDITIONAL_DEPTH_ON = 0; // whether add more depth to each antenas
-
-    ADDITIONAL_DEPTH = 100.; // default additional depth value
+  PHASE_SKIP_MODE = 0; // skip applying phase in t-domain mode (SIMULATION_MODE = 1). default 0 : don't skip (apply all phase), 1 : only upto Askaryan radiation, 2 : only upto antenna
 
 
 
-    TRIG_ONLY_LOW_CH_ON = 0;    // default trigger will occur with all chs (1 will do trigger analysis with lower 8 chs; bottom 4 Vpol & bottom 4 Hpols)
+  DEBUG_MODE_ON = 0; // 0 : off (do as usual), 1 : on (skip most of intensive computational process which don't have random generations)
+
+  DEBUG_SKIP_EVT = 0; // when DEBUG_MODE_ON = 1, skip upto this number and then do as DEBUG_MODE_ON = 0
 
 
-    ACCUM_TRIG_SEARCH_BINS_STATION0 = 0.; // not actually setting value but gives us how much trigger searched bins there were in the run for station0
+  V_SATURATION = 1.; // saturated voltage +-V_SATURATION
 
-    NU_NUBAR_SELECT_MODE = 3; // default : 3 = random nu_nubar based on arXiv:1108.3163, section 3, 0 = just nu, 1 = just nubar 
+  ADDITIONAL_DEPTH_ON = 0; // whether add more depth to each antenas
 
-
-    SELECT_FLAVOR = 0; // default : 0 = randomly 1:1:1 ratio, 1 : el. 2 : mu, 3 : tau
-    SELECT_CURRENT = 2; // default: 2:random, 0:nc, 1:cc
-
-    OUTPUT_TDR_GRAPH = 0;// saves a few example graphs of the tunnel diode response for a triggered event
+  ADDITIONAL_DEPTH = 100.; // default additional depth value
 
 
-    AVZ_NORM_FACTOR_MODE = 1; // default : 1 : don't apply sqrt(2) (actually applied but cancel that) as realft assume Hn as double-sided spectrum (invFFT normalization factor 2/N) and also remove dF binning factor in MakeArraysforFFT function, 0 : use normalization factors like in old version
 
-    number_of_stations = 1;
+  TRIG_ONLY_LOW_CH_ON = 0;    // default trigger will occur with all chs (1 will do trigger analysis with lower 8 chs; bottom 4 Vpol & bottom 4 Hpols)
 
-    RAY_TRACE_ICE_MODEL_PARAMS=0; // Default: South Pole values fitted from RICE data
 
-    WAVEFORM_LENGTH = 64/2*20; // Default: 64 digitization samples per block / 2 samples per waveform value * 20 blocks (value used for 2013-2016)
-    
-    WAVEFORM_CENTER = 0; // Default: 0, no offset in waveform centering
+  ACCUM_TRIG_SEARCH_BINS_STATION0 = 0.; // not actually setting value but gives us how much trigger searched bins there were in the run for station0
 
-    POSNU_R = 1000.;
-    POSNU_THETA=-3.1415926535/4.;
-    POSNU_PHI=0.;
+  NU_NUBAR_SELECT_MODE = 3; // default : 3 = random nu_nubar based on arXiv:1108.3163, section 3, 0 = just nu, 1 = just nubar 
 
-    ARBITRARY_EVENT_ATTENUATION = 1.0;
-    PICK_ABOVE_HEIGHT = 3000;
 
-    EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: event mode
-    //    EVENT_NUM = 10;//read in event number in EVENT_GENERATION_MODE=1, no more than 100 events
-    ANTENNA_MODE=0; //default: 0 - old antenna model information
-    IMPEDANCE_RX_VPOL=0;
-    IMPEDANCE_RX_VPOL_TOP=0;
-    IMPEDANCE_RX_HPOL=0;
-    IMPEDANCE_TX=4;
-    APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
+  SELECT_FLAVOR = 0; // default : 0 = randomly 1:1:1 ratio, 1 : el. 2 : mu, 3 : tau
+  SELECT_CURRENT = 2; // default: 2:random, 0:nc, 1:cc
 
-    CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.csv"
-    
-    CLOCK_ANGLE=0; //Default: 0 -- Angle of polarization "on the clock".  Angle of zero is pure thetaPol, whereas 90º is pure phiPol.
+  OUTPUT_TDR_GRAPH = 0;// saves a few example graphs of the tunnel diode response for a triggered event
+
+
+  AVZ_NORM_FACTOR_MODE = 1; // default : 1 : don't apply sqrt(2) (actually applied but cancel that) as realft assume Hn as double-sided spectrum (invFFT normalization factor 2/N) and also remove dF binning factor in MakeArraysforFFT function, 0 : use normalization factors like in old version
+
+  number_of_stations = 1;
+
+  RAY_TRACE_ICE_MODEL_PARAMS=0; // Default: South Pole values fitted from RICE data
+
+  WAVEFORM_LENGTH = 64/2*20; // Default: 64 digitization samples per block / 2 samples per waveform value * 20 blocks (value used for 2013-2016)
+  
+  WAVEFORM_CENTER = 0; // Default: 0, no offset in waveform centering
+
+  POSNU_R = 1000.;
+  POSNU_THETA=-3.1415926535/4.;
+  POSNU_PHI=0.;
+
+  ARBITRARY_EVENT_ATTENUATION = 1.0;
+  PICK_ABOVE_HEIGHT = 3000;
+
+  EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: event mode
+  //    EVENT_NUM = 10;//read in event number in EVENT_GENERATION_MODE=1, no more than 100 events
+  ANTENNA_MODE=0; //default: 0 - old antenna model information
+  IMPEDANCE_RX_VPOL=0;
+  IMPEDANCE_RX_VPOL_TOP=0;
+  IMPEDANCE_RX_HPOL=0;
+  IMPEDANCE_TX=0;
+  APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
+
+  CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.csv"
+
+  ELECTRONICS_ANTENNA_CONSISTENCY = 1; // default: 1 -- ensure antenna gain used to calculate electronics gain is consistent
+                                       //               with that used in this simulation  
+                                       // This setting is only used if DETECTOR > 3 && NOISE == 1 && CUSTOM_ELECTRONICS == 0
+ 
+  CLOCK_ANGLE=0; //Default: 0 -- Angle of polarization "on the clock".  Angle of zero is pure thetaPol, whereas 90º is pure phiPol.
 
 
 
@@ -393,6 +398,9 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "DETECTOR_STATION_LIVETIME_CONFIG") {
                   DETECTOR_STATION_LIVETIME_CONFIG = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+              }
+              else if (label == "DETECTOR_YEAR") {
+                  DETECTOR_YEAR = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "INTERACTION_MODE") {
                   INTERACTION_MODE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
@@ -726,6 +734,9 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "CUSTOM_ELECTRONICS"){
               	   CUSTOM_ELECTRONICS = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "ELECTRONICS_ANTENNA_CONSISTENCY"){
+              	   ELECTRONICS_ANTENNA_CONSISTENCY = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
           else if (label == "CLOCK_ANGLE"){
                CLOCK_ANGLE = atof(line.substr(line.find_first_of("=") + 1).c_str());

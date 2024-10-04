@@ -192,7 +192,7 @@ NFOUR=1024 // (DEFAULT=1024) Fourier space sample size. Twice the number of bins
  
 TIMESTEP=5E-10 // (DEFAULT=5E-10) sample rate for digitizer. decides the time difference between data points in wf. 
 
-ALL_ANT_V_ON = 1
+ALL_ANT_V_ON=0
   
-DEBUG_MODE_ON = 0 // 0 : off (do as usual), 1 : on (skip most of intensive computational process which don't have random generations)
+DEBUG_MODE_ON=0 // 0 : off (do as usual), 1 : on (skip most of intensive computational process which don't have random generations)
 

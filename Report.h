@@ -61,6 +61,8 @@ class Antenna_r {
         vector <double> rec_ang;     //receiving angle phi (in radians)
         vector <double> phi_rec;     // receiving phi angle,in antenna's coord system.
         vector <double> theta_rec;     // receiving theta angle, in antenna's coord system.
+        vector <double> phi_launch;     // launch phi angle,in antenna's coord system.
+        vector <double> theta_launch;     // launch theta angle, in antenna's coord system.    
         vector <double> reflect_ang; // surface reflection angle (if 100 : no reflection case)
         vector <double> Dist;        //Distance between posnu and antenna
         vector <double> L_att;        //Attenuation factor
@@ -108,8 +110,9 @@ class Antenna_r {
         vector < vector <double> > Ax;     // vector potential x component
         vector < vector <double> > Ay;
         vector < vector <double> > Az;
-        vector < vector <double> > V;   // volt signal with all factors applied (as far as we can) (from fft)
-        vector < vector <double> > V_noise;   // volt signal with all factors applied (as far as we can) (from fft)
+        vector < vector <double> > V;   // For each ray individually, volt signal with all factors applied (from fft, excludes gain offse)
+        vector <double> V_convolved;    // After convolution of all rays, volt signal with all factors applied (from Convolve_Signal, excludes gain offset)
+        vector <double> V_noise;        // noise voltage waveform with all factors applied (from Convolve_Signal, excludes gain offset)
 
         vector <int> SignalExt; // flag if actual signal exist for the ray trace solution
 
@@ -269,9 +272,7 @@ class Report {
         vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
         );
     
-    // Phased Array functions    
-    double getAverageSNR(const vector<double> & mysignal);
-    double getAverageSNR2(int raysolnum, int station_i, int trig_analysis_mode);
+    // Phased Array functions
     bool isTrigger(double eff);
     void checkPATrigger(
         int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,
@@ -287,12 +288,35 @@ class Report {
     
     void ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger);
 
-    
-        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin, vector <double> &V, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
-        
-        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin_1, int signalbin_2, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
+        // Signal+noise convolution functions
+        void Convolve_Signals(    
+            Antenna_r *antenna, int channel_number, int station_number,
+            Settings *settings1, Trigger *trigger, Detector *detector);
+        void GetAntennaSignalWF(
+            int raysol, int *n_connected_rays, int *this_signalbin, int BINSIZE, 
+            Antenna_r *antenna, vector <double> *V_signal,
+            Settings *settings1, Trigger *trigger, Detector *detector);
+        void Select_Wave_Convlv_Exchange( // Convolve the signal from 1 ray
+            vector <double> &V, 
+            int BINSIZE, vector <double> *V_signal); 
+        void Select_Wave_Convlv_Exchange( // Convolve the signal from 2 rays
+            int signalbin_1, int signalbin_2, 
+            vector <double> &V1, vector <double> &V2, 
+            int BINSIZE, vector <double> *V_signal); 
+        void Select_Wave_Convlv_Exchange( // Convolve the signal from 3 rays
+            int signalbin_0, int signalbin_1, int signalbin_2, 
+            vector <double> &V0, vector <double> &V1, vector <double> &V2, 
+            int BINSIZE, vector <double> *V_signal);
+        void GetNoiseThenConvolve(
+            Antenna_r *antenna, vector <double> V_signal,
+            int BINSIZE, int this_signalbin, int n_connected_rays, 
+            int channel_index, int station_number, 
+            Settings *settings1, Trigger *trigger, Detector *detector);
+        void GetAntennaNoiseWF(
+            int signalbin, 
+            int wf_length, int BINSIZE, int ID, int StationIndex, vector <double> *V_noise_only,
+            Settings *settings1, Trigger *trigger, Detector *detector);
 
-        void Select_Wave_Convlv_Exchange(Settings *settings1, Trigger *trigger, Detector *detector, int signalbin_0, int signalbin_1, int signalbin_2, vector <double> &V0, vector <double> &V1, vector <double> &V2, int *noise_ID, int ID, int StationIndex, vector <double> *V_with_noise);   // literally get noise waveform from trigger class and add signal voltage "V" and do convlv. convlv result will replace the value in Full_window array
 
         void Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *detector, int ID, int StationIndex); // we need to apply a gain offset to the basic waveforms.
 
@@ -310,22 +334,24 @@ class Report {
 
         void ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vmmhz, double antenna_theta, double antenna_phi);
 
-        void ApplyAntFactors_Tdomain(double AntPhase, double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, double Z_A=50, bool useInTransmitterMode=false);
+        void ApplyAntFactors_Tdomain(double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false, bool applyInverse=false);
 
-        void ApplyAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi,  double freq, double Z_A=50, bool useInTransmitterMode=false);
+        void ApplyAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi,  double freq, bool useInTransmitterMode=false, bool applyInverse=false);
     
-        void InvertAntFactors_Tdomain(double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, double antenna_theta, double antenna_phi, bool useInTransmitterMode=false);
+        void InvertAntFactors_Tdomain(double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false);
 
-        void InvertAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi);
+        void InvertAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false);
 
 
-        void ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, int gain_ch_no, Settings *settings1);
+        void ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, int gain_ch_no, Settings *settings1, bool applyInverse=false);
 
-        void ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, int gain_ch_no);
+        void ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, int gain_ch_no, Settings *settings1, bool applyInverse=false);
     
-        void InvertElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, int gain_ch_no);
+        void InvertElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, int gain_ch_no, Settings *settings1);
 
-        void InvertElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, int gain_ch_no);    
+        void InvertElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, int gain_ch_no, Settings *settings1);
+    
+        void ApplySplitterFactor(double &vm_real, double &vm_img, Detector *detector, Settings *settings1, bool applyInverse=false);
 
 
 
@@ -356,11 +382,17 @@ class Report {
 
 
         void GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_theta, double &ant_phi);
+        void GetAngleLaunch(Vector &launch_vector, double &launch_theta, double &launch_phi);
 
+        // Noise Functions
         void GetNoiseWaveforms(Settings *settings1, Detector *detector, double vhz_noise, double *vnoise);
         void GetNoiseWaveforms_ch(Settings *settings1, Detector *detector, double vhz_noise, double *vnoise, int ch);
-
         void GetNoisePhase(Settings *settings1);
+        void Prepare_Antenna_Noise(    
+            int debugmode, int ch_ID, 
+            int station_number, int string_number, int antenna_number,
+            Settings *settings1, Trigger *trigger, Detector *detector
+        );
 
         void MakeArraysforFFT(Settings *settings1, Detector *detector, int StationIndex, vector <double> &vsignal_array, double *vsignal_forfft);
         void MakeArraysforFFT(Settings *settings1, Detector *detector, int StationIndex, double *vsignal_array, double *vsignal_forfft);
@@ -387,6 +419,9 @@ class Report {
 	vector<double> getHitTimesVectorVpol(Detector *detector, int station_i=0);
 	vector<double> getHitTimesVectorHpol(Detector *detector, int station_i=0);
 
+       int getNumOfSignalledAnts(Station_r station);
+
+        double get_SNR(vector<double> signal_array, vector<double> noise_array);
 	
         vector <double> Vfft_noise_after;   // noise Vfft after get_random_rician
         vector <double> Vfft_noise_before;   // noise Vfft before get_random_rician

@@ -13,6 +13,8 @@ EXPONENT=224 // (DEFAULT=19) the energy spectrum of the neutrinos.
 ONLY_PASSED_EVENTS=0 // (DEFAULT=0) 0: runs NNU neutrinos. 1: runs until NNU_PASSED neutrinos globally trigger. 
  
 NNU=100 // (DEFAULT=100) The total number of neutrinos thrown. 
+
+ANTENNA_MODE=5
  
 NNU_PASSED=10 // (DEFAULT=10) when using ONLY_PASSED_EVENTS this determines how many events will pass the trigger. 
  
@@ -47,6 +49,8 @@ POSNU_RADIUS=3000 // (DEFAULT=3000) radius around detector in pick near mode.
 CLOCK_ANGLE=90
 
 BIREFRINGENCE=0
+
+RAY_TRACE_ICE_MODEL_PARAMS=50
  
 PICKNEARUNBIASED_R=5000 // (DEFAULT=5000) spherical radius around detector in pick near-unbiased mode. 
  
@@ -74,7 +78,7 @@ RAYSOL_RANGE=5000 // (DEFAULT=5000) distance from detector above which we do not
  
 USE_INSTALLED_TRIGGER_SETTINGS=0 // (DEFAULT=0) 0: ideal detector trigger settings. 1: use triggering as implemented in real stations (testbed only!). 
  
-TRIG_ANALYSIS_MODE=0 // (DEFAULT=0) 0: signal+noise. 1: signal only. 2: noise only 
+TRIG_ANALYSIS_MODE=1 // (DEFAULT=0) 0: signal+noise. 1: signal only. 2: noise only 
  
 POWERTHRESHOLD=-6.15 // (DEFAULT=-6.15) the trigger threshold (the closer to zero the weaker the threshold. measured in sigmas above the noise floor. 
   
@@ -194,7 +198,7 @@ NFOUR=1024 // (DEFAULT=1024) Fourier space sample size. Twice the number of bins
  
 TIMESTEP=5E-10 // (DEFAULT=5E-10) sample rate for digitizer. decides the time difference between data points in wf. 
 
-ALL_ANT_V_ON = 1
+ALL_ANT_V_ON=0
   
 DEBUG_MODE_ON = 0 // 0 : off (do as usual), 1 : on (skip most of intensive computational process which don't have random generations)
 
