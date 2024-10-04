@@ -1,0 +1,79 @@
+//////////////////////////////////////////////////////////
+//
+// Setup file for Phased Array GitHub test
+//
+//////////////////////////////////////////////////////////
+
+
+FILL_TREE_MODE=2     // default 0 : fill tree for all events,
+                     // 1 : fill tree only usable posnu events,
+                     // 2 : fill tree only trigger passed events
+
+
+DATA_SAVE_MODE=2     // 0 : save all generated information
+                     // 1 : light mode, remove most of data before final trigger
+                     //     (most of data except geometric info, final data,
+                     //      V_mimic will be removed).
+                     // 2 : light mode 2, except for physics information
+                     //     (energy, geometric info), all waveform information
+                     //     are removed (include trigger class noise waveforms)
+
+
+// Phased Array setting
+DETECTOR=5           // Phased Array DAQ
+DETECTOR_STATION=3   // Post Jan 2020, 7 ARA05 VPols connected to PA DAQ
+TIMESTEP=0.667E-9    // From Kaeli's sim and 2018 PA paper
+TRIG_SCAN_MODE=5     // Phased Array trigger mode
+number_of_stations=1 // Number of PA stations to build in hexagonal array
+DETECTOR_STATION_LIVETIME_CONFIG=4
+
+
+// Detector settings for all detectors
+ANTENNA_MODE=5       // KU Antenna Models
+NFOUR=1024           // number of total bins for FFT. has to be power of 2
+CORE_X = 10000       // X location of center of detector
+CORE_Y = 10000       // Y location of center of detector
+READGEOM=0           // 0: Do not read geometry information from the sqlite file
+
+
+// Event generation
+EVENT_GENERATION_MODE=0 // Create Event List
+RANDOM_MODE=0           // Will use seed specified in settings1->SEED
+SEED=1030
+
+
+// ICE
+NOFZ=1               // 1=depth dependent index of refraction,0=off
+RAY_TRACE_ICE_MODEL_PARAMS=40 // UNL Modified (PA model).
+
+
+// Major Neutrino Settings
+NNU=500              // number of neutrino events
+EXPONENT=113         // Equal number of events per energy decade
+EXPONENT_MAX=21.0    // maximum log10(eV) of Neutrino energy spectrum
+POSNU_RADIUS=5000    // Max neutrino generation distance from detector
+RAYSOL_RANGE=9000    // Max distance from detector to solve rays
+MAX_POSNU_DEPTH=2800 // Max depth of neutrinos
+
+
+//ADDED PRIMARY AND SHOWER FROM A23 SETTINGS: (inherited from Kaeli)
+NU_NUBAR_SELECT_MODE=3 // random
+SELECT_FLAVOR=0        // random 1:1:1 ratio
+SELECT_CURRENT=2       // rndom nc or cc
+SECONDARIES=1          // enable secondaries
+TAUDECAY=1             // account for tau decay in secondaries
+SHOWER_MODE=2          // both EM and hadronic shower in t-domain signal
+INTERACTION_MODE=1     // Veff cylinder mode
+SIGMA_SELECT=0         // cross section(0=nominal, 1=upper bound, 2=lower bound)
+
+
+// NOISE
+TRIG_ANALYSIS_MODE=0           // 0=signal+noise, 1=signal only, 2=noise only
+NOISE=1                        // Use Rayleigh Distribution
+NOISE_EVENTS=1                 // number of stored noise events
+NOISE_WAVEFORM_GENERATE_MODE=0 // generate new noise waveforms for each events
+NOISE_CHANNEL_MODE=1
+  // if using same noise temp for all chs (0, default), 
+  // using diff temp for all chs (1),
+  // using diff temp for first 8 chs and share same temp for other chs (2),
+  // using same noise temp but allowing to use noise

@@ -6148,6 +6148,12 @@ void Report::checkPATrigger(
     }
     bool hasTriggered = false;
 
+    // If the antenna we use to trigger the PA doesn't have any ray solutions, 
+    //   do not perform the trigger check.
+    if (stations[i].strings[0].antennas[8].ray_sol_cnt == 0){
+        return;
+    }
+
     //cout << "time to trigger " << endl;
     while(raySolNum < stations[i].strings[0].antennas[8].SignalBin.size()){
 
