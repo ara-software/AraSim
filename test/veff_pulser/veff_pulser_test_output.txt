@@ -1,0 +1,980 @@
+
+	Default values!
+NNU : 100
+ICE_MODEL : 0
+NOFZ : 1
+CONSTANTICETHICKNESS : 0
+FIXEDELEVATION : 0
+MOOREBAY : 0
+EXPONENT : 19
+DETECTOR : 1
+setupfile : test/veff_pulser/setup_variablePsi.txt
+run number : 0
+outputdir : outputs/.
+Read in READGEOM
+Read test/veff_pulser/setup_variablePsi.txt file!
+DETECTOR is set to 4
+Setting READGEOM to 1
+Setting number_of_stations to 1
+
+	New values!
+NNU : 10
+ICE_MODEL : 0
+NOFZ : 1
+CONSTANTICETHICKNESS : 0
+FIXEDELEVATION : 0
+MOOREBAY : 0
+EXPONENT : 224
+DETECTOR : 4
+POSNU_RADIUS : 3000
+EVENT_GENERATION_MODE: 0
+first random : 0.809467
+
+Surface at (log:0, lat:0) : 6.35973e+06
+SurfaceAboveGeoid at (log:0, lat:0) : 2977
+read stations_per_side
+read station_spacting
+read core_x
+read core_y
+read R_string
+read z_max
+read z_btw
+
+	Error, station number not match !
+InstalledStations[StationID].nChannels is 20
+Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
+Opening default 2013-2017 SQLite tables for all stations 
+Borehole ch: 0 inserted station: 0 station: 2 string: 3 ant: 2 Type: 0
+Borehole ch: 1 inserted station: 0 station: 2 string: 0 ant: 2 Type: 0
+Borehole ch: 2 inserted station: 0 station: 2 string: 1 ant: 2 Type: 0
+Borehole ch: 3 inserted station: 0 station: 2 string: 2 ant: 2 Type: 0
+Borehole ch: 4 inserted station: 0 station: 2 string: 3 ant: 0 Type: 0
+Borehole ch: 5 inserted station: 0 station: 2 string: 0 ant: 0 Type: 0
+Borehole ch: 6 inserted station: 0 station: 2 string: 1 ant: 0 Type: 0
+Borehole ch: 7 inserted station: 0 station: 2 string: 2 ant: 0 Type: 0
+Borehole ch: 8 inserted station: 0 station: 2 string: 3 ant: 3 Type: 1
+Borehole ch: 9 inserted station: 0 station: 2 string: 0 ant: 3 Type: 1
+Borehole ch: 10 inserted station: 0 station: 2 string: 1 ant: 3 Type: 1
+Borehole ch: 11 inserted station: 0 station: 2 string: 2 ant: 3 Type: 1
+Borehole ch: 12 inserted station: 0 station: 2 string: 3 ant: 1 Type: 1
+Borehole ch: 13 inserted station: 0 station: 2 string: 0 ant: 1 Type: 1
+Borehole ch: 14 inserted station: 0 station: 2 string: 1 ant: 1 Type: 1
+Borehole ch: 15 inserted station: 0 station: 2 string: 2 ant: 1 Type: 1
+No string/antenna matches the channel number
+No string/antenna matches the channel number
+No string/antenna matches the channel number
+No string/antenna matches the channel number
+Imported Station info
+DETECTOR=4 imported station geom info
+DetectorStation2:string:antenna:X:Y:Z:chno :: 0 : 0 : 10004.9 : 9989.6 : -189.4 : 	6
+DetectorStation2:string:antenna:X:Y:Z:chno :: 0 : 1 : 10004.9 : 9989.6 : -186.115 : 	14
+DetectorStation2:string:antenna:X:Y:Z:chno :: 0 : 2 : 10004.9 : 9989.6 : -170.347 : 	2
+DetectorStation2:string:antenna:X:Y:Z:chno :: 0 : 3 : 10004.9 : 9989.6 : -167.428 : 	10
+DetectorStation2:string:antenna:X:Y:Z:chno :: 1 : 0 : 9997.42 : 10009.4 : -191.242 : 	7
+DetectorStation2:string:antenna:X:Y:Z:chno :: 1 : 1 : 9997.42 : 10009.4 : -187.522 : 	15
+DetectorStation2:string:antenna:X:Y:Z:chno :: 1 : 2 : 9997.42 : 10009.4 : -171.589 : 	3
+DetectorStation2:string:antenna:X:Y:Z:chno :: 1 : 3 : 9997.42 : 10009.4 : -168.468 : 	11
+DetectorStation2:string:antenna:X:Y:Z:chno :: 2 : 0 : 9992.16 : 9995.94 : -194.266 : 	8
+DetectorStation2:string:antenna:X:Y:Z:chno :: 2 : 1 : 9992.16 : 9995.94 : -190.981 : 	16
+DetectorStation2:string:antenna:X:Y:Z:chno :: 2 : 2 : 9992.16 : 9995.94 : -175.377 : 	4
+DetectorStation2:string:antenna:X:Y:Z:chno :: 2 : 3 : 9992.16 : 9995.94 : -172.42 : 	12
+DetectorStation2:string:antenna:X:Y:Z:chno :: 3 : 0 : 10010.6 : 10002.3 : -189.502 : 	5
+DetectorStation2:string:antenna:X:Y:Z:chno :: 3 : 1 : 10010.6 : 10002.3 : -186.546 : 	13
+DetectorStation2:string:antenna:X:Y:Z:chno :: 3 : 2 : 10010.6 : 10002.3 : -170.247 : 	1
+DetectorStation2:string:antenna:X:Y:Z:chno :: 3 : 3 : 10010.6 : 10002.3 : -167.492 : 	9
+after FlattoEarth, station0 location
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 0 : 0 : 10004.9 : 9989.6 : -189.4 : 14139.5 : 1.58419 : 0.784635 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 0 : 1 : 10004.9 : 9989.6 : -186.115 : 14139.4 : 1.58396 : 0.784635 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 0 : 2 : 10004.9 : 9989.6 : -170.347 : 14139.2 : 1.58284 : 0.784635 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 0 : 3 : 10004.9 : 9989.6 : -167.428 : 14139.2 : 1.58264 : 0.784635 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 1 : 0 : 9997.42 : 10009.4 : -191.242 : 14148.2 : 1.58431 : 0.785996 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 1 : 1 : 9997.42 : 10009.4 : -187.522 : 14148.2 : 1.58405 : 0.785996 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 1 : 2 : 9997.42 : 10009.4 : -171.589 : 14148 : 1.58292 : 0.785996 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 1 : 3 : 9997.42 : 10009.4 : -168.468 : 14147.9 : 1.5827 : 0.785996 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 2 : 0 : 9992.16 : 9995.94 : -194.266 : 14135.1 : 1.58454 : 0.785587 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 2 : 1 : 9992.16 : 9995.94 : -190.981 : 14135 : 1.58431 : 0.785587 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 2 : 2 : 9992.16 : 9995.94 : -175.377 : 14134.8 : 1.5832 : 0.785587 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 2 : 3 : 9992.16 : 9995.94 : -172.42 : 14134.8 : 1.58299 : 0.785587 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 3 : 0 : 10010.6 : 10002.3 : -189.502 : 14152.5 : 1.58419 : 0.784986 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 3 : 1 : 10010.6 : 10002.3 : -186.546 : 14152.5 : 1.58398 : 0.784986 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 3 : 2 : 10010.6 : 10002.3 : -170.247 : 14152.3 : 1.58283 : 0.784986 : 6.37813e+06 : 
+Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 3 : 3 : 10010.6 : 10002.3 : -167.492 : 14152.2 : 1.58263 : 0.784985 : 6.37813e+06 : 
+N = 60
+freq_step = 60
+N = 60
+freq_step = 60
+N = 60
+freq_step = 60
+N = 60
+freq_step = 60
+In ReadNoiseFigure
+The number of channels: 16
+DATA_BIN_SIZE: 16384 TIMESTEP: 5e-10 df_fft: 122070
+number of f bins: 8192
+start read elect chain
+ Reading in situ ARA electronics response for this station and configuration from file:
+./data/gain/In_situ_Electronics_A2_C6.csv
+WARNING - Antenna model used to calculate in situ gain model may not match that used in this simulation!
+	 To ensure consistency load an in-situ noise model with NOISE = 1.
+done read elect chain
+ Reading trigger formation values for this station and configuration from file:
+./data/trigger/delays_masking_A2_C6.csv
+Sharesurface: 0 : 0 : 0 : 10004.4 : 9989.17 : 6.35944e+06 : 
+Sharesurface: 0 : 0 : 1 : 10004.4 : 9989.17 : 6.35945e+06 : 
+Sharesurface: 0 : 0 : 2 : 10004.4 : 9989.2 : 6.35946e+06 : 
+Sharesurface: 0 : 0 : 3 : 10004.5 : 9989.2 : 6.35946e+06 : 
+Sharesurface: 0 : 1 : 0 : 9996.98 : 10008.9 : 6.35944e+06 : 
+Sharesurface: 0 : 1 : 1 : 9996.99 : 10008.9 : 6.35944e+06 : 
+Sharesurface: 0 : 1 : 2 : 9997.01 : 10009 : 6.35946e+06 : 
+Sharesurface: 0 : 1 : 3 : 9997.02 : 10009 : 6.35946e+06 : 
+Sharesurface: 0 : 2 : 0 : 9991.72 : 9995.5 : 6.35944e+06 : 
+Sharesurface: 0 : 2 : 1 : 9991.72 : 9995.51 : 6.35944e+06 : 
+Sharesurface: 0 : 2 : 2 : 9991.75 : 9995.53 : 6.35946e+06 : 
+Sharesurface: 0 : 2 : 3 : 9991.75 : 9995.54 : 6.35946e+06 : 
+Sharesurface: 0 : 3 : 0 : 10010.2 : 10001.9 : 6.35944e+06 : 
+Sharesurface: 0 : 3 : 1 : 10010.2 : 10001.9 : 6.35945e+06 : 
+Sharesurface: 0 : 3 : 2 : 10010.2 : 10001.9 : 6.35946e+06 : 
+Sharesurface: 0 : 3 : 3 : 10010.2 : 10001.9 : 6.35946e+06 : 
+end calling detector
+called Efficiencies
+We are using Kotera2010_max.dat as the flux data.
+total lines in the file are 11
+called Spectra
+called Ray
+called Counting
+called Primaries
+called Event
+called Evt
+assign AraFile, AraTrees
+branch detector
+branch icemodel
+branch trigger
+branch settings
+branch spectra
+branch Evt
+branch report
+finish tree assign
+called RaySolver
+Make output file that is readable by AraRoot
+Error in <TStreamerInfo::Build>: AraEventCalibrator, discarding: unsigned short* fAtriPeds, no [dimension]
+
+will call secondaries
+Reading in data on secondary interactions.
+Finished reading secondary interaction data.
+will call signal
+Building the Param RE Tterm tables...
+Finished building the Param RE Tterm tables.
+finish calling secondaries and signal
+Preparing Noise
+Generating noise waveforms
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+100% done
+Calculating noise waveforms for RMS
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+100% done
+From pure noise waveforms, diode responses
+mean, rms diode are -4.77283e-15 9.47386e-14
+rms voltage is 0.0405678
+ DATA_BIN_SIZE : 16384
+powerthreshold : -6.15
+begin looping events!!
+Calpulser_on: 0
+number of stations : 1
+total number of antennas : 16
+station[0].strings[0].antennas[0] no_ch:1
+station[0].strings[0].antennas[1] no_ch:2
+station[0].strings[0].antennas[2] no_ch:3
+station[0].strings[0].antennas[3] no_ch:4
+station[0].strings[1].antennas[0] no_ch:5
+station[0].strings[1].antennas[1] no_ch:6
+station[0].strings[1].antennas[2] no_ch:7
+station[0].strings[1].antennas[3] no_ch:8
+station[0].strings[2].antennas[0] no_ch:9
+station[0].strings[2].antennas[1] no_ch:10
+station[0].strings[2].antennas[2] no_ch:11
+station[0].strings[2].antennas[3] no_ch:12
+station[0].strings[3].antennas[0] no_ch:13
+station[0].strings[3].antennas[1] no_ch:14
+station[0].strings[3].antennas[2] no_ch:15
+station[0].strings[3].antennas[3] no_ch:16
+*Thrown 0
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+
+trigger passed at bin 2136  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 13 ViewAngle : 67.0586 LikelyTrigSignal : 0
+trigger passed at bin 2167  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 15 ViewAngle : 66.6135 LikelyTrigSignal : 0
+trigger passed at bin 2223  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 10 ViewAngle : 66.7716 LikelyTrigSignal : 0
+Making useful event
+StationID: 2
+StationID_AraRoot: 2
+***NOTE***: Year/Unixtime argument is 0. If you want the correct channel mappings for ARA03 & ARA01 for 2018 & after please specify either: 
+a) The right year when you call AraGeomTool::getStationInfo(3,2017) where 3 is stationID and 2017 is DB year
+b) The Unixtime of any event at the chosen run when you call AraGeomTool::getStationInfo(3,1000000000) where 3 is stationID and 1000000000 is unixtime
+OR
+c) Call UsefulAtriStationEvent *realAtriEvPtr = new UsefulAtriStationEvent(rawAtriEvPtr, AraCalType::kLatestCalib); ***BEFORE*** 
+AraGeomTool::getStationInfo(3,2017)
+Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
+Opening default 2013-2017 SQLite tables for all stations 
+
+Global_Pass : 2223 evt : 0 added weight : 1
+*512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+
+trigger passed at bin 2137  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 4 ViewAngle : 67.0586 LikelyTrigSignal : 0
+trigger passed at bin 2169  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 9 ViewAngle : 66.6135 LikelyTrigSignal : 0
+trigger passed at bin 2230  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 8 ViewAngle : 66.7716 LikelyTrigSignal : 0
+Making useful event
+StationID: 2
+StationID_AraRoot: 2
+
+Global_Pass : 2230 evt : 1 added weight : 1
+*512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+
+trigger passed at bin 2135  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 5 ViewAngle : 67.0586 LikelyTrigSignal : 0
+trigger passed at bin 2167  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 6 ViewAngle : 66.6135 LikelyTrigSignal : 0
+trigger passed at bin 2217  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 3 ViewAngle : 66.7716 LikelyTrigSignal : 0
+Making useful event
+StationID: 2
+StationID_AraRoot: 2
+
+Global_Pass : 2217 evt : 2 added weight : 1
+*512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+
+trigger passed at bin 2119  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 7 ViewAngle : 67.0586 LikelyTrigSignal : 0
+trigger passed at bin 2167  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 15 ViewAngle : 66.6135 LikelyTrigSignal : 0
+trigger passed at bin 2231  passed ch : 13 (1type) Direct dist btw posnu : 2576.36 noiseID : 10 ViewAngle : 67.183 LikelyTrigSignal : 0
+Making useful event
+StationID: 2
+StationID_AraRoot: 2
+
+Global_Pass : 2231 evt : 3 added weight : 1
+*512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+
+trigger passed at bin 2113  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 9 ViewAngle : 67.0586 LikelyTrigSignal : 0
+trigger passed at bin 2167  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 15 ViewAngle : 66.6135 LikelyTrigSignal : 0
+trigger passed at bin 2227  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 3 ViewAngle : 66.7716 LikelyTrigSignal : 0
+Making useful event
+StationID: 2
+StationID_AraRoot: 2
+
+Global_Pass : 2227 evt : 4 added weight : 1
+*512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+
+trigger passed at bin 2134  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 7 ViewAngle : 67.0586 LikelyTrigSignal : 0
+trigger passed at bin 2164  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 5 ViewAngle : 66.6135 LikelyTrigSignal : 0
+trigger passed at bin 2235  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 15 ViewAngle : 66.7716 LikelyTrigSignal : 0
+Making useful event
+StationID: 2
+StationID_AraRoot: 2
+
+Global_Pass : 2235 evt : 5 added weight : 1
+*512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+
+trigger passed at bin 2134  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 4 ViewAngle : 67.0586 LikelyTrigSignal : 0
+trigger passed at bin 2168  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 13 ViewAngle : 66.6135 LikelyTrigSignal : 0
+trigger passed at bin 2227  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 3 ViewAngle : 66.7716 LikelyTrigSignal : 0
+Making useful event
+StationID: 2
+StationID_AraRoot: 2
+
+Global_Pass : 2227 evt : 6 added weight : 1
+*512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+
+trigger passed at bin 2135  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 10 ViewAngle : 67.0586 LikelyTrigSignal : 0
+trigger passed at bin 2162  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 12 ViewAngle : 66.6135 LikelyTrigSignal : 0
+trigger passed at bin 2220  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 0 ViewAngle : 66.7716 LikelyTrigSignal : 0
+Making useful event
+StationID: 2
+StationID_AraRoot: 2
+
+Global_Pass : 2220 evt : 7 added weight : 1
+*512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+
+trigger passed at bin 2121  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 14 ViewAngle : 67.0586 LikelyTrigSignal : 0
+trigger passed at bin 2158  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 12 ViewAngle : 66.6135 LikelyTrigSignal : 0
+trigger passed at bin 2231  passed ch : 13 (1type) Direct dist btw posnu : 2576.36 noiseID : 3 ViewAngle : 67.183 LikelyTrigSignal : 0
+Making useful event
+StationID: 2
+StationID_AraRoot: 2
+
+Global_Pass : 2231 evt : 8 added weight : 1
+*512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+512
+99
+
+trigger passed at bin 2136  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 9 ViewAngle : 67.0586 LikelyTrigSignal : 0
+trigger passed at bin 2166  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 13 ViewAngle : 66.6135 LikelyTrigSignal : 0
+trigger passed at bin 2223  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 6 ViewAngle : 66.7716 LikelyTrigSignal : 0
+Making useful event
+StationID: 2
+StationID_AraRoot: 2
+
+Global_Pass : 2223 evt : 9 added weight : 1
+ end loop
+Total Events Thrown: 10
+Total_Global_Pass : 10
+Total_Weight : 10
+Total_Probability : -80.3166
+weight bin values : 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+max_dt : 6.0702e-07
+rmsdiode= 9.47386e-14
+Info in <TCanvas::Print>: pdf file sigmaCrossSection.pdf has been created
+outputdir= outputs/.
+test is 0

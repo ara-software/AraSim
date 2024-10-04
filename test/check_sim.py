@@ -1,12 +1,13 @@
 import sys
 
-'''
-	Expected number of global events passing
-	And summed weight passing
-'''
-expected_global_pass = 2
-expected_total_weight = 5.09879e-11
-expected_total_weight_sigma = 0.0001
+"""
+	Interpret command-line arguments
+"""
+
+fin = sys.argv[1]
+expected_global_pass = int(sys.argv[2])
+expected_total_weight = float(sys.argv[3])
+expected_total_weight_sigma = float(sys.argv[4])
 
 
 '''
@@ -31,7 +32,6 @@ def contains_nan(search_string):
 '''
 	1: check if the output file exist at all
 '''
-fin = sys.argv[1]
 try:
 	with open(fin, 'r') as read_obj:
 		read_obj.close()

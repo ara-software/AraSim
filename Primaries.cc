@@ -1464,7 +1464,8 @@ Interaction::Interaction (Settings *settings1, Detector *detector, IceModel *ant
     Initialize ();
 
 
-    if (settings1->EVENT_TYPE == 10){
+    // Overwrite weights for arbitrary events and pulser events
+    if (settings1->EVENT_TYPE == 10 || settings1->EVENT_TYPE == 11 or settings1->EVENT_TYPE == 12){
       weight=1.;
     }
 
