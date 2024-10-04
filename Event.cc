@@ -98,7 +98,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
             if (interaction_cnt == 1){
                 interactions_birth_time.clear();
                 interactions_birth_time.push_back(0.0);
-                first_vertex_idx == inu_thrown;
+                first_vertex_idx = inu_thrown;
             }
             else{
                 double tmp_birth_time = (sec1->sec_nnu_interaction_distances(first_vertex_idx, inu_thrown, settings1)/CLIGHT) * 1e9;
