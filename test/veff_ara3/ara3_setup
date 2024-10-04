@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 //
-// Setup file for 20231122 EVENT_TYPE=20 sims/testing
+// Setup file for ARA 03 GitHub test
 //
 //////////////////////////////////////////////////////////
 
@@ -20,10 +20,10 @@ DATA_SAVE_MODE=2     // 0 : save all generated information
                      //     are removed (include trigger class noise waveforms)
 
 
-// Phased Array setting
+// Detector
 DETECTOR=4           // ARA DAQ
 DETECTOR_STATION=3   // Station 3
-number_of_stations=1 // Number of PA stations to build in hexagonal array
+number_of_stations=1 // Number of stations to build in hexagonal array
 DETECTOR_STATION_LIVETIME_CONFIG=2
 
 
