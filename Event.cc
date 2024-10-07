@@ -206,6 +206,11 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         Nu_Interaction.push_back(*Nu_temp);  // for the first interaction
         // test_report.push_back(*report_tmp);
 
+        // Initialize particle birth time to 0 (only relevant for multi-interaction events)
+        interactions_birth_time.clear();
+        interactions_birth_time.push_back(0.0);
+        first_vertex_idx = inu_thrown;
+
         delete Nu_temp;
 
         // for multiple interactions...
@@ -254,6 +259,11 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         
         Nu_Interaction.push_back(*Nu_temp);  // for the first interaction
         // test_report.push_back(*report_tmp);
+
+        // Initialize particle birth time to 0 (only relevant for multi-interaction events)
+        interactions_birth_time.clear();
+        interactions_birth_time.push_back(0.0);
+        first_vertex_idx = inu_thrown;
 
         delete Nu_temp;
 
