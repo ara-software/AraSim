@@ -481,34 +481,11 @@ void Report::clear_useless(Settings *settings1) {   // to reduce the size of out
 
 void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Birefringence *birefringence, Settings *settings1, Trigger *trigger, int evt) {
 
-
-    int ray_sol_cnt;
-    vector<vector < double>> ray_output;
-    double noise_rms;
-
-    double mag; // magnification factor. it can vary in case of plane / spherical wave
-    double fresnel; // fresnel factor
-    double tmp; // for non use return values
-    double Pol_factorV;
-    double Pol_factorH;
-    double phi_rec;
-    double theta_rec;
-
-    double antenna_theta, antenna_phi, launch_theta, launch_phi;  // values needed for apply antenna gain factor and prepare fft, trigger
-    double heff_Tx, Tx_theta, Tx_phi, heff_Tx_lastbin; // Values for transmitting antenna mode.
-
-    double dF_NFOUR = 1. / ((double)(settings1->NFOUR / 2) *settings1->TIMESTEP);   // in Hz
-
-    int waveformLength = settings1->WAVEFORM_LENGTH;
-    int waveformCenter = settings1->WAVEFORM_CENTER;
-
     int check_toomuch_Tdelay;   // return value from MixSignalNoise_Tdelay
 
     double min_arrival_time_tmp;    // min arrival time between all antennas, raysolves
     double max_arrival_time_tmp;    // max arrival time between all antennas, raysolves
     double max_PeakV_tmp;   // max PeakV of all antennas in the station
-
-    int trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
 
     RandomTshift = gRandom->Rndm();
 
@@ -517,10 +494,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
     if (settings1->DEBUG_MODE_ON == 1 && evt < settings1->DEBUG_SKIP_EVT) debugmode = 1;
     else if (settings1->DEBUG_MODE_ON == 1 && evt >= settings1->DEBUG_SKIP_EVT) cout << evt << " " << endl;
     // skip most of computation intensive processes if debugmode == 1
-
-    int N_pass; // number of trigger passed channels (antennas)
-    int N_pass_V;   // number of trigger passed channels (Vpol antennas)
-    int N_pass_H;   // number of trigger passed channels (Hpol antennas)
 
     for (int i = 0; i < detector->params.number_of_stations; i++)
     {
@@ -552,6 +525,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                     // if not, skip (set something like Sol_No = 0;
                     // if solution exist, calculate view angle and calculate TaperVmMHz
 
+                    int ray_sol_cnt = 0;
+                    vector<vector < double>> ray_output;
+
                     // added one more condition to run raysolver (direct distance is less than 3km)
 
                     if (  event->Nu_Interaction[interaction_idx].pickposnu && 
@@ -564,8 +540,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             event->Nu_Interaction[interaction_idx].posnu, detector->stations[i].strings[j].antennas[k], 
                             icemodel, ray_output, settings1, RayStep
                         );   // solve ray between source and antenna
-
-                        ray_sol_cnt = 0;
 
                         if (raysolver->solution_toggle) { // if there are solution from raysolver
 
@@ -627,9 +601,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
         stations[i].max_PeakV = max_PeakV_tmp;
     }   // for number_of_stations
 
-    // clear ray_output info
-    ray_output.clear();
-
     // do only if it's not in debugmode
     if (debugmode == 0)
     {
@@ -643,9 +614,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
     for (int i = 0; i < detector->params.number_of_stations; i++)
     {
 
-        N_pass = 0;
-        N_pass_V = 0;
-        N_pass_H = 0;
+        int N_pass = 0;
+        int N_pass_V = 0;
+        int N_pass_H = 0;
 
         stations[i].Global_Pass  = 0;
 
@@ -827,6 +798,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                 trig_search_init = trigger->maxt_diode_bin + settings1->NFOUR;  // give some time shift for mimicing force trig events
                 trig_i = trig_search_init;
+
+                int trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  // coincidence window bin for trigger
 
                 // save trig search bin info default (if no global trig, this value saved)
                 stations[i].total_trig_search_bin = max_total_bin - trig_search_init;
@@ -1015,6 +988,9 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                             {
                                 int string_i = detector->getStringfromArbAntID(i, ch_loop);
                                 int antenna_i = detector->getAntennafromArbAntID(i, ch_loop);
+
+                                int waveformLength = settings1->WAVEFORM_LENGTH;
+                                int waveformCenter = settings1->WAVEFORM_CENTER;
                                 
                                 stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0] = -1;  // no likely init
                                 stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1] = -1;  // no likely init
