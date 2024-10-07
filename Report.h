@@ -202,7 +202,8 @@ class CircularBuffer{
         double last_value; // value leaving buffer
         int addToNPass; // number of values above pthresh inside buffer
 
-        CircularBuffer(int size, double threshold, int scan_mode) : N(size), pthresh(threshold), mode(scan_mode) {i=0; best_value=0; temp_value=0; last_value=0; addToNPass=0; epsilon=1e-6; buffer=new double[N]; for(int j=0;j<N;j++) buffer[j]=0;}
+        CircularBuffer(int size, double threshold, int scan_mode) : mode(scan_mode), N(size), pthresh(threshold) 
+          { i=0; best_value=0; temp_value=0; last_value=0; addToNPass=0; epsilon=1e-6; buffer=new double[N]; for(int j=0;j<N;j++) buffer[j]=0; }
         ~CircularBuffer(){ delete [] buffer; }
 
         int add(double input_value);
