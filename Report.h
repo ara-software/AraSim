@@ -220,19 +220,9 @@ class Report {
     private:
         vector <double> noise_phase;    // random noise phase generated in GetNoisePhase()
 
-
-        // variables we need for trigger
-           // test selecting noise waveform
-
-           int noise_pass_nogo; // index for checking if any same noise_ID is used in different chs.
+           
            int N_noise;     // needed number of noise waveforms (most cases, we will need only 1)
            int noise_ID[5];    // selected noise waveform ID (we should not need 5 noise waveforms, but just in case)
-           int ch_ID;   // channel ID
-           //double Full_window[detector->params.number_of_strings_station * detector->params.number_of_antennas_string][settings1->DATA_BIN_SIZE];    // entire window for trigger check (diode convlv results for all antennas in a station)
-           //vector < vector <double> > Full_window;  // entire window for trigger check (diode convlv results for all antennas in a station)
-           int max_total_bin;   // to save time, use only necessary number of bins
-           int remain_bin;      // the bin number for not using entire DATA_BIN_SIZE array
-           vector < vector <int> > signal_bin;      // the center of bin where signal should locate
 
             void triggerCheck_ScanMode0(
                 int trig_search_init, int max_total_bin, int trig_window_bin,

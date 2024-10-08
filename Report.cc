@@ -64,7 +64,6 @@ void Report::delete_all() {
     Vfft_noise_before.clear();
 
     noise_phase.clear();    // random noise phase generated in GetNoisePhase()
-    signal_bin.clear();      // the center of bin where signal should locate
     Passed_chs.clear();
 
 
@@ -464,7 +463,6 @@ void Report::clear_useless(Settings *settings1) {   // to reduce the size of out
 
         // also clear all vector info to reduce output root file size
         noise_phase.clear();
-        signal_bin.clear();
         Passed_chs.clear();
         Vfft_noise_after.clear();
         Vfft_noise_before.clear();
@@ -668,7 +666,8 @@ void Report::BuildAndTriggerOnWaveforms(
             // if there is any ray_sol (don't check trigger if there is no ray_sol at all)
 
             // calculate total number of bins we need to do trigger check
-            max_total_bin = (stations[i].max_arrival_time - stations[i].min_arrival_time) / settings1->TIMESTEP + settings1->NFOUR *3 + trigger->maxt_diode_bin;    // make more time
+            // to save time, use only necessary number of bins
+            int max_total_bin = (stations[i].max_arrival_time - stations[i].min_arrival_time) / settings1->TIMESTEP + settings1->NFOUR *3 + trigger->maxt_diode_bin;    // make more time
 
             //stations[i].max_total_bin = max_total_bin;
 
@@ -729,8 +728,7 @@ void Report::BuildAndTriggerOnWaveforms(
             // mostly N_noise should be "1"
 
             // now, check the number of bins we need for portion of noise waveforms
-            remain_bin = max_total_bin % settings1->DATA_BIN_SIZE;
-            ch_ID = 0;
+            int ch_ID = 0;
             int ants_with_sufficient_SNR = 0;
             for (int j = 0; j < detector->stations[i].strings.size(); j++)
             {
@@ -3012,7 +3010,7 @@ void Report::Convolve_Signals(
     // init : bin + maxt_diode_bin, fin : bin + NFOUR/2
 
     // Clear old signals
-    signal_bin.clear();
+    vector < vector <int> > signal_bin; // the center of bin where signal should locate
     signal_bin.resize(event->Nu_Interaction.size());
 
     // Determine the bin (index) where the signal will arrive in output waveforms
@@ -4307,7 +4305,7 @@ void Report::Prepare_Antenna_Noise(
 
             // get random noise_ID and check if there are same noise_ID in different ch.
             // if there's same noise_ID, get noise_ID again until no noise_ID are same between chs
-            noise_pass_nogo = 1;
+            int noise_pass_nogo = 1; // index for checking if any same noise_ID is used in different chs.
             while (noise_pass_nogo)
             {
                 noise_ID[l] = (int)(settings1->NOISE_EVENTS *gRandom->Rndm());
