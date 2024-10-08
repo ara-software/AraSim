@@ -834,6 +834,43 @@ void Report::BuildAndTriggerOnWaveforms(
 
     }   // if there is any ray_sol in the station
 
+    // Check if there's additional waveform to trigger on. Save this event and rerun trigger if so.
+    int next_trig_search_init = -1;
+    bool analyze_more_waveform = false;
+    for (int string=0; string<stations[station_index].strings.size(); string++){
+        for (int antenna=0; antenna<stations[station_index].strings[string].antennas.size(); antenna++){
+
+            // Calculate the next bin that the station would check for trigger
+            int this_next_trig_search_init = (
+                stations[station_index].Global_Pass // trigger bin
+                + stations[station_index].strings[string].antennas[antenna].global_trig_bin // end of the readout window
+                + settings1->DEADTIME/settings1->TIMESTEP // deadtime in units of bins
+            ); 
+
+            // Save the largest next_trig_search_init for this station                   
+            if (this_next_trig_search_init > next_trig_search_init) {
+                next_trig_search_init = this_next_trig_search_init;
+            }
+
+            // If there is signal that exists beyond what would be the next trig_search_init, 
+            //   save that we need to analyze more signal.
+            if ( stations[station_index].strings[string].antennas[antenna].V_convolved.size() > this_next_trig_search_init ){
+                analyze_more_waveform = true;
+            }
+
+        }
+    }
+    if (analyze_more_waveform) {
+        
+        // Save the results from this trigger check
+
+        // Prepare data for the next trigger check
+
+        // Rerun the trigger check on the next piece of signal
+        BuildAndTriggerOnWaveforms(debugmode, station_index, evt, next_trig_search_init, detector, event, settings1, trigger);
+
+    }
+
 }
 
 void Antenna_r::Find_Likely_Sol(){
