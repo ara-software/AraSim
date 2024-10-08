@@ -638,10 +638,6 @@ void Report::BuildAndTriggerOnWaveforms(
     for (int i = 0; i < detector->params.number_of_stations; i++)
     {
 
-        int N_pass = 0;
-        int N_pass_V = 0;
-        int N_pass_H = 0;
-
         stations[i].Global_Pass  = 0;
 
         // If we're looking to trigger on signal, check that there 
