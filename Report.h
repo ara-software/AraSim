@@ -32,6 +32,7 @@ class Antenna;
 class Event;
 class RaySolver;
 class Signal;
+class ARA_station;
 class IceModel;
 class Interaction;
 class Settings;
@@ -233,13 +234,16 @@ class Report {
            int remain_bin;      // the bin number for not using entire DATA_BIN_SIZE array
            vector < vector <int> > signal_bin;      // the center of bin where signal should locate
 
-           int triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode=1);
-// 	   int triggerCheckLoopScan();
-// 	   int triggerCheckLoopScanNumbers();
-	   
-           int saveTriggeredEvent(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int last_trig_bin);
+            void triggerCheck_ScanMode0(
+                int trig_search_init, int max_total_bin, int trig_window_bin,
+                int n_scanned_channels, int station_index,
+                Detector *detector, Event *event, Settings *settings1, Trigger *trigger
+            );
+            int triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode=1);
 
-           vector < vector < vector <double> > > RayStep;
+            int saveTriggeredEvent(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int last_trig_bin);
+
+            vector < vector < vector <double> > > RayStep;
 
 
     public:
