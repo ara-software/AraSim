@@ -294,6 +294,8 @@ outputdir="outputs"; // directory where outputs go
   
   WAVEFORM_CENTER = 0; // Default: 0, no offset in waveform centering
 
+  DEADTIME = 0;
+
   POSNU_R = 1000.;
   POSNU_THETA=-3.1415926535/4.;
   POSNU_PHI=0.;
@@ -692,6 +694,9 @@ void Settings::ReadFile(string setupfile) {
 	      }
 	      else if (label == "WAVEFORM_CENTER") {
 		WAVEFORM_CENTER = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
+	      else if (label == "DEADTIME") {
+		    DEADTIME = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
 	      }
 	      else if (label == "POSNU_R") {
 		POSNU_R = atof( line.substr(line.find_first_of("=") + 1).c_str() );
