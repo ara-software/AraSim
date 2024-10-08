@@ -1272,7 +1272,7 @@ void Antenna_r::Find_Likely_Sol(){
 void Antenna_r::Get_Brightest_Interaction(int (*brightest_event)[2]){
     *brightest_event[0] = -1;
     *brightest_event[1] = -1;
-    double maxV = 0; 
+    double maxV = -1; 
     for (int interaction_idx=0; interaction_idx<V.size(); interaction_idx++){
         for (int ray=0; ray<V[interaction_idx].size(); ray++){
             double this_maxV = Tools::getMaxAbsoluteMagnitude(V[interaction_idx][ray]);
