@@ -496,7 +496,8 @@ void Report::Connect_Interaction_Detector_V2(
     CalculateSignals(debugmode, birefringence, detector, event, icemodel, raysolver, settings1, signal);
 
     // Combine all signal waveforms, add noise, perform trigger check
-    BuildAndTriggerOnWaveforms(debugmode, evt, detector, event, settings1, trigger);
+    int trig_search_init = trigger->maxt_diode_bin + settings1->NFOUR;  
+    BuildAndTriggerOnWaveforms(debugmode, evt, trig_search_init, detector, event, settings1, trigger);
 
 }   
 
@@ -628,7 +629,7 @@ void Report::CalculateSignals(
 }
 
 void Report::BuildAndTriggerOnWaveforms(
-    int debugmode, int evt,
+    int debugmode, int evt, int trig_search_init, 
     Detector *detector, Event *event, Settings *settings1, Trigger *trigger
 ){
 
@@ -793,9 +794,6 @@ void Report::BuildAndTriggerOnWaveforms(
             // Check for a trigger on this event
             // do only if it's not in debugmode  and if at least 1 antenna has sufficient signal
             if ( (debugmode == 0) && (ants_with_sufficient_SNR) ) {
-
-                // give some time shift for mimicing force trig events
-                int trig_search_init = trigger->maxt_diode_bin + settings1->NFOUR;  
 
                 // coincidence window bin for trigger
                 int trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  
