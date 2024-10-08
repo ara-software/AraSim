@@ -272,7 +272,7 @@ class Report {
         IceModel *icemodel, RaySolver *raysolver, Settings *settings1, Signal *signal
     );
     void BuildAndTriggerOnWaveforms(
-        int debugmode, int evt, int trig_search_init,
+        int debugmode, int station_index, int evt, int trig_search_init,
         Detector *detector, Event *event, Settings *settings1, Trigger *trigger
     );
 

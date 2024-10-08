@@ -496,8 +496,13 @@ void Report::Connect_Interaction_Detector_V2(
     CalculateSignals(debugmode, birefringence, detector, event, icemodel, raysolver, settings1, signal);
 
     // Combine all signal waveforms, add noise, perform trigger check
-    int trig_search_init = trigger->maxt_diode_bin + settings1->NFOUR;  
-    BuildAndTriggerOnWaveforms(debugmode, evt, trig_search_init, detector, event, settings1, trigger);
+    for (int station = 0; station < detector->params.number_of_stations; station++) {
+        int trig_search_init = trigger->maxt_diode_bin + settings1->NFOUR;  
+        BuildAndTriggerOnWaveforms(debugmode, station, evt, trig_search_init, detector, event, settings1, trigger);
+    }
+
+    // also clear all vector info to reduce output root file size
+    clear_useless(settings1);   // to reduce the size of output AraOut.root, remove some information
 
 }   
 
@@ -629,213 +634,205 @@ void Report::CalculateSignals(
 }
 
 void Report::BuildAndTriggerOnWaveforms(
-    int debugmode, int evt, int trig_search_init, 
+    int debugmode, int station_index, int evt, int trig_search_init, 
     Detector *detector, Event *event, Settings *settings1, Trigger *trigger
 ){
 
     // now loop over all antennas again to make DATA_BIN_SIZE array for signal + noise. (with time delay)
     // with that signal + noise array, we'll do convolution with diode response.
     // with the convolution result, we'll do trigger check
-    for (int i = 0; i < detector->params.number_of_stations; i++)
+    stations[station_index].Global_Pass  = 0;
+
+    // If we're looking to trigger on signal, check that there 
+    //   is enough signal that reached the station. 
+    // Otherwise, don't worry about checking for a trigger
+    int ants_with_nonzero_signal = 0;
+    if (settings1->TRIG_ANALYSIS_MODE == 2) { 
+        // TRIG_ANALYSIS_MODE=2 is the noise-only mode, 
+        //   say that all antennas have good signal
+        ants_with_nonzero_signal = 16; 
+    }
+    else {
+        // If rays connected to the station, count how many antennas 
+        //   have sufficient signal from the signal-only waveform
+        if (stations[station_index].Total_ray_sol) { 
+            ants_with_nonzero_signal = getNumOfSignalledAnts(stations[station_index]);
+        } 
+    }
+
+    if (stations[station_index].Total_ray_sol && ants_with_nonzero_signal)
     {
+        // if there is any ray_sol (don't check trigger if there is no ray_sol at all)
 
-        stations[i].Global_Pass  = 0;
+        // calculate total number of bins we need to do trigger check
+        // to save time, use only necessary number of bins
+        int max_total_bin = (stations[station_index].max_arrival_time - stations[station_index].min_arrival_time) / settings1->TIMESTEP + settings1->NFOUR *3 + trigger->maxt_diode_bin;    // make more time
 
-        // If we're looking to trigger on signal, check that there 
-        //   is enough signal that reached the station. 
-        // Otherwise, don't worry about checking for a trigger
-        int ants_with_nonzero_signal = 0;
-        if (settings1->TRIG_ANALYSIS_MODE == 2) { 
-            // TRIG_ANALYSIS_MODE=2 is the noise-only mode, 
-            //   say that all antennas have good signal
-            ants_with_nonzero_signal = 16; 
-        }
-        else {
-            // If rays connected to the station, count how many antennas 
-            //   have sufficient signal from the signal-only waveform
-            if (stations[i].Total_ray_sol) { 
-                ants_with_nonzero_signal = getNumOfSignalledAnts(stations[i]);
-            } 
-        }
+        //stations[station_index].max_total_bin = max_total_bin;
 
-        if (stations[i].Total_ray_sol && ants_with_nonzero_signal)
+        // test generating new noise waveform for only stations if there's any ray trace solutions
+        if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0)
         {
-            // if there is any ray_sol (don't check trigger if there is no ray_sol at all)
+            // noise waveforms will be generated for each evts
 
-            // calculate total number of bins we need to do trigger check
-            // to save time, use only necessary number of bins
-            int max_total_bin = (stations[i].max_arrival_time - stations[i].min_arrival_time) / settings1->TIMESTEP + settings1->NFOUR *3 + trigger->maxt_diode_bin;    // make more time
-
-            //stations[i].max_total_bin = max_total_bin;
-
-            // test generating new noise waveform for only stations if there's any ray trace solutions
-            if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0)
+            // redefine DATA_BIN_SIZE
+            int DATA_BIN_SIZE_tmp;
+            for (int DBS = 10; DBS < 16; DBS++)
             {
-                // noise waveforms will be generated for each evts
+                DATA_BIN_SIZE_tmp = (int) pow(2., (double) DBS);
+                if (DATA_BIN_SIZE_tmp > max_total_bin) DBS = 16;    // come out
+            }
+            settings1->DATA_BIN_SIZE = DATA_BIN_SIZE_tmp;
+            // cout<<"new DATA_BIN_SIZE : "<<DATA_BIN_SIZE_tmp<<endl;
+            // cout<<"max_total_bin : "<<max_total_bin<<endl;
 
-                // redefine DATA_BIN_SIZE
-                int DATA_BIN_SIZE_tmp;
-                for (int DBS = 10; DBS < 16; DBS++)
-                {
-                    DATA_BIN_SIZE_tmp = (int) pow(2., (double) DBS);
-                    if (DATA_BIN_SIZE_tmp > max_total_bin) DBS = 16;    // come out
-                }
-                settings1->DATA_BIN_SIZE = DATA_BIN_SIZE_tmp;
-                // cout<<"new DATA_BIN_SIZE : "<<DATA_BIN_SIZE_tmp<<endl;
-                // cout<<"max_total_bin : "<<max_total_bin<<endl;
+            // reset all filter values in Detector class
+            detector->get_NewDiodeModel(settings1);
+            detector->ReadFilter_New(settings1);
+            detector->ReadPreamp_New(settings1);
+            detector->ReadFOAM_New(settings1);
 
-                // reset all filter values in Detector class
-                detector->get_NewDiodeModel(settings1);
-                detector->ReadFilter_New(settings1);
-                detector->ReadPreamp_New(settings1);
-                detector->ReadFOAM_New(settings1);
-
-                if (settings1->USE_TESTBED_RFCM_ON == 1)
-                {
-                    detector->ReadRFCM_New(settings1);
-                }
-                if (settings1->NOISE == 1 && settings1->DETECTOR == 3)
-                {
-                    detector->ReadRayleigh_New(settings1);
-                }
-
-                // TODO: I think this is where the Rayleigh reading will go for this next version of the code
-                // if (settings1->NOISE==1 && settings1->DETECTOR==4 || settings1->DETECTOR==5) {
-                //     detector->ReadRayleigh_Station(settings1);
-                // }
-
-                // reset Trigger class noise temp values
-                trigger->Reset_V_noise_freqbin(settings1, detector);
-
-                // now call new noise waveforms with new DATA_BIN_SIZE
-                trigger->GetNewNoiseWaveforms(settings1, detector, this);
-                // cout << "New noise waveforms gotten" << endl;
+            if (settings1->USE_TESTBED_RFCM_ON == 1)
+            {
+                detector->ReadRFCM_New(settings1);
+            }
+            if (settings1->NOISE == 1 && settings1->DETECTOR == 3)
+            {
+                detector->ReadRayleigh_New(settings1);
             }
 
-            // do only if it's not in debugmode
-            if (debugmode == 1) N_noise = 1;
-            // now, check if DATA_BIN_SIZE is enough for total time delay between antennas
-            else
+            // TODO: I think this is where the Rayleigh reading will go for this next version of the code
+            // if (settings1->NOISE==1 && settings1->DETECTOR==4 || settings1->DETECTOR==5) {
+            //     detector->ReadRayleigh_Station(settings1);
+            // }
+
+            // reset Trigger class noise temp values
+            trigger->Reset_V_noise_freqbin(settings1, detector);
+
+            // now call new noise waveforms with new DATA_BIN_SIZE
+            trigger->GetNewNoiseWaveforms(settings1, detector, this);
+            // cout << "New noise waveforms gotten" << endl;
+        }
+
+        // do only if it's not in debugmode
+        if (debugmode == 1) N_noise = 1;
+        // now, check if DATA_BIN_SIZE is enough for total time delay between antennas
+        else
+        {
+            N_noise = (int)(max_total_bin / settings1->DATA_BIN_SIZE) + 1;
+        }
+        // cout<<"N_noise : "<<N_noise<<endl;
+
+        if (N_noise > 1) cout << "N_noise : " << N_noise << " max_total_bin : " << max_total_bin << " might cause error!!" << endl;
+        // mostly N_noise should be "1"
+
+        // now, check the number of bins we need for portion of noise waveforms
+        int ch_ID = 0;
+        int ants_with_sufficient_SNR = 0;
+        for (int j = 0; j < detector->stations[station_index].strings.size(); j++)
+        {
+            // cout << j << endl;
+            for (int k = 0; k < detector->stations[station_index].strings[j].antennas.size(); k++)
             {
-                N_noise = (int)(max_total_bin / settings1->DATA_BIN_SIZE) + 1;
-            }
-            // cout<<"N_noise : "<<N_noise<<endl;
 
-            if (N_noise > 1) cout << "N_noise : " << N_noise << " max_total_bin : " << max_total_bin << " might cause error!!" << endl;
-            // mostly N_noise should be "1"
+                // Fill trigger->Full_window and trigger->Full_window_V with noise waveforms
+                Prepare_Antenna_Noise(debugmode, ch_ID, station_index, j, k, settings1, trigger, detector);
 
-            // now, check the number of bins we need for portion of noise waveforms
-            int ch_ID = 0;
-            int ants_with_sufficient_SNR = 0;
-            for (int j = 0; j < detector->stations[i].strings.size(); j++)
-            {
-                // cout << j << endl;
-                for (int k = 0; k < detector->stations[i].strings[j].antennas.size(); k++)
-                {
+                // currently there is a initial spoiled bins (maxt_diode_bin) 
+                // at the initial Full_window "AND" at the initial of connected noisewaveform 
+                // (we can fix this by adding values but not accomplished yet)
 
-                    // Fill trigger->Full_window and trigger->Full_window_V with noise waveforms
-                    Prepare_Antenna_Noise(debugmode, ch_ID, i, j, k, settings1, trigger, detector);
+                // Combine signals from all rays, add noise, and convolve them through the tunnel diode
 
-                    // currently there is a initial spoiled bins (maxt_diode_bin) 
-                    // at the initial Full_window "AND" at the initial of connected noisewaveform 
-                    // (we can fix this by adding values but not accomplished yet)
-
-                    // Combine signals from all rays, add noise, and convolve them through the tunnel diode
-
-                    if (debugmode == 0) {
-                        Convolve_Signals(
-                            &stations[i].strings[j].antennas[k], ch_ID, i,
-                            event, settings1, trigger, detector
-                        );
-                    }
-
-                    // Get the SNR from this antenna
-                    double ant_SNR = 0.;
-                    if (settings1->TRIG_ANALYSIS_MODE==2){
-                        // TRIG_ANALYSIS_MODE=2 is the noise-only mode
-                        // Set the SNR to an arbitarily high number so it passes
-                        //   the coming insufficient signal check
-                        ant_SNR = 100.;
-                    }
-                    else {
-                        // For all other simulations, use previously calculated noise RMS
-                        
-                        // Steal the noise RMS from the trigger class and pass 
-                        //   it as the noise WF to get_SNR() (since the RMS of an 
-                        //   array with one element is the absolute value of that element)
-                        vector <double> tmp_noise_RMS;
-                        int trigger_ch_ID = GetChNumFromArbChID(detector, ch_ID, i, settings1) - 1;
-                        double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
-                        tmp_noise_RMS.push_back( ant_noise_voltage_RMS );
-
-                        // Calculate SNR in this antenna
-                        ant_SNR = get_SNR( 
-                            stations[i].strings[j].antennas[k].V_convolved, 
-                            tmp_noise_RMS);
-
-                    }
-
-                    // Log if this antenna has a strong SNR or not
-                    if ( ant_SNR > 0.01 ) ants_with_sufficient_SNR++;
-
-                    // Apply gain factors
-                    if ((debugmode == 0) && (settings1->USE_MANUAL_GAINOFFSET == 1) )
-                    {
-                        Apply_Gain_Offset(settings1, trigger, detector, ch_ID, i);
-
-                    } 
-
-                    ch_ID++;    // now to next channel
-
-                }   // for antennas
-
-            }   // for strings
-
-            // Check for a trigger on this event
-            // do only if it's not in debugmode  and if at least 1 antenna has sufficient signal
-            if ( (debugmode == 0) && (ants_with_sufficient_SNR) ) {
-
-                // coincidence window bin for trigger
-                int trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  
-
-                // save trig search bin info default (if no global trig, this value saved)
-                stations[i].total_trig_search_bin = max_total_bin - trig_search_init;
-
-                if (settings1->TRIG_SCAN_MODE==5){ // Trigger mode for phased array
-                    checkPATrigger(
-                        i, detector, event, evt, trigger, settings1, 
-                        trig_search_init, max_total_bin
-                    );
-                }
-                else if (settings1->TRIG_SCAN_MODE == 0) {
-                    triggerCheck_ScanMode0(
-                        trig_search_init, max_total_bin, trig_window_bin,
-                        ch_ID, i, detector, event, settings1, trigger
-                    );
-                }
-                else if (settings1->TRIG_SCAN_MODE > 0) {
-                    triggerCheckLoop(
-                        settings1, detector, event, trigger, 
-                        i, trig_search_init, max_total_bin, trig_window_bin, 
-                        settings1->TRIG_SCAN_MODE
+                if (debugmode == 0) {
+                    Convolve_Signals(
+                        &stations[station_index].strings[j].antennas[k], ch_ID, station_index,
+                        event, settings1, trigger, detector
                     );
                 }
 
-            }   // if it's not debugmode
+                // Get the SNR from this antenna
+                double ant_SNR = 0.;
+                if (settings1->TRIG_ANALYSIS_MODE==2){
+                    // TRIG_ANALYSIS_MODE=2 is the noise-only mode
+                    // Set the SNR to an arbitarily high number so it passes
+                    //   the coming insufficient signal check
+                    ant_SNR = 100.;
+                }
+                else {
+                    // For all other simulations, use previously calculated noise RMS
+                    
+                    // Steal the noise RMS from the trigger class and pass 
+                    //   it as the noise WF to get_SNR() (since the RMS of an 
+                    //   array with one element is the absolute value of that element)
+                    vector <double> tmp_noise_RMS;
+                    int trigger_ch_ID = GetChNumFromArbChID(detector, ch_ID, station_index, settings1) - 1;
+                    double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
+                    tmp_noise_RMS.push_back( ant_noise_voltage_RMS );
 
-            // delete noise waveforms 
-            if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0) {
-                // noise waveforms will be generated for each evts
-                // remove noise waveforms for next evt
-                trigger->ClearNoiseWaveforms();
+                    // Calculate SNR in this antenna
+                    ant_SNR = get_SNR( 
+                        stations[station_index].strings[j].antennas[k].V_convolved, 
+                        tmp_noise_RMS);
+
+                }
+
+                // Log if this antenna has a strong SNR or not
+                if ( ant_SNR > 0.01 ) ants_with_sufficient_SNR++;
+
+                // Apply gain factors
+                if ((debugmode == 0) && (settings1->USE_MANUAL_GAINOFFSET == 1) )
+                {
+                    Apply_Gain_Offset(settings1, trigger, detector, ch_ID, station_index);
+
+                } 
+
+                ch_ID++;    // now to next channel
+
+            }   // for antennas
+
+        }   // for strings
+
+        // Check for a trigger on this event
+        // do only if it's not in debugmode  and if at least 1 antenna has sufficient signal
+        if ( (debugmode == 0) && (ants_with_sufficient_SNR) ) {
+
+            // coincidence window bin for trigger
+            int trig_window_bin = (int)(settings1->TRIG_WINDOW / settings1->TIMESTEP);  
+
+            // save trig search bin info default (if no global trig, this value saved)
+            stations[station_index].total_trig_search_bin = max_total_bin - trig_search_init;
+
+            if (settings1->TRIG_SCAN_MODE==5){ // Trigger mode for phased array
+                checkPATrigger(
+                    station_index, detector, event, evt, trigger, settings1, 
+                    trig_search_init, max_total_bin
+                );
+            }
+            else if (settings1->TRIG_SCAN_MODE == 0) {
+                triggerCheck_ScanMode0(
+                    trig_search_init, max_total_bin, trig_window_bin,
+                    ch_ID, station_index, detector, event, settings1, trigger
+                );
+            }
+            else if (settings1->TRIG_SCAN_MODE > 0) {
+                triggerCheckLoop(
+                    settings1, detector, event, trigger, 
+                    station_index, trig_search_init, max_total_bin, trig_window_bin, 
+                    settings1->TRIG_SCAN_MODE
+                );
             }
 
-        }   // if there is any ray_sol in the station
+        }   // if it's not debugmode
 
-    }   // for stations
+        // delete noise waveforms 
+        if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0) {
+            // noise waveforms will be generated for each evts
+            // remove noise waveforms for next evt
+            trigger->ClearNoiseWaveforms();
+        }
 
-    // also clear all vector info to reduce output root file size
-    clear_useless(settings1);   // to reduce the size of output AraOut.root, remove some information
+    }   // if there is any ray_sol in the station
 
 }
 
