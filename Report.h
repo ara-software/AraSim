@@ -272,7 +272,20 @@ class Report {
     
 //    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger);
     
-    void Connect_Interaction_Detector_V2 (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Birefringence *birefringence, Settings *settings1, Trigger *trigger, int evt);     
+    void Connect_Interaction_Detector_V2 (
+        Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, 
+        IceModel *icemodel, Birefringence *birefringence, Settings *settings1, 
+        Trigger *trigger, int evt);   
+    void CalculateSignals(
+        int debugmode, 
+        Birefringence *birefringence, Detector *detector, Event *event, 
+        IceModel *icemodel, RaySolver *raysolver, Settings *settings1, Signal *signal
+    );
+    void BuildAndTriggerOnWaveforms(
+        int debugmode, int evt,
+        Detector *detector, Event *event, Settings *settings1, Trigger *trigger
+    );
+
     void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, Birefringence *birefringence, IceModel *icemodel, Settings *settings, int which_solution,
         vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
         );
@@ -456,8 +469,6 @@ class Report {
 
         vector <Station_r> stations;
         vector <String_r> strings;
-
-        double RandomTshift; // for t-domain signal, a factor for random init time shift
 
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
 

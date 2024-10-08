@@ -479,19 +479,40 @@ void Report::clear_useless(Settings *settings1) {   // to reduce the size of out
 
 }
 
-void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Birefringence *birefringence, Settings *settings1, Trigger *trigger, int evt) {
+void Report::Connect_Interaction_Detector_V2(
+    Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, 
+    IceModel *icemodel, Birefringence *birefringence, Settings *settings1, 
+    Trigger *trigger, int evt
+) {
+
+    // decide whether debug mode or not
+    int debugmode = 0;
+    if (settings1->DEBUG_MODE_ON == 1 && evt < settings1->DEBUG_SKIP_EVT) {
+        debugmode = 1;  // skip most of computation intensive processes if debugmode == 1
+    }
+    else if (settings1->DEBUG_MODE_ON == 1 && evt >= settings1->DEBUG_SKIP_EVT){
+        cout << evt << " " << endl;
+    }
+
+    // Ray trace and calculate signal for every ray from every interaction to every antenna
+    CalculateSignals(debugmode, birefringence, detector, event, icemodel, raysolver, settings1, signal);
+
+    // Combine all signal waveforms, add noise, perform trigger check
+    BuildAndTriggerOnWaveforms(debugmode, evt, detector, event, settings1, trigger);
+
+}   
+
+void Report::CalculateSignals(
+    int debugmode, 
+    Birefringence *birefringence, Detector *detector, Event *event, 
+    IceModel *icemodel, RaySolver *raysolver, Settings *settings1, Signal *signal
+){
 
     double min_arrival_time_tmp;    // min arrival time between all antennas, raysolves
     double max_arrival_time_tmp;    // max arrival time between all antennas, raysolves
     double max_PeakV_tmp;   // max PeakV of all antennas in the station
 
-    RandomTshift = gRandom->Rndm();
-
-    // decide whether debug mode or not
-    int debugmode = 0;
-    if (settings1->DEBUG_MODE_ON == 1 && evt < settings1->DEBUG_SKIP_EVT) debugmode = 1;
-    else if (settings1->DEBUG_MODE_ON == 1 && evt >= settings1->DEBUG_SKIP_EVT) cout << evt << " " << endl;
-    // skip most of computation intensive processes if debugmode == 1
+    double RandomTshift = gRandom->Rndm(); // for t-domain signal, a factor for random init time shift
 
     for (int i = 0; i < detector->params.number_of_stations; i++)
     {
@@ -605,6 +626,13 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
         // after all values are stored in Report, set ranking of signal between antennas
         SetRank(detector);
     }
+
+}
+
+void Report::BuildAndTriggerOnWaveforms(
+    int debugmode, int evt,
+    Detector *detector, Event *event, Settings *settings1, Trigger *trigger
+){
 
     // now loop over all antennas again to make DATA_BIN_SIZE array for signal + noise. (with time delay)
     // with that signal + noise array, we'll do convolution with diode response.
@@ -817,7 +845,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
     // also clear all vector info to reduce output root file size
     clear_useless(settings1);   // to reduce the size of output AraOut.root, remove some information
 
-}   // end Connect_Interaction_Detector
+}
 
 void Antenna_r::Find_Likely_Sol(){
 
