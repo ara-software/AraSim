@@ -481,8 +481,6 @@ void Report::clear_useless(Settings *settings1) {   // to reduce the size of out
 
 void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Birefringence *birefringence, Settings *settings1, Trigger *trigger, int evt) {
 
-    int check_toomuch_Tdelay;   // return value from MixSignalNoise_Tdelay
-
     double min_arrival_time_tmp;    // min arrival time between all antennas, raysolves
     double max_arrival_time_tmp;    // max arrival time between all antennas, raysolves
     double max_PeakV_tmp;   // max PeakV of all antennas in the station
