@@ -852,9 +852,20 @@ void Report::BuildAndTriggerOnWaveforms(
                 next_trig_search_init = this_next_trig_search_init;
             }
 
+            int signal_length = stations[station_index].strings[string].antennas[antenna].V_convolved.size();
+
+            // Find the last bin in V_convolved that has nonzero signal 
+            int last_nonzero_bin = signal_length-1;
+            for (int bin=signal_length-1; bin>-1; bin--) {
+                if ( stations[station_index].strings[string].antennas[antenna].V_convolved[bin] != 0. ) {
+                    last_nonzero_bin = bin;
+                    break;
+                }
+            }
+
             // If there is signal that exists beyond what would be the next trig_search_init, 
-            //   save that we need to analyze more signal.
-            if ( stations[station_index].strings[string].antennas[antenna].V_convolved.size() > this_next_trig_search_init ){
+            //   indicate that we need to analyze more signal.
+            if ( last_nonzero_bin > this_next_trig_search_init ){
                 analyze_more_waveform = true;
             }
 
