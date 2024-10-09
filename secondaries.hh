@@ -166,6 +166,7 @@ public:
   double GetDBViewAngle(const Vector &refr, const Vector &nnu);
   //void GetFirstBang(const Position &r_in, const Vector &nnu, Position &posnu, double len_int_kgm2, double d1, double &nuentrancelength);
   double NFBWeight(double ptau, double taulength);
+ 
 
 
 // from icemc with tau mode (just removed hy and inu)
@@ -230,6 +231,9 @@ string flavors[3]; // the gps path of the anita-lite flight
         double TauEnergyInitial(double ptau_final, double Distance, double z_distance, double density);
 
 	double interactionLengthNu(Primaries*primary1,Settings*settings1,double pnu,int nu_nubar,int currentint);
+
+  double sec_nnu_interaction_distances(int first_vertex_idx, int inu_thrown, Settings *settings1); // calculate distances between secondary interactions 
+
   
 }; //class Secondaries
 
