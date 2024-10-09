@@ -294,7 +294,7 @@ outputdir="outputs"; // directory where outputs go
   
   WAVEFORM_CENTER = 0; // Default: 0, no offset in waveform centering
 
-  DEADTIME = 0;
+  DEADTIME = 0.01E-3; // Default: 0.01 millisecond
 
   POSNU_R = 1000.;
   POSNU_THETA=-3.1415926535/4.;
