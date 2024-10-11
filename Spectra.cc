@@ -57,6 +57,7 @@ Spectra::Spectra(Settings *settings1) {
   else if (EXPONENT_model >= 10. && EXPONENT_model < 30.)
   {
       pnu_EXPONENT = EXPONENT_model;
+      return;
   }
   
   else if (EXPONENT_model >= 510. && EXPONENT_model <= 650.) // g.n. added so we can have simulations at E^2=17.8 not just whole numbers
@@ -315,31 +316,28 @@ Spectra::Spectra(Settings *settings1) {
 
 double  Spectra::GetNuEnergy() {
  
+  if ((EXPONENT_model >= 10. && EXPONENT_model < 30.) || (EXPONENT_model >= 510. && EXPONENT_model <= 650.)) {
+      return pow(10., pnu_EXPONENT);
+  }
+  
   double thisenergy = EXPONENT_min; // arbitrary initialisation
   double thisflux = 2.; // initialise higher than max
   double max = 1.;
   int energybin = 0; // arbitrary initialisation
   double maxenergy = Tools::dMax(&energy[0], E_bin);
   double minenergy = Tools::dMin(&energy[0], E_bin); 
+  
   // this uses the dartboard approach
- 
-  if ((EXPONENT_model >= 10. && EXPONENT_model < 30.) || (EXPONENT_model >= 510. && EXPONENT_model <= 650.)) {
-      return pow(10., pnu_EXPONENT);
-  }
-
-  else {
-
-    while(thisflux > max) {
-      // pick an energy  
-      thisenergy = Rand3.Rndm() * (maxenergy - minenergy) + minenergy; // pick energy at random between the highest and lowest
-      // the energy array is actually filled with energy exponents 
-      
-      // get interpolated flux at "thisenergy"
-      max = pow(10, SimpleLinearInterpolation_value(E_bin, &energy[0], &lgEdNdEdAdt[0], thisenergy)) / maxflux; // normalize to 1
-      thisflux = Rand3.Rndm(); // pick the flux at random between 0 and 1, if it's less than max it's a winner
-    } //while
-    return pow(10., thisenergy);
-  }
+  while(thisflux > max) {
+    // pick an energy  
+    thisenergy = Rand3.Rndm() * (maxenergy - minenergy) + minenergy; // pick energy at random between the highest and lowest
+    // the energy array is actually filled with energy exponents 
+    
+    // get interpolated flux at "thisenergy"
+    max = pow(10, SimpleLinearInterpolation_value(E_bin, &energy[0], &lgEdNdEdAdt[0], thisenergy)) / maxflux; // normalize to 1
+    thisflux = Rand3.Rndm(); // pick the flux at random between 0 and 1, if it's less than max it's a winner
+  } //while
+  return pow(10., thisenergy);
 	
 } //Pick Neutrino Energy
 
