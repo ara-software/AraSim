@@ -30,7 +30,7 @@ Spectra::Spectra(Settings *settings1) {
   // initialize parameters!!
 
   E_bin = 12;
-  dE_bin = (EXPONENT_max - EXPONENT_min) / (double)(E_bin - 1);
+  const double dE_bin = (EXPONENT_max - EXPONENT_min) / (double)(E_bin - 1);
 
   double Emuons[E_bin]; // E dN/dE/dA/dt for neutrinos that are produced as muon neutrinos or muon antineutrinos.
   double Eelectrons[E_bin];// E dN/dE/dA/dt for neutrinos that are produced as electron neutrinos or muon antineutrinos.

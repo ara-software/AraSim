@@ -21,8 +21,6 @@ class Spectra
     double maxflux;   // max flux value
     int E_bin;   // initialize # of energy bins (max = 50)
 
-    double dE_bin;
-
     void GetFlux(string filename);    // read neutrino flux EdNdEdAdt (in GeV) from filename file
 
     double EXPONENT_model; // set flux model
