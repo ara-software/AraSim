@@ -79,5 +79,6 @@ jobs:
           source root/bin/thisroot.sh
           export ARA_UTIL_INSTALL_DIR=`pwd`/AraRoot/
           export ARA_ROOT_DIR=`pwd`/AraRoot/
+          export ARA_SIM_DIR=`pwd`/AraSim/
           export LD_LIBRARY_PATH="/home/runner/work/AraSim/AraSim/libRootFftwWrapper/build/:$ARA_UTIL_INSTALL_DIR/lib:$LD_LIBRARY_PATH"
           bash test/veff_birefringence/run_veff_birefringence_test.sh
