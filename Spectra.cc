@@ -66,6 +66,7 @@ Spectra::Spectra(Settings *settings1) {
       if (settings1->EVENT_GENERATION_MODE != 1){
 	      cout<<"**************** energy is "<<pnu_EXPONENT<<" *******************"<<endl;
       }
+      return;
   }
   
   else if (EXPONENT_model == 30.) // ESS baseline model. Used to be EXPONENT "0"
