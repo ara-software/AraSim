@@ -5003,6 +5003,16 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 vnoise[2 * k] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
                 vnoise[2 * k + 1] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
 
+                if (k==100) {
+                    cout<<"        delta f "<<this_delta_f<<endl;
+                    cout<<"        vfft noise before "<<fits_for_this_station[ch][k]<<endl;
+                    cout<<"        current phase "<<current_phase<<endl;
+                    cout<<"        V_tmp "<<V_tmp<<endl;
+                    cout<<"        vnoise [2k] "<<vnoise[2 * k]<<endl;
+                    cout<<"        vnoise [2k+1] "<<vnoise[2 * k + 1]<<endl;
+                    cout<<"        Vnoise after [2k] "<<Vfft_noise_after[2 * k]<<endl;
+                }
+
             }
 
             // real FT back to get vnoise in time domain waveform; 
