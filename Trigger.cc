@@ -354,6 +354,16 @@ void Trigger::SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *r
                         Vfft_noise_before.push_back(report->Vfft_noise_before[m]);
                     }
 
+                    if (ch==0 && m==100){
+                        cout<<"    V_noise_timedomain_diode_ch "<<v_noise_timedomain_diode_ch[ch][i][m]<<endl;
+                        cout<<"    ngeneratedevents "<<ngeneratedevents<<endl;
+                        cout<<"    data bin size "<<settings1->DATA_BIN_SIZE<<endl;
+                        cout<<"    maxtdiode "<<maxt_diode<<endl;
+                        cout<<"    Timestep "<<TIMESTEP<<endl;
+                        cout<<"    vnoise "<<v_noise[m]<<endl;
+                        cout<<"    report noise before "<<report->Vfft_noise_before[m]<<endl;
+                    }
+
                 }
 
             }   // get meandiode with `ngeneratedevents` noisewaveforms
@@ -397,6 +407,9 @@ void Trigger::SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *r
         // Finish RMS calculation and print out
         cout << "From pure noise waveforms, diode responses" << "\n";
         for (int ch=0; ch<num_chs; ch++) {
+            if (ch==0){
+                cout<<"    before sqrt, rmsdiode "<<rmsdiode<<" rmsvoltage "<<rmsvoltage<<endl;
+            }
             rmsdiode_ch[ch]=sqrt(rmsdiode_ch[ch]);
             rmsvoltage_ch[ch]=sqrt(rmsvoltage_ch[ch]);
             cout << "For ch"<<ch<<" mean, rms diode are " << meandiode_ch[ch] << " " << rmsdiode_ch[ch] << " rms voltage is "<<rmsvoltage_ch[ch]<<"\n";
@@ -616,6 +629,7 @@ double Trigger::GetAntNoise_voltageRMS(int ch_ID, Settings *settings1){
     }
     else if (settings1->NOISE_CHANNEL_MODE == 1){
         // All antennas have their own noise WFs
+        cout<<"  In Trigger::GetAntNoise, length of rmsvoltage_ch: "<<rmsvoltage_ch.size()<<" ";
         return rmsvoltage_ch[ch_ID];
     }
     else if (settings1->NOISE_CHANNEL_MODE == 2){
