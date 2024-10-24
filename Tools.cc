@@ -147,12 +147,17 @@ void Tools::realft(double *data, const int isign, int nsize){
     }
     else if(isign==-1){
         fftw_complex *fftarray;
+        cout<<"        ~ nsize "<<nsize<<endl;
         fftarray=(fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nsize/2+1));
+        cout<<"        ~ fftarray[100] "<<*fftarray[100]<<endl;
         format_transform(nsize,-1,fftarray, data);
+        cout<<"        ~ fftarray[100] after format_transform "<<*fftarray[100]<<endl;
         double* invfft;
         invfft=FFTtools::doInvFFT(nsize, (FFTWComplex*)fftarray);
+        cout<<"        ~ invfft[100] "<<invfft[100]<<endl;
         for(int i=0;i<nsize;i++)
             data[i]=invfft[i]*nsize/2;
+        cout<<"        ~ data[100] after "<<data[100]<<endl;
         free(fftarray);
         delete [] invfft;
     }
