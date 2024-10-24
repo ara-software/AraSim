@@ -49,7 +49,7 @@ RAY_TRACE_ICE_MODEL_PARAMS=40 // UNL Modified (PA model).
 
 // Major Neutrino Settings
 NNU=500              // number of neutrino events
-EXPONENT=113         // Equal number of events per energy decade
+EXPONENT=1           // E^{-1} spectrum
 EXPONENT_MAX=21.0    // maximum log10(eV) of Neutrino energy spectrum
 POSNU_RADIUS=5000    // Max neutrino generation distance from detector
 RAYSOL_RANGE=9000    // Max distance from detector to solve rays
