@@ -151,6 +151,16 @@ void Tools::realft(double *data, const int isign, int nsize){
         fftarray=(fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nsize/2+1));
         cout<<"        ~ fftarray[100] "<<*fftarray[100]<<endl;
         format_transform(nsize,-1,fftarray, data);
+
+        int n_nans = 0;
+        for (int i=0; i<nsize; i++){
+            if (*fftarray[i] != *fftarray[i]){
+                *fftarray[i] = 0;
+                n_nans++;
+            }
+        }
+        cout<<"        ~ nnans going into doInvFFT "<<n_nans<<endl;
+
         cout<<"        ~ fftarray[100] after format_transform "<<*fftarray[100]<<endl;
         double* invfft;
         invfft=FFTtools::doInvFFT(nsize, (FFTWComplex*)fftarray);
