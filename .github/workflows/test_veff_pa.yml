@@ -91,6 +91,9 @@ jobs:
           export ARA_UTIL_INSTALL_DIR=`pwd`/AraRoot/
           export ARA_ROOT_DIR=`pwd`/AraRoot/
           export LD_LIBRARY_PATH="/home/runner/work/AraSim/AraSim/libRootFftwWrapper/build/:$ARA_UTIL_INSTALL_DIR/lib:$LD_LIBRARY_PATH"
+
+          pwd
+          ls
           
           bash test/veff_pa/run_veff_pa_test.sh
 
