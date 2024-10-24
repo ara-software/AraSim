@@ -330,12 +330,13 @@ void Trigger::SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *r
                 report->GetNoiseWaveforms_ch(settings1, detector, V_noise_freqbin_ch[ch], v_noise, ch);
 
                 // do normal time ordering (not sure if this is necessary)
+                cout<<"            V_noise before NTO "<<v_noise[100]<<endl;
                 Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise);
 
                 // Convolve signal through the tunnel diode
-                cout<<"            V_noise before "<<v_noise[100]<<endl;
+                cout<<"            V_noise before convlv "<<v_noise[100]<<endl;
                 myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin,v_noise_timedomain_diode_ch[ch][i]);
-                cout<<"            V_noise after "<<v_noise_timedomain_diode_ch[ch][i][100]<<endl;
+                cout<<"            V_noise after convlv"<<v_noise_timedomain_diode_ch[ch][i][100]<<endl;
 
                 // Save noise waveform and determine mean noise value in this channel
                 for (int m=0; m<settings1->DATA_BIN_SIZE; m++) {

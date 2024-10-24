@@ -5016,7 +5016,9 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
             }
 
             // real FT back to get vnoise in time domain waveform; 
+            cout<<"          Noise before realft "<<vnoise[200]<<endl;
             Tools::realft(vnoise, -1, settings1 -> DATA_BIN_SIZE);
+            cout<<"          Noise after realft "<<vnoise[100]<<endl;
 
         }
 
