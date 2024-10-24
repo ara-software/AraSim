@@ -4776,6 +4776,7 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
 // generate DATA_BIN_SIZE sized noise waveform array in time domain
 void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, double v_noise, double * vnoise, int ch) {
     //  cout << "channel: " << ch << endl;
+    cout<<"        last V_noise after entering report function "<<vnoise[16383]<<endl;
     if (settings1 -> NOISE == 0) { // NOISE == 0 : flat thermal noise with Johnson-Nyquist noise
 
         Vfft_noise_after.clear(); // remove previous Vfft_noise values
@@ -5016,9 +5017,13 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
             }
 
             // real FT back to get vnoise in time domain waveform; 
-            cout<<"          Noise before realft "<<vnoise[200]<<endl;
+            cout<<"          Noise (real) before realft "<<vnoise[200]<<endl;
+            cout<<"          Noise (imaginary) before realft "<<vnoise[201]<<endl;
+            cout<<"          Noise before realft "<<vnoise[16383]<<endl;
+            cout<<"          Data bin size "<<settings1 -> DATA_BIN_SIZE<<endl;
             Tools::realft(vnoise, -1, settings1 -> DATA_BIN_SIZE);
             cout<<"          Noise after realft "<<vnoise[100]<<endl;
+            cout<<"          Noise after realft "<<vnoise[16383]<<endl;
 
         }
 

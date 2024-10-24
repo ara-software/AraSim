@@ -327,6 +327,7 @@ void Trigger::SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *r
                 }
 
                 // get v_noise array (noise voltage in time domain)
+                cout<<"        V_noise before entering report function "<<v_noise[16383]<<endl;
                 report->GetNoiseWaveforms_ch(settings1, detector, V_noise_freqbin_ch[ch], v_noise, ch);
 
                 // do normal time ordering (not sure if this is necessary)
