@@ -6206,6 +6206,7 @@ void Report::checkPATrigger(
                 int trigger_ch_ID = GetChNumFromArbChID(detector, 8, i, settings1) - 1;
                 double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
                 tmp_noise_RMS.push_back( ant_noise_voltage_RMS );
+                cout<<"  PA Ant Noise RMS "<<ant_noise_voltage_RMS<<" ";
 
                 // Calculate SNR in this antenna
                 ant_SNR = get_SNR( 
