@@ -150,6 +150,21 @@ void Tools::realft(double *data, const int isign, int nsize){
         fftarray=(fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (nsize/2+1));
         format_transform(nsize,-1,fftarray, data);
         double* invfft;
+
+        vector <int> nan_tracker;
+        for (int index=0; index<nsize; index++){
+            if ( fftarray[index] != fftarray[index] ){
+                nan_tracker.push_back(index);
+            }
+        }
+        if ( nan_tracker.size() > 0 ){
+            cout<<endl<<"Nans found at the following indices: ";
+            for (int nan_index=0; nan_index<nan_tracker.size(); nan_index++){
+                cout<<nan_tracker[nan_index]<<" ";
+            }
+            cout<<endl;
+        }
+
         invfft=FFTtools::doInvFFT(nsize, (FFTWComplex*)fftarray);
         for(int i=0;i<nsize;i++)
             data[i]=invfft[i]*nsize/2;
