@@ -153,7 +153,7 @@ void Tools::realft(double *data, const int isign, int nsize){
 
         vector <int> nan_tracker;
         for (int index=0; index<nsize; index++){
-            if ( fftarray[index] != fftarray[index] ){
+            if ( *fftarray[index] != *fftarray[index] ){
                 nan_tracker.push_back(index);
             }
         }
