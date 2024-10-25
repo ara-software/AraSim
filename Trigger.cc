@@ -327,17 +327,13 @@ void Trigger::SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *r
                 }
 
                 // get v_noise array (noise voltage in time domain)
-                cout<<"        V_noise before entering report function "<<v_noise[16383]<<endl;
                 report->GetNoiseWaveforms_ch(settings1, detector, V_noise_freqbin_ch[ch], v_noise, ch);
 
                 // do normal time ordering (not sure if this is necessary)
-                cout<<"            V_noise before NTO "<<v_noise[100]<<endl;
                 Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise);
 
                 // Convolve signal through the tunnel diode
-                cout<<"            V_noise before convlv "<<v_noise[100]<<endl;
                 myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin,v_noise_timedomain_diode_ch[ch][i]);
-                cout<<"            V_noise after convlv"<<v_noise_timedomain_diode_ch[ch][i][100]<<endl;
 
                 // Save noise waveform and determine mean noise value in this channel
                 for (int m=0; m<settings1->DATA_BIN_SIZE; m++) {
@@ -356,16 +352,6 @@ void Trigger::SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *r
                     // save pure noise spectrum before applying Rayleigh distribution (only at first evt as they will be all same)
                     if ( i == 0 && m<settings1->DATA_BIN_SIZE/2 ) {
                         Vfft_noise_before.push_back(report->Vfft_noise_before[m]);
-                    }
-
-                    if (ch==0 && m==100){
-                        cout<<"    V_noise_timedomain_diode_ch "<<v_noise_timedomain_diode_ch[ch][i][m]<<endl;
-                        cout<<"    ngeneratedevents "<<ngeneratedevents<<endl;
-                        cout<<"    data bin size "<<settings1->DATA_BIN_SIZE<<endl;
-                        cout<<"    maxtdiode "<<maxt_diode<<endl;
-                        cout<<"    Timestep "<<TIMESTEP<<endl;
-                        cout<<"    vnoise "<<v_noise[m]<<endl;
-                        cout<<"    report noise before "<<report->Vfft_noise_before[m]<<endl;
                     }
 
                 }
@@ -411,9 +397,6 @@ void Trigger::SetMeanRmsDiode(Settings *settings1, Detector *detector, Report *r
         // Finish RMS calculation and print out
         cout << "From pure noise waveforms, diode responses" << "\n";
         for (int ch=0; ch<num_chs; ch++) {
-            if (ch==0){
-                cout<<"    before sqrt, rmsdiode "<<rmsdiode<<" rmsvoltage "<<rmsvoltage<<endl;
-            }
             rmsdiode_ch[ch]=sqrt(rmsdiode_ch[ch]);
             rmsvoltage_ch[ch]=sqrt(rmsvoltage_ch[ch]);
             cout << "For ch"<<ch<<" mean, rms diode are " << meandiode_ch[ch] << " " << rmsdiode_ch[ch] << " rms voltage is "<<rmsvoltage_ch[ch]<<"\n";
@@ -633,7 +616,6 @@ double Trigger::GetAntNoise_voltageRMS(int ch_ID, Settings *settings1){
     }
     else if (settings1->NOISE_CHANNEL_MODE == 1){
         // All antennas have their own noise WFs
-        cout<<"  In Trigger::GetAntNoise, length of rmsvoltage_ch: "<<rmsvoltage_ch.size()<<" ";
         return rmsvoltage_ch[ch_ID];
     }
     else if (settings1->NOISE_CHANNEL_MODE == 2){

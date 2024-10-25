@@ -4776,7 +4776,6 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
 // generate DATA_BIN_SIZE sized noise waveform array in time domain
 void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, double v_noise, double * vnoise, int ch) {
     //  cout << "channel: " << ch << endl;
-    cout<<"        last V_noise after entering report function "<<vnoise[16383]<<endl;
     if (settings1 -> NOISE == 0) { // NOISE == 0 : flat thermal noise with Johnson-Nyquist noise
 
         Vfft_noise_after.clear(); // remove previous Vfft_noise values
@@ -5004,26 +5003,10 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 vnoise[2 * k] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
                 vnoise[2 * k + 1] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
 
-                if (k==100) {
-                    cout<<"        delta f "<<this_delta_f<<endl;
-                    cout<<"        vfft noise before "<<fits_for_this_station[ch][k]<<endl;
-                    cout<<"        current phase "<<current_phase<<endl;
-                    cout<<"        V_tmp "<<V_tmp<<endl;
-                    cout<<"        vnoise [2k] "<<vnoise[2 * k]<<endl;
-                    cout<<"        vnoise [2k+1] "<<vnoise[2 * k + 1]<<endl;
-                    cout<<"        Vnoise after [2k] "<<Vfft_noise_after[2 * k]<<endl;
-                }
-
             }
 
             // real FT back to get vnoise in time domain waveform; 
-            cout<<"          Noise (real) before realft "<<vnoise[200]<<endl;
-            cout<<"          Noise (imaginary) before realft "<<vnoise[201]<<endl;
-            cout<<"          Noise before realft "<<vnoise[16383]<<endl;
-            cout<<"          Data bin size "<<settings1 -> DATA_BIN_SIZE<<endl;
             Tools::realft(vnoise, -1, settings1 -> DATA_BIN_SIZE);
-            cout<<"          Noise after realft "<<vnoise[100]<<endl;
-            cout<<"          Noise after realft "<<vnoise[16383]<<endl;
 
         }
 
@@ -6223,7 +6206,6 @@ void Report::checkPATrigger(
                 int trigger_ch_ID = GetChNumFromArbChID(detector, 8, i, settings1) - 1;
                 double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
                 tmp_noise_RMS.push_back( ant_noise_voltage_RMS );
-                cout<<"  PA Ant Noise RMS "<<ant_noise_voltage_RMS<<" ";
 
                 // Calculate SNR in this antenna
                 ant_SNR = get_SNR( 
