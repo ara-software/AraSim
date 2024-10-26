@@ -91,7 +91,7 @@ void IceModel::setUpIceModel(int model) {
   } //else if (BEDMAP)
  //read in attenuation length data for direct signals
   int i=0;
-  ifstream sheetup("data/icesheet_attenlength_up.txt");
+  ifstream sheetup(string(getenv("ARA_SIM_DIR"))+"/data/icesheet_attenlength_up.txt");
   if(sheetup.fail())
     {
       cerr << "Failed to open icesheet_attenlength_up.txt" << endl;
@@ -105,7 +105,7 @@ void IceModel::setUpIceModel(int model) {
     }
   sheetup.close();
 
-  ifstream shelfup("data/iceshelf_attenlength_up.txt");
+  ifstream shelfup(string(getenv("ARA_SIM_DIR"))+"/data/iceshelf_attenlength_up.txt");
   if(shelfup.fail())
     {
       cerr << "Failed to open iceshelf_attenlength_up.txt" << endl;
@@ -119,7 +119,7 @@ void IceModel::setUpIceModel(int model) {
     }
   shelfup.close();
 
-  ifstream westlandup("data/westland_attenlength_up.txt");
+  ifstream westlandup(string(getenv("ARA_SIM_DIR"))+"/data/westland_attenlength_up.txt");
   if(westlandup.fail())
     {cerr << "Failed to open westland_attenlength_up.txt";
       exit(1);
@@ -132,7 +132,7 @@ void IceModel::setUpIceModel(int model) {
   westlandup.close();
 
   //read in attenuation length for downgoing signals
-  ifstream sheetdown("data/icesheet_attenlength_down.txt");
+  ifstream sheetdown(string(getenv("ARA_SIM_DIR"))+"/data/icesheet_attenlength_down.txt");
   if(sheetdown.fail())
     {
       cerr << "Failed to open icesheet_attenlength_down.txt" << endl;
@@ -147,7 +147,7 @@ void IceModel::setUpIceModel(int model) {
   sheetdown.close();
 
 
-  ifstream shelfdown("data/iceshelf_attenlength_down.txt");
+  ifstream shelfdown(string(getenv("ARA_SIM_DIR"))+"/data/iceshelf_attenlength_down.txt");
   if(shelfdown.fail())
     {
       cerr << "Failed to open iceshelf_attenlength_down.txt" << endl;
@@ -161,7 +161,7 @@ void IceModel::setUpIceModel(int model) {
     }
   shelfdown.close();
 
-  ifstream westlanddown("data/westland_attenlength_down.txt");
+  ifstream westlanddown(string(getenv("ARA_SIM_DIR"))+"/data/westland_attenlength_down.txt");
   if(westlanddown.fail())
     {cerr << "Failed to open westland_attenlength_down.txt";
       exit(1);
