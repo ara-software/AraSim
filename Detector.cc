@@ -1479,27 +1479,27 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
         if (settings1 -> NOISE == 1) {
             // read Rayleigh fit for freq range, bh channels
-            ReadRayleighFit_TestBed("data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
+            ReadRayleighFit_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
         }
 
         if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
             // read RFCM gain file!! (measured value in ICL)
-            ReadRFCM_TestBed("data/TestBed_RFCM/R1C1.csv", settings1); // read and save RFCM gain for ch1
-            ReadRFCM_TestBed("data/TestBed_RFCM/R1C2.csv", settings1); // read and save RFCM gain for ch2
-            ReadRFCM_TestBed("data/TestBed_RFCM/R1C3.csv", settings1); // read and save RFCM gain for ch3
-            ReadRFCM_TestBed("data/TestBed_RFCM/R1C4.csv", settings1); // read and save RFCM gain for ch4
-            ReadRFCM_TestBed("data/TestBed_RFCM/R2C5.csv", settings1); // read and save RFCM gain for ch5
-            ReadRFCM_TestBed("data/TestBed_RFCM/R2C6.csv", settings1); // read and save RFCM gain for ch6
-            ReadRFCM_TestBed("data/TestBed_RFCM/R2C7.csv", settings1); // read and save RFCM gain for ch7
-            ReadRFCM_TestBed("data/TestBed_RFCM/R2C8.csv", settings1); // read and save RFCM gain for ch8
-            ReadRFCM_TestBed("data/TestBed_RFCM/R3C9.csv", settings1); // read and save RFCM gain for ch9
-            ReadRFCM_TestBed("data/TestBed_RFCM/R3C10.csv", settings1); // read and save RFCM gain for ch10
-            ReadRFCM_TestBed("data/TestBed_RFCM/R3C11.csv", settings1); // read and save RFCM gain for ch11
-            ReadRFCM_TestBed("data/TestBed_RFCM/R3C12.csv", settings1); // read and save RFCM gain for ch12
-            ReadRFCM_TestBed("data/TestBed_RFCM/R4C13.csv", settings1); // read and save RFCM gain for ch13
-            ReadRFCM_TestBed("data/TestBed_RFCM/R4C14.csv", settings1); // read and save RFCM gain for ch14
-            ReadRFCM_TestBed("data/TestBed_RFCM/R4C15.csv", settings1); // read and save RFCM gain for ch15
-            ReadRFCM_TestBed("data/TestBed_RFCM/R4C16.csv", settings1); // read and save RFCM gain for ch16
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C1.csv", settings1); // read and save RFCM gain for ch1
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C2.csv", settings1); // read and save RFCM gain for ch2
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C3.csv", settings1); // read and save RFCM gain for ch3
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C4.csv", settings1); // read and save RFCM gain for ch4
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C5.csv", settings1); // read and save RFCM gain for ch5
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C6.csv", settings1); // read and save RFCM gain for ch6
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C7.csv", settings1); // read and save RFCM gain for ch7
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C8.csv", settings1); // read and save RFCM gain for ch8
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C9.csv", settings1); // read and save RFCM gain for ch9
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C10.csv", settings1); // read and save RFCM gain for ch10
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C11.csv", settings1); // read and save RFCM gain for ch11
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C12.csv", settings1); // read and save RFCM gain for ch12
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C13.csv", settings1); // read and save RFCM gain for ch13
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C14.csv", settings1); // read and save RFCM gain for ch14
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C15.csv", settings1); // read and save RFCM gain for ch15
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C16.csv", settings1); // read and save RFCM gain for ch16
         }
 
         // read gain offset for chs file!!
@@ -1730,27 +1730,27 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         if (settings1 -> DETECTOR_STATION == 0) {
             if (settings1 -> NOISE == 1) {
                 // read Rayleigh fit for freq range, bh channels
-                ReadRayleighFit_TestBed("data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
+                ReadRayleighFit_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
             }
 
             if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
                 // read RFCM gain file!! (measured value in ICL)
-                ReadRFCM_TestBed("data/TestBed_RFCM/R1C1.csv", settings1); // read and save RFCM gain for ch1
-                ReadRFCM_TestBed("data/TestBed_RFCM/R1C2.csv", settings1); // read and save RFCM gain for ch2
-                ReadRFCM_TestBed("data/TestBed_RFCM/R1C3.csv", settings1); // read and save RFCM gain for ch3
-                ReadRFCM_TestBed("data/TestBed_RFCM/R1C4.csv", settings1); // read and save RFCM gain for ch4
-                ReadRFCM_TestBed("data/TestBed_RFCM/R2C5.csv", settings1); // read and save RFCM gain for ch5
-                ReadRFCM_TestBed("data/TestBed_RFCM/R2C6.csv", settings1); // read and save RFCM gain for ch6
-                ReadRFCM_TestBed("data/TestBed_RFCM/R2C7.csv", settings1); // read and save RFCM gain for ch7
-                ReadRFCM_TestBed("data/TestBed_RFCM/R2C8.csv", settings1); // read and save RFCM gain for ch8
-                ReadRFCM_TestBed("data/TestBed_RFCM/R3C9.csv", settings1); // read and save RFCM gain for ch9
-                ReadRFCM_TestBed("data/TestBed_RFCM/R3C10.csv", settings1); // read and save RFCM gain for ch10
-                ReadRFCM_TestBed("data/TestBed_RFCM/R3C11.csv", settings1); // read and save RFCM gain for ch11
-                ReadRFCM_TestBed("data/TestBed_RFCM/R3C12.csv", settings1); // read and save RFCM gain for ch12
-                ReadRFCM_TestBed("data/TestBed_RFCM/R4C13.csv", settings1); // read and save RFCM gain for ch13
-                ReadRFCM_TestBed("data/TestBed_RFCM/R4C14.csv", settings1); // read and save RFCM gain for ch14
-                ReadRFCM_TestBed("data/TestBed_RFCM/R4C15.csv", settings1); // read and save RFCM gain for ch15
-                ReadRFCM_TestBed("data/TestBed_RFCM/R4C16.csv", settings1); // read and save RFCM gain for ch16
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C1.csv", settings1); // read and save RFCM gain for ch1
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C2.csv", settings1); // read and save RFCM gain for ch2
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C3.csv", settings1); // read and save RFCM gain for ch3
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C4.csv", settings1); // read and save RFCM gain for ch4
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C5.csv", settings1); // read and save RFCM gain for ch5
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C6.csv", settings1); // read and save RFCM gain for ch6
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C7.csv", settings1); // read and save RFCM gain for ch7
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C8.csv", settings1); // read and save RFCM gain for ch8
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C9.csv", settings1); // read and save RFCM gain for ch9
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C10.csv", settings1); // read and save RFCM gain for ch10
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C11.csv", settings1); // read and save RFCM gain for ch11
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C12.csv", settings1); // read and save RFCM gain for ch12
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C13.csv", settings1); // read and save RFCM gain for ch13
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C14.csv", settings1); // read and save RFCM gain for ch14
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C15.csv", settings1); // read and save RFCM gain for ch15
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C16.csv", settings1); // read and save RFCM gain for ch16
             }
 
             // read gain offset for chs file!!

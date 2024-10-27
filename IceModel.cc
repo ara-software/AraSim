@@ -177,7 +177,7 @@ void IceModel::setUpIceModel(int model) {
   // new ARA ice attenuation measurement values (at 300 MHz)
   //
   /*
-  ifstream file( "data/ARA_IceAttenL.txt" );
+  ifstream file( string(getenv("ARA_SIM_DIR"))+"/data/ARA_IceAttenL.txt" );
 
   string line;
   string line2;
@@ -1583,7 +1583,7 @@ void IceModel::WaterENtoLonLat(int e, int n, double& lon, double& lat) const {
 void IceModel::ReadIceThickness() {
   //Reads the BEDMAP ice thickness data.  Assumes the file is in directory "data".  Code by Ryan Nichol, added to Monte Carlo by Stephen Hoover
 
-  ifstream IceThicknessFile("data/icethic.asc");
+  ifstream IceThicknessFile(string(getenv("ARA_SIM_DIR"))+"/data/icethic.asc");
   if(!IceThicknessFile) {
     cerr << "Couldn't open: data/icethic.asc" << endl;
     exit(1);
@@ -1640,7 +1640,7 @@ void IceModel::ReadIceThickness() {
 
 void IceModel::ReadGroundBed() {
   //Reads the BEDMAP data on the elevation of the ground beneath the ice.  If there is water beneath the ice, the ground elevation is given the value 0.  Assumes the file is in directory "data".  Code by Ryan Nichol, added to Monte Carlo by Stephen Hoover
-  ifstream GroundBedFile("data/groundbed.asc");
+  ifstream GroundBedFile(string(getenv("ARA_SIM_DIR"))+"/data/groundbed.asc");
   if(!GroundBedFile) {
     cerr << "Couldn't open: data/groundbed.asc" << endl;
     exit(1);
@@ -1701,7 +1701,7 @@ void IceModel::ReadGroundBed() {
 
 void IceModel::ReadWaterDepth() {
   //Reads BEDMAP data on the depth of water beneath the ice.  Where no water is present, the value 0 is entered.  Assumes the file is in directory "data".  Code by Ryan Nichol, added to Monte Carlo by Stephen Hoover
-  ifstream WaterDepthFile("data/water.asc");
+  ifstream WaterDepthFile(string(getenv("ARA_SIM_DIR"))+"/data/water.asc");
   if(!WaterDepthFile) {
     cerr << "Couldn't open: data/water.asc" << endl;
     exit(1);

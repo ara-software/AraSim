@@ -68,7 +68,7 @@ Secondaries::~Secondaries() {
   
   TAUFRAC=.5; //fraction of tau neutrino-cc current events where the primare interaction point is the first bang   
 
-  tauolainfile.open("data/tau_decay_tauola.dat",ifstream::in);
+  tauolainfile.open(string(getenv("ARA_SIM_DIR"))+"/data/tau_decay_tauola.dat",ifstream::in);
 
 
   count_nfb=0;
