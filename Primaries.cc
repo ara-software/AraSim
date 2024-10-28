@@ -765,7 +765,7 @@ double Primaries::GetThisAirColumn(Settings* settings1, Position r_in,Vector nnu
 void Primaries::GetAir(double *col1) {
 
   double nothing;
-  ifstream air1("data/atmosphere.dat"); // length of chord in air vs. theta (deg)
+  ifstream air1(string(getenv("ARA_SIM_DIR"))+"/data/atmosphere.dat"); // length of chord in air vs. theta (deg)
   //where theta is respect to "up"   
   // binned in 0.1 degrees
   for(int iii=0;iii<900;iii++) 

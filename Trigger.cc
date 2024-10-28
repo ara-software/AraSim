@@ -91,10 +91,9 @@ Trigger::Trigger(Detector *detector, Settings *settings1) {
         // Load Efficiency vs SNR curve: 
         // From arxiv.1809.04573, Fig 15, Dashed Pink 0.8Hz/beam curve
         ifstream infile;
-        infile.open("data/nuphase_trig_effc.txt",ios::in);
-        if(infile.fail()){ // checks to see if file opended
-            cerr << "   error, file could not be opened" << endl;
-        }
+        infile.open(string(getenv("ARA_SIM_DIR"))+"/data/nuphase_trig_effc.txt",ios::in);
+        if(infile.fail()) // checks to see if file opended
+            throw runtime_error("nuphase trigger efficiency file could not be opened");
         int num = 0;
         while(!infile.eof()) { // reads file to end of *file*, not line
             infile >> snr_PA[num]  // read first column number
@@ -109,10 +108,9 @@ Trigger::Trigger(Detector *detector, Settings *settings1) {
         //   arxiv.1809.04573 into digitized, linear units but ARB has not 
         //   been able to replicate this
         infile.clear();
-        infile.open("data/nuphase_SNR_angle.txt",ios::in);
-        if(infile.fail()) { // checks to see if file opended
-            cerr << "   error, file could not be opened" << endl;
-        }
+        infile.open(string(getenv("ARA_SIM_DIR"))+"/data/nuphase_SNR_angle.txt",ios::in);
+        if(infile.fail())  // checks to see if file opended
+            throw runtime_error("nuphase SNR angle file could not be opened");
         num = 0;
         while(!infile.eof()) { // reads file to end of *file*, not line
             infile >> angle_PA[num]   // read first column number
