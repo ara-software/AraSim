@@ -835,50 +835,53 @@ void Report::BuildAndTriggerOnWaveforms(
     }   // if there is any ray_sol in the station
 
     // Check if there's additional waveform to trigger on. Save this event and rerun trigger if so.
-    int next_trig_search_init = -1;
-    bool analyze_more_waveform = false;
-    for (int string=0; string<stations[station_index].strings.size(); string++){
-        for (int antenna=0; antenna<stations[station_index].strings[string].antennas.size(); antenna++){
+    if (stations[station_index].Global_Pass) {
+        bool analyze_more_waveform = false;
+        int next_trig_search_init = -1;
+        for (int string=0; string<stations[station_index].strings.size(); string++){
+            for (int antenna=0; antenna<stations[station_index].strings[string].antennas.size(); antenna++){
 
-            // Calculate the next bin that the station would check for trigger
-            int this_next_trig_search_init = (
-                stations[station_index].Global_Pass // trigger bin
-                + stations[station_index].strings[string].antennas[antenna].global_trig_bin // end of the readout window
-                + settings1->DEADTIME/settings1->TIMESTEP // deadtime in units of bins
-            ); 
+                // Calculate the next bin that the station would check for trigger
+                int this_next_trig_search_init = (
+                    stations[station_index].Global_Pass // trigger bin
+                    + stations[station_index].strings[string].antennas[antenna].global_trig_bin // end of the readout window
+                    + settings1->DEADTIME/settings1->TIMESTEP // deadtime in units of bins
+                ); 
 
-            // Save the largest next_trig_search_init for this station                   
-            if (this_next_trig_search_init > next_trig_search_init) {
-                next_trig_search_init = this_next_trig_search_init;
-            }
-
-            int signal_length = stations[station_index].strings[string].antennas[antenna].V_convolved.size();
-
-            // Find the last bin in V_convolved that has nonzero signal 
-            int last_nonzero_bin = signal_length-1;
-            for (int bin=signal_length-1; bin>-1; bin--) {
-                if ( stations[station_index].strings[string].antennas[antenna].V_convolved[bin] != 0. ) {
-                    last_nonzero_bin = bin;
-                    break;
+                // Save the largest next_trig_search_init for this station                   
+                if (this_next_trig_search_init > next_trig_search_init) {
+                    next_trig_search_init = this_next_trig_search_init;
                 }
-            }
 
-            // If there is signal that exists beyond what would be the next trig_search_init, 
-            //   indicate that we need to analyze more signal.
-            if ( last_nonzero_bin > this_next_trig_search_init ){
-                analyze_more_waveform = true;
+                int signal_length = stations[station_index].strings[string].antennas[antenna].V_convolved.size();
+
+                // Find the last bin in V_convolved that has nonzero signal 
+                int last_nonzero_bin = signal_length-1;
+                for (int bin=signal_length-1; bin>-1; bin--) {
+                    if ( stations[station_index].strings[string].antennas[antenna].V_convolved[bin] != 0. ) {
+                        last_nonzero_bin = bin;
+                        break;
+                    }
+                }
+
+                // If there is signal that exists beyond what would be the next trig_search_init, 
+                //   indicate that we need to analyze more signal.
+                if ( last_nonzero_bin > this_next_trig_search_init ){
+                    analyze_more_waveform = true;
+                }
+
             }
+        }
+        if (analyze_more_waveform) {
+            
+            // Save the results from this trigger check
+
+            // Prepare data for the next trigger check
+
+            // Rerun the trigger check on the next piece of signal
+            BuildAndTriggerOnWaveforms(debugmode, station_index, evt, next_trig_search_init, detector, event, settings1, trigger);
 
         }
-    }
-    if (analyze_more_waveform) {
-        
-        // Save the results from this trigger check
-
-        // Prepare data for the next trigger check
-
-        // Rerun the trigger check on the next piece of signal
-        BuildAndTriggerOnWaveforms(debugmode, station_index, evt, next_trig_search_init, detector, event, settings1, trigger);
 
     }
 
