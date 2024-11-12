@@ -843,8 +843,9 @@ void Report::BuildAndTriggerOnWaveforms(
 
                 // Calculate the next bin that the station would check for trigger
                 int this_next_trig_search_init = (
-                    stations[station_index].Global_Pass // trigger bin
-                    + stations[station_index].strings[string].antennas[antenna].global_trig_bin // end of the readout window
+                    stations[station_index].Global_Pass // trigger bin in V_convolved
+                    + (settings1->WAVEFORM_LENGTH - stations[station_index].strings[string].antennas[antenna].global_trig_bin) 
+                        // number of bins between trigger bin and end of readout window
                     + settings1->DEADTIME/settings1->TIMESTEP // deadtime in units of bins
                 ); 
 
