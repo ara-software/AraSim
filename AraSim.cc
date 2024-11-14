@@ -465,13 +465,6 @@ int main(int argc, char **argv) {   // read setup.txt file
         // go further only if we picked up usable posnu
         if (event->Nu_Interaction[0].pickposnu>0) {
 
-            /*
-            if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0) {// noise waveforms will be generated for each evts
-                trigger->GetNewNoiseWaveforms(settings1, detector, report);
-            }
-            */
-
-
             //--------------------------------------------------
             // cout<<"inu : "<<inu<<endl;
             // cout<<"event->pnu : "<<event->pnu<<endl;
@@ -485,13 +478,7 @@ int main(int argc, char **argv) {   // read setup.txt file
             // cout<<"pickposnu : "<<event->Nu_Interaction[0].pickposnu<<endl;
             //-------------------------------------------------- 
 
-            // connect Interaction class (nu interaction with ice) and Detector class (detector properties and layout)
-            // save signal, noise at each antennas to Report class
-            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger);
-
-            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent);
             report->Connect_Interaction_Detector_V2(event, detector, raysolver, signal, icemodel, birefringence, settings1, trigger, Events_Thrown);
-            //report->Connect_Interaction_Detector (event, detector, raysolver, signal, icemodel, settings1, trigger, theEvent, Events_Thrown);
 
             #ifdef ARA_UTIL_EXISTS
                 if (settings1->DATA_LIKE_OUTPUT !=0){
@@ -513,18 +500,9 @@ int main(int argc, char **argv) {   // read setup.txt file
                         // report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theIcrrEvent);
                         cout << endl << "Making useful event" << endl;
                         report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theAtriEvent);
-                        /*
-                        for (int i_chan = 0; i_chan< 16; i_chan++){
-                            int elecChan = AraGeomTool::Instance()->getElecChanFromRFChan(i_chan, stationID);
-                            int string_i = detector->getStringfromArbAntID( stationIndex, i_chan);
-                            int antenna_i = detector->getAntennafromArbAntID( stationIndex, i_chan);
-                            cout << "Output: " << elecChan << " : " << theAtriEvent->fTimes[elecChan][1] <<  " : " << report->stations[stationIndex].strings[string_i].antennas[antenna_i].time_mimic[1] << endl;
-                        }
-                        */
                     }
                     weight = event->Nu_Interaction[0].weight;
-                }
-                // cout << "weight: " << weight <<endl;    
+                }   
             #endif
 
             report->ClearUselessfromConnect(detector, settings1, trigger);
@@ -536,7 +514,6 @@ int main(int argc, char **argv) {   // read setup.txt file
                 cur_posnu_x = event->Nu_Interaction[0].posnu.GetX();
                 cur_posnu_y = event->Nu_Interaction[0].posnu.GetY();
                 cur_posnu_z = event->Nu_Interaction[0].posnu.GetZ();
-                // cout<<"posnu x:"<<cur_posnu_x<<" y:"<<cur_posnu_y<<" z:"<<cur_posnu_z<<endl;
                 if (inu>0) {
                     if (pre_posnu_x==cur_posnu_x && pre_posnu_y==cur_posnu_y && pre_posnu_z==cur_posnu_z) {
                     }
@@ -591,30 +568,9 @@ int main(int argc, char **argv) {   // read setup.txt file
                 }
             }
 
-            /*
-            AraTree2->Fill();   //fill interaction every events
-            // for 1, save all events whether passed trigger or not
-            if (settings1->DATA_LIKE_OUTPUT==2) {
-                //theEvent = &report->theUsefulEvent;
-                eventTree->Fill();
-            }
-            // for 0, save events which passed trigger
-            else if (settings1->DATA_LIKE_OUTPUT==1) {
-                //if ( Global_Pass_Flag == 1 ) {
-                if ( check_station_DC > 0 ) {
-                    //theEvent = &report->theUsefulEvent;
-                    eventTree->Fill();
-                }
-            }
-            theEvent = NULL;
-
-            delete theEvent;
-            */
-
             settings1->ACCUM_TRIG_SEARCH_BINS_STATION0 += report->stations[0].total_trig_search_bin;
         } // if pickposnu > 0
         else {
-            //cout<<"pickposnu : "<<event->Nu_Interaction[0].pickposnu<<endl;
             report->delete_all();
             event->delete_all();
         }
@@ -691,21 +647,6 @@ int main(int argc, char **argv) {   // read setup.txt file
             Events_Passed++;
         }
         Events_Thrown++;
-             
-
-        //theEvent = NULL;
-
-        /*
-        if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0) {// noise waveforms will be generated for each evts
-            // remove noise waveforms for next evt
-            rigger->ClearNoiseWaveforms();
-        }
-        */
-
-        // if(inu==nuLimit){
-        //      cout<<endl<<"sizeof: Report= "<<sizeof(*report)<<"  station= "<<sizeof(report->stations[0])<<"  antenna= "<<sizeof(report->stations[0].strings[0].antennas[0])<<endl;
-        //      cout<<"sizeof: Event= "<<sizeof(*event)<<" Interaction= "<<sizeof(event->Nu_Interaction[0])<<"  TOTAL SIZE= "<<sizeof(*report)+sizeof(*event)+sizeof(report->stations[0])+16*sizeof(report->stations[0].strings[0].antennas[0])+sizeof(event->Nu_Interaction[0])<<endl;
-        // }
 
         delete event;
         delete report;
