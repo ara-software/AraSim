@@ -506,6 +506,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
             for (int k = 0; k < detector->stations[i].strings[j].antennas.size(); k++)
             {
+cout << "string: " << k << endl;
                 // cout << i << " : " << j << " : " << k << endl;
 
                 stations[i].strings[j].antennas[k].clear(); // clear data in antenna which stored in previous event
@@ -1394,18 +1395,43 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             	{
 
                                                 	freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
-
+cout << "Here 1" << endl;
                                                     heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta,  antenna_phi,  detector->stations[i].strings[j].antennas[k].type, j, k),
                                                                         freq_tmp, 
                                                                         icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                                         detector->GetImpedance(freq_tmp*1.E-6, detector->stations[i].strings[j].antennas[k].type, k));                                                    
 
                                                 	stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(heff);
-                                           		
+cout << "Here 2" << endl;
+                                                    // Co-pol effective height
+                                                    double heff_copol = GaintoHeight(
+                                                        detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, antenna_theta, antenna_phi,
+                                                                                    detector->stations[i].strings[j].antennas[k].type, j, k, false, false),
+                                                        freq_tmp,
+                                                        icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
+                                                        detector->GetImpedance(freq_tmp * 1.E-6, detector->stations[i].strings[j].antennas[k].type, k));
+cout << "Here 3" << endl;
+                                                    // Cross-pol effective height
+                                                    double heff_crosspol = GaintoHeight(
+                                                        detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, antenna_theta, antenna_phi,
+                                                                                    detector->stations[i].strings[j].antennas[k].type, j, k, false, true),
+                                                        freq_tmp,
+                                                        icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
+                                                        detector->GetImpedance(freq_tmp * 1.E-6, detector->stations[i].strings[j].antennas[k].type, k));
+cout << "Here 4" << endl;                                           		
                                                     if (n > 0)
                                                 	{
-                                                        ApplyAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
-                                                            heff, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);
+                                                        // Retrieve co-pol and cross-pol phases
+                                                        double phase_copol = detector->GetAntPhase_1D(freq_tmp * 1.e-6, antenna_theta, antenna_phi, 
+                                                                                                    detector->stations[i].strings[j].antennas[k].type, false, false);
+                                                        double phase_crosspol = detector->GetAntPhase_1D(freq_tmp * 1.e-6, antenna_theta, antenna_phi, 
+                                                                                                        detector->stations[i].strings[j].antennas[k].type, false, true);
+
+                                                        // Call ApplyAntFactors_Tdomain with both co-pol and cross-pol contributions
+                                                        ApplyAntFactors_Tdomain_new(phase_copol, phase_crosspol, heff_copol, heff_crosspol, 
+                                                                                Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
+                                                                                V_forfft[2 * n], V_forfft[2 * n + 1], settings1, 
+                                                                                antenna_theta, antenna_phi, freq_tmp);
                                                     
                                                 	}
                                                 	else
@@ -4269,6 +4295,112 @@ void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_sla
 
 
 
+void Report::ApplyAntFactors_Tdomain_new(double phase_copol, double phase_crosspol, double heff_copol, double heff_crosspol, Vector &Pol_vector, 
+                                     int ant_type, double &pol_factor, double &vm_real, double &vm_img, 
+                                     Settings *settings1, double antenna_theta, double antenna_phi, double freq, 
+                                     bool useInTransmitterMode, bool applyInverse) {
+                                        
+    /*  Report::ApplyAntFactors_Tdomain()
+    Purpose: 
+        Multiply (or divide) voltage in Fourier space by the antenna gain and phase.
+    
+    Inputs:
+        AntPhase:  Phase of the antenna, usually calculated with Detector::GetAntPhase_1D()
+        heff:  Effective height of the antenna, usually calculated with Report::GainToHeight
+        Pol_vector:  polarization vector of electric field as it reaches the antenna.  Used to calculate pol_factor
+        ant_type:  integer indicates Vpol (0) or HPol (1) antenna.  Use to calculate pol_factor
+        pol_factor:  The projection of the E-field onto the antenna.  Essentially the cos(theta) term in a dot product between the E-field and effective height vector.
+        vm_real:  Real component of the voltage in this frequency bin of the fourier space.
+        vm_img:  Imaginary component of the voltage in this frequency bin of the fourier space.
+        settings1:  The ARA settings object containing the setup of the simulation or detector.
+        antenna_theta:  Incoming angle of the k-vector of the E-field when incident on the antenna.
+        antenna_phi:  Incoming angle of the k-vector of the E-field when incident on the antenna.
+        freq:  Frequency of the current frequency bin.
+        useInTransmitterMode:  Boolean that dictates whether this antenna is in Transmitter mode (Tx) or Receiver mode (Rx)
+        applyInverse:  Boolean that dictates if we're applying the antenna factors (projecting E-field onto h to get voltage) or inverting the factors (dividing h out of voltage to get E-field).
+        
+    Outputs:
+        New values of the following via pass-by-reference:
+        pol_factor, vm_real, vm_img
+    
+    */
+    double phaseSign = 1.;
+    double amplitudeSign = 1.;
+    //If using in transmitter mode, the phase gets a minus sign since the signal is out-going from the antenna rather than incoming.
+    if(useInTransmitterMode==true){ phaseSign*=-1.;};
+    //If using this function to invert the antenna response, we apply a minus sign the phase in order to undo the phase applied by the antenna.  We also divide the amplitude by the factor rather than multiply.  To do this, we simply apply a -1 to the power of the factor applied to the amplitude so that it is divided out.
+    if(applyInverse==true){ phaseSign*=-1.; amplitudeSign*=-1;};
+
+    //Calculate the polarization factor, which is essentially the vector component of the Electric field that is projected onto the antenna.
+    //pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
+   // Calculate the co-pol and cross-pol polarization factors
+    double pol_factor_copol = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
+    double pol_factor_crosspol = calculatePolFactor(Pol_vector, 1 - ant_type, antenna_theta, antenna_phi); // Opposite polarization type
+
+    if ( settings1->PHASE_SKIP_MODE != 1 ) {
+        double phase_current;
+        if ( vm_real != 0. ) {
+            phase_current = atan( vm_img / vm_real );
+            // phase in +-PI range
+            if (vm_real<0.) {
+                if (vm_img>0.) phase_current += PI;
+                else if (vm_img<0.) phase_current -= PI;
+            }
+        }
+        else {
+            if ( vm_img>0. ) phase_current = PI;
+            else if (vm_img<0.) phase_current = -PI;
+            else phase_current = 0.;
+        }
+        //Calculate amplitude via the real and imaginary components.
+        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img);
+
+        // Calculate amplitude contributions from co-pol and cross-pol
+        double v_amplification_copol = heff_copol * pol_factor_copol;
+        double v_amplification_crosspol = heff_crosspol * pol_factor_crosspol;
+
+        // Add the contributions linearly
+        double v_amplification = v_amplification_copol + v_amplification_crosspol;
+
+        // Apply amplitude sign for inversion if necessary
+        v_amp *= pow(v_amplification, amplitudeSign);
+
+        //If in transmitter mode, we must apply additional frequency and impedance terms to the amplitude.
+        if (useInTransmitterMode==true){ 
+            phase_current += PI/2;
+            // The factors of two in this line are currently up for debate.  Will be cleaned up in future push - JCF 3/2/2024 
+            v_amp *= pow(freq/CLIGHT*(Z0/Zr)/4/sqrt(2.), amplitudeSign);          
+        }
+
+        // Calculate the combined real and imaginary terms from co-pol and cross-pol
+        double vm_real_copol = vm_real * (v_amplification_copol * cos(phase_current + (phaseSign * phase_copol * RADDEG)));
+        double vm_img_copol = vm_img * (v_amplification_copol * sin(phase_current + (phaseSign * phase_copol * RADDEG)));
+
+        double vm_real_crosspol = vm_real * (v_amplification_crosspol * cos(phase_current + (phaseSign * phase_crosspol * RADDEG)));
+        double vm_img_crosspol = vm_img * (v_amplification_crosspol * sin(phase_current + (phaseSign * phase_crosspol * RADDEG)));
+
+        // Combine co-pol and cross-pol real and imaginary parts
+        vm_real = vm_real_copol + vm_real_crosspol;
+        vm_img = vm_img_copol + vm_img_crosspol;
+
+    }
+
+     else { // Amplitude-only mode
+        // Calculate amplitude contributions from co-pol and cross-pol
+        double v_amplification_copol = heff_copol * pol_factor_copol;
+        double v_amplification_crosspol = heff_crosspol * pol_factor_crosspol;
+
+        // Add the contributions linearly
+        double v_amplification = v_amplification_copol + v_amplification_crosspol;
+
+        // Apply amplitude sign for inversion if necessary
+        v_amplification = pow(v_amplification, amplitudeSign);
+
+        vm_real *= v_amplification;
+        vm_img *= v_amplification;
+    }
+}
+
 void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode, bool applyInverse) {  
     /*  Report::ApplyAntFactors_Tdomain()
     Purpose: 
@@ -4319,7 +4451,7 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol_
             else phase_current = 0.;
         }
         //Calculate amplitude via the real and imaginary components.
-        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img);
+        double v_amp = sqrt(vm_real*vm_real + vm_img*vm_img);
         //Apply effective height and polarization factors to ampltitude.
         v_amp *= pow(heff*pol_factor, amplitudeSign);
         //If in transmitter mode, we must apply additional frequency and impedance terms to the amplitude.

@@ -2256,6 +2256,21 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Custom.txt";
         HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Custom.txt";         
     }
+    std::string VgainCrossFile;
+    std::string VgainTopCrossFile;
+    std::string HgainCrossFile;
+
+    // Specify the cross-pol gain files (example for Kansas 2024 mode)
+    if (settings1->ANTENNA_MODE == 5 || settings1->ANTENNA_MODE == 1) {
+        VgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
+        VgainTopCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
+        HgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
+    }
+
+    // Read the cross-pol gain files
+    ReadAntennaGain(VgainCrossFile, settings1, eVPolCross);
+    ReadAntennaGain(VgainTopCrossFile, settings1, eVPolTopCross);
+    ReadAntennaGain(HgainCrossFile, settings1, eHPolCross);
     
     // Check for ALL_ANT_V_ON, then set all antennas to VPol if true
     if (settings1->ALL_ANT_V_ON == 1) {
@@ -2312,27 +2327,42 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
 
     // make sure dummy variables point to the right variables 
     switch(type) {
-      case(eVPol) :
-        gain = &Vgain;
-        phase = &Vphase;
-        transAnt_databin = &transV_databin;
-        break;
-      case(eVPolTop) :
-        gain = &VgainTop;
-        phase = &VphaseTop;
-        transAnt_databin = &transVTop_databin;
-        break;
-      case(eHPol) :
-        gain = &Hgain;
-        phase = &Hphase;
-        transAnt_databin = &transH_databin;
-        break;
-      case(eTx) :
-        gain = &Txgain;
-        phase = &Txphase;
-        break;
-      default :
-        throw runtime_error("Unknown antenna type!");
+        case(eVPol):
+            gain = &Vgain;
+            phase = &Vphase;
+            transAnt_databin = &transV_databin;
+            break;
+        case(eVPolTop):
+            gain = &VgainTop;
+            phase = &VphaseTop;
+            transAnt_databin = &transVTop_databin;
+            break;
+        case(eHPol):
+            gain = &Hgain;
+            phase = &Hphase;
+            transAnt_databin = &transH_databin;
+            break;
+        case(eVPolCross): // Cross-pol VPol
+            gain = &VgainCross;
+            phase = &VphaseCross;
+            transAnt_databin = &transVCross_databin;
+            break;
+        case(eVPolTopCross): // Cross-pol VPol Top
+            gain = &VgainTopCross;
+            phase = &VphaseTopCross;
+            transAnt_databin = &transVTopCross_databin;
+            break;
+        case(eHPolCross): // Cross-pol HPol
+            gain = &HgainCross;
+            phase = &HphaseCross;
+            transAnt_databin = &transHCross_databin;
+            break;
+        case(eTx):
+            gain = &Txgain;
+            phase = &Txphase;
+            break;
+        default:
+            throw runtime_error("Unknown antenna type!");
     }
 
     // open the requested file
@@ -2458,6 +2488,8 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     
     Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
+        cout << "Filename: " << filename << endl; 
+        cout << "ASG Trans_databin: " << trans_databin[i] << "i: " << i<< endl;
         if(!std::isfinite(trans_databin[i]))
           throw runtime_error("Non-finite FFT gain value found! "+filename);
         transAnt_databin->push_back(trans_databin[i]); // from Hz to MHz
@@ -2837,7 +2869,7 @@ double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m )
 }
 
 
-double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int string_number, int ant_number, bool useInTransmitterMode) {
+double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int string_number, int ant_number, bool useInTransmitterMode, bool useCrossPol) {
     
     /*
     The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, Txgain)
@@ -2849,37 +2881,40 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     
     //Assign local pointer to gain array specified in the function argument
     //VPol Rx
-    if ( Detector_mode == 5 ){ // Phased Array mode
-        if ( useInTransmitterMode ) tempGain = &Txgain; // Transmitter mode
-        else if ( ant_m == 1 ) tempGain = &Hgain; // PA Hpols
-        else {
-            if ( string_number == 0 ) tempGain = &Vgain; // PA Vpols
-            else {
-                if ( ant_number == 1 ) tempGain = &VgainTop; // A5 Top VPols
-                else tempGain = &Vgain; // A5 Bottom Vpols
+    if (Detector_mode == 5) { // Phased Array mode
+        if (useInTransmitterMode) {
+            tempGain = &Txgain; // Transmitter mode
+        } else if (ant_m == 1) {
+            tempGain = useCrossPol ? &HgainCross : &Hgain; // HPol
+        } else { // VPol
+            if (string_number == 0) {
+                tempGain = useCrossPol ? &VgainCross : &Vgain;
+            } else {
+                if (ant_number == 1) {
+                    tempGain = useCrossPol ? &VgainTopCross : &VgainTop; // A5 Top VPols
+                } else {
+                    tempGain = useCrossPol ? &VgainCross : &Vgain; // A5 Bottom VPols
+                }
             }
+        }
+    } else { // Traditional Station mode
+        if (!useInTransmitterMode) {
+            if (ant_m == 0) { // VPol
+                if (ant_number == 0) {
+                    tempGain = useCrossPol ? &VgainCross : &Vgain;
+                } else if (ant_number == 2) {
+                    tempGain = useCrossPol ? &VgainTopCross : &VgainTop;
+                }
+            } else if (ant_m == 1) { // HPol
+                tempGain = useCrossPol ? &HgainCross : &Hgain;
+            }
+        } else { // Tx mode
+            tempGain = &Txgain;
         }
     }
-    else { // Traditional Station mode
-        if ( ant_m == 0 and not useInTransmitterMode) {
-            if (ant_number == 0) {
-                tempGain = &Vgain;
-            }
-            else if (ant_number == 2) {
-                tempGain = &VgainTop;
-            }
-        }
-        //HPol Rx
-        else if ( ant_m == 1 and not useInTransmitterMode) {
-            tempGain = &Hgain;
-        }
-        //Tx
-        else if (useInTransmitterMode) {
-            tempGain = &Txgain;
-        } 
-        else {
-            throw runtime_error("In GetGain_1D_OutZero: No appropriate gain model for this simulation setup.");
-        }
+
+    if (!tempGain) {
+        throw runtime_error("In GetGain_1D_OutZero: No appropriate gain model for this simulation setup.");
     }
     
     // check if angles range actually theta 0-180, phi 0-360
@@ -2984,22 +3019,25 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
 
 
 
-double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m, bool useInTransmitterMode ) {
+double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m, bool useInTransmitterMode, bool useCrossPol ) {
     
     //Creating tempPhase array to make this function more dynamic for Rx and Tx mode.
     double (*tempPhase)[freq_step_max][ang_step_max] = nullptr;
     
-    //VPol Rx
-    if ( ant_m == 0 and not useInTransmitterMode) {
-        tempPhase = &Vphase;
-    }
-    //HPol Rx
-    else if ( ant_m == 1 and not useInTransmitterMode) {
-        tempPhase = &Hphase;
-    }
-    //Tx
-    else if (useInTransmitterMode) {
+
+    // Assign tempPhase based on polarization type and cross-pol flag
+    if (!useInTransmitterMode) {
+        if (ant_m == 0) { // VPol
+            tempPhase = useCrossPol ? &VphaseCross : &Vphase;
+        } else if (ant_m == 1) { // HPol
+            tempPhase = useCrossPol ? &HphaseCross : &Hphase;
+        }
+    } else { // Transmitter mode
         tempPhase = &Txphase;
+    }
+
+    if (!tempPhase) {
+        throw runtime_error("In GetAntPhase_1D: No appropriate phase model for this simulation setup.");
     }
 
     // check if angles range actually theta 0-180, phi 0-360
