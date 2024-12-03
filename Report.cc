@@ -4372,16 +4372,20 @@ void Report::ApplyAntFactors_Tdomain_new(double phase_copol, double phase_crossp
             v_amp *= pow(freq/CLIGHT*(Z0/Zr)/4/sqrt(2.), amplitudeSign);          
         }
 
-        // Calculate the combined real and imaginary terms from co-pol and cross-pol
-        double vm_real_copol = vm_real * (v_amplification_copol * cos(phase_current + (phaseSign * phase_copol * RADDEG)));
-        double vm_img_copol = vm_img * (v_amplification_copol * sin(phase_current + (phaseSign * phase_copol * RADDEG)));
+        //Calculate amplitude via the real and imaginary components.
+        double v_amp_test  = sqrt(vm_real*vm_real + vm_img*vm_img);
 
-        double vm_real_crosspol = vm_real * (v_amplification_crosspol * cos(phase_current + (phaseSign * phase_crosspol * RADDEG)));
-        double vm_img_crosspol = vm_img * (v_amplification_crosspol * sin(phase_current + (phaseSign * phase_crosspol * RADDEG)));
+        // Calculate the combined real and imaginary terms from co-pol and cross-pol
+        double vm_real_copol = v_amp_test * (v_amplification_copol * cos(phase_current + (phaseSign * phase_copol * RADDEG)));
+        double vm_img_copol = v_amp_test * (v_amplification_copol * sin(phase_current + (phaseSign * phase_copol * RADDEG)));
+
+        double vm_real_crosspol = v_amp_test * (v_amplification_crosspol * cos(phase_current + (phaseSign * phase_crosspol * RADDEG)));
+        double vm_img_crosspol = v_amp_test * (v_amplification_crosspol * sin(phase_current + (phaseSign * phase_crosspol * RADDEG)));
 
         // Combine co-pol and cross-pol real and imaginary parts
         vm_real = vm_real_copol + vm_real_crosspol;
         vm_img = vm_img_copol + vm_img_crosspol;
+cout << "ALAN IS IT HERE HOPEFULLY" << endl;
 
     }
 
