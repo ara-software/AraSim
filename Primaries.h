@@ -247,7 +247,7 @@ class Interaction  {
  Interaction(); // default constructor
  //Interaction(string inttype,Primaries *primary1,Settings *settings1,int whichray,Counting *count1);
 
-
+ Interaction* Clone() const;
 
  Interaction (double pnu, string nuflavor, int nu_nubar, int &n_interactions, IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 ); // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc
 

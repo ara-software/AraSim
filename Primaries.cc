@@ -846,6 +846,19 @@ void Interaction::Initialize() {
     taudecay = "test_taudecay";
 }
 
+Interaction* Interaction::Clone() const{
+  
+    Interaction* new_interaction = new Interaction();
+
+    new_interaction->shower_depth_m = this->shower_depth_m;
+    new_interaction->shower_Q_profile = this->shower_Q_profile;
+    new_interaction->EM_shower_depth_m = this->EM_shower_depth_m;
+    new_interaction->EM_shower_Q_profile = this->EM_shower_Q_profile;
+    new_interaction->HAD_shower_depth_m = this->HAD_shower_depth_m;
+    new_interaction->HAD_shower_Q_profile = this->HAD_shower_Q_profile;
+    
+}
+
 void Interaction::clear_useless(Settings *settings1){
  
   if(settings1->DATA_SAVE_MODE>0){
