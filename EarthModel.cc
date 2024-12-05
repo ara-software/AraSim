@@ -49,7 +49,6 @@ EarthModel::EarthModel(int model,int WEIGHTABSORPTION_SETTING) {
   radii[1]=(EarthModel::R_EARTH-4.0E4)*(EarthModel::R_EARTH-4.0E4);
   radii[2]=(EarthModel::R_EARTH*EarthModel::R_EARTH); // average radii of boundaries between earth layers
 
-
   //  cout << "In EarthModel, model is " << model << "\n";
   weightabsorption= WEIGHTABSORPTION_SETTING;
 
@@ -1896,8 +1895,12 @@ void EarthModel::ReadCrust(string test) {
 
   // reads in altitudes of 7 layers of crust, ice and water
   // puts data in arrays
-  
+
   fstream infile(test.c_str(),ios::in);
+  if(!infile.is_open() || !infile.good()) {
+    cerr << "Crust file " << test.c_str() << endl;
+    throw runtime_error("Error opening crust file.");
+  }
 
   string thisline; // for reading in file
   string slon; //longitude as a string
@@ -1916,7 +1919,7 @@ void EarthModel::ReadCrust(string test) {
 
   while(!infile.eof()) {
     getline(infile,thisline,'\n'); 
-    
+
     int loc=thisline.find("type, latitude, longitude,"); 
     
     if (loc!=(int)(string::npos)) {      

@@ -192,15 +192,15 @@ Signal::~Signal() {
 
      ReadCalPulserSpectrum();
 
-     std::string arbitraryWaveform = "arbitrary_waveform.txt";  //Testing out IDL pulser - JCF 4/9/2023
+     std::string arbitraryWaveform = string(getenv("ARA_SIM_DIR"))+"/data/arbitrary_waveform.txt";  //Testing out IDL pulser - JCF 4/9/2023
      ReadArbitraryWaveform(arbitraryWaveform);
      
-     // std::string pulserWaveform = "IDL1_waveform.txt";
-     std::string pulserWaveform = "IDL1_waveformNoiseless.txt";
+     // std::string pulserWaveform = string(getenv("ARA_SIM_DIR"))+"/data/IDL1_waveform.txt";
+     std::string pulserWaveform = string(getenv("ARA_SIM_DIR"))+"/data/IDL1_waveformNoiseless.txt";
      ReadPulserWaveform(pulserWaveform);
      
      // Added function to read in voltage versus time of IDL2 pulser data provided by Alisa.  Need ot expand this to be dynamic to other voltage sources in the future.
-     std::string inputVoltage = "IDL2_InputVoltageVersusTime.txt";
+     std::string inputVoltage = string(getenv("ARA_SIM_DIR"))+"/data/IDL2_InputVoltageVersusTime.txt";
      ReadInputVoltage(inputVoltage);
         
      
@@ -273,7 +273,7 @@ Signal::~Signal() {
     int frequency;
     double vmmhz1m_temp;
     int count = 0;
-    ifstream infile("calpulser_spectrum.txt");
+    ifstream infile(string(getenv("ARA_SIM_DIR"))+"/data/calpulser_spectrum.txt");
     if (infile){
         while (1) {
             infile >> frequency >> vmmhz1m_temp;

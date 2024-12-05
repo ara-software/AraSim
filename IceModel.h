@@ -14,7 +14,7 @@ class Settings;
 //Constants relating to all ice models
 const double FIRNDEPTH=-150.;                // depth of the firn, in meters: currently a constant over all ice
 // input files for Crust 2.0
-const string crust20_in="data/outcr"; // Crust 2.0 data
+const string crust20_in= string(getenv("ARA_SIM_DIR")) + "/data/outcr"; // Crust 2.0 data
 const string crust20_out="altitudes.txt"; // output file for plotting
 
 class IceModel : public EarthModel {
@@ -118,7 +118,6 @@ public:
 
   //  const static int NBNPOSITIONS_MAX=26000;
   //double volume_inhorizon[NBNPOSITIONS_MAX]; // volume of ice within horizon for each balloon phi position 
-//  IceModel();   //default constructor
   IceModel(int model=0,int earth_model=0,int mooreBay=0);
   ~IceModel();
 

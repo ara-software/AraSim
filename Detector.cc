@@ -840,26 +840,26 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         ReadAllAntennaImpedance(settings1);
 
         //	if (settings1->NOISE == 2){
-        ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
+        ReadNoiseFigure(string(getenv("ARA_SIM_DIR"))+"/data/ARA02_noiseFig.txt", settings1);
         //	}
 
         // read filter file!!
-        ReadFilter("./data/filter.csv", settings1);
+        ReadFilter(string(getenv("ARA_SIM_DIR"))+"/data/filter.csv", settings1);
         // read preamp gain file!!
-        ReadPreamp("./data/preamp.csv", settings1);
+        ReadPreamp(string(getenv("ARA_SIM_DIR"))+"/data/preamp.csv", settings1);
         // read FOAM gain file!!
-        ReadFOAM("./data/FOAM.csv", settings1);
+        ReadFOAM(string(getenv("ARA_SIM_DIR"))+"/data/FOAM.csv", settings1);
         // read gain offset for chs file!!
-        ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1); // only TestBed for now
+        ReadGainOffset_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/preamp_ch_gain_offset.csv", settings1); // only TestBed for now
         // read threshold offset for chs file!!
-        ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1); // only TestBed for now
+        ReadThresOffset_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/threshold_offset.csv", settings1); // only TestBed for now
         // read threshold values for chs file
-        ReadThres_TestBed("./data/thresholds_TB.csv", settings1); // only TestBed for now
+        ReadThres_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/thresholds_TB.csv", settings1); // only TestBed for now
         // read system temperature for chs file!!
         cout << "check read testbed temp1" << endl;
         if (settings1 -> NOISE_CHANNEL_MODE != 0) {
 
-            ReadTemp_TestBed("./data/system_temperature.csv", settings1); // only TestBed for now
+            ReadTemp_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/system_temperature.csv", settings1); // only TestBed for now
 
         }
         // read total elec. chain response file!!
@@ -867,18 +867,18 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         if (settings1 -> CUSTOM_ELECTRONICS == 0) {
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-            ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
-          //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+            ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+          //ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
 	}
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/gain/custom_electronics.csv", settings1);
+             ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/custom_electronics.csv", settings1);
         }
         cout << "done read elect chain" << endl;
 
 	cout<<"     Reading standard trigger formation values"<<endl;
-        ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
+        ReadTrig_Delays_Masking(string(getenv("ARA_SIM_DIR"))+"/data/trigger/delays_masking_custom.csv", settings1);
 
     } // if mode == 1
 
@@ -1228,43 +1228,43 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         ReadAllAntennaImpedance(settings1);
 
         //	if (settings1->NOISE==2){
-        ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
+        ReadNoiseFigure(string(getenv("ARA_SIM_DIR"))+"/data/ARA02_noiseFig.txt", settings1);
         //	}
 
-        ReadFilter("./data/filter.csv", settings1);
+        ReadFilter(string(getenv("ARA_SIM_DIR"))+"/data/filter.csv", settings1);
         // read preamp gain file!!
-        ReadPreamp("./data/preamp.csv", settings1);
+        ReadPreamp(string(getenv("ARA_SIM_DIR"))+"/data/preamp.csv", settings1);
         // read FOAM gain file!!
-        ReadFOAM("./data/FOAM.csv", settings1);
+        ReadFOAM(string(getenv("ARA_SIM_DIR"))+"/data/FOAM.csv", settings1);
         // read gain offset for chs file!!
-        ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1); // only TestBed for now
+        ReadGainOffset_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/preamp_ch_gain_offset.csv", settings1); // only TestBed for now
         // read threshold offset for chs file!!
-        ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1); // only TestBed for now
+        ReadThresOffset_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/threshold_offset.csv", settings1); // only TestBed for now
         // read threshold values for chs file
-        ReadThres_TestBed("./data/thresholds_TB.csv", settings1); // only TestBed for now
+        ReadThres_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/thresholds_TB.csv", settings1); // only TestBed for now
         // read system temperature for chs file!!
 
         cout << "check read temp testbed 2" << endl;
         if (settings1 -> NOISE_CHANNEL_MODE != 0) {
-            ReadTemp_TestBed("./data/system_temperature.csv", settings1); // only TestBed for now
+            ReadTemp_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/system_temperature.csv", settings1); // only TestBed for now
         }
         // read total elec. chain response file!!
         cout << "start read elect chain" << endl;
         if (settings1 -> CUSTOM_ELECTRONICS == 0) {
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-            ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
-          //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+            ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
+          //ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
 	}
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/gain/custom_electronics.csv", settings1);
+             ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/custom_electronics.csv", settings1);
 
         }
 
 	cout<<"     Reading standard trigger formation values"<<endl;
-	ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
+	ReadTrig_Delays_Masking(string(getenv("ARA_SIM_DIR"))+"/data/trigger/delays_masking_custom.csv", settings1);
 
     } // if mode == 2
 
@@ -1468,50 +1468,50 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         ReadAllAntennaGains(settings1);
         ReadAllAntennaImpedance(settings1);
 
-        ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
+        ReadNoiseFigure(string(getenv("ARA_SIM_DIR"))+"/data/ARA02_noiseFig.txt", settings1);
 
         // read filter file!!
-        ReadFilter("./data/filter.csv", settings1);
+        ReadFilter(string(getenv("ARA_SIM_DIR"))+"/data/filter.csv", settings1);
         // read preamp gain file!!
-        ReadPreamp("./data/preamp.csv", settings1);
+        ReadPreamp(string(getenv("ARA_SIM_DIR"))+"/data/preamp.csv", settings1);
         // read FOAM gain file!!
-        ReadFOAM("./data/FOAM.csv", settings1);
+        ReadFOAM(string(getenv("ARA_SIM_DIR"))+"/data/FOAM.csv", settings1);
 
         if (settings1 -> NOISE == 1) {
             // read Rayleigh fit for freq range, bh channels
-            ReadRayleighFit_TestBed("data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
+            ReadRayleighFit_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
         }
 
         if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
             // read RFCM gain file!! (measured value in ICL)
-            ReadRFCM_TestBed("data/TestBed_RFCM/R1C1.csv", settings1); // read and save RFCM gain for ch1
-            ReadRFCM_TestBed("data/TestBed_RFCM/R1C2.csv", settings1); // read and save RFCM gain for ch2
-            ReadRFCM_TestBed("data/TestBed_RFCM/R1C3.csv", settings1); // read and save RFCM gain for ch3
-            ReadRFCM_TestBed("data/TestBed_RFCM/R1C4.csv", settings1); // read and save RFCM gain for ch4
-            ReadRFCM_TestBed("data/TestBed_RFCM/R2C5.csv", settings1); // read and save RFCM gain for ch5
-            ReadRFCM_TestBed("data/TestBed_RFCM/R2C6.csv", settings1); // read and save RFCM gain for ch6
-            ReadRFCM_TestBed("data/TestBed_RFCM/R2C7.csv", settings1); // read and save RFCM gain for ch7
-            ReadRFCM_TestBed("data/TestBed_RFCM/R2C8.csv", settings1); // read and save RFCM gain for ch8
-            ReadRFCM_TestBed("data/TestBed_RFCM/R3C9.csv", settings1); // read and save RFCM gain for ch9
-            ReadRFCM_TestBed("data/TestBed_RFCM/R3C10.csv", settings1); // read and save RFCM gain for ch10
-            ReadRFCM_TestBed("data/TestBed_RFCM/R3C11.csv", settings1); // read and save RFCM gain for ch11
-            ReadRFCM_TestBed("data/TestBed_RFCM/R3C12.csv", settings1); // read and save RFCM gain for ch12
-            ReadRFCM_TestBed("data/TestBed_RFCM/R4C13.csv", settings1); // read and save RFCM gain for ch13
-            ReadRFCM_TestBed("data/TestBed_RFCM/R4C14.csv", settings1); // read and save RFCM gain for ch14
-            ReadRFCM_TestBed("data/TestBed_RFCM/R4C15.csv", settings1); // read and save RFCM gain for ch15
-            ReadRFCM_TestBed("data/TestBed_RFCM/R4C16.csv", settings1); // read and save RFCM gain for ch16
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C1.csv", settings1); // read and save RFCM gain for ch1
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C2.csv", settings1); // read and save RFCM gain for ch2
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C3.csv", settings1); // read and save RFCM gain for ch3
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C4.csv", settings1); // read and save RFCM gain for ch4
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C5.csv", settings1); // read and save RFCM gain for ch5
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C6.csv", settings1); // read and save RFCM gain for ch6
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C7.csv", settings1); // read and save RFCM gain for ch7
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C8.csv", settings1); // read and save RFCM gain for ch8
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C9.csv", settings1); // read and save RFCM gain for ch9
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C10.csv", settings1); // read and save RFCM gain for ch10
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C11.csv", settings1); // read and save RFCM gain for ch11
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C12.csv", settings1); // read and save RFCM gain for ch12
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C13.csv", settings1); // read and save RFCM gain for ch13
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C14.csv", settings1); // read and save RFCM gain for ch14
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C15.csv", settings1); // read and save RFCM gain for ch15
+            ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C16.csv", settings1); // read and save RFCM gain for ch16
         }
 
         // read gain offset for chs file!!
-        ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1); // only TestBed for now
+        ReadGainOffset_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/preamp_ch_gain_offset.csv", settings1); // only TestBed for now
         // read threshold offset for chs file!!
-        ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1); // only TestBed for now
+        ReadThresOffset_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/threshold_offset.csv", settings1); // only TestBed for now
         // read threshold values for chs file
-        ReadThres_TestBed("./data/thresholds_TB.csv", settings1); // only TestBed for now
+        ReadThres_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/thresholds_TB.csv", settings1); // only TestBed for now
         // read system temperature for chs file!!
         cout << "check read temp testbed 3" << endl;
         if (settings1 -> NOISE_CHANNEL_MODE != 0) {
-            ReadTemp_TestBed("./data/system_temperature.csv", settings1); // only TestBed for now
+            ReadTemp_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/system_temperature.csv", settings1); // only TestBed for now
         }
 
         // read total elec. chain response file!!
@@ -1519,13 +1519,13 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         if (settings1 -> CUSTOM_ELECTRONICS == 0) {
             //read the standard ARA electronics
             cout<<"     Reading standard ARA electronics response"<<endl;
-            ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
-          //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+            ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1); //Originally it was the TwoFilters
+          //ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
 	}
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/gain/custom_electronics.csv", settings1);
+             ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/custom_electronics.csv", settings1);
 
         }
         cout << "done read elect chain" << endl;
@@ -1533,11 +1533,11 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         // if calpulser case
         if (settings1 -> CALPULSER_ON > 0) {
             // read TestBed Calpulser waveform measured (before pulser)
-            ReadCalPulserWF("./data/CalPulserWF.txt", settings1);
+            ReadCalPulserWF(string(getenv("ARA_SIM_DIR"))+"/data/CalPulserWF.txt", settings1);
         }
 
 	cout<<"     Reading standard trigger formation values"<<endl;
-        ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
+        ReadTrig_Delays_Masking(string(getenv("ARA_SIM_DIR"))+"/data/trigger/delays_masking_custom.csv", settings1);
 
     } // if mode == 3
     
@@ -1713,56 +1713,56 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
         //	    if (settings1->NOISE == 2){
         //Read the noise figures
-        ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
+        ReadNoiseFigure(string(getenv("ARA_SIM_DIR"))+"/data/ARA02_noiseFig.txt", settings1);
         //	    }
 
         // read filter file!!
-        ReadFilter("./data/filter.csv", settings1);
+        ReadFilter(string(getenv("ARA_SIM_DIR"))+"/data/filter.csv", settings1);
         // read preamp gain file!!
-        ReadPreamp("./data/preamp.csv", settings1);
+        ReadPreamp(string(getenv("ARA_SIM_DIR"))+"/data/preamp.csv", settings1);
         // read FOAM gain file!!
-        ReadFOAM("./data/FOAM.csv", settings1);
+        ReadFOAM(string(getenv("ARA_SIM_DIR"))+"/data/FOAM.csv", settings1);
 
         if (settings1 -> NOISE_CHANNEL_MODE != 0) {
-            ReadTemp_TestBed("./data/system_temperature.csv", settings1); // only TestBed for now
+            ReadTemp_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/system_temperature.csv", settings1); // only TestBed for now
         }
 
         if (settings1 -> DETECTOR_STATION == 0) {
             if (settings1 -> NOISE == 1) {
                 // read Rayleigh fit for freq range, bh channels
-                ReadRayleighFit_TestBed("data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
+                ReadRayleighFit_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
             }
 
             if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
                 // read RFCM gain file!! (measured value in ICL)
-                ReadRFCM_TestBed("data/TestBed_RFCM/R1C1.csv", settings1); // read and save RFCM gain for ch1
-                ReadRFCM_TestBed("data/TestBed_RFCM/R1C2.csv", settings1); // read and save RFCM gain for ch2
-                ReadRFCM_TestBed("data/TestBed_RFCM/R1C3.csv", settings1); // read and save RFCM gain for ch3
-                ReadRFCM_TestBed("data/TestBed_RFCM/R1C4.csv", settings1); // read and save RFCM gain for ch4
-                ReadRFCM_TestBed("data/TestBed_RFCM/R2C5.csv", settings1); // read and save RFCM gain for ch5
-                ReadRFCM_TestBed("data/TestBed_RFCM/R2C6.csv", settings1); // read and save RFCM gain for ch6
-                ReadRFCM_TestBed("data/TestBed_RFCM/R2C7.csv", settings1); // read and save RFCM gain for ch7
-                ReadRFCM_TestBed("data/TestBed_RFCM/R2C8.csv", settings1); // read and save RFCM gain for ch8
-                ReadRFCM_TestBed("data/TestBed_RFCM/R3C9.csv", settings1); // read and save RFCM gain for ch9
-                ReadRFCM_TestBed("data/TestBed_RFCM/R3C10.csv", settings1); // read and save RFCM gain for ch10
-                ReadRFCM_TestBed("data/TestBed_RFCM/R3C11.csv", settings1); // read and save RFCM gain for ch11
-                ReadRFCM_TestBed("data/TestBed_RFCM/R3C12.csv", settings1); // read and save RFCM gain for ch12
-                ReadRFCM_TestBed("data/TestBed_RFCM/R4C13.csv", settings1); // read and save RFCM gain for ch13
-                ReadRFCM_TestBed("data/TestBed_RFCM/R4C14.csv", settings1); // read and save RFCM gain for ch14
-                ReadRFCM_TestBed("data/TestBed_RFCM/R4C15.csv", settings1); // read and save RFCM gain for ch15
-                ReadRFCM_TestBed("data/TestBed_RFCM/R4C16.csv", settings1); // read and save RFCM gain for ch16
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C1.csv", settings1); // read and save RFCM gain for ch1
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C2.csv", settings1); // read and save RFCM gain for ch2
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C3.csv", settings1); // read and save RFCM gain for ch3
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C4.csv", settings1); // read and save RFCM gain for ch4
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C5.csv", settings1); // read and save RFCM gain for ch5
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C6.csv", settings1); // read and save RFCM gain for ch6
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C7.csv", settings1); // read and save RFCM gain for ch7
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R2C8.csv", settings1); // read and save RFCM gain for ch8
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C9.csv", settings1); // read and save RFCM gain for ch9
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C10.csv", settings1); // read and save RFCM gain for ch10
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C11.csv", settings1); // read and save RFCM gain for ch11
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R3C12.csv", settings1); // read and save RFCM gain for ch12
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C13.csv", settings1); // read and save RFCM gain for ch13
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C14.csv", settings1); // read and save RFCM gain for ch14
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C15.csv", settings1); // read and save RFCM gain for ch15
+                ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R4C16.csv", settings1); // read and save RFCM gain for ch16
             }
 
             // read gain offset for chs file!!
-            ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1); // only TestBed for now
+            ReadGainOffset_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/preamp_ch_gain_offset.csv", settings1); // only TestBed for now
             // read threshold offset for chs file!!
-            ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1); // only TestBed for now
+            ReadThresOffset_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/threshold_offset.csv", settings1); // only TestBed for now
             // read threshold values for chs file
-            ReadThres_TestBed("./data/thresholds_TB.csv", settings1); // only TestBed for now
+            ReadThres_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/thresholds_TB.csv", settings1); // only TestBed for now
             // read system temperature for chs file!!
             cout << "check read temp testbed 4" << endl;
             if (settings1 -> NOISE_CHANNEL_MODE != 0) {
-                ReadTemp_TestBed("./data/system_temperature.csv", settings1); // only TestBed for now
+                ReadTemp_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/system_temperature.csv", settings1); // only TestBed for now
             }
         }
         if (settings1 -> DETECTOR_STATION > 0) {
@@ -1773,7 +1773,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             if(settings1->NOISE==1){
                 cout <<"Reading in situ ARA noise for this station and configuration from file: " <<endl;
                 char the_rayleigh_filename[500];
-                sprintf(the_rayleigh_filename, "./data/noise/sigmavsfreq_A_%d_config_%d.csv", 
+                sprintf(the_rayleigh_filename, "%s/data/noise/sigmavsfreq_A_%d_config_%d.csv", getenv("ARA_SIM_DIR"), 
                     settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
                 cout << the_rayleigh_filename << endl;
                 ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
@@ -1787,19 +1787,19 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
           if(settings1->DETECTOR_STATION > 0){
             char the_gain_filename[500];
             if(settings1->DETECTOR_STATION_LIVETIME_CONFIG == -1) {
-              sprintf(the_gain_filename, "./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv");
+              sprintf(the_gain_filename, "%s/data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", getenv("ARA_SIM_DIR"));
               cout<<" Reading standard ARA electronics response from file:"<<endl;
               cout << the_gain_filename <<endl;
             }
             else {
               cout <<" Reading in situ ARA electronics response for this station and configuration from file:"<<endl;	
-              sprintf(the_gain_filename, "./data/gain/In_situ_Electronics_A%d_C%d.csv", 	
+              sprintf(the_gain_filename, "%s/data/gain/In_situ_Electronics_A%d_C%d.csv", getenv("ARA_SIM_DIR"), 	
                       settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
               cout << the_gain_filename << endl;
               
               ReadElectChain(std::string(the_gain_filename), settings1);
-              //ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
-              //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+              //ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+              //ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
               if(settings1->ELECTRONICS_ANTENNA_CONSISTENCY==1) {
                 if(settings1->NOISE==1) {
                   cout << " Recalculating in situ electronic response amplitude to ensure consistency with antenna model used here." << endl;
@@ -1816,27 +1816,27 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
           }
           else{ // testbed only
             cout <<"    In situ gain model does not exist for this station"<<endl;
-            ReadElectChain("./data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
-            //ReadElectChain("./data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
+            ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
+            //ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
           }
         }
         else if (settings1->CUSTOM_ELECTRONICS==1){
             //read a custom user defined electronics gain
             cout<<"     Reading custom electronics response"<<endl;
-             ReadElectChain("./data/gain/custom_electronics.csv", settings1);
+             ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/custom_electronics.csv", settings1);
         }
         cout << "done read elect chain" << endl;
 
         // if calpulser case
         if (settings1 -> CALPULSER_ON > 0) {
             // read TestBed Calpulser waveform measured (before pulser)
-            ReadCalPulserWF("./data/CalPulserWF.txt", settings1);
+            ReadCalPulserWF(string(getenv("ARA_SIM_DIR"))+"/data/CalPulserWF.txt", settings1);
         }
 
 	if(settings1->DETECTOR_STATION > 0){
 	cout <<" Reading trigger formation values for this station and configuration from file:"<<endl;
                 char the_trig_filename[500];
-                sprintf(the_trig_filename, "./data/trigger/delays_masking_A%d_C%d.csv",
+                sprintf(the_trig_filename, "%s/data/trigger/delays_masking_A%d_C%d.csv", getenv("ARA_SIM_DIR"),
                      settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
                 cout << the_trig_filename <<endl;
                 ReadTrig_Delays_Masking(std::string(the_trig_filename), settings1);
@@ -1844,7 +1844,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 	else{
 		cout <<"    Trigger formation file does not exist for this station"<<endl;
                 cout<<"     Reading standard trigger formation values"<<endl;
-                ReadTrig_Delays_Masking("./data/trigger/delays_masking_custom.csv", settings1);
+                ReadTrig_Delays_Masking(string(getenv("ARA_SIM_DIR"))+"/data/trigger/delays_masking_custom.csv", settings1);
   }
 	
   //for A1 ICRR/ATRI differentiation
@@ -2103,24 +2103,24 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
         //	    if (settings1->NOISE == 2){
         //Read the noise figures
-        ReadNoiseFigure("./data/ARA02_noiseFig.txt", settings1);
+        ReadNoiseFigure(string(getenv("ARA_SIM_DIR"))+"/data/ARA02_noiseFig.txt", settings1);
         //	    }
 
         // read filter file!!
-        ReadFilter("./data/filter.csv", settings1);
+        ReadFilter(string(getenv("ARA_SIM_DIR"))+"/data/filter.csv", settings1);
         // read preamp gain file!!
-        ReadPreamp("./data/preamp.csv", settings1);
+        ReadPreamp(string(getenv("ARA_SIM_DIR"))+"/data/preamp.csv", settings1);
         // read FOAM gain file!!
-        ReadFOAM("./data/FOAM.csv", settings1);
+        ReadFOAM(string(getenv("ARA_SIM_DIR"))+"/data/FOAM.csv", settings1);
         // read gain offset for chs file!!
-        ReadGainOffset_TestBed("./data/preamp_ch_gain_offset.csv", settings1);// only TestBed for now
+        ReadGainOffset_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/preamp_ch_gain_offset.csv", settings1);// only TestBed for now
         // read threshold offset for chs file!!
-        ReadThresOffset_TestBed("./data/threshold_offset.csv", settings1);// only TestBed for now
+        ReadThresOffset_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/threshold_offset.csv", settings1);// only TestBed for now
         // read threshold values for chs file
-        ReadThres_TestBed("./data/thresholds_TB.csv", settings1);// only TestBed for now
+        ReadThres_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/thresholds_TB.csv", settings1);// only TestBed for now
         // read system temperature for chs file!!
         if (settings1->NOISE_CHANNEL_MODE!=0) {
-            ReadTemp_TestBed("./data/system_temperature.csv", settings1);// only TestBed for now
+            ReadTemp_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/system_temperature.csv", settings1);// only TestBed for now
         }
 
         // Load in detector_specific noise if requested
@@ -2128,7 +2128,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             cout <<"Reading in situ PA noise for this station and configuration from file: " <<endl;
             char the_rayleigh_filename[500];
             sprintf(
-                the_rayleigh_filename, "./data/noise/sigmavsfreq_PA_config_%d.csv",
+                the_rayleigh_filename, "%s/data/noise/sigmavsfreq_PA_config_%d.csv", getenv("ARA_SIM_DIR"),
                 settings1->DETECTOR_STATION_LIVETIME_CONFIG);
             cout << the_rayleigh_filename << endl;
             ReadRayleighFit_DeepStation(std::string(the_rayleigh_filename), settings1);
@@ -2140,12 +2140,12 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             //read the standard ARA electronics
             char the_gain_filename[500];
             if(settings1->DETECTOR_STATION_LIVETIME_CONFIG == -1) {
-              sprintf(the_gain_filename, "./data/gain/PA_Electronics_TotalGainPhase.csv"); 
+              sprintf(the_gain_filename, "%s/data/gain/PA_Electronics_TotalGainPhase.csv", getenv("ARA_SIM_DIR")); 
               cout << " Reading standard PA electronics response from file:" << endl;
               cout << the_gain_filename <<endl;
             }
             else{
-              sprintf(the_gain_filename, "./data/gain/In_situ_Electronics_PA_C%d.csv", 	
+              sprintf(the_gain_filename, "%s/data/gain/In_situ_Electronics_PA_C%d.csv", getenv("ARA_SIM_DIR"), 	
                    settings1->DETECTOR_STATION_LIVETIME_CONFIG);
               cout <<" Reading in situ ARA electronics response for the PA and this configuration from file:"<<endl;	
               cout << the_gain_filename <<endl;
@@ -2165,14 +2165,14 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         } else if (settings1 -> CUSTOM_ELECTRONICS == 1) {
             //read a custom user defined electronics gain
             cout << "     Reading custom PA electronics response" << endl;
-            ReadElectChain("./data/PA_custom_electronics.txt", settings1);
+            ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/PA_custom_electronics.txt", settings1);
         }
         cout << "done read elect chain" << endl;
 
         // if calpulser case
         if (settings1 -> CALPULSER_ON > 0) {
             // read TestBed Calpulser waveform measured (before pulser)
-            ReadCalPulserWF("./data/CalPulserWF.txt", settings1);
+            ReadCalPulserWF(string(getenv("ARA_SIM_DIR"))+"/data/CalPulserWF.txt", settings1);
             // But warn the use if we have this set AND we're simulating more than one station
             if (params.number_of_stations != 1){
                 cout<<"Warning: You're simulating calpulser events for an array of stations. ";
@@ -2206,13 +2206,13 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     std::string TxgainFile;    
     
     //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
-    TxgainFile = "./data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";     
+    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";     
     
     if (settings1->ANTENNA_MODE == 0){
         // use the orignal Vpol/Hpol gains
-        VgainFile = "./data/antennas/realizedGain/ARA_bicone6in_output.txt";
-        VgainTopFile = "./data/antennas/realizedGain/ARA_bicone6in_output.txt";
-        HgainFile = "./data/antennas/realizedGain/ARA_dipoletest1_output.txt";    
+        VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt";
+        VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt";
+        HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_dipoletest1_output.txt";    
     }
     else if (settings1->ANTENNA_MODE == 1) {
         // use the gains as Thomas had them circa 2016
@@ -2222,39 +2222,39 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         // is actually SWR (previously they were transmission coefficient, as identified by MYL in Jan 2020).
         // To calculate the SWR, brian did reflection_coefficient = sqrt(1-transmission_coefficient^2)
         // and then SWR = (1+reflection_coefficient)/(1-reflection_coefficient).
-        VgainFile = "./data/antennas/realizedGain/ARA_bicone6in_output_updated2020.txt";
-        VgainTopFile = "./data/antennas/realizedGain/ARA_VPresult_topTrec_updated2020.txt";
-        HgainFile = "./data/antennas/realizedGain/ARA_dipoletest1_output_updated2020.txt";        
+        VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output_updated2020.txt";
+        VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_VPresult_topTrec_updated2020.txt";
+        HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_dipoletest1_output_updated2020.txt";        
     }
     else if (settings1->ANTENNA_MODE == 2){
         // pull a "trick" and substitue the ARIANNA LPDAs for the antennas
-        VgainFile = "./data/antennas/realizedGain/Arianna_WIPLD_hpol.dat";
-        VgainTopFile = "./data/antennas/realizedGain/Arianna_WIPLD_hpol.dat";
-        HgainFile = "./data/antennas/realizedGain/Arianna_WIPLD_hpol.dat";         
+        VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/Arianna_WIPLD_hpol.dat";
+        VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/Arianna_WIPLD_hpol.dat";
+        HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/Arianna_WIPLD_hpol.dat";         
     }
     else if(settings1->ANTENNA_MODE == 3){
         // load the Chiba XFDTD models
         // same gain for top and bottom
-        VgainFile = "./data/antennas/realizedGain/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt";
-        VgainTopFile = "./data/antennas/realizedGain/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt";
-        HgainFile = "./data/antennas/realizedGain/Hpol_original_150mmHole_Ice_ARASim.txt";         
+        VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt";
+        VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/Vpol_original_CrossFeed_150mmHole_Ice_ARASim.txt";
+        HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/Hpol_original_150mmHole_Ice_ARASim.txt";         
     }
     else if (settings1->ANTENNA_MODE == 4){
         // load the Chiba in-situ models
         // same gain for top and bottom
-        VgainFile = "./data/antennas/realizedGain/In_situ_VPol_Model.txt";
-        VgainTopFile = "./data/antennas/realizedGain/In_situ_VPol_Model.txt";
-        HgainFile = "./data/antennas/realizedGain/In_situ_HPol_Model.txt";         
+        VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/In_situ_VPol_Model.txt";
+        VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/In_situ_VPol_Model.txt";
+        HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/In_situ_HPol_Model.txt";         
     }
     else if (settings1->ANTENNA_MODE == 5) { //Adding antenna mode for Kansas lab measurements.
-        VgainFile = "./data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Kansas2024.txt";
-        VgainTopFile = "./data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Kansas2024.txt";
-        HgainFile = "./data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Kansas2024.txt";         
+        VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Kansas2024.txt";
+        VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Kansas2024.txt";
+        HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Kansas2024.txt";         
     }
     else if (settings1->ANTENNA_MODE == 6) { //Adding antenna mode for custom gains.
-        VgainFile = "./data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Custom.txt";
-        VgainTopFile = "./data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Custom.txt";
-        HgainFile = "./data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Custom.txt";         
+        VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Custom.txt";
+        VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Custom.txt";
+        HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Custom.txt";         
     }
     
     // Check for ALL_ANT_V_ON, then set all antennas to VPol if true
@@ -2274,15 +2274,15 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
 inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
     
     //Initialize array of impedance filepaths, where the indices correspond to the IMPEDANCE_<> flag in the setup file.
-    std::string impedanceFileArray[9] = {"./data/antennas/impedance/ARA_Impedance_SimpleApproximation.txt",
-                                         "./data/antennas/impedance/ARA_BVpol_MohammadData_2024.txt",
-                                         "./data/antennas/impedance/ARA_TVpol_MohammadData_2024.txt",
-                                         "./data/antennas/impedance/ARA_Hpol_MohammadData_2024.txt",
-                                         "./data/antennas/impedance/PVA_Impedance_2023.txt",
-                                         "./data/antennas/impedance/Impedance_Custom1.txt",
-                                         "./data/antennas/impedance/Impedance_Custom2.txt",
-                                         "./data/antennas/impedance/Impedance_Custom3.txt",
-                                         "./data/antennas/impedance/Impedance_Custom4.txt"};
+    std::string impedanceFileArray[9] = {string(getenv("ARA_SIM_DIR"))+"/data/antennas/impedance/ARA_Impedance_SimpleApproximation.txt",
+                                         string(getenv("ARA_SIM_DIR"))+"/data/antennas/impedance/ARA_BVpol_MohammadData_2024.txt",
+                                         string(getenv("ARA_SIM_DIR"))+"/data/antennas/impedance/ARA_TVpol_MohammadData_2024.txt",
+                                         string(getenv("ARA_SIM_DIR"))+"/data/antennas/impedance/ARA_Hpol_MohammadData_2024.txt",
+                                         string(getenv("ARA_SIM_DIR"))+"/data/antennas/impedance/PVA_Impedance_2023.txt",
+                                         string(getenv("ARA_SIM_DIR"))+"/data/antennas/impedance/Impedance_Custom1.txt",
+                                         string(getenv("ARA_SIM_DIR"))+"/data/antennas/impedance/Impedance_Custom2.txt",
+                                         string(getenv("ARA_SIM_DIR"))+"/data/antennas/impedance/Impedance_Custom3.txt",
+                                         string(getenv("ARA_SIM_DIR"))+"/data/antennas/impedance/Impedance_Custom4.txt"};
     //Read in impedances
     //Vpol
     ReadImpedance(impedanceFileArray[settings1->IMPEDANCE_RX_VPOL], &RealImpedanceV, &ImagImpedanceV);
@@ -4037,21 +4037,21 @@ void Detector::ReadAmplifierNoiseFigure(Settings *settings) {
   if(detector == 4) { // ARA case
 
     if(station == 1)
-      filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_A1.csv";
+      filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_A1.csv";
     else if(station == 2)
-      filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_A2.csv";
+      filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_A2.csv";
     else if(station == 3)
-      filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_A3.csv";
+      filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_A3.csv";
     else if(station == 4)
-      filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_A4.csv";
+      filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_A4.csv";
     else if(station == 5)
-      filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_A5.csv";
+      filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_A5.csv";
     else
       throw runtime_error("Unsupported station for amplifier noise figure!");
   
   }
   else if(detector == 5) // PA case
-    filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_PA.csv";
+    filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_PA.csv";
   else
     throw runtime_error("Unsupported detector setting for amplifier noise figure!");
 
@@ -4105,7 +4105,7 @@ void Detector::ReadAmplifierNoiseFigure(Settings *settings) {
       throw runtime_error("Mismatch in A5-PA channel mapping for amplifier noise!"); 
 
     // read in the data 
-    filename = "./data/amplifierNoiseFigures/amplifierNoiseFigure_A5.csv";    
+    filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_A5.csv";    
 
     ifstream noiseFigFile(filename);
     if(!noiseFigFile.is_open())
@@ -4710,7 +4710,7 @@ inline void Detector::ReadTrig_Delays_Masking(string filename, Settings *setting
                 cout << "The not found trigger formation filename is: " << filename << endl;
                 cerr << errorMessage << endl;
                 cerr << "Defaulting to custom trigger formation file" << endl;
-                filename = "./data/trigger/delays_masking_custom.csv";
+                filename = string(getenv("ARA_SIM_DIR"))+"/data/trigger/delays_masking_custom.csv";
                 cout << "Defaulted to custom trigger formation from file: " << filename << endl;
         }
 

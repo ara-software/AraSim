@@ -27,6 +27,8 @@
 #include "Trigger.h"
 #include "Birefringence.h"
 
+#include <sys/stat.h>
+
 using namespace std;
 
 #ifdef ARA_UTIL_EXISTS
@@ -43,7 +45,20 @@ void test();
 string outputdir="outputs";
 
 int main(int argc, char **argv) {   // read setup.txt file
-    
+   
+    // first check if environmental variables exist and are set to something reasonable
+    string araSimDir = getenv("ARA_SIM_DIR");
+    // check if structure is as expected with test file
+    string araSimFilePath = araSimDir + "/AraSim.cc";
+    // check if file exists there
+    struct stat buff;
+    if(stat(araSimFilePath.c_str(), &buff) != 0) {
+      char errMsg[500];
+      sprintf(errMsg, "ARA_SIM_DIR not set to expected directory! Cannot find AraSim.cc!\n"
+                       "\tAraSim.cc path tested: %s", araSimFilePath.c_str());  
+      throw runtime_error(errMsg); 
+    }
+
     Settings *settings1 = new Settings();
 
     cout<<"\n\tDefault values!"<<endl;
@@ -794,7 +809,7 @@ int main(int argc, char **argv) {   // read setup.txt file
 
     AraTree->Fill();  // fill tree for one entry
     AraFile->Write();
-    // AraFile->Close();
+    AraFile->Close();
 
     efficiencies->summarize(); // summarize the results in an output file  
 

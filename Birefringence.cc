@@ -24,9 +24,9 @@ Birefringence::Birefringence(Settings *settings1) {
  */
 
 	//Reading values for principal axes and their asociated depths 
-	string sn1file="./data/birefringence/n1.txt";
-	string sn2file="./data/birefringence/n2.txt";
-	string sn3file="./data/birefringence/n3.txt";
+	string sn1file=string(getenv("ARA_SIM_DIR"))+"/data/birefringence/n1.txt";
+	string sn2file=string(getenv("ARA_SIM_DIR"))+"/data/birefringence/n2.txt";
+	string sn3file=string(getenv("ARA_SIM_DIR"))+"/data/birefringence/n3.txt";
 
 	Read_Indicatrix_Par(sn1file, sn2file, sn3file, settings1); //loading principal axes n1 (alpha in AC's paper), n2 (beta in AC's paper), n3 (gamma in AC's paper) and depths into nvec1, nvec2, nvec3, vdepths_n1, vdepths_n2, vdepths_n3
  	

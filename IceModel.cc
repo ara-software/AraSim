@@ -91,7 +91,7 @@ void IceModel::setUpIceModel(int model) {
   } //else if (BEDMAP)
  //read in attenuation length data for direct signals
   int i=0;
-  ifstream sheetup("data/icesheet_attenlength_up.txt");
+  ifstream sheetup(string(getenv("ARA_SIM_DIR"))+"/data/icesheet_attenlength_up.txt");
   if(sheetup.fail())
     {
       cerr << "Failed to open icesheet_attenlength_up.txt" << endl;
@@ -105,7 +105,7 @@ void IceModel::setUpIceModel(int model) {
     }
   sheetup.close();
 
-  ifstream shelfup("data/iceshelf_attenlength_up.txt");
+  ifstream shelfup(string(getenv("ARA_SIM_DIR"))+"/data/iceshelf_attenlength_up.txt");
   if(shelfup.fail())
     {
       cerr << "Failed to open iceshelf_attenlength_up.txt" << endl;
@@ -119,7 +119,7 @@ void IceModel::setUpIceModel(int model) {
     }
   shelfup.close();
 
-  ifstream westlandup("data/westland_attenlength_up.txt");
+  ifstream westlandup(string(getenv("ARA_SIM_DIR"))+"/data/westland_attenlength_up.txt");
   if(westlandup.fail())
     {cerr << "Failed to open westland_attenlength_up.txt";
       exit(1);
@@ -132,7 +132,7 @@ void IceModel::setUpIceModel(int model) {
   westlandup.close();
 
   //read in attenuation length for downgoing signals
-  ifstream sheetdown("data/icesheet_attenlength_down.txt");
+  ifstream sheetdown(string(getenv("ARA_SIM_DIR"))+"/data/icesheet_attenlength_down.txt");
   if(sheetdown.fail())
     {
       cerr << "Failed to open icesheet_attenlength_down.txt" << endl;
@@ -147,7 +147,7 @@ void IceModel::setUpIceModel(int model) {
   sheetdown.close();
 
 
-  ifstream shelfdown("data/iceshelf_attenlength_down.txt");
+  ifstream shelfdown(string(getenv("ARA_SIM_DIR"))+"/data/iceshelf_attenlength_down.txt");
   if(shelfdown.fail())
     {
       cerr << "Failed to open iceshelf_attenlength_down.txt" << endl;
@@ -161,7 +161,7 @@ void IceModel::setUpIceModel(int model) {
     }
   shelfdown.close();
 
-  ifstream westlanddown("data/westland_attenlength_down.txt");
+  ifstream westlanddown(string(getenv("ARA_SIM_DIR"))+"/data/westland_attenlength_down.txt");
   if(westlanddown.fail())
     {cerr << "Failed to open westland_attenlength_down.txt";
       exit(1);
@@ -177,7 +177,7 @@ void IceModel::setUpIceModel(int model) {
   // new ARA ice attenuation measurement values (at 300 MHz)
   //
   /*
-  ifstream file( "data/ARA_IceAttenL.txt" );
+  ifstream file( string(getenv("ARA_SIM_DIR"))+"/data/ARA_IceAttenL.txt" );
 
   string line;
   string line2;
@@ -1583,7 +1583,7 @@ void IceModel::WaterENtoLonLat(int e, int n, double& lon, double& lat) const {
 void IceModel::ReadIceThickness() {
   //Reads the BEDMAP ice thickness data.  Assumes the file is in directory "data".  Code by Ryan Nichol, added to Monte Carlo by Stephen Hoover
 
-  ifstream IceThicknessFile("data/icethic.asc");
+  ifstream IceThicknessFile(string(getenv("ARA_SIM_DIR"))+"/data/icethic.asc");
   if(!IceThicknessFile) {
     cerr << "Couldn't open: data/icethic.asc" << endl;
     exit(1);
@@ -1640,7 +1640,7 @@ void IceModel::ReadIceThickness() {
 
 void IceModel::ReadGroundBed() {
   //Reads the BEDMAP data on the elevation of the ground beneath the ice.  If there is water beneath the ice, the ground elevation is given the value 0.  Assumes the file is in directory "data".  Code by Ryan Nichol, added to Monte Carlo by Stephen Hoover
-  ifstream GroundBedFile("data/groundbed.asc");
+  ifstream GroundBedFile(string(getenv("ARA_SIM_DIR"))+"/data/groundbed.asc");
   if(!GroundBedFile) {
     cerr << "Couldn't open: data/groundbed.asc" << endl;
     exit(1);
@@ -1701,7 +1701,7 @@ void IceModel::ReadGroundBed() {
 
 void IceModel::ReadWaterDepth() {
   //Reads BEDMAP data on the depth of water beneath the ice.  Where no water is present, the value 0 is entered.  Assumes the file is in directory "data".  Code by Ryan Nichol, added to Monte Carlo by Stephen Hoover
-  ifstream WaterDepthFile("data/water.asc");
+  ifstream WaterDepthFile(string(getenv("ARA_SIM_DIR"))+"/data/water.asc");
   if(!WaterDepthFile) {
     cerr << "Couldn't open: data/water.asc" << endl;
     exit(1);
