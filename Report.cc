@@ -6129,6 +6129,8 @@ void Report::checkPATrigger(
     // If triggered, saves relevant information.
 
     //cout <<"successfully made it to PA Trigger!" << endl;
+
+    Antenna_r *trigger_antenna = &stations[i].strings[0].antennas[8];
     
     // For phased array, waveform length is 680 ns, but 
     // for PA trigger check only 20 ns around the signal bin.
@@ -6143,21 +6145,21 @@ void Report::checkPATrigger(
     viewangle=viewangle*180.0/PI;
     bool searchSecondRay = true;
     if (ray_sol_cnt == 2){
-        dsignalBin = abs(signal_bin[0] - signal_bin[1]); //original kah
-        dsignalBin = abs(stations[i].strings[0].antennas[8].SignalBin[0]-stations[i].strings[0].antennas[8].SignalBin[1]);
+        dsignalBin = abs( signal_bin[0] - signal_bin[1] ); //original kah
+        dsignalBin = abs( trigger_antenna->SignalBin[0] - trigger_antenna->SignalBin[1] );
     }
     bool hasTriggered = false;
 
     // If the antenna we use to trigger the PA doesn't have any ray solutions, 
     //   do not perform the trigger check.
-    if (stations[i].strings[0].antennas[8].ray_sol_cnt == 0){
+    if (trigger_antenna->ray_sol_cnt == 0){
         return;
     }
 
     //cout << "time to trigger " << endl;
-    while(raySolNum < stations[i].strings[0].antennas[8].SignalBin.size()){
+    while(raySolNum < trigger_antenna->SignalBin.size()){
 
-        int signalbinPA = stations[i].strings[0].antennas[8].SignalBin[raySolNum]; //new kah
+        int signalbinPA = trigger_antenna->SignalBin[raySolNum]; //new kah
         int bin_value;
         double ant_SNR;
         if(settings1->TRIG_ANALYSIS_MODE == 2) { // Noise only triggers
@@ -6176,7 +6178,7 @@ void Report::checkPATrigger(
         // //    This is a project for the future. 
         // else if (settings1->TRIG_ANALYSIS_MODE==1) // Noise + signal triggers
         //     // Estimate average SNR in topmost vpol
-        //     if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {   
+        //     if(trigger_antenna->V.size()>raySolNum) {   
         //
         //         // Steal the noise RMS from the trigger class and pass 
         //         //   it as the noise WF to get_SNR() (since the RMS of an 
@@ -6188,7 +6190,7 @@ void Report::checkPATrigger(
         //
         //         // Calculate SNR in this antenna
         //         ant_SNR = get_SNR( 
-        //             stations[i].strings[0].antennas[8].V_convolved, 
+        //             trigger_antenna->V_convolved, 
         //             tmp_noise_RMS);
         //
         //     }
@@ -6197,7 +6199,7 @@ void Report::checkPATrigger(
         //     }
         else { // signal only triggers
             // Estimate average SNR in topmost vpol
-            if(stations[i].strings[0].antennas[8].V.size()>raySolNum) {   
+            if(trigger_antenna->V.size()>raySolNum) {   
 
                 // Steal the noise RMS from the trigger class and pass 
                 //   it as the noise WF to get_SNR() (since the RMS of an 
@@ -6209,7 +6211,7 @@ void Report::checkPATrigger(
 
                 // Calculate SNR in this antenna
                 ant_SNR = get_SNR( 
-                    stations[i].strings[0].antennas[8].V_convolved, 
+                    trigger_antenna->V_convolved, 
                     tmp_noise_RMS);
                 
             }
