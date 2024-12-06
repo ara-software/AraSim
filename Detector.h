@@ -218,6 +218,7 @@ enum EAntennaType {
   eVPolTop, // top Vpol
   eHPol, // Hpol
   eTx, // transmitter 
+  eTxCross, // transmitter 
   eVPolCross,     // Cross-pol VPol
   eVPolTopCross,  // Cross-pol VPol Top
   eHPolCross      // Cross-pol HPol
@@ -259,6 +260,11 @@ class Detector {
         double ImagImpedanceTx[freq_step_max];
         double Txgain[freq_step_max][ang_step_max];
         double Txphase[freq_step_max][ang_step_max];
+    
+
+        double TxgainCross[freq_step_max][ang_step_max];
+        double TxphaseCross[freq_step_max][ang_step_max];
+
         void ReadImpedance(string filename, double (*TempRealImpedance)[freq_step_max], double (*TempImagImpedance)[freq_step_max]);
         void ReadAllAntennaImpedance(Settings *settings1);
 

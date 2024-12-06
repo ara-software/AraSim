@@ -2191,6 +2191,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
     // change coordinate from flat surface to curved Earth surface
     //FlattoEarth_ARA(icesurface);
+cout << "Here?" << endl;
     FlattoEarth_ARA_sharesurface(icesurface); // this one will share the lowest surface at each station.
 
     getDiodeModel(settings1); // set diode_real and fdiode_real values.
@@ -2204,11 +2205,14 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     std::string VgainTopFile;
     std::string HgainFile;
     std::string TxgainFile;    
+    std::string TxgainFileCross;    
+
     
     //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
     //TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";     
-    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt";     
-    
+    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";     
+    TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";     
+
 
     if (settings1->ANTENNA_MODE == 0){
         // use the orignal Vpol/Hpol gains
@@ -2285,6 +2289,8 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     ReadAntennaGain(VgainTopFile, settings1, eVPolTop);
     ReadAntennaGain(HgainFile, settings1, eHPol);
     ReadAntennaGain(TxgainFile, settings1, eTx);
+    ReadAntennaGain(TxgainFileCross, settings1, eTxCross);
+
 
 }
 //Defining function that reads in TX antenna impedances
@@ -2362,6 +2368,10 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         case(eTx):
             gain = &Txgain;
             phase = &Txphase;
+            break;
+        case(eTxCross):
+            gain = &TxgainCross;
+            phase = &TxphaseCross;
             break;
         default:
             throw runtime_error("Unknown antenna type!");
@@ -2883,7 +2893,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     //VPol Rx
     if (Detector_mode == 5) { // Phased Array mode
         if (useInTransmitterMode) {
-            tempGain = &Txgain; // Transmitter mode
+            tempGain = useCrossPol ? &TxgainCross : &Txgain; // Transmitter mode
         } else if (ant_m == 1) {
             tempGain = useCrossPol ? &HgainCross : &Hgain; // HPol
         } else { // VPol
@@ -2909,7 +2919,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
                 tempGain = useCrossPol ? &HgainCross : &Hgain;
             }
         } else { // Tx mode
-            tempGain = &Txgain;
+            tempGain = useCrossPol ? &TxgainCross : &Txgain;
         }
     }
 
@@ -3033,7 +3043,7 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
             tempPhase = useCrossPol ? &HphaseCross : &Hphase;
         }
     } else { // Transmitter mode
-        tempPhase = &Txphase;
+        tempPhase = useCrossPol ? &TxphaseCross : &Txphase;
     }
 
     if (!tempPhase) {
@@ -3517,7 +3527,7 @@ inline void Detector::FlattoEarth_ARA(IceModel *icesurface) {
 
 
 inline void Detector::FlattoEarth_ARA_sharesurface(IceModel *icesurface) {    // each station share the lowest surface
-    
+cout << "breaking? ASG 1" << endl;    
     double Dist = 0.;   //for sqrt(x^2 + y^2)
     double R1 = icesurface->Surface(0.,0.); // from core of earth to surface at theta, phi = 0.
     //--------------------------------------------------
