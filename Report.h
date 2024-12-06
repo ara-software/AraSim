@@ -174,6 +174,7 @@ class Station_r {
         int Global_Pass;    // if global trigger passed or not: 0 = not passed, >0 passed, number indicates the first bin in the triggered window of the waveform at which the global trigger passed
 
         int total_trig_search_bin;  // total number of bins for searching trigger. 
+        int next_trig_search_init; // if not -1, designates the next global bin to begin a trigger search from
 
 //         int numChan;
 // 	int numChanVpol;
@@ -246,26 +247,12 @@ class Report {
                     //                                         1 : 1 or more antenna trg
 
         Report ();
+        Report (Report *report);
         Report (Detector *detector, Settings *settings1);
         ~Report ();
-    //make the UsefulIcrrStationEvent for use with AraRoot
-    //UsefulIcrrStationEvent theUsefulEvent;
-
     
         void Initialize (Detector *detector, Settings *settings1);
 
-        //void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger);
-        //void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, UsefulIcrrStationEvent *theUsefulEvent);
-
-
-//        void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger, UsefulIcrrStationEvent *theUsefulEvent);
-    
-//    void Connect_Interaction_Detector (Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, IceModel *icemodel, Settings *settings1, Trigger *trigger);
-    
-    void Connect_Interaction_Detector_V2 (
-        Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, 
-        IceModel *icemodel, Birefringence *birefringence, Settings *settings1, 
-        Trigger *trigger, int evt);   
     void CalculateSignals(
         int debugmode, 
         Birefringence *birefringence, Detector *detector, Event *event, 

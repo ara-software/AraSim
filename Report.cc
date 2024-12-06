@@ -477,34 +477,6 @@ void Report::clear_useless(Settings *settings1) {   // to reduce the size of out
 
 }
 
-void Report::Connect_Interaction_Detector_V2(
-    Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, 
-    IceModel *icemodel, Birefringence *birefringence, Settings *settings1, 
-    Trigger *trigger, int evt
-) {
-
-    // decide whether debug mode or not
-    int debugmode = 0;
-    if (settings1->DEBUG_MODE_ON == 1 && evt < settings1->DEBUG_SKIP_EVT) {
-        debugmode = 1;  // skip most of computation intensive processes if debugmode == 1
-    }
-    else if (settings1->DEBUG_MODE_ON == 1 && evt >= settings1->DEBUG_SKIP_EVT){
-        cout << evt << " " << endl;
-    }
-
-    // Ray trace and calculate signal for every ray from every interaction to every antenna
-    CalculateSignals(debugmode, birefringence, detector, event, icemodel, raysolver, settings1, signal);
-
-    // Combine all signal waveforms, add noise, perform trigger check
-    for (int station = 0; station < detector->params.number_of_stations; station++) {
-        int trig_search_init = trigger->maxt_diode_bin + settings1->NFOUR;  
-        BuildAndTriggerOnWaveforms(debugmode, station, evt, trig_search_init, detector, event, settings1, trigger);
-    }
-
-    // also clear all vector info to reduce output root file size
-    clear_useless(settings1);   // to reduce the size of output AraOut.root, remove some information
-
-}   
 
 void Report::CalculateSignals(
     int debugmode, 
@@ -835,28 +807,39 @@ void Report::BuildAndTriggerOnWaveforms(
     }   // if there is any ray_sol in the station
 
     // Check if there's additional waveform to trigger on. Save this event and rerun trigger if so.
+    stations[station_index].next_trig_search_init = -1;
     if (stations[station_index].Global_Pass) {
+
         bool analyze_more_waveform = false;
-        int next_trig_search_init = -1;
+
         for (int string=0; string<stations[station_index].strings.size(); string++){
             for (int antenna=0; antenna<stations[station_index].strings[string].antennas.size(); antenna++){
 
-                // Calculate the next bin that the station would check for trigger
+                // Calculate the next bin that could be checked for a trigger based on this antenna's trigger bin
                 int this_next_trig_search_init = (
                     stations[station_index].Global_Pass // trigger bin in V_convolved
                     + (settings1->WAVEFORM_LENGTH - stations[station_index].strings[string].antennas[antenna].global_trig_bin) 
-                        // number of bins between trigger bin and end of readout window
+                        // number of bins between trigger bin and end of readout window. 
+                        // Sometimes includes channel-specific delays
                     + settings1->DEADTIME/settings1->TIMESTEP // deadtime in units of bins
                 ); 
 
-                // Save the largest next_trig_search_init for this station                   
-                if (this_next_trig_search_init > next_trig_search_init) {
-                    next_trig_search_init = this_next_trig_search_init;
+                // Save this antenna's "next initial trigger bin" as the whole station's 
+                //   "next initial trigger bin" if it's larger than what was previously saved                
+                if (this_next_trig_search_init > stations[station_index].next_trig_search_init) {
+                    stations[station_index].next_trig_search_init = this_next_trig_search_init;
                 }
 
-                int signal_length = stations[station_index].strings[string].antennas[antenna].V_convolved.size();
+            }
+
+        }
+
+        for (int string=0; string<stations[station_index].strings.size(); string++){
+
+            for (int antenna=0; antenna<stations[station_index].strings[string].antennas.size(); antenna++){
 
                 // Find the last bin in V_convolved that has nonzero signal 
+                int signal_length = stations[station_index].strings[string].antennas[antenna].V_convolved.size();
                 int last_nonzero_bin = signal_length-1;
                 for (int bin=signal_length-1; bin>-1; bin--) {
                     if ( stations[station_index].strings[string].antennas[antenna].V_convolved[bin] != 0. ) {
@@ -865,23 +848,20 @@ void Report::BuildAndTriggerOnWaveforms(
                     }
                 }
 
-                // If there is signal that exists beyond what would be the next trig_search_init, 
+                // If there is signal that exists later than what would be the next trig_search_init, 
                 //   indicate that we need to analyze more signal.
-                if ( last_nonzero_bin > this_next_trig_search_init ){
+                if ( last_nonzero_bin > stations[station_index].next_trig_search_init ){
                     analyze_more_waveform = true;
                 }
 
             }
-        }
-        if (analyze_more_waveform) {
             
-            // Save the results from this trigger check
+        }
 
-            // Prepare data for the next trigger check
-
-            // Rerun the trigger check on the next piece of signal
-            BuildAndTriggerOnWaveforms(debugmode, station_index, evt, next_trig_search_init, detector, event, settings1, trigger);
-
+        // If we have no waveform left to analyze, reset the `next_trig_search_init` to `-1`
+        //   to indicate that there's nothing to trigger check after reading out this event so far.
+        if ( !analyze_more_waveform ) {
+            stations[station_index].next_trig_search_init = -1;
         }
 
     }
@@ -3063,7 +3043,7 @@ void Report::Convolve_Signals(
             // Store the bin where the singal is located
             signal_bin[interaction_idx].push_back(
                 (antenna->arrival_time[interaction_idx][m] - stations[station_number].min_arrival_time) / (settings1->TIMESTEP) 
-                + settings1->NFOUR *2 + trigger->maxt_diode_bin);
+                + settings1->NFOUR *2 + trigger->maxt_diode_bin); 
             antenna->SignalBin[interaction_idx].push_back(signal_bin[interaction_idx][m]);
         }
     }
@@ -5320,7 +5300,7 @@ int Report::getNumOfSignalledAnts(Station_r station){
                 }
 
             } // end if (ray solutions exist)
-
+                        
             // If this antenna had a non-zero signal-only signal, 
             //   increment the good antenna tracker
             if ( max_signal > 0.0){ 
