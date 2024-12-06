@@ -274,9 +274,13 @@ class Report {
     
     // Phased Array functions
     bool isTrigger(double eff);
+    double get_PA_efficiency(double SNR, Trigger *trigger);
+    int get_PA_trigger_bin(
+        Antenna_r *antenna, vector <double> waveform, double timestep, 
+        double event_trigger_rand_num, double noise_RMS, Trigger *trigger
+    );
     void checkPATrigger(
-        int i, double all_receive_ang[2], double &viewangle, int ray_sol_cnt,
-        Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
+        int i, Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
         int trig_search_init, int max_total_bin);    
     double interpolate(double *xdata,double *ydata, double xi, int numData);
     
@@ -450,16 +454,9 @@ class Report {
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
 
         // Phased Array variables
-        double viewAngle;
-        double my_averageSNR;
-        double my_receive_ang;
-        double my_raysol;
         double pa_force_trigger_snr = 3.5; 
             // SNR that should always trigger, 
             // used (eg) when triggering on noise only events
-        double ara_noise_rms = 0.04; 
-            // KAH and ARB are unsure where this number comes from. 
-            // KAH belives she took this from the person who simulated PA before her 
         double pa_snr_cap = 25.;
             // KAH thinks this is the max SNR she had efficiencies calculated for
             // KAH says the PA has a SNR cap of 25 in practice and may have a link showing this.
