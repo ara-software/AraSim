@@ -2206,8 +2206,10 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     std::string TxgainFile;    
     
     //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
-    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";     
+    //TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";     
+    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt";     
     
+
     if (settings1->ANTENNA_MODE == 0){
         // use the orignal Vpol/Hpol gains
         VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt";
@@ -2488,8 +2490,6 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     
     Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
-        cout << "Filename: " << filename << endl; 
-        cout << "ASG Trans_databin: " << trans_databin[i] << "i: " << i<< endl;
         if(!std::isfinite(trans_databin[i]))
           throw runtime_error("Non-finite FFT gain value found! "+filename);
         transAnt_databin->push_back(trans_databin[i]); // from Hz to MHz
