@@ -2378,7 +2378,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
 
     // open the requested file
     ifstream NecOut( filename.c_str() );
-cout << "Filename" << filename << endl;  
+
     // initialize some variables used for read-in
     const int N = freq_step;
     double Transm[N];
@@ -2460,7 +2460,7 @@ cout << "Filename" << filename << endl;
                     // check the line is what we expected (gain for a particular theta/phi)
                     if(words.size() != 5)
                       throw runtime_error("Antenna gain file data line not properly formatted! "+filename);
-                    
+
                     // save dB gain and phase and check they are sensible
                     double thisdBGain = stof(words[2]);
                     double thisPhase = stof(words[4]);
