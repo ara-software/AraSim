@@ -4398,17 +4398,14 @@ void Report::ApplyAntFactors_Tdomain_new(double phase_copol, double phase_crossp
             
             phase_current += PI/2;
             double psi = settings1->CLOCK_ANGLE; 
-            double delta_psi = 0.0; //emitted angle due to x-pol 
+            double delta_psi = TMath::ATan(heff_crosspol / heff_copol); // Tx cross-pol tilt. Works for CLOCK_ANGLE=0 and I think works otherwise too. Needs verification -ASG 12/09/24); 
             double theta = antenna_theta*PI/180; 
             double phi = antenna_phi*PI/180;
 
             //turn on cross-pol Tx
-            if (settings1->CROSSPOL_TX){
-                v_amplification_crosspol = heff_crosspol * pol_factor_crosspol;
-                delta_psi = TMath::ATan(heff_crosspol / heff_copol); // works for CLOCK_ANGLE=0 and I think works otherwise too. Needs verification -ASG 12/09/24)
-            } 
-            else{
+            if (settings1->CROSSPOL_TX != 1){
                 heff_crosspol = 0.0; //need to be turned off for the calculation of amplitude v_amp
+                delta_psi = 0.0; // turn off cross-pol tx tilt
             }
 
             //Adjust polarization vector
