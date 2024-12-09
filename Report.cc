@@ -4346,16 +4346,29 @@ void Report::ApplyAntFactors_Tdomain_new(double phase_copol, double phase_crossp
     */
     double phaseSign = 1.;
     double amplitudeSign = 1.;
+
     //If using in transmitter mode, the phase gets a minus sign since the signal is out-going from the antenna rather than incoming.
     if(useInTransmitterMode==true){ phaseSign*=-1.;};
+
     //If using this function to invert the antenna response, we apply a minus sign the phase in order to undo the phase applied by the antenna.  We also divide the amplitude by the factor rather than multiply.  To do this, we simply apply a -1 to the power of the factor applied to the amplitude so that it is divided out.
     if(applyInverse==true){ phaseSign*=-1.; amplitudeSign*=-1;};
 
     //Calculate the polarization factor, which is essentially the vector component of the Electric field that is projected onto the antenna.
-    //pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
-   // Calculate the co-pol and cross-pol polarization factors
+   // Calculate both co-pol and cross-pol polarization factors
     double pol_factor_copol = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
-    double pol_factor_crosspol = calculatePolFactor(Pol_vector, 1 - ant_type, antenna_theta, antenna_phi); // Opposite polarization type
+    double pol_factor_crosspol = calculatePolFactor(Pol_vector, 1 - ant_type, antenna_theta, antenna_phi);
+
+    // Calculate amplitude amplifications from co-pol and cross-pol
+    double v_amplification_copol = heff_copol * pol_factor_copol;
+    double v_amplification_crosspol = 0.0;
+    
+    //turn on cross-pol for receiver
+    if (settings1->CROSSPOL_RX){
+        v_amplification_crosspol = heff_crosspol * pol_factor_crosspol;
+    }
+
+    // Add the contributions linearly for Rx
+    double v_amplification = v_amplification_copol + v_amplification_crosspol;
 
     if ( settings1->PHASE_SKIP_MODE != 1 ) {
         double phase_current;
@@ -4372,50 +4385,56 @@ void Report::ApplyAntFactors_Tdomain_new(double phase_copol, double phase_crossp
             else if (vm_img<0.) phase_current = -PI;
             else phase_current = 0.;
         }
+
         //Calculate amplitude via the real and imaginary components.
-        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img);
+        double v_amp_in  = sqrt(vm_real*vm_real + vm_img*vm_img);
+        double v_amp = v_amp_in; //save the incomming voltage
 
         // Calculate amplitude contributions from co-pol and cross-pol
-        double v_amplification_copol = heff_copol * pol_factor_copol;
-        double v_amplification_crosspol = heff_crosspol * pol_factor_crosspol;
+        //double v_amplification_copol = heff_copol * pol_factor_copol;
+        //double v_amplification_crosspol = heff_crosspol * pol_factor_crosspol;
 
-        // Add the contributions linearly
-        double v_amplification = v_amplification_copol + v_amplification_crosspol;
+        // Add the contributions linearly for Rx
+        //double v_amplification = v_amplification_copol + v_amplification_crosspol;
 
         // Apply amplitude sign for inversion if necessary
         v_amp *= pow(v_amplification, amplitudeSign);
 
         //If in transmitter mode, we must apply additional frequency and impedance terms to the amplitude.
-        if (useInTransmitterMode==true){ 
+        if (useInTransmitterMode==true){
+            
             phase_current += PI/2;
-            // The factors of two in this line are currently up for debate.  Will be cleaned up in future push - JCF 3/2/2024 
-//ASG: The 100 factor is for now, since I'm using an antenna Tx gain that's ~10x larger             
-//uncomment later IF NO XPOL            v_amp *= pow(100*freq/CLIGHT*(Z0/Zr)/4/sqrt(2.), amplitudeSign);          
-//IF XPOL 
             double psi = settings1->CLOCK_ANGLE; 
-            double delta_psi = TMath::ATan(heff_crosspol / heff_copol);
-            double theta = antenna_theta*PI/180; // theta*180/PI
+            double delta_psi = 0.0; //emitted angle due to x-pol 
+            double theta = antenna_theta*PI/180; 
             double phi = antenna_phi*PI/180;
-            //Justin's method
+
+            //turn on cross-pol Tx
+            if (settings1->CROSSPOL_TX){
+                v_amplification_crosspol = heff_crosspol * pol_factor_crosspol;
+                delta_psi = TMath::ATan(heff_crosspol / heff_copol); // works for CLOCK_ANGLE=0 and I think works otherwise too. Needs verification -ASG 12/09/24)
+            } 
+            else{
+                heff_crosspol = 0.0; //need to be turned off for the calculation of amplitude v_amp
+            }
+
+            //Adjust polarization vector
             double newPol_vectorX = -cos(psi+delta_psi)*cos(theta)*cos(phi) + sin(psi+delta_psi)*sin(phi);
             double newPol_vectorY = -cos(psi+delta_psi)*cos(theta)*sin(phi) - sin(psi+delta_psi)*cos(phi);
             double newPol_vectorZ = cos(psi+delta_psi)*sin(theta);
                                             
             Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
 
-
-                v_amp *= pow(100*freq/CLIGHT*(Z0/Zr)/4/sqrt(2.)*(v_amplification)*(1/sqrt(heff_crosspol* heff_crosspol + heff_copol*heff_copol )), amplitudeSign);
+            //copol and cross-pol add quadratically in E-field
+            v_amp *= pow(freq/CLIGHT*(Z0/Zr)/4/sqrt(2.)*(v_amplification)*(1/sqrt(heff_crosspol* heff_crosspol + heff_copol*heff_copol )), amplitudeSign);
         }
 
-        //Calculate amplitude via the real and imaginary components.
-        double v_amp_test  = sqrt(vm_real*vm_real + vm_img*vm_img);
-
         // Calculate the combined real and imaginary terms from co-pol and cross-pol
-        double vm_real_copol = v_amp_test * (v_amplification_copol * cos(phase_current + (phaseSign * phase_copol * RADDEG)));
-        double vm_img_copol = v_amp_test * (v_amplification_copol * sin(phase_current + (phaseSign * phase_copol * RADDEG)));
+        double vm_real_copol = v_amp_in * (v_amplification_copol * cos(phase_current + (phaseSign * phase_copol * RADDEG)));
+        double vm_img_copol = v_amp_in * (v_amplification_copol * sin(phase_current + (phaseSign * phase_copol * RADDEG)));
 
-        double vm_real_crosspol = v_amp_test * (v_amplification_crosspol * cos(phase_current + (phaseSign * phase_crosspol * RADDEG)));
-        double vm_img_crosspol = v_amp_test * (v_amplification_crosspol * sin(phase_current + (phaseSign * phase_crosspol * RADDEG)));
+        double vm_real_crosspol = v_amp_in * (v_amplification_crosspol * cos(phase_current + (phaseSign * phase_crosspol * RADDEG)));
+        double vm_img_crosspol = v_amp_in * (v_amplification_crosspol * sin(phase_current + (phaseSign * phase_crosspol * RADDEG)));
 
         // Combine co-pol and cross-pol real and imaginary parts
         vm_real = vm_real_copol + vm_real_crosspol;
@@ -4423,19 +4442,22 @@ void Report::ApplyAntFactors_Tdomain_new(double phase_copol, double phase_crossp
 
     }
 
-     else { // Amplitude-only mode
+    else { // Amplitude-only mode
         // Calculate amplitude contributions from co-pol and cross-pol
-        double v_amplification_copol = heff_copol * pol_factor_copol;
-        double v_amplification_crosspol = heff_crosspol * pol_factor_crosspol;
+        //double v_amplification_copol = heff_copol * pol_factor_copol;
+        //double v_amplification_crosspol = 0.0; // Default to 0
+        //if (CROSSPOL_RX) {
+        //    v_amplification_crosspol = heff_crosspol * pol_factor_crosspol;
+        //}
 
         // Add the contributions linearly
-        double v_amplification = v_amplification_copol + v_amplification_crosspol;
+        //double v_amplification = v_amplification_copol + v_amplification_crosspol;
 
         // Apply amplitude sign for inversion if necessary
-        v_amplification = pow(v_amplification, amplitudeSign);
+        //v_amplification = pow(v_amplification, amplitudeSign);
 
-        vm_real *= v_amplification;
-        vm_img *= v_amplification;
+        vm_real *= pow(v_amplification, amplitudeSign);
+        vm_img *= pow(v_amplification, amplitudeSign);
     }
 }
 
