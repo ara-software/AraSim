@@ -4398,7 +4398,7 @@ void Report::ApplyAntFactors_Tdomain_new(double phase_copol, double phase_crossp
             
             phase_current += PI/2;
             double psi = settings1->CLOCK_ANGLE; 
-            double delta_psi = TMath::ATan(heff_crosspol / heff_copol); // Tx cross-pol tilt. Works for CLOCK_ANGLE=0 and I think works otherwise too. Needs verification -ASG 12/09/24); 
+            double delta_psi = TMath::ATan(heff_crosspol / heff_copol); // Tx cross-pol tilt
             double theta = antenna_theta*PI/180; 
             double phi = antenna_phi*PI/180;
 
@@ -4416,7 +4416,7 @@ void Report::ApplyAntFactors_Tdomain_new(double phase_copol, double phase_crossp
             Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
 
             //copol and cross-pol add quadratically in E-field
-            v_amp *= pow(freq/CLIGHT*(Z0/Zr)/4/sqrt(2.)*(v_amplification)*(1/sqrt(heff_crosspol* heff_crosspol + heff_copol*heff_copol )), amplitudeSign);
+            v_amp *= pow(freq/CLIGHT*(Z0/Zr)/4/sqrt(2.)*(1/v_amplification)*(sqrt(heff_crosspol* heff_crosspol + heff_copol*heff_copol )), amplitudeSign);
         }
 
         // Calculate the combined real and imaginary terms from co-pol and cross-pol
@@ -4509,18 +4509,18 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol_
         vm_img *= pow(heff * pol_factor, amplitudeSign); 
     }
 }
-/*
+
 void Report::ApplyAntFactors_Tdomain_FirstTwo_new(double heff_copol, double heff_copol_lastbin, double heff_crosspol, double heff_crosspol_lastbin, 
                                               Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, 
-                                              double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode, 
-                                              bool applyInverse, Settings *settings1) {
+                                              Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode, 
+                                              bool applyInverse) {
     /* Report::ApplyAntFactors_Tdomain_FirstTwo()
     Purpose: 
         Multiply (or divide) first and last bin of voltage in Fourier space by the antenna gain and phase.
         
     For a more verbose explanation, see Report::ApplyAntFactors_Tdomain.  This simply applies the operation to the first and last bin, which much be done separately as a consequence of FFT's.  Does not calculate phase.
     */
-/*
+
     double amplitudeSign = 1.;
     //If using this function to invert the antenna response, we apply a minus sign the phase in order to undo the phase applied by the antenna.  We also divide the amplitude by the factor rather than multiply.  To do this, we simply apply a -1 to the power of the factor applied to the amplitude so that it is divided out.
     if(applyInverse==true){amplitudeSign*=-1;};
@@ -4551,17 +4551,31 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo_new(double heff_copol, double heff
     vm_bin1 *= pow(v_amplification_bin1, amplitudeSign);
     
     if (useInTransmitterMode) {
-        // The factors of two in these two lines are currently up for debate.  Will be cleaned up in future push - JCF 3/2/2024  
-        vm_bin0 *= pow(freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.), amplitudeSign);
-        vm_bin1 *= pow(freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.), amplitudeSign);
-    }
-    else {
-        vm_bin0 *= pow(heff * pol_factor, amplitudeSign);
-        vm_bin1 *= pow(heff_lastbin * pol_factor, amplitudeSign);
+        // Handle cross-pol factors for transmitter mode
+        if (settings1->CROSSPOL_TX) {
+            pol_factor_crosspol = calculatePolFactor(Pol_vector, 1 - ant_type, antenna_theta, antenna_phi);
+            v_amplification_crosspol_bin0 = heff_crosspol * pol_factor_crosspol;
+            v_amplification_crosspol_bin1 = heff_crosspol_lastbin * pol_factor_crosspol;
+        }
+
+        // Co-pol and cross-pol add quadratically in E-field
+        double tx_amplification_bin0 = freq / CLIGHT * (Z0 / Zr) / 4 / sqrt(2.0) * (1/v_amplification_bin0) *
+                                       (sqrt(heff_crosspol * heff_crosspol + heff_copol * heff_copol));
+        double tx_amplification_bin1 = freq / CLIGHT * (Z0 / Zr) / 4 / sqrt(2.0) * (1/v_amplification_bin1) *
+                                       (sqrt(heff_crosspol_lastbin * heff_crosspol_lastbin + heff_copol_lastbin * heff_copol_lastbin));
+
+        vm_bin0 *= pow(tx_amplification_bin0, amplitudeSign);
+        vm_bin1 *= pow(tx_amplification_bin1, amplitudeSign);
     }
 
+// I don't understand why we had it twice in the original function -ASG 12/09/24
+//    else {
+//        vm_bin0 *= pow(heff * pol_factor, amplitudeSign);
+//        vm_bin1 *= pow(heff_lastbin * pol_factor, amplitudeSign);
+//    }
+
 }
-*/
+
 
 void Report::ApplyAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode, bool applyInverse) {
     /* Report::ApplyAntFactors_Tdomain_FirstTwo()
