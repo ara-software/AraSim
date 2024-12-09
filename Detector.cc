@@ -2265,9 +2265,9 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Custom.txt";         
     }
 
-    // Read cross-pol gain files
+    // Add cross-pol gain files
     VgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
-    VgainTopCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
+    VgainTopCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt"; //Should be TV but it's not working -ASG 12/09/24
     HgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
 
 
@@ -2284,12 +2284,15 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     ReadAntennaGain(HgainFile, settings1, eHPol);
     ReadAntennaGain(TxgainFile, settings1, eTx);
 
-    // Read the cross-pol gain files
-    ReadAntennaGain(VgainCrossFile, settings1, eVPolCross);
-    ReadAntennaGain(VgainTopCrossFile, settings1, eVPolTopCross);
-    ReadAntennaGain(HgainCrossFile, settings1, eHPolCross);
-    ReadAntennaGain(TxgainFileCross, settings1, eTxCross);
-
+    // Read cross-pol Rx gain files
+    if (settings1->CROSSPOL_RX){
+        ReadAntennaGain(VgainCrossFile, settings1, eVPolCross);
+        ReadAntennaGain(VgainTopCrossFile, settings1, eVPolTopCross);
+        ReadAntennaGain(HgainCrossFile, settings1, eHPolCross);
+    }
+    if (settings1->CROSSPOL_TX){
+        ReadAntennaGain(TxgainFileCross, settings1, eTxCross);
+    }
 }
 
 //Defining function that reads in TX antenna impedances
