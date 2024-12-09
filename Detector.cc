@@ -2205,13 +2205,15 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     std::string VgainTopFile;
     std::string HgainFile;
     std::string TxgainFile;    
-    std::string TxgainFileCross;    
+    std::string TxgainFileCross;
+    std::string VgainCrossFile;
+    std::string VgainTopCrossFile;
+    std::string HgainCrossFile;    
 
     
     //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
-    //TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";     
-    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";     
-    TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";     
+    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";     
+    TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Crosspol_Kansas2024.txt";     
 
 
     if (settings1->ANTENNA_MODE == 0){
@@ -2262,21 +2264,13 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Custom.txt";
         HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Custom.txt";         
     }
-    std::string VgainCrossFile;
-    std::string VgainTopCrossFile;
-    std::string HgainCrossFile;
 
-    // Specify the cross-pol gain files (example for Kansas 2024 mode)
-    if (settings1->ANTENNA_MODE == 5 || settings1->ANTENNA_MODE == 1) {
-        VgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
-        VgainTopCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
-        HgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
-    }
+    // Read cross-pol gain files
+    VgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
+    VgainTopCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
+    HgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
 
-    // Read the cross-pol gain files
-    ReadAntennaGain(VgainCrossFile, settings1, eVPolCross);
-    ReadAntennaGain(VgainTopCrossFile, settings1, eVPolTopCross);
-    ReadAntennaGain(HgainCrossFile, settings1, eHPolCross);
+
     
     // Check for ALL_ANT_V_ON, then set all antennas to VPol if true
     if (settings1->ALL_ANT_V_ON == 1) {
@@ -2284,15 +2278,20 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         VgainTopFile = VgainFile;
     }
     
-    //Read in antenna gain files.
+    //Read in antenna co-pol gain files.
     ReadAntennaGain(VgainFile, settings1, eVPol);
     ReadAntennaGain(VgainTopFile, settings1, eVPolTop);
     ReadAntennaGain(HgainFile, settings1, eHPol);
     ReadAntennaGain(TxgainFile, settings1, eTx);
+
+    // Read the cross-pol gain files
+    ReadAntennaGain(VgainCrossFile, settings1, eVPolCross);
+    ReadAntennaGain(VgainTopCrossFile, settings1, eVPolTopCross);
+    ReadAntennaGain(HgainCrossFile, settings1, eHPolCross);
     ReadAntennaGain(TxgainFileCross, settings1, eTxCross);
 
-
 }
+
 //Defining function that reads in TX antenna impedances
 inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
     
@@ -2379,7 +2378,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
 
     // open the requested file
     ifstream NecOut( filename.c_str() );
-  
+cout << "Filename" << filename << endl;  
     // initialize some variables used for read-in
     const int N = freq_step;
     double Transm[N];
