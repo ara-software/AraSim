@@ -2267,7 +2267,7 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
 
     // Add cross-pol gain files
     VgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
-    VgainTopCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt"; //Should be TV but it's not working -ASG 12/09/24
+    VgainTopCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt"; //Should be TV but it's not working due to a negative SWR (first SWR entry) -ASG 12/09/24
     HgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
 
 
