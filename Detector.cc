@@ -95,7 +95,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         params.DeployedStations = 4;
     }
     
-    if (settings1->ANTENNA_MODE == 5 or settings1->ANTENNA_MODE == 6) {
+    if (settings1->ANTENNA_MODE == 5 or settings1->ANTENNA_MODE == 6 or settings1->CROSSPOL_RX == 1 or settings1->CROSSPOL_TX ==1) {
         params.freq_step = 56; //This is a stop-gap measure to allow the Kansas models ot work in AraSim, which only have data up to 1000 MHz rather than 1066.66 MHz. - JCF 2/22/2024
     }
 
