@@ -2285,14 +2285,11 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     ReadAntennaGain(TxgainFile, settings1, eTx);
 
     // Read cross-pol Rx gain files
-//    if (settings1->CROSSPOL_RX){
-        ReadAntennaGain(VgainCrossFile, settings1, eVPolCross);
-        ReadAntennaGain(VgainTopCrossFile, settings1, eVPolTopCross);
-        ReadAntennaGain(HgainCrossFile, settings1, eHPolCross);
-//    }
-//    if (settings1->CROSSPOL_TX){
-        ReadAntennaGain(TxgainFileCross, settings1, eTxCross);
-//    }
+    ReadAntennaGain(VgainCrossFile, settings1, eVPolCross);
+    ReadAntennaGain(VgainTopCrossFile, settings1, eVPolTopCross);
+    ReadAntennaGain(HgainCrossFile, settings1, eHPolCross);
+    ReadAntennaGain(TxgainFileCross, settings1, eTxCross);
+    
 }
 
 //Defining function that reads in TX antenna impedances
