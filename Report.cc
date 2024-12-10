@@ -157,6 +157,8 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
     Pol_vector.clear();
     vmmhz.clear();
     Heff.clear();
+    Heff_copol.clear();
+    Heff_crosspol.clear();
     Mag.clear();
     Fresnel.clear();
     Pol_factor.clear();
@@ -211,6 +213,8 @@ void Antenna_r::clear_useless(Settings *settings1) {   // to reduce the size of 
 
     if (settings1->DATA_SAVE_MODE == 1) {
     Heff.clear();
+    Heff_copol.clear();
+    Heff_crosspol.clear();
     
     //VHz_antfactor.clear();
     //VHz_filter.clear();
@@ -245,6 +249,8 @@ void Antenna_r::clear_useless(Settings *settings1) {   // to reduce the size of 
     ray_step.clear();  
     
     Heff.clear();
+    Heff_copol.clear();
+    Heff_crosspol.clear();
     //VHz_antfactor.clear();
     //VHz_filter.clear();
     Vfft.clear();
@@ -625,6 +631,8 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                 stations[i].strings[j].antennas[k].reflect_ang.push_back(ray_output[3][ray_sol_cnt]);
                                 stations[i].strings[j].antennas[k].vmmhz.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].Heff.resize(ray_sol_cnt + 1);
+                                stations[i].strings[j].antennas[k].Heff_copol.resize(ray_sol_cnt + 1);
+                                stations[i].strings[j].antennas[k].Heff_crosspol.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].Vm_zoom.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].Vm_zoom_T.resize(ray_sol_cnt + 1);
                                 stations[i].strings[j].antennas[k].Vfft.resize(ray_sol_cnt + 1);
@@ -1360,12 +1368,23 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 freq_tmp = dF_Nnew *((double) stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2. + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
 
                                                 freq_lastbin = freq_tmp;
-                                                
-                                                heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, j, k),
-                                                                            freq_tmp, 
-                                                                            icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
-                                                                            detector->GetImpedance(freq_tmp*1.E-6, detector->stations[i].strings[j].antennas[k].type, k));                                                                                 
-                                            
+
+                                                // Co-pol effective height for the last bin
+                                                double heff_copol_lastbin = GaintoHeight(
+                                                    detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, antenna_theta, antenna_phi,
+                                                                                detector->stations[i].strings[j].antennas[k].type, j, k, false, false),
+                                                    freq_tmp,
+                                                    icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
+                                                    detector->GetImpedance(freq_tmp * 1.E-6, detector->stations[i].strings[j].antennas[k].type, k));
+
+                                                // Cross-pol effective height for the last bin
+                                                double heff_crosspol_lastbin = GaintoHeight(
+                                                    detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, antenna_theta, antenna_phi,
+                                                                                detector->stations[i].strings[j].antennas[k].type, j, k, false, true),
+                                                    freq_tmp,
+                                                    icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
+                                                    detector->GetImpedance(freq_tmp * 1.E-6, detector->stations[i].strings[j].antennas[k].type, k));
+
                                                 icemodel->GetFresnel(
                                                     ray_output[1][ray_sol_cnt],    // launch_angle
                                                     ray_output[2][ray_sol_cnt], // rec_angle
@@ -1395,13 +1414,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 
                                                     freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
 
-                                                    heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta,  antenna_phi,  detector->stations[i].strings[j].antennas[k].type, j, k),
-                                                                        freq_tmp, 
-                                                                        icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
-                                                                        detector->GetImpedance(freq_tmp*1.E-6, detector->stations[i].strings[j].antennas[k].type, k));                                                    
-
-                                                    stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(heff);
-
                                                     // Co-pol effective height
                                                     double heff_copol = GaintoHeight(
                                                         detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, antenna_theta, antenna_phi,
@@ -1418,6 +1430,10 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                         icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                         detector->GetImpedance(freq_tmp * 1.E-6, detector->stations[i].strings[j].antennas[k].type, k));
 
+                                                    stations[i].strings[j].antennas[k].Heff_copol[ray_sol_cnt].push_back(heff_copol);
+                                                    stations[i].strings[j].antennas[k].Heff_crosspol[ray_sol_cnt].push_back(heff_crosspol);
+
+
                                                     if (n > 0)
                                                     {
                                                         // Retrieve co-pol and cross-pol phases
@@ -1427,16 +1443,14 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                                         detector->stations[i].strings[j].antennas[k].type, false, true);
 
                                                         // Call ApplyAntFactors_Tdomain with both co-pol and cross-pol contributions
-                                                        ApplyAntFactors_Tdomain_new(phase_copol, phase_crosspol, heff_copol, heff_crosspol, 
-                                                                                Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
-                                                                                V_forfft[2 * n], V_forfft[2 * n + 1], settings1, 
-                                                                                antenna_theta, antenna_phi, freq_tmp);
+                                                        ApplyAntFactors_Tdomain_new(phase_copol, phase_crosspol, heff_copol, heff_crosspol, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
+                                                                                V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);
                                                     
                                                     }
                                                     else
                                                     {
-                                                            ApplyAntFactors_Tdomain_FirstTwo(heff, heff_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi, freq_tmp);
-                                                    
+                                                        ApplyAntFactors_Tdomain_FirstTwo_new(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
+                                                        Pol_factor, V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp, false, false);                                                    
                                                     }
 
                                                     //
@@ -1568,19 +1582,39 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 //Defining the launch angles using the polarization vector calculations above, converted to degrees.
                                                 Tx_theta = theta*180/PI;
                                                 Tx_phi = phi*180/PI;
-                                                //Tx effective height for last bin.  Currently locked to standard ARA Vpol and HPol antennas.  Need to add selection mode.
-                                                
-                                                heff_Tx_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true),
-                                                                               freq_tmp, 
-                                                                               icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
-                                                                               detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));                                                                                      
-                                                //End Tx effective height for last bin
-                                                //Apply effective height of last bin for receiving antenna
-                                                heff_lastbin = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, j, k),
-                                                                            freq_tmp, 
-                                                                            icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
-                                                                            detector->GetImpedance(freq_tmp*1.E-6, detector->stations[i].strings[j].antennas[k].type, k));                                                
-                                                //end effective height of last bin for receiving antenna.
+
+                                                // Tx effective height for co-pol and cross-pol for the last bin
+                                                double heff_Tx_copol_lastbin = GaintoHeight(
+                                                    detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true, false),
+                                                    freq_tmp,
+                                                    icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
+                                                    detector->GetImpedance(freq_tmp * 1.E-6, 0, 0, true)
+                                                );
+
+                                                double heff_Tx_crosspol_lastbin = GaintoHeight(
+                                                    detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true, true),
+                                                    freq_tmp,
+                                                    icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
+                                                    detector->GetImpedance(freq_tmp * 1.E-6, 0, 0, true)
+                                                );
+                                                // End Tx effective height for last bin
+
+                                                // Receiving antenna effective height for co-pol and cross-pol for the last bin
+                                                double heff_copol_lastbin = GaintoHeight(
+                                                    detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, antenna_theta, antenna_phi,
+                                                                                detector->stations[i].strings[j].antennas[k].type, j, k, false, false),
+                                                    freq_tmp,
+                                                    icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
+                                                    detector->GetImpedance(freq_tmp * 1.E-6, detector->stations[i].strings[j].antennas[k].type, k)
+                                                );
+
+                                                double heff_crosspol_lastbin = GaintoHeight(
+                                                    detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, antenna_theta, antenna_phi,
+                                                                                detector->stations[i].strings[j].antennas[k].type, j, k, false, true),
+                                                    freq_tmp,
+                                                    icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
+                                                    detector->GetImpedance(freq_tmp * 1.E-6, detector->stations[i].strings[j].antennas[k].type, k)
+                                                );
 
                                             
                                                 //Apply Fresnel factors for magnification and 1/r dependence
@@ -1597,63 +1631,62 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 //ASG Move this after Tx!!!
                                                 //Apply birefringence.
                                                 birefringence->Principal_axes_polarization(Pol_vector, bire_ray_cnt, max_bire_ray_cnt, settings1); //For birefringence, modify the polarization at the antennas       
-
+cout << "ASG 1" << endl;
                                                 //Begin frequency binning
                                             	for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2; n++)
                                             	{
 
-                                                    // Calculate effective height for transmitting antenna in current frequency bin
-                                                    heff_Tx = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true),
-                                                                           freq_tmp, 
-                                                                           icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
-                                                                           detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));  
-                                                    // End Tx effective height calculation                                                    
-                                            
-                                                    // Calculate effective height for receiving antenna in current frequency bin
-                                                    heff = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type, j, k),
-                                                                        freq_tmp, 
-                                                                        icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
-                                                                        detector->GetImpedance(freq_tmp*1.E-6, detector->stations[i].strings[j].antennas[k].type, k));                                                    
-                                                    // End Rx effective height calculation
 
-                                                                                                        // Co-pol effective height
+                                                    // Co-pol effective height Tx
                                                     double heff_Tx_copol = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true, false),
                                                         freq_tmp,
                                                         icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                         detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));
 
-                                                    // Co-pol effective height
+                                                    // Cross-pol effective height Tx
                                                     double heff_Tx_crosspol = GaintoHeight(detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true, true),
                                                         freq_tmp,
                                                         icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
                                                         detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));
 
-                                                	stations[i].strings[j].antennas[k].Heff[ray_sol_cnt].push_back(heff);
-                                                    
+                                                    // Co-pol effective height Rx
+                                                    double heff_copol = GaintoHeight(
+                                                        detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, antenna_theta, antenna_phi,
+                                                                                    detector->stations[i].strings[j].antennas[k].type, j, k, false, false),
+                                                        freq_tmp,
+                                                        icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
+                                                        detector->GetImpedance(freq_tmp * 1.E-6, detector->stations[i].strings[j].antennas[k].type, k));
+
+                                                    // Cross-pol effective height Rx
+                                                    double heff_crosspol = GaintoHeight(
+                                                        detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, antenna_theta, antenna_phi,
+                                                                                    detector->stations[i].strings[j].antennas[k].type, j, k, false, true),
+                                                        freq_tmp,
+                                                        icemodel->GetN(detector->stations[i].strings[j].antennas[k]),
+                                                        detector->GetImpedance(freq_tmp * 1.E-6, detector->stations[i].strings[j].antennas[k].type, k));
+
+                                                	stations[i].strings[j].antennas[k].Heff_copol[ray_sol_cnt].push_back(heff_copol);
+                                                	stations[i].strings[j].antennas[k].Heff_crosspol[ray_sol_cnt].push_back(heff_crosspol);
+
                                                 	freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq                                                      
-                    
+cout << "ASG 2" << endl;                   
                                                     //Apply Tx antenna factors
                                                     if (n > 0)
                                                 	{
-                                           
                                                         // Retrieve co-pol and cross-pol phases
-                                                        double phase_copol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0);
-                                                        double phase_crosspol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0);
+                                                        double phase_copol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, false, false);
+                                                        double phase_crosspol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, false, true);
 
                                                         // Call ApplyAntFactors_Tdomain with both co-pol and cross-pol contributions
-                                                        ApplyAntFactors_Tdomain_new(phase_copol_tx, phase_crosspol_tx, heff_Tx_copol, heff_Tx_crosspol, 
-                                                                                Pol_vector, 0, Pol_factor, 
-                                                                                V_forfft[2 * n], V_forfft[2 * n + 1], settings1, 
-                                                                                 Tx_theta, Tx_phi, freq_tmp, detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true), true);
+                                                        ApplyAntFactors_Tdomain_new(phase_copol_tx, phase_crosspol_tx, heff_Tx_copol, heff_Tx_crosspol, Pol_vector, 0, Pol_factor, 
+                                                                                V_forfft[2 * n], V_forfft[2 * n + 1], settings1, Tx_theta, Tx_phi, freq_tmp, true, false);
 
-                                                            //ApplyAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0),
-                                                              //  heff_Tx, Pol_vector, 0, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], settings1, Tx_theta, Tx_phi, freq_tmp, detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true), true);
-                                                	}
+                                                    }
                                                 	else
                                                 	{
-                                                       
-                                                    	ApplyAntFactors_Tdomain_FirstTwo(heff_Tx, heff_Tx_lastbin, Pol_vector, 0, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], Tx_theta, Tx_phi, freq_tmp);
-                                                	
+                                                        ApplyAntFactors_Tdomain_FirstTwo_new(
+                                                            heff_Tx_copol, heff_Tx_copol_lastbin, heff_Tx_crosspol, heff_Tx_crosspol_lastbin, Pol_vector, 0, 
+                                                            Pol_factor, V_forfft[2 * n], V_forfft[2 * n + 1], settings1, Tx_theta, Tx_phi, freq_tmp, true, false);                                                	
                                                     }
                                                     //End Tx antenna factors
                                                     
@@ -1662,17 +1695,23 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                     //Apply Rx antenna factors
                                                     if (n > 0)
                                                 	{
-                                                        ApplyAntFactors_Tdomain(detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, detector->stations[i].strings[j].antennas[k].type),
-                                                            heff, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);
+                                                        double phase_copol = detector->GetAntPhase_1D(freq_tmp * 1.e-6, antenna_theta, antenna_phi, 
+                                                                                                    detector->stations[i].strings[j].antennas[k].type, false, false);
+                                                        double phase_crosspol = detector->GetAntPhase_1D(freq_tmp * 1.e-6, antenna_theta, antenna_phi, 
+                                                                                                        detector->stations[i].strings[j].antennas[k].type, false, true);
+
+                                                        // Call ApplyAntFactors_Tdomain with both co-pol and cross-pol contributions
+                                                        ApplyAntFactors_Tdomain_new(phase_copol, phase_crosspol, heff_copol, heff_crosspol, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
+                                                                                V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);
                                                     }
                                                 	else
                                                 	{
-
-                                                    	ApplyAntFactors_Tdomain_FirstTwo(heff, heff_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], antenna_theta, antenna_phi, freq_tmp);
-    
+                                                        ApplyAntFactors_Tdomain_FirstTwo_new(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
+                                                                                        Pol_factor, V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);                                                    
+                                                                
                                                 	}
                                                     //End Rx antenna factors                                                        
-
+cout << "ASG 3" << endl;
                                                 	//
                                                 	// apply entire elect chain gain, phase
                                                 	//
@@ -1684,7 +1723,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 	{
                                                     	ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
                                                 	}                                                   
-
+cout << "ASG 4" << endl;
                                             	}   // end for freq bin
                                                 //End amplification at receiving antenna
 
@@ -1695,7 +1734,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
 					                        } //end for bire_ray_cnt    
 
 					                        birefringence->Two_rays_interference(V_forfft, V_forfft_bire[0], V_forfft_bire[1], stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], max_bire_ray_cnt, settings1); //Apply interference of two rays from birefringence						
-
+cout << "ASG 5" << endl;
 					                        Tools::SincInterpolation(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR / 2, T_forint, volts_forint);                                              
 
                                             for (int n = 0; n < settings1->NFOUR / 2; n++)

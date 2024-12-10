@@ -1,7 +1,4 @@
-
-
  // Setup file with basic notation. Please report any issues or mistakes: (guy.nir@weizmann.ac.il) Date: February 28, 2014// 
- 
 
 // neutrino energies (user guide: see section 3.1 page 6) //
  
@@ -196,4 +193,12 @@ ALL_ANT_V_ON=0
   
 DEBUG_MODE_ON=0 // 0 : off (do as usual), 1 : on (skip most of intensive computational process which don't have random generations)
 
-ANTENNA_MODE=5
+ANTENNA_MODE=1
+
+V_SATURATION=10
+
+WAVEFORM_LENGTH=1000
+
+CROSSPOL_RX=1
+
+CROSSPOL_TX=1
