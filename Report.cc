@@ -1067,12 +1067,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                     double phase_crosspol = detector->GetAntPhase_1D(freq_tmp * 1.e-6, antenna_theta, antenna_phi, 
                                                                                                                     detector->stations[i].strings[j].antennas[k].type, false, true);
 
-                                                                ApplyAntFactors_Tdomain_new(phase_copol, phase_crosspol, heff_copol, heff_crosspol, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
+                                                                ApplyAntFactors_Tdomain(phase_copol, phase_crosspol, heff_copol, heff_crosspol, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
                                                                     V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);
                                                             }
                                                             else
                                                             {
-                                                                ApplyAntFactors_Tdomain_FirstTwo_new(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
+                                                                ApplyAntFactors_Tdomain_FirstTwo(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
                                                                     Pol_factor, V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp, false, false);                                                    
                                                             }
 
@@ -1280,12 +1280,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                         double phase_crosspol = detector->GetAntPhase_1D(freq_tmp * 1.e-6, antenna_theta, antenna_phi, 
                                                                                                         detector->stations[i].strings[j].antennas[k].type, false, true);
 
-                                                    ApplyAntFactors_Tdomain_new(phase_copol, phase_crosspol, heff_copol, heff_crosspol, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
+                                                    ApplyAntFactors_Tdomain(phase_copol, phase_crosspol, heff_copol, heff_crosspol, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
                                                         V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);
                                                 }
                                                 else
                                                 {
-                                                    ApplyAntFactors_Tdomain_FirstTwo_new(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
+                                                    ApplyAntFactors_Tdomain_FirstTwo(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
                                                         Pol_factor, V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp, false, false);                                                    
                                                 }
 
@@ -1509,13 +1509,13 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                                         detector->stations[i].strings[j].antennas[k].type, false, true);
 
                                                         // Call ApplyAntFactors_Tdomain with both co-pol and cross-pol contributions
-                                                        ApplyAntFactors_Tdomain_new(phase_copol, phase_crosspol, heff_copol, heff_crosspol, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
+                                                        ApplyAntFactors_Tdomain(phase_copol, phase_crosspol, heff_copol, heff_crosspol, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
                                                                                 V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);
                                                     
                                                     }
                                                     else
                                                     {
-                                                        ApplyAntFactors_Tdomain_FirstTwo_new(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
+                                                        ApplyAntFactors_Tdomain_FirstTwo(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
                                                         Pol_factor, V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp, false, false);                                                    
                                                     }
 
@@ -1744,13 +1744,13 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                         double phase_crosspol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, false, true);
 
                                                         // Call ApplyAntFactors_Tdomain with both co-pol and cross-pol contributions
-                                                        ApplyAntFactors_Tdomain_new(phase_copol_tx, phase_crosspol_tx, heff_Tx_copol, heff_Tx_crosspol, Pol_vector, 0, Pol_factor, 
+                                                        ApplyAntFactors_Tdomain(phase_copol_tx, phase_crosspol_tx, heff_Tx_copol, heff_Tx_crosspol, Pol_vector, 0, Pol_factor, 
                                                                                 V_forfft[2 * n], V_forfft[2 * n + 1], settings1, Tx_theta, Tx_phi, freq_tmp, true, false);
 
                                                     }
                                                 	else
                                                 	{
-                                                        ApplyAntFactors_Tdomain_FirstTwo_new(
+                                                        ApplyAntFactors_Tdomain_FirstTwo(
                                                             heff_Tx_copol, heff_Tx_copol_lastbin, heff_Tx_crosspol, heff_Tx_crosspol_lastbin, Pol_vector, 0, 
                                                             Pol_factor, V_forfft[2 * n], V_forfft[2 * n + 1], settings1, Tx_theta, Tx_phi, freq_tmp, true, false);                                                	
                                                     }
@@ -1767,12 +1767,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                                         detector->stations[i].strings[j].antennas[k].type, false, true);
 
                                                         // Call ApplyAntFactors_Tdomain with both co-pol and cross-pol contributions
-                                                        ApplyAntFactors_Tdomain_new(phase_copol, phase_crosspol, heff_copol, heff_crosspol, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
+                                                        ApplyAntFactors_Tdomain(phase_copol, phase_crosspol, heff_copol, heff_crosspol, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
                                                                                 V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);
                                                     }
                                                 	else
                                                 	{
-                                                        ApplyAntFactors_Tdomain_FirstTwo_new(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
+                                                        ApplyAntFactors_Tdomain_FirstTwo(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
                                                                                         Pol_factor, V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);                                                    
                                                                 
                                                 	}
@@ -1992,12 +1992,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                                 detector->stations[i].strings[j].antennas[k].type, false, true);
 
                                                 // Call ApplyAntFactors_Tdomain with both co-pol and cross-pol contributions
-                                                ApplyAntFactors_Tdomain_new(phase_copol_trans, phase_crosspol_trans, heff_copol_trans, heff_crosspol_trans, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
+                                                ApplyAntFactors_Tdomain(phase_copol_trans, phase_crosspol_trans, heff_copol_trans, heff_crosspol_trans, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
                                                                         V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);
                                             }
                                             else
                                             {
-                                                ApplyAntFactors_Tdomain_FirstTwo_new(heff_copol_trans, heff_copol_lastbin_trans, heff_crosspol_trans, heff_crosspol_lastbin_trans, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
+                                                ApplyAntFactors_Tdomain_FirstTwo(heff_copol_trans, heff_copol_lastbin_trans, heff_crosspol_trans, heff_crosspol_lastbin_trans, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
                                                                                 Pol_factor, V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);                                                    
                                                         
                                             }
@@ -2036,12 +2036,12 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                                                                 detector->stations[i].strings[j].antennas[k].type, false, true);
 
                                                 // Call ApplyAntFactors_Tdomain with both co-pol and cross-pol contributions
-                                                ApplyAntFactors_Tdomain_new(phase_copol, phase_crosspol, heff_copol, heff_crosspol, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
+                                                ApplyAntFactors_Tdomain(phase_copol, phase_crosspol, heff_copol, heff_crosspol, Pol_vector, detector->stations[i].strings[j].antennas[k].type, Pol_factor, 
                                                                         V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);
                                             }
                                             else
                                             {
-                                                ApplyAntFactors_Tdomain_FirstTwo_new(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
+                                                ApplyAntFactors_Tdomain_FirstTwo(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, Pol_vector, detector->stations[i].strings[j].antennas[k].type, 
                                                                                 Pol_factor, V_forfft[2 * n], V_forfft[2 * n + 1], settings1, antenna_theta, antenna_phi, freq_tmp);                                                    
                                                         
                                             }
@@ -3072,7 +3072,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                         // and the electronics response
                         double Pol_factor;
                         if(n>0){
-                            ApplyAntFactors_Tdomain_new(
+                            ApplyAntFactors_Tdomain(
                                 phase_copol, phase_crosspol, 
                                 heff_copol, heff_crosspol, 
                                 Pol_vector, 
@@ -3086,7 +3086,7 @@ void Report::rerun_event(Event *event, Detector *detector,
                                 );
                         }
                         else{
-                            ApplyAntFactors_Tdomain_FirstTwo_new(
+                            ApplyAntFactors_Tdomain_FirstTwo(
                                 heff_copol, heff_copol_lastbin, 
                                 heff_crosspol, heff_crosspol_lastbin, 
                                 Pol_vector, 
@@ -4522,7 +4522,7 @@ void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_sla
 
 
 
-void Report::ApplyAntFactors_Tdomain_new(double phase_copol, double phase_crosspol, double heff_copol, double heff_crosspol, Vector &Pol_vector, 
+void Report::ApplyAntFactors_Tdomain(double phase_copol, double phase_crosspol, double heff_copol, double heff_crosspol, Vector &Pol_vector, 
                                      int ant_type, double &pol_factor, double &vm_real, double &vm_img, 
                                      Settings *settings1, double antenna_theta, double antenna_phi, double freq, 
                                      bool useInTransmitterMode, bool applyInverse) {
@@ -4646,78 +4646,7 @@ void Report::ApplyAntFactors_Tdomain_new(double phase_copol, double phase_crossp
     }
 }
 
-void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode, bool applyInverse) {  
-    /*  Report::ApplyAntFactors_Tdomain()
-    Purpose: 
-        Multiply (or divide) voltage in Fourier space by the antenna gain and phase.
-    
-    Inputs:
-        AntPhase:  Phase of the antenna, usually calculated with Detector::GetAntPhase_1D()
-        heff:  Effective height of the antenna, usually calculated with Report::GainToHeight
-        Pol_vector:  polarization vector of electric field as it reaches the antenna.  Used to calculate pol_factor
-        ant_type:  integer indicates Vpol (0) or HPol (1) antenna.  Use to calculate pol_factor
-        pol_factor:  The projection of the E-field onto the antenna.  Essentially the cos(theta) term in a dot product between the E-field and effective height vector.
-        vm_real:  Real component of the voltage in this frequency bin of the fourier space.
-        vm_img:  Imaginary component of the voltage in this frequency bin of the fourier space.
-        settings1:  The ARA settings object containing the setup of the simulation or detector.
-        antenna_theta:  Incoming angle of the k-vector of the E-field when incident on the antenna.
-        antenna_phi:  Incoming angle of the k-vector of the E-field when incident on the antenna.
-        freq:  Frequency of the current frequency bin.
-        useInTransmitterMode:  Boolean that dictates whether this antenna is in Transmitter mode (Tx) or Receiver mode (Rx)
-        applyInverse:  Boolean that dictates if we're applying the antenna factors (projecting E-field onto h to get voltage) or inverting the factors (dividing h out of voltage to get E-field).
-        
-    Outputs:
-        New values of the following via pass-by-reference:
-        pol_factor, vm_real, vm_img
-    
-    */
-    double phaseSign = 1.;
-    double amplitudeSign = 1.;
-    //If using in transmitter mode, the phase gets a minus sign since the signal is out-going from the antenna rather than incoming.
-    if(useInTransmitterMode==true){ phaseSign*=-1.;};
-    //If using this function to invert the antenna response, we apply a minus sign the phase in order to undo the phase applied by the antenna.  We also divide the amplitude by the factor rather than multiply.  To do this, we simply apply a -1 to the power of the factor applied to the amplitude so that it is divided out.
-    if(applyInverse==true){ phaseSign*=-1.; amplitudeSign*=-1;};
-
-    //Calculate the polarization factor, which is essentially the vector component of the Electric field that is projected onto the antenna.
-    pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
-    if ( settings1->PHASE_SKIP_MODE != 1 ) {
-        double phase_current;
-        if ( vm_real != 0. ) {
-            phase_current = atan( vm_img / vm_real );
-            // phase in +-PI range
-            if (vm_real<0.) {
-                if (vm_img>0.) phase_current += PI;
-                else if (vm_img<0.) phase_current -= PI;
-            }
-        }
-        else {
-            if ( vm_img>0. ) phase_current = PI;
-            else if (vm_img<0.) phase_current = -PI;
-            else phase_current = 0.;
-        }
-        //Calculate amplitude via the real and imaginary components.
-        double v_amp = sqrt(vm_real*vm_real + vm_img*vm_img);
-        //Apply effective height and polarization factors to ampltitude.
-        v_amp *= pow(heff*pol_factor, amplitudeSign);
-        //If in transmitter mode, we must apply additional frequency and impedance terms to the amplitude.
-        if (useInTransmitterMode==true){ 
-            phase_current += PI/2;
-            // The factors of two in this line are currently up for debate.  Will be cleaned up in future push - JCF 3/2/2024 
-//ASG: The 100 factor is for now, since I'm using an antenna Tx gain that's ~10x larger             
-            v_amp *= pow(100*freq/CLIGHT*(Z0/Zr)/4/sqrt(2.), amplitudeSign);
-        }
-        //Calculate the real and imaginary terms using the new ampltitude and phase.
-        vm_real = v_amp * cos( phase_current + (phaseSign * AntPhase*RADDEG) );
-        vm_img =  v_amp * sin( phase_current + (phaseSign * AntPhase*RADDEG) );
-    }
-
-    else { // only amplitude
-        vm_real *= pow(heff * pol_factor, amplitudeSign);
-        vm_img *= pow(heff * pol_factor, amplitudeSign); 
-    }
-}
-
-void Report::ApplyAntFactors_Tdomain_FirstTwo_new(double heff_copol, double heff_copol_lastbin, double heff_crosspol, double heff_crosspol_lastbin, 
+void Report::ApplyAntFactors_Tdomain_FirstTwo(double heff_copol, double heff_copol_lastbin, double heff_crosspol, double heff_crosspol_lastbin, 
                                               Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, 
                                               Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode, 
                                               bool applyInverse) {
@@ -4783,47 +4712,7 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo_new(double heff_copol, double heff
 
 }
 
-
-void Report::ApplyAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode, bool applyInverse) {
-    /* Report::ApplyAntFactors_Tdomain_FirstTwo()
-    Purpose: 
-        Multiply (or divide) first and last bin of voltage in Fourier space by the antenna gain and phase.
-        
-    For a more verbose explanation, see Report::ApplyAntFactors_Tdomain.  This simply applies the operation to the first and last bin, which much be done separately as a consequence of FFT's.  Does not calculate phase.
-    */
-
-    double amplitudeSign = 1.;
-    //If using this function to invert the antenna response, we apply a minus sign the phase in order to undo the phase applied by the antenna.  We also divide the amplitude by the factor rather than multiply.  To do this, we simply apply a -1 to the power of the factor applied to the amplitude so that it is divided out.
-    if(applyInverse==true){amplitudeSign*=-1;};
-
-    //double pol_factor;
-    pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
-
-    //First step in the voltage calculation.  Both Tx and Rx mode use this.
-    vm_bin0 *= pow(heff * pol_factor, amplitudeSign);
-    vm_bin1 *= pow(heff_lastbin * pol_factor, amplitudeSign);
-    
-    if (useInTransmitterMode) {
-        // The factors of two in these two lines are currently up for debate.  Will be cleaned up in future push - JCF 3/2/2024  
-        vm_bin0 *= pow(freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.), amplitudeSign);
-        vm_bin1 *= pow(freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.), amplitudeSign);
-    }
-    else {
-        vm_bin0 *= pow(heff * pol_factor, amplitudeSign);
-        vm_bin1 *= pow(heff_lastbin * pol_factor, amplitudeSign);
-    }
-
-}
-
-void Report::InvertAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode) {  
-    /* Report::InvertAntFactors_Tdomain()
-    Purpose:  Inverts the antenna factors in a convenient way by simply calling ApplyAntFactors with the boolean applyInverse enabled.
-    */
-    ApplyAntFactors_Tdomain (AntPhase, heff, Pol_vector, ant_type, pol_factor, vm_real, vm_img, settings1, antenna_theta, antenna_phi, freq, useInTransmitterMode, true);
-
-}
-
-void Report::InvertAntFactors_Tdomain_new(double AntPhase_copol, double AntPhase_crosspol, 
+void Report::InvertAntFactors_Tdomain(double AntPhase_copol, double AntPhase_crosspol, 
                                           double heff_copol, double heff_crosspol, 
                                           Vector &Pol_vector, int ant_type, 
                                           double &pol_factor, double &vm_real, double &vm_img, 
@@ -4834,24 +4723,12 @@ void Report::InvertAntFactors_Tdomain_new(double AntPhase_copol, double AntPhase
     Purpose: Inverts the antenna factors for both co-polarization and cross-polarization 
              by simply calling ApplyAntFactors_Tdomain_new with the boolean applyInverse enabled.
     */
-    ApplyAntFactors_Tdomain_new(AntPhase_copol, AntPhase_crosspol, heff_copol, heff_crosspol, 
+    ApplyAntFactors_Tdomain(AntPhase_copol, AntPhase_crosspol, heff_copol, heff_crosspol, 
                                 Pol_vector, ant_type, pol_factor, vm_real, vm_img,
                                 settings1, antenna_theta, antenna_phi, freq, useInTransmitterMode, true);
 }
 
-
-
-
-void Report::InvertAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode) { 
-    /* Report::InvertAntFactors_Tdomain_FirstTwo()
-    Purpose:  Inverts the antenna factors in a convenient way by simply calling ApplyAntFactors with the boolean applyInverse enabled.
-    */
-
-    ApplyAntFactors_Tdomain_FirstTwo (heff, heff_lastbin, Pol_vector, ant_type, pol_factor, vm_bin0, vm_bin1, antenna_theta, antenna_phi, freq, useInTransmitterMode, true);
-
-}
-
-void Report::InvertAntFactors_Tdomain_FirstTwo_new(double heff_copol, double heff_copol_lastbin, 
+void Report::InvertAntFactors_Tdomain_FirstTwo(double heff_copol, double heff_copol_lastbin, 
                                                    double heff_crosspol, double heff_crosspol_lastbin, 
                                                    Vector &Pol_vector, int ant_type, 
                                                    double &pol_factor, double &vm_bin0, double &vm_bin1, 
@@ -4862,7 +4739,7 @@ void Report::InvertAntFactors_Tdomain_FirstTwo_new(double heff_copol, double hef
              by simply calling ApplyAntFactors_Tdomain_FirstTwo_new with the boolean applyInverse enabled.
     */
 
-    ApplyAntFactors_Tdomain_FirstTwo_new(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, 
+    ApplyAntFactors_Tdomain_FirstTwo(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, 
                                          Pol_vector, ant_type, pol_factor, vm_bin0, vm_bin1, 
                                          settings1, antenna_theta, antenna_phi, freq, useInTransmitterMode, true);
 }
