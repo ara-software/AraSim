@@ -352,8 +352,13 @@ class Report {
 
         void InvertAntFactors_Tdomain(double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false);
 
+        void InvertAntFactors_Tdomain_new(double AntPhase_copol, double AntPhase_crosspol, double heff_copol, double heff_crosspol, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, 
+                                          double antenna_phi, double freq, bool useInTransmitterMode=false);
+
         void InvertAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false);
 
+        void InvertAntFactors_Tdomain_FirstTwo_new(double heff_copol, double heff_copol_lastbin, double heff_crosspol, double heff_crosspol_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, Settings *settings1,
+                                                    double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false);
 
         void ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, int gain_ch_no, Settings *settings1, bool applyInverse=false);
 

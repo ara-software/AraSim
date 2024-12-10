@@ -4835,8 +4835,8 @@ void Report::InvertAntFactors_Tdomain_new(double AntPhase_copol, double AntPhase
              by simply calling ApplyAntFactors_Tdomain_new with the boolean applyInverse enabled.
     */
     ApplyAntFactors_Tdomain_new(AntPhase_copol, AntPhase_crosspol, heff_copol, heff_crosspol, 
-                                Pol_vector, ant_type, pol_factor, vm_real, vm_img, 
-                                settings1, antenna_theta, antenna_phi, freq, true);
+                                Pol_vector, ant_type, pol_factor, vm_real, vm_img,
+                                settings1, antenna_theta, antenna_phi, freq, useInTransmitterMode, true);
 }
 
 
@@ -4849,6 +4849,22 @@ void Report::InvertAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin
 
     ApplyAntFactors_Tdomain_FirstTwo (heff, heff_lastbin, Pol_vector, ant_type, pol_factor, vm_bin0, vm_bin1, antenna_theta, antenna_phi, freq, useInTransmitterMode, true);
 
+}
+
+void Report::InvertAntFactors_Tdomain_FirstTwo_new(double heff_copol, double heff_copol_lastbin, 
+                                                   double heff_crosspol, double heff_crosspol_lastbin, 
+                                                   Vector &Pol_vector, int ant_type, 
+                                                   double &pol_factor, double &vm_bin0, double &vm_bin1, 
+                                                   Settings *settings1, double antenna_theta, double antenna_phi, double freq, 
+                                                   bool useInTransmitterMode) {
+    /* Report::InvertAntFactors_Tdomain_FirstTwo_new()
+    Purpose: Inverts the antenna factors for both co-polarization and cross-polarization 
+             by simply calling ApplyAntFactors_Tdomain_FirstTwo_new with the boolean applyInverse enabled.
+    */
+
+    ApplyAntFactors_Tdomain_FirstTwo_new(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, 
+                                         Pol_vector, ant_type, pol_factor, vm_bin0, vm_bin1, 
+                                         settings1, antenna_theta, antenna_phi, freq, useInTransmitterMode, true);
 }
 
 
