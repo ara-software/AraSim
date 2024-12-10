@@ -1631,7 +1631,7 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                                 //ASG Move this after Tx!!!
                                                 //Apply birefringence.
                                                 birefringence->Principal_axes_polarization(Pol_vector, bire_ray_cnt, max_bire_ray_cnt, settings1); //For birefringence, modify the polarization at the antennas       
-cout << "ASG 1" << endl;
+
                                                 //Begin frequency binning
                                             	for (int n = 0; n < stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] / 2; n++)
                                             	{
@@ -1669,7 +1669,7 @@ cout << "ASG 1" << endl;
                                                 	stations[i].strings[j].antennas[k].Heff_crosspol[ray_sol_cnt].push_back(heff_crosspol);
 
                                                 	freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq                                                      
-cout << "ASG 2" << endl;                   
+
                                                     //Apply Tx antenna factors
                                                     if (n > 0)
                                                 	{
@@ -1711,7 +1711,7 @@ cout << "ASG 2" << endl;
                                                                 
                                                 	}
                                                     //End Rx antenna factors                                                        
-cout << "ASG 3" << endl;
+
                                                 	//
                                                 	// apply entire elect chain gain, phase
                                                 	//
@@ -1723,7 +1723,7 @@ cout << "ASG 3" << endl;
                                                 	{
                                                     	ApplyElect_Tdomain_FirstTwo(freq_tmp *1.e-6, freq_lastbin *1.e-6, detector, V_forfft[2 *n], V_forfft[2 *n + 1], gain_ch_no, settings1);
                                                 	}                                                   
-cout << "ASG 4" << endl;
+
                                             	}   // end for freq bin
                                                 //End amplification at receiving antenna
 
@@ -1734,7 +1734,7 @@ cout << "ASG 4" << endl;
 					                        } //end for bire_ray_cnt    
 
 					                        birefringence->Two_rays_interference(V_forfft, V_forfft_bire[0], V_forfft_bire[1], stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], max_bire_ray_cnt, settings1); //Apply interference of two rays from birefringence						
-cout << "ASG 5" << endl;
+
 					                        Tools::SincInterpolation(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], T_forfft, V_forfft, settings1->NFOUR / 2, T_forint, volts_forint);                                              
 
                                             for (int n = 0; n < settings1->NFOUR / 2; n++)

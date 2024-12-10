@@ -95,7 +95,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         params.DeployedStations = 4;
     }
     
-    if (settings1->ANTENNA_MODE == 5 or settings1->ANTENNA_MODE == 6 or settings1->CROSSPOL_RX == 1 or settings1->CROSSPOL_TX ==1) {
+    if (settings1->ANTENNA_MODE == 5 or settings1->ANTENNA_MODE == 6) {
         params.freq_step = 56; //This is a stop-gap measure to allow the Kansas models ot work in AraSim, which only have data up to 1000 MHz rather than 1066.66 MHz. - JCF 2/22/2024
     }
 
@@ -2213,9 +2213,7 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     
     //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
     TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt"; 
-    //TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output_updated2020.txt";         
     TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Crosspol_Kansas2024.txt";     
-    //TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output_updated2020.txt";         
 
 
     if (settings1->ANTENNA_MODE == 0){
@@ -2287,14 +2285,14 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     ReadAntennaGain(TxgainFile, settings1, eTx);
 
     // Read cross-pol Rx gain files
-    if (settings1->CROSSPOL_RX){
+//    if (settings1->CROSSPOL_RX){
         ReadAntennaGain(VgainCrossFile, settings1, eVPolCross);
         ReadAntennaGain(VgainTopCrossFile, settings1, eVPolTopCross);
         ReadAntennaGain(HgainCrossFile, settings1, eHPolCross);
-    }
-    if (settings1->CROSSPOL_TX){
+//    }
+//    if (settings1->CROSSPOL_TX){
         ReadAntennaGain(TxgainFileCross, settings1, eTxCross);
-    }
+//    }
 }
 
 //Defining function that reads in TX antenna impedances
