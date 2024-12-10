@@ -2191,7 +2191,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
     // change coordinate from flat surface to curved Earth surface
     //FlattoEarth_ARA(icesurface);
-cout << "Here?" << endl;
+
     FlattoEarth_ARA_sharesurface(icesurface); // this one will share the lowest surface at each station.
 
     getDiodeModel(settings1); // set diode_real and fdiode_real values.
@@ -3529,7 +3529,7 @@ inline void Detector::FlattoEarth_ARA(IceModel *icesurface) {
 
 
 inline void Detector::FlattoEarth_ARA_sharesurface(IceModel *icesurface) {    // each station share the lowest surface
-cout << "breaking? ASG 1" << endl;    
+
     double Dist = 0.;   //for sqrt(x^2 + y^2)
     double R1 = icesurface->Surface(0.,0.); // from core of earth to surface at theta, phi = 0.
     //--------------------------------------------------
