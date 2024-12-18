@@ -1796,23 +1796,21 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
               sprintf(the_gain_filename, "%s/data/gain/In_situ_Electronics_A%d_C%d.csv", getenv("ARA_SIM_DIR"), 	
                       settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
               cout << the_gain_filename << endl;
-              
-              ReadElectChain(std::string(the_gain_filename), settings1);
-              //ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
-              //ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
-              if(settings1->ELECTRONICS_ANTENNA_CONSISTENCY==1) {
-                if(settings1->NOISE==1) {
-                  cout << " Recalculating in situ electronic response amplitude to ensure consistency with antenna model used here." << endl;
-                  ReadAmplifierNoiseFigure(settings1); // load amplifier noise figure
-                  CalculateElectChain(settings1); // calculate consistent electronics chain gain amplitude
-                }
-                else {
-                  cerr << "WARNING - Antenna model used to calculate in situ gain model may not match that used in this simulation!" << endl;
-                  cerr << "\t To ensure consistency load an in-situ noise model with NOISE = 1." << endl;
-                } 
+            }  
+            
+            ReadElectChain(std::string(the_gain_filename), settings1);
+            if(settings1->ELECTRONICS_ANTENNA_CONSISTENCY==1) {
+              if(settings1->NOISE==1) {
+                cout << " Recalculating in situ electronic response amplitude to ensure consistency with antenna model used here." << endl;
+                ReadAmplifierNoiseFigure(settings1); // load amplifier noise figure
+                CalculateElectChain(settings1); // calculate consistent electronics chain gain amplitude
               }
-  
+              else {
+                cerr << "WARNING - Antenna model used to calculate in situ gain model may not match that used in this simulation!" << endl;
+                cerr << "\t To ensure consistency load an in-situ noise model with NOISE = 1." << endl;
+              } 
             }
+  
           }
           else{ // testbed only
             cout <<"    In situ gain model does not exist for this station"<<endl;
