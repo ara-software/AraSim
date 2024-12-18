@@ -1786,7 +1786,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
           //read the standard ARA electronics
           if(settings1->DETECTOR_STATION > 0){
             char the_gain_filename[500];
-            if(settings1->DETECTOR_STATION_LIVETIME_CONFIG == -1) {
+            if(settings1->DETECTOR_STATION_LIVETIME_CONFIG == -1 || settings1->ELECTRONICS_ANTENNA_CONSISTENCY==1) {
               sprintf(the_gain_filename, "%s/data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", getenv("ARA_SIM_DIR"));
               cout<<" Reading standard ARA electronics response from file:"<<endl;
               cout << the_gain_filename <<endl;
@@ -2139,7 +2139,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         if (settings1 -> CUSTOM_ELECTRONICS == 0) {
             //read the standard ARA electronics
             char the_gain_filename[500];
-            if(settings1->DETECTOR_STATION_LIVETIME_CONFIG == -1) {
+            if(settings1->DETECTOR_STATION_LIVETIME_CONFIG == -1 || settings1->ELECTRONICS_ANTENNA_CONSISTENCY==1) {
               sprintf(the_gain_filename, "%s/data/gain/PA_Electronics_TotalGainPhase.csv", getenv("ARA_SIM_DIR")); 
               cout << " Reading standard PA electronics response from file:" << endl;
               cout << the_gain_filename <<endl;
