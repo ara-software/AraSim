@@ -824,6 +824,8 @@ void Settings::ReadEvtFile(string evtfile){
         }
         evtFile.close();
 
+        NNU=EVID.size()+1;
+
         //start counting the number of unique neutrinos
         if (NNU == 0 || NNU > EVID.size()){
             NNU = 0; //restart from zero

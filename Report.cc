@@ -579,7 +579,7 @@ void Report::CalculateSignals(
                         ray_sol_cnt = 0;
                     }
 
-                    stations[i].strings[j].antennas[k].ray_sol_cnt += ray_sol_cnt;   // save number of RaySolver solutions
+                    stations[i].strings[j].antennas[k].ray_sol_cnt = ray_sol_cnt;   // save number of RaySolver solutions
                     stations[i].Total_ray_sol += ray_sol_cnt;   // add ray_sol_cnt to Total_ray_sol
 
                 }
@@ -649,12 +649,24 @@ void Report::BuildAndTriggerOnWaveforms(
 
             // redefine DATA_BIN_SIZE
             int DATA_BIN_SIZE_tmp;
-            for (int DBS = 10; DBS < 16; DBS++)
-            {
+            int DBS = 10;  // Starting power of 2
+            while (true) {
                 DATA_BIN_SIZE_tmp = (int) pow(2., (double) DBS);
-                if (DATA_BIN_SIZE_tmp > max_total_bin) DBS = 16;    // come out
+                if (DATA_BIN_SIZE_tmp > max_total_bin) {
+                    break; // Exit the loop if the size exceeds max_total_bin
+                }
+                DBS++; // Increment DBS for the next power of 2
             }
             settings1->DATA_BIN_SIZE = DATA_BIN_SIZE_tmp;
+
+            // Allocate memory for Full_window and Full_window_V
+            trigger->Full_window = new double*[16];
+            trigger->Full_window_V = new double*[16];
+            for (int i = 0; i < 16; i++) {
+                trigger->Full_window[i] = new double[DATA_BIN_SIZE_tmp];
+                trigger->Full_window_V[i] = new double[DATA_BIN_SIZE_tmp];
+            }
+
             // cout<<"new DATA_BIN_SIZE : "<<DATA_BIN_SIZE_tmp<<endl;
             // cout<<"max_total_bin : "<<max_total_bin<<endl;
 
@@ -3281,8 +3293,8 @@ void Report::GetNoiseThenConvolve(
     if ( n_connected_rays > 1 ) { // multiple ray solutions in one window
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is 2*BINSIZE
         offset = trigger->maxt_diode_bin;
-        min_wf_bin = this_signalbin - wf_length/2/2 + offset;
-        max_wf_bin = this_signalbin + wf_length/2/2 + wf_length/2;
+        min_wf_bin = this_signalbin - BINSIZE/2 + offset;
+        max_wf_bin = this_signalbin + BINSIZE/2 + BINSIZE/2;
         diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
     else if ( antenna->ray_sol_cnt == 0 ){ // No rays connected to this antenna
@@ -3296,8 +3308,8 @@ void Report::GetNoiseThenConvolve(
     else { // Only one ray signal in the window
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is BINSIZE
         offset = trigger->maxt_diode_bin;
-        min_wf_bin = this_signalbin - wf_length/2 + offset;
-        max_wf_bin = this_signalbin + wf_length/2;
+        min_wf_bin = this_signalbin - BINSIZE/2 + offset;
+        max_wf_bin = this_signalbin + BINSIZE/2;
         diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
 
