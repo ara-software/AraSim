@@ -2170,7 +2170,7 @@ void Report::triggerCheck_ScanMode0(
 
                             station_r->strings[string_i].antennas[antenna_i].V_mimic.push_back((trigger->Full_window_V[ch_loop][thisBin]) *1.e3);   // save in mV
                             station_r->strings[string_i].antennas[antenna_i].time.push_back(thisBin);
-                            station_r->strings[string_i].antennas[antenna_i].time_mimic.push_back(thisBin *settings1->TIMESTEP *1.e9);    // save in ns
+                            station_r->strings[string_i].antennas[antenna_i].time_mimic.push_back(thisTimeBin *settings1->TIMESTEP *1.e9);    // save in ns
                         }
                         else if (V_mimic_mode == 1) {
                             // Global passed bin is the center of the window + delay to each chs from araGeom
