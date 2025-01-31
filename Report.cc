@@ -3293,8 +3293,8 @@ void Report::GetNoiseThenConvolve(
     if ( n_connected_rays > 1 ) { // multiple ray solutions in one window
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is 2*BINSIZE
         offset = trigger->maxt_diode_bin;
-        min_wf_bin = this_signalbin - BINSIZE/2 + offset;
-        max_wf_bin = this_signalbin + BINSIZE/2 + BINSIZE/2;
+        min_wf_bin = this_signalbin - BINSIZE/2/2 + offset;
+        max_wf_bin = this_signalbin + BINSIZE/2/2 + BINSIZE/2;
         diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
     else if ( antenna->ray_sol_cnt == 0 ){ // No rays connected to this antenna
