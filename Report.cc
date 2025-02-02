@@ -3288,29 +3288,33 @@ void Report::GetNoiseThenConvolve(
     int wf_length = 0;
     int min_wf_bin = 0;
     int max_wf_bin = 0;
+    int wf_length_to_convlv=0;
     int offset = 0;
     vector <double> diode_response;
     if ( n_connected_rays > 1 ) { // multiple ray solutions in one window
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is 2*BINSIZE
+        wf_length_to_convlv = 2*BINSIZE;
         offset = trigger->maxt_diode_bin;
-        min_wf_bin = this_signalbin - BINSIZE/2/2 + offset;
-        max_wf_bin = this_signalbin + BINSIZE/2/2 + BINSIZE/2;
-        diode_response = detector->getDiodeModel(2*wf_length, settings1);
+        min_wf_bin = this_signalbin - BINSIZE/2 + offset;
+        max_wf_bin = this_signalbin + BINSIZE/2 + BINSIZE;
+        diode_response = detector->getDiodeModel(2*wf_length_to_convlv, settings1);
     }
     else if ( antenna->ray_sol_cnt == 0 ){ // No rays connected to this antenna
-        this_signalbin = V_signal.size()/2;
+        this_signalbin = BINSIZE/2;
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is BINSIZE
+        wf_length_to_convlv = BINSIZE;
         offset = 0;
         min_wf_bin = 0;
-        max_wf_bin = V_signal.size();
-        diode_response = detector->getDiodeModel(2*wf_length, settings1);
+        max_wf_bin = BINSIZE;
+        diode_response = detector->getDiodeModel(2*wf_length_to_convlv, settings1);
     }
     else { // Only one ray signal in the window
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is BINSIZE
+        wf_length_to_convlv = BINSIZE;
         offset = trigger->maxt_diode_bin;
         min_wf_bin = this_signalbin - BINSIZE/2 + offset;
         max_wf_bin = this_signalbin + BINSIZE/2;
-        diode_response = detector->getDiodeModel(2*wf_length, settings1);
+        diode_response = detector->getDiodeModel(2*wf_length_to_convlv, settings1);
     }
 
     // Get noise-only waveform
@@ -3325,14 +3329,19 @@ void Report::GetNoiseThenConvolve(
         V_total_forconvlv.push_back( V_signal.at(bin) + V_noise[bin]);
     }
 
+    // Keep only the bins within the desired range
+    if (min_wf_bin >= 0 && max_wf_bin < wf_length && min_wf_bin - offset <= max_wf_bin) {
+        V_total_forconvlv.assign(V_total_forconvlv.begin() + min_wf_bin - offset, V_total_forconvlv.begin() + max_wf_bin + 1);
+    }
+
     // Push noise+signal waveform through the tunnel diode
-    trigger->myconvlv( V_total_forconvlv, wf_length, diode_response, V_total_forconvlv);
+    trigger->myconvlv( V_total_forconvlv, wf_length_to_convlv, diode_response, V_total_forconvlv);
 
     // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
     for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
 
         // Export WFs with newly-processed signals
-        const int vBin = bin - min_wf_bin + offset;
+        const int vBin = bin - (min_wf_bin - offset);
         trigger->Full_window[channel_index][bin] = V_total_forconvlv[vBin];
         trigger->Full_window_V[channel_index][bin] += V_signal[vBin];
         antenna->V_convolved[bin] += V_signal[vBin];
