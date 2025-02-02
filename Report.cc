@@ -658,13 +658,13 @@ void Report::BuildAndTriggerOnWaveforms(
                 DBS++; // Increment DBS for the next power of 2
             }
             settings1->DATA_BIN_SIZE = DATA_BIN_SIZE_tmp;
-
-            // Allocate memory for Full_window and Full_window_V
-            trigger->Full_window = new double*[16];
-            trigger->Full_window_V = new double*[16];
+    
+            // Resize Full_window and Full_window_V to size 16 for 16 channels
+            trigger->Full_window.resize(16);
+            trigger->Full_window_V.resize(16);
             for (int i = 0; i < 16; i++) {
-                trigger->Full_window[i] = new double[DATA_BIN_SIZE_tmp];
-                trigger->Full_window_V[i] = new double[DATA_BIN_SIZE_tmp];
+                trigger->Full_window[i].resize(DATA_BIN_SIZE_tmp);
+                trigger->Full_window_V[i].resize(DATA_BIN_SIZE_tmp);
             }
 
             // cout<<"new DATA_BIN_SIZE : "<<DATA_BIN_SIZE_tmp<<endl;

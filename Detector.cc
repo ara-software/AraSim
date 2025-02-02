@@ -5915,8 +5915,8 @@ void Detector::getDiodeModel(Settings *settings1) {
 
 vector<double> Detector::getDiodeModel(const int len, Settings *settings1) {
     // creates diode model vector of length len
-    
-    
+
+
     //  this is our homegrown diode response function which is a downgoing gaussian followed by an upward step function
     TF1 *fdown1=new TF1("fl_down1","[3]+[0]*exp(-1.*(x-[1])*(x-[1])/(2*[2]*[2]))",-300.E-9,300.E-9);
     fdown1->SetParameter(0,-0.8);
@@ -5945,7 +5945,9 @@ vector<double> Detector::getDiodeModel(const int len, Settings *settings1) {
     double sum=0.;
 	
     f_up->SetParameter(0,-1.*sqrt(2.*PI)*(fdown1->GetParameter(0)*fdown1->GetParameter(2)+fdown2->GetParameter(0)*fdown2->GetParameter(2))/(2.*pow(f_up->GetParameter(2),3.)*1.E18));
-	
+
+   diode_real.clear();
+
     for (int i=0;i<NFOUR/2;i++) {
         
         diode_real.push_back(0.);   // first puchback 0. value  (this is actually not standard way though works fine)
@@ -5982,6 +5984,10 @@ vector<double> Detector::getDiodeModel(const int len, Settings *settings1) {
     for (int i=0; i < len; i++) {
         fdiode.push_back( diode_real_fft[i] );
     }
+
+    delete fdown1;
+    delete fdown2;
+    delete f_up;
     
     return fdiode;
 }

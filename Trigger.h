@@ -36,13 +36,13 @@ class Trigger {
      /*
            double Full_window[16][16384];  // test with array, not vector, diode response
            double Full_window_V[16][16384];  // test with array, not vector, voltage waveform
-           */
+           
 
-//           double Full_window[16][32768];  // test with array, not vector, diode response
-//           double Full_window_V[16][32768];  // test with array, not vector, voltage waveform
-
-    double** Full_window;       // Pointer to a 2D array
-    double** Full_window_V;     // Pointer to a 2D array
+           double Full_window[16][32768];  // test with array, not vector, diode response
+           double Full_window_V[16][32768];  // test with array, not vector, voltage waveform
+     */
+     std::vector<std::vector<double>> Full_window;
+     std::vector<std::vector<double>> Full_window_V;
 
      double TIMESTEP;   // will copy from Detector class
      double maxt_diode; // will copy from Detector class
