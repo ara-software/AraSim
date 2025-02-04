@@ -855,6 +855,7 @@ void save_event_data(
 }
 
 
+#ifdef ARA_UTIL_EXISTS
 void save_useful_event(
     int check_station_DC, 
     UsefulIcrrStationEvent *theIcrrEvent, UsefulAtriStationEvent *theAtriEvent, double *weight, TTree *eventTree,
@@ -945,3 +946,4 @@ void save_useful_event(
     }
 
 }
+#endif
