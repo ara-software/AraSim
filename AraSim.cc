@@ -223,7 +223,6 @@ int main(int argc, char **argv) {   // read setup.txt file
         cout<<"finish tree assign"<<endl;
     }
 
-
     RaySolver *raysolver = new RaySolver();
     cout<<"called RaySolver"<<endl;
 
@@ -735,10 +734,10 @@ int main(int argc, char **argv) {   // read setup.txt file
     if (settings1->DATA_SAVE_MODE == 2) {// in DATA_SAVE_MODE==2, remove noise spectrum before Rayleigh dist.
         trigger->Vfft_noise_before.clear();
     }
-
+    
     AraTree->Fill();  // fill tree for one entry
     AraFile->Write();
-    // AraFile->Close();
+    AraFile->Close();
 
     efficiencies->summarize(); // summarize the results in an output file  
 
