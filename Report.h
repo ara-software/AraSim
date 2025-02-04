@@ -59,38 +59,38 @@ class Antenna_r {
 
         //vector <int> trg;    // if antenna recieved any signal or not. 0 : no signal,  1 : yes signal
 
-        vector < vector <double> > view_ang;    //viewing angle
-        vector < vector <double> > launch_ang;  //launch angle
-        vector < vector <double> > rec_ang;     //receiving angle phi (in radians)
-        vector < vector <double> > phi_rec;     // receiving phi angle,in antenna's coord system.
-        vector < vector <double> > theta_rec;     // receiving theta angle, in antenna's coord system.
-        vector < vector <double> > phi_launch;     // launch phi angle,in antenna's coord system.
-        vector < vector <double> > theta_launch;     // launch theta angle, in antenna's coord system.    
-        vector < vector <double> > reflect_ang; // surface reflection angle (if 100 : no reflection case)
-        vector < vector <double> > Dist;        //Distance between posnu and antenna
-        vector < vector <double> > L_att;        //Attenuation factor
-        vector < vector <double> > arrival_time;        //time from posnu to antenna (t:0 at posnu)
-        vector < vector <int> > reflection;     // non-reflected : 0,  reflected : 1
-        vector < vector < Position > > Pol_vector;   // polarization vector at the antenna
+        vector < vector <double> > view_ang; //!   //viewing angle
+        vector < vector <double> > launch_ang; //!  //launch angle
+        vector < vector <double> > rec_ang; //!    //receiving angle phi (in radians)
+        vector < vector <double> > phi_rec; //!    // receiving phi angle,in antenna's coord system.
+        vector < vector <double> > theta_rec; //!    // receiving theta angle, in antenna's coord system.
+        vector < vector <double> > phi_launch; //!     // launch phi angle,in antenna's coord system.
+        vector < vector <double> > theta_launch; //!    // launch theta angle, in antenna's coord system.    
+        vector < vector <double> > reflect_ang; //! // surface reflection angle (if 100 : no reflection case)
+        vector < vector <double> > Dist; //!        //Distance between posnu and antenna
+        vector < vector <double> > L_att; //!       //Attenuation factor
+        vector < vector <double> > arrival_time; //!       //time from posnu to antenna (t:0 at posnu)
+        vector < vector <int> > reflection; //!    // non-reflected : 0,  reflected : 1
+        vector < vector < Position > > Pol_vector; //!  // polarization vector at the antenna
         //vector <Position> n_H;  // normalized vector for H pol
         //vector <Position> n_V;  // normalized vector for V pol
 
         //! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
         //! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
-        vector < vector < vector < vector <double> > > > ray_step;
+        vector < vector < vector < vector <double> > > > ray_step; //!
 
         // below freq domain simulation output
-        vector < vector < vector <double> > > vmmhz;  // signal V/m/MHz for each freq bin
+        vector < vector < vector <double> > > vmmhz; //!  // signal V/m/MHz for each freq bin
         //
-        vector < vector < vector <double> > > Heff;  // effective height for each freq bin
-        vector < vector <double> > Mag;  // magnification factor
-        vector < vector <double> > Fresnel;  // Fresnel factor
-        vector < vector <double> > Pol_factor;  // Polarization factor
-        vector < vector <double> > Pol_factorH;  //Hpol Polarization factor
-        vector < vector <double> > Pol_factorV;  //Vpol Polarization factor
+        vector < vector < vector <double> > > Heff; //!  // effective height for each freq bin
+        vector < vector <double> > Mag; //!  // magnification factor
+        vector < vector <double> > Fresnel; //!  // Fresnel factor
+        vector < vector <double> > Pol_factor; //! // Polarization factor
+        vector < vector <double> > Pol_factorH; //!  //Hpol Polarization factor
+        vector < vector <double> > Pol_factorV; //!  //Vpol Polarization factor
         
-        vector < vector < vector <double> > > Vm_zoom;  // E field before ant T-domain
-        vector < vector < vector <double> > > Vm_zoom_T;  // E field before ant T-domain time
+        vector < vector < vector <double> > > Vm_zoom; //!  // E field before ant T-domain
+        vector < vector < vector <double> > > Vm_zoom_T; //!  // E field before ant T-domain time
         //vector < vector <double> > Vm_wo_antfactor;  // before applying ApplyAntFactors
         //vector < vector <double> > VHz_antfactor;  // after applying ApplyAntFactors to vmmhz above ( 1/sqrt2 * 1/dt * 0.5 * heff * pol_factor )
         //vector < vector <double> > VHz_filter;  // after applying ApplyAntFactors above and then apply filter gain from detector->GetFilterGain
@@ -99,8 +99,8 @@ class Antenna_r {
 
         int Nnew[2]; // new number of bins for V_fotfft array
 
-        vector < vector < vector <double> > > Vfft;  // signal V preparing for FFT
-        vector < vector < vector <double> > > Vfft_noise;  // noise V preparing for FFT
+        vector < vector < vector <double> > > Vfft; //! // signal V preparing for FFT
+        vector < vector < vector <double> > > Vfft_noise; //!  // noise V preparing for FFT
 
 
         // below time domain simulation output
@@ -110,19 +110,19 @@ class Antenna_r {
 
         int global_trig_bin; // from V_mimic [0, NFOUR/2] bins, where global trigger occured
 
-        vector < vector < vector <double> > > V;   // For each ray individually, volt signal with all factors applied (from fft, excludes gain offse)
+        vector < vector < vector <double> > > V; //!   // For each ray individually, volt signal with all factors applied (from fft, excludes gain offse)
         vector <double> V_convolved;    // After convolution of all rays, volt signal with all factors applied (from Convolve_Signal, excludes gain offset)
         vector <double> V_noise;        // noise voltage waveform with all factors applied (from Convolve_Signal, excludes gain offset)
 
-        vector < vector <int> > SignalExt; // flag if actual signal exist for the ray trace solution
+        vector < vector <int> > SignalExt; //! // flag if actual signal exist for the ray trace solution
 
-        vector < vector <int> > SignalBin; // the bin number where the center of signal located. we can compare this value to Trig_Pass value to have likely triggered ray trace solution
+        vector < vector <int> > SignalBin; //! // the bin number where the center of signal located. we can compare this value to Trig_Pass value to have likely triggered ray trace solution
 
-        vector < vector <double> > SignalBinTime; ///< the time of center of bin where signal should locate after sim decided the readout window. MK added -2023-05-18-
+        vector < vector <double> > SignalBinTime; //! ///< the time of center of bin where signal should locate after sim decided the readout window. MK added -2023-05-18-
 
         vector <int> noise_ID;      // information about which pure noise waveform is used for trigger analysis
 
-        vector < vector <double> > PeakV;  // peak voltage in time domain
+        vector < vector <double> > PeakV; //!  // peak voltage in time domain
         vector <int> Rank;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
 
         //	vector <double> PeakV_fromFullWaveform; // peak voltage in time domain taken from full waveform, including noise at the time of signal insertion
@@ -147,7 +147,7 @@ class Antenna_r {
         void clear ();  // clear all vector format information for next event
         void clear_useless ( Settings *settings1 );  // clear all vector information which are useless
 
-        ClassDef(Antenna_r,3);
+        ClassDef(Antenna_r,4);
 };
 
 class String_r {
@@ -186,7 +186,7 @@ class Station_r {
 	vector <double> TDR_Hpol_sorted;
 	vector <double> TDR_Vpol_sorted;
         
-        ClassDef(Station_r,3);
+        ClassDef(Station_r,4);
 };
 
 class CircularBuffer{

@@ -91,7 +91,7 @@ class Event {
 //  Event(double) : pos_sh(),int_type(0),iev(0),part_type(0),n_incident(3), e_incident(1.E18), eField1m(3) {}
 //-------------------------------------------------- 
 
-      ClassDef(Event,1);
+      ClassDef(Event,2);
 
 };
 
