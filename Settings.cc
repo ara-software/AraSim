@@ -318,8 +318,8 @@ outputdir="outputs"; // directory where outputs go
  
   CLOCK_ANGLE=0; //Default: 0 -- Angle of polarization "on the clock".  Angle of zero is pure thetaPol, whereas 90º is pure phiPol.
 
-
-
+  CROSSPOL_RX=0; //Default: 0 -- don't use cross-pol responses on receiving antennas
+  CROSSPOL_TX=0; //Default: 0 -- don't use cross-pol responses on transmitting antennas
 
     /*
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
@@ -390,11 +390,11 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "DETECTOR_STATION") {
                   DETECTOR_STATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-		  DETECTOR_STATION_ARAROOT = DETECTOR_STATION;
-		  if (DETECTOR_STATION == 100) {
-			DETECTOR_STATION = 1;
-			DETECTOR_STATION_ARAROOT = 100;
-			}
+		          DETECTOR_STATION_ARAROOT = DETECTOR_STATION;
+		            if (DETECTOR_STATION == 100) {
+			            DETECTOR_STATION = 1;
+			            DETECTOR_STATION_ARAROOT = 100;
+			        }
               }
               else if (label == "DETECTOR_STATION_LIVETIME_CONFIG") {
                   DETECTOR_STATION_LIVETIME_CONFIG = atof( line.substr(line.find_first_of("=") + 1).c_str() );
@@ -449,7 +449,7 @@ void Settings::ReadFile(string setupfile) {
               }
               else if(label == "TRIG_SCAN_MODE"){
                   TRIG_SCAN_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
+	          }
               else if (label == "POWERTHRESHOLD") {
                   POWERTHRESHOLD = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -750,6 +750,12 @@ void Settings::ReadFile(string setupfile) {
           }
           else if (label == "SOURCE_DEPTH"){
                SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          else if (label == "CROSSPOL_RX"){
+               CROSSPOL_RX = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          else if (label == "CROSSPOL_TX"){
+               CROSSPOL_TX = atof(line.substr(line.find_first_of("=") + 1).c_str());
           }
 
 
