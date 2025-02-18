@@ -2303,6 +2303,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
 
     // define some dummy variables that will point to the real variables
     // where values are stored
+    vector<double> * freq;
     vector< vector<double> > * gain;
     vector< vector<double> > * phase;
     vector<double>* transAnt_databin;
@@ -2310,21 +2311,25 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     // make sure dummy variables point to the right variables 
     switch(type) {
       case(eVPol) :
+        freq = &Freq;
         gain = &Vgain;
         phase = &Vphase;
         transAnt_databin = &transV_databin;
         break;
       case(eVPolTop) :
+        freq = &Freq;
         gain = &VgainTop;
         phase = &VphaseTop;
         transAnt_databin = &transVTop_databin;
         break;
       case(eHPol) :
+        freq = &Freq;
         gain = &Hgain;
         phase = &Hphase;
         transAnt_databin = &transH_databin;
         break;
       case(eTx) :
+        freq = &TxFreq;
         gain = &Txgain;
         phase = &Txphase;
         break;
@@ -2342,8 +2347,8 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     // clear vector in case there's any lingering data
     gain->clear();
     phase->clear();   
-    if(freq_step == -1) // only reset if it hasn't been read-in yet
-      Freq.clear(); 
+    if(freq_step == -1 || type == eTx) // only reset if it hasn't been read-in yet
+      freq->clear(); 
     
     // check the file opened successfully
     if (! NecOut.is_open() ) 
@@ -2376,12 +2381,12 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
             if(!std::isfinite(thisFreq))
               throw runtime_error("Non-finite frequency value found! "+filename);
 
-            if(freq_step == -1) // add frequency if this is the first read-in
-              Freq.push_back(thisFreq);
+            if(freq_step == -1 || type == eTx) // add frequency if this is the first read-in
+              freq->push_back(thisFreq);
             else { // otherwise make sure it matches the values already stored
               int i = (int)Transm.size();
 
-              if(abs(Freq[i]-thisFreq) > 0.1 ) // ensure they match to at least 0.1 MHz
+              if(abs(freq->at(i)-thisFreq) > 0.1 ) // ensure they match to at least 0.1 MHz
                 throw runtime_error("Frequency bins of antenna models do not match! "+filename);
             } 
 
@@ -2445,14 +2450,19 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
 
     // skip this for the transmitter case for now since it may not match other models 
     if(type == eTx)
+    {
+      Tx_freq_width = freq->at(1)-freq->at(0);
+      Tx_freq_init = freq->at(0);
+      
       return;
+    }
 
     // set parameter values if this is the first read-in
     if(freq_step == -1) { 
-      freq_step = (int)Freq.size();
+      freq_step = (int)freq->size();
       ang_step = (int)gain->back().size();
-      freq_width = Freq[1]-Freq[0];
-      freq_init = Freq[0];   
+      freq_width = freq->at(1)-freq->at(0);
+      freq_init = freq->at(0);   
     }
 
     // check things look sensible
@@ -2882,7 +2892,9 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     
     //Initialize pointer to dynamically point to the gain for chosen antenna.  The structure of this pointer matches that of the global gain arrays defined in Detector.h.
     vector<vector<double> > *tempGain = nullptr;
-    
+
+    vector<double> * F;   
+ 
     //Assign local pointer to gain array specified in the function argument
     //VPol Rx
     if ( Detector_mode == 5 ){ // Phased Array mode
@@ -2897,7 +2909,11 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
         }
     }
     else { // Traditional Station mode
-        if ( ant_m == 0 and not useInTransmitterMode) {
+        //Tx
+        if (useInTransmitterMode) {
+            tempGain = &Txgain;
+        } 
+        else if (ant_m == 0) {
             if (ant_number == 0) {
                 tempGain = &Vgain;
             }
@@ -2906,18 +2922,26 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
             }
         }
         //HPol Rx
-        else if ( ant_m == 1 and not useInTransmitterMode) {
+        else if (ant_m == 1) {
             tempGain = &Hgain;
         }
-        //Tx
-        else if (useInTransmitterMode) {
-            tempGain = &Txgain;
-        } 
-        else {
+        else 
             throw runtime_error("In GetGain_1D_OutZero: No appropriate gain model for this simulation setup.");
-        }
     }
-    
+
+    double thisFreq_init;
+    double thisFreq_width;
+    if(useInTransmitterMode) {
+      F = &TxFreq;
+      thisFreq_init = Tx_freq_init;
+      thisFreq_width = Tx_freq_width;
+    }
+    else {
+      F = &Freq;
+      thisFreq_init = freq_init;
+      thisFreq_width = freq_width;
+    }  
+  
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
     int j = (int)( (phi+2.5)/5. );
@@ -2932,23 +2956,22 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
     double Gout;
 
-    int bin = (int)( (freq - freq_init) / freq_width )+1;
+    int bin = (int)( (freq - thisFreq_init) / thisFreq_width )+1;
 
      //Interpolation of tempGain
-    slope_1 = ((*tempGain)[1][angle_bin] - (*tempGain)[0][angle_bin]) / (Freq[1] - Freq[0]);
+    slope_1 = ((*tempGain)[1][angle_bin] - (*tempGain)[0][angle_bin]) / (F->at(1) - F->at(0));
 
     // if freq is lower than freq_init
-    if ( freq < freq_init ) {
-        Gout = slope_1 * (freq - Freq[0]) + (*tempGain)[0][angle_bin];
+    if ( freq < thisFreq_init ) {
+        Gout = slope_1 * (freq - F->at(0)) + (*tempGain)[0][angle_bin];
     }
     // if freq is higher than last freq
-    else if ( freq > Freq[freq_step-1] ) {
-        //Gout = slope_2 * (freq - Freq[freq_step-1]) + Vgain[freq_step-1][angle_bin];
+    else if ( freq > F->back() ) {
         Gout = 0.;
     }
 
     else {
-        Gout = (*tempGain)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+        Gout = (*tempGain)[bin-1][angle_bin] + (freq-F->back())*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(F->at(bin)-F->at(bin-1));
 
     } // not outside the Freq[] range    
     
@@ -2964,44 +2987,49 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useInTransmitterMode ) {
     //Initialize pointer to dynamically point to the impedance for the chosen antenna.
     double (*tempImpedance)[freq_step_max] = nullptr;
+    //Tx
+    if (useInTransmitterMode) {
+        tempImpedance = &RealImpedanceTx;
+    }
     //VPol Rx
-    if ( ant_m == 0 and not useInTransmitterMode) {
+    else if (ant_m == 0) {
         tempImpedance = &RealImpedanceV;
     }
     //HPol Rx
-    else if ( ant_m == 1 and not useInTransmitterMode) {
+    else if (ant_m == 1) {
         tempImpedance = &RealImpedanceH;
     }
-    //Tx
-    else if ( ant_m == 0 and useInTransmitterMode) {
-        tempImpedance = &RealImpedanceTx;
-    }
-    
-    
+    else 
+        throw runtime_error("In GetImpedance: No appropriate impedance model for this simulation setup.");
    
+    vector<double> * F = &impFreq;   
+    double thisFreq_init = F->at(0);
+    double thisFreq_width = F->at(1) - F->at(0);
+    int thisFreq_step = (int)F->size();
+    
     //The following is a simplified form of the interpolation used in GetGain_1D_OutZero, where we only interpolate over freuqnecy bins and ignore angle bins.
     double slope_1; // slope of init part
 
     double ZOut;
 
-    int bin = (int)( (freq - freq_init) / freq_width )+1;
+    int bin = (int)( (freq - thisFreq_init) / thisFreq_width )+1;
 
      //Interpolation of tempGain
-    slope_1 = ((*tempImpedance)[1] - (*tempImpedance)[0]) / (Freq[1] - Freq[0]);
+    slope_1 = ((*tempImpedance)[1] - (*tempImpedance)[0]) / (F->at(1) - F->at(0));
 
     // if freq is lower than freq_init
-    if ( freq < freq_init ) {
+    if ( freq < thisFreq_init ) {
 
-        ZOut = slope_1 * (freq - Freq[0]) + (*tempImpedance)[0];
+        ZOut = slope_1 * (freq - F->at(0)) + (*tempImpedance)[0];
     }
     // if freq is higher than last freq
-    else if ( freq > Freq[freq_step-1] ) {
+    else if ( freq > F->back() ) {
         ZOut = 0.;
     }
 
     else {
 
-        ZOut = (*tempImpedance)[bin-1] + (freq-Freq[bin-1])*((*tempImpedance)[bin]-(*tempImpedance)[bin-1])/(Freq[bin]-Freq[bin-1]);
+        ZOut = (*tempImpedance)[bin-1] + (freq - F->at(bin-1))*((*tempImpedance)[bin]-(*tempImpedance)[bin-1])/(F->at(bin) - F->at(bin-1));
     } // not outside the Freq[] range    
     
 
@@ -3024,19 +3052,37 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
     
     //Creating tempPhase array to make this function more dynamic for Rx and Tx mode.
     vector<vector<double> > *tempPhase = nullptr;
-    
+    vector<double> * F;   
+ 
+    //Tx
+    if (useInTransmitterMode) {
+        tempPhase = &Txphase;
+    }
     //VPol Rx
-    if ( ant_m == 0 and not useInTransmitterMode) {
+    else if (ant_m == 0) {
         tempPhase = &Vphase;
     }
     //HPol Rx
-    else if ( ant_m == 1 and not useInTransmitterMode) {
+    else if (ant_m == 1) {
         tempPhase = &Hphase;
     }
-    //Tx
-    else if (useInTransmitterMode) {
-        tempPhase = &Txphase;
+    else 
+        throw runtime_error("In GetAntPhase_1D: No appropriate gain model for this simulation setup.");
+    
+    double thisFreq_init;
+    double thisFreq_width;
+    int thisFreq_step;
+    if(useInTransmitterMode) {
+      F = &TxFreq;
+      thisFreq_init = Tx_freq_init;
+      thisFreq_width = Tx_freq_width;
     }
+    else {
+      F = &Freq;
+      thisFreq_init = freq_init;
+      thisFreq_width = freq_width;
+    }
+    thisFreq_step = (int)F->size();  
 
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
@@ -3054,16 +3100,16 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
 
     double phase;
 
-    int bin = (int)( (freq - freq_init) / freq_width )+1;
+    int bin = (int)( (freq - thisFreq_init) / thisFreq_width )+1;
 
-    slope_1 = ((*tempPhase)[1][angle_bin] - (*tempPhase)[0][angle_bin]) / (Freq[1] - Freq[0]);
-    slope_2 = ((*tempPhase)[freq_step-1][angle_bin] - (*tempPhase)[freq_step-2][angle_bin]) / (Freq[freq_step-1] - Freq[freq_step-2]);
+    slope_1 = ((*tempPhase)[1][angle_bin] - (*tempPhase)[0][angle_bin]) / (F->at(1) - F->at(0));
+    slope_2 = ((*tempPhase)[thisFreq_step-1][angle_bin] - (*tempPhase)[thisFreq_step-2][angle_bin]) / (F->at(thisFreq_step-1) - F->at(thisFreq_step-2));
 
 
     // if freq is lower than freq_init
-    if ( freq < freq_init ) {
+    if ( freq < thisFreq_init ) {
 
-        phase = slope_1 * (freq - Freq[0]) + (*tempPhase)[0][angle_bin];
+        phase = slope_1 * (freq - F->at(0)) + (*tempPhase)[0][angle_bin];
 
         if ( phase > 180. ) {
             while ( phase > 180. ) {
@@ -3077,9 +3123,9 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
         }
     }
     // if freq is higher than last freq
-    else if ( freq > Freq[freq_step-1] ) {
+    else if ( freq > F->back() ) {
 
-        phase = slope_2 * (freq - Freq[freq_step-1]) + (*tempPhase)[freq_step-1][angle_bin];
+        phase = slope_2 * (freq - F->back()) + (*tempPhase)[thisFreq_step-1][angle_bin];
 
         if ( phase > 180. ) {
             while ( phase > 180. ) {
@@ -3096,25 +3142,25 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
     else {
 
         // not at the first two bins
-        if ( bin<freq_step-1 && bin>1 ) {
+        if ( bin<thisFreq_step-1 && bin>1 ) {
 
-            slope_t1 = ((*tempPhase)[bin-1][angle_bin] - (*tempPhase)[bin-2][angle_bin]) / (Freq[bin-1] - Freq[bin-2]);
-            slope_t2 = ((*tempPhase)[bin+1][angle_bin] - (*tempPhase)[bin][angle_bin]) / (Freq[bin+1] - Freq[bin]);
+            slope_t1 = ((*tempPhase)[bin-1][angle_bin] - (*tempPhase)[bin-2][angle_bin]) / (F->at(bin-1) - F->at(bin-2));
+            slope_t2 = ((*tempPhase)[bin+1][angle_bin] - (*tempPhase)[bin][angle_bin]) / (F->at(bin+1) - F->at(bin));
 
             // down going case
             if ( slope_t1 * slope_t2 > 0. && (*tempPhase)[bin][angle_bin] - (*tempPhase)[bin-1][angle_bin] > 180. ) {
 
-                phase = (*tempPhase)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempPhase)[bin][angle_bin]-360.-(*tempPhase)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+                phase = (*tempPhase)[bin-1][angle_bin] + (freq - F->at(bin-1))*((*tempPhase)[bin][angle_bin]-360.-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
             }
 
             // up going case
             else if ( slope_t1 * slope_t2 > 0. && (*tempPhase)[bin][angle_bin] - (*tempPhase)[bin-1][angle_bin] < -180. ) {
-                phase = (*tempPhase)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempPhase)[bin][angle_bin]+360.-(*tempPhase)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+                phase = (*tempPhase)[bin-1][angle_bin] + (freq - F->at(bin-1))*((*tempPhase)[bin][angle_bin]+360.-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
             }
 
             // neither case
             else {
-                phase = (*tempPhase)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+                phase = (*tempPhase)[bin-1][angle_bin] + (freq - F->at(bin-1))*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
             }
 
             // if outside the range, put inside
@@ -3132,7 +3178,7 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
         }// not first two bins
 
         else {
-            phase = (*tempPhase)[bin-1][angle_bin] + (freq-Freq[bin-1])*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(Freq[bin]-Freq[bin-1]);
+            phase = (*tempPhase)[bin-1][angle_bin] + (freq - F->at(bin-1))*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
         }
 
         // if outside the range, put inside
@@ -3947,7 +3993,6 @@ inline void Detector::ReadFOAM(string filename, Settings *settings1) {    // wil
 
 void Detector::ReadNoiseFigure(string filename, Settings *settings1)
 {
-cout<<"In ReadNoiseFigure"<<endl;    
     ifstream nfFile( filename.c_str() );
     
     string line;
@@ -7100,42 +7145,40 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
 
 //TODO:  Need to retool the arguments of this to use the Settings parameters for Vpol, Vpol_top, HPol, and Tx.
 inline void Detector::ReadImpedance(string filename, double (*TempRealImpedance)[freq_step_max], double (*TempImagImpedance)[freq_step_max]) {
-    //Initialize temp Impedance array to allow for dynamic importing of impedances for Tx and Rx
-    // double (*TempRealImpedance)[freq_step_max] = nullptr;
-    // double (*TempImagImpedance)[freq_step_max] = nullptr;  
-    
-    // //VPol Rx  TODO:  Add Top and bottom Vpol
-    // if ( ant_m == 0 and not useInTransmitterMode) {
-    //     TempRealImpedance = &RealImpedanceV;
-    //     TempImagImpedance = &ImagImpedanceV;
-    // }
-    // //HPol Rx
-    // else if ( ant_m == 1 and not useInTransmitterMode) {
-    //     TempRealImpedance = &RealImpedanceH;
-    //     TempImagImpedance = &ImagImpedanceH;     
-    // }
-    // //VPol Tx
-    // else if ( ant_m == 0 and useInTransmitterMode) {
-    //     TempRealImpedance = &RealImpedanceTx;
-    //     TempImagImpedance = &ImagImpedanceTx;   
-    // }       
+
+    // this is really dumb but were gonna assume all the impedances have the same frequency
+    // binning and just rewrite this every time a file is read-in. seems okay for now 
+    // and i just don't have the time, someone make this better one day -- MSM 2/18/25
+    impFreq.clear();
     
     ifstream NecOut( filename.c_str() );
-    const int N = freq_step;
     string line;
-    cout << "N = " << N << endl;
-    cout << "freq_step = " << freq_step << endl;
+    int idx = 0; 
     if ( NecOut.is_open() ) {
+        getline (NecOut, line); //gets first line to skip header
+        
+        getline (NecOut, line); //gets first line of data 
         while (NecOut.good() ) {
-            getline (NecOut, line); //Gets first line to skip header
-            for (int i=0; i<freq_step; i++){
-                // getline (NecOut, line, '\t');
-                getline (NecOut, line);
-                if (not line.empty()) {
-                    (*TempRealImpedance)[i] = atof(line.substr(13,21).c_str());
-                    (*TempImagImpedance)[i] = atof(line.substr(25,32).c_str());
-                }
-            } //end frep_step
+        
+          //put line into a string stream
+          stringstream ss(line);
+
+          // break line up into each of its words (i.e. strings separated by whitespace)
+          string buff;
+          vector<string> words;
+          while(ss >> buff) // >> skips whitespace and just goes to the next word
+            words.push_back(buff);
+
+          if(words.size() != 3)
+            throw runtime_error("Impedance file not formatted properly! "+filename);           
+
+          impFreq.push_back(stod(words[0]));
+          (*TempRealImpedance)[idx] = stod(words[1]);
+          (*TempImagImpedance)[idx] = stod(words[2]);
+
+          getline (NecOut, line); //Gets next line of data 
+          idx++;
+        
         }// end while NecOut.good
         NecOut.close();
     }// end if file open    
