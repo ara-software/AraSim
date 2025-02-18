@@ -2381,8 +2381,8 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
             else { // otherwise make sure it matches the values already stored
               int i = (int)Transm.size();
 
-              if(Freq[i] != thisFreq)
-                throw runtime_error("Frequency bins of antenna models do not match!");
+              if(abs(Freq[i]-thisFreq) > 0.1 ) // ensure they match to at least 0.1 MHz
+                throw runtime_error("Frequency bins of antenna models do not match! "+filename);
             } 
 
             // read SWR info line
