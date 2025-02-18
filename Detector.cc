@@ -77,28 +77,15 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
     params.number_of_antennas = 0;
 
     //initialize few params values.
-    params.freq_step = 60;  //The hard-coding of this seems unnecessary, as it limits forces us to have our gain files go beyond 1000 MHz in data, which is out of band for us. - JCF 2/22/2024
-                            //In addition to the hardcoding issue, I think this (potentially) conflicts with the max size of arrays which is set by freq_step_max = 60 in Detector.h - MSM 4/10/2024
-    params.ang_step = 2664;
-    params.freq_width = 16.667;
-    params.freq_init = 83.333;
     params.DeployedStations = 4;
     //end initialize
 
     //Parameters to use if using Arianna_WIPLD_hpol.dat
 
     if (settings1 -> ANTENNA_MODE == 2) {
-        params.freq_step = 238; //60
-        params.ang_step = 2664; //2664;
-        params.freq_width = 5; //16.667;
-        params.freq_init = 15; //83.333;
         params.DeployedStations = 4;
     }
     
-    if (settings1->ANTENNA_MODE == 5 or settings1->ANTENNA_MODE == 6) {
-        params.freq_step = 56; //This is a stop-gap measure to allow the Kansas models ot work in AraSim, which only have data up to 1000 MHz rather than 1066.66 MHz. - JCF 2/22/2024
-    }
-
     //copy freq_width, freq_init in params to Detector freq_width, freq_init
     freq_step = params.freq_step;
     ang_step = params.ang_step;
@@ -2261,13 +2248,24 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         HgainFile = VgainFile;
         VgainTopFile = VgainFile;
     }
-    
+  
+    // set parameters to "unset" values
+    freq_step = -1;
+    ang_step = -1;
+    freq_width = -1;
+    freq_init = -1;   
+ 
     //Read in antenna gain files.
     ReadAntennaGain(VgainFile, settings1, eVPol);
     ReadAntennaGain(VgainTopFile, settings1, eVPolTop);
     ReadAntennaGain(HgainFile, settings1, eHPol);
     ReadAntennaGain(TxgainFile, settings1, eTx);
 
+    // update parameters to reflect what was read-in
+    params.freq_step = freq_step;
+    params.ang_step = ang_step;
+    params.freq_width = freq_width;
+    params.freq_init = freq_init;
 }
 //Defining function that reads in TX antenna impedances
 inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
@@ -2305,8 +2303,8 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
 
     // define some dummy variables that will point to the real variables
     // where values are stored
-    double (*gain)[freq_step_max][ang_step_max];
-    double (*phase)[freq_step_max][ang_step_max];
+    vector< vector<double> > * gain;
+    vector< vector<double> > * phase;
     vector<double>* transAnt_databin;
 
     // make sure dummy variables point to the right variables 
@@ -2338,109 +2336,148 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     ifstream NecOut( filename.c_str() );
   
     // initialize some variables used for read-in
-    const int N = freq_step;
-    double Transm[N];
+    vector<double> Transm;
     string line;
+  
+    // clear vector in case there's any lingering data
+    gain->clear();
+    phase->clear();   
+    if(freq_step == -1) // only reset if it hasn't been read-in yet
+      Freq.clear(); 
     
     // check the file opened successfully
     if (! NecOut.is_open() ) 
       throw runtime_error("Antenna gain file could not be opened: "+filename);
-   
+ 
+    // read the first line
+    getline (NecOut, line);
+            
     // start reading the file 
     while (NecOut.good() ) {
-        // iterate over expected number of frequencies
-        // MSM 3/28/24 - this is not ideal but will keep it for now 
-        for (int i=0; i<freq_step; i++) {
+        
+        //put line into a string stream
+        stringstream ss(line);
 
-            // readline
+        // break line up into each of its words (i.e. strings separated by whitespace)
+        string buff;
+        vector<string> words;
+        while(ss >> buff) // >> skips whitespace and just goes to the next word
+          words.push_back(buff);
+        
+        // check if this is the start of a new frequency section
+        if (words.size() > 0 && words[0] == "freq") {
+
+            // make sure it's properly formatted
+            if(words.size() != 4 || words[3] != "MHz")
+              throw runtime_error("Antenna gain file frequency not properly formatted! "+filename);
+
+            // save frequency and check its sensible
+            double thisFreq = stof(words[2]);
+            if(!std::isfinite(thisFreq))
+              throw runtime_error("Non-finite frequency value found! "+filename);
+
+            if(freq_step == -1) // add frequency if this is the first read-in
+              Freq.push_back(thisFreq);
+            else { // otherwise make sure it matches the values already stored
+              int i = (int)Transm.size();
+
+              if(Freq[i] != thisFreq)
+                throw runtime_error("Frequency bins of antenna models do not match!");
+            } 
+
+            // read SWR info line
             getline (NecOut, line);
-            //put line into a string stream
-            stringstream ss(line);
 
-            // break line up into each of its words (i.e. strings separated by whitespace)
-            string buff;
-            vector<string> words;
-            while(ss >> buff) // >> skips whitespace and just goes to the next word
+            // reset the string stream and words vector
+            words.clear();
+            ss.clear();
+
+            // put new line into string stream and break up line into its words
+            ss.str(line);
+            while(ss >> buff)
               words.push_back(buff);
 
-            // check the line is what we expected (start of frequency section)
-            if (words.size() > 0 && words[0] == "freq") {
-                if(words.size() != 4 || words[3] != "MHz")
-                  throw runtime_error("Antenna gain file frequency not properly formatted! "+filename);
+            // check the line is what we expected (SWR info)
+            if(words.size() != 3 || words[0] != "SWR")
+              throw runtime_error("Antenna gain file SWR not properly formatted! "+filename);
 
-                // save frequency and check its sensible
-                double thisFreq = stof(words[2]);
-                if(!std::isfinite(thisFreq))
-                  throw runtime_error("Non-finite frequency value found! "+filename);
-                Freq[i] = thisFreq;
+            // save SWR value, check that its sensible, and calculate corresponding transmittance
+            double swr = stof(words[2]);
+            if(!std::isfinite(swr))
+              throw runtime_error("Non-finite SWR value found! "+filename);
+            Transm.push_back(SWRtoTransCoeff(swr));
 
-                // read SWR info line
-                getline (NecOut, line);
-  
-                // reset the string stream and words vector
-                words.clear();
-                ss.clear();
+            // read in next line but we won't do anything with it
+            getline (NecOut, line); //read names (ie column names)
+       
+            // add new vector to gain and phase
+            gain->push_back(vector<double>());
+            phase->push_back(vector<double>());
+ 
+        } // end frequency/header read in
 
-                // put new line into string stream and break up line into its words
-                ss.str(line);
-                while(ss >> buff)
-                  words.push_back(buff);
+        // otherwise we are reading in theta/phi values for a specific frequency
+        else {
 
-                // check the line is what we expected (SWR info)
-                if(words.size() != 3 || words[0] != "SWR")
-                  throw runtime_error("Antenna gain file SWR not properly formatted! "+filename);
+            // check the line is what we expected (gain for a particular theta/phi)
+            if(words.size() != 5)
+              throw runtime_error("Antenna gain file data line not properly formatted! "+filename);
+ 
+            // save dB gain and phase and check they are sensible
+            double thisdBGain = stof(words[2]);
+            double thisPhase = stof(words[4]);
+            if(!std::isfinite(thisdBGain))
+              throw runtime_error("Non-finite dB gain value found! "+filename);
+            if(!std::isfinite(thisPhase))
+              throw runtime_error("Non-finite phase value found! "+filename);
 
-                // save SWR value, check that its sensible, and calculate corresponding transmittance
-                double swr = stof(words[2]);
-                if(!std::isfinite(swr))
-                  throw runtime_error("Non-finite SWR value found! "+filename);
-                Transm[i] = SWRtoTransCoeff(swr);
+            // save the (linear) gain and phase into real vectors
+            gain->back().push_back(pow(10, thisdBGain/10));  //Importing gain in dB, then converting to linear gain
+            phase->back().push_back(thisPhase);
 
-                // read in next line but we won't do anything with it
-                getline (NecOut, line); //read names (ie column names)
-
-                // iterate over the expected number of angles 
-                // MSM 3/28/24 - this is not ideal but will keep it for now 
-                for (int j=0; j<ang_step; j++) {
-        
-                    // read the data for this theta/phi
-                    getline (NecOut, line); //read data line
-
-                    // reset the string stream and words vector
-                    words.clear();
-                    ss.clear();
-
-                    // put new line into string stream and break up line into its words
-                    ss.str(line);
-                    while(ss >> buff)
-                      words.push_back(buff);
-
-                    // check the line is what we expected (gain for a particular theta/phi)
-                    if(words.size() != 5)
-                      throw runtime_error("Antenna gain file data line not properly formatted! "+filename);
-                    
-                    // save dB gain and phase and check they are sensible
-                    double thisdBGain = stof(words[2]);
-                    double thisPhase = stof(words[4]);
-                    if(!std::isfinite(thisdBGain))
-                      throw runtime_error("Non-finite dB gain value found! "+filename);
-                    if(!std::isfinite(thisPhase))
-                      throw runtime_error("Non-finite phase value found! "+filename);
-
-                    // save the (linear) gain and phase into real vectors
-                    (*gain)[i][j] = pow(10, thisdBGain/10);  //Importing gain in dB, then converting to linear gain
-                    (*phase)[i][j] = thisPhase;
-                }// end ang_step
-            }// end check freq label
-        }// end freq_step
+        } // end theta/phi read in       
+ 
+        // read the next line
+        getline (NecOut, line);
+            
     }// end while NecOut.good
     NecOut.close();
-  
+
+    // skip this for the transmitter case for now since it may not match other models 
+    if(type == eTx)
+      return;
+
+    // set parameter values if this is the first read-in
+    if(freq_step == -1) { 
+      freq_step = (int)Freq.size();
+      ang_step = (int)gain->back().size();
+      freq_width = Freq[1]-Freq[0];
+      freq_init = Freq[0];   
+    }
+
+    // check things look sensible
+    if(Transm.size() != freq_step)
+      throw runtime_error("Transm has an unexpected length! "+filename);
+    if(gain->size() != freq_step)
+      throw runtime_error("gain has an unexpected length! "+filename);
+    if(phase->size() != freq_step) 
+      throw runtime_error("phase has an unexpected length! "+filename);
+    for(int i = 0; i < freq_step; ++i) {
+      if(gain->at(i).size() != ang_step)
+        throw runtime_error("gain vectors have inconsistent length! "+filename);
+      if(phase->at(i).size() != ang_step)
+        throw runtime_error("gain vectors have inconsistent length! "+filename);
+    }
+ 
     // skip this for the transmitter case 
     if(type == eTx)
       return;
-    
+   
+    const int N = freq_step; 
     double xfreq[N];
+
+    if(freq_step > settings1->DATA_BIN_SIZE/2)
+      throw runtime_error("settings1->DATA_BIN_SIZE not large enough for the number of frequencies");
     double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
     double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
     double df_fft;
@@ -2455,7 +2492,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
     
-    Tools::SimpleLinearInterpolation( freq_step-1, xfreq, Transm, settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
+    Tools::SimpleLinearInterpolation( freq_step-1, xfreq, &Transm[0], settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
         if(!std::isfinite(trans_databin[i]))
           throw runtime_error("Non-finite FFT gain value found! "+filename);
@@ -2844,7 +2881,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     */
     
     //Initialize pointer to dynamically point to the gain for chosen antenna.  The structure of this pointer matches that of the global gain arrays defined in Detector.h.
-    double (*tempGain)[freq_step_max][ang_step_max] = nullptr;
+    vector<vector<double> > *tempGain = nullptr;
     
     //Assign local pointer to gain array specified in the function argument
     //VPol Rx
@@ -2986,7 +3023,7 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
 double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m, bool useInTransmitterMode ) {
     
     //Creating tempPhase array to make this function more dynamic for Rx and Tx mode.
-    double (*tempPhase)[freq_step_max][ang_step_max] = nullptr;
+    vector<vector<double> > *tempPhase = nullptr;
     
     //VPol Rx
     if ( ant_m == 0 and not useInTransmitterMode) {
@@ -3669,7 +3706,7 @@ inline void Detector::ReadFilter(string filename, Settings *settings1) {    // w
     
     
     // Tools::SimpleLinearInterpolation will return Filter array (in dB)
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, Freq, FilterGain );
+    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, &Freq[0], FilterGain );
     
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
     
@@ -3711,7 +3748,7 @@ void Detector::ReadFilter_New(Settings *settings1) {    // will return gain (dB)
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
 
-    Tools::SimpleLinearInterpolation( freq_step, Freq, FilterGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+    Tools::SimpleLinearInterpolation( freq_step, &Freq[0], FilterGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
         
     FilterGain_databin.clear();
     
@@ -3774,7 +3811,7 @@ inline void Detector::ReadPreamp(string filename, Settings *settings1) {    // w
     
     
     // Tools::SimpleLinearInterpolation will return Preampgain array (in dB)
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, Freq, PreampGain );
+    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, &Freq[0], PreampGain );
     
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
     
@@ -3818,7 +3855,7 @@ void Detector::ReadPreamp_New(Settings *settings1) {    // will return gain (dB)
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
 
-    Tools::SimpleLinearInterpolation( freq_step, Freq, PreampGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+    Tools::SimpleLinearInterpolation( freq_step, &Freq[0], PreampGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
         
     PreampGain_databin.clear();
     
@@ -3882,7 +3919,7 @@ inline void Detector::ReadFOAM(string filename, Settings *settings1) {    // wil
     
     
     // Tools::SimpleLinearInterpolation will return FOAMgain array (in dB)
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, Freq, FOAMGain );
+    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, &Freq[0], FOAMGain );
     
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
     
@@ -4002,7 +4039,7 @@ cout<<"number of f bins: "<<settings1->DATA_BIN_SIZE/2<<endl;
 	//	cout << endl;
 
         // Tools::SimpleLinearInterpolation will return NoiseFig array (in dB)
-        Tools::SimpleLinearInterpolation( N-1, xfreq, NoiseFig, freq_step, Freq, NoiseFig_ch[ch] );
+        Tools::SimpleLinearInterpolation( N-1, xfreq, NoiseFig, freq_step, &Freq[0], NoiseFig_ch[ch] );
 	//	cout << "2nd Test reading 2: ";
 //        for (int i=0;i<30;i++){
 //		cout << Freq[i] << "   " <<  NoiseFig_ch[ch][i] << "\t";
@@ -4194,7 +4231,7 @@ void Detector::ReadFOAM_New(Settings *settings1) {    // will return gain (dB) w
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
 
-    Tools::SimpleLinearInterpolation( freq_step, Freq, FOAMGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+    Tools::SimpleLinearInterpolation( freq_step, &Freq[0], FOAMGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
         
     FOAMGain_databin.clear();
     
@@ -4540,12 +4577,12 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
 		// now, do interpolation
 		Tools::SimpleLinearInterpolation(
 			numFreqBins, frequencies_asarray, gains_asarray, //From original binning
-			freq_step, Freq, interp_gains	//To the new binning
+			freq_step, &Freq[0], interp_gains	//To the new binning
 			);
 		       
 		Tools::SimpleLinearInterpolation(
 			numFreqBins, frequencies_asarray, phases_asarray, //From original binning
-			freq_step, Freq, interp_phases //To the new binning
+			freq_step, &Freq[0], interp_phases //To the new binning
 			);
 		       
 	
@@ -4687,7 +4724,7 @@ inline void Detector::CalculateElectChain(Settings *settings) {
  
     // interpolate back onto the original frequency binning for the gain
     Tools::SimpleLinearInterpolation(nFreqs, interp_frequencies_databin, (double*)&buffGain[0],
-                                     freq_step, Freq, (double*)&ElectGain[rfChan][0]);
+                                     freq_step, &Freq[0], (double*)&ElectGain[rfChan][0]);
   }
 
   return;
@@ -5063,7 +5100,7 @@ inline void Detector::ReadRFCM_TestBed(string filename, Settings *settings1) {  
     int ch_no = RFCM_TB_databin_ch.size();
     
     // Tools::SimpleLinearInterpolation will return RFCM array (in dB)
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, Freq, RFCM_TB_ch[ch_no] );
+    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, &Freq[0], RFCM_TB_ch[ch_no] );
     
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
 
@@ -5099,7 +5136,7 @@ void Detector::ReadRFCM_New(Settings *settings1) {    // will return gain (dB) w
     int RFCM_ch = RFCM_TB_databin_ch.size();
 
     for (int ch=0; ch<RFCM_ch; ch++) {
-        Tools::SimpleLinearInterpolation( freq_step, Freq, RFCM_TB_ch[ch], settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+        Tools::SimpleLinearInterpolation( freq_step, &Freq[0], RFCM_TB_ch[ch], settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
             
         RFCM_TB_databin_ch[ch].clear();
         
@@ -5245,7 +5282,7 @@ inline void Detector::ReadRayleighFit_TestBed(string filename, Settings *setting
 
 
         // Tools::SimpleLinearInterpolation will return Rayleigh array (in dB)
-        Tools::SimpleLinearInterpolation( N, xfreq, Rayleigh, freq_step, Freq, Rayleigh_TB_ch[ch] );
+        Tools::SimpleLinearInterpolation( N, xfreq, Rayleigh, freq_step, &Freq[0], Rayleigh_TB_ch[ch] );
         
         Tools::SimpleLinearInterpolation( N, xfreq, Rayleigh, settings1->DATA_BIN_SIZE/2, xfreq_databin, Rayleigh_databin );
 
@@ -5587,7 +5624,7 @@ cout<<"NoiseFig_numCh: "<<NoiseFig_numCh<<endl;
 
     for (int ch=0; ch<NoiseFig_numCh; ch++) {
 
-        Tools::SimpleLinearInterpolation( freq_step, Freq, NoiseFig_ch[ch], settings1->DATA_BIN_SIZE/2, xfreq_databin, NoiseFig_databin );
+        Tools::SimpleLinearInterpolation( freq_step, &Freq[0], NoiseFig_ch[ch], settings1->DATA_BIN_SIZE/2, xfreq_databin, NoiseFig_databin );
             
         NoiseFig_databin_ch[ch].clear();
         
@@ -5628,7 +5665,7 @@ void Detector::ReadRayleigh_New(Settings *settings1) {    // will return gain (d
 
     for (int ch=0; ch<Rayleigh_ch; ch++) {
 
-        Tools::SimpleLinearInterpolation( freq_step, Freq, Rayleigh_TB_ch[ch], settings1->DATA_BIN_SIZE/2, xfreq_databin, Rayleigh_databin );
+        Tools::SimpleLinearInterpolation( freq_step, &Freq[0], Rayleigh_TB_ch[ch], settings1->DATA_BIN_SIZE/2, xfreq_databin, Rayleigh_databin );
             
         Rayleigh_TB_databin_ch[ch].clear();
         

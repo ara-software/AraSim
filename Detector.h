@@ -227,13 +227,13 @@ class Detector {
         void ReadAllAntennaGains(Settings *settings1);
         double SWRtoTransCoeff(double swr);
         void ReadAntennaGain(string filename, Settings *settings1, EAntennaType type);
-        double Vgain[freq_step_max][ang_step_max];
-        double Vphase[freq_step_max][ang_step_max];
-        double VgainTop[freq_step_max][ang_step_max];
-        double VphaseTop[freq_step_max][ang_step_max];
-        double Hgain[freq_step_max][ang_step_max];
-        double Hphase[freq_step_max][ang_step_max];
-        double Freq[freq_step_max];
+        vector<vector<double> > Vgain;
+        vector<vector<double> > Vphase;
+        vector<vector<double> > VgainTop;
+        vector<vector<double> > VphaseTop;
+        vector<vector<double> > Hgain;
+        vector<vector<double> > Hphase;
+        vector<double> Freq;
     
         //Define impedance and gain for receiving antenna
         double RealImpedanceV[freq_step_max];
@@ -246,8 +246,8 @@ class Detector {
         //Define impedance and gain for transmitting antenna
         double RealImpedanceTx[freq_step_max];
         double ImagImpedanceTx[freq_step_max];
-        double Txgain[freq_step_max][ang_step_max];
-        double Txphase[freq_step_max][ang_step_max];
+        vector<vector<double> > Txgain;
+        vector<vector<double> > Txphase;
         void ReadImpedance(string filename, double (*TempRealImpedance)[freq_step_max], double (*TempImagImpedance)[freq_step_max]);
         void ReadAllAntennaImpedance(Settings *settings1);
 
@@ -549,7 +549,7 @@ class Detector {
 
         ~Detector();    //destructor
 
-        ClassDef(Detector,1);
+        ClassDef(Detector,2);
         
     
     
