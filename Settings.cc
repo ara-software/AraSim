@@ -115,7 +115,7 @@ outputdir="outputs"; // directory where outputs go
 
   PHASE=90.;            // default : 90 deg phase (it means all imaginary values)
 
-  NFOUR=1024;           // default : 1024, same as in icemc
+  NFOUR=2048;           // default : 2048
     
   NOISE=0;              // degault : 0, flat thermal noise, 1 : for TestBed (DETECTOR=3), use Rayleigh distribution fitted for borehole channels
 
