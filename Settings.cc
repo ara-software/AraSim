@@ -887,6 +887,18 @@ int Settings::CheckCompatibilitiesSettings() {
 
     int num_err = 0;
 
+    // ensure that NFOUR is a multiple of 2
+    if (NFOUR & (NFOUR-1) != 0) {
+        cerr<<"NFOUR is not a power of 2!"<<endl;
+        num_err++;
+    }
+
+    // ensure that NFOUR is big enough that you don't have problems with FFTs or readout
+    if (2*WAVEFORM_LENGTH > NFOUR) {
+        cerr<<"NFOUR should be at least twice WAVEFORM_LENGTH to avoid FFT artifacts or problems with readout!"<<endl; 
+        num_err++;
+    }
+
     // if BH_ANT_SEP_DIST_ON=1, we can't use READGEOM=1 (actual installed geom)
     if (BH_ANT_SEP_DIST_ON==1 && READGEOM==1) {
         cerr<<"BH_ANT_SEP_DIST_ON=1 is only available in ideal station geom (READGEOM=0)!"<<endl; 
