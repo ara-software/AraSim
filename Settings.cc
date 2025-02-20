@@ -887,7 +887,7 @@ int Settings::CheckCompatibilitiesSettings() {
 
     int num_err = 0;
 
-    // ensure that NFOUR is a multiple of 2
+    // ensure that NFOUR is a power of 2
     if (NFOUR & (NFOUR-1) != 0) {
         cerr<<"NFOUR is not a power of 2!"<<endl;
         num_err++;
