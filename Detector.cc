@@ -2190,6 +2190,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
     // change coordinate from flat surface to curved Earth surface
     //FlattoEarth_ARA(icesurface);
+
     FlattoEarth_ARA_sharesurface(icesurface); // this one will share the lowest surface at each station.
 
     getDiodeModel(settings1); // set diode_real and fdiode_real values.
@@ -2203,10 +2204,17 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     std::string VgainTopFile;
     std::string HgainFile;
     std::string TxgainFile;    
+    std::string TxgainFileCross;
+    std::string VgainCrossFile;
+    std::string VgainTopCrossFile;
+    std::string HgainCrossFile;    
+
     
     //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
-    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";     
-    
+    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt"; 
+    TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Crosspol_Kansas2024.txt";     
+
+
     if (settings1->ANTENNA_MODE == 0){
         // use the orignal Vpol/Hpol gains
         VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt";
@@ -2255,6 +2263,13 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Custom.txt";
         HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Custom.txt";         
     }
+
+    // Add cross-pol gain files
+    VgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
+    VgainTopCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt"; //Should be TV but it's not working due to a negative SWR (first SWR entry) -ASG 12/09/24
+    HgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
+
+
     
     // Check for ALL_ANT_V_ON, then set all antennas to VPol if true
     if (settings1->ALL_ANT_V_ON == 1) {
@@ -2262,13 +2277,20 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         VgainTopFile = VgainFile;
     }
     
-    //Read in antenna gain files.
+    //Read in antenna co-pol gain files.
     ReadAntennaGain(VgainFile, settings1, eVPol);
     ReadAntennaGain(VgainTopFile, settings1, eVPolTop);
     ReadAntennaGain(HgainFile, settings1, eHPol);
     ReadAntennaGain(TxgainFile, settings1, eTx);
 
+    // Read cross-pol Rx gain files
+    ReadAntennaGain(VgainCrossFile, settings1, eVPolCross);
+    ReadAntennaGain(VgainTopCrossFile, settings1, eVPolTopCross);
+    ReadAntennaGain(HgainCrossFile, settings1, eHPolCross);
+    ReadAntennaGain(TxgainFileCross, settings1, eTxCross);
+    
 }
+
 //Defining function that reads in TX antenna impedances
 inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
     
@@ -2311,32 +2333,51 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
 
     // make sure dummy variables point to the right variables 
     switch(type) {
-      case(eVPol) :
-        gain = &Vgain;
-        phase = &Vphase;
-        transAnt_databin = &transV_databin;
-        break;
-      case(eVPolTop) :
-        gain = &VgainTop;
-        phase = &VphaseTop;
-        transAnt_databin = &transVTop_databin;
-        break;
-      case(eHPol) :
-        gain = &Hgain;
-        phase = &Hphase;
-        transAnt_databin = &transH_databin;
-        break;
-      case(eTx) :
-        gain = &Txgain;
-        phase = &Txphase;
-        break;
-      default :
-        throw runtime_error("Unknown antenna type!");
+        case(eVPol):
+            gain = &Vgain;
+            phase = &Vphase;
+            transAnt_databin = &transV_databin;
+            break;
+        case(eVPolTop):
+            gain = &VgainTop;
+            phase = &VphaseTop;
+            transAnt_databin = &transVTop_databin;
+            break;
+        case(eHPol):
+            gain = &Hgain;
+            phase = &Hphase;
+            transAnt_databin = &transH_databin;
+            break;
+        case(eVPolCross): // Cross-pol VPol
+            gain = &VgainCross;
+            phase = &VphaseCross;
+            transAnt_databin = &transVCross_databin;
+            break;
+        case(eVPolTopCross): // Cross-pol VPol Top
+            gain = &VgainTopCross;
+            phase = &VphaseTopCross;
+            transAnt_databin = &transVTopCross_databin;
+            break;
+        case(eHPolCross): // Cross-pol HPol
+            gain = &HgainCross;
+            phase = &HphaseCross;
+            transAnt_databin = &transHCross_databin;
+            break;
+        case(eTx):
+            gain = &Txgain;
+            phase = &Txphase;
+            break;
+        case(eTxCross):
+            gain = &TxgainCross;
+            phase = &TxphaseCross;
+            break;
+        default:
+            throw runtime_error("Unknown antenna type!");
     }
 
     // open the requested file
     ifstream NecOut( filename.c_str() );
-  
+
     // initialize some variables used for read-in
     const int N = freq_step;
     double Transm[N];
@@ -2418,7 +2459,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
                     // check the line is what we expected (gain for a particular theta/phi)
                     if(words.size() != 5)
                       throw runtime_error("Antenna gain file data line not properly formatted! "+filename);
-                    
+
                     // save dB gain and phase and check they are sensible
                     double thisdBGain = stof(words[2]);
                     double thisPhase = stof(words[4]);
@@ -2836,7 +2877,7 @@ double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m )
 }
 
 
-double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int string_number, int ant_number, bool useInTransmitterMode) {
+double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int string_number, int ant_number, bool useInTransmitterMode, bool useCrossPol) {
     
     /*
     The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, Txgain)
@@ -2848,37 +2889,40 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     
     //Assign local pointer to gain array specified in the function argument
     //VPol Rx
-    if ( Detector_mode == 5 ){ // Phased Array mode
-        if ( useInTransmitterMode ) tempGain = &Txgain; // Transmitter mode
-        else if ( ant_m == 1 ) tempGain = &Hgain; // PA Hpols
-        else {
-            if ( string_number == 0 ) tempGain = &Vgain; // PA Vpols
-            else {
-                if ( ant_number == 1 ) tempGain = &VgainTop; // A5 Top VPols
-                else tempGain = &Vgain; // A5 Bottom Vpols
+    if (Detector_mode == 5) { // Phased Array mode
+        if (useInTransmitterMode) {
+            tempGain = useCrossPol ? &TxgainCross : &Txgain; // Transmitter mode
+        } else if (ant_m == 1) {
+            tempGain = useCrossPol ? &HgainCross : &Hgain; // HPol
+        } else { // VPol
+            if (string_number == 0) {
+                tempGain = useCrossPol ? &VgainCross : &Vgain;
+            } else {
+                if (ant_number == 1) {
+                    tempGain = useCrossPol ? &VgainTopCross : &VgainTop; // A5 Top VPols
+                } else {
+                    tempGain = useCrossPol ? &VgainCross : &Vgain; // A5 Bottom VPols
+                }
             }
+        }
+    } else { // Traditional Station mode
+        if (!useInTransmitterMode) {
+            if (ant_m == 0) { // VPol
+                if (ant_number == 0) {
+                    tempGain = useCrossPol ? &VgainCross : &Vgain;
+                } else if (ant_number == 2) {
+                    tempGain = useCrossPol ? &VgainTopCross : &VgainTop;
+                }
+            } else if (ant_m == 1) { // HPol
+                tempGain = useCrossPol ? &HgainCross : &Hgain;
+            }
+        } else { // Tx mode
+            tempGain = useCrossPol ? &TxgainCross : &Txgain;
         }
     }
-    else { // Traditional Station mode
-        if ( ant_m == 0 and not useInTransmitterMode) {
-            if (ant_number == 0) {
-                tempGain = &Vgain;
-            }
-            else if (ant_number == 2) {
-                tempGain = &VgainTop;
-            }
-        }
-        //HPol Rx
-        else if ( ant_m == 1 and not useInTransmitterMode) {
-            tempGain = &Hgain;
-        }
-        //Tx
-        else if (useInTransmitterMode) {
-            tempGain = &Txgain;
-        } 
-        else {
-            throw runtime_error("In GetGain_1D_OutZero: No appropriate gain model for this simulation setup.");
-        }
+
+    if (!tempGain) {
+        throw runtime_error("In GetGain_1D_OutZero: No appropriate gain model for this simulation setup.");
     }
     
     // check if angles range actually theta 0-180, phi 0-360
@@ -2983,22 +3027,25 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
 
 
 
-double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m, bool useInTransmitterMode ) {
+double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m, bool useInTransmitterMode, bool useCrossPol ) {
     
     //Creating tempPhase array to make this function more dynamic for Rx and Tx mode.
     double (*tempPhase)[freq_step_max][ang_step_max] = nullptr;
     
-    //VPol Rx
-    if ( ant_m == 0 and not useInTransmitterMode) {
-        tempPhase = &Vphase;
+
+    // Assign tempPhase based on polarization type and cross-pol flag
+    if (!useInTransmitterMode) {
+        if (ant_m == 0) { // VPol
+            tempPhase = useCrossPol ? &VphaseCross : &Vphase;
+        } else if (ant_m == 1) { // HPol
+            tempPhase = useCrossPol ? &HphaseCross : &Hphase;
+        }
+    } else { // Transmitter mode
+        tempPhase = useCrossPol ? &TxphaseCross : &Txphase;
     }
-    //HPol Rx
-    else if ( ant_m == 1 and not useInTransmitterMode) {
-        tempPhase = &Hphase;
-    }
-    //Tx
-    else if (useInTransmitterMode) {
-        tempPhase = &Txphase;
+
+    if (!tempPhase) {
+        throw runtime_error("In GetAntPhase_1D: No appropriate phase model for this simulation setup.");
     }
 
     // check if angles range actually theta 0-180, phi 0-360
@@ -3478,7 +3525,7 @@ inline void Detector::FlattoEarth_ARA(IceModel *icesurface) {
 
 
 inline void Detector::FlattoEarth_ARA_sharesurface(IceModel *icesurface) {    // each station share the lowest surface
-    
+
     double Dist = 0.;   //for sqrt(x^2 + y^2)
     double R1 = icesurface->Surface(0.,0.); // from core of earth to surface at theta, phi = 0.
     //--------------------------------------------------

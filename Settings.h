@@ -343,7 +343,8 @@ class Settings
                                   
         double CLOCK_ANGLE;  // default: 0; Angle of polarization "on the clock" for use in pulser events (EVENT_TYPE=11)
 
-
+        int CROSSPOL_RX=0; //Default: 0 -- don't use cross-pol responses on receiving antennas
+        int CROSSPOL_TX=0; //Default: 0 -- don't use cross-pol responses on transmitting antennas
 
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
         vector<int> EVID;
