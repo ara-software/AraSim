@@ -115,6 +115,13 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         //Report *report_tmp;
 
         Nu_temp = new Interaction (pnu, nuflavor, nu_nubar, n_interactions, icemodel, detector, settings1, primary1, signal, sec1 );
+      
+        // set weights to 1 if this is a noise only simulation
+        if(settings1->TRIG_ANALYSIS_MODE==2) {
+            Nu_temp->weight = 1.;
+            Nu_temp->probability = 1.;
+        }
+
         //report_tmp = new Report(detector ,settings1);
         if(Nu_temp->sigma_err==1){
             // only if getting sigma was successful
