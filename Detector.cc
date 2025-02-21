@@ -2971,7 +2971,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     }
 
     else {
-        Gout = (*tempGain)[bin-1][angle_bin] + (freq-F->back())*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(F->at(bin)-F->at(bin-1));
+        Gout = (*tempGain)[bin-1][angle_bin] + (freq-F->at(bin-1))*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(F->at(bin)-F->at(bin-1));
 
     } // not outside the Freq[] range    
     
