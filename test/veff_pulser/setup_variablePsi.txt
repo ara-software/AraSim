@@ -185,8 +185,6 @@ EVENT_TYPE=11 // (DEFAULT=0) 0: neutrinos. other modes in future release.
  
 LPM=1 // (DEFAULT=1) 0: don’t use LPM effect. 1: use LPM (default) 
  
-NFOUR=1024 // (DEFAULT=1024) Fourier space sample size. Twice the number of bins in time domain wf. must be power of 2. 
- 
 TIMESTEP=5E-10 // (DEFAULT=5E-10) sample rate for digitizer. decides the time difference between data points in wf. 
 
 ALL_ANT_V_ON=0
