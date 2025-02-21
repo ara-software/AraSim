@@ -1153,6 +1153,12 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
     } // tdomain mode
   }// if pickposnu
 
+  // set weights to 1 if this is a noise only simulation
+  if(settings1->TRIG_ANALYSIS_MODE==2) {
+      weight = 1.;
+      probability = 1.;
+  }
+
 }
 
 // Arbitrary event Interaction class
