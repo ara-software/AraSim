@@ -579,7 +579,7 @@ void Report::CalculateSignals(
                         ray_sol_cnt = 0;
                     }
 
-                    stations[i].strings[j].antennas[k].ray_sol_cnt = ray_sol_cnt;   // save number of RaySolver solutions
+                    stations[i].strings[j].antennas[k].ray_sol_cnt += ray_sol_cnt;   // save number of RaySolver solutions
                     stations[i].Total_ray_sol += ray_sol_cnt;   // add ray_sol_cnt to Total_ray_sol
 
                 }
@@ -3051,8 +3051,8 @@ void Report::Convolve_Signals(
     // Determine the bin (index) where the signal will arrive in output waveforms
     //   and flag which signals will fit into the same time window
     for (int interaction_idx=0; interaction_idx<event->Nu_Interaction.size(); interaction_idx++) {
-        for (int m = 0; m < antenna->ray_sol_cnt; m++) { // loop over raysol numbers
-            // Store the bin where the singal is located
+        for (int m = 0; m < antenna->arrival_time[interaction_idx].size(); m++) { // loop over raysol numbers
+            // Store the bin where the signal is located
             signal_bin[interaction_idx].push_back(
                 (antenna->arrival_time[interaction_idx][m] - stations[station_number].min_arrival_time) / (settings1->TIMESTEP) 
                 + settings1->NFOUR *2 + trigger->maxt_diode_bin); 
@@ -3093,7 +3093,7 @@ void Report::Convolve_Signals(
         for (int i=0; i<array_length; i++) antenna->V_noise.push_back(0.);
 
     }
-    
+
     // Loop over ray solutions and get signals from each
     // Loop does not run if there are no ray solutions
     if(antenna->ray_sol_cnt > 0) {
@@ -3101,7 +3101,7 @@ void Report::Convolve_Signals(
       int n_connected_rays = antenna->ray_sol_cnt; 
       vector<double> V_signal;
       for (int interaction_idx=0; interaction_idx<antenna->V.size(); interaction_idx++){
-        for (int m = 0; m < antenna->ray_sol_cnt; ++m) {
+        for (int m = 0; m < signal_bin[interaction_idx].size(); ++m) {
             Combine_Waveforms(
                 signal_bin[interaction_idx][m], this_signalbin,
                 antenna->V[interaction_idx][m], V_signal,
@@ -5066,7 +5066,7 @@ void Report::SetRank(Detector *detector) {
 
                     if (stations[i].strings[j].antennas[k].ray_sol_cnt) {
                         if (stations[i].strings[j].antennas[k].Rank[0] != 0) {  // there is non-zero value! and ray_sol_cnt also non-zero!
-                            if (stations[i].strings[j].antennas[k].PeakV[0][0] < pre_maxpeak) {
+                            if ( stations[i].strings[j].antennas[k].PeakV[0].size()!=0 && stations[i].strings[j].antennas[k].PeakV[0][0] < pre_maxpeak) {
 
                                 if (maxpeak < stations[i].strings[j].antennas[k].PeakV[0][0] ) {
                                     maxpeak = stations[i].strings[j].antennas[k].PeakV[0][0];

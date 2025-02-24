@@ -37,6 +37,7 @@ class Event {
 
       vector<double> interactions_birth_time; //time between interactions of a single event
 
+      vector<double> event_ID; //time between interactions of a single event
     
       double pnu;   // energy of neutrino
       //Vector nnu;   // direction of neutrino

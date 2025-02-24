@@ -27,6 +27,7 @@ Event::Event (Event *event){
     inu_passed = event->inu_passed;
 
     interactions_birth_time = event->interactions_birth_time;
+    event_ID = event->event_ID;
 
     pnu = event->pnu;
 
@@ -118,6 +119,10 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 settings1->YPARAM = 2;
                 settings1->ELAST_Y = settings1->ELAST[inu_thrown];
             }
+
+	    //ASG: Add EventID
+	    event_ID.clear(); 
+	    event_ID.push_back(settings1->EVID[inu_thrown]);
 
             //ASG: Calculate the interactions birth time for secondaries
             if (interaction_cnt == 1){
