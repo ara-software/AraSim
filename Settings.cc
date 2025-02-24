@@ -115,7 +115,7 @@ outputdir="outputs"; // directory where outputs go
 
   PHASE=90.;            // default : 90 deg phase (it means all imaginary values)
 
-  NFOUR=1024;           // default : 1024, same as in icemc
+  NFOUR=2048;           // default : 2048
     
   NOISE=0;              // degault : 0, flat thermal noise, 1 : for TestBed (DETECTOR=3), use Rayleigh distribution fitted for borehole channels
 
@@ -918,22 +918,17 @@ int Settings::CheckCompatibilitiesSettings() {
 
     int num_err = 0;
 
+    // ensure that NFOUR is a power of 2
+    if (NFOUR & (NFOUR-1) != 0) {
+        cerr<<"NFOUR is not a power of 2!"<<endl;
+        num_err++;
+    }
 
-    /*
-    // if INTERACTION_MODE is 0 (sphere area and obtain Aeff), make sure using GETCHORD_MODE=1
-    if (INTERACTION_MODE==0) { // picknear_sphere mode
-        if (GETCHORD_MODE==0) { // but use old getchord mode (not working!)
-            cerr<<"In INTERACTION_MODE=0, you have to use GETCHORD_MODE=1"<<endl; 
-            num_err++;
-        }
+    // ensure that NFOUR is big enough that you don't have problems with FFTs or readout
+    if (2*WAVEFORM_LENGTH > NFOUR) {
+        cerr<<"NFOUR should be at least twice WAVEFORM_LENGTH to avoid FFT artifacts or problems with readout!"<<endl; 
+        num_err++;
     }
-    else if (INTERACTION_MODE==1) { // picknear_cylinder mode
-        if (GETCHORD_MODE==1) { // but use new getchord mode (not working!)
-            cerr<<"In INTERACTION_MODE=1, you have to use GETCHORD_MODE=0"<<endl; 
-            num_err++;
-        }
-    }
-    */
 
     // if BH_ANT_SEP_DIST_ON=1, we can't use READGEOM=1 (actual installed geom)
     if (BH_ANT_SEP_DIST_ON==1 && READGEOM==1) {
@@ -965,24 +960,12 @@ int Settings::CheckCompatibilitiesSettings() {
 
 
     // check modes which will only work for actual installed TestBed case
-    //
     if (TRIG_ONLY_BH_ON==1 && DETECTOR!=3) {
         cerr<<"TRIG_ONLY_BH_ON=1 only works with DETECTOR=3!"<<endl;
         num_err++;
     }
 
-    /*
-    //if (NOISE_CHANNEL_MODE==1 && DETECTOR!=3) {
-    if (NOISE_CHANNEL_MODE==1 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
-        //cerr<<"NOISE_CHANNEL_MODE=1 only works with DETECTOR=3!"<<endl;
-        cerr<<"NOISE_CHANNEL_MODE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
-        num_err++;
-    }
-    */
-
-    //if (NOISE_CHANNEL_MODE==2 && DETECTOR!=3) {
     if (NOISE_CHANNEL_MODE==2 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
-        //cerr<<"NOISE_CHANNEL_MODE=2 only works with DETECTOR=3!"<<endl;
         cerr<<"NOISE_CHANNEL_MODE=2 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
         num_err++;
     }
@@ -1003,13 +986,11 @@ int Settings::CheckCompatibilitiesSettings() {
     }
 
     if (TRIG_THRES_MODE==1 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
-        //cerr<<"TRIG_THRES_MODE=1 and 2 only works with DETECTOR=3!"<<endl;
         cerr<<"TRIG_THRES_MODE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
         num_err++;
     }
 
     if (TRIG_THRES_MODE==2 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
-        //cerr<<"TRIG_THRES_MODE=1 and 2 only works with DETECTOR=3!"<<endl;
         cerr<<"TRIG_THRES_MODE=2 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
         num_err++;
     }
@@ -1034,11 +1015,6 @@ int Settings::CheckCompatibilitiesSettings() {
         num_err++;
     }
 
-    // if (NOISE==1 && DETECTOR!=3 && TRIG_ONLY_LOW_CH_ON!=1) {
-    //     cerr<<"NOISE=1 only works with DETECTOR=3 or TRIG_ONLY_LOW_CH_ON=1"<<endl;
-    //     num_err++;
-    // }
-
     if (NOISE==1 && USE_TESTBED_RFCM_ON==1) {
         cerr<<"NOISE=1 only works with USE_TESTBED_RFCM_ON=0!"<<endl;
         num_err++;
@@ -1057,83 +1033,39 @@ int Settings::CheckCompatibilitiesSettings() {
     }
     if (DATA_LIKE_OUTPUT != 0 && (DETECTOR==0 || DETECTOR==1 || DETECTOR==2)) {
         cerr<<"DATA_LIKE_OUTPUT=1,2 doesn't work with DETECTOR=0,1,2"<<endl;
-        cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format; without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
+        cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format;" 
+            <<" without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
         num_err++;
     }
 
     if (DATA_LIKE_OUTPUT != 0 && (DETECTOR_STATION>5)) {
         cerr<<"DATA_LIKE_OUTPUT=1,2 doesn't work with DETECTOR_STATION>3"<<endl;
-        cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format; without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
+        cerr<<"DATA_LIKE_OUTPUT controls data-like output into UsefulAtriStationEvent format;"
+            <<" without a real station selected (using DETECTOR==3,4), the mapping to the data-like output will not function correctly"<<endl;
         num_err++;
     }
-    /*
-    if(NOISE == 2 && (DETECTOR==0 || DETECTOR==1 || DETECTOR==2)){
-      cerr << "CALIBRATION_MODE=1 doesn't work with DETECTOR=0,1,2" << endl;
-      cerr << "CALIBRATION_MODE controls the response from installed stations 2,3 and thus has no real relevance for DETECTOR=0,1,2" << endl;
-      num_err++;
-    }
-    */
 
-    // Verify valid DETECTOR_STATION_LIVETIME_CONFIG values for Installed A1-A5 stations
     if (DETECTOR == 4 ) {
       if (ARAUTIL_EXISTS == false){
-	    cerr << "DETECTOR=4 only works with an installation of AraRoot" << endl;
-	    num_err++;
-      } else {
+        cerr << "DETECTOR=4 only works with an installation of AraRoot" << endl;
+        num_err++;
+      } 
+      else {
 	
-	    cerr << "DETECTOR is set to 4" << endl; 
-	    cerr << "Setting READGEOM to 1" << endl;
-	    READGEOM=1;
+        cerr << "DETECTOR is set to 4" << endl; 
+        cerr << "Setting READGEOM to 1" << endl;
+        READGEOM=1;
 
-	    cerr << "Setting number_of_stations to 1" << endl;
-	    number_of_stations = 1;
+        cerr << "Setting number_of_stations to 1" << endl;
+        number_of_stations = 1;
 
-	    if (DETECTOR_STATION <0 || DETECTOR_STATION >= NUM_INSTALLED_STATIONS){
-	        cerr << "DETECTOR_STATION is not set to a valid station number" << endl;
-	        num_err++;
-	    }
-        if(DETECTOR_STATION_LIVETIME_CONFIG>-1){
-	        if((int)DETECTOR_STATION==1){
-                if(DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1){
-                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only seven expected configurations for A1"<<endl;
-                    num_err++;
-                }
-            }
-            else if((int)DETECTOR_STATION==2){
-                if(DETECTOR_STATION_LIVETIME_CONFIG>6 || DETECTOR_STATION_LIVETIME_CONFIG<1){
-                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only six expected configurations for A2"<<endl;
-                    num_err++;
-                }
-            }
-            else if((int)DETECTOR_STATION==3){
-                if(DETECTOR_STATION_LIVETIME_CONFIG>7 || DETECTOR_STATION_LIVETIME_CONFIG<1){
-                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only seven expected configurations for A3"<<endl;
-                    num_err++;
-                }
-            }
-            else if((int)DETECTOR_STATION==4){
-                if(DETECTOR_STATION_LIVETIME_CONFIG>4 || DETECTOR_STATION_LIVETIME_CONFIG<1){
-                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only four expected configurations for A3"<<endl;
-                    num_err++;
-                }
-            }
-            else if((int)DETECTOR_STATION==5){
-                if(DETECTOR_STATION_LIVETIME_CONFIG>2 || DETECTOR_STATION_LIVETIME_CONFIG<1){
-                    cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but there are only two expected configurations for A3"<<endl;
-                    num_err++;
-                }
-            }
-            else{
-                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to "<<DETECTOR_STATION_LIVETIME_CONFIG<<" but DETECTOR_STATION is "<<DETECTOR_STATION<<endl;
-                cerr<<" Unfamiliar DETECTOR_STATION value"<<endl;
-                num_err++;
-            }
+        if (DETECTOR_STATION <0 || DETECTOR_STATION >= NUM_INSTALLED_STATIONS){
+          cerr << "DETECTOR_STATION is not set to a valid station number" << endl;
+          num_err++;
         }
-		
       }
     }
 
-    // Verify valid DETECTOR_STATION_LIVETIME_CONFIG values for Installed PA
     if ( (int)DETECTOR == 5 ){
 
 	    cerr << "DETECTOR is set to 5" << endl; 
@@ -1143,58 +1075,51 @@ int Settings::CheckCompatibilitiesSettings() {
 	        cerr << "DETECTOR_STATION is not set to a valid station number" << endl;
 	        num_err++;
 	    }
-
-        if ( DETECTOR_STATION_LIVETIME_CONFIG > -1 ) {
-            if ( DETECTOR_STATION_LIVETIME_CONFIG>5 || DETECTOR_STATION_LIVETIME_CONFIG<1 ) {
-                cerr<<" DETECTOR_STATION_LIVETIME_CONFIG is set to ";
-                cerr<<DETECTOR_STATION_LIVETIME_CONFIG;
-                cerr<<" but there are only five expected configurations for the PA"<<endl;
-                num_err++;
-            } 
-        }
-
     } // end if DETECTOR==5
 
-   //Check that DETECTOR_STATION=0 is only used with DETECTOR=3
-   if (DETECTOR_STATION==0 && DETECTOR!=3){
+    //Check that DETECTOR_STATION=0 is only used with DETECTOR=3
+    if (DETECTOR_STATION==0 && DETECTOR!=3){
       cerr << " DETECTOR_STATION=0 doesn't work with DETECTOR!=3. If you want to work with TestBed, use DETECTOR=3 & DETECTOR_STATION=0" << endl;
       num_err++;
-   }
-   if (DETECTOR==0){
-    cerr << "DETECTOR=0 is un-used in AraSim."<<endl;
-    num_err++;
-   }
-   if (DETECTOR_STATION>=0 && DETECTOR<3){
-    cerr << "DETECTOR_STATION>=0 is only compatible with DETECTOR=3 (Testbed) or DETECTOR=4 (deep stations)"<<endl;
-    num_err++;
-   }
+    }
+    if (DETECTOR==0){
+      cerr << "DETECTOR=0 is un-used in AraSim."<<endl;
+      num_err++;
+    }
+    if (DETECTOR_STATION>=0 && DETECTOR<3){
+      cerr << "DETECTOR_STATION>=0 is only compatible with DETECTOR=3 (Testbed) or DETECTOR=4 (deep stations)"<<endl;
+      num_err++;
+    }
 
-   // check that USE_PARAM_RE_TTERM_TABLE is only used with SIMULATION_MODE==1
-   if (USE_PARAM_RE_TTERM_TABLE==1 && SIMULATION_MODE!=1){
-    cerr << "USE_PARAM_RE_TTERM_TABLE=0 doesn't work with SIMULATION_MODE!=1"<<endl;
-    num_err++;
-   }
+    // check that USE_PARAM_RE_TTERM_TABLE is only used with SIMULATION_MODE==1
+    if (USE_PARAM_RE_TTERM_TABLE==1 && SIMULATION_MODE!=1){
+      cerr << "USE_PARAM_RE_TTERM_TABLE=0 doesn't work with SIMULATION_MODE!=1"<<endl;
+      num_err++;
+    }
 
    //Compatibilities for birefringence
-   if (BIREFRINGENCE==1){
-	if(DETECTOR!=4){
-	   cerr << "BIREFRINGENCE=1 is only supported for individual stations" <<endl;
-	   num_err++; 
-	}	
-	if (BIAXIAL<0 || BIAXIAL>1){
-	 cerr << "BIREFRINGENCE only supports BIAXIAL=0 (uniaxial) or BIAXIAL=1 (biaxial)" << endl;
-	 num_err++;
-	}
-	if (RAY_TRACE_ICE_MODEL_PARAMS!=50){
-	 cerr << "BIREFRINGENCE=1 should only work with RAY_TRACE_ICE_MODEL_PARAMS=50" <<endl;	
-	 num_err++;
-	}
-   }
-   if (BIREFRINGENCE!=1 && BIREFRINGENCE!=0){
-    cerr << "BIREFRINGENCE only takes 0 or 1" << endl;
-    num_err++;
-   }
+    if (BIREFRINGENCE==1){
+      if(DETECTOR!=4){
+        cerr << "BIREFRINGENCE=1 is only supported for individual stations" <<endl;
+        num_err++; 
+      }	
+      if (BIAXIAL<0 || BIAXIAL>1){
+        cerr << "BIREFRINGENCE only supports BIAXIAL=0 (uniaxial) or BIAXIAL=1 (biaxial)" << endl;
+        num_err++;
+      }
+      if (RAY_TRACE_ICE_MODEL_PARAMS!=50){
+          cerr << "BIREFRINGENCE=1 should only work with RAY_TRACE_ICE_MODEL_PARAMS=50" <<endl;	
+          num_err++;
+      }
+    }
+    if (BIREFRINGENCE!=1 && BIREFRINGENCE!=0){
+      cerr << "BIREFRINGENCE only takes 0 or 1" << endl;
+      num_err++;
+    }
 
     return num_err;
 
 }
+
+
+

@@ -165,24 +165,25 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 nuflavorint=3;
             }
 
-            Interaction *Nu_temp;
-            //Report *report_tmp;
+        Interaction *Nu_temp;
+        //Report *report_tmp;
 
-            Nu_temp = new Interaction (pnu, nuflavor, nu_nubar, n_interactions, icemodel, detector, settings1, primary1, signal, sec1 );        
-            //report_tmp = new Report(detector ,settings1);
-            if(Nu_temp->sigma_err==1){
-               // only if getting sigma was successful
-               Nu_Interaction.push_back(*Nu_temp);  // for the first interaction
-               delete Nu_temp;
-            }
-            else{
-               //otherwise, just delete Nu_temp, but don't put it into Nu_Interaction
-               delete Nu_temp;
-               // and warn!
-                cout<<"Warning! sigma_err is "<<Nu_temp->sigma_err<<endl;
-                cout<<"This means the cross section was not found correctly!"<<endl;
-                cout<<"Nu_Interaction will be empty!"<<endl;
-            }
+        Nu_temp = new Interaction (pnu, nuflavor, nu_nubar, n_interactions, icemodel, detector, settings1, primary1, signal, sec1 );
+      
+        //report_tmp = new Report(detector ,settings1);
+        if(Nu_temp->sigma_err==1){
+            // only if getting sigma was successful
+            Nu_Interaction.push_back(*Nu_temp);  // for the first interaction
+            delete Nu_temp;
+        }
+        else{
+            //otherwise, just delete Nu_temp, but don't put it into Nu_Interaction
+            delete Nu_temp;
+            // and warn!
+            cout<<"Warning! sigma_err is "<<Nu_temp->sigma_err<<endl;
+            cout<<"This means the cross section was not found correctly!"<<endl;
+            cout<<"Nu_Interaction will be empty!"<<endl;
+        }
 
             // for multiple interactions...
             /*
