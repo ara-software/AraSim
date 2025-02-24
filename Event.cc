@@ -118,11 +118,10 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 settings1->NNU_PHI = settings1->IND_NNU_PHI[inu_thrown];
                 settings1->YPARAM = 2;
                 settings1->ELAST_Y = settings1->ELAST[inu_thrown];
-            }
 
-	    //ASG: Add EventID
-	    event_ID.clear(); 
-	    event_ID.push_back(settings1->EVID[inu_thrown]);
+                //Add event ID
+                event_ID.push_back(settings1->EVID[inu_thrown]);
+            }
 
             //ASG: Calculate the interactions birth time for secondaries
             if (interaction_cnt == 1){
