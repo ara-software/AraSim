@@ -796,19 +796,6 @@ void Interaction::Initialize() {
   taudecay = "test_taudecay";
 }
 
-Interaction* Interaction::Clone() const{
-  
-    Interaction* new_interaction = new Interaction();
-
-    new_interaction->shower_depth_m = this->shower_depth_m;
-    new_interaction->shower_Q_profile = this->shower_Q_profile;
-    new_interaction->EM_shower_depth_m = this->EM_shower_depth_m;
-    new_interaction->EM_shower_Q_profile = this->EM_shower_Q_profile;
-    new_interaction->HAD_shower_depth_m = this->HAD_shower_depth_m;
-    new_interaction->HAD_shower_Q_profile = this->HAD_shower_Q_profile;
-    
-}
-
 void Interaction::clear_useless(Settings *settings1){
  
   if(settings1->DATA_SAVE_MODE>0){
@@ -1589,39 +1576,6 @@ double Interaction::PickNear_Sphere (IceModel *antarctica, Detector *detector, S
     return 0.;
   }
 
-    //calculate posnu's X, Y wrt detector core
-    if (settings1->EVENT_GENERATION_MODE == 1){
-      // DO shift neutrino vertices when events are provided
-        X = thisR*cos(thisPhi)*sin(thisTheta) + avgX;
-        Y = thisR*sin(thisPhi)*sin(thisTheta) + avgY;
-        D = pow(X*X + Y*Y, 0.5);
-    }
-    else if (detector->Get_mode() == 1 || detector->Get_mode() == 2 ||detector->Get_mode() == 3 ||detector->Get_mode() == 4 || detector->Get_mode() == 5 ) {   // detector mode is for ARA stations;
-//        X = detector->params.core_x + thisR*cos(thisPhi)*cos(thisTheta);
-//        Y = detector->params.core_y + thisR*sin(thisPhi)*cos(thisTheta);
-        X = avgX + thisR*cos(thisPhi)*sin(thisTheta);
-        Y = avgY + thisR*sin(thisPhi)*sin(thisTheta);
-        D = pow(X*X + Y*Y, 0.5);
-        //interaction1->posnu.SetThetaPhi( D/antarctica->Surface(0., 0.), atan2(Y,X) ); 
-        
-    }
-    //calculate posnu's X, Y wrt to (0,0)
-    else {  // for mode = 0 (testbed)
-        X = thisR*cos(thisPhi)*sin(thisTheta);
-        Y = thisR*sin(thisPhi)*sin(thisTheta);
-        D = pow(X*X + Y*Y, 0.5);
-    }
-
-//    double centerZ = (detector->stations[0].strings[0].antennas[1].GetZ()+ detector->stations[0].strings[0].antennas[2].GetZ())/2.;
-    if (settings1->EVENT_GENERATION_MODE == 1){
-      // Don't shift neutrino vertices when events are provided
-        Z = thisR*cos(thisTheta) + avgZ;
-    }
-    else {
-      Z = avgZ + thisR*cos(thisTheta);
-    }
-    //    std::cout << "CenterPosition:X:Y:Z:: "  << avgX << " : " << avgY << " : " << avgZ <<  std::endl;
-    
   pickposnu = 1;  // all PickNear sucess for pickposnu
 
   // set the position where nu enter the earth
