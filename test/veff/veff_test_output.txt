@@ -1,0 +1,223 @@
+
+	Default values!
+NNU : 100
+ICE_MODEL : 0
+NOFZ : 1
+CONSTANTICETHICKNESS : 0
+FIXEDELEVATION : 0
+MOOREBAY : 0
+EXPONENT : 19
+DETECTOR : 1
+setupfile : test/veff/setup_veff_test.txt
+run number : 0
+outputdir : outputs/.
+Read test/veff/setup_veff_test.txt file!
+
+	New values!
+NNU : 500
+ICE_MODEL : 0
+NOFZ : 1
+CONSTANTICETHICKNESS : 0
+FIXEDELEVATION : 0
+MOOREBAY : 0
+EXPONENT : 18
+DETECTOR : 1
+POSNU_RADIUS : 5000
+EVENT_GENERATION_MODE: 0
+first random : 0.543405
+
+Surface at (log:0, lat:0) : 6.35973e+06
+SurfaceAboveGeoid at (log:0, lat:0) : 2977
+N = 60
+freq_step = 60
+N = 60
+freq_step = 60
+N = 60
+freq_step = 60
+N = 60
+freq_step = 60
+In ReadNoiseFigure
+The number of channels: 16
+DATA_BIN_SIZE: 4096 TIMESTEP: 6.25e-10 df_fft: 390625
+number of f bins: 2048
+ThresOffset ch0 : 1
+ThresOffset ch1 : 1
+ThresOffset ch2 : 1
+ThresOffset ch3 : 1
+ThresOffset ch4 : 1
+ThresOffset ch5 : 1
+ThresOffset ch6 : 1
+ThresOffset ch7 : 1
+ThresOffset ch8 : 1
+ThresOffset ch9 : 1
+ThresOffset ch10 : 1
+ThresOffset ch11 : 1
+ThresOffset ch12 : 1
+ThresOffset ch13 : 1
+ThresOffset ch14 : 1
+ThresOffset ch15 : 1
+Thres ch0 : -6.06
+Thres ch1 : -6.06
+Thres ch2 : -6.06
+Thres ch3 : -6.06
+Thres ch4 : -6.06
+Thres ch5 : -6.06
+Thres ch6 : -6.06
+Thres ch7 : -6.06
+Thres ch8 : -6.06
+Thres ch9 : -6.06
+Thres ch10 : -6.06
+Thres ch11 : -6.06
+Thres ch12 : -6.06
+Thres ch13 : -6.06
+Thres ch14 : -6.06
+Thres ch15 : -6.06
+check read testbed temp1
+start read elect chain
+     Reading standard ARA electronics response
+done read elect chain
+     Reading standard trigger formation values
+Sharesurface: 0 : 0 : 0 : 9992.48 : 10006.6 : 6.35943e+06 : 
+Sharesurface: 0 : 0 : 1 : 9992.48 : 10006.6 : 6.35943e+06 : 
+Sharesurface: 0 : 0 : 2 : 9992.51 : 10006.6 : 6.35945e+06 : 
+Sharesurface: 0 : 0 : 3 : 9992.51 : 10006.7 : 6.35945e+06 : 
+Sharesurface: 0 : 1 : 0 : 10006.6 : 10006.6 : 6.35943e+06 : 
+Sharesurface: 0 : 1 : 1 : 10006.6 : 10006.6 : 6.35943e+06 : 
+Sharesurface: 0 : 1 : 2 : 10006.6 : 10006.6 : 6.35945e+06 : 
+Sharesurface: 0 : 1 : 3 : 10006.7 : 10006.7 : 6.35945e+06 : 
+Sharesurface: 0 : 2 : 0 : 9992.48 : 9992.48 : 6.35943e+06 : 
+Sharesurface: 0 : 2 : 1 : 9992.48 : 9992.48 : 6.35943e+06 : 
+Sharesurface: 0 : 2 : 2 : 9992.51 : 9992.51 : 6.35945e+06 : 
+Sharesurface: 0 : 2 : 3 : 9992.51 : 9992.51 : 6.35945e+06 : 
+Sharesurface: 0 : 3 : 0 : 10006.6 : 9992.48 : 6.35943e+06 : 
+Sharesurface: 0 : 3 : 1 : 10006.6 : 9992.48 : 6.35943e+06 : 
+Sharesurface: 0 : 3 : 2 : 10006.6 : 9992.51 : 6.35945e+06 : 
+Sharesurface: 0 : 3 : 3 : 10006.7 : 9992.51 : 6.35945e+06 : 
+end calling detector
+called Efficiencies
+called Spectra
+called Ray
+called Counting
+called Primaries
+called Event
+called Evt
+assign AraFile, AraTrees
+branch detector
+branch icemodel
+branch trigger
+branch settings
+branch spectra
+branch Evt
+branch report
+finish tree assign
+called RaySolver
+Make output file that is readable by AraRoot
+Error in <TStreamerInfo::Build>: AraEventCalibrator, discarding: unsigned short* fAtriPeds, no [dimension]
+
+will call secondaries
+Reading in data on secondary interactions.
+Finished reading secondary interaction data.
+will call signal
+Building the Param RE Tterm tables...
+Finished building the Param RE Tterm tables.
+finish calling secondaries and signal
+Generating noise waveforms
+0% done
+10% done
+20% done
+30% done
+40% done
+50% done
+60% done
+70% done
+80% done
+90% done
+100% done
+Calculating noise waveforms RMS
+0% done
+10% done
+20% done
+30% done
+40% done
+50% done
+60% done
+70% done
+80% done
+90% done
+100% done
+From pure noise waveforms, diode responses
+mean, rms diode are -4.7237e-15 9.54455e-14
+rms voltage is 0.0400107
+ DATA_BIN_SIZE : 4096
+powerthreshold : -6.06
+begin looping events!!
+Calpulser_on: 0
+number of stations : 1
+total number of antennas : 16
+station[0].strings[0].antennas[0] no_ch:1
+station[0].strings[0].antennas[1] no_ch:2
+station[0].strings[0].antennas[2] no_ch:3
+station[0].strings[0].antennas[3] no_ch:4
+station[0].strings[1].antennas[0] no_ch:5
+station[0].strings[1].antennas[1] no_ch:6
+station[0].strings[1].antennas[2] no_ch:7
+station[0].strings[1].antennas[3] no_ch:8
+station[0].strings[2].antennas[0] no_ch:9
+station[0].strings[2].antennas[1] no_ch:10
+station[0].strings[2].antennas[2] no_ch:11
+station[0].strings[2].antennas[3] no_ch:12
+station[0].strings[3].antennas[0] no_ch:13
+station[0].strings[3].antennas[1] no_ch:14
+station[0].strings[3].antennas[2] no_ch:15
+station[0].strings[3].antennas[3] no_ch:16
+*Thrown 0
+****************************************************************************************************Thrown 100
+******************************************************************************************
+trigger passed at bin 3290  passed ch : 2 (0type) Direct dist btw posnu : 799.013 noiseID : 40 ViewAngle : 30.39 LikelyTrigSignal : 1
+trigger passed at bin 3240  passed ch : 6 (0type) Direct dist btw posnu : 791.886 noiseID : 86 ViewAngle : 30.6729 LikelyTrigSignal : 1
+trigger passed at bin 3324  passed ch : 14 (0type) Direct dist btw posnu : 803.599 noiseID : 31 ViewAngle : 30.5769 LikelyTrigSignal : 1
+Global_Pass : 3324 evt : 190 added weight : 0.99829
+0.99829 : 9
+**********Thrown 200
+****************************************************************************************************Thrown 300
+**********************************************************************************
+trigger passed at bin 2183  passed ch : 4 (0type) Direct dist btw posnu : 401.997 noiseID : 40 ViewAngle : 61.644 LikelyTrigSignal : 0
+trigger passed at bin 2194  passed ch : 5 (1type) Direct dist btw posnu : 402.727 noiseID : 60 ViewAngle : 61.9147 LikelyTrigSignal : 0
+trigger passed at bin 2178  passed ch : 12 (0type) Direct dist btw posnu : 401.589 noiseID : 75 ViewAngle : 62.075 LikelyTrigSignal : 0
+trigger passed at bin 2249  passed ch : 14 (0type) Direct dist btw posnu : 408.074 noiseID : 97 ViewAngle : 64.3299 LikelyTrigSignal : 0
+Global_Pass : 2249 evt : 382 added weight : 0.999149
+0.999149 : 9
+******************Thrown 400
+******************************************************************depth negative! -6.94865
+depth negative! -6.94865
+depth negative! -6.94865
+depth negative! -6.94865
+depth negative! -6.95658
+depth negative! -6.95658
+depth negative! -6.95658
+depth negative! -6.95658
+depth negative! -6.94438
+depth negative! -6.94438
+depth negative! -6.94438
+depth negative! -6.94438
+depth negative! -6.95231
+depth negative! -6.95231
+depth negative! -6.95231
+depth negative! -6.95231
+********************************* end loop
+Total Events Thrown: 500
+Total_Global_Pass : 2
+Total_Weight : 1.99744
+Total_Probability : 3884.07
+weight bin values : 0, 0, 0, 0, 0, 0, 0, 0, 0, 2
+
+Radius: 5000 [m]
+IceVolume : 2.35619e+11
+test Veff(ice) : 1.18284e+10 m3sr, 11.8284 km3sr
+test Veff(water eq.) : 1.08466e+10 m3sr, 10.8466 km3sr
+And Veff(water eq.) error plus : 9.11415 km3sr and error minus : 4.84385 km3sr
+max_dt : 2.16675e-06
+rmsdiode= 9.54455e-14
+Info in <TCanvas::Print>: pdf file sigmaCrossSection.pdf has been created
+outputdir= outputs/.
+test is 0
