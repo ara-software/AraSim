@@ -294,6 +294,8 @@ outputdir="outputs"; // directory where outputs go
   
   WAVEFORM_CENTER = 0; // Default: 0, no offset in waveform centering
 
+  DEADTIME = 0.01*1.E-3; // Default: 0.01 millisecond
+  
   POSNU_R = 1000.;
   POSNU_THETA=-3.1415926535/4.;
   POSNU_PHI=0.;
@@ -693,6 +695,9 @@ void Settings::ReadFile(string setupfile) {
 	      else if (label == "WAVEFORM_CENTER") {
 		WAVEFORM_CENTER = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
 	      }
+	      else if (label == "DEADTIME") {
+		    DEADTIME = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	      }
 	      else if (label == "POSNU_R") {
 		POSNU_R = atof( line.substr(line.find_first_of("=") + 1).c_str() );
 	      }
@@ -818,10 +823,36 @@ void Settings::ReadEvtFile(string evtfile){
             }
         }
         evtFile.close();
-	if (NNU == 0 || NNU > EVID.size()){
-	  //	  EVENT_NUM = EVID.size();
-	  NNU = EVID.size();
-	}
+
+        NNU=EVID.size()+1;
+
+        //start counting the number of unique neutrinos
+        if (NNU == 0 || NNU > EVID.size()){
+            NNU = 0; //restart from zero
+
+            if (!EVID.empty()) {
+                int interactions_per_nnu_cnt = 1;  // Start the counter at 1 for the first occurrence
+
+                // Iterate through the EVID vector starting from the second element
+                for (size_t i = 1; i < EVID.size(); ++i) {
+                    if (EVID[i] == EVID[i - 1]) {
+                        interactions_per_nnu_cnt++;  // Increment the counter when the same event ID repeats
+                    } else {
+                        // Store the interactions per nnu count for the previous EVID
+                        INT_PER_NNU.push_back(interactions_per_nnu_cnt);
+                        // Reset the counter for the new EVID
+                        interactions_per_nnu_cnt = 1;
+                        // Increment the number of neutrinos
+                        NNU++;
+                    }
+                }
+                // Don't forget to store the count for the last EVID
+                INT_PER_NNU.push_back(interactions_per_nnu_cnt);
+
+                //Increment the number of neutrinos (adding the last neutrino)
+                NNU++;
+            }
+        }
 	
     }
     else
