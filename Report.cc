@@ -1381,8 +1381,8 @@ void Report::ModelRay(
                     double dT_forfft = signal->PulserWaveform_T[1] - signal->PulserWaveform_T[0];    // step in ns
                     InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
                     
-                    cout << antenna_r->Nnew[ray_idx] << endl;
-                    cout << waveform_bin << endl;
+                    //cout << antenna_r->Nnew[ray_idx] << endl;
+                    //cout << waveform_bin << endl;
 
                     //Defining polarization at the source (using launch_vector)
                     double psi = TMath::DegToRad()*settings->CLOCK_ANGLE;
