@@ -45,15 +45,12 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
     NoiseFig_numCh = 16;
 
     for (int i = 0; i < settings1 -> NFOUR / 4; i++) {
-
         freq_forfft.push_back((double) i * freqstep); // even numbers
         freq_forfft.push_back((double) i * freqstep); // odd numbers
-
     }
     for (int i = settings1 -> NFOUR / 4; i < settings1 -> NFOUR / 2; i++) {
         freq_forfft.push_back((double) i * freqstep); // even numbers
         freq_forfft.push_back((double) i * freqstep); // odd numbers
-
     }
     // end of settings freq_forfft
 
@@ -81,9 +78,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
     //end initialize
 
     //Parameters to use if using Arianna_WIPLD_hpol.dat
-
-    if (settings1 -> ANTENNA_MODE == 2) 
+    if (settings1 -> ANTENNA_MODE == 2) { 
         params.DeployedStations = 4;
+    }
     
     //copy freq_width, freq_init in params to Detector freq_width, freq_init
     freq_step = params.freq_step;
@@ -121,40 +118,37 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                             strings.push_back(temp);
                         }
                         cout << "read numner_of_strings" << endl;
-                        //                        Parameters.number_of_strings = atoi( line.substr( line.find_first_of("=") + 1).c_str() );
-                    } else if (label == "antenna_string") {
+                    } 
+                    else if (label == "antenna_string") {
                         string_id++;
                         antenna_id = 0;
                         cout << "read antenna_string" << endl;
-                        //                        if (string_id + 1 >= params.number_of_strings) {
-                        //                            cout<<"Error! Too many strings!"<<endl;
-                        //                        }
-                    } else if (label == "x") {
-                        //strings[string_id].x = atof( line.substr( line.find_first_of("=") + 1).c_str() );
+                    } 
+                    else if (label == "x") {
                         strings[string_id].SetX(atof(line.substr(line.find_first_of("=") + 1).c_str()));
                         cout << "read x : " << (double) strings[string_id].GetX() << " string_id : " << string_id << endl;
-                    } else if (label == "y") {
-                        //strings[string_id].y = atof( line.substr( line.find_first_of("=") + 1).c_str() );
+                    } 
+                    else if (label == "y") {
                         strings[string_id].SetY(atof(line.substr(line.find_first_of("=") + 1).c_str()));
                         cout << "read y : " << (double) strings[string_id].GetY() << " string_id : " << string_id << endl;
-                    } else if (label == "z") {
+                    } 
+                    else if (label == "z") {
                         strings[string_id].antennas.push_back(temp_antenna);
-                        //strings[string_id].antennas[antenna_id].z = atof( line.substr( line.find_first_of("=") + 1, line.find_first_of(",") ).c_str() );
                         strings[string_id].antennas[antenna_id].SetZ(atof(line.substr(line.find_first_of("=") + 1, line.find_first_of(",")).c_str()));
                         strings[string_id].antennas[antenna_id].type = atoi(line.substr(line.find_first_of(",") + 1).c_str());
                         cout << "read z : " << (double) strings[string_id].antennas[antenna_id].GetZ() << " string_id : " << string_id << " antenna_id : " 
                              << antenna_id << " type : " << (int) strings[string_id].antennas[antenna_id].type << endl;
                         antenna_id++;
                         params.number_of_antennas++;
-                        //                        Parameters.number_of_antennas++;
                     }
 
                 }
             }
             testbed.close();
         } 
-        else 
+        else {
             cout << "Unable to open antenna array file !" << endl;
+        }
 
         // testbed version of FlattoEarth_ARA 
         // strings and antennas on the strings use geoid surface!
@@ -170,8 +164,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             theta_tmp = Dist / R1; // assume R1 is constant (which is not)
             phi_tmp = atan2(strings[i].GetY(), strings[i].GetX());
 
-            if (phi_tmp < 0.) 
+            if (phi_tmp < 0.) { 
                 phi_tmp += 2. * PI;
+            }
 
             // set theta, phi for strings.
             strings[i].SetThetaPhi(theta_tmp, phi_tmp);
@@ -181,17 +176,16 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             cout << "R, Theta, Phi : " << strings[i].R() << " " << strings[i].Theta() << " " << strings[i].Phi() << endl;
 
             // set antennas r, theta, phi
-            for (int j = 0; j < antenna_id; j++) 
+            for (int j = 0; j < antenna_id; j++) { 
                 strings[i].antennas[j].SetRThetaPhi(strings[i].R() + strings[i].antennas[j].GetZ(), strings[i].Theta(), strings[i].Phi());
+            }
         }
 
     } // if mode == 0 
     
     /////////////////////////////////////////////////////////////////////////////
     else if (mode == 1) {
-        //        cout<<"\n\tDector mode 1 : Specific number of stations (less than 7 stations) !"<<endl;
         ifstream ARA_N(ARA_N_file.c_str());
-        //        cout<<"We use "<<ARA_N_file.c_str()<<" as antenna info."<<endl;
 
         // initialize info
         params.number_of_stations = 1;
@@ -199,8 +193,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         params.number_of_antennas_string = 4; // 4 antennas on each strings
         params.number_of_surfaces_station = 4;
 
-        //double core_x = 0.; 
-        //double core_y = 0.;
         params.core_x = 10000.;
         params.core_y = 10000.;
         double R_string = 10.; // all units are in meter
@@ -210,17 +202,21 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         double z_btw_array[6]; // assume there will be less than 6 bore hole antennas at each string
         // these z_btw array will be used when settings->BH_ANT_SEP_DIST_ON=1 case
         for (int i = 0; i < 6; i++) {
-            if (i == 0) 
+            if (i == 0) { 
                 z_btw_array[i] = 0.;
-            //else z_btw_array[i] = z_btw;
-            else if (i == 1) 
+            }
+            else if (i == 1) { 
                 z_btw_array[i] = 2.;
-            else if (i == 2) 
+            }
+            else if (i == 2) { 
                 z_btw_array[i] = 15.;
-            else if (i == 3) 
+            }
+            else if (i == 3) {
                 z_btw_array[i] = 2.;
-            else 
+            }
+            else { 
                 z_btw_array[i] = z_btw;
+            }
         }
         double z_btw_total;
         params.stations_per_side = 4; // total 37 stations
@@ -228,7 +224,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         params.antenna_orientation = 0; // all antenna facing x
         params.bore_hole_antenna_layout = settings1 -> BORE_HOLE_ANTENNA_LAYOUT;
         // finish initialization
-        //
 
         // Read new parameters if there are...
         if (ARA_N.is_open()) {
@@ -334,34 +329,29 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             params.number_of_antennas_string = 1;
         }
 
-        //
-        // caculate number of stations, strings, antennas 
+        // calculate number of stations, strings, antennas 
         params.number_of_strings = params.number_of_stations * params.number_of_strings_station;
         params.number_of_antennas = params.number_of_strings * params.number_of_antennas_string;
-        //
-        //
 
-        //
         // prepare vectors
         for (int i = 0; i < params.number_of_stations; i++) {
             stations.push_back(temp_station);
 
-            for (int j = 0; j < params.number_of_surfaces_station; j++) 
+            for (int j = 0; j < params.number_of_surfaces_station; j++) { 
                 stations[i].surfaces.push_back(temp_surface);
+            }
 
             for (int k = 0; k < params.number_of_strings_station; k++) {
                 stations[i].strings.push_back(temp_string);
 
-                for (int l = 0; l < params.number_of_antennas_string; l++) 
+                for (int l = 0; l < params.number_of_antennas_string; l++) { 
                     stations[i].strings[k].antennas.push_back(temp_antenna);
+                }
             }
         }
         // end prepare vectors
-        //
 
-        //
         // for ARA-37 (or more than 1 station case), need code for setting position for all 37 stations here!
-        //
         int station_count = 0;
 
         int side_step;
@@ -428,28 +418,26 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 station_count++;
             } 
             else if (station_count < (int) params.number_of_stations) {
-                //stations[station_count].x = core_x;
-                //stations[station_count].y = core_y;
                 stations[station_count].SetX(params.core_x);
                 stations[station_count].SetY(params.core_y);
                 station_count++;
             } 
-            else 
+            else {
                 cout << "\n\tError, too many stations !" << endl;
+            }
         }
         // finished setting all stations' position
 
-        //        cout<<"total station_count : "<<station_count<<endl;
-        if (station_count != (int) params.number_of_stations) cout << "\n\tError, station number not match !" << endl;
-
-        //
+        if (station_count != (int) params.number_of_stations) {
+            cout << "\n\tError, station number not match !" << endl;
+        }
+  
         // set antenna values from parameters
         // set station positions
         if (settings1 -> READGEOM == 0) { // use idealized geometry
 
             for (int i = 0; i < params.number_of_stations; i++) {
 
-                //
                 // set string postions based on station position
                 stations[i].strings[0].SetX(stations[i].GetX() - (R_string * cos(PI / 4.)));
                 stations[i].strings[0].SetY(stations[i].GetY() + (R_string * sin(PI / 4.)));
@@ -463,7 +451,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 stations[i].strings[3].SetX(stations[i].GetX() + (R_string * cos(PI / 4.)));
                 stations[i].strings[3].SetY(stations[i].GetY() - (R_string * sin(PI / 4.)));
 
-                //
                 // set antenna postions in borehole
                 // and set type (h or v pol antenna) and set orientation (facing x or y)
                 if (params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
@@ -471,9 +458,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                     for (int j = 0; j < params.number_of_strings_station; j++) {
                         for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                            if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                            if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
-
+                            }
                             else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
                                 z_btw_total = 0.;
                                 for (int l = 0; l < k + 1; l++) 
@@ -482,25 +469,32 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
                             }
 
-                            if (k % 2 == 0) 
+                            if (k % 2 == 0) {
                                 stations[i].strings[j].antennas[k].type = 0; // v-pol
-                            else 
+                            }
+                            else {
                                 stations[i].strings[j].antennas[k].type = 1; // h-pol
+                            }
 
-                            if (params.antenna_orientation == 0)  // all borehole antennas facing same x
+                            if (params.antenna_orientation == 0) {  // all borehole antennas facing same x
                                 stations[i].strings[j].antennas[k].orient = 0;
+                            }
                             else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
                                 if (j == 0 || j == 3) {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) { 
                                         stations[i].strings[j].antennas[k].orient = 0;
-                                    else 
+                                    }
+                                    else { 
                                         stations[i].strings[j].antennas[k].orient = 1;
+                                    }
                                 }
                                 else {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) { 
                                         stations[i].strings[j].antennas[k].orient = 1;
-                                    else 
+                                    }
+                                    else { 
                                         stations[i].strings[j].antennas[k].orient = 0;
+                                    }
                                 }
 
                             } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
@@ -513,9 +507,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                     for (int j = 0; j < params.number_of_strings_station; j++) {
                         for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                            if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                            if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
-
+                            }
                             else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
                                 z_btw_total = 0.;
                                 for (int l = 0; l < k + 1; l++) 
@@ -524,25 +518,32 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
                             }
 
-                            if (k == 1)  // only the second antenna is H pol
+                            if (k == 1){  // only the second antenna is H pol
                                 stations[i].strings[j].antennas[k].type = 1; // h-pol
-                            else // other antennas are V pol
+                            }
+                            else { // other antennas are V pol
                                 stations[i].strings[j].antennas[k].type = 0; // v-pol
+                            }
 
-                            if (params.antenna_orientation == 0)  // all borehole antennas facing same x
+                            if (params.antenna_orientation == 0) { // all borehole antennas facing same x
                                 stations[i].strings[j].antennas[k].orient = 0;
+                            }
                             else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
                                 if (j == 0 || j == 3) {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 0;
-                                    else 
+                                    }
+                                    else { 
                                         stations[i].strings[j].antennas[k].orient = 1;
+                                    }
                                 } 
                                 else {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) { 
                                         stations[i].strings[j].antennas[k].orient = 1;
-                                    else 
+                                    }
+                                    else { 
                                         stations[i].strings[j].antennas[k].orient = 0;
+                                    }
                                 }
 
                             } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
@@ -555,36 +556,44 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                     for (int j = 0; j < params.number_of_strings_station; j++) {
                         for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                            if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                            if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
-
+                            }
                             else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
                                 z_btw_total = 0.;
-                                for (int l = 0; l < k + 1; l++) 
+                                for (int l = 0; l < k + 1; l++) { 
                                     z_btw_total += z_btw_array[l];
+                                }
                                 
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
                             }
 
-                            if (k == 0)  // only the first antenna is V pol
+                            if (k == 0) {  // only the first antenna is V pol
                                 stations[i].strings[j].antennas[k].type = 0; // v-pol
-                            else  // other antennas are H pol
+                            }
+                            else {  // other antennas are H pol
                                 stations[i].strings[j].antennas[k].type = 1; // h-pol
+                            }
 
-                            if (params.antenna_orientation == 0)  // all borehole antennas facing same x
+                            if (params.antenna_orientation == 0) {  // all borehole antennas facing same x
                                 stations[i].strings[j].antennas[k].orient = 0;
+                            }
                             else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
                                 if (j == 0 || j == 3) {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) { 
                                         stations[i].strings[j].antennas[k].orient = 0;
-                                    else 
+                                    }
+                                    else {
                                         stations[i].strings[j].antennas[k].orient = 1;
+                                    }
                                 } 
                                 else {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 1;
-                                    else 
+                                    }
+                                    else { 
                                         stations[i].strings[j].antennas[k].orient = 0;
+                                    }
                                 }
 
                             } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
@@ -600,33 +609,40 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                     for (int j = 0; j < params.number_of_strings_station; j++) {
                         for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                            if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                            if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
+                            }
 
                             else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
                                 z_btw_total = 0.;
-                                for (int l = 0; l < k + 1; l++) 
+                                for (int l = 0; l < k + 1; l++) { 
                                     z_btw_total += z_btw_array[l];
+                                }
                                 
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
                             }
 
                             stations[i].strings[j].antennas[k].type = 0; // all antennas v-pol			  
 
-                            if (params.antenna_orientation == 0)  // all borehole antennas facing same x
+                            if (params.antenna_orientation == 0) {  // all borehole antennas facing same x
                                 stations[i].strings[j].antennas[k].orient = 0;
+                            }
                             else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
                                 if (j == 0 || j == 3) {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) { 
                                         stations[i].strings[j].antennas[k].orient = 0;
-                                    else 
+                                    }
+                                    else {
                                         stations[i].strings[j].antennas[k].orient = 1;
+                                    }
                                 } 
                                 else {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) { 
                                         stations[i].strings[j].antennas[k].orient = 1;
-                                    else 
+                                    }
+                                    else {
                                         stations[i].strings[j].antennas[k].orient = 0;
+                                    }
                                 }
 
                             } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
@@ -635,7 +651,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
                 } // end if bore hole antenna layout = 5,6,7 (VVVV, VV, V)
 
-                //
                 // set surface antenna postions
                 stations[i].surfaces[0].SetX(stations[i].GetX() + (R_surface * cos(PI / 3.)));
                 stations[i].surfaces[0].SetY(stations[i].GetY() + (R_surface * sin(PI / 3.)));
@@ -661,9 +676,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
         else { // non-idealized geometry
 
-            //for (int i=0; i<params.number_of_stations; i++) {
-
-            //AraGeomTool *araGeom=AraGeomTool::Instance();
             AraGeomTool * araGeom = new AraGeomTool();
             cout << "read AraGeomTool" << endl;
 
@@ -674,12 +686,10 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
                     for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                        //int chan = GetChannelfromStringAntenna (i+1,j,k);
                         int chan = GetChannelfromStringAntenna(i + 1, j, k, settings1);
 
                         stations[i].strings[j].antennas[k].SetX(stations[i].GetX() + araGeom -> getStationInfo(i + 1, settings1->DETECTOR_YEAR) -> fAntInfo[chan - 1].antLocation[0]);
                         stations[i].strings[j].antennas[k].SetY(stations[i].GetY() + araGeom -> getStationInfo(i + 1, settings1->DETECTOR_YEAR) -> fAntInfo[chan - 1].antLocation[1]);
-                        //stations[i].strings[j].antennas[k].SetZ(araGeom->fStationInfo[i+1].fAntInfo[chan-1].antLocation[2]-double(settings1->DEPTH_CHANGE));
                         stations[i].strings[j].antennas[k].SetZ(araGeom -> getStationInfo(i + 1, settings1->DETECTOR_YEAR) -> fAntInfo[chan - 1].antLocation[2]);
                         cout << "DetectorStation:string:antenna:X:Y:Z:: " 
                              << i << " : " 
@@ -709,25 +719,32 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                     for (int j = 0; j < params.number_of_strings_station; j++) {
                         for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                            if (k % 2 == 0) 
+                            if (k % 2 == 0) { 
                                 stations[i].strings[j].antennas[k].type = 0; // v-pol
-                            else 
+                            }
+                            else {
                                 stations[i].strings[j].antennas[k].type = 1; // h-pol
+                            }
 
-                            if (params.antenna_orientation == 0)  // all borehole antennas facing same x
+                            if (params.antenna_orientation == 0) {  // all borehole antennas facing same x
                                 stations[i].strings[j].antennas[k].orient = 0;
+                            }
                             else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
                                 if (j == 0 || j == 3) {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) { 
                                         stations[i].strings[j].antennas[k].orient = 0;
-                                    else 
+                                    }
+                                    else { 
                                         stations[i].strings[j].antennas[k].orient = 1;
+                                    }
                                 } 
                                 else {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 1;
-                                    else 
+                                    }
+                                    else {
                                         stations[i].strings[j].antennas[k].orient = 0;
+                                    }
                                 }
 
                             } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
@@ -740,25 +757,32 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                     for (int j = 0; j < params.number_of_strings_station; j++) {
                         for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                            if (k == 1)  // only the second antenna is H pol
+                            if (k == 1) {  // only the second antenna is H pol
                                 stations[i].strings[j].antennas[k].type = 1; // h-pol
-                            else  // other antennas are V pol
+                            }
+                            else { // other antennas are V pol
                                 stations[i].strings[j].antennas[k].type = 0; // v-pol
+                            }
 
-                            if (params.antenna_orientation == 0)  // all borehole antennas facing same x
+                            if (params.antenna_orientation == 0) {  // all borehole antennas facing same x
                                 stations[i].strings[j].antennas[k].orient = 0;
+                            }
                             else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
                                 if (j == 0 || j == 3) {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 0;
-                                    else 
+                                    }
+                                    else {
                                         stations[i].strings[j].antennas[k].orient = 1;
+                                    }
                                 } 
                                 else {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 1;
-                                    else 
+                                    }
+                                    else {
                                         stations[i].strings[j].antennas[k].orient = 0;
+                                    }
                                 }
 
                             } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
@@ -771,25 +795,32 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                     for (int j = 0; j < params.number_of_strings_station; j++) {
                         for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                            if (k == 0)  // only the first antenna is V pol
+                            if (k == 0) { // only the first antenna is V pol
                                 stations[i].strings[j].antennas[k].type = 0; // v-pol
-                            else  // other antennas are H pol
+                            }
+                            else { // other antennas are H pol
                                 stations[i].strings[j].antennas[k].type = 1; // h-pol
+                            }
 
-                            if (params.antenna_orientation == 0)  // all borehole antennas facing same x
+                            if (params.antenna_orientation == 0) {  // all borehole antennas facing same x
                                 stations[i].strings[j].antennas[k].orient = 0;
+                            }
                             else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
                                 if (j == 0 || j == 3) {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) {
                                         stations[i].strings[j].antennas[k].orient = 0;
-                                    else 
+                                    }
+                                    else {
                                         stations[i].strings[j].antennas[k].orient = 1;
+                                    }
                                 } 
                                 else {
-                                    if (k == 0 || k == 1) 
+                                    if (k == 0 || k == 1) { 
                                         stations[i].strings[j].antennas[k].orient = 1;
-                                    else 
+                                    }
+                                    else { 
                                         stations[i].strings[j].antennas[k].orient = 0;
+                                    }
                                 }
 
                             } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
@@ -798,7 +829,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
                 } // end if bore hole antenna layout = 3 (where VHHH way)
 
-                //
                 // set surface antenna postions
                 stations[i].surfaces[0].SetX(stations[i].GetX() + (R_surface * cos(PI / 3.)));
                 stations[i].surfaces[0].SetY(stations[i].GetY() + (R_surface * sin(PI / 3.)));
@@ -821,13 +851,15 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
                 antenna_count = 0;
                 for (int j = 0; j < (int)(stations[i].strings.size()); j++) {
-                    for (int k = 0; k < (int)(stations[i].strings[j].antennas.size()); k++) 
+                    for (int k = 0; k < (int)(stations[i].strings[j].antennas.size()); k++) { 
                         antenna_count++;
+                    }
                 }
                 stations[i].number_of_antennas = antenna_count;
 
-                if (max_number_of_antennas_station < antenna_count) 
+                if (max_number_of_antennas_station < antenna_count) { 
                     max_number_of_antennas_station = antenna_count;
+                }
             }
 
         } // if non-idealized geom
@@ -836,9 +868,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         ReadAllAntennaGains(settings1);
         ReadAllAntennaImpedance(settings1);
 
-        //	if (settings1->NOISE == 2){
         ReadNoiseFigure(string(getenv("ARA_SIM_DIR"))+"/data/ARA02_noiseFig.txt", settings1);
-        //	}
 
         // read filter file!!
         ReadFilter(string(getenv("ARA_SIM_DIR"))+"/data/filter.csv", settings1);
@@ -855,8 +885,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         
         // read system temperature for chs file!!
         cout << "check read testbed temp1" << endl;
-        if (settings1 -> NOISE_CHANNEL_MODE != 0) 
+        if (settings1 -> NOISE_CHANNEL_MODE != 0) { 
             ReadTemp_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/system_temperature.csv", settings1); // only TestBed for now
+        }
 
         // read total elec. chain response file!!
         cout << "start read elect chain" << endl;
@@ -892,8 +923,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         params.number_of_antennas_string = 4; // 4 antennas on each strings
         params.number_of_surfaces_station = 4;
 
-        //double core_x = 0.;  // all units are in meter
-        //double core_y = 0.;
         params.core_x = 10000.; // all units are in meter
         params.core_y = 10000.;
         double R_string = 10.;
@@ -903,16 +932,21 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         double z_btw_array[6]; // assume there will be less than 6 bore hole antennas at each string
         // these z_btw array will be used when settings->BH_ANT_SEP_DIST_ON=1 case
         for (int i = 0; i < 6; i++) {
-            if (i == 0) 
+            if (i == 0) { 
                 z_btw_array[i] = 0.;
-            else if (i == 1) 
+            }
+            else if (i == 1) { 
                 z_btw_array[i] = 2.;
-            else if (i == 2) 
+            }
+            else if (i == 2) { 
                 z_btw_array[i] = 15.;
-            else if (i == 3) 
+            }
+            else if (i == 3) { 
                 z_btw_array[i] = 2.;
-            else 
+            }
+            else { 
                 z_btw_array[i] = z_btw;
+            }
         }
         double z_btw_total;
         params.stations_per_side = 4; // total 37 stations
@@ -920,7 +954,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         params.antenna_orientation = 0; // all antenna facing x
         params.bore_hole_antenna_layout = settings1 -> BORE_HOLE_ANTENNA_LAYOUT;
         // finish initialization
-        //
 
         // Read new parameters if there are...
         if (ARA37.is_open()) {
@@ -993,51 +1026,49 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         // finished reading new parameters
 
         // set number of antennas in a string
-        if (params.bore_hole_antenna_layout == 0)  // VHVH layout
+        if (params.bore_hole_antenna_layout == 0) {  // VHVH layout
             params.number_of_antennas_string = 4;
-        else if (params.bore_hole_antenna_layout == 1)  // VHV layout
+        }
+        else if (params.bore_hole_antenna_layout == 1) {  // VHV layout
             params.number_of_antennas_string = 3;
-        else if (params.bore_hole_antenna_layout == 2)  // VHVV layout
+        }
+        else if (params.bore_hole_antenna_layout == 2) {  // VHVV layout
             params.number_of_antennas_string = 4;
-        else if (params.bore_hole_antenna_layout == 3)  // VHHH layout
+        }
+        else if (params.bore_hole_antenna_layout == 3) {  // VHHH layout
             params.number_of_antennas_string = 4;
-        else if (params.bore_hole_antenna_layout == 4)  // VHH layout
+        }
+        else if (params.bore_hole_antenna_layout == 4) {  // VHH layout
             params.number_of_antennas_string = 3;
+        }
 
-        //
         // caculate number of stations, strings, antennas 
         params.number_of_stations = 1 + (3 * params.stations_per_side) * (params.stations_per_side - 1);
 
         params.number_of_strings = params.number_of_stations * params.number_of_strings_station;
         params.number_of_antennas = params.number_of_strings * params.number_of_antennas_string;
-        // 
 
-        //
         // prepare vectors
         for (int i = 0; i < params.number_of_stations; i++) {
             stations.push_back(temp_station);
 
-            for (int j = 0; j < params.number_of_surfaces_station; j++) 
+            for (int j = 0; j < params.number_of_surfaces_station; j++) { 
                 stations[i].surfaces.push_back(temp_surface);
+            }
 
             for (int k = 0; k < params.number_of_strings_station; k++) {
                 stations[i].strings.push_back(temp_string);
 
-                for (int l = 0; l < params.number_of_antennas_string; l++) 
+                for (int l = 0; l < params.number_of_antennas_string; l++) { 
                     stations[i].strings[k].antennas.push_back(temp_antenna);
-
+                }
             }
 
         }
         // end prepare vectors
-        //
 
-        //
         // for ARA-37 (or more than 1 station case), need code for setting position for all 37 stations here!
-        //
-        //
         // here, this only works for pentagon shape!
-        //
         double y_offset = (double) params.station_spacing * sqrt(3) / 2.;
 
         int station_count = 0;
@@ -1052,25 +1083,23 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                     stations[station_count].SetX((double) params.station_spacing * ((double) istation - ((double) stations_this_row - 1.) / 2.) + params.core_x);
                     station_count++;
                 } 
-                else 
+                else {
                     cout << "\n\tError, too many stations !" << endl;
+                }
             }
         }
         // finished setting all stations' position
 
         cout << "total station_count : " << station_count << endl;
-        if (station_count != (int) params.number_of_stations) 
+        if (station_count != (int) params.number_of_stations) { 
             cout << "\n\tError, station number not match !" << endl;
+        }
 
-        //
         // set antenna values from parameters
         // set station positions
         for (int i = 0; i < params.number_of_stations; i++) {
 
-            //
             // set string postions based on station position
-            //            for (int j=0; j<params.number_of_strings_station; j++) {
-            //            stations[i].string[0].x = stations[i].x - (R_string / 1.414);
             stations[i].strings[0].SetX(stations[i].GetX() - (R_string * cos(PI / 4.)));
             stations[i].strings[0].SetY(stations[i].GetY() + (R_string * sin(PI / 4.)));
 
@@ -1083,43 +1112,50 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             stations[i].strings[3].SetX(stations[i].GetX() + (R_string * cos(PI / 4.)));
             stations[i].strings[3].SetY(stations[i].GetY() - (R_string * sin(PI / 4.)));
 
-            //
             // set antenna postions in borehole
             // and set type (h or v pol antenna) and set orientation (facing x or y)
             if (params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
                 for (int j = 0; j < params.number_of_strings_station; j++) {
                     for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                        if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                        if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                             stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
-
+                        }
                         else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
                             z_btw_total = 0.;
-                            for (int l = 0; l < k + 1; l++) 
+                            for (int l = 0; l < k + 1; l++) {
                                 z_btw_total += z_btw_array[l];
+                            }
                             
                             stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
                         }
 
-                        if (k % 2 == 0) 
+                        if (k % 2 == 0) {
                             stations[i].strings[j].antennas[k].type = 0; // v-pol
-                        else 
+                        }
+                        else {
                             stations[i].strings[j].antennas[k].type = 1; // h-pol
+                        }
 
-                        if (params.antenna_orientation == 0)  // all borehole antennas facing same x
+                        if (params.antenna_orientation == 0) {  // all borehole antennas facing same x
                             stations[i].strings[j].antennas[k].orient = 0;
+                        }
                         else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
                             if (j == 0 || j == 3) {
-                                if (k == 0 || k == 1) 
+                                if (k == 0 || k == 1) { 
                                     stations[i].strings[j].antennas[k].orient = 0;
-                                else 
+                                }
+                                else { 
                                     stations[i].strings[j].antennas[k].orient = 1;
+                                }
                             }
                             else {
-                                if (k == 0 || k == 1) 
+                                if (k == 0 || k == 1) { 
                                     stations[i].strings[j].antennas[k].orient = 1;
-                                else 
+                                }
+                                else { 
                                     stations[i].strings[j].antennas[k].orient = 0;
+                                }
                             }
 
                         } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
@@ -1130,9 +1166,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 for (int j = 0; j < params.number_of_strings_station; j++) {
                     for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                        if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                        if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                             stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
-
+                        }
                         else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
                             z_btw_total = 0.;
                             for (int l = 0; l < k + 1; l++) 
@@ -1141,25 +1177,32 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                             stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
                         }
 
-                        if (k == 1)  // only the second antenna is H pol
+                        if (k == 1) {  // only the second antenna is H pol
                             stations[i].strings[j].antennas[k].type = 1; // h-pol
-                        else  // other antennas are V pol
+                        }
+                        else {  // other antennas are V pol
                             stations[i].strings[j].antennas[k].type = 0; // v-pol
+                        }
 
-                        if (params.antenna_orientation == 0)  // all borehole antennas facing same x
+                        if (params.antenna_orientation == 0) {  // all borehole antennas facing same x
                             stations[i].strings[j].antennas[k].orient = 0;
+                        }
                         else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
                             if (j == 0 || j == 3) {
-                                if (k == 0 || k == 1) 
+                                if (k == 0 || k == 1) { 
                                     stations[i].strings[j].antennas[k].orient = 0;
-                                else 
+                                }
+                                else {
                                     stations[i].strings[j].antennas[k].orient = 1;
+                                }
                             }
                             else {
-                                if (k == 0 || k == 1) 
+                                if (k == 0 || k == 1) { 
                                     stations[i].strings[j].antennas[k].orient = 1;
-                                else 
+                                }
+                                else {
                                     stations[i].strings[j].antennas[k].orient = 0;
+                                }
                             }
 
                         } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
@@ -1170,36 +1213,44 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 for (int j = 0; j < params.number_of_strings_station; j++) {
                     for (int k = 0; k < params.number_of_antennas_string; k++) {
 
-                        if (settings1 -> BH_ANT_SEP_DIST_ON == 0)
+                        if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                             stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
-
+                        }
                         else if (settings1 -> BH_ANT_SEP_DIST_ON == 1) {
                             z_btw_total = 0.;
-                            for (int l = 0; l < k + 1; l++) 
+                            for (int l = 0; l < k + 1; l++) { 
                                 z_btw_total += z_btw_array[l];
+                            }
                             
                             stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw_total);
                         }
 
-                        if (k == 0)  // only the first antenna is V pol
+                        if (k == 0) {  // only the first antenna is V pol
                             stations[i].strings[j].antennas[k].type = 0; // v-pol
-                        else  // other antennas are H pol
+                        }
+                        else {  // other antennas are H pol
                             stations[i].strings[j].antennas[k].type = 1; // h-pol
+                        }
 
-                        if (params.antenna_orientation == 0)  // all borehole antennas facing same x
+                        if (params.antenna_orientation == 0) {  // all borehole antennas facing same x
                             stations[i].strings[j].antennas[k].orient = 0;
+                        }
                         else if (params.antenna_orientation == 1) { // borehole antennas one next facing different way
                             if (j == 0 || j == 3) {
-                                if (k == 0 || k == 1) 
+                                if (k == 0 || k == 1) { 
                                     stations[i].strings[j].antennas[k].orient = 0;
-                                else 
+                                }
+                                else { 
                                     stations[i].strings[j].antennas[k].orient = 1;
+                                }
                             } 
                             else {
-                                if (k == 0 || k == 1) 
+                                if (k == 0 || k == 1) { 
                                     stations[i].strings[j].antennas[k].orient = 1;
-                                else 
+                                }
+                                else { 
                                     stations[i].strings[j].antennas[k].orient = 0;
+                                }
                             }
 
                         } // end facing different. I know it only works with 4 strings, 4 antennas on each strings but couldn't find a better way than this. -Eugene
@@ -1207,7 +1258,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 }
             } // end if bore hole antenna layout = 3 (where VHHH way)
 
-            //
             // set surface antenna postions
             stations[i].surfaces[0].SetX(stations[i].GetX() + (R_surface * cos(PI / 3.)));
             stations[i].surfaces[0].SetY(stations[i].GetY() + (R_surface * sin(PI / 3.)));
@@ -1216,7 +1266,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             stations[i].surfaces[1].SetY(stations[i].GetY() + (R_surface * sin(-PI / 3.)));
 
             stations[i].surfaces[2].SetX(stations[i].GetX() + (R_surface * cos(PI)));
-            //            stations[i].surfaces[2].y = stations[i].y + (R_surface * sin(PI));
             stations[i].surfaces[2].SetY(stations[i].GetY());
 
             stations[i].surfaces[3].SetX(stations[i].GetX());
@@ -1232,9 +1281,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         ReadAllAntennaGains(settings1);
         ReadAllAntennaImpedance(settings1);
 
-        //	if (settings1->NOISE==2){
         ReadNoiseFigure(string(getenv("ARA_SIM_DIR"))+"/data/ARA02_noiseFig.txt", settings1);
-        //	}
 
         ReadFilter(string(getenv("ARA_SIM_DIR"))+"/data/filter.csv", settings1);
         // read preamp gain file!!
@@ -1273,8 +1320,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
     } // if mode == 2
 
     /////////////////////////////////////////////////////////////////////////////////    
-    else if (mode == 3) { //        cout<<"\n\tDector mode 3 : Testbed and eventual inclusion of a specific number of stations (less than 7 stations) !"<<endl;
-        //        cout<<"We use "<<ARA_N_file.c_str()<<" as antenna info."<<endl;
+    else if (mode == 3) {
 
         // initialize info
         params.number_of_stations = 1; //including Testbed
@@ -1283,8 +1329,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         params.number_of_surfaces_station = 4;
         params.number_of_channels = 20;
 
-        //double core_x = 0.;
-        //double core_y = 0.;
         params.core_x = 10000.;
         params.core_y = 10000.;
         double R_string = 10.; // all units are in meter
@@ -1358,22 +1402,16 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         PrepareVectorsInstalled();
         // end prepare vectors
 
-        //
         // for ARA-37 (or more than 1 station case), need code for setting position for all 37 stations here!
-        //
         int station_count = 0;
 
         for (int istation = 0; istation < (int) params.number_of_stations; istation++) {
             if (station_count < (int) params.number_of_stations - 1) {
-                //stations[station_count].x = core_x + (double)params.station_spacing * cos( (PI/3.) * (double)station_count );
-                //stations[station_count].y = core_y + (double)params.station_spacing * sin( (PI/3.) * (double)station_count );
                 stations[station_count].SetX(params.core_x + (double) params.station_spacing * cos((PI / 3.) * (double) station_count));
                 stations[station_count].SetY(params.core_y + (double) params.station_spacing * sin((PI / 3.) * (double) station_count));
                 station_count++;
             } 
             else if (station_count < (int) params.number_of_stations) {
-                //stations[station_count].x = core_x;
-                //stations[station_count].y = core_y;
                 stations[station_count].SetX(params.core_x);
                 stations[station_count].SetY(params.core_y);
                 station_count++;
@@ -1383,19 +1421,15 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         }
         // finished setting all stations' position
 
-        //        cout<<"total station_count : "<<station_count<<endl;
-        if (station_count != (int) params.number_of_stations) 
+        if (station_count != (int) params.number_of_stations) { 
             cout << "\n\tError, station number not match !" << endl;
+        }
 
-        //
         // set antenna values from parameters
         // set station positions
-        //cout << "READGEOM:" << settings1->READGEOM << endl;
-
         #ifdef ARA_UTIL_EXISTS
         UseAntennaInfo(0, settings1);
         #endif
-        //            UseAntennaInfo(1, settings1);
         for (int i = 0; i < (int) params.number_of_stations; i++) {
             stations[i].StationID = i;
             
@@ -1467,13 +1501,15 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
             antenna_count = 0;
             for (int j = 0; j < (int)(stations[i].strings.size()); j++) {
-                for (int k = 0; k < (int)(stations[i].strings[j].antennas.size()); k++) 
+                for (int k = 0; k < (int)(stations[i].strings[j].antennas.size()); k++) { 
                     antenna_count++;
+                }
             }
             stations[i].number_of_antennas = antenna_count;
 
-            if (max_number_of_antennas_station < antenna_count) 
+            if (max_number_of_antennas_station < antenna_count) { 
                 max_number_of_antennas_station = antenna_count;
+            }
         }
 
         ReadAllAntennaGains(settings1);
@@ -1488,12 +1524,13 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         // read FOAM gain file!!
         ReadFOAM(string(getenv("ARA_SIM_DIR"))+"/data/FOAM.csv", settings1);
 
-        if (settings1 -> NOISE == 1) 
-            // read Rayleigh fit for freq range, bh channels
+        // read Rayleigh fit for freq range, bh channels
+        if (settings1 -> NOISE == 1) { 
             ReadRayleighFit_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
+        }
 
+        // read RFCM gain file!! (measured value in ICL)
         if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
-            // read RFCM gain file!! (measured value in ICL)
             ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C1.csv", settings1); // read and save RFCM gain for ch1
             ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C2.csv", settings1); // read and save RFCM gain for ch2
             ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C3.csv", settings1); // read and save RFCM gain for ch3
@@ -1521,8 +1558,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         
         // read system temperature for chs file!!
         cout << "check read temp testbed 3" << endl;
-        if (settings1 -> NOISE_CHANNEL_MODE != 0) 
+        if (settings1 -> NOISE_CHANNEL_MODE != 0) { 
             ReadTemp_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/system_temperature.csv", settings1); // only TestBed for now
+        }
 
         // read total elec. chain response file!!
         cout << "start read elect chain" << endl;
@@ -1540,9 +1578,10 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         cout << "done read elect chain" << endl;
 
         // if calpulser case
-        if (settings1 -> CALPULSER_ON > 0) 
+        if (settings1 -> CALPULSER_ON > 0) { 
             // read TestBed Calpulser waveform measured (before pulser)
             ReadCalPulserWF(string(getenv("ARA_SIM_DIR"))+"/data/CalPulserWF.txt", settings1);
+        }
 
         cout<<"     Reading standard trigger formation values"<<endl;
         ReadTrig_Delays_Masking(string(getenv("ARA_SIM_DIR"))+"/data/trigger/delays_masking_custom.csv", settings1);
@@ -1550,7 +1589,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
     } // if mode == 3
     
     else if (mode == 4) {
-        // cout<<"\n\tDector mode 4 : Single installed station determined by DETECTOR_STATION !"<<endl;
 
         // initialize info
         params.number_of_stations = 1; //including Testbed
@@ -1631,9 +1669,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         stations[0].SetX(params.core_x);
         stations[0].SetY(params.core_y);
 
-        // cout<<"total station_count : "<<station_count<<endl;
-        if (station_count != (int) params.number_of_stations) 
+        if (station_count != (int) params.number_of_stations) { 
             cout << "\n\tError, station number not match !" << endl;
+        }
 
 
         #ifdef ARA_UTIL_EXISTS
@@ -1715,13 +1753,15 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
             antenna_count = 0;
             for (int j = 0; j < (int)(stations[i].strings.size()); j++) {
-                for (int k = 0; k < (int)(stations[i].strings[j].antennas.size()); k++) 
+                for (int k = 0; k < (int)(stations[i].strings[j].antennas.size()); k++) { 
                     antenna_count++;
+                }
             }
             stations[i].number_of_antennas = antenna_count;
 
-            if (max_number_of_antennas_station < antenna_count) 
+            if (max_number_of_antennas_station < antenna_count) { 
                 max_number_of_antennas_station = antenna_count;
+            }
         }
 
         ReadAllAntennaGains(settings1);
@@ -1741,12 +1781,13 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             ReadTemp_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/system_temperature.csv", settings1); // only TestBed for now
 
         if (settings1 -> DETECTOR_STATION == 0) {
-            if (settings1 -> NOISE == 1) 
-                // read Rayleigh fit for freq range, bh channels
+            // read Rayleigh fit for freq range, bh channels
+            if (settings1 -> NOISE == 1) { 
                 ReadRayleighFit_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/RayleighFit_TB.csv", settings1); // read and save RFCM gain
+            }
 
+            // read RFCM gain file!! (measured value in ICL)
             if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
-                // read RFCM gain file!! (measured value in ICL)
                 ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C1.csv", settings1); // read and save RFCM gain for ch1
                 ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C2.csv", settings1); // read and save RFCM gain for ch2
                 ReadRFCM_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/TestBed_RFCM/R1C3.csv", settings1); // read and save RFCM gain for ch3
@@ -1774,8 +1815,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
             // read system temperature for chs file!!
             cout << "check read temp testbed 4" << endl;
-            if (settings1 -> NOISE_CHANNEL_MODE != 0) 
+            if (settings1 -> NOISE_CHANNEL_MODE != 0) { 
                 ReadTemp_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/system_temperature.csv", settings1); // only TestBed for now
+            }
         }
         if (settings1 -> DETECTOR_STATION > 0) {
             // simulating a deep station (not testbed, DETECTOR_STATION==0)
@@ -1826,7 +1868,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             else{ // testbed only
               cout <<"    In situ gain model does not exist for this station"<<endl;
               ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGain_TwoFilters.csv", settings1);
-              //ReadElectChain(string(getenv("ARA_SIM_DIR"))+"/data/gain/ARA_Electronics_TotalGainPhase.csv", settings1);
             }
         }
         else if (settings1->CUSTOM_ELECTRONICS==1){
@@ -1837,29 +1878,32 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         cout << "done read elect chain" << endl;
 
         // if calpulser case
-        if (settings1 -> CALPULSER_ON > 0) 
+        if (settings1 -> CALPULSER_ON > 0) { 
             // read TestBed Calpulser waveform measured (before pulser)
             ReadCalPulserWF(string(getenv("ARA_SIM_DIR"))+"/data/CalPulserWF.txt", settings1);
+        }
 
         if(settings1->DETECTOR_STATION > 0){
-        cout <<" Reading trigger formation values for this station and configuration from file:"<<endl;
-                      char the_trig_filename[500];
-                      sprintf(the_trig_filename, "%s/data/trigger/delays_masking_A%d_C%d.csv", getenv("ARA_SIM_DIR"),
-                                                 settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
-                      cout << the_trig_filename <<endl;
-                      ReadTrig_Delays_Masking(std::string(the_trig_filename), settings1);
+            cout <<" Reading trigger formation values for this station and configuration from file:"<<endl;
+            char the_trig_filename[500];
+            sprintf(the_trig_filename, "%s/data/trigger/delays_masking_A%d_C%d.csv", getenv("ARA_SIM_DIR"),
+                                       settings1->DETECTOR_STATION,  settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+            cout << the_trig_filename <<endl;
+            ReadTrig_Delays_Masking(std::string(the_trig_filename), settings1);
         }
         else{
-          cout <<"    Trigger formation file does not exist for this station"<<endl;
-                      cout<<"     Reading standard trigger formation values"<<endl;
-                      ReadTrig_Delays_Masking(string(getenv("ARA_SIM_DIR"))+"/data/trigger/delays_masking_custom.csv", settings1);
+            cout <<"    Trigger formation file does not exist for this station"<<endl;
+            cout<<"     Reading standard trigger formation values"<<endl;
+            ReadTrig_Delays_Masking(string(getenv("ARA_SIM_DIR"))+"/data/trigger/delays_masking_custom.csv", settings1);
         }
         
         //for A1 ICRR/ATRI differentiation
-        if (settings1->DETECTOR_STATION_ARAROOT==1)
-          cout << "\n A1 is being simulated as an ICRR" << endl;
-        else if (settings1->DETECTOR_STATION_ARAROOT==100)
-          cout << "\n A1 is being simulated as an ATRI" << endl;
+        if (settings1->DETECTOR_STATION_ARAROOT==1) {
+            cout << "\n A1 is being simulated as an ICRR" << endl;
+        }
+        else if (settings1->DETECTOR_STATION_ARAROOT==100) {
+            cout << "\n A1 is being simulated as an ATRI" << endl;
+        }
 
     } // if mode == 4
 
@@ -1919,8 +1963,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
             // Build Phased Array string
             stations[i].strings.push_back(temp_string);
-            for (int l=0; l<9; l++) 
+            for (int l=0; l<9; l++) { 
                 stations[i].strings[0].antennas.push_back(temp_antenna);
+            }
 
             // Build additional strings attached to PA
             // Only PA Attached to PA DAQ in DETECTOR_STATION == 1
@@ -2007,14 +2052,13 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 station_count++;
             }
             else if (station_count < (int)params.number_of_stations) {
-                //stations[station_count].x = core_x;
-                //stations[station_count].y = core_y;
                 stations[station_count].SetX( params.core_x );
                 stations[station_count].SetY( params.core_y );
                 station_count++;
             }
-            else 
+            else {
                 cout<<"\n\tError, too many stations !"<<endl;
+            }
         } // finished iterating over stations to set locations
 
 
@@ -2073,20 +2117,23 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 // Set all antennas to VPOL (1 for HPOL)
                 stations[i].strings[0].antennas[0].type = 1; // PA Hpol
                 stations[i].strings[0].antennas[1].type = 1; // PA Hpol 
-                for (int l=2; l<9; l++)  // PA Vpols
+                for (int l=2; l<9; l++) {  // PA Vpols
                     stations[i].strings[0].antennas[l].type = 0;
+                }
                 
                 if (settings1->DETECTOR_STATION > 1){ // Set all vanilla antennas to VPol
                     for (int k=1; k<stations[i].strings.size(); k++) {
-                        for (int l=0; l<stations[i].strings[k].antennas.size(); l++) 
+                        for (int l=0; l<stations[i].strings[k].antennas.size(); l++) { 
                             stations[i].strings[k].antennas[l].type = 0;
+                        }
                     } 
                 }
 
                 // Orient all antennas in x direction
                 for (int k=0; k<stations[i].strings.size(); k++) {
-                    for (int l=0; l<stations[i].strings[k].antennas.size(); l++) 
+                    for (int l=0; l<stations[i].strings[k].antennas.size(); l++) { 
                         stations[i].strings[k].antennas[l].orient = 0;
+                    }
                 } 
 
                 // Calculate the number of antennas created
@@ -2104,10 +2151,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         ReadAllAntennaGains(settings1);
         ReadAllAntennaImpedance(settings1);
 
-        //	    if (settings1->NOISE == 2){
         //Read the noise figures
         ReadNoiseFigure(string(getenv("ARA_SIM_DIR"))+"/data/ARA02_noiseFig.txt", settings1);
-        //	    }
 
         // read filter file!!
         ReadFilter(string(getenv("ARA_SIM_DIR"))+"/data/filter.csv", settings1);
@@ -2123,8 +2168,9 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         ReadThres_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/thresholds_TB.csv", settings1);// only TestBed for now
 
         // read system temperature for chs file!!
-        if (settings1->NOISE_CHANNEL_MODE!=0) 
+        if (settings1->NOISE_CHANNEL_MODE!=0) { 
             ReadTemp_TestBed(string(getenv("ARA_SIM_DIR"))+"/data/system_temperature.csv", settings1);// only TestBed for now
+        }
 
         // Load in detector_specific noise if requested
         if(settings1->NOISE==1){
@@ -2142,28 +2188,28 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             //read the standard ARA electronics
             char the_gain_filename[500];
             if(settings1->DETECTOR_STATION_LIVETIME_CONFIG == -1 || settings1->ELECTRONICS_ANTENNA_CONSISTENCY==1) {
-              sprintf(the_gain_filename, "%s/data/gain/PA_Electronics_TotalGainPhase.csv", getenv("ARA_SIM_DIR")); 
-              cout << " Reading standard PA electronics response from file:" << endl;
-              cout << the_gain_filename <<endl;
+                sprintf(the_gain_filename, "%s/data/gain/PA_Electronics_TotalGainPhase.csv", getenv("ARA_SIM_DIR")); 
+                cout << " Reading standard PA electronics response from file:" << endl;
+                cout << the_gain_filename <<endl;
             }
             else{
-              sprintf(the_gain_filename, "%s/data/gain/In_situ_Electronics_PA_C%d.csv", getenv("ARA_SIM_DIR"), 	
-                                         settings1->DETECTOR_STATION_LIVETIME_CONFIG);
-              cout <<" Reading in situ ARA electronics response for the PA and this configuration from file:"<<endl;	
-              cout << the_gain_filename <<endl;
+                sprintf(the_gain_filename, "%s/data/gain/In_situ_Electronics_PA_C%d.csv", getenv("ARA_SIM_DIR"), 	
+                                           settings1->DETECTOR_STATION_LIVETIME_CONFIG);
+                cout <<" Reading in situ ARA electronics response for the PA and this configuration from file:"<<endl;	
+                cout << the_gain_filename <<endl;
             }
 
             ReadElectChain(std::string(the_gain_filename), settings1);
             if(settings1->ELECTRONICS_ANTENNA_CONSISTENCY==1) {
-              if(settings1->NOISE==1) {
-                cout << " Recalculating in situ electronic response amplitude to ensure consistency with antenna model used here." << endl;
-                ReadAmplifierNoiseFigure(settings1); // load amplifier noise figure
-                CalculateElectChain(settings1); // calculate consistent electronics chain gain amplitude
-              }
-              else {
-                cerr << "WARNING - Antenna model used to calculate in situ gain model may not match that used in this simulation!" << endl;
-                cerr << "\t To ensure consistency load an in-situ noise model with NOISE = 1." << endl;
-              } 
+                if(settings1->NOISE==1) {
+                    cout << " Recalculating in situ electronic response amplitude to ensure consistency with antenna model used here." << endl;
+                    ReadAmplifierNoiseFigure(settings1); // load amplifier noise figure
+                    CalculateElectChain(settings1); // calculate consistent electronics chain gain amplitude
+                }
+                else {
+                    cerr << "WARNING - Antenna model used to calculate in situ gain model may not match that used in this simulation!" << endl;
+                    cerr << "\t To ensure consistency load an in-situ noise model with NOISE = 1." << endl;
+                } 
             }
         } 
         else if (settings1 -> CUSTOM_ELECTRONICS == 1) {
@@ -2194,7 +2240,6 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
     AddAdditional_Depth(settings1);
 
     // change coordinate from flat surface to curved Earth surface
-    //FlattoEarth_ARA(icesurface);
     FlattoEarth_ARA_sharesurface(icesurface); // this one will share the lowest surface at each station.
 
     getDiodeModel(settings1); // set diode_real and fdiode_real values.
@@ -2284,6 +2329,8 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     params.ang_step = ang_step;
     params.freq_width = freq_width;
     params.freq_init = freq_init;
+    
+    return;
 }
 //Defining function that reads in TX antenna impedances
 inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
@@ -2365,13 +2412,15 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     // clear vector in case there's any lingering data
     gain->clear();
     phase->clear();   
-    if(freq_step == -1 || type == eTx) // only reset if it hasn't been read-in yet
+    if(freq_step == -1 || type == eTx) { // only reset if it hasn't been read-in yet
         freq->clear(); 
+    }
     
     // check the file opened successfully
-    if (! NecOut.is_open() ) 
+    if (! NecOut.is_open() ) { 
         throw runtime_error("Antenna gain file could not be opened: "+filename);
- 
+    }
+  
     // read the first line
     getline (NecOut, line);
             
@@ -2384,28 +2433,33 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         // break line up into each of its words (i.e. strings separated by whitespace)
         string buff;
         vector<string> words;
-        while(ss >> buff) // >> skips whitespace and just goes to the next word
+        while(ss >> buff) { // >> skips whitespace and just goes to the next word
             words.push_back(buff);
+        }
         
         // check if this is the start of a new frequency section
         if (words.size() > 0 && words[0] == "freq") {
 
             // make sure it's properly formatted
-            if(words.size() != 4 || words[3] != "MHz")
+            if(words.size() != 4 || words[3] != "MHz") {
                 throw runtime_error("Antenna gain file frequency not properly formatted! "+filename);
+            }
 
             // save frequency and check its sensible
             double thisFreq = stof(words[2]);
-            if(!std::isfinite(thisFreq))
+            if(!std::isfinite(thisFreq)) {
                 throw runtime_error("Non-finite frequency value found! "+filename);
+            }
 
-            if(freq_step == -1 || type == eTx) // add frequency if this is the first read-in
+            if(freq_step == -1 || type == eTx) { // add frequency if this is the first read-in
                 freq->push_back(thisFreq);
+            }
             else { // otherwise make sure it matches the values already stored
                 int i = (int)Transm.size();
 
-                if(abs(freq->at(i)-thisFreq) > 0.1 ) // ensure they match to at least 0.1 MHz
+                if(abs(freq->at(i)-thisFreq) > 0.1 ) { // ensure they match to at least 0.1 MHz
                     throw runtime_error("Frequency bins of antenna models do not match! "+filename);
+                }
             } 
 
             // read SWR info line
@@ -2417,17 +2471,20 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
 
             // put new line into string stream and break up line into its words
             ss.str(line);
-            while(ss >> buff)
+            while(ss >> buff) {
                 words.push_back(buff);
+            }
 
             // check the line is what we expected (SWR info)
-            if(words.size() != 3 || words[0] != "SWR")
+            if(words.size() != 3 || words[0] != "SWR") {
                 throw runtime_error("Antenna gain file SWR not properly formatted! "+filename);
+            }
 
             // save SWR value, check that its sensible, and calculate corresponding transmittance
             double swr = stof(words[2]);
-            if(!std::isfinite(swr))
+            if(!std::isfinite(swr)) {
                 throw runtime_error("Non-finite SWR value found! "+filename);
+            }
             Transm.push_back(SWRtoTransCoeff(swr));
 
             // read in next line but we won't do anything with it
@@ -2443,16 +2500,19 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         else {
 
             // check the line is what we expected (gain for a particular theta/phi)
-            if(words.size() != 5)
+            if(words.size() != 5) {
                 throw runtime_error("Antenna gain file data line not properly formatted! "+filename);
+            }
  
             // save dB gain and phase and check they are sensible
             double thisdBGain = stof(words[2]);
             double thisPhase = stof(words[4]);
-            if(!std::isfinite(thisdBGain))
+            if(!std::isfinite(thisdBGain)) {
                 throw runtime_error("Non-finite dB gain value found! "+filename);
-            if(!std::isfinite(thisPhase))
+            }
+            if(!std::isfinite(thisPhase)) {
                 throw runtime_error("Non-finite phase value found! "+filename);
+            }
 
             // save the (linear) gain and phase into real vectors
             gain->back().push_back(pow(10, thisdBGain/10));  //Importing gain in dB, then converting to linear gain
@@ -2484,28 +2544,35 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     }
 
     // check things look sensible
-    if(Transm.size() != freq_step)
+    if(Transm.size() != freq_step) {
         throw runtime_error("Transm has an unexpected length! "+filename);
-    if(gain->size() != freq_step)
+    }
+    if(gain->size() != freq_step) {
         throw runtime_error("gain has an unexpected length! "+filename);
-    if(phase->size() != freq_step) 
+    }
+    if(phase->size() != freq_step) { 
         throw runtime_error("phase has an unexpected length! "+filename);
+    }
     for(int i = 0; i < freq_step; ++i) {
-        if(gain->at(i).size() != ang_step)
+        if(gain->at(i).size() != ang_step) {
             throw runtime_error("gain vectors have inconsistent length! "+filename);
-        if(phase->at(i).size() != ang_step)
+        }
+        if(phase->at(i).size() != ang_step) {
             throw runtime_error("gain vectors have inconsistent length! "+filename);
+        }
     }
  
     // skip this for the transmitter case 
-    if(type == eTx)
+    if(type == eTx) {
         return;
+    }
    
     const int N = freq_step; 
     double xfreq[N];
 
-    if(freq_step > settings1->DATA_BIN_SIZE/2)
+    if(freq_step > settings1->DATA_BIN_SIZE/2) {
         throw runtime_error("settings1->DATA_BIN_SIZE not large enough for the number of frequencies");
+    }
     double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
     double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
     double df_fft;
@@ -2513,46 +2580,53 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
     
     // now below are values that shared in all channels
-    for (int i=0; i<freq_step; i++)  // copy values
+    for (int i=0; i<freq_step; i++) {  // copy values
         xfreq[i] = Freq[i];
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++)     // this one is for DATA_BIN_SIZE
+    }
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    
+    }    
+
     Tools::SimpleLinearInterpolation( freq_step-1, xfreq, &Transm[0], settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
     for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {    // this one is for DATA_BIN_SIZE
-        if(!std::isfinite(trans_databin[i]))
+        if(!std::isfinite(trans_databin[i])) {
             throw runtime_error("Non-finite FFT gain value found! "+filename);
+        }
         transAnt_databin->push_back(trans_databin[i]); // from Hz to MHz
     }
 
+    return;
 } 
 
 double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
-    //double GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
-    
-    //Parameters params;
     
     // change antenna facing orientation
     if (ant_o == 0) {
         // no change...
     }
     else if (ant_o == 1) {
-        if (phi - 90. >= 0.) 
+        if (phi - 90. >= 0.) { 
             phi = phi - 90.;
-        else 
+        }
+        else { 
             phi = 360. + phi - 90.;
+        }
     }
     else if (ant_o == 2) {
-        if (phi - 180. >= 0.) 
+        if (phi - 180. >= 0.) { 
             phi = phi - 180.;
-        else 
+        }
+        else { 
             phi = 360. + phi - 180.;
+        }
     }
     else if (ant_o == 3) {
-        if (phi - 270. >= 0.) 
+        if (phi - 270. >= 0.) { 
             phi = phi - 270.;
-        else 
+        }
+        else { 
             phi = 360. + phi - 270.;
+        }
     }
     else {
         cout<<"Wrong option selected for antenna orientation "<<ant_o<<" !!"<<endl;
@@ -2573,14 +2647,16 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
     double u = (phi - phij)/(phij1 - phij);
     
     // in case when freq is out of nec2 freq range. use nearest min/max freq bin value. 
-    if ( freq < freq_init ) 
+    if ( freq < freq_init ) { 
         //cout<<"Frequency value is smaller than frequency range with Gain."<<endl;
         //cout<<"Frequency value "<<freq<<" will be replaced to minimum frequency value "<<freq_init<<endl;
         freq = freq_init;
-    else if ( freq > (freq_init + freq_width*((double)freq_step-1.) ) ) 
+    }
+    else if ( freq > (freq_init + freq_width*((double)freq_step-1.) ) ) { 
         //cout<<"Frequency value is bigger than frequency range with Gain."<<endl;
         //cout<<"Frequency value "<<freq<<" will be replaced to maximum frequency value "<< freq_init + freq_width*((double)freq_step-1.) - 0.01 <<endl;
         freq = freq_init + freq_width*((double)freq_step-1.) - 0.01;
+    }
     
     int fx1 = (int)( (freq - freq_init)/freq_width );
     int fx2 = fx1 + 1;
@@ -2653,8 +2729,9 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
     
     Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
     
-    if ( Gout < 0. ) // gain can not go below 0
+    if ( Gout < 0. ) { // gain can not go below 0
     	Gout = 0.;
+    }
     
     return Gout;
     
@@ -2678,17 +2755,17 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m) {
     
     
     // in case when freq is out of nec2 freq range. use nearest min/max freq bin value. 
-    if ( freq < freq_init ) 
+    if ( freq < freq_init ) { 
         //cout<<"Frequency value is smaller than frequency range with Gain."<<endl;
         //cout<<"Frequency value "<<freq<<" will be replaced to minimum frequency value "<<freq_init<<endl;
-        freq = freq_init;
-    else if ( freq > (freq_init + freq_width*((double)freq_step - 1.) ) ) 
+        freq = freq_init; 
+    }
+    else if ( freq > (freq_init + freq_width*((double)freq_step - 1.) ) ) { 
         //cout<<"Frequency value is bigger than frequency range with Gain."<<endl;
         //cout<<"Frequency value "<<freq<<" will be replaced to maximum frequency value "<< freq_init + freq_width*((double)freq_step-1.) - 0.01 <<endl;
         freq = freq_init + freq_width*((double)freq_step-1.) - 0.01;
+    }
     
-    
-    //    int fx1 = (int)( (freq + (freq_width/2.) - freq_init)/freq_width );
     int fx1 = (int)( (freq - freq_init)/freq_width );
     int fx2 = fx1 + 1;
     
@@ -2759,11 +2836,11 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m) {
     }
     
     Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
-    if ( Gout < 0. ) // gain can not go below 0
+    if ( Gout < 0. ) { // gain can not go below 0
     	Gout = 0.;
+    }
     
     return Gout;
-    
 }
 
 
@@ -2783,14 +2860,16 @@ double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m )
     
     
     // in case when freq is out of nec2 freq range. use nearest min/max freq bin value. 
-    if ( freq < freq_init ) 
+    if ( freq < freq_init ) { 
         //cout<<"Frequency value is smaller than frequency range with phase."<<endl;
         //cout<<"Frequency value "<<freq<<" will be replaced to minimum frequency value "<<freq_init<<endl;
         freq = freq_init;
-    else if ( freq > (freq_init + freq_width*((double)freq_step - 1.) ) ) 
+    }
+    else if ( freq > (freq_init + freq_width*((double)freq_step - 1.) ) ) { 
         //cout<<"Frequency value is bigger than frequency range with phase."<<endl;
         //cout<<"Frequency value "<<freq<<" will be replaced to maximum frequency value "<< freq_init + freq_width*((double)freq_step-1.) - 0.01 <<endl;
         freq = freq_init + freq_width*((double)freq_step-1.) - 0.01;
+    }
     
     
     int fx1 = (int)( (freq - freq_init)/freq_width );
@@ -2857,7 +2936,6 @@ double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m )
     }
     
     else {
-        //cout<<"There is no antenna type : "<<ant_m<<" !!"<<endl;
         cout<<"Will return phase = 0 !!"<<endl;
         Gout1 = 0.;
         Gout2 = 0.;
@@ -2867,7 +2945,6 @@ double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m )
     
     
     return Gout;
-
 }
 
 
@@ -2886,36 +2963,46 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     //Assign local pointer to gain array specified in the function argument
     //VPol Rx
     if ( Detector_mode == 5 ){ // Phased Array mode
-        if ( useInTransmitterMode ) 
+        if ( useInTransmitterMode ) {
             tempGain = &Txgain; // Transmitter mode
-        else if ( ant_m == 1 ) 
+        }
+        else if ( ant_m == 1 ) {
             tempGain = &Hgain; // PA Hpols
+        }
         else {
-            if ( string_number == 0 ) 
+            if ( string_number == 0 ) { 
                 tempGain = &Vgain; // PA Vpols
+            }
             else {
-                if ( ant_number == 1 ) 
+                if ( ant_number == 1 ) { 
                     tempGain = &VgainTop; // A5 Top VPols
-                else 
+                }
+                else { 
                     tempGain = &Vgain; // A5 Bottom Vpols
+                }
             }
         }
     }
     else { // Traditional Station mode
         //Tx
-        if (useInTransmitterMode) 
+        if (useInTransmitterMode) { 
             tempGain = &Txgain;
+        }
         else if (ant_m == 0) {
-            if (ant_number == 0) 
+            if (ant_number == 0) { 
                 tempGain = &Vgain;
-            else if (ant_number == 2) 
+            }
+            else if (ant_number == 2) { 
                 tempGain = &VgainTop;
+            }
         }
         //HPol Rx
-        else if (ant_m == 1) 
+        else if (ant_m == 1) { 
             tempGain = &Hgain;
-        else 
+        }
+        else { 
             throw runtime_error("In GetGain_1D_OutZero: No appropriate gain model for this simulation setup.");
+        }
     }
 
     double thisFreq_init;
@@ -2935,13 +3022,13 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     int i = (int)( (theta+2.5)/5. );
     int j = (int)( (phi+2.5)/5. );
 
-    if ( j == 72 ) 
+    if ( j == 72 ) { 
         j = 0;
+    }
 
     int angle_bin = 37*j+i;
 
     // now just do linear interpolation at that angle
-
     double slope_1; // slope of init part
 
     double Gout;
@@ -2952,19 +3039,22 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     slope_1 = ((*tempGain)[1][angle_bin] - (*tempGain)[0][angle_bin]) / (F->at(1) - F->at(0));
 
     // if freq is lower than freq_init
-    if ( freq < thisFreq_init ) 
+    if ( freq < thisFreq_init ) { 
         Gout = slope_1 * (freq - F->at(0)) + (*tempGain)[0][angle_bin];
+    }
     // if freq is higher than last freq
-    else if ( freq > F->back() ) 
+    else if ( freq > F->back() ) { 
         Gout = 0.;
-    else 
+    }
+    else { 
         Gout = (*tempGain)[bin-1][angle_bin] + (freq-F->at(bin-1))*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(F->at(bin)-F->at(bin-1));
-    
-    if ( Gout < 0. ) // gain can not go below 0
+    }   
+ 
+    if ( Gout < 0. ) { // gain can not go below 0
     	Gout = 0.;
+    }
 
     return Gout;
-
 }
 
 //Creating function to interpolate antenna impedance to frequency binning.
@@ -2973,17 +3063,21 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
     //Initialize pointer to dynamically point to the impedance for the chosen antenna.
     double (*tempImpedance)[freq_step_max] = nullptr;
     //Tx
-    if (useInTransmitterMode) 
+    if (useInTransmitterMode) { 
         tempImpedance = &RealImpedanceTx;
+    }
     //VPol Rx
-    else if (ant_m == 0) 
+    else if (ant_m == 0) { 
         tempImpedance = &RealImpedanceV;
+    }
     //HPol Rx
-    else if (ant_m == 1) 
+    else if (ant_m == 1) { 
         tempImpedance = &RealImpedanceH;
-    else 
+    }
+    else { 
         throw runtime_error("In GetImpedance: No appropriate impedance model for this simulation setup.");
-   
+    }  
+ 
     vector<double> * F = &impFreq;   
     double thisFreq_init = F->at(0);
     double thisFreq_width = F->at(1) - F->at(0);
@@ -3000,20 +3094,22 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
     slope_1 = ((*tempImpedance)[1] - (*tempImpedance)[0]) / (F->at(1) - F->at(0));
 
     // if freq is lower than freq_init
-    if ( freq < thisFreq_init ) 
+    if ( freq < thisFreq_init ) { 
         ZOut = slope_1 * (freq - F->at(0)) + (*tempImpedance)[0];
+    }
     // if freq is higher than last freq
-    else if ( freq > F->back() ) 
+    else if ( freq > F->back() ) { 
         ZOut = 0.;
-    else 
+    }
+    else { 
         ZOut = (*tempImpedance)[bin-1] + (freq - F->at(bin-1))*((*tempImpedance)[bin]-(*tempImpedance)[bin-1])/(F->at(bin) - F->at(bin-1));
-    
-    if ( ZOut < 0. ) // impedance can not go below 0
+    }    
+
+    if ( ZOut < 0. ) { // impedance can not go below 0
     	ZOut = 0.;
+    }
 
     return ZOut;
-    
-    
 }
 
 
@@ -3024,17 +3120,21 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
     vector<double> * F;   
  
     //Tx
-    if (useInTransmitterMode) 
+    if (useInTransmitterMode) { 
         tempPhase = &Txphase;
+    }
     //VPol Rx
-    else if (ant_m == 0) 
+    else if (ant_m == 0) { 
         tempPhase = &Vphase;
+    }
     //HPol Rx
-    else if (ant_m == 1) 
+    else if (ant_m == 1) { 
         tempPhase = &Hphase;
-    else 
+    }
+    else {
         throw runtime_error("In GetAntPhase_1D: No appropriate gain model for this simulation setup.");
-    
+    }    
+
     double thisFreq_init;
     double thisFreq_width;
     int thisFreq_step;
@@ -3054,8 +3154,9 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
     int i = (int)( (theta+2.5)/5. );
     int j = (int)( (phi+2.5)/5. );
 
-    if ( j == 72 ) 
+    if ( j == 72 ) { 
         j = 0;
+    }
 
     int angle_bin = 37*j+i;
 
@@ -3079,12 +3180,14 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
         phase = slope_1 * (freq - F->at(0)) + (*tempPhase)[0][angle_bin];
 
         if ( phase > 180. ) {
-            while ( phase > 180. ) 
+            while ( phase > 180. ) { 
                 phase = phase - 360.;
+            }
         }
         else if ( phase < -180. ) {
-            while ( phase < -180. ) 
+            while ( phase < -180. ) { 
                 phase = phase + 360.;
+            }
         }
     }
     // if freq is higher than last freq
@@ -3093,12 +3196,14 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
         phase = slope_2 * (freq - F->back()) + (*tempPhase)[thisFreq_step-1][angle_bin];
 
         if ( phase > 180. ) {
-            while ( phase > 180. ) 
+            while ( phase > 180. ) { 
                 phase = phase - 360.;
+            }
         }
         else if ( phase < -180. ) {
-            while ( phase < -180. ) 
+            while ( phase < -180. ) { 
                 phase = phase + 360.;
+            }
         }
     }
 
@@ -3111,40 +3216,45 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
             slope_t2 = ((*tempPhase)[bin+1][angle_bin] - (*tempPhase)[bin][angle_bin]) / (F->at(bin+1) - F->at(bin));
 
             // down going case
-            if ( slope_t1 * slope_t2 > 0. && (*tempPhase)[bin][angle_bin] - (*tempPhase)[bin-1][angle_bin] > 180. ) 
+            if ( slope_t1 * slope_t2 > 0. && (*tempPhase)[bin][angle_bin] - (*tempPhase)[bin-1][angle_bin] > 180. ) { 
                 phase = (*tempPhase)[bin-1][angle_bin] + (freq - F->at(bin-1))*((*tempPhase)[bin][angle_bin]-360.-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
-
+            }
             // up going case
-            else if ( slope_t1 * slope_t2 > 0. && (*tempPhase)[bin][angle_bin] - (*tempPhase)[bin-1][angle_bin] < -180. ) 
+            else if ( slope_t1 * slope_t2 > 0. && (*tempPhase)[bin][angle_bin] - (*tempPhase)[bin-1][angle_bin] < -180. ) { 
                 phase = (*tempPhase)[bin-1][angle_bin] + (freq - F->at(bin-1))*((*tempPhase)[bin][angle_bin]+360.-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
-
+            }
             // neither case
-            else 
+            else { 
                 phase = (*tempPhase)[bin-1][angle_bin] + (freq - F->at(bin-1))*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
+            }          
 
             // if outside the range, put inside
             if ( phase > 180. ) {
-                while ( phase > 180. ) 
+                while ( phase > 180. ) { 
                     phase = phase - 360.;
+                }
             }
             else if ( phase < -180. ) {
-                while ( phase < -180. ) 
+                while ( phase < -180. ) { 
                     phase = phase + 360.;
+                }
             }
 
         }// not first two bins
-
-        else 
+        else { 
             phase = (*tempPhase)[bin-1][angle_bin] + (freq - F->at(bin-1))*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
-
+        }
+    
         // if outside the range, put inside
         if ( phase > 180. ) {
-            while ( phase > 180. ) 
+            while ( phase > 180. ) { 
                 phase = phase - 360.;
+            }
         }
         else if ( phase < -180. ) {
-            while ( phase < -180. ) 
+            while ( phase < -180. ) { 
                 phase = phase + 360.;
+            }
         }
 
     } // not outside the Freq[] range
@@ -3160,19 +3270,20 @@ double Detector::GetFilterGain_1D_OutZero( double freq ) {
 
     int bin = (int)( (freq - freq_init) / freq_width )+1;
 
-
     slope_1 = (FilterGain[1] - FilterGain[0]) / (Freq[1] - Freq[0]);
 
-
     // if freq is lower than freq_init
-    if ( freq < freq_init ) 
+    if ( freq < freq_init ) { 
         Gout = slope_1 * (freq - Freq[0]) + FilterGain[0];
+    }
     // if freq is higher than last freq
-    else if ( freq > Freq[freq_step-1] ) 
+    else if ( freq > Freq[freq_step-1] ) { 
         Gout = 0.;
-    else 
+    }
+    else { 
         Gout = FilterGain[bin-1] + (freq-Freq[bin-1])*(FilterGain[bin]-FilterGain[bin-1])/(Freq[bin]-Freq[bin-1]);
-    
+    }   
+ 
     return Gout;
 }
 
@@ -3189,13 +3300,16 @@ double Detector::GetPreampGain_1D_OutZero( double freq ) {
 
 
     // if freq is lower than freq_init
-    if ( freq < freq_init ) 
+    if ( freq < freq_init ) { 
         Gout = slope_1 * (freq - Freq[0]) + PreampGain[0];
+    }
     // if freq is higher than last freq
-    else if ( freq > Freq[freq_step-1] ) 
+    else if ( freq > Freq[freq_step-1] ) { 
         Gout = 0.;
-    else 
+    }
+    else { 
         Gout = PreampGain[bin-1] + (freq-Freq[bin-1])*(PreampGain[bin]-PreampGain[bin-1])/(Freq[bin]-Freq[bin-1]);
+    }
 
     return Gout;
 }
@@ -3211,19 +3325,19 @@ double Detector::GetFOAMGain_1D_OutZero( double freq ) {
     slope_1 = (FOAMGain[1] - FOAMGain[0]) / (Freq[1] - Freq[0]);
 
     // if freq is lower than freq_init
-    if ( freq < freq_init ) 
+    if ( freq < freq_init ) { 
         Gout = slope_1 * (freq - Freq[0]) + FOAMGain[0];
+    }
     // if freq is higher than last freq
-    else if ( freq > Freq[freq_step-1] ) 
+    else if ( freq > Freq[freq_step-1] ) { 
         Gout = 0.;
-    else 
+    }
+    else { 
         Gout = FOAMGain[bin-1] + (freq-Freq[bin-1])*(FOAMGain[bin]-FOAMGain[bin-1])/(Freq[bin]-Freq[bin-1]);
+    }
 
     return Gout;
 }
-
-
-
 
 // set outside value as 0
 double Detector::GetElectGain_1D_OutZero( double freq, int gain_ch_no) {
@@ -3237,14 +3351,17 @@ double Detector::GetElectGain_1D_OutZero( double freq, int gain_ch_no) {
 
 
     // if freq is lower than freq_init
-    if ( bin < 1) 
+    if ( bin < 1) { 
         Gout = 0.;
+    }
     // if freq is higher than last freq
-    else if ( bin > freq_step -1 )
+    else if ( bin > freq_step -1 ) {
         Gout = 0.;
-    else 
+    }
+    else { 
         Gout = ElectGain[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectGain[gain_ch_no][bin]-ElectGain[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
-    
+    }   
+ 
     return Gout;
 }
 
@@ -3269,12 +3386,14 @@ double Detector::GetElectPhase_1D( double freq, int gain_ch_no ) {
         phase = slope_1 * (freq - Freq[0]) + ElectPhase[gain_ch_no][0];
 
         if ( phase > PI ) {
-            while ( phase > PI ) 
+            while ( phase > PI ) { 
                 phase = phase - 2*PI;
+            }
         }
         else if ( phase < -PI ) {
-            while ( phase < -PI ) 
+            while ( phase < -PI ) { 
                 phase = phase + 2*PI;
+            }
         }
     }
     // if freq is higher than last freq
@@ -3283,12 +3402,14 @@ double Detector::GetElectPhase_1D( double freq, int gain_ch_no ) {
         phase = slope_2 * (freq - Freq[freq_step-1]) + ElectPhase[gain_ch_no][freq_step-1];
 
         if ( phase > PI ) {
-            while ( phase > PI ) 
+            while ( phase > PI ) { 
                 phase = phase - 2*PI;
+            }
         }
         else if ( phase < -PI ) {
-            while ( phase < -PI ) 
+            while ( phase < -PI ) { 
                 phase = phase + 2*PI;
+            }
         }
     }
     else {
@@ -3300,37 +3421,45 @@ double Detector::GetElectPhase_1D( double freq, int gain_ch_no ) {
             slope_t2 = (ElectPhase[gain_ch_no][bin+1] - ElectPhase[gain_ch_no][bin]) / (Freq[bin+1] - Freq[bin]);
 
             // down going case
-            if ( slope_t1 * slope_t2 > 0. && ElectPhase[gain_ch_no][bin] - ElectPhase[gain_ch_no][bin-1] > PI ) 
+            if ( slope_t1 * slope_t2 > 0. && ElectPhase[gain_ch_no][bin] - ElectPhase[gain_ch_no][bin-1] > PI ) { 
                 phase = ElectPhase[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectPhase[gain_ch_no][bin]-2*PI-ElectPhase[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
+            }
             // up going case
-            else if ( slope_t1 * slope_t2 > 0. && ElectPhase[gain_ch_no][bin] - ElectPhase[gain_ch_no][bin-1] < -PI ) 
+            else if ( slope_t1 * slope_t2 > 0. && ElectPhase[gain_ch_no][bin] - ElectPhase[gain_ch_no][bin-1] < -PI ) { 
                 phase = ElectPhase[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectPhase[gain_ch_no][bin]+2*PI-ElectPhase[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
+            }
             // neither case
-            else 
+            else { 
                 phase = ElectPhase[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectPhase[gain_ch_no][bin]-ElectPhase[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
+            }
 
             // if outside the range, put inside
             if ( phase > PI ) {
-                while ( phase > PI ) 
+                while ( phase > PI ) { 
                     phase = phase - 2*PI;
+                }
             }
             else if ( phase < -PI ) {
-                while ( phase < -PI ) 
+                while ( phase < -PI ) { 
                     phase = phase + 2*PI;
+                }
             }
 
         }// not first two bins
-        else 
+        else {
             phase = ElectPhase[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectPhase[gain_ch_no][bin]-ElectPhase[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
+        }
 
         // if outside the range, put inside
         if ( phase > PI ) {
-            while ( phase > PI ) 
+            while ( phase > PI ) { 
                 phase = phase - 2*PI;
+            }
         }
         else if ( phase < -PI ) {
-            while ( phase < -PI ) 
+            while ( phase < -PI ) { 
                 phase = phase + 2*PI;
+            }
         }
 
     } // not outside the Freq[] range
@@ -3352,9 +3481,6 @@ inline void Detector::FlattoEarth_ARA(IceModel *icesurface) {
     
     double Dist = 0.;   //for sqrt(x^2 + y^2)
     double R1 = icesurface->Surface(0.,0.); // from core of earth to surface at theta, phi = 0.
-    //--------------------------------------------------
-    //     double R1 = icesurface->Geoid(0.); // from core of earth to surface at theta, phi = 0.
-    //-------------------------------------------------- 
     double theta_tmp;
     double phi_tmp;
     
@@ -3366,8 +3492,9 @@ inline void Detector::FlattoEarth_ARA(IceModel *icesurface) {
         theta_tmp = Dist/R1;
         phi_tmp = atan2(stations[i].GetY(),stations[i].GetX());
         
-        if (phi_tmp<0.) 
+        if (phi_tmp<0.) { 
             phi_tmp += 2.*PI;
+        }
         
         // set theta, phi for stations.
         stations[i].SetThetaPhi(theta_tmp, phi_tmp);
@@ -3381,16 +3508,18 @@ inline void Detector::FlattoEarth_ARA(IceModel *icesurface) {
             theta_tmp = Dist/R1;
             phi_tmp = atan2(stations[i].strings[j].GetY(),stations[i].strings[j].GetX());
             
-            if (phi_tmp<0.) 
+            if (phi_tmp<0.) { 
                 phi_tmp += 2.*PI;
+            }
             
             stations[i].strings[j].SetThetaPhi(theta_tmp, phi_tmp);
             // string Vector points the position where string meets the ice surface!
             stations[i].strings[j].SetR( icesurface->Surface( stations[i].strings[j].Lon(), stations[i].strings[j].Lat()) );
             
             // borehole antennas
-            for (int k=0; k<params.number_of_antennas_string; k++) 
+            for (int k=0; k<params.number_of_antennas_string; k++) { 
                 stations[i].strings[j].antennas[k].SetRThetaPhi( stations[i].strings[j].R() + stations[i].strings[j].antennas[k].GetZ() , stations[i].strings[j].Theta(), stations[i].strings[j].Phi() );
+            }
         }
         
         // surface antennas
@@ -3400,8 +3529,9 @@ inline void Detector::FlattoEarth_ARA(IceModel *icesurface) {
             theta_tmp = Dist/R1;
             phi_tmp = atan2(stations[i].surfaces[l].GetY(),stations[i].surfaces[l].GetX());
             
-            if (phi_tmp<0.) 
+            if (phi_tmp<0.) { 
                 phi_tmp += 2.*PI;
+            }
             
             stations[i].surfaces[l].SetThetaPhi(theta_tmp, phi_tmp);
             stations[i].surfaces[l].SetR( icesurface->Surface( stations[i].surfaces[l].Lon(), stations[i].surfaces[l].Lat()) );
@@ -3416,9 +3546,6 @@ inline void Detector::FlattoEarth_ARA_sharesurface(IceModel *icesurface) {    //
     
     double Dist = 0.;   //for sqrt(x^2 + y^2)
     double R1 = icesurface->Surface(0.,0.); // from core of earth to surface at theta, phi = 0.
-    //--------------------------------------------------
-    //     double R1 = icesurface->Geoid(0.); // from core of eart to surface at theta, phi = 0.
-    //-------------------------------------------------- 
     double theta_tmp;
     double phi_tmp;
     
@@ -3432,8 +3559,9 @@ inline void Detector::FlattoEarth_ARA_sharesurface(IceModel *icesurface) {    //
         theta_tmp = Dist/R1;
         phi_tmp = atan2(stations[i].GetY(),stations[i].GetX());
         
-        if (phi_tmp<0.) 
+        if (phi_tmp<0.) { 
             phi_tmp += 2.*PI;
+        }
         
         // set theta, phi for stations.
         stations[i].SetThetaPhi(theta_tmp, phi_tmp);
@@ -3448,23 +3576,26 @@ inline void Detector::FlattoEarth_ARA_sharesurface(IceModel *icesurface) {    //
             theta_tmp = Dist/R1;
             phi_tmp = atan2(stations[i].strings[j].GetY(),stations[i].strings[j].GetX());
             
-            if (phi_tmp<0.) 
+            if (phi_tmp<0.) { 
                 phi_tmp += 2.*PI;
+            }
             
             stations[i].strings[j].SetThetaPhi(theta_tmp, phi_tmp);
             // string Vector points the position where string meets the ice surface!
             stations[i].strings[j].SetR( icesurface->Surface( stations[i].strings[j].Lon(), stations[i].strings[j].Lat()) );
             
             // find the lowest surface among strings in a station
-            if ( lowest_surface > stations[i].strings[j].R() ) 
+            if ( lowest_surface > stations[i].strings[j].R() ) { 
                 lowest_surface = stations[i].strings[j].R();
+            }
         }
         
         // string loop again for borehole antennas
         for (int j=0; j<int(stations[i].strings.size()); j++) {
             // borehole antennas
-            for (int k=0; k<int(stations[i].strings[j].antennas.size()); k++) 
+            for (int k=0; k<int(stations[i].strings[j].antennas.size()); k++) { 
                 stations[i].strings[j].antennas[k].SetRThetaPhi( lowest_surface + stations[i].strings[j].antennas[k].GetZ() , stations[i].strings[j].Theta(), stations[i].strings[j].Phi() );
+            }
         } // end string loop for borehole antennas
         
         
@@ -3476,8 +3607,9 @@ inline void Detector::FlattoEarth_ARA_sharesurface(IceModel *icesurface) {    //
             theta_tmp = Dist/R1;
             phi_tmp = atan2(stations[i].surfaces[l].GetY(),stations[i].surfaces[l].GetX());
             
-            if (phi_tmp<0.) 
+            if (phi_tmp<0.) { 
                 phi_tmp += 2.*PI;
+            }
             
             stations[i].surfaces[l].SetThetaPhi(theta_tmp, phi_tmp);
             stations[i].surfaces[l].SetR( icesurface->Surface( stations[i].surfaces[l].Lon(), stations[i].surfaces[l].Lat()) );
@@ -3511,8 +3643,9 @@ inline void Detector::AddAdditional_Depth(Settings *settings1) {    // each stat
             // strings
             for (int j=0; j<int(stations[i].strings.size()); j++) {
                 // antennas
-                for (int k = 0; k < int(stations[i].strings[j].antennas.size()); k++)
+                for (int k = 0; k < int(stations[i].strings[j].antennas.size()); k++) {
                     stations[i].strings[j].antennas[k].SetZ( stations[i].strings[j].antennas[k].GetZ() - settings1->ADDITIONAL_DEPTH );
+                }
             }
         }
     }
@@ -3543,10 +3676,10 @@ inline void Detector::ReadFilter(string filename, Settings *settings1) {    // w
         }
         Filter.close();
     }
-    
-    else 
+    else {
         cout<<"Filter file can not opened!!"<<endl;
-    
+    }   
+ 
     double xfreq[N];
     double ygain[N];  // need array for Tools::SimpleLinearInterpolation
     double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
@@ -3559,16 +3692,18 @@ inline void Detector::ReadFilter(string filename, Settings *settings1) {    // w
         xfreq[i] = xfreq_tmp[i];
         ygain[i] = ygain_tmp[i];
     }
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    
+    }    
+
     // Tools::SimpleLinearInterpolation will return Filter array (in dB)
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, &Freq[0], FilterGain );
     
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
     
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) 
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) { 
         FilterGain_databin.push_back( ygain_databin[i] );
+    }
     
     // for NFOUR/2 t domain array
     double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
@@ -3576,13 +3711,15 @@ inline void Detector::ReadFilter(string filename, Settings *settings1) {    // w
     
     df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
 
-    for (int i=0;i<settings1->NFOUR/4+1;i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0;i<settings1->NFOUR/4+1;i++) {     // this one is for DATA_BIN_SIZE
         xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
 
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
     
-    for (int i=0;i<settings1->NFOUR/4+1;i++) 
+    for (int i=0;i<settings1->NFOUR/4+1;i++) { 
         FilterGain_NFOUR.push_back( ygain_NFOUR[i] );
+    }
    
     return; 
 }
@@ -3597,15 +3734,17 @@ void Detector::ReadFilter_New(Settings *settings1) {    // will return gain (dB)
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
 
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
 
     Tools::SimpleLinearInterpolation( freq_step, &Freq[0], FilterGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
         
     FilterGain_databin.clear();
     
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) 
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) { 
         FilterGain_databin.push_back( ygain_databin[i] );
+    }
 
     return;
 }
@@ -3633,10 +3772,10 @@ inline void Detector::ReadPreamp(string filename, Settings *settings1) {    // w
         }
         Preampgain.close();
     }
-    
-    else 
+    else { 
         cout<<"Preamgain file can not opened!!"<<endl;
-    
+    }    
+
     double xfreq[N];
     double ygain[N];  // need array for Tools::SimpleLinearInterpolation
     double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
@@ -3649,16 +3788,18 @@ inline void Detector::ReadPreamp(string filename, Settings *settings1) {    // w
         xfreq[i] = xfreq_tmp[i];
         ygain[i] = ygain_tmp[i];
     }
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    
+    }    
+
     // Tools::SimpleLinearInterpolation will return Preampgain array (in dB)
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, &Freq[0], PreampGain );
     
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
     
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) 
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) { 
         PreampGain_databin.push_back( ygain_databin[i] );
+    }
     
     // for NFOUR/2 t domain array
     double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
@@ -3666,13 +3807,15 @@ inline void Detector::ReadPreamp(string filename, Settings *settings1) {    // w
     
     df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
 
-    for (int i=0; i<settings1->NFOUR/4+1; i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0; i<settings1->NFOUR/4+1; i++) {     // this one is for DATA_BIN_SIZE
         xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
 
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
     
-    for (int i=0; i<settings1->NFOUR/4+1; i++) 
+    for (int i=0; i<settings1->NFOUR/4+1; i++) { 
         PreampGain_NFOUR.push_back( ygain_NFOUR[i] );
+    }
     
     return; 
 }
@@ -3687,15 +3830,17 @@ void Detector::ReadPreamp_New(Settings *settings1) {    // will return gain (dB)
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
 
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
 
     Tools::SimpleLinearInterpolation( freq_step, &Freq[0], PreampGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
         
     PreampGain_databin.clear();
     
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) 
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) { 
         PreampGain_databin.push_back( ygain_databin[i] );
+    }
 
     return;
 }
@@ -3722,10 +3867,10 @@ inline void Detector::ReadFOAM(string filename, Settings *settings1) {    // wil
         }
         FOAMgain.close();
     }
-    
-    else 
+    else { 
         cout<<"Preamgain file can not opened!!"<<endl;
-    
+    }    
+
     double xfreq[N];
     double ygain[N];  // need array for Tools::SimpleLinearInterpolation
     double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
@@ -3738,16 +3883,18 @@ inline void Detector::ReadFOAM(string filename, Settings *settings1) {    // wil
         xfreq[i] = xfreq_tmp[i];
         ygain[i] = ygain_tmp[i];
     }
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    
+    }   
+ 
     // Tools::SimpleLinearInterpolation will return FOAMgain array (in dB)
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, &Freq[0], FOAMGain );
     
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
     
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) 
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) { 
         FOAMGain_databin.push_back( ygain_databin[i] );
+    }
 
     // for NFOUR/2 t domain array
     double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
@@ -3755,13 +3902,15 @@ inline void Detector::ReadFOAM(string filename, Settings *settings1) {    // wil
     
     df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
 
-    for (int i=0; i<settings1->NFOUR/4+1; i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0; i<settings1->NFOUR/4+1; i++) {    // this one is for DATA_BIN_SIZE
         xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
 
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
     
-    for (int i=0; i<settings1->NFOUR/4+1; i++) 
+    for (int i=0; i<settings1->NFOUR/4+1; i++) { 
         FOAMGain_NFOUR.push_back( ygain_NFOUR[i] );
+    }
 
     return;
 }
@@ -3797,9 +3946,10 @@ void Detector::ReadNoiseFigure(string filename, Settings *settings1)
         }
         nfFile.close();
     }
-    else 
+    else { 
         cout<<"Noise Figure file can not be opened!!"<<endl;
-     
+    }     
+
     double xfreq[N];  // need array for Tools::SimpleLinearInterpolation
     double NoiseFig[N];
 
@@ -3813,13 +3963,15 @@ void Detector::ReadNoiseFigure(string filename, Settings *settings1)
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
     cout<<"DATA_BIN_SIZE: "<<settings1->DATA_BIN_SIZE<<" TIMESTEP: "<<settings1->TIMESTEP<<" df_fft: "<<df_fft<<endl; 
     // now below are values that shared in all channels
-    for (int i=0;i<N;i++)  // copy values
+    for (int i=0;i<N;i++) {  // copy values
         xfreq[i] = all_chNF[i][0];
+    }
 
     cout<<"number of f bins: "<<settings1->DATA_BIN_SIZE/2<<endl;
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-      
+    }      
+
     // set vector array size to number of chs
     NoiseFig_databin_ch.resize(ch_no);
 
@@ -3827,15 +3979,17 @@ void Detector::ReadNoiseFigure(string filename, Settings *settings1)
     for (int ch=0; ch<ch_no; ch++) {
 
         // copy fit values
-        for (int i=0;i<N;i++) 
+        for (int i=0;i<N;i++) { 
             NoiseFig[i] = (all_chNF[i][ch+1]);
-        
+        }        
+
         // Tools::SimpleLinearInterpolation will return NoiseFig array (in dB)
         Tools::SimpleLinearInterpolation( N-1, xfreq, NoiseFig, freq_step, &Freq[0], NoiseFig_ch[ch] );
         Tools::SimpleLinearInterpolation( N-1, xfreq, NoiseFig, settings1->DATA_BIN_SIZE/2, xfreq_databin, NoiseFig_databin );
     
-        for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) 
+        for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) { 
             NoiseFig_databin_ch[ch].push_back( NoiseFig_databin[i] );
+        }
     }
 
     return;
@@ -3853,24 +4007,32 @@ void Detector::ReadAmplifierNoiseFigure(Settings *settings) {
   string filename;
   if(detector == 4) { // ARA case
 
-    if(station == 1)
+    if(station == 1) {
         filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_A1.csv";
-    else if(station == 2)
+    }
+    else if(station == 2) {
         filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_A2.csv";
-    else if(station == 3)
+    }
+    else if(station == 3) {
         filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_A3.csv";
-    else if(station == 4)
+    }
+    else if(station == 4) {
         filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_A4.csv";
-    else if(station == 5)
+    }
+    else if(station == 5) {
         filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_A5.csv";
-    else
+    }
+    else {
         throw runtime_error("Unsupported station for amplifier noise figure!");
-  
+    }  
+
   }
-  else if(detector == 5) // PA case
+  else if(detector == 5) { // PA case
       filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_PA.csv";
-  else
+  }
+  else {
       throw runtime_error("Unsupported detector setting for amplifier noise figure!");
+  }
 
   // initialize vectors to store raw values
   vector<double> rawFreqs;
@@ -3879,33 +4041,38 @@ void Detector::ReadAmplifierNoiseFigure(Settings *settings) {
   // read-in noise figure data
   {
       ifstream noiseFigFile(filename);
-      if(!noiseFigFile.is_open())
+      if(!noiseFigFile.is_open()) {
           throw runtime_error("Amplifier noise figure file cannot be opened: "+filename);
+      }
 
       string line;
       while(getline(noiseFigFile, line)) {
       
           stringstream ss(line);
-          if(line[0] == '#') // comment, skip line
+          if(line[0] == '#') { // comment, skip line
               continue;
+          }
 
           // actually read the line
           string buff;
           vector<double> words;
           while(getline(ss, buff, ',')) {
               words.push_back(stof(buff));
-              if(!std::isfinite(words.back()))
+              if(!std::isfinite(words.back())) {
                   throw runtime_error("Non-finite value found in amplifier noise file: "+filename);
+              }
           }
 
           // check that things are looking okay
-          if(words.size() != 17)
+          if(words.size() != 17) {
               throw runtime_error("Amplifier noise figure file not properly formatted!");
-
+          }
+  
           // actually put data into data arrays
           rawFreqs.push_back(words[0]); // expected to be in MHz
-          for(int chan = 0; chan < 16; ++chan)
-              rawNf[chan].push_back(words[chan+1]); // expected to be in linear units  
+          for(int chan = 0; chan < 16; ++chan) {
+              rawNf[chan].push_back(words[chan+1]); // expected to be in linear units
+          }  
       }
       noiseFigFile.close();
   } 
@@ -3918,42 +4085,48 @@ void Detector::ReadAmplifierNoiseFigure(Settings *settings) {
       // define corresponding A5 RF channels  
       vector<int> srcChans = {7, 6, 3, 4, 0, 5, 1};
     
-      if(chans.size() != srcChans.size())
+      if(chans.size() != srcChans.size()) {
           throw runtime_error("Mismatch in A5-PA channel mapping for amplifier noise!"); 
+      }
 
       // read in the data 
       filename = string(getenv("ARA_SIM_DIR"))+"/data/amplifierNoiseFigures/amplifierNoiseFigure_A5.csv";    
 
       ifstream noiseFigFile(filename);
-      if(!noiseFigFile.is_open())
+      if(!noiseFigFile.is_open()) {
           throw runtime_error("Amplifier noise figure file cannot be opened: "+filename);
+      }
 
       int idx = 0; 
       string line;
       while(getline(noiseFigFile, line)) {
         
           stringstream ss(line);
-          if(line[0] == '#') // comment, skip line
+          if(line[0] == '#') { // comment, skip line
               continue;
+          }
 
           // actually read the line
           string buff;
           vector<double> words;
           while(getline(ss, buff, ',')) {
               words.push_back(stof(buff));
-              if(!std::isfinite(words.back()))
+              if(!std::isfinite(words.back())) {
                   throw runtime_error("Non-finite value found in amplifier noise file: "+filename);
+              }
           }
 
           // check that things are looking okay
-          if(words.size() != 17)
+          if(words.size() != 17) {
               throw runtime_error("Amplifier noise figure file not properly formatted!");
+          }
 
           // check that the frequency binnings are aligned as expected -- could do an interpolation on PA binning
           // but let's save that for another day...
-          if(words[0] != rawFreqs[idx])
+          if(words[0] != rawFreqs[idx]) {
               throw runtime_error("A5 and PA amplifier noise figures are not aligned properly!");
-          
+          }          
+
           // actually put data into data arrays
           for(unsigned int i = 0; i < chans.size(); ++i) { 
               
@@ -4008,15 +4181,17 @@ void Detector::ReadFOAM_New(Settings *settings1) {    // will return gain (dB) w
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
 
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
 
     Tools::SimpleLinearInterpolation( freq_step, &Freq[0], FOAMGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
         
     FOAMGain_databin.clear();
     
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) 
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) { 
         FOAMGain_databin.push_back( ygain_databin[i] );
+    }
 
     return;
 }
@@ -4029,8 +4204,6 @@ inline void Detector::ReadCalPulserWF(string filename, Settings *settings1 ) {  
     
     int N=-1;
     
-    //vector <double> CalPulserWF_ns;
-    //vector <double> CalPulserWF_V;
     CalPulserWF_ns.clear();
     CalPulserWF_V.clear();
     
@@ -4047,8 +4220,6 @@ inline void Detector::ReadCalPulserWF(string filename, Settings *settings1 ) {  
             }
             
             getline (CalPulWF, line);
-            //CalPulserWF_ns.push_back( atof( line.substr(0, 4).c_str() ) );
-            //CalPulserWF_V.push_back( atof( line.substr(5).c_str() ) * settings1->CALPUL_AMP );
             CalPulserWF_ns.push_back( atof( line.substr(0, line.find_first_of(",")).c_str() ) );
             CalPulserWF_V.push_back( atof( line.substr(line.find_first_of(",") + 1).c_str() ) * settings1->CALPUL_AMP );
             
@@ -4073,18 +4244,18 @@ inline void Detector::ReadCalPulserWF(string filename, Settings *settings1 ) {  
 
 inline void Detector::ReadElectChain(string filename, Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
 
-/*
-The main goal of this function is to store gain and phase values to be used. 
-This is update stores values for each channel in vectors.
-The first dimension is the number of channels (this is "number of channels")
-The second dimension is for the number of frequency bins (this is "number of frequency bins" long).
-	
+    /*
+    The main goal of this function is to store gain and phase values to be used. 
+    This is update stores values for each channel in vectors.
+    The first dimension is the number of channels (this is "number of channels")
+    The second dimension is for the number of frequency bins (this is "number of frequency bins" long).
+      
 
-This function has two main parts: (1) loading of gain/phase values from gainFile containing the gain model and 
-(2) interpolating these values to the frequency binning of "Freq" array having frequencies used in the simulation.  
-*/
+    This function has two main parts: (1) loading of gain/phase values from gainFile containing the gain model and 
+    (2) interpolating these values to the frequency binning of "Freq" array having frequencies used in the simulation.  
+    */
 
-//This is the beginning of PART 1: getting gain/phase and frequency values out of the gain model file
+    //This is the beginning of PART 1: getting gain/phase and frequency values out of the gain model file
 
     // check if the gain file exists
     char errorMessage[400];
@@ -4116,10 +4287,10 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
                 cout << "The gain filename is: " << filename << endl; 
                 throw std::runtime_error(errorMessage);
             }
-
-            else
+            else {
                 // otherwise, the first header of the file is correct, and we can proceed
                 break;
+            }
         }
        
     }
@@ -4167,8 +4338,9 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
                 numCommas = int(std::count(first_line.begin(), first_line.end(), ','));
                 theLineNo++;
             }
-            else
+            else {
                 break;
+            }
         }
     }
 
@@ -4182,11 +4354,11 @@ This function has two main parts: (1) loading of gain/phase values from gainFile
           cout << "The gain filename is: " << filename << endl; 
           throw std::runtime_error(errorMessage);
     }
-
-    else  //we can continue
+    else {  //we can continue
         gain_ch = numCommas/2; // also need to set this detector wide variable, 
                                   // which specifies how many channels for which we have separate gain models
-    
+    }  
+  
     /*
         Fourth, we loop over the rows of the file again,
         and get the frequency values out, as well as the gain and phase values.
@@ -4369,9 +4541,10 @@ inline void Detector::CalculateElectChain(Settings *settings) {
     double interp_frequencies_databin[nFreqs];   // array for interpolated FFT frequencies
    
     // set the frequencies
-    for(int i=0; i < nFreqs; i++)
+    for(int i=0; i < nFreqs; i++) {
         interp_frequencies_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    
+    }    
+
     // get thermal noise level from data for this station & livetime config 
     std::vector< std::vector<double> > Hmeas = GetRayleighFitVector_databin(station, settings);
 
@@ -4397,41 +4570,53 @@ inline void Detector::CalculateElectChain(Settings *settings) {
             EAntennaType type;
             if(detector == 4) { // A1-5 case
 
-                if(rfChan < 4)
-                    type = eVPolTop;      
-                else if(rfChan < 8)
+                if(rfChan < 4) {
+                    type = eVPolTop;
+                }      
+                else if(rfChan < 8) {
                     type = eVPol;
-                else
+                }
+                else {
                     type = eHPol;
+                }
             
             }
             else if(detector == 5) { // PA case
                 
-                if(rfChan < 8) // even channel 5 is a bottom Vpol
+                if(rfChan < 8) { // even channel 5 is a bottom Vpol
                     type = eVPol;
-                else if(rfChan < 10)
+                }
+                else if(rfChan < 10) {
                     type = eHPol;
-                else if(rfChan%2 == 0)
+                }
+                else if(rfChan%2 == 0) {
                     type = eVPol;
-                else
+                }
+                else {
                     type = eVPolTop;
+                }
             }
-            else
+            else {
                 throw runtime_error("Detector type unsupported for automated data-driven gain model calculation!");
+            }
 
             // calculate ice contribution to Ttot at each frequency for this channel 
             // uses loaded antenna model for transmittance
             for(int i = 0; i < nFreqs; ++i) {
 
                 // trans*_databin vectors store the sqrt of the trasmittance, so we need to square them
-                if(type == eVPol)
+                if(type == eVPol) {
                     Ttot[i] = pow(transV_databin[i], 2)*Tice;
-                else if(type == eVPolTop)
+                }
+                else if(type == eVPolTop) {
                     Ttot[i] = pow(transVTop_databin[i], 2)*Tice;
-                else if(type == eHPol)
+                }
+                else if(type == eHPol) {
                     Ttot[i] = pow(transH_databin[i], 2)*Tice;
-                else
-                    throw runtime_error("Unsupported antenna type, transmittance unknown!"); 
+                }
+                else {
+                    throw runtime_error("Unsupported antenna type, transmittance unknown!");
+                } 
             } 
         }
       
@@ -4703,15 +4888,17 @@ inline void Detector::ReadGainOffset_TestBed(string filename, Settings *settings
         }
 
         else {// not using gain offset file, but just use same gainoffset value to all channels
-            for (int N=0; N<16; N++)
+            for (int N=0; N<16; N++) {
                 GainOffset_TB_ch.push_back( settings1->MANUAL_GAINOFFSET_VALUE );
+            }
         }
 
     }
     // use manual gain offset from setup file
     else if (settings1->USE_MANUAL_GAINOFFSET == 0) {
-        for (int i=0; i<params.number_of_antennas; i++) 
+        for (int i=0; i<params.number_of_antennas; i++) { 
             GainOffset_TB_ch.push_back( 1. );
+        }
     }
 
     return;
@@ -4820,9 +5007,10 @@ inline void Detector::ReadRFCM_TestBed(string filename, Settings *settings1) {  
         RFCM.close();
     }
     
-    else 
+    else {
         cout<<"RFCM file can not opened!!"<<endl;
-    
+    }    
+
     double xfreq[N];
     double ygain[N];  // need array for Tools::SimpleLinearInterpolation
     double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
@@ -4835,8 +5023,9 @@ inline void Detector::ReadRFCM_TestBed(string filename, Settings *settings1) {  
         xfreq[i] = xfreq_tmp[i];
         ygain[i] = ygain_tmp[i];
     }
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
 
     // check if there's pre assigned chs
     int ch_no = RFCM_TB_databin_ch.size();
@@ -4850,8 +5039,9 @@ inline void Detector::ReadRFCM_TestBed(string filename, Settings *settings1) {  
     // set vector array size to number of chs
     RFCM_TB_databin_ch.resize(ch_no+1);
     
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) 
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) { 
         RFCM_TB_databin_ch[ch_no].push_back( ygain_databin[i] );
+    }
    
     return; 
 }
@@ -4866,8 +5056,9 @@ void Detector::ReadRFCM_New(Settings *settings1) {    // will return gain (dB) w
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
 
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
 
     int RFCM_ch = RFCM_TB_databin_ch.size();
 
@@ -4876,8 +5067,9 @@ void Detector::ReadRFCM_New(Settings *settings1) {    // will return gain (dB) w
             
         RFCM_TB_databin_ch[ch].clear();
         
-        for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) 
+        for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) { 
             RFCM_TB_databin_ch[ch].push_back( ygain_databin[i] );
+        }
     }
 
     return;
@@ -4889,7 +5081,6 @@ inline void Detector::ReadRayleighFit_TestBed(string filename, Settings *setting
     
     string line;
     
-    //int N=-1;
     int init = 1;
     int ch_loop = 0;
     
@@ -4904,8 +5095,6 @@ inline void Detector::ReadRayleighFit_TestBed(string filename, Settings *setting
     double fit_tmp_tmp;
     double freq_tmp_tmp;
 
-    //cout<<"Reading RayleighFit file!"<<endl;
-    
     if ( Rayleigh_file.is_open() ) {
         while (Rayleigh_file.good() ) {
             
@@ -4925,8 +5114,9 @@ inline void Detector::ReadRayleighFit_TestBed(string filename, Settings *setting
                 
                 fit_tmp[ch_tmp].push_back( fit_tmp_tmp ); // fit result
 
-                if (ch_tmp == 0) 
+                if (ch_tmp == 0) { 
                     xfreq_tmp.push_back( freq_tmp_tmp );
+                }
 
                 getline (Rayleigh_file, line, '\n');
                 
@@ -4937,8 +5127,9 @@ inline void Detector::ReadRayleighFit_TestBed(string filename, Settings *setting
         Rayleigh_file.close();
     }
     
-    else 
+    else {
         cout<<"Rayleigh file can not opened!!"<<endl;
+    }
 
     int N = (int)xfreq_tmp.size() - 1;
     total_line = total_line - 1;
@@ -4959,12 +5150,14 @@ inline void Detector::ReadRayleighFit_TestBed(string filename, Settings *setting
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
     
     // now below are values that shared in all channels
-    for (int i=0;i<N;i++)  // copy values
+    for (int i=0;i<N;i++) {  // copy values
         xfreq[i] = xfreq_tmp[i];
+    }
     
-    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
-    
+    }   
+ 
     // set vector array size to number of chs
     Rayleigh_TB_databin_ch.resize(ch_no);
     
@@ -4972,16 +5165,18 @@ inline void Detector::ReadRayleighFit_TestBed(string filename, Settings *setting
     for (int ch=0; ch<ch_no; ch++) {
 
         // copy fit values
-        for (int i=0;i<N;i++) 
+        for (int i=0;i<N;i++) { 
             Rayleigh[i] = fit_tmp[ch][i];
+        }
 
         // Tools::SimpleLinearInterpolation will return Rayleigh array (in dB)
         Tools::SimpleLinearInterpolation( N, xfreq, Rayleigh, freq_step, &Freq[0], Rayleigh_TB_ch[ch] );
         
         Tools::SimpleLinearInterpolation( N, xfreq, Rayleigh, settings1->DATA_BIN_SIZE/2, xfreq_databin, Rayleigh_databin );
 
-        for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) 
+        for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) { 
             Rayleigh_TB_databin_ch[ch].push_back( Rayleigh_databin[i] );
+        }
     }
     
     return; 
@@ -5037,8 +5232,9 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
             }
 
             // otherwise, the first header of the file is correct, and we can proceed
-            else
+            else {
                 break;
+            }
         }
     }
     else{
@@ -5067,8 +5263,9 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
             */
 
             // skip this line WITHOUT advancing the line counter
-            if (std::all_of(line.begin(), line.end(), [](unsigned char c){ return std::isspace(c); }))
+            if (std::all_of(line.begin(), line.end(), [](unsigned char c){ return std::isspace(c); })) {
                 continue;
+            }
 
             lineCount++;
         }
@@ -5096,8 +5293,9 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
                 numCommas = int(std::count(first_line.begin(), first_line.end(), ','));
                 theLineNo++;
             }
-            else
+            else {
                 break;
+            }
         }
     }
     rayleighFile.clear(); // back to the beginning of the file again
@@ -5117,8 +5315,9 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
     */
     std::vector< std::vector <double> > fits; 
     fits.resize(RayleighFit_ch); // resize to account for number of channels
-    for(int iCh=0; iCh<RayleighFit_ch; iCh++) 
+    for(int iCh=0; iCh<RayleighFit_ch; iCh++) { 
         fits[iCh].resize(numFreqBins); // resize to account for number of freq bins
+    }
 
     theLineNo = 0; // reset this counter
     if (rayleighFile.is_open()){
@@ -5143,8 +5342,9 @@ void Detector::ReadRayleighFit_DeepStation(string filename, Settings *settings){
                 getline(rayleighFile, line, ',');
 
                 // skip this line WITHOUT advancing the line counter
-                if (std::all_of(line.begin(), line.end(), [](unsigned char c){ return std::isspace(c); }))
+                if (std::all_of(line.begin(), line.end(), [](unsigned char c){ return std::isspace(c); })) {
                     continue;
+                }
 
                 // first, peel off the frequency
                 int theFreqBin = theLineNo -1 ;
@@ -5275,8 +5475,9 @@ std::vector< std::vector< double> > Detector::GetRayleighFitVector_databin(int s
         );
 
         // copy the interpolated values out
-        for(int iFreqBin=0; iFreqBin<settings->DATA_BIN_SIZE/2; iFreqBin++)
+        for(int iFreqBin=0; iFreqBin<settings->DATA_BIN_SIZE/2; iFreqBin++) {
             rayleighFits_DeepStation_values_databin[iCh].push_back( interp_fits_databin[iFreqBin] );
+        }
     }
 
     return rayleighFits_DeepStation_values_databin;
@@ -5294,8 +5495,9 @@ void Detector::ReadNoiseFig_New(Settings *settings1) {    // will return gain (d
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
 
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
 
     int NoiseFig_numCh = NoiseFig_databin_ch.size();
     cout<<"NoiseFig_numCh: "<<NoiseFig_numCh<<endl;
@@ -5307,8 +5509,9 @@ void Detector::ReadNoiseFig_New(Settings *settings1) {    // will return gain (d
         NoiseFig_databin_ch[ch].clear();
         
         for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {
-            if(i%100==0) 
+            if(i%100==0) { 
                 cout<<"NoiseFig_databin: "<<NoiseFig_databin[i]<<endl;
+            }
             NoiseFig_databin_ch[ch].push_back( NoiseFig_databin[i] );
         }
     }
@@ -5337,8 +5540,9 @@ void Detector::ReadRayleigh_New(Settings *settings1) {    // will return gain (d
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
 
-    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++)     // this one is for DATA_BIN_SIZE
+    for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
+    }
 
     int Rayleigh_ch = Rayleigh_TB_databin_ch.size();
 
@@ -5347,8 +5551,9 @@ void Detector::ReadRayleigh_New(Settings *settings1) {    // will return gain (d
             
         Rayleigh_TB_databin_ch[ch].clear();
         
-        for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) 
+        for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) { 
             Rayleigh_TB_databin_ch[ch].push_back( Rayleigh_databin[i] );
+        }
     }
 
     return;
@@ -5363,9 +5568,10 @@ int Detector::GetTrigOffset( int ch, Settings *settings1 ){
         mostDelay = *max_element(triggerDelay.begin(), triggerDelay.end());
         offset = int((mostDelay -  triggerDelay[ch]) / (settings1->TIMESTEP * 1e9));
     }
-    else
+    else {
         offset = 0;
-    
+    }   
+ 
     return offset;
 }
 
@@ -5377,10 +5583,12 @@ int Detector::GetTrigMasking( int ch){
 
 double Detector::GetGainOffset( int StationID, int ch, Settings *settings1 ) { // returns voltage factor for specific channel gain off set
 
-    if ( (StationID == 0)&&(settings1->DETECTOR==3) )  // if TestBed, we have offset values
+    if ( (StationID == 0)&&(settings1->DETECTOR==3) ) {  // if TestBed, we have offset values
         return GainOffset_TB_ch[ch];
-    else if ( settings1->TRIG_ONLY_LOW_CH_ON==1 )  // if only triggered by bottom chs with TB info
+    }
+    else if ( settings1->TRIG_ONLY_LOW_CH_ON==1 ) {  // if only triggered by bottom chs with TB info
         return GainOffset_TB_ch[ch];
+    }
     
     return 1.;// other stations, just return 1.
 }
@@ -5388,29 +5596,36 @@ double Detector::GetGainOffset( int StationID, int ch, Settings *settings1 ) { /
 
 double Detector::GetThresOffset( int StationID, int ch, Settings *settings1 ) { // returns voltage factor for specific channel gain off set
 
-    if ( (StationID == 0)&&(settings1->DETECTOR==3) )  // if TestBed, we have offset values
+    if ( (StationID == 0)&&(settings1->DETECTOR==3) ) {  // if TestBed, we have offset values
         return ThresOffset_TB_ch[ch];
-    else if ( settings1->TRIG_ONLY_LOW_CH_ON==1 )  // if only triggered by bottom chs with TB info
+    }
+    else if ( settings1->TRIG_ONLY_LOW_CH_ON==1 ) {  // if only triggered by bottom chs with TB info
         return ThresOffset_TB_ch[ch];
+    }
     
     return 1.;// other stations, just return 1.
 }
 
 double Detector::GetThres( int StationID, int ch, Settings *settings1 ){
-    if ( (StationID == 0) && (settings1->DETECTOR==3) ) 
+    
+    if ( (StationID == 0) && (settings1->DETECTOR==3) ) { 
         return Thres_TB_ch[ch];
-    else if ( settings1->TRIG_ONLY_LOW_CH_ON==1 )  // if only triggered by bottom chs with TB info
+    }
+    else if ( settings1->TRIG_ONLY_LOW_CH_ON==1 ) {  // if only triggered by bottom chs with TB info
         return Thres_TB_ch[ch];
+    }
 
     return settings1->POWERTHRESHOLD;
 }
 
 double Detector::GetTemp( int StationID, int ch, Settings *settings1 ) {  // returns system temp for specific channel
 
-    if ( (StationID == 0)&&(settings1->DETECTOR==3) )  // if TestBed, we have offset values
+    if ( (StationID == 0)&&(settings1->DETECTOR==3) ) {  // if TestBed, we have offset values
         return Temp_TB_ch[ch];
-    else if ( settings1->TRIG_ONLY_LOW_CH_ON==1 )  // if only triggered by bottom chs with TB info
+    }
+    else if ( settings1->TRIG_ONLY_LOW_CH_ON==1 ) {  // if only triggered by bottom chs with TB info
         return Temp_TB_ch[ch];
+    }
     
     return settings1->NOISE_TEMP;// other stations, just return setup NOISE_TEMP
 }
@@ -5452,12 +5667,12 @@ void Detector::getDiodeModel(Settings *settings1) {
         
         diode_real.push_back(0.);   // first puchback 0. value  (this is actually not standard way though works fine)
 	    
-        //if (time[i]>0. && time[i]<maxt_diode) {
         if (i<(int)(maxt_diode/TIMESTEP)) { // think this is same with above commented if
             
             diode_real[i]=fdown1->Eval((double)i*TIMESTEP)+fdown2->Eval((double)i*TIMESTEP);
-            if (i>(int)(f_up->GetParameter(1)/TIMESTEP))
+            if (i>(int)(f_up->GetParameter(1)/TIMESTEP)) {
                 diode_real[i]+=f_up->Eval((double)i*TIMESTEP);
+            }
             
             sum+=diode_real[i];
         }
@@ -5469,27 +5684,32 @@ void Detector::getDiodeModel(Settings *settings1) {
     double diode_real_fft_double[NFOUR*2];    // test with NFOUR*2 array
     
     
-    //for (int i=0; i<settings1->DATA_BIN_SIZE + 512; i++) {  // 512 bin added for zero padding
     for (int i=0; i<settings1->DATA_BIN_SIZE*2; i++) {  // 512 bin added for zero padding
-        if ( i<(int)(maxt_diode/TIMESTEP) ) 
+        if ( i<(int)(maxt_diode/TIMESTEP) ) { 
             diode_real_fft[i] = diode_real[i];
-        else 
+        }
+        else { 
             diode_real_fft[i] = 0.;
+        }
     }
     
     for (int i=0; i<NFOUR; i++) {
-        if ( i<(int)(maxt_diode/TIMESTEP) ) 
+        if ( i<(int)(maxt_diode/TIMESTEP) ) { 
             diode_real_fft_half[i] = diode_real[i];
-        else
+        }
+        else {
             diode_real_fft_half[i] = 0.;
+        }
     }
     
     // test for double size array
     for (int i=0; i<NFOUR*2; i++) {
-        if ( i<(int)(maxt_diode/TIMESTEP) ) 
+        if ( i<(int)(maxt_diode/TIMESTEP) ) { 
             diode_real_fft_double[i] = diode_real[i];
-        else 
+        }
+        else { 
             diode_real_fft_double[i] = 0.;
+        }
     }
     
     // forward FFT
@@ -5506,16 +5726,19 @@ void Detector::getDiodeModel(Settings *settings1) {
     fdiode_real_double.clear();
     
     // save f domain diode response in fdiode_real
-    for (int i=0; i<settings1->DATA_BIN_SIZE*2; i++) 
+    for (int i=0; i<settings1->DATA_BIN_SIZE*2; i++) { 
         fdiode_real_databin.push_back( diode_real_fft[i] );
+    }
     
     // save f domain diode response in fdiode_real_half
-    for (int i=0; i<NFOUR; i++) 
-        fdiode_real.push_back( diode_real_fft_half[i] );
+    for (int i=0; i<NFOUR; i++) { 
+        fdiode_real.push_back( diode_real_fft_half[i] ); 
+    }
     
     // save f domain diode response in fdiode_real_double
-    for (int i=0; i<NFOUR*2; i++) 
+    for (int i=0; i<NFOUR*2; i++ ) { 
         fdiode_real_double.push_back( diode_real_fft_double[i] );
+    }
    
     delete fdown1;
     delete fdown2;
@@ -5526,7 +5749,6 @@ void Detector::getDiodeModel(Settings *settings1) {
 
 vector<double> Detector::getDiodeModel(const int len, Settings *settings1) {
     // creates diode model vector of length len
-
 
     //  this is our homegrown diode response function which is a downgoing gaussian followed by an upward step function
     TF1 *fdown1=new TF1("fl_down1","[3]+[0]*exp(-1.*(x-[1])*(x-[1])/(2*[2]*[2]))",-300.E-9,300.E-9);
@@ -5563,8 +5785,9 @@ vector<double> Detector::getDiodeModel(const int len, Settings *settings1) {
 	    
         if (i<(int)(maxt_diode/TIMESTEP)) { // think this is same with above commented if
             diode_real[i]=fdown1->Eval((double)i*TIMESTEP)+fdown2->Eval((double)i*TIMESTEP);
-            if (i>(int)(f_up->GetParameter(1)/TIMESTEP))
+            if (i>(int)(f_up->GetParameter(1)/TIMESTEP)) {
                 diode_real[i]+=f_up->Eval((double)i*TIMESTEP);
+            }
             
             sum+=diode_real[i];
         }
@@ -5573,10 +5796,12 @@ vector<double> Detector::getDiodeModel(const int len, Settings *settings1) {
     double diode_real_fft[len];  
     
     for (int i=0; i < len; i++) {  
-        if ( i<(int)(maxt_diode/TIMESTEP) ) 
+        if ( i<(int)(maxt_diode/TIMESTEP) ) { 
             diode_real_fft[i] = diode_real[i];
-        else 
+        }
+        else { 
             diode_real_fft[i] = 0.;
+        }
     }
     
     // forward FFT
@@ -5585,8 +5810,9 @@ vector<double> Detector::getDiodeModel(const int len, Settings *settings1) {
     vector<double> fdiode; 
     
     // save f domain diode response in fdiode
-    for (int i=0; i < len; i++) 
+    for (int i=0; i < len; i++) { 
         fdiode.push_back( diode_real_fft[i] );
+    }
 
     delete fdown1;
     delete fdown2;
@@ -5603,10 +5829,12 @@ void Detector::get_NewDiodeModel(Settings *settings1) {
     double diode_real_fft[settings1->DATA_BIN_SIZE*2];  // double sized array for myconvlv
 
     for (int i=0; i<settings1->DATA_BIN_SIZE*2; i++) {  // 512 bin added for zero padding
-        if ( i<(int)(maxt_diode/TIMESTEP) ) 
+        if ( i<(int)(maxt_diode/TIMESTEP) ) { 
             diode_real_fft[i] = diode_real[i];
-        else 
+        }
+        else { 
             diode_real_fft[i] = 0.;
+        }
     }
 
     // forward FFT
@@ -5616,8 +5844,9 @@ void Detector::get_NewDiodeModel(Settings *settings1) {
     fdiode_real_databin.clear();
 
     // save f domain diode response in fdiode_real
-    for (int i=0; i<settings1->DATA_BIN_SIZE*2; i++) 
+    for (int i=0; i<settings1->DATA_BIN_SIZE*2; i++) { 
         fdiode_real_databin.push_back( diode_real_fft[i] );
+    }
 
     return;
 }
@@ -5636,15 +5865,17 @@ void Detector::PrepareVectorsInstalled(){
     for (int i=0; i<params.number_of_stations; i++) {
         stations.push_back(temp_station);
         
-        for (int j = 0; j < InstalledStations[i].nSurfaces; j++) 
+        for (int j = 0; j < InstalledStations[i].nSurfaces; j++) { 
             stations[i].surfaces.push_back(temp_surface);
+        }
         
         for (int k = 0; k < InstalledStations[i].nStrings; k++) {
             
             stations[i].strings.push_back(temp_string);
             
-            for (int l = 0; l < InstalledStations[i].VHChannel[k].size(); l++)
+            for (int l = 0; l < InstalledStations[i].VHChannel[k].size(); l++) {
                 stations[i].strings[k].antennas.push_back(temp_antenna);
+            }
         }
     }
     
@@ -5662,13 +5893,15 @@ void Detector::PrepareVectorsInstalled(int importedStation) {
     // prepare vectors
     for (int i = 0; i < params.number_of_stations; i++) {
         stations.push_back(temp_station);
-        for (int j = 0; j < InstalledStations[importedStation].nSurfaces; j++) 
+        for (int j = 0; j < InstalledStations[importedStation].nSurfaces; j++) { 
             stations[i].surfaces.push_back(temp_surface);
+        }
         for (int k = 0; k < InstalledStations[importedStation].nStrings; k++) {
             stations[i].strings.push_back(temp_string);
 
-            for (int l = 0; l < InstalledStations[importedStation].VHChannel[k].size(); l++) 
+            for (int l = 0; l < InstalledStations[importedStation].VHChannel[k].size(); l++) { 
                 stations[i].strings[k].antennas.push_back(temp_antenna);
+            }
         }
     }
 
@@ -6227,9 +6460,10 @@ void Detector::GetSSAfromChannel ( int stationID, int channelNum, int * antennaN
         }
     }
     
-    if (*stringNum == -1)
+    if (*stringNum == -1) {
         cerr << "No string/antenna matches the channel number" << endl;
-    
+    }   
+ 
     return;
 }
 
@@ -6250,8 +6484,9 @@ void Detector::GetSSAfromChannel(int stationID, int channelNum, int * antennaNum
             }
         }
 
-        if ( * stringNum == -1) 
+        if ( * stringNum == -1) { 
             cerr << "No string/antenna matches the channel number" << endl;
+        }
     } 
     else if (settings1 -> DETECTOR == 4) {
 
@@ -6280,8 +6515,9 @@ void Detector::GetSSAfromChannel(int stationID, int channelNum, int * antennaNum
             }
         }
 
-        if ( * stringNum == -1) 
+        if ( * stringNum == -1) { 
             cerr << "No string/antenna matches the channel number" << endl;
+        }
     }
     // if only ideal stations are in use and also installed ARA1a (use ARA1a ch mapping for now)
     else {
@@ -6295,8 +6531,9 @@ void Detector::GetSSAfromChannel(int stationID, int channelNum, int * antennaNum
             }
         }
 
-        if ( * stringNum == -1) 
+        if ( * stringNum == -1) {
             cerr << "No string/antenna matches the channel number" << endl;
+        }
     }
 
     return;
@@ -6309,9 +6546,10 @@ void Detector::UseAntennaInfo(int stationNum, Settings *settings1){
     
     AraGeomTool *araGeom = new AraGeomTool();
 
-    if (stationNum == 0) 
+    if (stationNum == 0) { 
         params.TestBed_BH_Mean_delay = 0.;
-    
+    }    
+
     for ( int chan = 1; chan < InstalledStations[stationNum].nChannels+1; chan++){
         
         double avgX, avgY;
@@ -6331,30 +6569,37 @@ void Detector::UseAntennaInfo(int stationNum, Settings *settings1){
             stations[stationNum].strings[stringNum].SetX(stations[stationNum].GetX()+araGeom->getStationInfo(stationNum, settings1->DETECTOR_YEAR)->fAntInfo[chan-1].antLocation[0]);
             stations[stationNum].strings[stringNum].SetY(stations[stationNum].GetY()+araGeom->getStationInfo(stationNum, settings1->DETECTOR_YEAR)->fAntInfo[chan-1].antLocation[1]);
             
-            if ( params.antenna_orientation == 0 )     // all borehole antennas facing same x
+            if ( params.antenna_orientation == 0 ) {     // all borehole antennas facing same x
                 stations[stationNum].strings[stringNum].antennas[antennaNum].orient = 0;
+            }
             else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
                 if ( stringNum==0||stringNum==3 ) {
-                    if ( antennaNum==0||antennaNum==1 ) 
+                    if ( antennaNum==0||antennaNum==1 ) { 
                         stations[stationNum].strings[stringNum].antennas[antennaNum].orient = 0;
-                    else 
+                    }
+                    else { 
                         stations[stationNum].strings[stringNum].antennas[antennaNum].orient = 1;
+                    }
                 }
                 else {
-                    if ( antennaNum==0||antennaNum==1 ) 
+                    if ( antennaNum==0||antennaNum==1 ) { 
                         stations[stationNum].strings[stringNum].antennas[antennaNum].orient = 1;
-                    else 
+                    }
+                    else { 
                         stations[stationNum].strings[stringNum].antennas[antennaNum].orient = 0;
+                    }
                 }
                 
             } //end orientation selection
 
 
             // put DAQ channel type 
-            if (araGeom->getStationInfo(stationNum, settings1->DETECTOR_YEAR)->fAntInfo[chan-1].daqChanType == AraDaqChanType::kDisconeChan) // BH chs
+            if (araGeom->getStationInfo(stationNum, settings1->DETECTOR_YEAR)->fAntInfo[chan-1].daqChanType == AraDaqChanType::kDisconeChan) { // BH chs
                 stations[stationNum].strings[stringNum].antennas[antennaNum].DAQchan = 0;
-            else if (araGeom->getStationInfo(stationNum, settings1->DETECTOR_YEAR)->fAntInfo[chan-1].daqChanType == AraDaqChanType::kBatwingChan)  // not BH chs
+            }
+            else if (araGeom->getStationInfo(stationNum, settings1->DETECTOR_YEAR)->fAntInfo[chan-1].daqChanType == AraDaqChanType::kBatwingChan) { // not BH chs
                 stations[stationNum].strings[stringNum].antennas[antennaNum].DAQchan = 1;
+            }
 
             cout << "Borehole ch: " << chan << " station: " << stationNum << " string: " << stringNum 
                  << " ant: " << antennaNum << " Type: " << stations[stationNum].strings[stringNum].antennas[antennaNum].type 
@@ -6364,29 +6609,40 @@ void Detector::UseAntennaInfo(int stationNum, Settings *settings1){
 
                 params.TestBed_Ch_delay[chan-1] = araGeom->getStationInfo(stationNum, settings1->DETECTOR_YEAR)->fAntInfo[chan-1].debugTotalCableDelay;
                 params.TestBed_Ch_delay_bin[chan-1] = params.TestBed_Ch_delay[chan-1]/(settings1->TIMESTEP * 1.e9); // change TIMESTEP s to ns
-                if (chan<9) 
+                if (chan<9) {
                     params.TestBed_BH_Mean_delay += params.TestBed_Ch_delay[chan-1];
-
+                }
+  
                 // give manual delay time for BH chs (for TestBed)
-                if (chan == 2)
+                if (chan == 2) {
                     stations[stationNum].strings[stringNum].antennas[antennaNum].manual_delay = 50.; // additional delay in ns
-                else if (chan == 3) 
+                }
+                else if (chan == 3) { 
                     stations[stationNum].strings[stringNum].antennas[antennaNum].manual_delay = -10.; // additional delay in ns
-                else if (chan == 4) 
+                }
+                else if (chan == 4) { 
                     stations[stationNum].strings[stringNum].antennas[antennaNum].manual_delay = 20.; // additional delay in ns
-                else if (chan == 5) 
+                }
+                else if (chan == 5) { 
                     stations[stationNum].strings[stringNum].antennas[antennaNum].manual_delay = 30.; // additional delay in ns
-                else if (chan == 6) 
+                }
+                else if (chan == 6) { 
                     stations[stationNum].strings[stringNum].antennas[antennaNum].manual_delay = 20.; // additional delay in ns
-                else if (chan == 7) 
+                }
+                else if (chan == 7) { 
                     stations[stationNum].strings[stringNum].antennas[antennaNum].manual_delay = -10.; // additional delay in ns
-                else if (chan == 8) 
+                }
+                else if (chan == 8) { 
                     stations[stationNum].strings[stringNum].antennas[antennaNum].manual_delay = 10.; // additional delay in ns
-                else 
+                }
+                else { 
                     stations[stationNum].strings[stringNum].antennas[antennaNum].manual_delay = 0.;
+                }
             }
-            else stations[stationNum].strings[stringNum].antennas[antennaNum].manual_delay = 0.;// no manual delay for other stations (not known yet)
-
+            else {
+                stations[stationNum].strings[stringNum].antennas[antennaNum].manual_delay = 0.;// no manual delay for other stations (not known yet)
+            }
+  
             // set manual delay bin
             stations[stationNum].strings[stringNum].antennas[antennaNum].manual_delay_bin = stations[stationNum].strings[stringNum].antennas[antennaNum].manual_delay / (settings1->TIMESTEP * 1.e9);
 
@@ -6421,17 +6677,20 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
 
     int StationID_AraRoot = settings1->DETECTOR_STATION_ARAROOT;
     
-    if (StationID == 0) 
+    if (StationID == 0) { 
         params.TestBed_BH_Mean_delay = 0.;
-    
+    }    
+
     std::cout<<"InstalledStations[StationID].nChannels is "<<InstalledStations[StationID].nChannels<<std::endl;
     for ( int chan = 0; chan < InstalledStations[StationID].nChannels; chan++){
         
-      int antId;
-      if (StationID == 0) 
-          antId = chan+1; 
-      else
-          antId = chan; 
+        int antId;
+        if (StationID == 0) { 
+            antId = chan+1; 
+        }
+        else {
+            antId = chan;
+        } 
 
         double avgX;
         double avgY;
@@ -6444,39 +6703,44 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
             stations[StationIndex].strings[stringNum].antennas[antennaNum].SetX(stations[StationIndex].GetX()+araGeom->getStationInfo(StationID_AraRoot, settings1->DETECTOR_YEAR)->fAntInfo[antId].antLocation[0]);
             stations[StationIndex].strings[stringNum].antennas[antennaNum].SetY(stations[StationIndex].GetY()+araGeom->getStationInfo(StationID_AraRoot, settings1->DETECTOR_YEAR)->fAntInfo[antId].antLocation[1]);
             stations[StationIndex].strings[stringNum].antennas[antennaNum].SetZ(araGeom->getStationInfo(StationID_AraRoot, settings1->DETECTOR_YEAR)->fAntInfo[antId].antLocation[2]);
-            
+
             //set polarization to match the deployed information
             stations[StationIndex].strings[stringNum].antennas[antennaNum].type = int(araGeom->getStationInfo(StationID_AraRoot, settings1->DETECTOR_YEAR)->fAntInfo[antId].polType);  
-            
+
             stations[StationIndex].strings[stringNum].SetX(stations[StationIndex].GetX()+araGeom->getStationInfo(StationID_AraRoot, settings1->DETECTOR_YEAR)->fAntInfo[antId].antLocation[0]);
             stations[StationIndex].strings[stringNum].SetY(stations[StationIndex].GetY()+araGeom->getStationInfo(StationID_AraRoot, settings1->DETECTOR_YEAR)->fAntInfo[antId].antLocation[1]);
-            
-            
-            
-            if ( params.antenna_orientation == 0 )     // all borehole antennas facing same x
+              
+            if ( params.antenna_orientation == 0 ) {     // all borehole antennas facing same x
                 stations[StationIndex].strings[stringNum].antennas[antennaNum].orient = 0;
+            }
             else if ( params.antenna_orientation == 1 ) {   // borehole antennas one next facing different way
                 if ( stringNum==0||stringNum==3 ) {
-                    if ( antennaNum==0||antennaNum==1 ) 
+                    if ( antennaNum==0||antennaNum==1 ) { 
                         stations[StationIndex].strings[stringNum].antennas[antennaNum].orient = 0;
-                    else 
+                    }
+                    else { 
                         stations[StationIndex].strings[stringNum].antennas[antennaNum].orient = 1;
+                    }
                 }
                 else {
-                    if ( antennaNum==0||antennaNum==1 ) 
+                    if ( antennaNum==0||antennaNum==1 ) { 
                         stations[StationIndex].strings[stringNum].antennas[antennaNum].orient = 1;
-                    else 
+                    }
+                    else {
                         stations[StationIndex].strings[stringNum].antennas[antennaNum].orient = 0;
+                    }
                 }
-                
+    
             } //end orientation selection
 
 
             // put DAQ channel type 
-            if (araGeom->getStationInfo(StationID_AraRoot, settings1->DETECTOR_YEAR)->fAntInfo[antId].daqChanType == AraDaqChanType::kDisconeChan)  // BH chs
+            if (araGeom->getStationInfo(StationID_AraRoot, settings1->DETECTOR_YEAR)->fAntInfo[antId].daqChanType == AraDaqChanType::kDisconeChan) {  // BH chs
                 stations[StationIndex].strings[stringNum].antennas[antennaNum].DAQchan = 0;
-            else if (araGeom->getStationInfo(StationID_AraRoot, settings1->DETECTOR_YEAR)->fAntInfo[antId].daqChanType == AraDaqChanType::kBatwingChan)  // not BH chs
+            }
+            else if (araGeom->getStationInfo(StationID_AraRoot, settings1->DETECTOR_YEAR)->fAntInfo[antId].daqChanType == AraDaqChanType::kBatwingChan) {  // not BH chs
                 stations[StationIndex].strings[stringNum].antennas[antennaNum].DAQchan = 1;
+            }
 
             cout << "Borehole ch: " << chan << " inserted station: " << StationIndex << " station: " << StationID 
                  << " string: " << stringNum << " ant: " << antennaNum << " Type: " << stations[StationIndex].strings[stringNum].antennas[antennaNum].type 
@@ -6486,29 +6750,39 @@ void Detector::ImportStationInfo(Settings *settings1, int StationIndex, int Stat
 
                 params.TestBed_Ch_delay[chan] = araGeom->getStationInfo(StationID_AraRoot, settings1->DETECTOR_YEAR)->fAntInfo[antId].debugTotalCableDelay;
                 params.TestBed_Ch_delay_bin[chan] = params.TestBed_Ch_delay[chan]/(settings1->TIMESTEP * 1.e9); // change TIMESTEP s to ns
-                if (chan<8) 
+                if (chan<8) { 
                     params.TestBed_BH_Mean_delay += params.TestBed_Ch_delay[chan];
+                }
 
                 // give manual delay time for BH chs (for TestBed)
-                if (chan == 1) 
+                if (chan == 1) { 
                     stations[StationIndex].strings[stringNum].antennas[antennaNum].manual_delay = 50.; // additional delay in ns
-                else if (chan == 2) 
+                }
+                else if (chan == 2) { 
                     stations[StationIndex].strings[stringNum].antennas[antennaNum].manual_delay = -10.; // additional delay in ns
-                else if (chan == 3) 
+                }
+                else if (chan == 3) { 
                     stations[StationIndex].strings[stringNum].antennas[antennaNum].manual_delay = 20.; // additional delay in ns
-                else if (chan == 4) 
+                }
+                else if (chan == 4) { 
                     stations[StationIndex].strings[stringNum].antennas[antennaNum].manual_delay = 30.; // additional delay in ns
-                else if (chan == 5) 
+                }
+                else if (chan == 5) { 
                     stations[StationIndex].strings[stringNum].antennas[antennaNum].manual_delay = 20.; // additional delay in ns
-                else if (chan == 6) 
+                }
+                else if (chan == 6) {
                     stations[StationIndex].strings[stringNum].antennas[antennaNum].manual_delay = -10.; // additional delay in ns
-                else if (chan == 7) 
+                }
+                else if (chan == 7) {
                     stations[StationIndex].strings[stringNum].antennas[antennaNum].manual_delay = 10.; // additional delay in ns
-                else 
+                }
+                else {
                     stations[StationIndex].strings[stringNum].antennas[antennaNum].manual_delay = 0.;
+                }
             }
-            else 
+            else {
                 stations[StationIndex].strings[stringNum].antennas[antennaNum].manual_delay = 0.;// no manual delay for other stations (not known yet)
+            }
 
             // set manual delay bin
             stations[StationIndex].strings[stringNum].antennas[antennaNum].manual_delay_bin = stations[StationIndex].strings[stringNum].antennas[antennaNum].manual_delay / (settings1->TIMESTEP * 1.e9);
@@ -6632,8 +6906,9 @@ void Detector::SetupIdealStations(){
         }
         for (int surfAntID = 0; surfAntID < IdealStations[stationID].nSurfaces; surfAntID++){
             for (int i = 0; i < IdealStations[stationID].surfaceID.size(); i++){
-                if (IdealStations[stationID].surfaceID[i] == surfAntID)
+                if (IdealStations[stationID].surfaceID[i] == surfAntID) {
                     IdealStations[stationID].IDSurface.push_back(i);
+                }
             }
         }
     }    
@@ -6644,10 +6919,12 @@ void Detector::SetupIdealStations(){
 int Detector::getStringfromArbAntID( int stationID, int ant_ID){
 
     for (int i = 0; i < stations[stationID].strings.size(); i++){
-        if (ant_ID < stations[stationID].strings[i].antennas.size()) 
+        if (ant_ID < stations[stationID].strings[i].antennas.size()) { 
             return i;
-        else 
+        }
+        else {
             ant_ID = ant_ID - stations[stationID].strings[i].antennas.size();
+        }
     }
 
     throw runtime_error("Detector::getStringfromArbAntID - you've reached a place where a return statement is missing. Can you fix it?");    
@@ -6656,10 +6933,12 @@ int Detector::getStringfromArbAntID( int stationID, int ant_ID){
 int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
     
     for (int i = 0; i < stations[stationID].strings.size(); i++){
-        if (ant_ID < stations[stationID].strings[i].antennas.size()) 
+        if (ant_ID < stations[stationID].strings[i].antennas.size()) { 
             return ant_ID;
-        else 
+        }
+        else {
             ant_ID = ant_ID - stations[stationID].strings[i].antennas.size();
+        }
     }
     
     throw runtime_error("Detector:::getAntennafromArbAntID - you've reached a place where a return statement is missing. Can you fix it?");    
@@ -6688,11 +6967,13 @@ inline void Detector::ReadImpedance(string filename, double (*TempRealImpedance)
             // break line up into each of its words (i.e. strings separated by whitespace)
             string buff;
             vector<string> words;
-            while(ss >> buff) // >> skips whitespace and just goes to the next word
+            while(ss >> buff) { // >> skips whitespace and just goes to the next word
                 words.push_back(buff);
+            }
 
-            if(words.size() != 3)
+            if(words.size() != 3) {
                 throw runtime_error("Impedance file not formatted properly! "+filename);           
+            }
 
             impFreq.push_back(stod(words[0]));
             (*TempRealImpedance)[idx] = stod(words[1]);
@@ -6717,24 +6998,27 @@ double Detector::GetSplitterFactor(Settings *settings) {
   double factor; 
  
   //Case for simulating real ARA Stations 0 (testbed), A1, A2, and A3.
-  if (settings->DETECTOR == 4 and settings->DETECTOR_STATION < 4) 
+  if (settings->DETECTOR == 4 and settings->DETECTOR_STATION < 4) { 
       factor = 1/sqrt(pow(10,-0.34));
+  }
   //Case for simulating real ARA Stations A4 and A5 (non phased array).
-  else if (settings->DETECTOR == 4 and settings->DETECTOR_STATION >= 4) 
+  else if (settings->DETECTOR == 4 and settings->DETECTOR_STATION >= 4) { 
       factor = 1/sqrt(pow(10,-0.14));
+  }
   //Case for Phased Array implementation by Abby Bishop. 
-  else if (settings->DETECTOR == 5) 
+  else if (settings->DETECTOR == 5) { 
       factor = 1;
+  }
   //Final case where if none of the above are satisfied, it defaults to the historical 1/sqrt(2)
-  else 
+  else { 
       factor = 1/sqrt(2);
+  }
 
   return factor;
 }
 
 
 Detector::~Detector() {
-  //cout<<"Destruct class Detector"<<endl;
 }
 
 
