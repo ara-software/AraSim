@@ -294,7 +294,8 @@ outputdir="outputs"; // directory where outputs go
   
   WAVEFORM_CENTER = 0; // Default: 0, no offset in waveform centering
 
-  DEADTIME = 0.01*1.E-3; // Default: 0.01 millisecond
+  DEADTIME = 1.E-3; // Default: 1 millisecond (for ARA stations; see https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2116)
+                    // Deadtime for PA should be 0.1 ms (based on 0.12% livetime loss in PA search arXiv:2202.07080)
   
   POSNU_R = 1000.;
   POSNU_THETA=-3.1415926535/4.;
