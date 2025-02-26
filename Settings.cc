@@ -825,34 +825,35 @@ void Settings::ReadEvtFile(string evtfile){
         }
         evtFile.close();
 
-        NNU=EVID.size()+1;
+        // EVID: Vector storing event IDs (integers) for neutrino interactions.
+        // Each element in EVID represents a specific interaction, and repeated event IDs 
+        // indicate multiple interactions associated with the same neutrino (stochastic losses, decays, etc).
+        
+        NNU = 0; //restart neutrino count from zero (default N = 100)
 
-        //start counting the number of unique neutrinos
-        if (NNU == 0 || NNU > EVID.size()){
-            NNU = 0; //restart from zero
+        if (!EVID.empty()) {
+            int interactions_per_nnu_cnt = 1;  // Start the counter for interactions per neutrino
 
-            if (!EVID.empty()) {
-                int interactions_per_nnu_cnt = 1;  // Start the counter at 1 for the first occurrence
-
-                // Iterate through the EVID vector starting from the second element
-                for (size_t i = 1; i < EVID.size(); ++i) {
-                    if (EVID[i] == EVID[i - 1]) {
-                        interactions_per_nnu_cnt++;  // Increment the counter when the same event ID repeats
-                    } else {
-                        // Store the interactions per nnu count for the previous EVID
-                        INT_PER_NNU.push_back(interactions_per_nnu_cnt);
-                        // Reset the counter for the new EVID
-                        interactions_per_nnu_cnt = 1;
-                        // Increment the number of neutrinos
-                        NNU++;
-                    }
+            // Iterate through the EVID vector starting from the second element
+            for (size_t i = 1; i < EVID.size(); ++i) {
+                if (EVID[i] == EVID[i - 1]) {
+                    interactions_per_nnu_cnt++;  // Increment the counter when the same event ID repeats
+                } else {
+                    //New event ID encountered
+                    // Store the interactions count for the previous neutrino
+                    INT_PER_NNU.push_back(interactions_per_nnu_cnt);
+                    // Reset the interaction counter for the new neutrino
+                    interactions_per_nnu_cnt = 1;
+                    // Increment the number of unique neutrinos
+                    NNU++;
                 }
-                // Don't forget to store the count for the last EVID
-                INT_PER_NNU.push_back(interactions_per_nnu_cnt);
-
-                //Increment the number of neutrinos (adding the last neutrino)
-                NNU++;
             }
+
+            // Store the interaction count for the last neutrino (or if EVID = 1)
+            INT_PER_NNU.push_back(interactions_per_nnu_cnt);
+
+            // Increment the neutrino count to account for the last unique neutrino (or if EVID = 1)
+            NNU++;
         }
 	
     }
