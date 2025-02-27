@@ -29,8 +29,15 @@ class Event {
 
       int inu_thrown; // event number. in case we save triggered events only, this event number could be useful
 
+      int first_vertex_idx; // first vertex index for secondary interactions of a given event
+
+      int interaction_cnt_max; //   counter for the max number of interactions in a given neutrino event
+
       int inu_passed; // event number. in case we save triggered events only, this event number could be useful
 
+      vector<double> interactions_birth_time; //time between interactions of a single event
+
+      vector<double> event_ID; //time between interactions of a single event
     
       double pnu;   // energy of neutrino
       //Vector nnu;   // direction of neutrino
@@ -51,6 +58,7 @@ class Event {
       //vector <Report> test_report;  
 
       Event (); // default constructor
+      Event (Event *event);
       //Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceModel *icemodel, Detector *detector, Signal *signal, Secondaries *sec1 );
       Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceModel *icemodel, Detector *detector, Signal *signal, Secondaries *sec1, int event_num );
 
@@ -84,7 +92,7 @@ class Event {
 //  Event(double) : pos_sh(),int_type(0),iev(0),part_type(0),n_incident(3), e_incident(1.E18), eField1m(3) {}
 //-------------------------------------------------- 
 
-      ClassDef(Event,1);
+      ClassDef(Event,2);
 
 };
 
