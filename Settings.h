@@ -296,6 +296,8 @@ class Settings
 
         int WAVEFORM_CENTER; // the relative location of the center of the write-out window with respect to the last triggered bin (which is laced at the center of the window by default), this effectively provides a global delay in the write-out window across all channels: positive values shift the write-out window to later times in the waveform, negative values shift the window to earlier times, default: 0
 
+        double DEADTIME; // Time (in s) the station is down between reading out one event and searching for new triggers
+
         double POSNU_R; // default: 1000; meters from station center
         double POSNU_THETA; // default: -PI/4; elevation angle from station center coordinates
         double POSNU_PHI; // default: 0; azimuth angle from station center coordinates
@@ -357,6 +359,8 @@ class Settings
         vector<double> IND_NNU_THETA;
         vector<double> IND_NNU_PHI;
         vector<double> ELAST;
+        vector<int> INT_PER_NNU; //storing the number of interactions per neutrino (NNU) e.g. stochastic losses, decays, ...,
+                                 //associated to a primary neutrino interaction
 
 
 
@@ -476,7 +480,7 @@ class Settings
  // end of values from icemc
 
 
-  ClassDef(Settings,1);
+  ClassDef(Settings,2);
 
 
 };

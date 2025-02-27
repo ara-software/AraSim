@@ -1298,9 +1298,6 @@ void Report::Connect_Interaction_Detector_V2(Event *event, Detector *detector, R
                                             double V_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
                                             double T_forfft[stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]];
                                             
-                                            cout << stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt] << endl;
-                                            cout << waveform_bin << endl;
-
 					    int max_bire_ray_cnt = settings1->BIREFRINGENCE + 1;  // rays in birefringence per ray solution
                                             double V_forfft_bire[max_bire_ray_cnt][stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt]]; // for the waveforms of the rays in birefringence
 

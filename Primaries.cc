@@ -1823,9 +1823,9 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
   
   //calculate posnu's X, Y wrt detector core
   if (settings1->EVENT_GENERATION_MODE == 1){
-    // Don't shift neutrino vertices when events are provided
-    X = thisR*cos(thisPhi)*sin(thisTheta);
-    Y = thisR*sin(thisPhi)*sin(thisTheta);
+    // DO shift neutrino vertices when events are provided
+    X = thisR*cos(thisPhi)*sin(thisTheta) + avgX;
+    Y = thisR*sin(thisPhi)*sin(thisTheta) + avgY;
     D = pow(X*X + Y*Y, 0.5);
   }
   else if (detector->Get_mode() == 1 || detector->Get_mode() == 2 ||detector->Get_mode() == 3 
@@ -1842,8 +1842,8 @@ void Interaction::PickExact (IceModel *antarctica, Detector *detector, Settings 
   }
 
   if (settings1->EVENT_GENERATION_MODE == 1){
-    // Don't shift neutrino vertices when events are provided
-    Z = thisR*cos(thisTheta);
+    // DO shift neutrino vertices when events are provided
+    Z = thisR*cos(thisTheta) + avgZ;
   }
   else {
     Z = avgZ + thisR*cos(thisTheta);

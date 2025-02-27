@@ -467,7 +467,7 @@ class Detector {
         int max_number_of_antennas_station; // maximum number of antennas in a station
 
         void getDiodeModel(Settings *settings1);   // similar with icemc -> anita -> getDiodeModel().  set diode_real and fdiode_real values.
-
+        vector<double> getDiodeModel(const int len, Settings *settings1); // returns diode model vector of length len
 
         // this is a test version for getting new noise waveforms for each event
         // for a best performance, we can just set a new reasonable DATA_BIN_SIZE and make new values for those
