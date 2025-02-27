@@ -5665,7 +5665,7 @@ void Detector::getDiodeModel(Settings *settings1) {
 	
     for (int i=0;i<NFOUR/2;i++) {
         
-        diode_real.push_back(0.);   // first puchback 0. value  (this is actually not standard way though works fine)
+        diode_real.push_back(0.);   // first pushback 0. value  (this is actually not standard way though works fine)
 	    
         if (i<(int)(maxt_diode/TIMESTEP)) { // think this is same with above commented if
             
