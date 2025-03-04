@@ -18,6 +18,7 @@ Event::Event () {
     Initialize ();
 }
 
+/*
 Event::Event (Event *event){
 
     Event_type = event->Event_type;
@@ -43,6 +44,7 @@ Event::Event (Event *event){
     }
 
 }
+*/
 
 void Event::Initialize () {
 

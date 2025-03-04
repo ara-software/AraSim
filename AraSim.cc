@@ -555,9 +555,11 @@ int main(int argc, char **argv) {   // read setup.txt file
                 //   with the saved full report and event objects
                 if (stations_to_trigger_check >= 1){
                     delete report;
+                    delete event;
+                    
                     report = new Report(detector, settings1);
-                    // Event *event_save = new Event(*event); // Works
-                    *event = Event(event_save); // doesnt work
+                    event = new Event(*event_save); // Works
+                    //*event = Event(event_save); // doesnt work
                 }
 
                 for (int station_i=0; station_i<report->stations.size(); station_i++){
