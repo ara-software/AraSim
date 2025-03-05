@@ -38,11 +38,11 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
     interaction_cnt_max = n_interactions;
 
     // If the event generation mode is set to 1 (event read-in mode), 
-    // adjust interaction count to the number of interactions per neutrino primary
+    // adjust interaction count to the number of interactions per event
     // calculated in Settings.cc (ReadEvtFile) by looping over events with the same EVID
     if (settings1->EVENT_GENERATION_MODE==1){
 
-        // Retrieve the number of interactions for the current neutrino primary
+        // Retrieve the number of interactions for the current event
         interaction_cnt_max = settings1->INT_PER_NNU[event_num];
 
         // Initialize counter for the cumulative number of interactions
@@ -116,7 +116,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 // The first interaction is set to have a birth time of 0.0 (reference point)
                 interactions_birth_time.push_back(0.0);
 
-                // Store the index of the first neutrino primary for this event
+                // Store the index of the first interaction for this event
                 first_vertex_idx = inu_thrown;
             }
             else{
