@@ -30,6 +30,7 @@ class Event {
       int inu_passed; // event number. in case we save triggered events only, this event number could be useful
       
       int first_vertex_idx; // first vertex index (possibly vertex of a primary) for secondary interactions of a given event
+                            // it contains indices of arrays created by the event list reader Settings::ReadEvtFile()
       int interaction_cnt_max; // counter for the max number of interactions in a given neutrino event
       vector<double> interactions_birth_time; // time between secondary interactions and the primary interaction of a single event
       vector<double> event_ID; // event_ID of a single event i.e. all secondary interactions get the same event_ID as the primary
