@@ -18,34 +18,6 @@ Event::Event () {
     Initialize ();
 }
 
-/*
-Event::Event (Event *event){
-
-    Event_type = event->Event_type;
-    inu_thrown = event->inu_thrown;
-    first_vertex_idx = event->first_vertex_idx;
-    interaction_cnt_max = event->interaction_cnt_max;
-    inu_passed = event->inu_passed;
-
-    interactions_birth_time = event->interactions_birth_time;
-    event_ID = event->event_ID;
-
-    pnu = event->pnu;
-
-    nuflavor = event->nuflavor;
-    nuflavorint = event->nuflavorint;
-    n_interactions = event->n_interactions;
-    IsCalpulser = event->IsCalpulser;
-    nu_nubar = event->nu_nubar;
-
-    for (int nu_int_idx=0; nu_int_idx<event->Nu_Interaction.size(); nu_int_idx++){
-        Interaction *save_interaction = new Interaction(event->Nu_Interaction[nu_int_idx]);
-        Nu_Interaction.push_back( *save_interaction );
-    }
-
-}
-*/
-
 void Event::Initialize () {
 
     Nu_Interaction.clear();
