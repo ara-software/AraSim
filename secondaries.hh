@@ -233,13 +233,9 @@ string flavors[3]; // the gps path of the anita-lite flight
 	double interactionLengthNu(Primaries*primary1,Settings*settings1,double pnu,int nu_nubar,int currentint);
 
   /*
-  * Computes the Euclidean distance between two interaction points.
+  * Computes the Euclidean distance between two interactions.
   *
-  * This function calculates the straight-line distance between two interaction 
-  * positions given in spherical coordinates (r, theta, phi). It converts these coordinates 
-  * to Cartesian (x, y, z) and then applies the Euclidean distance formula.
-  *
-  * We need this helper function to calculate the distance between interactions when there are more than one, 
+  * We need this helper function to calculates the distance between interactions when there are more than one, 
   * e.g. when there is a muon traveling and leaving stochastics
   */
   double get_interaction_distance(int first_int_idx, int second_int_idx, Settings *settings1);
