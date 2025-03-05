@@ -29,10 +29,10 @@ class Event {
       int inu_thrown; // event number. in case we save triggered events only, this event number could be useful
       int inu_passed; // event number. in case we save triggered events only, this event number could be useful
       
-      int first_vertex_idx; // first vertex index for secondary interactions of a given event
+      int first_vertex_idx; // first vertex index (possibly vertex of a primary) for secondary interactions of a given event
       int interaction_cnt_max; // counter for the max number of interactions in a given neutrino event
-      vector<double> interactions_birth_time; // time between interactions of a single event
-      vector<double> event_ID; // time between interactions of a single event
+      vector<double> interactions_birth_time; // time between secondary interactions and the primary interaction of a single event
+      vector<double> event_ID; // event_ID of a single event i.e. all secondary interactions get the same event_ID as the primary
     
       double pnu; // energy of neutrino
       //Vector nnu; // direction of neutrino

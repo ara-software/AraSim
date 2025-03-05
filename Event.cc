@@ -57,7 +57,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         }  
     }
 
-    for (int interaction_cnt = 0; interaction_cnt < interaction_cnt_max; ++interaction_cnt){ 
+    for (int interaction_cnt = 1; interaction_cnt <= interaction_cnt_max; ++interaction_cnt){ 
 
         Choose_Evt_Type (settings1);
 
@@ -109,7 +109,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
             }
 
             //Calculate the interactions birth time for secondaries
-            if (interaction_cnt == 0){
+            if (interaction_cnt == 1){
                 // If this is the first interaction, clear the birth time storage
                 interactions_birth_time.clear();
 
@@ -120,7 +120,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 first_vertex_idx = inu_thrown;
             }
             else{
-                // Compute the birth time for subsequent secondary interactions.
+                // Compute the birth time for secondaries (inu_thrown) of a primary 
                 // This is determined by dividing the interaction distance by the speed of light (CLIGHT),
                 // giving the travel time from the previous interaction.
                 // Assumes particles travel at ~CLIGHT.
