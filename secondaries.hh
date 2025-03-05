@@ -235,7 +235,7 @@ string flavors[3]; // the gps path of the anita-lite flight
   /*
   * Computes the Euclidean distance between two interactions.
   *
-  * We need this helper function to calculates the distance between interactions when there are more than one, 
+  * We need this helper function to calculate the distance between interactions when there are more than one, 
   * e.g. when there is a muon traveling and leaving stochastics
   */
   double get_interaction_distance(int first_int_idx, int second_int_idx, Settings *settings1);
