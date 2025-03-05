@@ -232,7 +232,19 @@ string flavors[3]; // the gps path of the anita-lite flight
 
 	double interactionLengthNu(Primaries*primary1,Settings*settings1,double pnu,int nu_nubar,int currentint);
 
-  double get_interaction_distance(int first_int_idx, int second_int_idx, Settings *settings1); // Calculate the distance from the primary neutrino’s first interaction to each secondary interaction
+  /*
+  * Computes the Euclidean distance between two interaction points.
+  *
+  * This function calculates the straight-line distance between two interaction 
+  * positions given in spherical coordinates (r, theta, phi). It converts these coordinates 
+  * to Cartesian (x, y, z) and then applies the Euclidean distance formula.
+  *
+  * @first_int_idx Index of the first interaction (e.g., primary neutrino interaction).
+  * second_int_idx Index of the second interaction (e.g., secondary cascade interaction).
+  * settings1 Pointer to the settings object containing interaction position data read from event lists.
+  * Returns the Euclidean distance between the two interaction points in meters.
+  */
+  double get_interaction_distance(int first_int_idx, int second_int_idx, Settings *settings1);
 
   
 }; //class Secondaries
