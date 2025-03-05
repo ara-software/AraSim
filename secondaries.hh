@@ -166,6 +166,7 @@ public:
   double GetDBViewAngle(const Vector &refr, const Vector &nnu);
   //void GetFirstBang(const Position &r_in, const Vector &nnu, Position &posnu, double len_int_kgm2, double d1, double &nuentrancelength);
   double NFBWeight(double ptau, double taulength);
+ 
 
 
 // from icemc with tau mode (just removed hy and inu)
@@ -230,6 +231,15 @@ string flavors[3]; // the gps path of the anita-lite flight
         double TauEnergyInitial(double ptau_final, double Distance, double z_distance, double density);
 
 	double interactionLengthNu(Primaries*primary1,Settings*settings1,double pnu,int nu_nubar,int currentint);
+
+  /*
+  * Computes the Euclidean distance between two interactions.
+  *
+  * We need this helper function to calculate the distance between interactions when there are more than one, 
+  * e.g. when there is a muon traveling and leaving stochastics
+  */
+  double get_interaction_distance(int first_int_idx, int second_int_idx, Settings *settings1);
+
   
 }; //class Secondaries
 

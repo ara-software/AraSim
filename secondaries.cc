@@ -1718,3 +1718,30 @@ double Secondaries::interactionLengthNu(Primaries*primary1,Settings*settings1,do
 	double L=Lcm/100.;//convert cm to m.
 	return L;//meters.
 }
+
+double Secondaries::get_interaction_distance(int first_int_idx, int second_int_idx, Settings *settings1) {
+    // Retrieve spherical coordinates for the first vertex
+    double r1 = settings1->IND_POSNU_R[first_int_idx];
+    double theta1 = settings1->IND_POSNU_THETA[first_int_idx];
+    double phi1 = settings1->IND_POSNU_PHI[first_int_idx];
+
+    // Retrieve spherical coordinates for the second point (inu_thrown)
+    double r2 = settings1->IND_POSNU_R[second_int_idx];
+    double theta2 = settings1->IND_POSNU_THETA[second_int_idx];
+    double phi2 = settings1->IND_POSNU_PHI[second_int_idx];
+
+    // Convert first vertex to Cartesian coordinates
+    double x1 = r1 * sin(theta1) * cos(phi1);
+    double y1 = r1 * sin(theta1) * sin(phi1);
+    double z1 = r1 * cos(theta1);
+
+    // Convert second point to Cartesian coordinates
+    double x2 = r2 * sin(theta2) * cos(phi2);
+    double y2 = r2 * sin(theta2) * sin(phi2);
+    double z2 = r2 * cos(theta2);
+
+    // Compute Euclidean distance between the two points
+    double distance = sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2) + pow(z2 - z1, 2));
+
+    return distance;
+}
