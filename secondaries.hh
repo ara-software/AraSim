@@ -232,7 +232,7 @@ string flavors[3]; // the gps path of the anita-lite flight
 
 	double interactionLengthNu(Primaries*primary1,Settings*settings1,double pnu,int nu_nubar,int currentint);
 
-  double sec_nnu_interaction_distances(int first_vertex_idx, int inu_thrown, Settings *settings1); // calculate distances between secondary interactions 
+  double get_interaction_distance(int first_int_idx, int second_int_idx, Settings *settings1); // Calculate the distance from the primary neutrino’s first interaction to each secondary interaction
 
   
 }; //class Secondaries

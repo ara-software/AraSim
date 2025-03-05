@@ -25,25 +25,20 @@ class Event {
 
   public:
 
-      int Event_type;   // 0 : neutrino event,  1 : blackhole event,  2 : monopole event,... etc
-
+      int Event_type; // 0 : neutrino event,  1 : blackhole event,  2 : monopole event,... etc
       int inu_thrown; // event number. in case we save triggered events only, this event number could be useful
-
-      int first_vertex_idx; // first vertex index for secondary interactions of a given event
-
-      int interaction_cnt_max; //   counter for the max number of interactions in a given neutrino event
-
       int inu_passed; // event number. in case we save triggered events only, this event number could be useful
-
-      vector<double> interactions_birth_time; //time between interactions of a single event
-
-      vector<double> event_ID; //time between interactions of a single event
+      
+      int first_vertex_idx; // first vertex index for secondary interactions of a given event
+      int interaction_cnt_max; // counter for the max number of interactions in a given neutrino event
+      vector<double> interactions_birth_time; // time between interactions of a single event
+      vector<double> event_ID; // time between interactions of a single event
     
-      double pnu;   // energy of neutrino
-      //Vector nnu;   // direction of neutrino
-      string nuflavor;  // flavor of neutrino
-      int nuflavorint;  // 1 : nue,  2 : numu,  3 : nutau
-      int n_interactions;    // number of interaction inside the ice
+      double pnu; // energy of neutrino
+      //Vector nnu; // direction of neutrino
+      string nuflavor; // flavor of neutrino
+      int nuflavorint; // 1 : nue,  2 : numu,  3 : nutau
+      int n_interactions; // number of interaction inside the ice
       int IsCalpulser;
 
       int nu_nubar; // 0 : nu, 1 : nu_bar
