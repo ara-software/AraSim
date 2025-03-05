@@ -120,9 +120,9 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 first_vertex_idx = inu_thrown;
             }
             else{
-                // Compute the birth time for secondary interactions (inu_thrown) after its first interaction (first_vertex_idx)
-                // This is determined by dividing the interaction distance by the speed of light (CLIGHT),
-                // giving the travel time from the previous interaction.
+                // Compute the birth time for the current secondary interaction (inu_thrown) after 
+                // its first interaction (first_vertex_idx). This is determined by dividing the interaction 
+                // distance by the speed of light (CLIGHT), giving the travel time from the previous interaction.
                 // Assumes particles travel at ~CLIGHT.
                 double tmp_birth_time = (sec1->get_interaction_distance(first_vertex_idx, inu_thrown, settings1)/CLIGHT);
 
