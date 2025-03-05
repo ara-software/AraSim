@@ -239,10 +239,8 @@ string flavors[3]; // the gps path of the anita-lite flight
   * positions given in spherical coordinates (r, theta, phi). It converts these coordinates 
   * to Cartesian (x, y, z) and then applies the Euclidean distance formula.
   *
-  * @first_int_idx Index of the first interaction (e.g., primary neutrino interaction).
-  * second_int_idx Index of the second interaction (e.g., secondary cascade interaction).
-  * settings1 Pointer to the settings object containing interaction position data read from event lists.
-  * Returns the Euclidean distance between the two interaction points in meters.
+  * We need this helper function to calculate the distance between interactions when there are more than one, 
+  * e.g. when there is a muon traveling and leaving stochastics
   */
   double get_interaction_distance(int first_int_idx, int second_int_idx, Settings *settings1);
 
