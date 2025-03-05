@@ -58,7 +58,6 @@ class Event {
       //vector <Report> test_report;  
 
       Event (); // default constructor
-      Event (Event *event);
       //Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceModel *icemodel, Detector *detector, Signal *signal, Secondaries *sec1 );
       Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceModel *icemodel, Detector *detector, Signal *signal, Secondaries *sec1, int event_num );
 
