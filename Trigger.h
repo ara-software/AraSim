@@ -36,11 +36,13 @@ class Trigger {
      /*
            double Full_window[16][16384];  // test with array, not vector, diode response
            double Full_window_V[16][16384];  // test with array, not vector, voltage waveform
-           */
+           
 
            double Full_window[16][32768];  // test with array, not vector, diode response
            double Full_window_V[16][32768];  // test with array, not vector, voltage waveform
-
+     */
+     vector<vector<double> > Full_window;
+     vector<vector<double> > Full_window_V;
 
      double TIMESTEP;   // will copy from Detector class
      double maxt_diode; // will copy from Detector class
@@ -105,13 +107,13 @@ class Trigger {
            //vector < vector <double> >  Full_window;  // test with array, not vector
 
      
-     ClassDef(Trigger,1);
+     ClassDef(Trigger,2);
 
-    // Phased Array Triggering Variables
-    double snr_PA[60];    // First  column of nuphase_trig_effc.txt data
-    double eff_PA[60];    // Second column of nuphase_trig_effc.txt data
-    double angle_PA[188]; // First  column of nuphase_SNR_angle.txt data
-    double aSNR_PA[188];  // Second column of nuphase_SNR_angle.txt data
+     // Phased Array Triggering Variables
+     double snr_PA[60];    // First  column of nuphase_trig_effc.txt data
+     double eff_PA[60];    // Second column of nuphase_trig_effc.txt data
+     double angle_PA[188]; // First  column of nuphase_SNR_angle.txt data
+     double aSNR_PA[188];  // Second column of nuphase_SNR_angle.txt data
 
 
 };
