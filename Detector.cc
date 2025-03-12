@@ -2488,7 +2488,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
 
     if(freq_step > settings1->DATA_BIN_SIZE/2)
       throw runtime_error("settings1->DATA_BIN_SIZE not large enough for the number of frequencies");
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+    vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
     double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
     double df_fft;
     
@@ -2501,8 +2501,11 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
-    
-    Tools::SimpleLinearInterpolation( freq_step-1, xfreq, &Transm[0], settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
+
+    // store the frequency bins used (should be okay to overwrite since all antenna types have same binning since it's defined here)
+    trans_freq = xfreq_databin;   
+ 
+    Tools::SimpleLinearInterpolation( freq_step-1, xfreq, &Transm[0], settings1->DATA_BIN_SIZE/2, &xfreq_databin[0], trans_databin );
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {    // this one is for DATA_BIN_SIZE
         if(!std::isfinite(trans_databin[i]))
           throw runtime_error("Non-finite FFT gain value found! "+filename);
@@ -2510,6 +2513,38 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     }
 
 } 
+
+double Detector::GetTransm_OutZero(int ch, double freq) {
+
+  ch = ch%16; // to match the convention of Detector::GetTransm_databin
+
+  vector<double>* transm; 
+  if(ch < 4)
+      transm = &transVTop_databin;
+  else if(ch < 8)
+      transm = &transV_databin;
+  else
+      transm = &transH_databin;
+
+  const int nFreq = (int)trans_freq.size();
+  const double dfreq = trans_freq[1] - trans_freq[0]; 
+  const int bin = (int)( (freq - trans_freq[0]) / dfreq )+1;
+
+  if(freq == trans_freq[0])
+    return transm->front();
+  
+  if(freq == trans_freq.back())
+    return transm->back();
+ 
+  if(bin <= 0 || bin >= nFreq)
+    return 0;
+
+  const double m = (transm->at(bin) - transm->at(bin-1))/(trans_freq[bin] - trans_freq[bin-1]);
+  const double b = transm->at(bin-1); 
+  
+  return m*(freq - trans_freq[bin-1]) + b; 
+
+}
 
 double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
     //double GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
@@ -4036,7 +4071,7 @@ void Detector::ReadNoiseFigure(string filename, Settings *settings1)
     int ch_no = 16;// all_chNF[1].size()-2;
     cerr << "The number of channels: " << ch_no << endl;
 
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+    vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
     double NoiseFig_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
     double df_fft;
     
@@ -4072,6 +4107,9 @@ cout<<"number of f bins: "<<settings1->DATA_BIN_SIZE/2<<endl;
     NoiseFig_databin_ch.resize(ch_no);
     //    cout<<"ch_no: "<<ch_no<<endl;        
 
+    // save frequency values we interpolate onto
+    NoiseFig_freq = xfreq_databin;
+
     // now loop over channels and do interpolation
     for (int ch=0; ch<ch_no; ch++) {
 
@@ -4090,7 +4128,7 @@ cout<<"number of f bins: "<<settings1->DATA_BIN_SIZE/2<<endl;
 //		cout << Freq[i] << "   " <<  NoiseFig_ch[ch][i] << "\t";
 //	} 
 //	cout << endl;
-	Tools::SimpleLinearInterpolation( N-1, xfreq, NoiseFig, settings1->DATA_BIN_SIZE/2, xfreq_databin, NoiseFig_databin );
+	Tools::SimpleLinearInterpolation( N-1, xfreq, NoiseFig, settings1->DATA_BIN_SIZE/2, &xfreq_databin[0], NoiseFig_databin );
 	//	cout << "Third test reading next ";
 //        for (int i=0;i<30;i++){
 //		cout << xfreq_databin[i+3000] << "   " << NoiseFig_databin[i+3000] << "\t";
@@ -4103,6 +4141,33 @@ cout<<"number of f bins: "<<settings1->DATA_BIN_SIZE/2<<endl;
             NoiseFig_databin_ch[ch].push_back( NoiseFig_databin[i] );
         }
     }
+}
+
+// linearly interpolate noise figure for channel, returning 0 out of range
+double Detector::GetNoiseFig_OutZero(int ch, double freq) {
+
+  ch = ch%16; // to match the convention of Detector::GetNoiseFig_databin
+
+  const int nFreq = (int)NoiseFig_freq.size();
+  const double dfreq = NoiseFig_freq[1] - NoiseFig_freq[0]; 
+  const int bin = (int)( (freq - NoiseFig_freq[0]) / dfreq )+1;
+
+  if(freq == NoiseFig_freq[0])
+    return NoiseFig_databin_ch[ch].front();
+  
+  if(freq == NoiseFig_freq.back())
+    return NoiseFig_databin_ch[ch].back();
+ 
+  if(bin <= 0 || bin >= nFreq)
+    return 0;
+
+  vector<double>* noiseFig = &NoiseFig_databin_ch[ch];
+
+  const double m = (noiseFig->at(bin) - noiseFig->at(bin-1))/(NoiseFig_freq[bin] - NoiseFig_freq[bin-1]);
+  const double b = noiseFig->at(bin-1); 
+  
+  return m*(freq - NoiseFig_freq[bin-1]) + b; 
+
 }
 
 // read-in amplifier noise figure for this station -- stored in linear units
@@ -5126,7 +5191,7 @@ inline void Detector::ReadRFCM_TestBed(string filename, Settings *settings1) {  
     else cout<<"RFCM file can not opened!!"<<endl;
     
     double xfreq[N], ygain[N];  // need array for Tools::SimpleLinearInterpolation
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+    vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
     double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
     double df_fft;
     
@@ -5147,8 +5212,10 @@ inline void Detector::ReadRFCM_TestBed(string filename, Settings *settings1) {  
     // Tools::SimpleLinearInterpolation will return RFCM array (in dB)
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, &Freq[0], RFCM_TB_ch[ch_no] );
     
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, &xfreq_databin[0], ygain_databin );
 
+    // store frequency bins (should be okay if this is overwritten since it's defined in this function, so should be the same)
+    RFCM_TB_freq = xfreq_databin;
 
     // set vector array size to number of chs
     RFCM_TB_databin_ch.resize(ch_no+1);
@@ -5162,6 +5229,29 @@ inline void Detector::ReadRFCM_TestBed(string filename, Settings *settings1) {  
     
 }
 
+double Detector::GetRFCMGain_OutZero(int ch, double freq) {
+
+  const int nFreq = (int)RFCM_TB_freq.size();
+  const double dfreq = RFCM_TB_freq[1] - RFCM_TB_freq[0]; 
+  const int bin = (int)( (freq - RFCM_TB_freq[0]) / dfreq )+1;
+
+  vector<double>* RFCM_TB = &RFCM_TB_databin_ch[ch];
+
+  if(freq == RFCM_TB_freq[0])
+    return RFCM_TB->front();
+  
+  if(freq == NoiseFig_freq.back())
+    return RFCM_TB->back();
+ 
+  if(bin <= 0 || bin >= nFreq)
+    return 0;
+
+  const double m = (RFCM_TB->at(bin) - RFCM_TB->at(bin-1))/(RFCM_TB_freq[bin] - RFCM_TB_freq[bin-1]);
+  const double b = RFCM_TB->at(bin-1); 
+  
+  return m*(freq - RFCM_TB_freq[bin-1]) + b; 
+
+}
 
 
 void Detector::ReadRFCM_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain

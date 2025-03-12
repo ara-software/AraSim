@@ -3884,6 +3884,12 @@ void Report::ApplyRFCM_databin(int ch, int bin_n, Detector *detector, double &vm
 
 }
 
+void Report::ApplyRFCM_OutZero(int ch, double freq, Detector *detector, double &vmmhz, double RFCM_OFFSET) {  // read RFCM gain in dB and apply unitless gain to vmmhz
+
+    vmmhz = vmmhz * pow(10., ( detector->GetRFCMGain_OutZero(ch, freq) + RFCM_OFFSET )/20.);   // from dB to unitless gain for voltage
+
+    return;
+}
 
 void Report::ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double &vmmhz, Settings *settings1) {  // read noise figure and apply unitless gain to vmmhz
   //cout<<"Entered ApplyNoiseFig_databin    ";
@@ -3913,8 +3919,19 @@ void Report::ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double
   
 }
 
+void Report::ApplyNoiseFig_OutZero(int ch, double freq, Detector *detector, double &vmmhz, Settings *settings1) {  // read noise figure and apply unitless gain to vmmhz
 
-
+    double tempNoise = vmmhz*vmmhz;
+    
+    if(detector->GetNoiseFig_OutZero(ch, freq)>1.0){
+        vmmhz = TMath::Sqrt( tempNoise*(detector->GetTransm_OutZero(ch, freq)) + tempNoise/(settings1->NOISE_TEMP)*220.0*(detector->GetNoiseFig_OutZero(ch, freq) - 1.0) ) ;  
+    }
+    else{
+      vmmhz = vmmhz;
+    }
+    
+    return;
+}
 
 void Report::GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_theta, double &ant_phi) {   //ant_theta and ant_phi is in degree 
 
@@ -3983,16 +4000,15 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
                 ApplyFilter_OutZero(freq, detector, V_tmp);
                 ApplyPreamp_OutZero(freq, detector, V_tmp);
                 ApplyFOAM_OutZero(freq, detector, V_tmp);
-		if (settings1->APPLY_NOISE_FIGURE==1){
-		  ApplyNoiseFig_databin(0,k,detector, V_tmp, settings1);
-		}
+                if (settings1->APPLY_NOISE_FIGURE==1){
+                    ApplyNoiseFig_OutZero(0, freq, detector, V_tmp, settings1);
+                }
             }
             else if (settings1->USE_TESTBED_RFCM_ON == 1) {
                 // apply RFCM gain
                 // as this mode don't have different chs' noise waveform separately, just use ch0 RFCM gain...
                 cerr<<"Trying not allowed mode : NOISE_CHANNEL_MODE=0 and USE_TESTBED_RFCM_ON=1 same time!"<<endl;
                 break;
-                //ApplyRFCM_databin(0, detector, V_tmp);
             }
 
 
@@ -4073,11 +4089,13 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 ApplyPreamp_OutZero(freq, detector, V_tmp);
                 ApplyFOAM_OutZero(freq, detector, V_tmp);
                 if (settings1 -> APPLY_NOISE_FIGURE == 1) {
-                    ApplyNoiseFig_databin(ch % 16, k, detector, V_tmp, settings1);
+                    ApplyNoiseFig_OutZero(ch % 16, freq, detector, V_tmp, settings1);
                 }
             } else if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
+                const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP);
+                const double freq = k*dfreq;
                 // apply RFCM gain
-                ApplyRFCM_databin(ch, k, detector, V_tmp, settings1 -> RFCM_OFFSET);
+                ApplyRFCM_OutZero(ch, freq, detector, V_tmp, settings1 -> RFCM_OFFSET);
             }
 
             Vfft_noise_before.push_back(V_tmp);
@@ -4158,8 +4176,10 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                         ApplyFOAM_OutZero(freq, detector, V_tmp);
 
                     } else if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
+                        const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP);
+                        const double freq = k*dfreq;
                         // apply RFCM gain
-                        ApplyRFCM_databin(ch, k, detector, V_tmp, settings1 -> RFCM_OFFSET);
+                        ApplyRFCM_OutZero(ch, freq, detector, V_tmp, settings1 -> RFCM_OFFSET);
                     }
 
                     Vfft_noise_before.push_back(V_tmp);
