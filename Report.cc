@@ -1221,9 +1221,9 @@ void Report::ModelRay(
                 ApplyAntFactors(
                     heff, n_trg_pokey, n_trg_slappy, Pol_vector, antenna_d->type, 
                     Pol_factor, vmmhz1m_tmp, antenna_theta, antenna_phi);
-                ApplyFilter(l, detector, vmmhz1m_tmp);
-                ApplyPreamp(l, detector, vmmhz1m_tmp);
-                ApplyFOAM(l, detector, vmmhz1m_tmp);
+                ApplyFilter_OutZero(freq_tmp, detector, vmmhz1m_tmp);
+                ApplyPreamp_OutZero(freq_tmp, detector, vmmhz1m_tmp);
+                ApplyFOAM_OutZero(freq_tmp, detector, vmmhz1m_tmp);
 
                 vmmhz_filter[l] = vmmhz1m_tmp;
                 
@@ -3978,9 +3978,11 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
             V_tmp = v_noise / sqrt(2.) ; // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
 
             if (settings1->USE_TESTBED_RFCM_ON == 0) {
-                ApplyFilter_databin(k, detector, V_tmp);
-                ApplyPreamp_databin(k, detector, V_tmp);
-                ApplyFOAM_databin(k, detector, V_tmp);
+                const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP);
+                const double freq = k*dfreq;
+                ApplyFilter_OutZero(freq, detector, V_tmp);
+                ApplyPreamp_OutZero(freq, detector, V_tmp);
+                ApplyFOAM_OutZero(freq, detector, V_tmp);
 		if (settings1->APPLY_NOISE_FIGURE==1){
 		  ApplyNoiseFig_databin(0,k,detector, V_tmp, settings1);
 		}
@@ -4065,9 +4067,11 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
             V_tmp = v_noise / sqrt(2.); // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
 
             if (settings1 -> USE_TESTBED_RFCM_ON == 0) {
-                ApplyFilter_databin(k, detector, V_tmp);
-                ApplyPreamp_databin(k, detector, V_tmp);
-                ApplyFOAM_databin(k, detector, V_tmp);
+                const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP);
+                const double freq = k*dfreq;
+                ApplyFilter_OutZero(freq, detector, V_tmp);
+                ApplyPreamp_OutZero(freq, detector, V_tmp);
+                ApplyFOAM_OutZero(freq, detector, V_tmp);
                 if (settings1 -> APPLY_NOISE_FIGURE == 1) {
                     ApplyNoiseFig_databin(ch % 16, k, detector, V_tmp, settings1);
                 }
@@ -4147,9 +4151,11 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                     V_tmp = v_noise / sqrt(2.); // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
 
                     if (settings1 -> USE_TESTBED_RFCM_ON == 0) {
-                        ApplyFilter_databin(k, detector, V_tmp);
-                        ApplyPreamp_databin(k, detector, V_tmp);
-                        ApplyFOAM_databin(k, detector, V_tmp);
+                        const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP);
+                        const double freq = k*dfreq;
+                        ApplyFilter_OutZero(freq, detector, V_tmp);
+                        ApplyPreamp_OutZero(freq, detector, V_tmp);
+                        ApplyFOAM_OutZero(freq, detector, V_tmp);
 
                     } else if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
                         // apply RFCM gain
