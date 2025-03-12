@@ -662,8 +662,11 @@ void Report::BuildAndTriggerOnWaveforms(
       trigger->Full_window.resize(16);
       trigger->Full_window_V.resize(16);
       for (int i = 0; i < 16; i++) {
-        trigger->Full_window[i].resize(DATA_BIN_SIZE_tmp);
-        trigger->Full_window_V[i].resize(DATA_BIN_SIZE_tmp);
+        trigger->Full_window[i].clear();
+        trigger->Full_window[i].resize(DATA_BIN_SIZE_tmp, 0.0);
+
+        trigger->Full_window_V[i].clear();
+        trigger->Full_window_V[i].resize(DATA_BIN_SIZE_tmp, 0.0);
       }
 
       // cout<<"new DATA_BIN_SIZE : "<<DATA_BIN_SIZE_tmp<<endl;
@@ -1009,7 +1012,7 @@ void Report::rerun_event(Event *event, Detector *detector,
             signal->GetVm_FarField_Tarray(event, settings, viewangle,
                                           atten_factor, local_outbin, 
                                           local_Tarray, local_Earray, 
-                                          local_skipbins);
+                                          local_skipbins, interaction_idx);
 
             double dT_forfft = local_Tarray[1] - local_Tarray[0];
 
@@ -1284,7 +1287,7 @@ void Report::ModelRay(
                         double Earray[outbin];
                         signal->GetVm_FarField_Tarray(
                             event, settings, viewangle, atten_factor, outbin, Tarray, Earray, 
-                            antenna_r->skip_bins[ray_idx]);
+                            antenna_r->skip_bins[ray_idx], interaction_idx);
 
                         double dT_forfft = Tarray[1] - Tarray[0];  // step in ns
                         InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
@@ -3262,33 +3265,29 @@ void Report::GetNoiseThenConvolve(
     int wf_length = 0;
     int min_wf_bin = 0;
     int max_wf_bin = 0;
-    int wf_length_to_convlv=0;
     int offset = 0;
     vector <double> diode_response;
     if ( n_connected_rays > 1 ) { // multiple ray solutions in one window
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is 2*BINSIZE
-        wf_length_to_convlv = 2*BINSIZE;
         offset = trigger->maxt_diode_bin;
         min_wf_bin = this_signalbin - BINSIZE/2 + offset;
-        max_wf_bin = this_signalbin + BINSIZE/2 + BINSIZE;
-        diode_response = detector->getDiodeModel(2*wf_length_to_convlv, settings1);
+        max_wf_bin = this_signalbin - BINSIZE/2 + wf_length;
+        diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
     else if ( antenna->ray_sol_cnt == 0 ){ // No rays connected to this antenna
         this_signalbin = BINSIZE/2;
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is BINSIZE
-        wf_length_to_convlv = BINSIZE;
         offset = 0;
         min_wf_bin = 0;
-        max_wf_bin = BINSIZE;
-        diode_response = detector->getDiodeModel(2*wf_length_to_convlv, settings1);
+        max_wf_bin = wf_length;
+        diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
     else { // Only one ray signal in the window
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is BINSIZE
-        wf_length_to_convlv = BINSIZE;
         offset = trigger->maxt_diode_bin;
         min_wf_bin = this_signalbin - BINSIZE/2 + offset;
-        max_wf_bin = this_signalbin + BINSIZE/2;
-        diode_response = detector->getDiodeModel(2*wf_length_to_convlv, settings1);
+        max_wf_bin = this_signalbin - BINSIZE/2 + wf_length;
+        diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
 
     // Get noise-only waveform
@@ -3303,13 +3302,8 @@ void Report::GetNoiseThenConvolve(
         V_total_forconvlv.push_back( V_signal.at(bin) + V_noise[bin]);
     }
 
-    // Keep only the bins within the desired range
-    if (min_wf_bin >= 0 && max_wf_bin < wf_length && min_wf_bin - offset <= max_wf_bin) {
-        V_total_forconvlv.assign(V_total_forconvlv.begin() + min_wf_bin - offset, V_total_forconvlv.begin() + max_wf_bin + 1);
-    }
-
     // Push noise+signal waveform through the tunnel diode
-    trigger->myconvlv( V_total_forconvlv, wf_length_to_convlv, diode_response, V_total_forconvlv);
+    trigger->myconvlv( V_total_forconvlv, wf_length, diode_response, V_total_forconvlv);
 
     // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
     for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
@@ -4090,6 +4084,9 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 ApplyFOAM_OutZero(freq, detector, V_tmp);
                 if (settings1 -> APPLY_NOISE_FIGURE == 1) {
                     ApplyNoiseFig_OutZero(ch % 16, freq, detector, V_tmp, settings1);
+                    if (std::isnan(V_tmp) || std::isinf(V_tmp)) {
+                        throw std::runtime_error("V_tmp is NaN or Inf");
+                    }
                 }
             } else if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
                 const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP);
