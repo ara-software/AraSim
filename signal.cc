@@ -1232,7 +1232,7 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             Const = sin_view / sin_changle * 1./event->Nu_Interaction[interaction_idx].EM_LQ * (V_s) * E_shower / 1.e12;
 
             //shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
-            shower_bin = event->Nu_Interaction[0].EM_shower_Q_profile.size();
+            shower_bin = event->Nu_Interaction[interaction_idx].EM_shower_Q_profile.size();
 
 
             // ok, let's just calculate near signal time bins
