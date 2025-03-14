@@ -3989,7 +3989,7 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
             V_tmp = v_noise / sqrt(2.) ; // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
 
             if (settings1->USE_TESTBED_RFCM_ON == 0) {
-                const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP);
+                const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP * (1.E6)); // from Hz to MHz;
                 const double freq = k*dfreq;
                 ApplyFilter_OutZero(freq, detector, V_tmp);
                 ApplyPreamp_OutZero(freq, detector, V_tmp);
@@ -4077,7 +4077,7 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
             V_tmp = v_noise / sqrt(2.); // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
 
             if (settings1 -> USE_TESTBED_RFCM_ON == 0) {
-                const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP);
+                const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP * (1.E6)); // from Hz to MHz;
                 const double freq = k*dfreq;
                 ApplyFilter_OutZero(freq, detector, V_tmp);
                 ApplyPreamp_OutZero(freq, detector, V_tmp);
@@ -4089,7 +4089,7 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                     }
                 }
             } else if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
-                const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP);
+                const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP * (1.E6)); // from Hz to MHz;
                 const double freq = k*dfreq;
                 // apply RFCM gain
                 ApplyRFCM_OutZero(ch, freq, detector, V_tmp, settings1 -> RFCM_OFFSET);
@@ -4166,14 +4166,14 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                     V_tmp = v_noise / sqrt(2.); // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
 
                     if (settings1 -> USE_TESTBED_RFCM_ON == 0) {
-                        const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP);
+                        const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP * (1.E6)); // from Hz to MHz;
                         const double freq = k*dfreq;
                         ApplyFilter_OutZero(freq, detector, V_tmp);
                         ApplyPreamp_OutZero(freq, detector, V_tmp);
                         ApplyFOAM_OutZero(freq, detector, V_tmp);
 
                     } else if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
-                        const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP);
+                        const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP * (1.E6)); // from Hz to MHz;
                         const double freq = k*dfreq;
                         // apply RFCM gain
                         ApplyRFCM_OutZero(ch, freq, detector, V_tmp, settings1 -> RFCM_OFFSET);
