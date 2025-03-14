@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - master
+      - multitriggers
   pull_request:
     branches:
       - master
+      - multitriggers
   workflow_dispatch:
 
 jobs:
