@@ -30,7 +30,7 @@ DETECTOR_STATION_LIVETIME_CONFIG=4
 
 // Detector settings for all detectors
 ANTENNA_MODE=5       // KU Antenna Models
-NFOUR=1024           // number of total bins for FFT. has to be power of 2
+NFOUR=8192           // number of total bins for FFT. has to be power of 2
 CORE_X = 10000       // X location of center of detector
 CORE_Y = 10000       // Y location of center of detector
 READGEOM=0           // 0: Do not read geometry information from the sqlite file
@@ -49,7 +49,7 @@ RAY_TRACE_ICE_MODEL_PARAMS=40 // UNL Modified (PA model).
 
 // Major Neutrino Settings
 NNU=500              // number of neutrino events
-EXPONENT=113         // Equal number of events per energy decade
+EXPONENT=610         // Equal number of events per energy decade
 EXPONENT_MAX=21.0    // maximum log10(eV) of Neutrino energy spectrum
 POSNU_RADIUS=5000    // Max neutrino generation distance from detector
 RAYSOL_RANGE=9000    // Max distance from detector to solve rays
