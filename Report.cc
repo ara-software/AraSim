@@ -662,12 +662,12 @@ void Report::BuildAndTriggerOnWaveforms(
       trigger->Full_window.resize(16);
       trigger->Full_window_V.resize(16);
       for (int i = 0; i < 16; i++) {
-        trigger->Full_window[i].resize(DATA_BIN_SIZE_tmp);
-        trigger->Full_window_V[i].resize(DATA_BIN_SIZE_tmp);
-      }
+        trigger->Full_window[i].clear();
+        trigger->Full_window[i].resize(DATA_BIN_SIZE_tmp, 0.0);
 
-      // cout<<"new DATA_BIN_SIZE : "<<DATA_BIN_SIZE_tmp<<endl;
-      // cout<<"max_total_bin : "<<max_total_bin<<endl;
+        trigger->Full_window_V[i].clear();
+        trigger->Full_window_V[i].resize(DATA_BIN_SIZE_tmp, 0.0);
+      }
 
       // reset all filter values in Detector class
       detector->get_NewDiodeModel(settings1);
@@ -1009,7 +1009,7 @@ void Report::rerun_event(Event *event, Detector *detector,
             signal->GetVm_FarField_Tarray(event, settings, viewangle,
                                           atten_factor, local_outbin, 
                                           local_Tarray, local_Earray, 
-                                          local_skipbins);
+                                          local_skipbins, interaction_idx);
 
             double dT_forfft = local_Tarray[1] - local_Tarray[0];
 
@@ -1221,9 +1221,9 @@ void Report::ModelRay(
                 ApplyAntFactors(
                     heff, n_trg_pokey, n_trg_slappy, Pol_vector, antenna_d->type, 
                     Pol_factor, vmmhz1m_tmp, antenna_theta, antenna_phi);
-                ApplyFilter(l, detector, vmmhz1m_tmp);
-                ApplyPreamp(l, detector, vmmhz1m_tmp);
-                ApplyFOAM(l, detector, vmmhz1m_tmp);
+                ApplyFilter_OutZero(freq_tmp, detector, vmmhz1m_tmp);
+                ApplyPreamp_OutZero(freq_tmp, detector, vmmhz1m_tmp);
+                ApplyFOAM_OutZero(freq_tmp, detector, vmmhz1m_tmp);
 
                 vmmhz_filter[l] = vmmhz1m_tmp;
                 
@@ -1284,7 +1284,7 @@ void Report::ModelRay(
                         double Earray[outbin];
                         signal->GetVm_FarField_Tarray(
                             event, settings, viewangle, atten_factor, outbin, Tarray, Earray, 
-                            antenna_r->skip_bins[ray_idx]);
+                            antenna_r->skip_bins[ray_idx], interaction_idx);
 
                         double dT_forfft = Tarray[1] - Tarray[0];  // step in ns
                         InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
@@ -3262,33 +3262,29 @@ void Report::GetNoiseThenConvolve(
     int wf_length = 0;
     int min_wf_bin = 0;
     int max_wf_bin = 0;
-    int wf_length_to_convlv=0;
     int offset = 0;
     vector <double> diode_response;
     if ( n_connected_rays > 1 ) { // multiple ray solutions in one window
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is 2*BINSIZE
-        wf_length_to_convlv = 2*BINSIZE;
         offset = trigger->maxt_diode_bin;
         min_wf_bin = this_signalbin - BINSIZE/2 + offset;
-        max_wf_bin = this_signalbin + BINSIZE/2 + BINSIZE;
-        diode_response = detector->getDiodeModel(2*wf_length_to_convlv, settings1);
+        max_wf_bin = this_signalbin - BINSIZE/2 + wf_length;
+        diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
     else if ( antenna->ray_sol_cnt == 0 ){ // No rays connected to this antenna
         this_signalbin = BINSIZE/2;
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is BINSIZE
-        wf_length_to_convlv = BINSIZE;
         offset = 0;
         min_wf_bin = 0;
-        max_wf_bin = BINSIZE;
-        diode_response = detector->getDiodeModel(2*wf_length_to_convlv, settings1);
+        max_wf_bin = wf_length;
+        diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
     else { // Only one ray signal in the window
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is BINSIZE
-        wf_length_to_convlv = BINSIZE;
         offset = trigger->maxt_diode_bin;
         min_wf_bin = this_signalbin - BINSIZE/2 + offset;
-        max_wf_bin = this_signalbin + BINSIZE/2;
-        diode_response = detector->getDiodeModel(2*wf_length_to_convlv, settings1);
+        max_wf_bin = this_signalbin - BINSIZE/2 + wf_length;
+        diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
 
     // Get noise-only waveform
@@ -3303,13 +3299,8 @@ void Report::GetNoiseThenConvolve(
         V_total_forconvlv.push_back( V_signal.at(bin) + V_noise[bin]);
     }
 
-    // Keep only the bins within the desired range
-    if (min_wf_bin >= 0 && max_wf_bin < wf_length && min_wf_bin - offset <= max_wf_bin) {
-        V_total_forconvlv.assign(V_total_forconvlv.begin() + min_wf_bin - offset, V_total_forconvlv.begin() + max_wf_bin + 1);
-    }
-
     // Push noise+signal waveform through the tunnel diode
-    trigger->myconvlv( V_total_forconvlv, wf_length_to_convlv, diode_response, V_total_forconvlv);
+    trigger->myconvlv( V_total_forconvlv, wf_length, diode_response, V_total_forconvlv);
 
     // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
     for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
@@ -3884,37 +3875,39 @@ void Report::ApplyRFCM_databin(int ch, int bin_n, Detector *detector, double &vm
 
 }
 
+void Report::ApplyRFCM_OutZero(int ch, double freq, Detector *detector, double &vmmhz, double RFCM_OFFSET) {  // read RFCM gain in dB and apply unitless gain to vmmhz
+
+    vmmhz = vmmhz * pow(10., ( detector->GetRFCMGain_OutZero(ch, freq) + RFCM_OFFSET )/20.);   // from dB to unitless gain for voltage
+
+    return;
+}
 
 void Report::ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double &vmmhz, Settings *settings1) {  // read noise figure and apply unitless gain to vmmhz
-  //cout<<"Entered ApplyNoiseFig_databin    ";
-  //cout<<"vmmhz: "<<vmmhz;
   
   double tempNoise = vmmhz*vmmhz;
-  //  cout<<"    1: "<<detector->GetNoiseFig_databin(ch,bin_n);
-  //  cout<<"    2: "<<detector->GetTransm_databin(ch, bin_n);
-  //  cout<<"    3: "<<settings1->NOISE_TEMP;
-  //FILE *fp = fopen("noiseTemp_NOISE_CHANNEL_MODE_0.txt","a+");
-  if(detector->GetNoiseFig_databin(ch,bin_n)>1.0){vmmhz = TMath::Sqrt( tempNoise*(detector->GetTransm_databin(ch, bin_n)) + tempNoise/(settings1->NOISE_TEMP)*220.0*(detector->GetNoiseFig_databin(ch,bin_n) - 1.0) ) ;  
-    //cout<<"   vmmhz   "<<vmmhz;
-    //cout<<"   bin: "<<bin_n<<" freq: "<<detector->GetFreq(bin_n) << " noise temp: " << 246.0*((detector->GetTransm_databin(ch, bin_n)) + 1.0/(settings1->NOISE_TEMP)*220.0*(detector->GetNoiseFig_databin(ch,bin_n) - 1.0) ) << endl;  
-    //fprintf(fp, "%f   ",246.0*((detector->GetTransm_databin(ch, bin_n)) + 1.0/(settings1->NOISE_TEMP)*220.0*(detector->GetNoiseFig_databin(ch,bin_n) - 1.0) ));
-}
-  else{
-    vmmhz = vmmhz;
-    //fprintf(fp, "%f   ",246.0);
+  if(detector->GetNoiseFig_databin(ch,bin_n)>1.0){
+      vmmhz = TMath::Sqrt( tempNoise*(detector->GetTransm_databin(ch, bin_n)) + tempNoise/(settings1->NOISE_TEMP)*220.0*(detector->GetNoiseFig_databin(ch,bin_n) - 1.0) ) ;  
   }
-  
-  //fclose(fp);
-  //    if(ch==0 && bin_n==2050) cout << "Noise ch: "<< ch <<"   "<< detector->GetNoiseFig_databin(ch,bin_n) << "   " << detector->GetTransm_databin(ch, bin_n)
-//		<< "   " << TMath::Sqrt( tempNoise ) << "   " << vmmhz << endl;
-  //  if(ch==8 && bin_n==2050) cout << "Noise ch: "<< ch <<"   "<< detector->GetNoiseFig_databin(ch,bin_n) << "   " << detector->GetTransm_databin(ch, bin_n)
-  //		<< "   " << TMath::Sqrt( tempNoise ) << "   " << vmmhz << endl;
-  //    if(ch==24 && bin_n==2000) cout << "Noise ch: "<< ch << "   " << detector->GetNoiseFig_databin(ch,bin_n)*220.0/246.0 << "   " << TMath::Sqrt(detector->GetTransm_databin(ch, bin_n) ) << endl;
-  
+  else{
+      vmmhz = vmmhz;
+  }
+
+  return;  
 }
 
+void Report::ApplyNoiseFig_OutZero(int ch, double freq, Detector *detector, double &vmmhz, Settings *settings1) {  // read noise figure and apply unitless gain to vmmhz
 
-
+    double tempNoise = vmmhz*vmmhz;
+    
+    if(detector->GetNoiseFig_OutZero(ch, freq)>1.0){
+        vmmhz = TMath::Sqrt( tempNoise*(detector->GetTransm_OutZero(ch, freq)) + tempNoise/(settings1->NOISE_TEMP)*220.0*(detector->GetNoiseFig_OutZero(ch, freq) - 1.0) ) ;  
+    }
+    else{
+      vmmhz = vmmhz;
+    }
+    
+    return;
+}
 
 void Report::GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_theta, double &ant_phi) {   //ant_theta and ant_phi is in degree 
 
@@ -3957,11 +3950,9 @@ void Report::GetAngleLaunch(Vector &launch_vector, double &launch_theta, double 
 void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v_noise, double *vnoise) {
 
     if (settings1->NOISE == 0) {    // NOISE == 0 : flat thermal noise with Johnson-Nyquist noise
-        //V_noise_fft_bin = sqrt( (double)(NFOUR/2) * 50. * KBOLTZ * T_noise / (2. * TIMESTEP) ); 
 
         Vfft_noise_after.clear();  // remove previous Vfft_noise values
         Vfft_noise_before.clear();  // remove previous Vfft_noise values
-        //V_noise_timedomain.clear(); // remove previous V_noise_timedomain values
 
 
         double V_tmp; // copy original flat H_n [V] value
@@ -3969,28 +3960,27 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
 
         GetNoisePhase(settings1); // get random phase for noise
 
-        //MakeArraysforFFT_noise(settings1, detector, vhz_noise_tmp , vnoise);
         // returned array vnoise currently have real value = imag value as no phase term applied
 
-        //for (int k=0; k<settings1->NFOUR/4; k++) {
         for (int k=0; k<settings1->DATA_BIN_SIZE/2; k++) {
 
             V_tmp = v_noise / sqrt(2.) ; // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
 
             if (settings1->USE_TESTBED_RFCM_ON == 0) {
-                ApplyFilter_databin(k, detector, V_tmp);
-                ApplyPreamp_databin(k, detector, V_tmp);
-                ApplyFOAM_databin(k, detector, V_tmp);
-		if (settings1->APPLY_NOISE_FIGURE==1){
-		  ApplyNoiseFig_databin(0,k,detector, V_tmp, settings1);
-		}
+                const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP * (1.E6)); // from Hz to MHz;
+                const double freq = k*dfreq;
+                ApplyFilter_OutZero(freq, detector, V_tmp);
+                ApplyPreamp_OutZero(freq, detector, V_tmp);
+                ApplyFOAM_OutZero(freq, detector, V_tmp);
+                if (settings1->APPLY_NOISE_FIGURE==1){
+                    ApplyNoiseFig_OutZero(0, freq, detector, V_tmp, settings1);
+                }
             }
             else if (settings1->USE_TESTBED_RFCM_ON == 1) {
                 // apply RFCM gain
                 // as this mode don't have different chs' noise waveform separately, just use ch0 RFCM gain...
                 cerr<<"Trying not allowed mode : NOISE_CHANNEL_MODE=0 and USE_TESTBED_RFCM_ON=1 same time!"<<endl;
                 break;
-                //ApplyRFCM_databin(0, detector, V_tmp);
             }
 
 
@@ -4065,27 +4055,29 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
             V_tmp = v_noise / sqrt(2.); // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
 
             if (settings1 -> USE_TESTBED_RFCM_ON == 0) {
-                ApplyFilter_databin(k, detector, V_tmp);
-                ApplyPreamp_databin(k, detector, V_tmp);
-                ApplyFOAM_databin(k, detector, V_tmp);
+                const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP * (1.E6)); // from Hz to MHz;
+                const double freq = k*dfreq;
+                ApplyFilter_OutZero(freq, detector, V_tmp);
+                ApplyPreamp_OutZero(freq, detector, V_tmp);
+                ApplyFOAM_OutZero(freq, detector, V_tmp);
                 if (settings1 -> APPLY_NOISE_FIGURE == 1) {
-                    ApplyNoiseFig_databin(ch % 16, k, detector, V_tmp, settings1);
+                    ApplyNoiseFig_OutZero(ch % 16, freq, detector, V_tmp, settings1);
                 }
-            } else if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
+            } 
+            else if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
+                const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP * (1.E6)); // from Hz to MHz;
+                const double freq = k*dfreq;
                 // apply RFCM gain
-                ApplyRFCM_databin(ch, k, detector, V_tmp, settings1 -> RFCM_OFFSET);
+                ApplyRFCM_OutZero(ch, freq, detector, V_tmp, settings1 -> RFCM_OFFSET);
             }
 
             Vfft_noise_before.push_back(V_tmp);
 
             current_phase = noise_phase[k];
 
-            //Tools::get_random_rician( 0., 0., sqrt(2./ M_PI) * V_tmp, current_amplitude, current_phase);    // use real value array value
             Tools::get_random_rician(0., 0., sqrt(2. / M_PI) / 1.177 * V_tmp, current_amplitude, current_phase); // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
 
             // vnoise is currently noise spectrum (before fft, unit : V)
-            //vnoise[2 * k] = sqrt(current_amplitude) * cos(noise_phase[k]);
-            //vnoise[2 * k + 1] = sqrt(current_amplitude) * sin(noise_phase[k]);
             vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
             vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
 
@@ -4098,8 +4090,6 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
 
         }
 
-        //	cout << "After applying noise figure" << endl;
-
         // now vnoise is time domain waveform
         Tools::realft(vnoise, -1, settings1 -> DATA_BIN_SIZE);
 
@@ -4109,7 +4099,6 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
             V_noise_timedomain.push_back( vnoise[k] );
         }
         */
-        //	cout << "After fft" << endl;
 
     } else if (settings1 -> NOISE == 1) { // NOISE == 1 : use Rayleigh dist. fits
 
@@ -4138,8 +4127,6 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
 
                     V_tmp = detector -> GetRayleighFit_databin(ch, k) * sqrt((double) settings1 -> DATA_BIN_SIZE / (double)(settings1 -> NFOUR / 2.));
 
-                    //Tools::get_random_rician( 0., 0., sqrt(2./ M_PI) * V_tmp, current_amplitude, current_phase);    // use real value array value
-                    //Tools::get_random_rician( 0., 0., sqrt(2./M_PI)/1.177 * V_tmp, current_amplitude, current_phase);    // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
                     Tools::get_random_rician(0., 0., V_tmp, current_amplitude, current_phase); // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
 
                 } else {
@@ -4147,13 +4134,17 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                     V_tmp = v_noise / sqrt(2.); // copy original flat H_n [V] value, and apply 1/sqrt2 for SURF/TURF divide same as signal
 
                     if (settings1 -> USE_TESTBED_RFCM_ON == 0) {
-                        ApplyFilter_databin(k, detector, V_tmp);
-                        ApplyPreamp_databin(k, detector, V_tmp);
-                        ApplyFOAM_databin(k, detector, V_tmp);
+                        const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP * (1.E6)); // from Hz to MHz;
+                        const double freq = k*dfreq;
+                        ApplyFilter_OutZero(freq, detector, V_tmp);
+                        ApplyPreamp_OutZero(freq, detector, V_tmp);
+                        ApplyFOAM_OutZero(freq, detector, V_tmp);
 
                     } else if (settings1 -> USE_TESTBED_RFCM_ON == 1) {
+                        const double dfreq = 1./(settings1->DATA_BIN_SIZE * settings1->TIMESTEP * (1.E6)); // from Hz to MHz;
+                        const double freq = k*dfreq;
                         // apply RFCM gain
-                        ApplyRFCM_databin(ch, k, detector, V_tmp, settings1 -> RFCM_OFFSET);
+                        ApplyRFCM_OutZero(ch, freq, detector, V_tmp, settings1 -> RFCM_OFFSET);
                     }
 
                     Vfft_noise_before.push_back(V_tmp);

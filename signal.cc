@@ -979,7 +979,7 @@ void Signal::Build_Param_RE_Tterm_tables(){
 
 
 // depending on the shower_mode, make Vm array for em shower/had shower or both
-void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins ) {
+void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins, int interaction_idx ) {
 
     double sin_view = sin(viewangle);
     double cos_view = cos(viewangle);
@@ -1215,7 +1215,7 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 
         // 1) for EM shower part
         //
-        if ( event->Nu_Interaction[0].EM_LQ > 0 ) {
+        if ( event->Nu_Interaction[interaction_idx].EM_LQ > 0 ) {
 
             EM_shower_on = 1;
 
@@ -1224,15 +1224,15 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             the_table_to_use = pick_table(0);
 
 
-            E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
+            E_shower = event->Nu_Interaction[interaction_idx].pnuenergy*event->Nu_Interaction[interaction_idx].emfrac;
 
             //cout<<"E_shower, em : "<<E_shower<<endl;
 
             //Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
-            Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].EM_LQ * (V_s) * E_shower / 1.e12;
+            Const = sin_view / sin_changle * 1./event->Nu_Interaction[interaction_idx].EM_LQ * (V_s) * E_shower / 1.e12;
 
             //shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
-            shower_bin = event->Nu_Interaction[0].EM_shower_Q_profile.size();
+            shower_bin = event->Nu_Interaction[interaction_idx].EM_shower_Q_profile.size();
 
 
             // ok, let's just calculate near signal time bins
@@ -1296,11 +1296,11 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
                     //Tterm = Tarray[tbin] - (0.5+(double)bin)*settings1->SHOWER_STEP * ( (1.-nice*cos(angle))/c_ns );
                     //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[bin] * ( (1.-nice*cos(viewangle))/c_ns );
                     //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
-                    Tterm = Tarray[tbin] - event->Nu_Interaction[0].EM_shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
+                    Tterm = Tarray[tbin] - event->Nu_Interaction[interaction_idx].EM_shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
 
                     //if ( event->Nu_Interaction[0].shower_Q_profile[bin]<=0) {
                     //if ( event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]<=0) {
-                    if ( event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]<=0) {
+                    if ( event->Nu_Interaction[interaction_idx].EM_shower_Q_profile[mid_old_bin]<=0) {
                         Integrate += 0.;
                     }
                     else {
@@ -1309,10 +1309,10 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
                         if(settings1->USE_PARAM_RE_TTERM_TABLE==1){
-                    		  Integrate += -1 *(event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_em);
+                    		  Integrate += -1 *(event->Nu_Interaction[interaction_idx].EM_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_em);
                         }
                         else{
-                        	Integrate += -1.*(event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);                        		
+                        	Integrate += -1.*(event->Nu_Interaction[interaction_idx].EM_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);                        		
                         }
 
                     }
@@ -1332,22 +1332,22 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 
         // 2) for HAD shower part
         //
-        if ( event->Nu_Interaction[0].HAD_LQ > 0 ) {
+        if ( event->Nu_Interaction[interaction_idx].HAD_LQ > 0 ) {
 
             V_s = -3.2e-14;
             get_Param_RA(1, param_RA);
             the_table_to_use = pick_table(1);
 
             //E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
-            E_shower = event->pnu*event->Nu_Interaction[0].hadfrac;
+            E_shower = event->Nu_Interaction[interaction_idx].pnuenergy*event->Nu_Interaction[interaction_idx].hadfrac;
 
             //cout<<"E_shower, had : "<<E_shower<<endl;
 
             //Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
-            Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].HAD_LQ * (V_s) * E_shower / 1.e12;
+            Const = sin_view / sin_changle * 1./event->Nu_Interaction[interaction_idx].HAD_LQ * (V_s) * E_shower / 1.e12;
 
             //shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
-            shower_bin = event->Nu_Interaction[0].HAD_shower_Q_profile.size();
+            shower_bin = event->Nu_Interaction[interaction_idx].HAD_shower_Q_profile.size();
 
 
 
@@ -1423,11 +1423,11 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
                     //Tterm = Tarray[tbin] - (0.5+(double)bin)*settings1->SHOWER_STEP * ( (1.-nice*cos(angle))/c_ns );
                     //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[bin] * ( (1.-nice*cos(viewangle))/c_ns );
                     //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
-                    Tterm = Tarray[tbin] - event->Nu_Interaction[0].HAD_shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
+                    Tterm = Tarray[tbin] - event->Nu_Interaction[interaction_idx].HAD_shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
 
                     //if ( event->Nu_Interaction[0].shower_Q_profile[bin]<=0) {
                     //if ( event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]<=0) {
-                    if ( event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]<=0) {
+                    if ( event->Nu_Interaction[interaction_idx].HAD_shower_Q_profile[mid_old_bin]<=0) {
                         Integrate += 0.;
                     }
                     else {
@@ -1436,10 +1436,10 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
                         //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
                         if(settings1->USE_PARAM_RE_TTERM_TABLE==1){
-                        	Integrate += -1 *(event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_had);
+                        	Integrate += -1 *(event->Nu_Interaction[interaction_idx].HAD_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_had);
                         }
                         else{
-                       		Integrate += -1.*(event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);                        	
+                       		Integrate += -1.*(event->Nu_Interaction[interaction_idx].HAD_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);                        	
                         }
                     }
 

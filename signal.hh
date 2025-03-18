@@ -153,7 +153,7 @@ double GetELPM();  // elpm
 
 
   //void GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray );
-  void GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins );
+  void GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins, int interaction_idx );
 
   double Param_RE_Tterm(double Tterm, double *par);
   double Param_RE_Tterm_approx(double Tterm, double *par); // use approx expansion if possible
