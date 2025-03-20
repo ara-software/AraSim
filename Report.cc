@@ -3240,8 +3240,11 @@ void Report::Combine_Waveforms(int signalbin_0, int signalbin_1,
   }
 
   // if length is not a power of 2, zero pad
-  //while((V.size() & (V.size() - 1)) != 0) 
-  //  V.push_back(0.);
+  if((len & (len - 1)) != 0) {
+    const int newLen = int(pow(2, ceil(log2(len)))); // get next power of 2 
+    V.resize(newLen, 0.);
+  }
+
 
   return;
 }
