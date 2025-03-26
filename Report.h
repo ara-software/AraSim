@@ -248,7 +248,7 @@ class Report {
             Antenna_r *antenna_r, Antenna *antenna_d,  int i, int j, int k, 
             int debugmode,  Birefringence *birefringence, Detector *detector, 
             Event *event, IceModel *icemodel, Settings *settings, Signal *signal);
-        void InitializeNNew(Antenna_r *antenna, int interaction_idx, int ray_idx, double dT, Settings *settings1);
+        void DetermineWFBins(Antenna_r *antenna, int interaction_idx, int ray_idx, double dT, Settings *settings1);
         void GetRayParameters(
             Antenna_r *antenna_r, Antenna *antenna_d, Interaction interaction, int interaction_idx,
             int i, int j, int k, int ray_idx, vector<vector< double > > ray_output,

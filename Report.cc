@@ -1157,7 +1157,7 @@ void Report::ModelRay(
                         double dT_forfft = Tarray[1] - Tarray[0];  // step in ns
                         
                         // Determine the number of bins that will be used to build the waveform that will be fourier transformed
-                        InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
+                        DetermineWFBins(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                         // Convert the time array so it works with signal calculator
                         vector< double > Tarray_vector;
@@ -1220,7 +1220,7 @@ void Report::ModelRay(
                     double dT_forfft = signal->ArbitraryWaveform_T[1] - signal->ArbitraryWaveform_T[0]; // step in ns
 
                     // Determine the number of bins that will be used to build the waveform that will be fourier transformed
-                    InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
+                    DetermineWFBins(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                     // Convert time array to vector double so it'll work with the signal calculator
                     vector< double > ArbitraryWaveform_T_vector;
@@ -1247,7 +1247,7 @@ void Report::ModelRay(
                     double dT_forfft = signal->PulserWaveform_T[1] - signal->PulserWaveform_T[0]; // step in ns
 
                     // Determine the number of bins that will be used to build the waveform that will be fourier transformed
-                    InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
+                    DetermineWFBins(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                     // Define polarization at the source (using launch_vector (a unit vector))
                     double psi = TMath::DegToRad()*settings->CLOCK_ANGLE;
@@ -1301,7 +1301,7 @@ void Report::ModelRay(
                     double dT_forfft = signal->InputVoltage_T[1] - signal->InputVoltage_T[0];    // step in ns
 
                     // Determine the number of bins that will be used to build the waveform that will be fourier transformed
-                    InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
+                    DetermineWFBins(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                     //Defining polarization at the source (using launch_vector (a unit vector))
                     // double psi = TMath::DegToRad()*settings->CLOCK_ANGLE;
@@ -1349,7 +1349,7 @@ void Report::ModelRay(
                 double dT_forfft = detector->CalPulserWF_ns[1] - detector->CalPulserWF_ns[0];  // step in ns
 
                 // Determine the number of bins that will be used to build the waveform that will be fourier transformed
-                InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
+                DetermineWFBins(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                 PropagateSignal(
                     dT_forfft, CP_bin, detector->CalPulserWF_ns, detector->CalPulserWF_V, T_forint,
@@ -1470,7 +1470,7 @@ void Report::GetRayParameters(
     
 }
 
-void Report::InitializeNNew(
+void Report::DetermineWFBins(
     Antenna_r *antenna, int interaction_idx, int ray_idx, double dT, Settings *settings1
 ){
     // Chooses the number of bins for the waveforms that will be fourier transformed
