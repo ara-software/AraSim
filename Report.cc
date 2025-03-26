@@ -926,6 +926,7 @@ void Report::rerun_event(Event *event, Detector *detector,
   int num_strings = detector->stations[0].strings.size();
   int num_antennas = detector->stations[0].strings[0].antennas.size();
 
+  // Loop over strings
   for(int j=0; j<num_strings; j++){
 
     // Normal way of calculating init_T and T_forint - Using user defined TIMESTEP in settings
@@ -933,6 +934,7 @@ void Report::rerun_event(Event *event, Detector *detector,
     for (int n = 0; n < settings->NFOUR / 2; n++)
       T_forint[n] = init_T + (double) n *settings->TIMESTEP *1.e9;   // in ns
 
+    // Loop over antennas
     for(int k=0; k<num_antennas; k++){
 
       // This (gain_ch_no) is used for per-channel gain implementation. 
@@ -946,6 +948,7 @@ void Report::rerun_event(Event *event, Detector *detector,
 
       int idx = ((j*4)+k);
 
+      // Loop over interactions
       for (int interaction_idx=0; interaction_idx<event->Nu_Interaction.size(); interaction_idx++){
 
         // redo the ray tracing
@@ -961,8 +964,9 @@ void Report::rerun_event(Event *event, Detector *detector,
           // numSolutions[idx]=ray_output[0].size();
           numSolutions[idx]=ray_output[0].size();
 
+          // Loop over ray solutions
           int ray_sol_cnt=0;
-          while (ray_sol_cnt < ray_output[0].size()){
+          while (ray_sol_cnt < ray_output[0].size()){ 
 
             if(std::find(which_sols_to_search.begin(), which_sols_to_search.end(), ray_sol_cnt) == which_sols_to_search.end()){
               // if this solution is not meant to be searched, skip it
@@ -1035,11 +1039,12 @@ void Report::rerun_event(Event *event, Detector *detector,
             }
 
             ray_sol_cnt++;
-          }
-        }
-      }
-    }
-  }
+
+          } // End loop over ray solutions
+        } // End "if there are ray solutions"
+      } // End loop over interactions
+    } // End loop over antennas
+  } // End loop over strings
 
   return;
 }
