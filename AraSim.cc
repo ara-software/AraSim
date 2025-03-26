@@ -480,7 +480,7 @@ int main(int argc, char **argv) {   // read setup.txt file
             // cout<<"pickposnu : "<<event->Nu_Interaction[0].pickposnu<<endl;
             //-------------------------------------------------- 
 
-            // decide whether debug mode or not
+            // Determine if the simulation is in debug mode or not
             int debugmode = 0;
             if (settings1->DEBUG_MODE_ON == 1 && Events_Thrown < settings1->DEBUG_SKIP_EVT) {
                 debugmode = 1;  // skip most of computation intensive processes if debugmode == 1
@@ -489,6 +489,10 @@ int main(int argc, char **argv) {   // read setup.txt file
                 cout << Events_Thrown << " " << endl;
             }
 
+            // While there is at least 1 station with enough waveform to perform a trigger check,
+            //   build waveforms for this event and check the trigger over it. 
+            //   If there is a part of any waveform that wasn't analyzed and exists beyond the
+            //   deadtime of the station, say there is still at least one station to trigger check. 
             int stations_to_trigger_check = report->stations.size();
             for (int station_i=0; station_i<report->stations.size(); station_i++){
                 report->stations[station_i].next_trig_search_init = trigger->maxt_diode_bin + settings1->NFOUR;  
@@ -508,9 +512,8 @@ int main(int argc, char **argv) {   // read setup.txt file
                 // Save the event object to a temporary object in case we have more data to analyze
                 Event *event_save = new Event(*event);
 
-                // If any stations have waveform left to analyze (indicated by whether 
-                //   `report->stations[station_i].next_trig_search_init` is equal to `-1` or not),
-                //   fill tree and rerun this trigger check. 
+                // Count how many stations have waveform left to analyze (indicated by whether 
+                //   `report->stations[station_i].next_trig_search_init` is equal to `-1` or not)
                 stations_to_trigger_check = 0;
                 int stations_next_trig_search_init[ detector->stations.size() ];
                 for (int station_i=0; station_i<report->stations.size(); station_i++){
@@ -520,7 +523,7 @@ int main(int argc, char **argv) {   // read setup.txt file
                     }
                 }
 
-                // Save the event data, report data, and ARA_like data if ARA_UTIL_EXISTS
+                // Save this event's event data, report data, and ARA_like data if ARA_UTIL_EXISTS
                 save_event_data(
                     Events_Passed, inu, 
                     &max_dt, &Total_Global_Pass, &Total_Weight, &Total_Probability, &check_station_DC,
@@ -535,7 +538,7 @@ int main(int argc, char **argv) {   // read setup.txt file
                     detector, report, settings1, trigger);
                 #endif
 
-                // test if posnu is exactly same in calpulser mode
+                // Ensure the calpulser didn't move randomly during the simulation
                 if (settings1->CALPULSER_ON == 1) {
                     cur_posnu_x = event->Nu_Interaction[0].posnu.GetX();
                     cur_posnu_y = event->Nu_Interaction[0].posnu.GetY();
@@ -790,6 +793,7 @@ void save_event_data(
     Event *event, Report *report, TTree *AraTree2,
     Counting *count1, Detector *detector, Settings *settings1, Trigger *trigger
 ){
+    // Save the report and event branches of the requested simulated event to the output TTree
 
     report->clear_useless(settings1);   // to reduce the size of output AraOut.root, remove some information
     report->ClearUselessfromConnect(detector, settings1, trigger);
@@ -862,15 +866,20 @@ void save_useful_event(
     UsefulIcrrStationEvent *theIcrrEvent, UsefulAtriStationEvent *theAtriEvent, double *weight, TTree *eventTree,
     Event *event, 
     Detector *detector, Report *report, Settings *settings1, Trigger *trigger){
+    // Save simulated event data in a format similar to how ARA detectors save their events
 
+    // Extract the number of channels in each detector
     for (int i=0; i<detector->params.number_of_stations; i++) {
         if (settings1->DATA_LIKE_OUTPUT != 0){
             if (settings1->DETECTOR == 3 && i == 0)
+                // The testbed has 14 channels
                 { theIcrrEvent->numRFChans = 14; }
             else if (settings1->DETECTOR == 4 && settings1->DETECTOR_STATION == 0)
+                // The testbed has 14 channels
                 { theIcrrEvent->numRFChans = 14; }
             else { 
-                theAtriEvent->fNumChannels = 20; 
+                // All other stations have 16 channels
+                theAtriEvent->fNumChannels = 20; // Includes 4 surface channels
                 theIcrrEvent->numRFChans = 16; 
             }
         }
@@ -879,67 +888,66 @@ void save_useful_event(
         int stationID;
         int stationIndex;
         if (settings1->DETECTOR == 4){
+            // Traditional ARA1-5 Detectors
             stationID = settings1->DETECTOR_STATION;
             stationIndex = 0;
         }
         else if (settings1->DETECTOR == 5){
+            // Phased Array
             stationID = 6;
             stationIndex = 0;
         } else {
+            // Other detectors, e.g. the Testbed
             stationID = 0;
             stationIndex = 0;
         }
 
         if (report->stations[stationIndex].Global_Pass) {
-            // report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theIcrrEvent);
             cout << endl << "Making useful event" << endl;
             report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theAtriEvent);
         }
         *weight = event->Nu_Interaction[0].weight;
     }   
 
-    // test FILL_TREE_MODE
-    if (settings1->FILL_TREE_MODE==0) { // fill event event  
-        // for 1, save all events whether passed trigger or not
+    // Determine if the current event should be saved based on simulation settings
+    if (settings1->FILL_TREE_MODE==0) { 
+        // Save data for all events
         if (settings1->DATA_LIKE_OUTPUT==2) {
-            // theEvent = &report->theUsefulEvent;
+            // save all events whether they passed the trigger or not
             eventTree->Fill();
         }
-        // for 0, save events which passed trigger
         else if (settings1->DATA_LIKE_OUTPUT==1) {
+            // only save events that passed the trigger
             if ( check_station_DC > 0 ) {
-                // theEvent = &report->theUsefulEvent;
                 eventTree->Fill();
             }
         }
     }
-    else if (settings1->FILL_TREE_MODE==1) { // fill only usable posnu event 
+    else if (settings1->FILL_TREE_MODE==1) { 
+        // Only save events if their location was "usable"
         if (event->Nu_Interaction[0].pickposnu>0) {
-            // for 1, save all events whether passed trigger or not
             if (settings1->DATA_LIKE_OUTPUT==2) {
-                // theEvent = &report->theUsefulEvent;
+                // save all events whether they passed the trigger or not
                 eventTree->Fill();
             }
-            // for 0, save events which passed trigger
             else if (settings1->DATA_LIKE_OUTPUT==1) {
+                // only save events that passed the trigger
                 if ( check_station_DC > 0 ) {
-                    //theEvent = &report->theUsefulEvent;
                     eventTree->Fill();
                 }
             }
         }
     }
-    else if (settings1->FILL_TREE_MODE==2) { // fill only triggered event    
+    else if (settings1->FILL_TREE_MODE==2) { 
+        // Only save events that triggered
         if (check_station_DC>0) {
-            // for 1, save all events whether passed trigger or not
             if (settings1->DATA_LIKE_OUTPUT==2) {
-                //theEvent = &report->theUsefulEvent;
+                // save all events whether they passed the trigger or not
                 eventTree->Fill();
             }
-            // for 0, save events which passed trigger
             else if (settings1->DATA_LIKE_OUTPUT==1) {
+                // only save events that passed the trigger
                 if ( check_station_DC > 0 ) {
-                    //theEvent = &report->theUsefulEvent;
                     eventTree->Fill();
                 }
             }

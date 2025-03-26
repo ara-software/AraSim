@@ -63,7 +63,7 @@ void Report::delete_all() {
   Vfft_noise_after.clear();
   Vfft_noise_before.clear();
 
-  noise_phase.clear();    // random noise phase generated in GetNoisePhase()
+  noise_phase.clear();
   Passed_chs.clear();
 
 
@@ -71,11 +71,8 @@ void Report::delete_all() {
 
 void Report::Initialize(Detector *detector, Settings *settings1) {
   
-  // clear information stored in (but there shouldn't be. just to make sure)
-  //
-  //stations.clear();
+  // Clear information stored in this object (but there shouldn't be. just to make sure)
   delete_all();
-
 
   // tmp for push_back vector structure
   Antenna_r tmp_antenna;
@@ -155,7 +152,10 @@ void Report::Initialize(Detector *detector, Settings *settings1) {
 
 
 
-void Antenna_r::Prepare_Outputs(int n_interactions) {   // if any vector variable added in Antenna_r, need to be added here!
+void Antenna_r::Prepare_Outputs(int n_interactions) {   
+  // Initialize all vectors used to save event information so that they have one
+  //   index per interaction in this event.
+  // If any objects are added to Antenna_r, they may need to be added here!
     
   view_ang.resize(n_interactions);
   launch_ang.resize(n_interactions);
@@ -203,7 +203,9 @@ void Antenna_r::Prepare_Outputs(int n_interactions) {   // if any vector variabl
 
 
 
-void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need to be added here!
+void Antenna_r::clear() {
+  // Empty all vectors used to save event information.
+  // If any objects are added to Antenna_r, they may need to be added here!
   
   view_ang.clear();
   launch_ang.clear();
@@ -275,7 +277,9 @@ void Antenna_r::clear() {   // if any vector variable added in Antenna_r, need t
 
 
 
-void Antenna_r::clear_useless(Settings *settings1) {   // to reduce the size of output AraOut.root, remove some information
+void Antenna_r::clear_useless(Settings *settings1) {
+  // If the user requests that less information be stored in the output file, 
+  //   clear some information here from the Antenna_r object
 
   if (settings1->DATA_SAVE_MODE == 1) {
     Heff.clear();
@@ -463,18 +467,17 @@ int CircularBuffer::numBinsToLatestTrigger(){
 
 
 
-void Report::clear_useless(Settings *settings1) {   // to reduce the size of output AraOut.root, remove some information
+void Report::clear_useless(Settings *settings1) { 
+  // If the user requests that less information be stored in the output file, 
+  //   clear some information here from the Report object
 
   if (settings1->DATA_SAVE_MODE != 0) {
 
-      // also clear all vector info to reduce output root file size
       noise_phase.clear();
       Passed_chs.clear();
       Vfft_noise_after.clear();
       Vfft_noise_before.clear();
       //V_noise_timedomain.clear();
-      // done clear vector info in report head
-  
       V_total_forconvlv.clear();
       RayStep.clear();
 
@@ -489,6 +492,8 @@ void Report::CalculateSignals(
     Birefringence *birefringence, Detector *detector, Event *event, 
     IceModel *icemodel, RaySolver *raysolver, Settings *settings1, Signal *signal
 ){
+  // For each each station, perform the ray tracing from each cascade to each antenna 
+  //   and determine the voltage readout in the antenna for each connected ray
 
   double min_arrival_time_tmp;    // min arrival time between all antennas, raysolves
   double max_arrival_time_tmp;    // max arrival time between all antennas, raysolves
@@ -496,6 +501,7 @@ void Report::CalculateSignals(
 
   double RandomTshift = gRandom->Rndm(); // for t-domain signal, a factor for random init time shift
 
+  // Loop over stations
   for (int i = 0; i < detector->params.number_of_stations; i++)
   {
 
@@ -505,46 +511,52 @@ void Report::CalculateSignals(
 
     stations[i].Total_ray_sol = 0;  // initial Total_ray_sol value
 
+    // Loop over strings on this station
     for (int j = 0; j < detector->stations[i].strings.size(); j++)
     {
       
-      double init_T = settings1->TIMESTEP *-1.e9 *((double) settings1->NFOUR / 4 + RandomTshift);    // locate zero time at the middle and give random time shift
-      double T_forint[settings1->NFOUR / 2];  // array for interpolation
+      // Create the array used for interpolation
+      double init_T = settings1->TIMESTEP *-1.e9 *((double) settings1->NFOUR / 4 + RandomTshift); // locate zero time at the middle and give random time shift
+      double T_forint[settings1->NFOUR / 2];
       for (int n = 0; n < settings1->NFOUR / 2; n++)
-        T_forint[n] = init_T + (double) n *settings1->TIMESTEP *1.e9;   // in ns
+        T_forint[n] = init_T + (double) n *settings1->TIMESTEP *1.e9; // in ns
 
+      // Loop over antennas on this string
       for (int k = 0; k < detector->stations[i].strings[j].antennas.size(); k++) {
 
         stations[i].strings[j].antennas[k].clear(); // clear data in antenna which stored in previous event
         stations[i].strings[j].antennas[k].Prepare_Outputs(event->Nu_Interaction.size()); // Resize output arrays to the number of interactions
 
+        // Loop over interactions in this event
         for (int interaction_idx=0; interaction_idx<event->Nu_Interaction.size(); interaction_idx++) {
-          
-          // run ray solver, see if solution exist
-          // if not, skip (set something like Sol_No = 0;
-          // if solution exist, calculate view angle and calculate TaperVmMHz
+
+          // Perform the ray tracing between this interaction (interaction_idx) 
+          //   and the antenna (k) then calculate the voltage response in the antenna
 
           int ray_sol_cnt = 0;
           vector<vector < double>> ray_output;
 
-          // added one more condition to run raysolver (direct distance is less than 3km)
+          // Check that the event is in a valid location and close enough to the antenna before raytracing
+          if (  event->Nu_Interaction[interaction_idx].pickposnu && // If the event location is in Antarctic Ice
+                event->Nu_Interaction[interaction_idx].posnu.Distance(detector->stations[i].strings[j].antennas[k]) <= settings1->RAYSOL_RANGE 
+                  // If the event is closer to the antenna than the user-defined maximum distance for ray tracing (settings1->RAYSOL_RANGE)
+          ) {
 
-          if (  event->Nu_Interaction[interaction_idx].pickposnu && 
-                event->Nu_Interaction[interaction_idx].posnu.Distance(detector->stations[i].strings[j].antennas[k]) <= settings1->RAYSOL_RANGE
-             ) 
-          {
-            // if posnu is selected inside the antarctic ice
-
-            RayStep.clear();    // remove previous values
+            // Clear and calculate all ray solutions between the cascade and antenna
+            RayStep.clear();
             raysolver->Solve_Ray(
                 event->Nu_Interaction[interaction_idx].posnu, detector->stations[i].strings[j].antennas[k], 
                 icemodel, ray_output, settings1, RayStep
-            );   // solve ray between source and antenna
+            );
 
-            if (raysolver->solution_toggle) { // if there are solution from raysolver
+            // If there are ray tracing solutions from the cascade to the antenna
+            if (raysolver->solution_toggle) {
 
+              // Loop over the number of ray solutions (could be 1 or 2)
               while (ray_sol_cnt < ray_output[0].size()) {
 
+                // Calculate parameters of this ray tracing solution such as
+                //   attenuation factors, antenna viewing angles, polarization, etc
                 ModelRay(
                     ray_sol_cnt, ray_output, interaction_idx, T_forint,
                     &stations[i].strings[j].antennas[k], 
@@ -552,8 +564,6 @@ void Report::CalculateSignals(
                     i, j, k, debugmode, 
                     birefringence, detector, event, icemodel, settings1, signal
                 );
-
-                // for number of soultions (could be 1 or 2)
 
                 // check max_PeakV
                 if ( debugmode == 0){
@@ -574,7 +584,7 @@ void Report::CalculateSignals(
 
             }   // end if solution exist
 
-          }   // end if posnu selected
+          }   // end if event position is acceptable
 
           else {
             ray_sol_cnt = 0;
@@ -597,10 +607,11 @@ void Report::CalculateSignals(
     stations[i].max_PeakV = max_PeakV_tmp;
   }   // for number_of_stations
 
-  // do only if it's not in debugmode
-  if (debugmode == 0)
-    // after all values are stored in Report, set ranking of signal between antennas
+  // If the simulation is not in debug mode, set ranking of signal between 
+  //   antennas after all values are stored in Report
+  if (debugmode == 0){
     SetRank(detector);
+  }
 
   return;
 }
@@ -609,10 +620,12 @@ void Report::BuildAndTriggerOnWaveforms(
     int debugmode, int station_index, int evt, int trig_search_init, 
     Detector *detector, Event *event, Settings *settings1, Trigger *trigger
 ){
+  // Loop over all antennas to make DATA_BIN_SIZE array for signal + noise. (with time delay)
+  // With that signal + noise array, we'll do the convolution with the diode response.
+  // With the convolution result, we'll do a trigger check.
 
-  // now loop over all antennas again to make DATA_BIN_SIZE array for signal + noise. (with time delay)
-  // with that signal + noise array, we'll do convolution with diode response.
-  // with the convolution result, we'll do trigger check
+  // When this variable is non-zero, it indicates that the station triggered
+  // Reinitialize it back to 0
   stations[station_index].Global_Pass  = 0;
 
   // If we're looking to trigger on signal, check that there 
@@ -641,10 +654,10 @@ void Report::BuildAndTriggerOnWaveforms(
 
     //stations[station_index].max_total_bin = max_total_bin;
 
-    // test generating new noise waveform for only stations if there's any ray trace solutions
-    if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0)
-    {
-      // noise waveforms will be generated for each evts
+    // Decide if new noise waveforms will be generated for every new event. 
+    // Otherwise, the same noise waveforms will be used for the entire simulation run.
+    if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0) {
+      // Generate brand new noise waveforms for each event
 
       // redefine DATA_BIN_SIZE
       int DATA_BIN_SIZE_tmp;
@@ -690,29 +703,34 @@ void Report::BuildAndTriggerOnWaveforms(
 
       // now call new noise waveforms with new DATA_BIN_SIZE
       trigger->GetNewNoiseWaveforms(settings1, detector, this);
-      // cout << "New noise waveforms gotten" << endl;
+
     }
 
-    // do only if it's not in debugmode
-    if (debugmode == 1) 
-      N_noise = 1;
-    // now, check if DATA_BIN_SIZE is enough for total time delay between antennas
-    else
-      N_noise = (int)(max_total_bin / settings1->DATA_BIN_SIZE) + 1;
-    // cout<<"N_noise : "<<N_noise<<endl;
+    // If the simulation is not in debug mode, check if DATA_BIN_SIZE is large 
+    //   enough for the total time delay between antennas via this N_noise 
+    //   variable. It should evaluate to 1 in most cases.
+    if (debugmode == 1) {
+        N_noise = 1;
+    }
+    else {
+        N_noise = (int)(max_total_bin / settings1->DATA_BIN_SIZE) + 1;
+    }
+    if (N_noise > 1) {
+        cout << "N_noise : " << N_noise << " max_total_bin : " << max_total_bin << " might cause error!!" << endl;
+    }
 
-    if (N_noise > 1) 
-      cout << "N_noise : " << N_noise << " max_total_bin : " << max_total_bin << " might cause error!!" << endl;
-    // mostly N_noise should be "1"
-
-    // now, check the number of bins we need for portion of noise waveforms
+    // For all antennas on all strings, get the noise waveform and combine 
+    //   it with the signal waveforms from all connected rays then convolve the 
+    //   full waveform through the tunnel diode. 
     int ch_ID = 0;
     int ants_with_sufficient_SNR = 0;
     for (int j = 0; j < detector->stations[station_index].strings.size(); j++)
     {
-      // cout << j << endl;
+      // Loop over strings
+
       for (int k = 0; k < detector->stations[station_index].strings[j].antennas.size(); k++)
       {
+        // Loop over antennas
 
         // Fill trigger->Full_window and trigger->Full_window_V with noise waveforms
         Prepare_Antenna_Noise(debugmode, ch_ID, station_index, j, k, settings1, trigger, detector);
@@ -721,15 +739,17 @@ void Report::BuildAndTriggerOnWaveforms(
         // at the initial Full_window "AND" at the initial of connected noisewaveform 
         // (we can fix this by adding values but not accomplished yet)
 
-        // Combine signals from all rays, add noise, and convolve them through the tunnel diode
+        // If the simulation is not in debug mode, combine the voltage response
+        //   from all rays into a single vector, add the noise waveform, 
+        //   and convolve this complete waveform with the tunnel diode.
+        if (debugmode == 0) {
+            Convolve_Signals(
+                &stations[station_index].strings[j].antennas[k], ch_ID, station_index,
+                event, settings1, trigger, detector
+            );
+        }
 
-        if (debugmode == 0) 
-          Convolve_Signals(
-              &stations[station_index].strings[j].antennas[k], ch_ID, station_index,
-              event, settings1, trigger, detector
-          );
-
-        // Get the SNR from this antenna
+        // Calculate the SNR in this antenna from the event signal only
         double ant_SNR = 0.;
         if (settings1->TRIG_ANALYSIS_MODE==2)
           // TRIG_ANALYSIS_MODE=2 is the noise-only mode
@@ -737,9 +757,8 @@ void Report::BuildAndTriggerOnWaveforms(
           //   the coming insufficient signal check
           ant_SNR = 100.;
         else {
-          // For all other simulations, use previously calculated noise RMS
-          
-          // Steal the noise RMS from the trigger class and pass 
+
+          // Use the noise RMS from the trigger class and pass 
           //   it as the noise WF to get_SNR() (since the RMS of an 
           //   array with one element is the absolute value of that element)
           vector <double> tmp_noise_RMS;
@@ -747,14 +766,14 @@ void Report::BuildAndTriggerOnWaveforms(
           double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
           tmp_noise_RMS.push_back( ant_noise_voltage_RMS );
 
-          // Calculate SNR in this antenna
+          // Calculate the SNR in this antenna from the signal only
           ant_SNR = get_SNR( 
               stations[station_index].strings[j].antennas[k].V_convolved, 
               tmp_noise_RMS);
 
         }
 
-        // Log if this antenna has a strong SNR or not
+        // Log if this antenna has a decent signal-only SNR or not.
         if ( ant_SNR > 0.01 ) 
           ants_with_sufficient_SNR++;
 
@@ -762,14 +781,20 @@ void Report::BuildAndTriggerOnWaveforms(
         if ((debugmode == 0) && (settings1->USE_MANUAL_GAINOFFSET == 1) )
           Apply_Gain_Offset(settings1, trigger, detector, ch_ID, station_index);
 
-        ch_ID++;    // now to next channel
+        ch_ID++; // now to next channel
 
-      }   // for antennas
+      } // for antennas
 
-    }   // for strings
+    } // for strings
 
     // Check for a trigger on this event
-    // do only if it's not in debugmode  and if at least 1 antenna has sufficient signal
+    // Do only if it's not in debugmode and if at least 1 antenna has sufficient signal
+    // Previously, events with very low neutrino signals were triggering on 
+    //   noise and inflating effective volume calculations. By skipping
+    //   events with insufficient signal in all antennas, we reduce
+    //   contributions from noise-only triggered events in our effective 
+    //   volume calculations which require a pure sample of signal-only 
+    //   triggered events. 
     if ( (debugmode == 0) && (ants_with_sufficient_SNR) ) {
 
       // coincidence window bin for trigger
@@ -778,22 +803,29 @@ void Report::BuildAndTriggerOnWaveforms(
       // save trig search bin info default (if no global trig, this value saved)
       stations[station_index].total_trig_search_bin = max_total_bin - trig_search_init;
 
-      if (settings1->TRIG_SCAN_MODE==5) // Trigger mode for phased array
+      if (settings1->TRIG_SCAN_MODE==5) {
+        // Trigger mode for phased array
         checkPATrigger(
             station_index, detector, event, evt, trigger, settings1, 
             trig_search_init, max_total_bin
         );
-      else if (settings1->TRIG_SCAN_MODE == 0) 
+      }
+      else if (settings1->TRIG_SCAN_MODE == 0) {
+        // Original and default AraSim trigger mode
         triggerCheck_ScanMode0(
             trig_search_init, max_total_bin, trig_window_bin,
             ch_ID, station_index, detector, event, settings1, trigger
         );
-      else if (settings1->TRIG_SCAN_MODE > 0) 
+      }
+      else if (settings1->TRIG_SCAN_MODE > 0) {
+        // Newer trigger check loops that use the Circular Buffer and 
+        //   save some extra information. More information in log.txt. 
         triggerCheckLoop(
             settings1, detector, event, trigger, 
             station_index, trig_search_init, max_total_bin, trig_window_bin, 
             settings1->TRIG_SCAN_MODE
         );
+      }
 
     }   // if it's not debugmode
 
@@ -862,6 +894,9 @@ void Report::BuildAndTriggerOnWaveforms(
 }
 
 void Antenna_r::Find_Likely_Sol(){
+  // Estimate which interaction and which ray from said interaction triggered 
+  //   the detector based on the timing between the bin that triggered and the
+  //   SignalBin of each ray from each simulated cascade.
 
   int mindBin = 1.e9; // init big value
   int dBin = 0;
@@ -869,7 +904,7 @@ void Antenna_r::Find_Likely_Sol(){
   Likely_Sol[0] = -1;
   Likely_Sol[1] = -1;
 
-  for (int n=0; n<SignalBin.size(); n++) {
+  for (int n=0; n<SignalBin.size(); n++) { // Loop over interactions
     for (int m = 0; m < SignalBin[n].size(); m++) { // loop over raysol numbers
       if (SignalExt[n][m]) {
         dBin = abs(SignalBin[n][m] - Trig_Pass);
@@ -887,6 +922,8 @@ void Antenna_r::Find_Likely_Sol(){
 }
 
 void Antenna_r::Get_Brightest_Interaction(int (*brightest_event)[2]){
+  // Determine which interaction and which ray from that interaction yielded
+  //   the highest voltage response in this antenna. 
     
   *brightest_event[0] = -1;
   *brightest_event[1] = -1;
@@ -1052,6 +1089,12 @@ void Report::ModelRay(
     int debugmode,  Birefringence *birefringence, Detector *detector, 
     Event *event, IceModel *icemodel, Settings *settings, Signal *signal
 ){
+    // Get the voltage response in an antenna along one ray path from a cascade by
+    //   - Calculating the electric field signal at the cascade
+    //   - Transforming that into the signal at the antenna by modifying the 
+    //       field according to attenuation, fresnel, etc along the ray path
+    //   - Convolving the signal at the antenna with the antenna's effective height, 
+    //       gain, and other parameters to obtain the voltage response to the cascade
 
     // This (gain_ch_no) is used for per-channel gain implementation. 
     // It is used in all instances of ApplyElect_Tdomain() and ApplyElect_Tdomain_FirstTwo(), to indicate channel number
@@ -1108,6 +1151,8 @@ void Report::ModelRay(
         IceAttenFactor = exp(-ray_output[0][ray_idx] / icemodel->EffectiveAttenuationLength(settings, event->Nu_Interaction[0].posnu, 0));
     }
 
+    // If the simulation is not in debug mode, calculate the field from the
+    //   cascade and transform it into a voltage read out by the antenna
     if (debugmode == 0) {
 
         Vector n_trg_pokey; // unit pokey vector at the target
@@ -1144,6 +1189,9 @@ void Report::ModelRay(
 
             double Pol_factor = 0;
 
+            // In frequency space, modify the signal from the cascade according 
+            //   to the ice attenuation, the antennas effective height, 
+            //   the antenna's Filter, the Preamplifiers, and the FOAM
             for (int l = 0; l < detector->GetFreqBin(); l++) { // for detector freq bin numbers
 
                 if (event->IsCalpulser > 0) {
@@ -1154,7 +1202,7 @@ void Report::ModelRay(
                     signal->TaperVmMHz(viewangle, event->Nu_Interaction[0].d_theta_em[l], event->Nu_Interaction[0].d_theta_had[l], event->Nu_Interaction[0].emfrac, event->Nu_Interaction[0].hadfrac, vmmhz1m_tmp, vmmhz1m_em);
                 }
 
-                // multiply all factors for traveling ice
+                // multiply all factors for traveling through ice
                 if (settings->USE_ARA_ICEATTENU == 1 || settings->USE_ARA_ICEATTENU == 0) {
                     // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
                     vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_idx] *IceAttenFactor *mag * fresnel;
@@ -1246,7 +1294,7 @@ void Report::ModelRay(
 
             Tools::NormalTimeOrdering(settings->NFOUR / 2, volts_forfft);
 
-            // time at 0 s is when ray started at the posnu
+            // Store the signal from this interaction and this ray to this antenna
             for (int n = 0; n < settings->NFOUR / 2; n++) {
                 if (settings->TRIG_ANALYSIS_MODE != 2) { // not pure noise mode (we need signal)
                     antenna_r->V[interaction_idx][ray_idx].push_back(volts_forfft[n]);
@@ -1263,7 +1311,9 @@ void Report::ModelRay(
             // if event is not calpulser
             if (event->IsCalpulser == 0) {
 
-                if (settings->EVENT_TYPE == 0) {
+                if (settings->EVENT_TYPE == 0) { 
+                    // Get the signal from Neutrino events
+
                     // see if integrated shower profile LQ is non-zero and near the cone viewangle
                     static const int outbin = 64;
                     if (event->Nu_Interaction[0].LQ > 0 && (fabs(viewangle - signal->CHANGLE_ICE) <= settings->OFFCONE_LIMIT *RADDEG)) {
@@ -1344,6 +1394,7 @@ void Report::ModelRay(
                     
                 } // neutrino events
                 else if (settings->EVENT_TYPE == 10) {
+                    // Get the signal from Arbitrary Events
 
                     int waveform_bin = (int) signal->ArbitraryWaveform_V.size();
                     double dT_forfft = signal->ArbitraryWaveform_T[1] - signal->ArbitraryWaveform_T[0]; // step in ns
@@ -1367,26 +1418,17 @@ void Report::ModelRay(
                         gain_ch_no, j, k, birefringence, detector, event, icemodel, settings);
 
                 }   // Arbitrary Events
-                
-                //Attempting to create pulser events using arbitrary events as a framework. - JCF 4/6/2023
                 else if (settings->EVENT_TYPE == 11) {
-
-                    /*
-                    NB: This has not be "cleaned up" in the way that the neutrino mode (EVENT_TYPE==10) has above
-                    (BAC June 2022)
-                    */
+                    // Get the signal from simple pulser events
 
                     int waveform_bin = (int) signal->PulserWaveform_V.size();
 
-                    double dT_forfft = signal->PulserWaveform_T[1] - signal->PulserWaveform_T[0];    // step in ns
+                    double dT_forfft = signal->PulserWaveform_T[1] - signal->PulserWaveform_T[0]; // step in ns
                     InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
-                    
-                    //cout << antenna_r->Nnew[ray_idx] << endl;
-                    //cout << waveform_bin << endl;
 
-                    //Defining polarization at the source (using launch_vector)
+                    // Define polarization at the source (using launch_vector (a unit vector))
                     double psi = TMath::DegToRad()*settings->CLOCK_ANGLE;
-                    double theta = acos(launch_vector[2]); //launch_vector is a unit vector
+                    double theta = acos(launch_vector[2]);
                     double phi = atan2(launch_vector[1],launch_vector[0]);
                                                     
                     //Justin's method
@@ -1396,7 +1438,7 @@ void Report::ModelRay(
                     Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
                     
                     icemodel->GetFresnel(
-                        ray_output[1][ray_idx],    // launch_angle
+                        ray_output[1][ray_idx], // launch_angle
                         ray_output[2][ray_idx], // rec_angle
                         ray_output[3][ray_idx], // reflect_angle
                         event->Nu_Interaction[0].posnu,
@@ -1428,6 +1470,7 @@ void Report::ModelRay(
                 
                 //Attempting to simulate PVA pulser.  Starting separate from previous pulser event type to avoid breaking things. - JCF 1/9/2024
                 else if (settings->EVENT_TYPE == 12) {
+                    // Get the signal from PVA Pulser events
 
                     // Import Voltage versus time fed into antenna (via data from Alisa in IDL2_InputVoltageVersusTime.txt)
                     
@@ -1435,11 +1478,11 @@ void Report::ModelRay(
                     double dT_forfft = signal->InputVoltage_T[1] - signal->InputVoltage_T[0];    // step in ns
                     InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
-                    //Defining polarization at the source (using launch_vector)
+                    //Defining polarization at the source (using launch_vector (a unit vector))
                     // double psi = TMath::DegToRad()*settings->CLOCK_ANGLE;
                     double psi = 0;  // In the absence of cross-pol, the polarization angle is nominally zero for an antenna in the ice that is azimuthally symmetric. 
                                         // Cross pol is the next step in implementation. - JCF 2/9/2024
-                    double theta = acos(launch_vector[2]); //launch_vector is a unit vector
+                    double theta = acos(launch_vector[2]);
                     double phi = atan2(launch_vector[1],launch_vector[0]);
                                                     
                     //Justin's method
@@ -1474,6 +1517,7 @@ void Report::ModelRay(
 
             // if calpulser event
             else if (event->IsCalpulser > 0) {
+                // Get the signal from Calpulser events
 
                 int CP_bin = (int) detector->CalPulserWF_ns.size();
 
@@ -1505,14 +1549,19 @@ void Report::GetRayParameters(
     Position *launch_vector, Position *receive_vector, 
     IceModel *icemodel, Settings *settings1
 ){
+    // For a given ray path connecting a cascade to an antenna, calculate and
+    //   save parameters including the antenna's viewing angle of the ray, 
+    //   attenuation length, magnification factors, etc. 
+    // Also initializes the objects that store electric field and voltage
+    //   signals from the cascade by resizing those objects to the number of rays.
 
     // set viewangle, launch_vector, receive vectors
     double viewangle = ray_output[1][ray_idx];
     GetParameters(
-        interaction.posnu,   // posnu
-        *antenna_d,   // trg antenna
-        interaction.nnu,   // nnu
-        viewangle,  // inputs launch_angle, returns viewangle
+        interaction.posnu, // posnu
+        *antenna_d, // trg antenna
+        interaction.nnu, // nnu
+        viewangle, // inputs launch_angle, returns viewangle
         ray_output[2][ray_idx], // receive_angle
         *launch_vector, *receive_vector,
         *n_trg_slappy, *n_trg_pokey);
@@ -1539,7 +1588,7 @@ void Report::GetRayParameters(
 
     double fresnel = 0;
     icemodel->GetFresnel(
-        ray_output[1][ray_idx],    // launch_angle
+        ray_output[1][ray_idx], // launch_angle
         ray_output[2][ray_idx], // rec_angle
         ray_output[3][ray_idx], // reflect_angle
         interaction.posnu,
@@ -1547,7 +1596,7 @@ void Report::GetRayParameters(
         *receive_vector,
         settings1,
         fresnel,
-        Pol_vector);    // input src Pol and return Pol at trg
+        Pol_vector); // input src Pol and return Pol at trg
     double mag = 0;
     icemodel->GetMag(
         mag, 
@@ -1701,8 +1750,11 @@ void Report::PropagateSignal(
         double Tx_phi = 0;
         double heff_Tx_lastbin = 0;
         if (settings->EVENT_TYPE == 11 || settings->EVENT_TYPE == 12){
-            double theta = acos(launch_vector[2]); //launch_vector is a unit vector
+
+            //Defining polarization at the source (using launch_vector (a unit vector))
+            double theta = acos(launch_vector[2]);
             double phi = atan2(launch_vector[1],launch_vector[0]);
+
             double Tx_theta = theta*180/PI;
             double Tx_phi = phi*180/PI;
             double heff_Tx_lastbin = GaintoHeight(

@@ -219,9 +219,9 @@ class CircularBuffer{
 
 class Report {
     private:
-        vector <double> noise_phase;    // random noise phase generated in GetNoisePhase()
+    
+           vector <double> noise_phase; // random noise phase generated in GetNoisePhase()
 
-           
            int N_noise;     // needed number of noise waveforms (most cases, we will need only 1)
            int noise_ID[5];    // selected noise waveform ID (we should not need 5 noise waveforms, but just in case)
 
