@@ -1921,11 +1921,11 @@ void Report::triggerCheck_ScanMode0(
     //   the data-like V_mimic objects
     // Original AraSim trigger checking mode
 
-    int trig_i = trig_search_init;
+    int this_bin = trig_search_init;
 
     // avoid really long trig_window_bin case (change trig_window to check upto max_total_bin)
-    if (max_total_bin - trig_window_bin <= trig_i) {
-        trig_window_bin = max_total_bin - trig_i - 1;
+    if (max_total_bin - trig_window_bin <= this_bin) {
+        trig_window_bin = max_total_bin - this_bin - 1;
     }
 
     int trig_mode = settings1->TRIG_MODE;
@@ -1945,7 +1945,7 @@ void Report::triggerCheck_ScanMode0(
 
     // Loop over global time bins and identify the first, if any, time bin
     //    with sufficient signal to trigger in the appropriate amount of antennas 
-    while (trig_i < max_total_bin - trig_window_bin) { // loop over waveform bins
+    while (this_bin < max_total_bin - trig_window_bin) { // loop over waveform bins
 
         int N_pass = 0;
         int N_pass_V = 0;
@@ -1953,11 +1953,11 @@ void Report::triggerCheck_ScanMode0(
         int last_trig_bin = 0; // stores last trigger passed bin number
         Passed_chs.clear();
 
-        int trig_j = 0;
-        while (trig_j < n_scanned_channels) { // loop over antennas
+        int antenna_counter = 0;
+        while (antenna_counter < n_scanned_channels) { // loop over antennas
 
-            int string_i = detector->getStringfromArbAntID(station_index, trig_j);
-            int antenna_i = detector->getAntennafromArbAntID(station_index, trig_j);
+            int string_i = detector->getStringfromArbAntID(station_index, antenna_counter);
+            int antenna_i = detector->getAntennafromArbAntID(station_index, antenna_counter);
             int channel_num = detector->GetChannelfromStringAntenna(station_index, string_i, antenna_i, settings1);
 
             // Channel numbering is different for DETECTOR=(1,2,3) than for
@@ -1968,7 +1968,7 @@ void Report::triggerCheck_ScanMode0(
 
             // Antenna Masking (masked_ant=0 means this antenna should be ignored from trigger)
             if( detector->GetTrigMasking(channel_num-1)==0){ 
-                trig_j++;
+                antenna_counter++;
                 continue;   
             }
 
@@ -1985,14 +1985,14 @@ void Report::triggerCheck_ScanMode0(
 
                         double diode_noise_RMS = trigger->GetAntNoise_diodeRMS(channel_num-1, settings1);
                         if (
-                            trigger->Full_window[trig_j][trig_i + trig_bin] < 
+                            trigger->Full_window[antenna_counter][this_bin + trig_bin] < 
                             (   detector->GetThres(station_index, channel_num - 1, settings1) 
                                 * diode_noise_RMS 
                                 * detector->GetThresOffset(station_index, channel_num - 1, settings1))
                         ) {
                             // if this channel passed the trigger!
 
-                            station_r->strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
+                            station_r->strings[string_i].antennas[antenna_i].Trig_Pass = this_bin + trig_bin;
                             N_pass++;
                             if (station_d->strings[string_i].antennas[antenna_i].type == 0) { // Vpol
                                 N_pass_V++;
@@ -2000,10 +2000,10 @@ void Report::triggerCheck_ScanMode0(
                             if (station_d->strings[string_i].antennas[antenna_i].type == 1) { // Hpol
                                 N_pass_H++;
                             }
-                            if (last_trig_bin < trig_i + trig_bin) 
-                                last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
+                            if (last_trig_bin < this_bin + trig_bin) 
+                                last_trig_bin = this_bin + trig_bin;   // added for fixed V_mimic
                             trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                            Passed_chs.push_back(trig_j);
+                            Passed_chs.push_back(antenna_counter);
 
                         }
 
@@ -2030,14 +2030,14 @@ void Report::triggerCheck_ScanMode0(
                         double diode_noise_RMS = trigger->GetAntNoise_diodeRMS(channel_num-1, settings1);
                         // with threshold offset by chs
                         if (
-                            trigger->Full_window[trig_j][trig_i + trig_bin] < 
+                            trigger->Full_window[antenna_counter][this_bin + trig_bin] < 
                             (   detector->GetThres(station_index, channel_num - 1, settings1) 
                                 * diode_noise_RMS 
                                 * detector->GetThresOffset(station_index, channel_num - 1, settings1)))
                         {
                             // if this channel passed the trigger!
 
-                            station_r->strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin;
+                            station_r->strings[string_i].antennas[antenna_i].Trig_Pass = this_bin + trig_bin;
                             N_pass++;
                             if (station_d->strings[string_i].antennas[antenna_i].type == 0) {
                                 // Vpol
@@ -2047,10 +2047,10 @@ void Report::triggerCheck_ScanMode0(
                                 // Hpol
                                 N_pass_H++;
                             }
-                            if (last_trig_bin < trig_i + trig_bin) 
-                                last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
+                            if (last_trig_bin < this_bin + trig_bin) 
+                                last_trig_bin = this_bin + trig_bin;   // added for fixed V_mimic
                             trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                            Passed_chs.push_back(trig_j);
+                            Passed_chs.push_back(antenna_counter);
 
                         }
 
@@ -2066,17 +2066,17 @@ void Report::triggerCheck_ScanMode0(
                 while (trig_bin < trig_window_bin) {
 
                     double diode_noise_RMS = trigger->GetAntNoise_diodeRMS(channel_num-1, settings1);
-                    if( trig_i+offset+trig_bin >= settings1->DATA_BIN_SIZE ) 
-                        break; //if trigger window hits wf end, cannot scan this channel further with this trig_i
+                    if( this_bin+offset+trig_bin >= settings1->DATA_BIN_SIZE ) 
+                        break; //if trigger window hits wf end, cannot scan this channel further with this this_bin
                     if (
-                        trigger->Full_window[trig_j][trig_i + trig_bin + offset] < 
+                        trigger->Full_window[antenna_counter][this_bin + trig_bin + offset] < 
                         (   detector->GetThres(station_index, channel_num - 1, settings1) 
                             * diode_noise_RMS 
                             * detector->GetThresOffset(station_index, channel_num - 1, settings1))
                     ) {
                         // if this channel passed the trigger!
 
-                        station_r->strings[string_i].antennas[antenna_i].Trig_Pass = trig_i + trig_bin + offset;
+                        station_r->strings[string_i].antennas[antenna_i].Trig_Pass = this_bin + trig_bin + offset;
                         N_pass++;
                         if (station_d->strings[string_i].antennas[antenna_i].type == 0) { // Vpol
                             N_pass_V++;
@@ -2084,10 +2084,10 @@ void Report::triggerCheck_ScanMode0(
                         if (station_d->strings[string_i].antennas[antenna_i].type == 1) { // Hpol
                             N_pass_H++;
                         }
-                        if (last_trig_bin < trig_i + trig_bin) 
-                            last_trig_bin = trig_i + trig_bin;   // added for fixed V_mimic
+                        if (last_trig_bin < this_bin + trig_bin) 
+                            last_trig_bin = this_bin + trig_bin;   // added for fixed V_mimic
                         trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
-                        Passed_chs.push_back(trig_j);
+                        Passed_chs.push_back(antenna_counter);
 
                     }
 
@@ -2095,9 +2095,9 @@ void Report::triggerCheck_ScanMode0(
                 }
             }
 
-            trig_j++;   // if station not passed the trigger, just go to next channel
+            antenna_counter++;   // if station not passed the trigger, just go to next channel
 
-        }   // while trig_j < n_scanned_channels
+        }   // while antenna_counter < n_scanned_channels
 
         if (((trig_mode == 0) && (N_pass > settings1->N_TRIG - 1))  // trig_mode = 0 case!
             ||  // or
@@ -2107,7 +2107,7 @@ void Report::triggerCheck_ScanMode0(
             int check_ch = 0; // Indexer for the Passed_chs object
             station_r->Global_Pass = last_trig_bin; // Save the waveform bin when the station triggered and read out
 
-            trig_i = max_total_bin; // also if we know this station is trigged, don't need to check rest of time window
+            this_bin = max_total_bin; // also if we know this station is trigged, don't need to check rest of time window
 
             // Loop over all antennas on the station and save the data-like waveform, V_mimic
             for (int ch_loop = 0; ch_loop < n_scanned_channels; ch_loop++) { 
@@ -2334,9 +2334,9 @@ void Report::triggerCheck_ScanMode0(
 
         }   // if global trig!
         else {
-            trig_i++;   // also if station not passed the trigger, just go to next bin
+            this_bin++;   // also if station not passed the trigger, just go to next bin
         }
-    }   // while trig_i
+    }   // while this_bin
 
 }
 
