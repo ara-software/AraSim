@@ -859,14 +859,14 @@ void Antenna_r::Find_Likely_Sol(){
   Likely_Sol[0] = -1;
   Likely_Sol[1] = -1;
 
-  for (int n=0; n<SignalBin.size(); n++) { // Loop over interactions
-    for (int m = 0; m < SignalBin[n].size(); m++) { // loop over raysol numbers
-      if (SignalExt[n][m]) {
-        dBin = abs(SignalBin[n][m] - Trig_Pass);
+  for (int interaction_index=0; interaction_index<SignalBin.size(); interaction_index++) { // Loop over interactions
+    for (int ray_index = 0; ray_index < SignalBin[interaction_index].size(); ray_index++) { // loop over raysol numbers
+      if (SignalExt[interaction_index][ray_index]) {
+        dBin = abs(SignalBin[interaction_index][ray_index] - Trig_Pass);
         if (dBin < mindBin) {
           // store the ray sol number which is minimum difference between Trig_Pass bin
-          Likely_Sol[0] = n;
-          Likely_Sol[1] = m;
+          Likely_Sol[0] = interaction_index;
+          Likely_Sol[1] = ray_index;
           mindBin = dBin;
         }
       }
