@@ -46,11 +46,9 @@ Report::~Report() {
 
   stations.clear();
   strings.clear();
-
   Passed_chs.clear();
   Vfft_noise_after.clear();
   Vfft_noise_before.clear();
-  //V_noise_timedomain.clear();
 
 }
 
@@ -58,14 +56,11 @@ void Report::delete_all() {
 
   stations.clear();
   strings.clear();
-
   Passed_chs.clear();
   Vfft_noise_after.clear();
   Vfft_noise_before.clear();
-
   noise_phase.clear();
   Passed_chs.clear();
-
 
 }
 
@@ -177,8 +172,6 @@ void Antenna_r::Prepare_Outputs(int n_interactions) {
   Pol_factorV.resize(n_interactions);
   phi_rec.resize(n_interactions);
   theta_rec.resize(n_interactions);
-  //VHz_antfactor.resize(n_interactions);
-  //VHz_filter.resize(n_interactions);
   Vfft.resize(n_interactions);
   Vfft_noise.resize(n_interactions);
 
@@ -190,8 +183,6 @@ void Antenna_r::Prepare_Outputs(int n_interactions) {
 
   Trig_Pass = 0;
 
-  // additional for before ant waveform
-  //Vm_wo_antfactor.resize(n_interactions);
   Vm_zoom.resize(n_interactions);
   Vm_zoom_T.resize(n_interactions);
 
@@ -227,8 +218,6 @@ void Antenna_r::clear() {
   Pol_factorV.clear();
   phi_rec.clear();
   theta_rec.clear();
-  //VHz_antfactor.clear();
-  //VHz_filter.clear();
   Vfft.clear();
   Vfft_noise.clear();
 
@@ -248,9 +237,6 @@ void Antenna_r::clear() {
   Rank.clear();
   TooMuch_Tdelay.clear();
 
-
-  // additional for before ant waveform
-  //Vm_wo_antfactor.clear();
   Vm_zoom.clear();
   Vm_zoom_T.clear();
 
@@ -282,27 +268,17 @@ void Antenna_r::clear_useless(Settings *settings1) {
   //   clear some information here from the Antenna_r object
 
   if (settings1->DATA_SAVE_MODE == 1) {
-    Heff.clear();
     
-    //VHz_antfactor.clear();
-    //VHz_filter.clear();
+    // Clear EM signal and waveform data for each interaction and ray
+    vmmhz.clear();
+    Heff.clear();
     Vfft.clear();
     Vfft_noise.clear();
-
     V.clear();
 
-    //Trig_Pass.clear();
     TooMuch_Tdelay.clear();
 
-    // need or not?
-    //Pol_vector.clear();
-    vmmhz.clear();
-    //Mag.clear();
-    //Fresnel.clear();
-    //Pol_factor.clear();
-    //
     // additional for before ant waveform
-    //Vm_wo_antfactor.clear();
     Vm_zoom.clear();
     Vm_zoom_T.clear();
   }
@@ -311,23 +287,14 @@ void Antenna_r::clear_useless(Settings *settings1) {
     //! clear the ray step to reduce the size of output AraOut.root
     ray_step.clear();  
     
+    // Clear EM signal and waveform data for each interaction and ray
+    vmmhz.clear();
     Heff.clear();
-    //VHz_antfactor.clear();
-    //VHz_filter.clear();
     Vfft.clear();
     Vfft_noise.clear();
-
     V.clear();
 
-    //Trig_Pass.clear();
     TooMuch_Tdelay.clear();
-
-    // need or not?
-    //Pol_vector.clear();
-    vmmhz.clear();
-    //Mag.clear();
-    //Fresnel.clear();
-    //Pol_factor.clear();
     
     // clear global trigger waveform info also
     time.clear();
@@ -336,8 +303,6 @@ void Antenna_r::clear_useless(Settings *settings1) {
     V_noise.clear();
     V_mimic.clear();
 
-    // additional for before ant waveform
-    //Vm_wo_antfactor.clear();
     Vm_zoom.clear();
     Vm_zoom_T.clear();
     
@@ -477,7 +442,6 @@ void Report::clear_useless(Settings *settings1) {
       Passed_chs.clear();
       Vfft_noise_after.clear();
       Vfft_noise_before.clear();
-      //V_noise_timedomain.clear();
       V_total_forconvlv.clear();
       RayStep.clear();
 
@@ -497,7 +461,7 @@ void Report::CalculateSignals(
 
   double min_arrival_time_tmp;    // min arrival time between all antennas, raysolves
   double max_arrival_time_tmp;    // max arrival time between all antennas, raysolves
-  double max_PeakV_tmp;   // max PeakV of all antennas in the station
+  double max_PeakV_tmp;           // max PeakV of all antennas in the station
 
   double RandomTshift = gRandom->Rndm(); // for t-domain signal, a factor for random init time shift
 
@@ -507,7 +471,7 @@ void Report::CalculateSignals(
 
     min_arrival_time_tmp = 10.; // first min_arrival_time is unreasonably big value
     max_arrival_time_tmp = 0.;  // first max_arrival_time is unreasonably small value
-    max_PeakV_tmp = 0.; // first max_PeakV_tmp is 0.
+    max_PeakV_tmp = 0.;         // first max_PeakV_tmp is 0.
 
     stations[i].Total_ray_sol = 0;  // initial Total_ray_sol value
 
@@ -652,8 +616,6 @@ void Report::BuildAndTriggerOnWaveforms(
     // to save time, use only necessary number of bins
     int max_total_bin = (stations[station_index].max_arrival_time - stations[station_index].min_arrival_time) / settings1->TIMESTEP + settings1->NFOUR *3 + trigger->maxt_diode_bin;    // make more time
 
-    //stations[station_index].max_total_bin = max_total_bin;
-
     // Decide if new noise waveforms will be generated for every new event. 
     // Otherwise, the same noise waveforms will be used for the entire simulation run.
     if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0) {
@@ -692,11 +654,6 @@ void Report::BuildAndTriggerOnWaveforms(
         detector->ReadRFCM_New(settings1);
       if (settings1->NOISE == 1 && settings1->DETECTOR == 3)
         detector->ReadRayleigh_New(settings1);
-
-      // TODO: I think this is where the Rayleigh reading will go for this next version of the code
-      // if (settings1->NOISE==1 && settings1->DETECTOR==4 || settings1->DETECTOR==5) {
-      //     detector->ReadRayleigh_Station(settings1);
-      // }
 
       // reset Trigger class noise temp values
       trigger->Reset_V_noise_freqbin(settings1, detector);
@@ -1251,19 +1208,15 @@ void Report::ModelRay(
 
                 // apply pol factor, heff
                 if (event->IsCalpulser == 1) {
-                    //cout<<"set signal pol as Hpol for Calpulser1 evts"<<endl;
                     Pol_vector = n_trg_slappy;
                 }
                 else if (event->IsCalpulser == 2) {
-                    //cout<<"set signal pol as Vpol for Calpulser2 evts"<<endl;
                     Pol_vector = n_trg_pokey;
                 }
                 else if (event->IsCalpulser == 3) {
-                    //cout<<"set signal pol as Hpol for Calpulser2 evts"<<endl;
                     Pol_vector = n_trg_slappy;
                 }
                 else if (event->IsCalpulser == 4) {
-                    //cout<<"set signal pol as Vpol + Hpol for Calpulser2 evts"<<endl;
                     Pol_vector = n_trg_slappy + n_trg_pokey;
                 }
 
@@ -1758,7 +1711,7 @@ void Report::PropagateSignal(
             icemodel->GetN(*antenna_d),
             detector->GetImpedance(freq_tmp*1.E-6, antenna_d->type, k));
 
-        //Tx effective height for last bin.  Currently locked to standard ARA Vpol and HPol antennas.  
+        // Tx effective height for last bin.  Currently locked to standard ARA Vpol and HPol antennas.  
         // Need to add selection mode.
         // Only used in EVENT_MODE == 12
         double Tx_theta = 0;
@@ -1785,19 +1738,15 @@ void Report::PropagateSignal(
                 freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu));   
                 
             if (event->IsCalpulser == 1) {
-                //cout<<"set signal pol as Hpol for Calpulser1 evts"<<endl;
                 Pol_vector = n_trg_slappy;
             }
             else if (event->IsCalpulser == 2) {
-                //cout<<"set signal pol as Vpol for Calpulser2 evts"<<endl;
                 Pol_vector = n_trg_pokey;
             }
             else if (event->IsCalpulser == 3) {
-                //cout<<"set signal pol as Hpol for Calpulser2 evts"<<endl;
                 Pol_vector = n_trg_slappy;
             }
             else if (event->IsCalpulser == 4) {
-                //cout<<"set signal pol as Vpol + Hpol for Calpulser2 evts"<<endl;
                 Pol_vector = n_trg_slappy + n_trg_pokey;
             }
 
@@ -1998,12 +1947,12 @@ void Report::triggerCheck_ScanMode0(
             int channel_num = detector->GetChannelfromStringAntenna(station_index, string_i, antenna_i, settings1);
 
             // Channel numbering is different for DETECTOR=(1,2,3) than for
-            // DETECTOR = 4 in GetChannelfromStringAntenna(), it needs that shift 
+            // DETECTOR = 4 and 5 in GetChannelfromStringAntenna(), it needs that shift 
             if (!(settings1->DETECTOR==4 || settings1->DETECTOR==5)){
                 channel_num = channel_num+1; 
             }
 
-            //Antenna Masking (masked_ant=0 means this antenna should be ignored from trigger)
+            // Antenna Masking (masked_ant=0 means this antenna should be ignored from trigger)
             if( detector->GetTrigMasking(channel_num-1)==0){ 
                 trig_j++;
                 continue;   
@@ -2971,7 +2920,6 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
             if ( settings1->NFOUR/2 < EFFECTIVE_LAB3_SAMPLES*2) UsefulEventBin = settings1->NFOUR/2;
             else UsefulEventBin = EFFECTIVE_LAB3_SAMPLES*2;
             
-            //for (int mimicbin=0; mimicbin<settings1->NFOUR/2; mimicbin++) {
             for (int mimicbin=0; mimicbin<UsefulEventBin; mimicbin++) {
                 if (stations[stationIndex].Global_Pass > 0){
                     theUsefulEvent->fVoltsRF[AraRootChannel-1][mimicbin] = stations[i].strings[string_i].antennas[antenna_i].V_mimic[mimicbin];
@@ -2982,7 +2930,6 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
                     theUsefulEvent->fTimesRF[AraRootChannel-1][mimicbin] = 0.;
                 }
             }
-            //theUsefulEvent->fNumPointsRF[ch_loop] = EFFECTIVE_SAMPLES * 2;
             theUsefulEvent->fNumPointsRF[ch_loop] = UsefulEventBin;
         }
     }
@@ -2991,16 +2938,13 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 
 #ifdef ARA_UTIL_EXISTS
 void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulAtriStationEvent *theUsefulEvent) {
-  //    if (stationID < detector->params.number_of_stations){
 
-        int i = stationID;
+    int i = stationID;
 	int stationID_AraRoot = settings1->DETECTOR_STATION_ARAROOT;
 	cout << "StationID: " << stationID << endl;	
 	cout << "StationID_AraRoot: " << stationID_AraRoot << endl;
 	theUsefulEvent->fNumChannels = 32;
 	theUsefulEvent->stationId = stationID_AraRoot;
-	
-	//	cout << endl << stationID << endl;
 	
 	int ch_limit;
 	if (stationID == 0){
@@ -3012,22 +2956,15 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 	int maxElecChans = 32;
 	
 	for (int ch_loop=0; ch_loop < ch_limit; ch_loop++) {
-	  //	  int elecChan = AraGeom->getElecChanFromRFChan(ch_loop, stationID);
 	  int elecChan = AraGeomTool::Instance()->getElecChanFromRFChan(ch_loop, stationID_AraRoot);
 	  int string_i = 0;
 	  int antenna_i = 0;
 	  detector->GetSSAfromChannel(stationID, ch_loop, &antenna_i, &string_i, settings1);
 
-	  //	  cout << ch_loop << " : " << elecChan << " : " << string_i << " : " << antenna_i << endl;
-
-	  //	  int string_i = detector->getStringfromArbAntID( stationIndex, ch_loop);
-	  //	  int antenna_i = detector->getAntennafromArbAntID( stationIndex, ch_loop);
 	  int AraRootChannel = 0;
 	  AraRootChannel = detector->GetChannelfromStringAntenna (stationID, string_i, antenna_i, settings1);
 	  
 	  int UsefulEventBin;
-	  //	  if ( settings1->NFOUR/2 < EFFECTIVE_LAB3_SAMPLES*2) UsefulEventBin = settings1->NFOUR/2;
-	  //	  else UsefulEventBin = EFFECTIVE_LAB3_SAMPLES*2;
 
 	  UsefulEventBin = settings1->WAVEFORM_LENGTH;
 
@@ -3035,19 +2972,11 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 	  volts.resize(UsefulEventBin);
 	  vector < double > times;
 	  times.resize(UsefulEventBin);
-
-	  //	  theUsefulEvent->fVolts[AraRootChannel-1].resize(UsefulEventBin);
-	  //	  theUsefulEvent->fTimes[AraRootChannel-1].resize(UsefulEventBin);
-	  //	  cout << string_i << " : " << antenna_i << endl;
-	  
-	  //for (int mimicbin=0; mimicbin<settings1->NFOUR/2; mimicbin++) {
+      
 	  for (int mimicbin=0; mimicbin<UsefulEventBin; mimicbin++) {
 	    if (stations[stationIndex].Global_Pass > 0){
-	      //	      cout << "Test 1" << endl;
 	      volts[mimicbin] = stations[stationIndex].strings[string_i].antennas[antenna_i].V_mimic[mimicbin];
 	      times[mimicbin] = stations[stationIndex].strings[string_i].antennas[antenna_i].time_mimic[mimicbin];
-	      
-	      
 	    }
 	    else {
 	      volts[mimicbin] = 0.;
@@ -3056,16 +2985,11 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 	  }
 	  theUsefulEvent->fVolts.insert( std::pair < int, std::vector < double > > (elecChan, volts ));
 	  theUsefulEvent->fTimes.insert( std::pair < int, std::vector < double > > (elecChan, times ));
-
-	  //	  cout << elecChan << " : " << theUsefulEvent->fTimes[elecChan][1] <<  " : " << stations[stationIndex].strings[string_i].antennas[antenna_i].time_mimic[1] << endl;
-	  //	  cout << elecChan << " : " << theUsefulEvent->fVolts[elecChan][1] <<  " : " << stations[stationIndex].strings[string_i].antennas[antenna_i].V_mimic[1] << endl;
-
-
+      
 	  volts.clear();
 	  times.clear();
 
-        }
-	//  }
+    }
 }
 #endif
 
@@ -3469,12 +3393,9 @@ void Report::Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *
     int string_num = detector->getStringfromArbAntID( StationIndex, ID );
     int ant_num = detector->getAntennafromArbAntID( StationIndex, ID );
 
-    //int channel_num = detector->GetChannelfromStringAntenna ( StationIndex, string_num, ant_num );
     int channel_num = detector->GetChannelfromStringAntenna ( StationIndex, string_num, ant_num, settings1 );
-    //cout<<"station "<<StationIndex<<" ch"<<channel_num<<" applying gain offset "<<detector->GetGainOffset( StationIndex, channel_num, settings1 )<<" applying"<<endl;
 
     for (int bin=0; bin<settings1->DATA_BIN_SIZE; bin++) {   // test for full window
-        
         trigger->Full_window[ID][bin] = ( trigger->Full_window[ID][bin] * detector->GetGainOffset( StationIndex, channel_num-1, settings1 ) * detector->GetGainOffset( StationIndex, channel_num-1, settings1 ) ); // offset in voltage factor so we need power (V^2 factor to diode response)
         trigger->Full_window_V[ID][bin] = ( trigger->Full_window_V[ID][bin] * detector->GetGainOffset( StationIndex, channel_num-1, settings1 ) ); // gain in voltage factor
     }
@@ -3487,17 +3408,12 @@ int Report::GetChNumFromArbChID( Detector *detector, int ID, int StationIndex, S
 
     int string_num = detector->getStringfromArbAntID( StationIndex, ID );
     int ant_num = detector->getAntennafromArbAntID( StationIndex, ID );
-    
     int StationID = detector->stations[StationIndex].StationID;
-    //    cout << "Station ID: " << StationID << endl;
-    //    cout << "string_num: " << string_num << endl;
-    //    cout << "ant_num: " << ant_num << endl;
-    //    cout << StationID << " : " << string_num << " : " << ant_num << endl;
-    
-    //int channel_num = detector->GetChannelfromStringAntenna ( StationIndex, string_num, ant_num );
+
     int channel_num = detector->GetChannelfromStringAntenna ( StationID, string_num, ant_num, settings1 );
 
     return channel_num;
+
 }
 
 
@@ -3551,8 +3467,6 @@ void Report::GetParameters( Position &src, Position &trg, Vector &nnu, double &v
       * n_trg_slappy is parallel to the surface and perpendicular to the plane
       * defined by the vector pointing to ant and vertex
      */
-    
-    //cout<<"launch_vector angle between R1 (trg) : "<<launch_vector.Angle(trg)<<"\n";
 
     receive_vector = trg.Rotate( receive_angle, src.Cross(trg) );
     receive_vector = receive_vector.Unit();
@@ -3597,15 +3511,13 @@ double Report::calculatePolFactor(Vector &Pol_vector, int ant_type, double anten
 
 void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vmmhz, double antenna_theta, double antenna_phi) {  // vmmhz is input and output. output will have some antenna factors on it
 
-    //double pol_factor;
     pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
 
     // apply 3dB spliter, d nu to prepare FFT
     // now actually vmmhz is not V/m/MHz but V/m/Hz unit
-    //vmmhz = vmmhz/sqrt(2.)/(settings1->TIMESTEP*1.E6); //sqrt(2) for 3dB spliter for TURF, SURF
-    vmmhz = vmmhz/sqrt(2.)/(1.E6); //sqrt(2) for 3dB spliter for TURF, SURF. 1/TIMESTEP moved to MakeArraysforFFT
+    // sqrt(2) for 3dB spliter for TURF, SURF. 1/TIMESTEP moved to MakeArraysforFFT
     // 1/(1.E6) for V/MHz to V/Hz
-
+    vmmhz = vmmhz/sqrt(2.)/(1.E6); 
 
     // apply antenna effective height and 0.5 (to calculate power with heff), and polarization factor
     // not vmmhz is actually V/Hz unit
@@ -4037,7 +3949,6 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
         Vfft_noise_after.clear();  // remove previous Vfft_noise values
         Vfft_noise_before.clear();  // remove previous Vfft_noise values
 
-
         double V_tmp; // copy original flat H_n [V] value
         double current_amplitude, current_phase;
 
@@ -4066,26 +3977,15 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
                 break;
             }
 
-
             Vfft_noise_before.push_back( V_tmp );
-
 
             current_phase = noise_phase[k];
 
-            //Tools::get_random_rician( 0., 0., sqrt(2./ M_PI) * V_tmp, current_amplitude, current_phase);    // use real value array value
             Tools::get_random_rician( 0., 0., sqrt(2./M_PI)/1.177 * V_tmp, current_amplitude, current_phase);    // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
 
             // vnoise is currently noise spectrum (before fft, unit : V)
-           //vnoise[2 * k] = sqrt(current_amplitude) * cos(noise_phase[k]);
-           //vnoise[2 * k + 1] = sqrt(current_amplitude) * sin(noise_phase[k]);
            vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
            vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
-
-
-
-           //vnoise[2 * k] = (V_tmp) * cos(noise_phase[k]);
-           //vnoise[2 * k + 1] = (V_tmp) * sin(noise_phase[k]);
-           
 
             Vfft_noise_after.push_back( vnoise[2*k] );
             Vfft_noise_after.push_back( vnoise[2*k+1] );
@@ -4094,20 +3994,10 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
             vnoise[2 * k] *= 2./((double)settings1->DATA_BIN_SIZE);
             vnoise[2 * k + 1] *= 2./((double)settings1->DATA_BIN_SIZE);
 
-
         }
-
 
         // now vnoise is time domain waveform
         Tools::realft( vnoise, -1, settings1->DATA_BIN_SIZE);
-
-        
-        // save timedomain noise to Report class
-        /*
-        for (int k=0; k<settings1->DATA_BIN_SIZE; k++) {
-            V_noise_timedomain.push_back( vnoise[k] );
-        }
-        */
 
     }
     else {  // currently there are no more options!
@@ -4121,12 +4011,11 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
 
 // generate DATA_BIN_SIZE sized noise waveform array in time domain
 void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, double v_noise, double * vnoise, int ch) {
-    //  cout << "channel: " << ch << endl;
+
     if (settings1 -> NOISE == 0) { // NOISE == 0 : flat thermal noise with Johnson-Nyquist noise
 
         Vfft_noise_after.clear(); // remove previous Vfft_noise values
         Vfft_noise_before.clear(); // remove previous Vfft_noise values
-        //V_noise_timedomain.clear(); // remove previous V_noise_timedomain values
 
         double V_tmp; // copy original flat H_n [V] value
         double current_amplitude, current_phase;
@@ -4175,13 +4064,6 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
 
         // now vnoise is time domain waveform
         Tools::realft(vnoise, -1, settings1 -> DATA_BIN_SIZE);
-
-        // save timedomain noise to Report class
-        /*
-        for (int k=0; k<settings1->DATA_BIN_SIZE; k++) {
-            V_noise_timedomain.push_back( vnoise[k] );
-        }
-        */
 
     } else if (settings1 -> NOISE == 1) { // NOISE == 1 : use Rayleigh dist. fits
 
@@ -4234,14 +4116,11 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
 
                     current_phase = noise_phase[k];
 
-                    //Tools::get_random_rician( 0., 0., sqrt(2./ M_PI) * V_tmp, current_amplitude, current_phase);    // use real value array value
                     Tools::get_random_rician(0., 0., sqrt(2. / M_PI) / 1.177 * V_tmp, current_amplitude, current_phase); // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
 
                 }
 
                 // vnoise is currently noise spectrum (before fft, unit : V)
-                //vnoise[2 * k] = sqrt(current_amplitude) * cos(noise_phase[k]);
-                //vnoise[2 * k + 1] = sqrt(current_amplitude) * sin(noise_phase[k]);
                 vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
                 vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
 
@@ -4370,10 +4249,10 @@ void Report::GetNoisePhase(Settings *settings1) {
 
     noise_phase.clear();    // remove all previous noise_phase vector values
 
-    //for (int i=0; i<settings1->NFOUR/4; i++) {
     for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {  // noise with DATA_BIN_SIZE bin array
         noise_phase.push_back(2*PI*gRandom->Rndm());  // get random phase for flat thermal noise
     }
+    
 }
 
 
@@ -4474,12 +4353,11 @@ void Report::Prepare_Antenna_Noise(
                         trigger->Full_window[channel_index][bin] = (trigger->v_noise_timedomain_diode[noise_ID[l]][bin]);
                         trigger->Full_window_V[channel_index][bin] = (trigger->v_noise_timedomain[noise_ID[l]][bin]);
                     }
-                    // cout<<"last noise filled in Full_window!"<<endl;
+                    // last noise filled in Full_window
                 }
                 else
                 {
-                    // when it's not final noise waveform
-                    // cout<<"full noise will fill in Full_window!"<<endl;
+                    // when it's not final noise waveform, full noise will fill in Full_window
                     for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
                     {
                         trigger->Full_window[channel_index][bin] = (trigger->v_noise_timedomain_diode[noise_ID[l]][bin]);
@@ -4506,12 +4384,11 @@ void Report::Prepare_Antenna_Noise(
                                 GetChNumFromArbChID(detector, channel_index, station_number, settings1) - 1
                             ][ noise_ID[l] ][ bin ] );
                     }
-                    //cout<<"last noise filled in Full_window!"<<endl;
+                    // last noise filled in Full_window
                 }
                 else
                 {
-                    // when it's not final noise waveform
-                    //cout<<"full noise will fill in Full_window!"<<endl;
+                    // when it's not final noise waveform, full noise will fill in Full_window
                     for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
                     {
                         trigger->Full_window[channel_index][bin] = (
@@ -4549,12 +4426,11 @@ void Report::Prepare_Antenna_Noise(
                                     GetChNumFromArbChID(detector, channel_index, station_number, settings1) - 1
                                 ][ noise_ID[l] ][ bin ] );
                         }
-                        // cout<<"last noise filled in Full_window!"<<endl;
+                        // last noise filled in Full_window
                     }
                     else
                     {
-                        // when it's not final noise waveform
-                        // cout<<"full noise will fill in Full_window!"<<endl;
+                        // when it's not final noise waveform, full noise will fill in Full_window
                         for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
                         {
                             trigger->Full_window[channel_index][bin] = (
@@ -4583,12 +4459,11 @@ void Report::Prepare_Antenna_Noise(
                             trigger->Full_window[channel_index][bin] = (trigger->v_noise_timedomain_diode_ch[8][noise_ID[l]][bin]);
                             trigger->Full_window_V[channel_index][bin] = (trigger->v_noise_timedomain_ch[8][noise_ID[l]][bin]);
                         }
-                        // cout<<"last noise filled in Full_window!"<<endl;
+                        // last noise filled in Full_window
                     }
                     else
                     {
-                        // when it's not final noise waveform
-                        // cout<<"full noise will fill in Full_window!"<<endl;
+                        // when it's not final noise waveform, full noise will fill in Full_window
                         for (int bin = 0; bin < settings1->DATA_BIN_SIZE; bin++)
                         {
                             trigger->Full_window[channel_index][bin] = (trigger->v_noise_timedomain_diode_ch[8][noise_ID[l]][bin]);
@@ -4611,20 +4486,13 @@ void Report::Prepare_Antenna_Noise(
 
 void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int StationIndex, vector <double> &vsignal_array, double *vsignal_forfft) {
 
-
-
     // from icemc, anita class MakeArraysforFFT
     int NFOUR = settings1->NFOUR;
     double TIMESTEP = settings1->TIMESTEP;
 
-//    int NFOUR = detector->stations[StationIndex].NFOUR;
-//    int TIMESTEP = detector->stations[StationIndex].TIMESTEP;
     Tools::Zero(vsignal_forfft,NFOUR/2);
-    
-
 
     if (settings1->AVZ_NORM_FACTOR_MODE == 0) { // use previous normalization factors
-
 
         double previous_value_e_even=0.;
         double previous_value_e_odd=0.;
@@ -4632,7 +4500,7 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
         int iprevious=0;
         int ifirstnonzero=-1;
         int ilastnonzero=2000;
-        //for (int i=0;i<NFREQ;i++) {
+        
         for (int i=0;i<detector->GetFreqBin();i++) {
             
             // freq_forfft has NFOUR/2 elements because it is meant to cover real and imaginary values
@@ -4647,8 +4515,6 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
                 
                 vsignal_forfft[2*ifour]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // inverse fft normalization factor (2/(N/2)), 1/dt for change integration fft form to discrete numerical fft
                 
-                //      cout << "ifour, vsignal is " << ifour << " " << vsignal_e_forfft[2*ifour] << "\n";
-                
                 vsignal_forfft[2*ifour+1]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // phase is 90 deg.
                 // the 2/(nfour/2) needs to be included since were using Tools::realft with the -1 setting
                 
@@ -4656,8 +4522,6 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
                 
                 for (int j=iprevious+1;j<ifour;j++) {
                     vsignal_forfft[2*j]=previous_value_e_even+(vsignal_forfft[2*ifour]-previous_value_e_even)*(double)(j-iprevious)/(double)(ifour-iprevious);
-                    //	cout << "j, vsignal is " << j << " " << vsignal_e_forfft[2*j] << "\n";
-                    
                     vsignal_forfft[2*j+1]=previous_value_e_odd+(vsignal_forfft[2*ifour+1]-previous_value_e_odd)*(double)(j-iprevious)/(double)(ifour-iprevious);
                 }
                 
@@ -4674,55 +4538,25 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
         // don't applying any extra factor for the change in array (change of bin size)
         // as change in the bin size doesn't matter for the total energy
         // total energy is just same as integral over frequency range and this frequency range will not change
-        //
-          //cout << "ifirstnonzero, ilastnonzero are " << ifirstnonzero << " " << ilastnonzero << "\n";
-          //cout << "non zero count is " << count_nonzero << "\n";
-          //cout << "ratio is " << (double)count_nonzero/(double)(ilastnonzero-ifirstnonzero) << "\n";
         for (int j=0;j<NFOUR/4;j++) {
             vsignal_forfft[2*j]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
             vsignal_forfft[2*j+1]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
         }
 
-
-
-        
-        //  Tools::InterpolateComplex(vsignal_e_forfft,NFOUR/4);
-        //Tools::InterpolateComplex(vsignal_h_forfft,NFOUR/4);
         for (int ifour=0;ifour<NFOUR/4;ifour++) {
-
-
 
             vsignal_forfft[2*ifour]*=cos(settings1->PHASE*PI/180.);
             vsignal_forfft[2*ifour+1]*=sin(settings1->PHASE*PI/180.);
-            
-            //--------------------------------------------------
-            // if (!PULSER) {
-            //     
-            //     vsignal_forfft[2*ifour]*=cos(phase*PI/180.);
-            //     vsignal_forfft[2*ifour+1]*=sin(phase*PI/180.);
-            //     
-            //     
-            // }
-            // else {
-            //     vsignal_forfft[2*ifour]*=cos(v_phases[ifour]*PI/180.);
-            //     vsignal_forfft[2*ifour+1]*=sin(v_phases[ifour]*PI/180.);
-            //     
-            // }	  	  	  
-            //-------------------------------------------------- 
-            
-            
+
         }
     }
     else if (settings1->AVZ_NORM_FACTOR_MODE == 1) { // use new (fixed) normalization factors
     
         double dF = 1. / ((double)(NFOUR/2) * TIMESTEP); // in Hz
-        //cout<<"dF1 : "<<dF<<endl;
             
         double dF_org = detector->GetFreq(1) - detector->GetFreq(0); // in Hz
             
-        //double dF_factor = sqrt( dF_org / dF );
          double dF_factor = 1.;
-         //double dF_factor = sqrt( dF / dF_org );
             
          int Norg = detector->GetFreqBin();
                                     
@@ -4734,13 +4568,11 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
          
          for (int i=0;i<Norg+1;i++) {
                                                         
-             if ( i==0 ) {
-                                                                       
+             if ( i==0 ) {                                   
                  VmMHzOrg[i] = 0.;
                  FreqOrg[i] = 0.;
              }
-             else {
-                                                                                                              
+             else {                                                                                    
                  VmMHzOrg[i] = vsignal_array[i-1];
                  FreqOrg[i] = detector->GetFreq(i-1);
              }
@@ -4753,11 +4585,8 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
              VmMHzNFOUR[ifour] = 0.;
                                                                                                                                                                 
          }
-         
-           
-         //Tools::SimpleLinearInterpolation_OutZero( Norg, FreqOrg, vsignal_array, NFOUR/4+1, FreqNFOUR, VmMHzNFOUR );
+
          Tools::SimpleLinearInterpolation_OutZero( Norg+1, FreqOrg, VmMHzOrg, NFOUR/4+1, FreqNFOUR, VmMHzNFOUR );
-          
            
          for (int ifour=1;ifour<NFOUR/4;ifour++) {
            
@@ -4774,9 +4603,6 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
          vsignal_forfft[0] = VmMHzNFOUR[0] * 2/((double)NFOUR/2) * dF_factor / TIMESTEP;
          vsignal_forfft[1] = VmMHzNFOUR[NFOUR/4] * 2/((double)NFOUR/2) * dF_factor / TIMESTEP;
     }
-
-
-
     
 }
 
@@ -4785,16 +4611,11 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
 
 void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int StationIndex, double *vsignal_array, double *vsignal_forfft) {
 
-
-
     // from icemc, anita class MakeArraysforFFT
     int NFOUR = settings1->NFOUR;
     double TIMESTEP = settings1->TIMESTEP;
 
-//    int NFOUR = detector->stations[StationIndex].NFOUR;
-//    int TIMESTEP = detector->stations[StationIndex].TIMESTEP;
     Tools::Zero(vsignal_forfft,NFOUR/2);
-
 
     if (settings1->AVZ_NORM_FACTOR_MODE == 0) { // use previous normalization factors
 
@@ -4805,7 +4626,7 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
         int iprevious=0;
         int ifirstnonzero=-1;
         int ilastnonzero=2000;
-        //for (int i=0;i<NFREQ;i++) {
+        
         for (int i=0;i<detector->GetFreqBin();i++) {
             
             // freq_forfft has NFOUR/2 elements because it is meant to cover real and imaginary values
@@ -4819,9 +4640,7 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
                     ifirstnonzero=ifour;
                 
                 vsignal_forfft[2*ifour]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // inverse fft normalization factor (2/(N/2)), 1/dt for change integration fft form to discrete numerical fft
-                
-                //      cout << "ifour, vsignal is " << ifour << " " << vsignal_e_forfft[2*ifour] << "\n";
-                
+
                 vsignal_forfft[2*ifour+1]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // phase is 90 deg.
                 // the 2/(nfour/2) needs to be included since were using Tools::realft with the -1 setting
                 
@@ -4829,8 +4648,6 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
                 
                 for (int j=iprevious+1;j<ifour;j++) {
                     vsignal_forfft[2*j]=previous_value_e_even+(vsignal_forfft[2*ifour]-previous_value_e_even)*(double)(j-iprevious)/(double)(ifour-iprevious);
-                    //	cout << "j, vsignal is " << j << " " << vsignal_e_forfft[2*j] << "\n";
-                    
                     vsignal_forfft[2*j+1]=previous_value_e_odd+(vsignal_forfft[2*ifour+1]-previous_value_e_odd)*(double)(j-iprevious)/(double)(ifour-iprevious);
                 }
                 
@@ -4841,61 +4658,28 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
             }
             
         } // end loop over nfreq
-        
-
 
         // don't applying any extra factor for the change in array (change of bin size)
         // as change in the bin size doesn't matter for the total energy
         // total energy is just same as integral over frequency range and this frequency range will not change
-        //
-          //cout << "ifirstnonzero, ilastnonzero are " << ifirstnonzero << " " << ilastnonzero << "\n";
-          //cout << "non zero count is " << count_nonzero << "\n";
-          //cout << "ratio is " << (double)count_nonzero/(double)(ilastnonzero-ifirstnonzero) << "\n";
         for (int j=0;j<NFOUR/4;j++) {
             vsignal_forfft[2*j]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
             vsignal_forfft[2*j+1]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
         }
 
-
-
-        
-        //  Tools::InterpolateComplex(vsignal_e_forfft,NFOUR/4);
-        //Tools::InterpolateComplex(vsignal_h_forfft,NFOUR/4);
         for (int ifour=0;ifour<NFOUR/4;ifour++) {
-
-
-
             vsignal_forfft[2*ifour]*=cos(settings1->PHASE*PI/180.);
             vsignal_forfft[2*ifour+1]*=sin(settings1->PHASE*PI/180.);
-            
-            //--------------------------------------------------
-            // if (!PULSER) {
-            //     
-            //     vsignal_forfft[2*ifour]*=cos(phase*PI/180.);
-            //     vsignal_forfft[2*ifour+1]*=sin(phase*PI/180.);
-            //     
-            //     
-            // }
-            // else {
-            //     vsignal_forfft[2*ifour]*=cos(v_phases[ifour]*PI/180.);
-            //     vsignal_forfft[2*ifour+1]*=sin(v_phases[ifour]*PI/180.);
-            //     
-            // }	  	  	  
-            //-------------------------------------------------- 
-            
-            
         }
+
     }
     else if (settings1->AVZ_NORM_FACTOR_MODE == 1) { // use new (fixed) normalization factors
     
         double dF = 1. / ((double)(NFOUR/2) * TIMESTEP); // in Hz
-        //cout<<"dF1 : "<<dF<<endl;
             
         double dF_org = detector->GetFreq(1) - detector->GetFreq(0); // in Hz
             
-        //double dF_factor = sqrt( dF_org / dF );
          double dF_factor = 1.;
-         //double dF_factor = sqrt( dF / dF_org );
             
          int Norg = detector->GetFreqBin();
                                     
@@ -4926,12 +4710,9 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
              VmMHzNFOUR[ifour] = 0.;
                                                                                                                                                                 
          }
-         
-           
-         //Tools::SimpleLinearInterpolation_OutZero( Norg, FreqOrg, vsignal_array, NFOUR/4+1, FreqNFOUR, VmMHzNFOUR );
+
          Tools::SimpleLinearInterpolation_OutZero( Norg+1, FreqOrg, VmMHzOrg, NFOUR/4+1, FreqNFOUR, VmMHzNFOUR );
-          
-           
+
          for (int ifour=1;ifour<NFOUR/4;ifour++) {
            
              // same amplitude, 2/(NFOUR/2) for inverse FFT normalization factor
@@ -4947,8 +4728,6 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
          vsignal_forfft[0] = VmMHzNFOUR[0] * 2/((double)NFOUR/2) * dF_factor / TIMESTEP;
          vsignal_forfft[1] = VmMHzNFOUR[NFOUR/4] * 2/((double)NFOUR/2) * dF_factor / TIMESTEP;
     }
-
-
 
 }
 
@@ -4959,15 +4738,10 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
 
 void Report::MakeArraysforFFT_noise(Settings *settings1, Detector *detector, int StationIndex, vector <double> &vsignal_array, double *vsignal_forfft) {
 
-
-
     // from icemc, anita class MakeArraysforFFT
     int NFOUR = settings1->NFOUR;
     double TIMESTEP = settings1->TIMESTEP;
 
-//    int NFOUR = detector->stations[StationIndex].NFOUR;
-//    int TIMESTEP = detector->stations[StationIndex].TIMESTEP;
-    
     Tools::Zero(vsignal_forfft,NFOUR/2);
     
     double previous_value_e_even=0.;
@@ -4976,7 +4750,7 @@ void Report::MakeArraysforFFT_noise(Settings *settings1, Detector *detector, int
     int iprevious=0;
     int ifirstnonzero=-1;
     int ilastnonzero=2000;
-    //for (int i=0;i<NFREQ;i++) {
+
     for (int i=0;i<detector->GetFreqBin();i++) {
 	
 	// freq_forfft has NFOUR/2 elements because it is meant to cover real and imaginary values
@@ -4990,19 +4764,14 @@ void Report::MakeArraysforFFT_noise(Settings *settings1, Detector *detector, int
 		ifirstnonzero=ifour;
 	    
 	    vsignal_forfft[2*ifour]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // inverse fft normalization factor (2/(N/2)), 1/dt for change integration fft form to discrete numerical fft
-	    
-	    //      cout << "ifour, vsignal is " << ifour << " " << vsignal_e_forfft[2*ifour] << "\n";
-	    
 	    vsignal_forfft[2*ifour+1]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // phase is 90 deg.
 	    // the 2/(nfour/2) needs to be included since were using Tools::realft with the -1 setting
 	    
 	    // how about we interpolate instead of doing a box average
 	    
 	    for (int j=iprevious+1;j<ifour;j++) {
-		vsignal_forfft[2*j]=previous_value_e_even+(vsignal_forfft[2*ifour]-previous_value_e_even)*(double)(j-iprevious)/(double)(ifour-iprevious);
-		//	cout << "j, vsignal is " << j << " " << vsignal_e_forfft[2*j] << "\n";
-		
-		vsignal_forfft[2*j+1]=previous_value_e_odd+(vsignal_forfft[2*ifour+1]-previous_value_e_odd)*(double)(j-iprevious)/(double)(ifour-iprevious);
+            vsignal_forfft[2*j]=previous_value_e_even+(vsignal_forfft[2*ifour]-previous_value_e_even)*(double)(j-iprevious)/(double)(ifour-iprevious);
+            vsignal_forfft[2*j+1]=previous_value_e_odd+(vsignal_forfft[2*ifour+1]-previous_value_e_odd)*(double)(j-iprevious)/(double)(ifour-iprevious);
 	    }
 	    
 	    ilastnonzero=ifour;
@@ -5018,19 +4787,13 @@ void Report::MakeArraysforFFT_noise(Settings *settings1, Detector *detector, int
     // don't applying any extra factor for the change in array (change of bin size)
     // as change in the bin size doesn't matter for the total energy
     // total energy is just same as integral over frequency range and this frequency range will not change
-    //
-      //cout << "ifirstnonzero, ilastnonzero are " << ifirstnonzero << " " << ilastnonzero << "\n";
-      //cout << "non zero count is " << count_nonzero << "\n";
-      //cout << "ratio is " << (double)count_nonzero/(double)(ilastnonzero-ifirstnonzero) << "\n";
     for (int j=0;j<NFOUR/4;j++) {
-	vsignal_forfft[2*j]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
-	vsignal_forfft[2*j+1]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
+        vsignal_forfft[2*j]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
+        vsignal_forfft[2*j+1]*=1./sqrt((double)count_nonzero/(double)(ilastnonzero-ifirstnonzero));
     }
-
 
     // phase for noise will be applied in GetNoiseWaveforms
 
-    
 }
 
 
@@ -5093,9 +4856,6 @@ void Report::SetRank(Detector *detector) {
         }
     }
 
-
-    //cout<<"Start while loop for Ranking!!"<<endl;
-
     check = 1;
     pre_maxpeak = 1.E5; // unreasonably big value which real PeakV will never reach
     while (check!=0) {
@@ -5107,11 +4867,7 @@ void Report::SetRank(Detector *detector) {
 
                 for (int k=0; k< detector->stations[i].strings[j].antennas.size(); k++) {
 
-                    //for (int l=0; l< detector->stations[i].strings[j].antennas[k].ray_sol_cnt; l++) {
-                    //
                     //lets start with 1st ray_sol only
-                    //
-
                     if (stations[i].strings[j].antennas[k].ray_sol_cnt) {
                         if (stations[i].strings[j].antennas[k].Rank[0] != 0) {  // there is non-zero value! and ray_sol_cnt also non-zero!
                             if ( stations[i].strings[j].antennas[k].PeakV[0].size()!=0 && stations[i].strings[j].antennas[k].PeakV[0][0] < pre_maxpeak) {
@@ -5137,16 +4893,9 @@ void Report::SetRank(Detector *detector) {
         current++;
         pre_maxpeak = maxpeak;
 
-
     }   // while
 
-
-    //cout<<"END Ranking!!"<<endl;
-
-
-
 }
-
 
 
 int Report::GetChannelNum8_LowAnt(int string_num, int antenna_num) {
@@ -5154,7 +4903,6 @@ int Report::GetChannelNum8_LowAnt(int string_num, int antenna_num) {
     int outputch = 16;
 
     // just give ch numbers 1-8 for antenna 0 - 1 while higher ch numbers for antenna 2 - 3
-    //
     if ( string_num == 0 && antenna_num == 0 ) {
         outputch = 1;
     }
@@ -5210,10 +4958,6 @@ int Report::GetChannelNum8_LowAnt(int string_num, int antenna_num) {
 
 }
 
-                        
-
-
-                        
 
 TGraph *Report::getWaveform(Detector *detector, int ch, int station_i, int event_num, int run_num){
  
@@ -5453,8 +5197,6 @@ void Report::checkPATrigger(
     //   efficiency vs SNR data.
     // Triggers if signal efficiency is above certain treshold.
     // If triggered, saves relevant information.
-
-    //cout <<"successfully made it to PA Trigger!" << endl;
     
     // For phased array, waveform length is 680 ns, but 
     // for PA trigger check only 20 ns around the signal bin.
@@ -5474,7 +5216,6 @@ void Report::checkPATrigger(
         return;
     }
 
-    //cout << "time to trigger " << endl;
     while(raySolNum < stations[i].strings[0].antennas[8].SignalBin.size()){
 
         // Find and log the event and ray with the most signal
@@ -5570,7 +5311,6 @@ void Report::checkPATrigger(
                             
                         }//end bin
                         my_ch_id ++;
-                        //cout<<" Peak Value for ant "<<ant<<" is "<<peakvalue<<endl;
                     }//end ant
                 }//end detector
 
