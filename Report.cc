@@ -459,19 +459,15 @@ void Report::CalculateSignals(
   // For each each station, perform the ray tracing from each cascade to each antenna 
   //   and determine the voltage readout in the antenna for each connected ray
 
-  double min_arrival_time_tmp;    // min arrival time between all antennas, raysolves
-  double max_arrival_time_tmp;    // max arrival time between all antennas, raysolves
-  double max_PeakV_tmp;           // max PeakV of all antennas in the station
-
   double RandomTshift = gRandom->Rndm(); // for t-domain signal, a factor for random init time shift
 
   // Loop over stations
   for (int i = 0; i < detector->params.number_of_stations; i++)
   {
 
-    min_arrival_time_tmp = 10.; // first min_arrival_time is unreasonably big value
-    max_arrival_time_tmp = 0.;  // first max_arrival_time is unreasonably small value
-    max_PeakV_tmp = 0.;         // first max_PeakV_tmp is 0.
+    double min_arrival_time_tmp = 10.; // min arrival time between all antennas, raysolves, first min_arrival_time is unreasonably big value
+    double max_arrival_time_tmp = 0.;  // max arrival time between all antennas, raysolves, first max_arrival_time is unreasonably small value
+    double max_PeakV_tmp = 0.;         // max PeakV of all antennas in the station, first max_PeakV_tmp is 0.
 
     stations[i].Total_ray_sol = 0;  // initial Total_ray_sol value
 
