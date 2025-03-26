@@ -70,7 +70,7 @@ class Antenna_r {
         vector < vector <int> > reflection; //!    // non-reflected : 0,  reflected : 1
         vector < vector < Position > > Pol_vector; //!  // polarization vector at the antenna
 
-        //! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
+        //! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 
         //! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
         vector < vector < vector < vector <double> > > > ray_step; //!
 
@@ -110,7 +110,7 @@ class Antenna_r {
 
         vector < vector <int> > SignalBin; //! // the bin number where the center of signal located. we can compare this value to Trig_Pass value to have likely triggered ray trace solution
 
-        vector < vector <double> > SignalBinTime; //! ///< the time of center of bin where signal should locate after sim decided the readout window. MK added -2023-05-18-
+        vector < vector <double> > SignalBinTime; //! ///< the time of center of bin where signal should locate after sim decided the readout window.
 
         vector <int> noise_ID;      // information about which pure noise waveform is used for trigger analysis
 
@@ -243,11 +243,6 @@ class Report {
             Detector *detector, Event *event, Settings *settings1, Trigger *trigger
         );
 
-        void rerun_event(
-            Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, 
-            Birefringence *birefringence, IceModel *icemodel, Settings *settings, int which_solution,
-            vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
-            );
         void ModelRay(
             int ray_idx, vector< vector< double > > ray_output, int interaction_idx, double *T_forint, 
             Antenna_r *antenna_r, Antenna *antenna_d,  int i, int j, int k, 

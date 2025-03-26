@@ -188,7 +188,7 @@ double changle; // cherenkov angle
     
   std::vector<double> InputVoltage_V;
   std::vector<double> InputVoltage_T;    
-  void ReadInputVoltage(std::string target);  //Adding function to read input voltage at transmitting antenna - JCF 1/10/2024
+  void ReadInputVoltage(std::string target);  // Reads the input voltage at transmitting antenna 
 
   // variables needed to precompute the Param_RE_Tterm tables
   std::vector<double> tterm_table_em;

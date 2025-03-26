@@ -929,7 +929,7 @@ void Report::ModelRay(
 
     antenna_r->arrival_time[interaction_idx].push_back(ray_output[4][ray_idx] + event->interactions_birth_time[interaction_idx]);
 
-    //! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
+    //! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 
     //! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
     antenna_r->ray_step[interaction_idx].resize(ray_idx + 1); ///< resize by number of ray solutions
     antenna_r->ray_step[interaction_idx][ray_idx].resize(2); ///< resize by xz values
@@ -950,10 +950,10 @@ void Report::ModelRay(
             dl = sqrt((dx *dx) + (dz *dz));
 
             // Skipping attenuation calculation when the distance between two RaySteps is 0. 
-            // PrevenTing adds -nan into the IceAttenFactor. (MK 2021)
+            // PrevenTing adds -nan into the IceAttenFactor.
             if (dl > 0) {
                 // use new ice model
-                // use the midpoint of the array to calculate the attenuation length, instead of the end of the ray (BAC 2020)
+                // use the midpoint of the array to calculate the attenuation length, instead of the end of the ray 
                 IceAttenFactor *= (
                     exp(-dl / icemodel->GetARAIceAttenuLength(-RayStep[ray_idx][1][steps])) + 
                     exp(-dl / icemodel->GetARAIceAttenuLength(-RayStep[ray_idx][1][steps - 1]))
@@ -1037,7 +1037,8 @@ void Report::ModelRay(
                         dz = RayStep[ray_idx][1][steps - 1] - RayStep[ray_idx][1][steps];
                         dl = sqrt((dx *dx) + (dz *dz));
 
-                        // Skipping attenuation calculation when the distance between two RaySteps is 0. Prevening adds -nan into the IceAttenFactor. (MK 2021)
+                        // Skipping attenuation calculation when the distance between two RaySteps is 0. 
+                        // Prevening adds -nan into the IceAttenFactor.
                         if (dl > 0)
                         {
                             // use ray midpoint for attenuation calculation
@@ -1290,7 +1291,7 @@ void Report::ModelRay(
 
                 } // Simple Pulser Simulation
                 
-                //Attempting to simulate PVA pulser.  Starting separate from previous pulser event type to avoid breaking things. - JCF 1/9/2024
+                // PVA pulser simulation.  Separate from previous pulser event type to avoid breaking things. 
                 else if (settings->EVENT_TYPE == 12) {
                     // Get the signal from PVA Pulser events
 
@@ -1638,7 +1639,8 @@ void Report::PropagateSignal(
                         dz = RayStep[ray_idx][1][steps - 1] - RayStep[ray_idx][1][steps];
                         dl = sqrt((dx *dx) + (dz *dz));
 
-                        // Skipping attenuation calculation when the distance between two RaySteps is 0. Prevening adds -nan into the IceAttenFactor. (MK 2021)
+                        // Skipping attenuation calculation when the distance between two RaySteps is 0. 
+                        // Prevening adds -nan into the IceAttenFactor. 
                         if (dl > 0) {
                             // use ray midpoint for attenuation calculation
                             IceAttenFactor *= (
@@ -3831,7 +3833,6 @@ void Report::GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_thet
 void Report::GetAngleLaunch(Vector &launch_vector, double &launch_theta, double &launch_phi) {
     
     /*
-    2024-07-01 JCF
     Takes the launch vector of the signal and calculates the theta and phi of the launch vector in the 
     station-centric coordinates and returns them in degrees; where theta=0 is along the upward vertical axis,
     theta=90 is along the horizon, and theta=180 is along the downward vertical axis.
@@ -5212,7 +5213,7 @@ void Report::checkPATrigger(
                         for (int bin=0; bin<BINSIZE; bin++) {
 
                             int bin_value = last_trig_bin - BINSIZE/2 + bin;
-                            stations[i].strings[str].antennas[ant].V_mimic.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
+                            stations[i].strings[str].antennas[ant].V_mimic.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (KAH)
                             stations[i].strings[str].antennas[ant].time.push_back( bin_value );
                             stations[i].strings[str].antennas[ant].time_mimic.push_back( ( bin) * settings1->TIMESTEP*1.e9 );// save in ns
                             if (TMath::Abs(trigger->Full_window_V[ant][bin_value]) > peakvalue) {
