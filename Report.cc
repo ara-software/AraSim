@@ -614,7 +614,9 @@ void Report::BuildAndTriggerOnWaveforms(
 
     // calculate total number of bins we need to do trigger check
     // to save time, use only necessary number of bins
-    int max_total_bin = (stations[station_index].max_arrival_time - stations[station_index].min_arrival_time) / settings1->TIMESTEP + settings1->NFOUR *3 + trigger->maxt_diode_bin;    // make more time
+    int max_total_bin = (
+        (stations[station_index].max_arrival_time - stations[station_index].min_arrival_time) 
+        / settings1->TIMESTEP + settings1->NFOUR *3 + trigger->maxt_diode_bin );    // make more time
 
     // Decide if new noise waveforms will be generated for every new event. 
     // Otherwise, the same noise waveforms will be used for the entire simulation run.
@@ -968,9 +970,10 @@ void Report::rerun_event(Event *event, Detector *detector,
               continue;
             }
 
-            double time_diff_birefringence = birefringence->Time_Diff_TwoRays(RayStep[ray_sol_cnt][0], RayStep[ray_sol_cnt][1], 
-                                                                              ray_output[3][ray_sol_cnt], 
-                                                                              event->Nu_Interaction[0].posnu_from_antcen, settings); // calculate time differences for birefringence 
+            double time_diff_birefringence = birefringence->Time_Diff_TwoRays(
+                RayStep[ray_sol_cnt][0], RayStep[ray_sol_cnt][1], 
+                ray_output[3][ray_sol_cnt], 
+                event->Nu_Interaction[0].posnu_from_antcen, settings); // calculate time differences for birefringence 
 
             Vector n_trg_pokey; // unit pokey vector at the target
             Vector n_trg_slappy; // unit slappy vector at the target
@@ -1157,7 +1160,13 @@ void Report::ModelRay(
                 }
                 else {
                     vmmhz1m_tmp = event->Nu_Interaction[0].vmmhz1m[l];
-                    signal->TaperVmMHz(viewangle, event->Nu_Interaction[0].d_theta_em[l], event->Nu_Interaction[0].d_theta_had[l], event->Nu_Interaction[0].emfrac, event->Nu_Interaction[0].hadfrac, vmmhz1m_tmp, vmmhz1m_em);
+                    signal->TaperVmMHz(
+                        viewangle, 
+                        event->Nu_Interaction[0].d_theta_em[l], 
+                        event->Nu_Interaction[0].d_theta_had[l], 
+                        event->Nu_Interaction[0].emfrac, 
+                        event->Nu_Interaction[0].hadfrac, 
+                        vmmhz1m_tmp, vmmhz1m_em);
                 }
 
                 // multiply all factors for traveling through ice
@@ -1442,7 +1451,7 @@ void Report::ModelRay(
                     //Defining polarization at the source (using launch_vector (a unit vector))
                     // double psi = TMath::DegToRad()*settings->CLOCK_ANGLE;
                     double psi = 0;  // In the absence of cross-pol, the polarization angle is nominally zero for an antenna in the ice that is azimuthally symmetric. 
-                                        // Cross pol is the next step in implementation. - JCF 2/9/2024
+                                     // Cross pol is the next step in implementation. - JCF 2/9/2024
                     double theta = acos(launch_vector[2]);
                     double phi = atan2(launch_vector[1],launch_vector[0]);
                                                     
@@ -2299,11 +2308,15 @@ void Report::triggerCheck_ScanMode0(
                     }
                     else if (V_mimic_mode == 1) {
                         // Global passed bin is the center of the window + delay to each chs from araGeom
-                        station_r->strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) + waveformLength / 2 - waveformCenter;
+                        station_r->strings[string_i].antennas[antenna_i].global_trig_bin = (
+                            (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin) 
+                            + waveformLength / 2 - waveformCenter);
                     }
                     else if (V_mimic_mode == 2) {
                         // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
-                        station_r->strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + station_d->strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformLength / 2 - waveformCenter;
+                        station_r->strings[string_i].antennas[antenna_i].global_trig_bin = (
+                            (detector->params.TestBed_Ch_delay_bin[ch_loop] - detector->params.TestBed_BH_Mean_delay_bin + station_d->strings[string_i].antennas[antenna_i].manual_delay_bin) 
+                            + waveformLength / 2 - waveformCenter);
                     }
 
                     // done V_mimic for non-triggered chs (done fixed V_mimic)
@@ -2322,7 +2335,10 @@ void Report::triggerCheck_ScanMode0(
 
 }
 
-int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode ){
+int Report::triggerCheckLoop(
+    Settings *settings1, Detector *detector, Event *event, Trigger *trigger, 
+    int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode 
+){
  
   int i=stationID;
   
@@ -2716,8 +2732,10 @@ int Report::triggerCheckLoop(Settings *settings1, Detector *detector, Event *eve
   
 }
 
-int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int last_trig_bin)
-{
+int Report::saveTriggeredEvent(
+    Settings *settings1, Detector *detector, Event *event, Trigger *trigger, 
+    int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int last_trig_bin
+) {
  
   int i=stationID;
   int numChan=stations[i].TDR_all.size();
@@ -3396,8 +3414,13 @@ void Report::Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *
     int channel_num = detector->GetChannelfromStringAntenna ( StationIndex, string_num, ant_num, settings1 );
 
     for (int bin=0; bin<settings1->DATA_BIN_SIZE; bin++) {   // test for full window
-        trigger->Full_window[ID][bin] = ( trigger->Full_window[ID][bin] * detector->GetGainOffset( StationIndex, channel_num-1, settings1 ) * detector->GetGainOffset( StationIndex, channel_num-1, settings1 ) ); // offset in voltage factor so we need power (V^2 factor to diode response)
-        trigger->Full_window_V[ID][bin] = ( trigger->Full_window_V[ID][bin] * detector->GetGainOffset( StationIndex, channel_num-1, settings1 ) ); // gain in voltage factor
+        trigger->Full_window[ID][bin] = ( 
+            trigger->Full_window[ID][bin] * detector->GetGainOffset( StationIndex, channel_num-1, settings1 ) 
+            * detector->GetGainOffset( StationIndex, channel_num-1, settings1 ) 
+        ); // offset in voltage factor so we need power (V^2 factor to diode response)
+        trigger->Full_window_V[ID][bin] = ( 
+            trigger->Full_window_V[ID][bin] * detector->GetGainOffset( StationIndex, channel_num-1, settings1 ) 
+        ); // gain in voltage factor
     }
 
 }
@@ -3449,7 +3472,10 @@ Vector Report::GetPolarization (Vector &nnu, Vector &launch_vector) {
 } //GetPolarization
 
 
-void Report::GetParameters( Position &src, Position &trg, Vector &nnu, double &viewangle, double receive_angle, Vector &launch_vector, Vector &receive_vector, Vector &n_trg_slappy, Vector &n_trg_pokey) {
+void Report::GetParameters( 
+    Position &src, Position &trg, Vector &nnu, double &viewangle, double receive_angle, 
+    Vector &launch_vector, Vector &receive_vector, Vector &n_trg_slappy, Vector &n_trg_pokey
+) {
 
     viewangle = PI/2. - viewangle;  // viewangle was actually launch angle
 
@@ -3509,7 +3535,10 @@ double Report::calculatePolFactor(Vector &Pol_vector, int ant_type, double anten
  }
 
 
-void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vmmhz, double antenna_theta, double antenna_phi) {  // vmmhz is input and output. output will have some antenna factors on it
+void Report::ApplyAntFactors(
+    double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, 
+    int ant_type, double &pol_factor, double &vmmhz, double antenna_theta, double antenna_phi
+) {  // vmmhz is input and output. output will have some antenna factors on it
 
     pol_factor = calculatePolFactor(Pol_vector, ant_type, antenna_theta, antenna_phi);
 
@@ -3528,7 +3557,11 @@ void Report::ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_sla
 
 
 
-void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode, bool applyInverse) {  
+void Report::ApplyAntFactors_Tdomain (
+    double AntPhase, double heff, Vector &Pol_vector, 
+    int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, 
+    double freq, bool useInTransmitterMode, bool applyInverse
+) {  
     /*  Report::ApplyAntFactors_Tdomain()
     Purpose: 
         Multiply (or divide) voltage in Fourier space by the antenna gain and phase.
@@ -3600,7 +3633,11 @@ void Report::ApplyAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol_
 
 
 
-void Report::ApplyAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode, bool applyInverse) {
+void Report::ApplyAntFactors_Tdomain_FirstTwo (
+    double heff, double heff_lastbin, Vector &Pol_vector, 
+    int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi, 
+    double freq, bool useInTransmitterMode, bool applyInverse
+) {
     /* Report::ApplyAntFactors_Tdomain_FirstTwo()
     Purpose: 
         Multiply (or divide) first and last bin of voltage in Fourier space by the antenna gain and phase.
@@ -3631,7 +3668,11 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin,
 
 }
 
-void Report::InvertAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode) {  
+void Report::InvertAntFactors_Tdomain (
+    double AntPhase, double heff, Vector &Pol_vector, 
+    int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, 
+    double freq, bool useInTransmitterMode
+) {  
     /* Report::InvertAntFactors_Tdomain()
     Purpose:  Inverts the antenna factors in a convenient way by simply calling ApplyAntFactors with the boolean applyInverse enabled.
     */
@@ -3640,8 +3681,11 @@ void Report::InvertAntFactors_Tdomain (double AntPhase, double heff, Vector &Pol
 }
 
 
-
-void Report::InvertAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode) { 
+void Report::InvertAntFactors_Tdomain_FirstTwo (
+    double heff, double heff_lastbin, Vector &Pol_vector, 
+    int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi, 
+    double freq, bool useInTransmitterMode
+) { 
     /* Report::InvertAntFactors_Tdomain_FirstTwo()
     Purpose:  Inverts the antenna factors in a convenient way by simply calling ApplyAntFactors with the boolean applyInverse enabled.
     */
@@ -3649,7 +3693,6 @@ void Report::InvertAntFactors_Tdomain_FirstTwo (double heff, double heff_lastbin
     ApplyAntFactors_Tdomain_FirstTwo (heff, heff_lastbin, Pol_vector, ant_type, pol_factor, vm_bin0, vm_bin1, antenna_theta, antenna_phi, freq, useInTransmitterMode, true);
 
 }
-
 
 
 void Report::ApplyFilter(int bin_n, Detector *detector, double &vmmhz) {  // read filter gain in dB and apply unitless gain to vmmhz
@@ -3708,7 +3751,9 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
     */
     double phaseSign = 1.;
     double amplitudeSign = 1.;
-    //If using this function to invert the electronics response, we apply a minus sign the phase in order to undo the phase applied by the electronics.  We also divide the amplitude by the factor rather than multiply.  To do this, we simply apply a -1 to the power of the factor applied to the amplitude so that it is divided out.
+    // If using this function to invert the electronics response, we apply a minus sign the phase in order to undo the 
+    //   phase applied by the electronics.  We also divide the amplitude by the factor rather than multiply.  
+    //   To do this, we simply apply a -1 to the power of the factor applied to the amplitude so that it is divided out.
     if(applyInverse==true){ phaseSign*=-1.; amplitudeSign*=-1;};
 
     if ( settings1->PHASE_SKIP_MODE == 0 ) {
@@ -3732,8 +3777,8 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
             else phase_current = 0.;
         }
 
-        // V amplitude
-        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) * pow(detector->GetElectGain_1D_OutZero( freq, gain_ch_no ),amplitudeSign); // apply gain (unitless) to amplitude
+        // V amplitude, apply gain (unitless) to amplitude
+        double v_amp  = sqrt(vm_real*vm_real + vm_img*vm_img) * pow(detector->GetElectGain_1D_OutZero( freq, gain_ch_no ),amplitudeSign); 
 
         vm_real = v_amp * cos( phase_current - phaseSign*detector->GetElectPhase_1D(freq, gain_ch_no) );
         vm_img = v_amp * sin( phase_current - phaseSign*detector->GetElectPhase_1D(freq, gain_ch_no ) );
@@ -3754,17 +3799,23 @@ void Report::ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real
 
 
 
-void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, int gain_ch_no, Settings *settings1, bool applyInverse) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
+void Report::ApplyElect_Tdomain_FirstTwo(
+    double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1,
+    int gain_ch_no, Settings *settings1, bool applyInverse
+) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
+
     /*  Report::ApplyElect_Tdomain_FirstTwo()
     Purpose: 
         Multiply (or divide) first two bins of voltage in Fourier space by the electronics gain and phase.
     
-    For a more verbose explanation, see Report::ApplyElect_Tdomain.  This simply applies the operation to the first and last bin, which much be done separately as a consequence of FFT's.  Does not calculate phase.
-
-    
+    For a more verbose explanation, see Report::ApplyElect_Tdomain.  
+    This simply applies the operation to the first and last bin, which much be done separately as a consequence of FFT's.  
+    Does not calculate phase.
     */
     double amplitudeSign = 1.;
-    //If using this function to invert the electronics response, we apply a minus sign the phase in order to undo the phase applied by the electronics.  We also divide the amplitude by the factor rather than multiply.  To do this, we simply apply a -1 to the power of the factor applied to the amplitude so that it is divided out.
+    // If using this function to invert the electronics response, we apply a minus sign the phase in order to undo the 
+    //   phase applied by the electronics.  We also divide the amplitude by the factor rather than multiply. 
+    //   To do this, we simply apply a -1 to the power of the factor applied to the amplitude so that it is divided out.
     if(applyInverse==true){amplitudeSign*=-1;};
 
     vm_bin0 = vm_bin0 * pow(detector->GetElectGain_1D_OutZero( freq0 , gain_ch_no),amplitudeSign);
@@ -3777,7 +3828,8 @@ void Report::ApplyElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *d
 void Report::ApplySplitterFactor(double &vm_real, double &vm_img, Detector* detector, Settings *settings1, bool applyInverse) {
     // Apply splitter/attenuation factor in the digitizer path based on station.
     
-    //If we wish to invert the splitter factor, we must divide the factor out rather than multiply.  To accomplish this, we simply raise the factor to the -1 power in the multiplication step.
+    // If we wish to invert the splitter factor, we must divide the factor out rather than multiply.  To accomplish this,
+    //   we simply raise the factor to the -1 power in the multiplication step.
     double amplitudeSign=1;
     if (applyInverse==true){amplitudeSign*=-1;};    
   
@@ -3789,7 +3841,10 @@ void Report::ApplySplitterFactor(double &vm_real, double &vm_img, Detector* dete
     return;
 }
 
-void Report::InvertElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, int gain_ch_no, Settings *settings1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
+void Report::InvertElect_Tdomain(
+    double freq, Detector *detector, double &vm_real, double &vm_img, int gain_ch_no, Settings *settings1
+) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
+
     /* Report::InvertElect_Tdomain()
     Purpose:  Inverts the electronics factors in a convenient way by simply calling ApplyElecFactors with the boolean applyInverse enabled.
     */
@@ -3797,16 +3852,16 @@ void Report::InvertElect_Tdomain(double freq, Detector *detector, double &vm_rea
   
 }
 
-void Report::InvertElect_Tdomain_FirstTwo(double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, int gain_ch_no, Settings *settings1) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
+void Report::InvertElect_Tdomain_FirstTwo(
+    double freq0, double freq1, Detector *detector, double &vm_bin0, double &vm_bin1, int gain_ch_no, Settings *settings1
+) {  // read elect chain gain (unitless), phase (rad) and apply to V/m
+
     /* Report::InvertElect_Tdomain_FirstTwo()
     Purpose:  Inverts the electronics factors in a convenient way by simply calling ApplyElecFactors with the boolean applyInverse enabled.
     */
     ApplyElect_Tdomain_FirstTwo(freq0, freq1, detector, vm_bin0, vm_bin1, gain_ch_no, settings1, true);
     
 }
-
-
-
 
 
 void Report::ApplyPreamp_NFOUR (int bin_n, Detector *detector, double &vmmhz) {  // read filter gain in dB and apply unitless gain to vmmhz
@@ -3981,7 +4036,8 @@ void Report::GetNoiseWaveforms(Settings *settings1, Detector *detector, double v
 
             current_phase = noise_phase[k];
 
-            Tools::get_random_rician( 0., 0., sqrt(2./M_PI)/1.177 * V_tmp, current_amplitude, current_phase);    // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
+            // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
+            Tools::get_random_rician( 0., 0., sqrt(2./M_PI)/1.177 * V_tmp, current_amplitude, current_phase);
 
             // vnoise is currently noise spectrum (before fft, unit : V)
            vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
@@ -4047,7 +4103,8 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
 
             current_phase = noise_phase[k];
 
-            Tools::get_random_rician(0., 0., sqrt(2. / M_PI) / 1.177 * V_tmp, current_amplitude, current_phase); // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
+            // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
+            Tools::get_random_rician(0., 0., sqrt(2. / M_PI) / 1.177 * V_tmp, current_amplitude, current_phase);
 
             // vnoise is currently noise spectrum (before fft, unit : V)
             vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
@@ -4092,7 +4149,8 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
 
                     V_tmp = detector -> GetRayleighFit_databin(ch, k) * sqrt((double) settings1 -> DATA_BIN_SIZE / (double)(settings1 -> NFOUR / 2.));
 
-                    Tools::get_random_rician(0., 0., V_tmp, current_amplitude, current_phase); // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
+                    // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
+                    Tools::get_random_rician(0., 0., V_tmp, current_amplitude, current_phase); 
 
                 } else {
 
@@ -4116,7 +4174,8 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
 
                     current_phase = noise_phase[k];
 
-                    Tools::get_random_rician(0., 0., sqrt(2. / M_PI) / 1.177 * V_tmp, current_amplitude, current_phase); // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
+                    // use real value array value, extra 1/1.177 to make total power same with "before random_rician".
+                    Tools::get_random_rician(0., 0., sqrt(2. / M_PI) / 1.177 * V_tmp, current_amplitude, current_phase); 
 
                 }
 
@@ -4164,7 +4223,8 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 V_tmp *= double(settings1->DATA_BIN_SIZE);
                 V_tmp *= sqrt(this_delta_f);
 
-                Tools::get_random_rician(0., 0., V_tmp, current_amplitude, current_phase); // draw a random number from the distribution with this rayleigh fit parameter
+                // draw a random number from the distribution with this rayleigh fit parameter
+                Tools::get_random_rician(0., 0., V_tmp, current_amplitude, current_phase); 
 
                 // set the real and imaginary components of the FFT
                 vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
@@ -4215,7 +4275,8 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 V_tmp *= double(settings1->DATA_BIN_SIZE);
                 V_tmp *= sqrt(this_delta_f);
 
-                Tools::get_random_rician(0., 0., V_tmp, current_amplitude, current_phase); // draw a random number from the distribution with this rayleigh fit parameter
+                // draw a random number from the distribution with this rayleigh fit parameter
+                Tools::get_random_rician(0., 0., V_tmp, current_amplitude, current_phase); 
 
                 // set the real and imaginary components of the FFT
                 vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
@@ -4482,8 +4543,6 @@ void Report::Prepare_Antenna_Noise(
 }
 
 
-    
-
 void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int StationIndex, vector <double> &vsignal_array, double *vsignal_forfft) {
 
     // from icemc, anita class MakeArraysforFFT
@@ -4513,8 +4572,8 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
                 if (ifirstnonzero==-1)
                     ifirstnonzero=ifour;
                 
-                vsignal_forfft[2*ifour]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // inverse fft normalization factor (2/(N/2)), 1/dt for change integration fft form to discrete numerical fft
-                
+                // inverse fft normalization factor (2/(N/2)), 1/dt for change integration fft form to discrete numerical fft
+                vsignal_forfft[2*ifour]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); 
                 vsignal_forfft[2*ifour+1]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // phase is 90 deg.
                 // the 2/(nfour/2) needs to be included since were using Tools::realft with the -1 setting
                 
@@ -4639,8 +4698,8 @@ void Report::MakeArraysforFFT(Settings *settings1, Detector *detector, int Stati
                 if (ifirstnonzero==-1)
                     ifirstnonzero=ifour;
                 
-                vsignal_forfft[2*ifour]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // inverse fft normalization factor (2/(N/2)), 1/dt for change integration fft form to discrete numerical fft
-
+                // inverse fft normalization factor (2/(N/2)), 1/dt for change integration fft form to discrete numerical fft
+                vsignal_forfft[2*ifour]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); 
                 vsignal_forfft[2*ifour+1]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // phase is 90 deg.
                 // the 2/(nfour/2) needs to be included since were using Tools::realft with the -1 setting
                 
@@ -4763,7 +4822,8 @@ void Report::MakeArraysforFFT_noise(Settings *settings1, Detector *detector, int
 	    if (ifirstnonzero==-1)
 		ifirstnonzero=ifour;
 	    
-	    vsignal_forfft[2*ifour]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // inverse fft normalization factor (2/(N/2)), 1/dt for change integration fft form to discrete numerical fft
+        // inverse fft normalization factor (2/(N/2)), 1/dt for change integration fft form to discrete numerical fft
+	    vsignal_forfft[2*ifour]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); 
 	    vsignal_forfft[2*ifour+1]=vsignal_array[i]*2/((double)NFOUR/2)/(TIMESTEP); // phase is 90 deg.
 	    // the 2/(nfour/2) needs to be included since were using Tools::realft with the -1 setting
 	    
@@ -5445,17 +5505,21 @@ void Report::checkPATrigger(
                         for(int trig_j=0;trig_j<numChan;trig_j++){ // Set Trig_Pass for each ant
                             int string_i = detector->getStringfromArbAntID( i, trig_j);
                             int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
+
+                            // mark the bin on which we triggered...
                             if(buffer[trig_j]->addToNPass>0) 
-                              stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i-buffer[trig_j]->numBinsToOldestTrigger(); // mark the bin on which we triggered...
+                              stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = trig_i-buffer[trig_j]->numBinsToOldestTrigger(); 
                             else 
                               stations[i].strings[string_i].antennas[antenna_i].Trig_Pass = 0.;
+
                         }// for trig_j
                         bin_to_save_on = trig_i;
                     }// first trigger
 
                 } // end if N_Pass_Vpol > some value
 
-                if(settings1->TRIG_SCAN_MODE>1&&check_TDR_configuration&&window_pass_bit){// if there's a trigger and anything changes in the buffers, restock the TDR arrays
+                // if there's a trigger and anything changes in the buffers, restock the TDR arrays
+                if(settings1->TRIG_SCAN_MODE>1&&check_TDR_configuration&&window_pass_bit){
                         
                     for(int trig_j=0;trig_j<numChan;trig_j++) 
                       TDR_all_sorted_temp[trig_j]=0;
@@ -5551,16 +5615,18 @@ void Report::checkPATrigger(
                   stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = waveformLength/2 + waveformCenter ;
                 }
                 else if (settings1->V_MIMIC_MODE == 1) { // Global passed bin is the center of the window + delay to each chs from araGeom
-                  stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) 
-                                                                                      + waveformLength/2 + waveformCenter ;
+                  stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (
+                    (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin) 
+                    + waveformLength/2 + waveformCenter );
                 }
                 else if (settings1->V_MIMIC_MODE == 2) { // Global passed bin is the center of the window + delay to each chs from araGeom + fitted by eye
-                  stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin 
-                                                                                      + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) + waveformLength/2 + waveformCenter ;
+                  stations[i].strings[string_i].antennas[antenna_i].global_trig_bin = (
+                    (detector->params.TestBed_Ch_delay_bin[trig_j] - detector->params.TestBed_BH_Mean_delay_bin
+                         + detector->stations[i].strings[string_i].antennas[antenna_i].manual_delay_bin) 
+                    + waveformLength/2 + waveformCenter );
                 }
                 
                 stations[i].total_trig_search_bin = stations[i].Global_Pass + trig_window_bin - trig_search_init;
-
 
             } // end for trig_j in numchans
 

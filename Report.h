@@ -211,9 +211,13 @@ class Report {
                 int n_scanned_channels, int station_index,
                 Detector *detector, Event *event, Settings *settings1, Trigger *trigger
             );
-            int triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode=1);
+            int triggerCheckLoop(
+                Settings *settings1, Detector *detector, Event *event, Trigger *trigger, 
+                int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode=1);
 
-            int saveTriggeredEvent(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int last_trig_bin);
+            int saveTriggeredEvent(
+                Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, 
+                int trig_search_init, int max_total_bin, int trig_window_bin, int last_trig_bin);
 
             vector < vector < vector <double> > > RayStep;
 
@@ -239,7 +243,9 @@ class Report {
             Detector *detector, Event *event, Settings *settings1, Trigger *trigger
         );
 
-        void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, Birefringence *birefringence, IceModel *icemodel, Settings *settings, int which_solution,
+        void rerun_event(
+            Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, 
+            Birefringence *birefringence, IceModel *icemodel, Settings *settings, int which_solution,
             vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
             );
         void ModelRay(
@@ -310,22 +316,39 @@ class Report {
 
         Vector GetPolarization (Vector &nnu, Vector &launch_vector);
 
-        void GetParameters (Position &src, Position &trg, Vector &nnu, double &viewangle, double receive_angle, Vector &launch_vector, Vector &receive_vector, Vector &n_trg_slappy, Vector &n_trg_pokey );    // get viewangle, launch, receive vectors  (it reads launch angle as a viewangle and returns actual viewangle)
+        void GetParameters (
+            Position &src, Position &trg, Vector &nnu, double &viewangle, double receive_angle, 
+            Vector &launch_vector, Vector &receive_vector, Vector &n_trg_slappy, Vector &n_trg_pokey 
+        );    // get viewangle, launch, receive vectors  (it reads launch angle as a viewangle and returns actual viewangle)
 
         double GaintoHeight(double gain, double freq, double n_medium, double Z_A=50);
         
         double calculatePolFactor(Vector &Pol_vector, int ant_type, double antenna_theta, double antenna_phi);
 
-        void ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vmmhz, double antenna_theta, double antenna_phi);
-
-        void ApplyAntFactors_Tdomain(double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false, bool applyInverse=false);
-
-        void ApplyAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi,  double freq, bool useInTransmitterMode=false, bool applyInverse=false);
-    
-        void InvertAntFactors_Tdomain(double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false);
-
-        void InvertAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false);
-
+        void ApplyAntFactors(
+            double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, 
+            int ant_type, double &pol_factor, double &vmmhz, double antenna_theta, double antenna_phi
+        );
+        void ApplyAntFactors_Tdomain(
+            double AntPhase, double heff, Vector &Pol_vector, 
+            int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, 
+            double freq, bool useInTransmitterMode=false, bool applyInverse=false
+        );
+        void ApplyAntFactors_Tdomain_FirstTwo ( 
+            double heff, double heff_lastbin, Vector &Pol_vector, 
+            int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi,  
+            double freq, bool useInTransmitterMode=false, bool applyInverse=false
+        );
+        void InvertAntFactors_Tdomain(
+            double AntPhase, double heff, Vector &Pol_vector, 
+            int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, 
+            double freq, bool useInTransmitterMode=false
+        );
+        void InvertAntFactors_Tdomain_FirstTwo ( 
+            double heff, double heff_lastbin, Vector &Pol_vector, 
+            int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi, 
+            double freq, bool useInTransmitterMode=false
+        );
 
         void ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, int gain_ch_no, Settings *settings1, bool applyInverse=false);
 
@@ -385,7 +408,9 @@ class Report {
 
         void SetRank(Detector *detector); // set rank (rank of strength of signal at each antenna)
 
-        int GetChannelNum8_LowAnt(int string_num, int antenna_num); // just return ch numbers 1-8 for antenna 0-1 (bottom antennas) and higher ch numbers for antenna 2-3 (top antennas) this is used for only TRIG_ONLY_LOW_CH_ON=1 mode with 
+        int GetChannelNum8_LowAnt(int string_num, int antenna_num); 
+        // just return ch numbers 1-8 for antenna 0-1 (bottom antennas) and higher ch numbers for antenna 2-3 (top antennas)
+        // this is used for only TRIG_ONLY_LOW_CH_ON=1 mode with 
 
         TGraph *getWaveform(Detector *detector, int ch, int station_i=0, int event_num=0, int run_num=0);
 

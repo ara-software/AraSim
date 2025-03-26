@@ -124,7 +124,9 @@ int main(int argc, char **argv) {   // read setup.txt file
     }
     cout<<"first random : "<<gRandom->Rndm()<<"\n";
 
-    IceModel *icemodel=new IceModel(settings1->ICE_MODEL + settings1->NOFZ*10,settings1->CONSTANTICETHICKNESS * 1000 + settings1->CONSTANTCRUST * 100 + settings1->FIXEDELEVATION * 10 + 0,settings1->MOOREBAY);// creates Antarctica ice model
+    IceModel *icemodel=new IceModel(
+        settings1->ICE_MODEL + settings1->NOFZ*10,settings1->CONSTANTICETHICKNESS * 1000 + 
+        settings1->CONSTANTCRUST * 100 + settings1->FIXEDELEVATION * 10 + 0,settings1->MOOREBAY);// creates Antarctica ice model
     // IceModel inherits from EarthModel  
 
     cout<<endl;
@@ -758,8 +760,7 @@ void save_event_data(
 void save_useful_event(
     int check_station_DC, 
     UsefulIcrrStationEvent *theIcrrEvent, UsefulAtriStationEvent *theAtriEvent, double *weight, TTree *eventTree,
-    Event *event, 
-    Detector *detector, Report *report, Settings *settings1, Trigger *trigger){
+    Event *event,  Detector *detector, Report *report, Settings *settings1, Trigger *trigger){
     // Save simulated event data in a format similar to how ARA detectors save their events
 
     // Extract the number of channels in each detector
