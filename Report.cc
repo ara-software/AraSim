@@ -1050,6 +1050,7 @@ void Report::rerun_event(Event *event, Detector *detector,
 
             double dT_forfft = local_Tarray[1] - local_Tarray[0];
 
+            // Determine the number of bins that will be used to build the waveform that will be fourier transformed
             InitializeNNew(&stations[0].strings[j].antennas[k], interaction_idx, ray_sol_cnt, dT_forfft, settings);
 
             // Convert the time array so it works with signal calculator
@@ -1306,7 +1307,7 @@ void Report::ModelRay(
 
         }   // if SIMULATION_MODE = 0
 
-        else if (settings->SIMULATION_MODE == 1) {
+        else if (settings->SIMULATION_MODE == 1) { // Time domain simulation mode
 
             // if event is not calpulser
             if (event->IsCalpulser == 0) {
@@ -1337,6 +1338,8 @@ void Report::ModelRay(
                             antenna_r->skip_bins[ray_idx], interaction_idx);
 
                         double dT_forfft = Tarray[1] - Tarray[0];  // step in ns
+                        
+                        // Determine the number of bins that will be used to build the waveform that will be fourier transformed
                         InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                         // Convert the time array so it works with signal calculator
@@ -1398,6 +1401,8 @@ void Report::ModelRay(
 
                     int waveform_bin = (int) signal->ArbitraryWaveform_V.size();
                     double dT_forfft = signal->ArbitraryWaveform_T[1] - signal->ArbitraryWaveform_T[0]; // step in ns
+
+                    // Determine the number of bins that will be used to build the waveform that will be fourier transformed
                     InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                     // Convert time array to vector double so it'll work with the signal calculator
@@ -1422,8 +1427,9 @@ void Report::ModelRay(
                     // Get the signal from simple pulser events
 
                     int waveform_bin = (int) signal->PulserWaveform_V.size();
-
                     double dT_forfft = signal->PulserWaveform_T[1] - signal->PulserWaveform_T[0]; // step in ns
+
+                    // Determine the number of bins that will be used to build the waveform that will be fourier transformed
                     InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                     // Define polarization at the source (using launch_vector (a unit vector))
@@ -1476,6 +1482,8 @@ void Report::ModelRay(
                     
                     int waveform_bin = (int) signal->InputVoltage_V.size();
                     double dT_forfft = signal->InputVoltage_T[1] - signal->InputVoltage_T[0];    // step in ns
+
+                    // Determine the number of bins that will be used to build the waveform that will be fourier transformed
                     InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                     //Defining polarization at the source (using launch_vector (a unit vector))
@@ -1523,6 +1531,7 @@ void Report::ModelRay(
 
                 double dT_forfft = detector->CalPulserWF_ns[1] - detector->CalPulserWF_ns[0];  // step in ns
 
+                // Determine the number of bins that will be used to build the waveform that will be fourier transformed
                 InitializeNNew(antenna_r, interaction_idx, ray_idx, dT_forfft, settings);
 
                 PropagateSignal(
@@ -1647,6 +1656,9 @@ void Report::GetRayParameters(
 void Report::InitializeNNew(
     Antenna_r *antenna, int interaction_idx, int ray_idx, double dT, Settings *settings1
 ){
+    // Chooses the number of bins for the waveforms that will be fourier transformed
+    // The Fourier transform performs more quickly if the waveform has a length
+    //   that is a power of two.
     antenna->SignalExt[interaction_idx][ray_idx] = 1;
     int Ntmp = settings1->TIMESTEP *1.e9 / dT;
     antenna->Nnew[ray_idx] = 1;
@@ -1665,10 +1677,13 @@ void Report::PropagateSignal(
     Antenna_r *antenna_r, Antenna *antenna_d, int gain_ch_no, int j, int k,
     Birefringence *birefringence, Detector *detector, Event *event, IceModel *icemodel, Settings *settings
 ){
+    // For the provided `antenna_r`, interaction, and ray:
+    //   take the EM signal at the source and calculate how it's read out 
+    //   as a voltage waveform by the antenna by applying all attenuation, 
+    //   birefringence, antenna, and other factors.
 
     // now we have to make NFOUR/2 number of bins with random init time
     // as a test, make first as it is and zero pad
-
     double V_forfft[antenna_r->Nnew[ray_idx]];
     double T_forfft[antenna_r->Nnew[ray_idx]];
 
@@ -1749,7 +1764,7 @@ void Report::PropagateSignal(
         double Tx_theta = 0;
         double Tx_phi = 0;
         double heff_Tx_lastbin = 0;
-        if (settings->EVENT_TYPE == 11 || settings->EVENT_TYPE == 12){
+        if (settings->EVENT_TYPE == 11 || settings->EVENT_TYPE == 12){ // Pulser simulations
 
             //Defining polarization at the source (using launch_vector (a unit vector))
             double theta = acos(launch_vector[2]);
@@ -1763,7 +1778,7 @@ void Report::PropagateSignal(
                 icemodel->GetN(*antenna_d),
                 detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));  
         }
-        else if (event->IsCalpulser > 0){
+        else if (event->IsCalpulser > 0){ // Calibration Pulser simulations
             Tx_theta = ray_output[1][ray_idx] *DEGRAD;    // from 0 to 180
             heff_Tx_lastbin = GaintoHeight(
                 detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, antenna_phi, antenna_d->type, j, k),
@@ -1788,7 +1803,9 @@ void Report::PropagateSignal(
 
         }
 
-        for (int n = 0; n < antenna_r->Nnew[ray_idx] / 2; n++) {
+        // Apply frequency-dependent scaling factors to the waveform like
+        //   ice attenuation, antenna effective height, and electronics gain
+        for (int n = 0; n < antenna_r->Nnew[ray_idx] / 2; n++) { // Loop over frequency bins
 
             freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
         
@@ -1936,8 +1953,10 @@ void Report::triggerCheck_ScanMode0(
     int n_scanned_channels, int station_index,
     Detector *detector, Event *event, Settings *settings1, Trigger *trigger
 ){
-
-    //*******************old mode left as-is ********************
+    // Check the tunnel diode for each antenna for sufficient signal to trigger 
+    //   then perform station-wide trigger check. Transforms waveforms into
+    //   the data-like V_mimic objects
+    // Original AraSim trigger checking mode
 
     int trig_i = trig_search_init;
 
@@ -1949,7 +1968,7 @@ void Report::triggerCheck_ScanMode0(
     int trig_mode = settings1->TRIG_MODE;
     // global trigger mode
     // 0 for orginal N_TRIG out of all channels
-    // 1 for new stations, N_TRIG_V out of Vpol channels or N_TRIG_H out of Hpol channels
+    // 1 for stations 1-5, N_TRIG_V out of Vpol channels or N_TRIG_H out of Hpol channels
 
     // mode select for non-trigger passed chs' V_mimic
     int V_mimic_mode = settings1->V_MIMIC_MODE;
@@ -1961,7 +1980,9 @@ void Report::triggerCheck_ScanMode0(
     Station_r *station_r = &stations[station_index];
     ARA_station *station_d = &detector->stations[station_index];
 
-    while (trig_i < max_total_bin - trig_window_bin) {
+    // Loop over global time bins and identify the first, if any, time bin
+    //    with sufficient signal to trigger in the appropriate amount of antennas 
+    while (trig_i < max_total_bin - trig_window_bin) { // loop over waveform bins
 
         int N_pass = 0;
         int N_pass_V = 0;
@@ -1970,7 +1991,7 @@ void Report::triggerCheck_ScanMode0(
         Passed_chs.clear();
 
         int trig_j = 0;
-        while (trig_j < n_scanned_channels) {
+        while (trig_j < n_scanned_channels) { // loop over antennas
 
             int string_i = detector->getStringfromArbAntID(station_index, trig_j);
             int antenna_i = detector->getAntennafromArbAntID(station_index, trig_j);
@@ -2120,11 +2141,13 @@ void Report::triggerCheck_ScanMode0(
             ((trig_mode == 1) && ((N_pass_V > settings1->N_TRIG_V - 1) || (N_pass_H > settings1->N_TRIG_H - 1)))    // trig_mode = 1 case!
         ) {
 
-            int check_ch = 0;
-            station_r->Global_Pass = last_trig_bin;    // where actually global trigger occured
+            int check_ch = 0; // Indexer for the Passed_chs object
+            station_r->Global_Pass = last_trig_bin; // Save the waveform bin when the station triggered and read out
 
             trig_i = max_total_bin; // also if we know this station is trigged, don't need to check rest of time window
-            for (int ch_loop = 0; ch_loop < n_scanned_channels; ch_loop++) {
+
+            // Loop over all antennas on the station and save the data-like waveform, V_mimic
+            for (int ch_loop = 0; ch_loop < n_scanned_channels; ch_loop++) { 
                 int string_i = detector->getStringfromArbAntID(station_index, ch_loop);
                 int antenna_i = detector->getAntennafromArbAntID(station_index, ch_loop);
 
@@ -2133,11 +2156,14 @@ void Report::triggerCheck_ScanMode0(
                 
                 station_r->strings[string_i].antennas[antenna_i].Likely_Sol[0] = -1;  // no likely init
                 station_r->strings[string_i].antennas[antenna_i].Likely_Sol[1] = -1;  // no likely init
+
+                // If this channel was one that passed, also determine which 
+                //   ray and interaction triggered the detector and print some info
                 if (ch_loop == Passed_chs[check_ch] && check_ch < N_pass) {
-                    // added one more condition (check_ch < N_Pass) for bug in vector Passed_chs.clear()???
+                    // `check_ch < N_Pass` present to circumvent a bug in vector Passed_chs.clear()
 
-                    // store which ray sol is triggered based on trig time
-
+                    // Determine which ray and interaciton triggered triggered 
+                    //   the station based on signal and trigger bins
                     station_r->strings[string_i].antennas[antenna_i].Find_Likely_Sol();
                     int likely_int = station_r->strings[string_i].antennas[antenna_i].Likely_Sol[0];
                     int likely_ray = station_r->strings[string_i].antennas[antenna_i].Likely_Sol[1];
@@ -2183,7 +2209,7 @@ void Report::triggerCheck_ScanMode0(
 
                     }
 
-                    check_ch++;
+                    check_ch++; // Increase the Passed_chs index tracker
 
                     // now save the voltage waveform to V_mimic
                     for (int mimicbin = 0; mimicbin < waveformLength; mimicbin++) {
@@ -2761,6 +2787,8 @@ int Report::saveTriggeredEvent(Settings *settings1, Detector *detector, Event *e
     
     if(stations[i].strings[string_i].antennas[antenna_i].Trig_Pass){// if this channel triggered
       
+      // Determine which ray and interaciton triggered triggered 
+      //   the station based on signal and trigger bins
       stations[i].strings[string_i].antennas[antenna_i].Find_Likely_Sol();
       int likely_int = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[0];
       int likely_ray = stations[i].strings[string_i].antennas[antenna_i].Likely_Sol[1];
@@ -3260,7 +3288,7 @@ void Report::Combine_Waveforms(int signalbin_0, int signalbin_1,
   vector<double>& V = *V_combined;
   int& signalbin = *signalbin_combined;
 
-  // ensure V_combined is empty
+  // ensure voltage array is empty
   V.clear();
 
   // check if both input vectors are empty
@@ -5341,7 +5369,7 @@ int Report::getNumOfSignalledAnts(Station_r station){
                 }
 
             } // end if (ray solutions exist)
-                        
+
             // If this antenna had a non-zero signal-only signal, 
             //   increment the good antenna tracker
             if ( max_signal > 0.0){ 
@@ -5496,7 +5524,7 @@ void Report::checkPATrigger(
             }
         }
 
-        //scale snr to reflect the angle
+        // Scale SNR with respect to the antenna's viewing angle of the signal
         double viewangle = stations[i].strings[0].antennas[8].view_ang[brightest_event[0]][brightest_event[1]];
         viewangle = viewangle * 180.0/PI - 90.0;
         double snr_50 = interpolate(
@@ -5774,6 +5802,8 @@ void Report::checkPATrigger(
                 int string_i = detector->getStringfromArbAntID( i, trig_j);
                 int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
                     
+                // Determine which ray and interaciton triggered triggered 
+                //   the station based on signal and trigger bins
                 stations[i].strings[string_i].antennas[antenna_i].Find_Likely_Sol(); // no likely init
                         
                 // set global_trig_bin values
