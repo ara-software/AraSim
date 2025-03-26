@@ -1883,10 +1883,6 @@ void Report::PropagateSignal(
 
     antenna_r->Pol_factor[interaction_idx].push_back(Pol_factor);
 
-    // we need to do normal time ordering as we did zero padding(?)
-    // If signal is located at the center, we don't need to do NormalTimeOrdering???
-    //Tools::NormalTimeOrdering(stations[i].strings[j].antennas[k].Nnew[ray_sol_cnt], V_forfft);
-
     // do linear interpolation
     // changed to sinc interpolation Dec 2020 by BAC
     double volts_forint[settings->NFOUR / 2];  // array for interpolation
