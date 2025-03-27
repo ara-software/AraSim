@@ -1059,7 +1059,7 @@ void Report::ModelRay(
 
                 double freq_tmp = detector->GetFreq(l);    // freq in Hz
 
-                // Get ant gain with 2-D interpolation (may have bug?) 
+                // Get ant gain with 2-D interpolation
                 double heff = GaintoHeight(
                     detector->GetGain_1D_OutZero(
                         freq_tmp *1.E-6, antenna_theta,  antenna_phi,  
