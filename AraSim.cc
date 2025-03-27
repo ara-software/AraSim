@@ -734,23 +734,21 @@ void save_useful_event(
     Event *event,  Detector *detector, Report *report, Settings *settings1, Trigger *trigger){
     // Save simulated event data in a format similar to how ARA detectors save their events
 
-    // Extract the number of channels in each detector
-    for (int i=0; i<detector->params.number_of_stations; i++) {
-        if (settings1->DATA_LIKE_OUTPUT != 0){
-            if (settings1->DETECTOR == 3 && i == 0)
-                // The testbed has 14 channels
-                { theIcrrEvent->numRFChans = 14; }
-            else if (settings1->DETECTOR == 4 && settings1->DETECTOR_STATION == 0)
-                // The testbed has 14 channels
-                { theIcrrEvent->numRFChans = 14; }
-            else { 
-                // All other stations have 16 channels
-                theAtriEvent->fNumChannels = 20; // Includes 4 surface channels
-                theIcrrEvent->numRFChans = 16; 
-            }
+    if (settings1->DATA_LIKE_OUTPUT != 0){
+
+        // Extract the number of channels in each detector
+        if (settings1->DETECTOR == 3 )
+            // The testbed has 14 channels
+            { theIcrrEvent->numRFChans = 14; }
+        else if (settings1->DETECTOR == 4 && settings1->DETECTOR_STATION == 0)
+            // The testbed has 14 channels
+            { theIcrrEvent->numRFChans = 14; }
+        else { 
+            // All other stations have 16 channels
+            theAtriEvent->fNumChannels = 20; // Includes 4 surface channels
+            theIcrrEvent->numRFChans = 16; 
         }
-    }
-    if (settings1->DATA_LIKE_OUTPUT !=0){
+        
         int stationID;
         int stationIndex;
         if (settings1->DETECTOR == 4){
