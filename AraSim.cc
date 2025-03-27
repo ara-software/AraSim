@@ -38,7 +38,6 @@ using namespace std;
 
 class EarthModel; //class
 
-void test();
 void save_event_data(int, int, double*, int*, double*, double*, int*, Event*, Report*, TTree*, Counting*, Detector*, Settings*, Trigger*);
 #ifdef ARA_UTIL_EXISTS
 void save_useful_event(int, UsefulIcrrStationEvent*, UsefulAtriStationEvent*, double*, TTree*, Event*, Detector*, Report*, Settings*, Trigger*);
@@ -669,19 +668,12 @@ int main(int argc, char **argv) {   // read setup.txt file
 
     cout<<"outputdir= "<<outputdir<<endl;
 
-    // Please do not delete this test line
-    // Please leave 'test(); return 0;' as the last lines in 
-    // AraSim.cc before '} //end main'
-    // These test lines are used to verify that AraSim completed properly.
+    // This statement is used by the python tester script in the test folder
+    cout<<"This AraSim run is complete and will exit with code 0"<<endl;
 
-    test();
     return 0;   
 } //end main
 
-
-void test() {
-    cout << "test is " << 0 << "\n";
-}
 
 void save_event_data(
     int Events_Passed, int inu, 

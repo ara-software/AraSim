@@ -44,15 +44,16 @@ except:
 
 '''
 	2: check if AraSim finished running
-	We will check for the 'test is 0' line in the AraSim output
-	So, we split on 'test is', then cast the third element to an int
+	We will check for the 'This AraSim run is complete and will exit with code 0' 
+	line in the AraSim output. So, we split on 'This AraSim run is complete and 
+	will exit with code', then cast the return code to an int
 '''
-internal_test = search_file(fin, 'test is')
+internal_test = search_file(fin, 'This AraSim run is complete and will exit with code')
 if internal_test is None:
 	print('AraSim output file is incomplete. AraSim finished test will fail.')
 	sys.exit(-1) # fail out
 else:
-	internal_test = int(internal_test.split(' ')[2])
+	internal_test = int(internal_test.split(' ')[-1])
 	if internal_test == 0:
 		print('AraSim reports a successful run. AraSim finished test will pass.')
 	else:
