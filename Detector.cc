@@ -5826,7 +5826,7 @@ vector<double> Detector::getDiodeModel(const int len, Settings *settings1) {
 // for a best performance, we can just set a new reasonable DATA_BIN_SIZE and make new values for those
 void Detector::get_NewDiodeModel(Settings *settings1) {
 
-    double diode_real_fft[settings1->DATA_BIN_SIZE*2];  // double sized array for myconvlv
+    std::vector<double> diode_real_fft(settings1->DATA_BIN_SIZE * 2);  // double sized vector for myconvlv
 
     for (int i=0; i<settings1->DATA_BIN_SIZE*2; i++) {  // 512 bin added for zero padding
         if ( i<(int)(maxt_diode/TIMESTEP) ) { 
@@ -5838,7 +5838,7 @@ void Detector::get_NewDiodeModel(Settings *settings1) {
     }
 
     // forward FFT
-    Tools::realft(diode_real_fft,1,settings1->DATA_BIN_SIZE*2);
+    Tools::realft(diode_real_fft.data(),1,settings1->DATA_BIN_SIZE*2);
 
     // clear previous data as we need new diode response array for new DATA_BIN_SIZE
     fdiode_real_databin.clear();
