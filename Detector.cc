@@ -2601,6 +2601,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     return;
 } 
 
+// linearly interpolate the transmittance for a channel at a particular frequency (OutZero == extrapolation is fixed to return 0)
 double Detector::GetTransm_OutZero(int ch, double freq) {
 
   ch = ch%16; // to match the convention of Detector::GetTransm_databin
