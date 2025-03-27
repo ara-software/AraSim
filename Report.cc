@@ -3466,7 +3466,7 @@ void Report::ApplyAntFactors_Tdomain (
         //If in transmitter mode, we must apply additional frequency and impedance terms to the amplitude.
         if (useInTransmitterMode==true){ 
             phase_current += PI/2;
-            // The factors of two in this line are currently up for debate.  Will be cleaned up in future push - JCF 3/2/2024 
+            // The factors of two in this line are still under consideration, see GitHub Issue #175
             v_amp *= pow(freq/CLIGHT*(Z0/Zr)/4/sqrt(2.), amplitudeSign);          
         }
         //Calculate the real and imaginary terms using the new ampltitude and phase.
@@ -3506,7 +3506,7 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo (
     vm_bin1 *= pow(heff_lastbin * pol_factor, amplitudeSign);
     
     if (useInTransmitterMode) {
-        // The factors of two in these two lines are currently up for debate.  Will be cleaned up in future push - JCF 3/2/2024  
+        // The factors of two in these two lines are currently up for debate, see GitHub Issue #175
         vm_bin0 *= pow(freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.), amplitudeSign);
         vm_bin1 *= pow(freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.), amplitudeSign);
     }
