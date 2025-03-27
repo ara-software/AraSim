@@ -1136,9 +1136,6 @@ void Report::ModelRay(
                     static const int outbin = 64;
                     if (event->Nu_Interaction[0].LQ > 0 && (fabs(viewangle - signal->CHANGLE_ICE) <= settings->OFFCONE_LIMIT *RADDEG)) {
 
-                        // let's make NFOUR/2 bin of time domain pure signal part for now
-                        // later once we understand how to apply antenna phase, total electronics with phase, apply those
-
                         double atten_factor = 0.;
                         if (settings->USE_ARA_ICEATTENU == 1 || settings->USE_ARA_ICEATTENU == 0) {
                             atten_factor = 1. / ray_output[0][ray_idx] *IceAttenFactor *mag * fresnel;  
