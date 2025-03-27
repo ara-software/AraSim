@@ -38,7 +38,7 @@ using namespace std;
 
 class EarthModel; //class
 
-void save_event_data(int, int, double*, int*, double*, double*, int*, Event*, Report*, TTree*, Counting*, Detector*, Settings*, Trigger*);
+void save_event_data(int, int, int*, double*, double*, int*, Event*, Report*, TTree*, Counting*, Detector*, Settings*, Trigger*);
 #ifdef ARA_UTIL_EXISTS
 void save_useful_event(int, UsefulIcrrStationEvent*, UsefulAtriStationEvent*, double*, TTree*, Event*, Detector*, Report*, Settings*, Trigger*);
 #endif
@@ -243,8 +243,6 @@ int main(int argc, char **argv) {   // read setup.txt file
 
     // now in Trigger class, there will be meandiode, rmsdiode values for noise (we need this for trigger later)
 
-    double max_dt = 0.; // max arrival time difference
-
     int Total_Global_Pass = 0;  // total global trigger passed number 
     double Total_Weight = 0.;
     double Total_Probability = 0.;
@@ -433,7 +431,7 @@ int main(int argc, char **argv) {   // read setup.txt file
                 // Save this event's event data, report data, and ARA_like data if ARA_UTIL_EXISTS
                 save_event_data(
                     Events_Passed, inu, 
-                    &max_dt, &Total_Global_Pass, &Total_Weight, &Total_Probability, &check_station_DC,
+                    &Total_Global_Pass, &Total_Weight, &Total_Probability, &check_station_DC,
                     event, report, AraTree2,
                     count1, detector, settings1, trigger
                 );
@@ -637,9 +635,6 @@ int main(int argc, char **argv) {   // read setup.txt file
         Filter_E[i] = pow(10., (detector->GetFilterGain(i))/20.);
     }
 
-    cout<<"max_dt : "<<max_dt<<endl;
-    cout<<"rmsdiode= "<<trigger->GetAntNoise_diodeRMS(0, settings1)<<endl;
-
     delete raysolver;
     delete icemodel;
     delete efficiencies;
@@ -664,7 +659,7 @@ int main(int argc, char **argv) {   // read setup.txt file
 
 void save_event_data(
     int Events_Passed, int inu, 
-    double *max_dt, int *Total_Global_Pass, double *Total_Weight, double *Total_Probability, int *check_station_DC,
+    int *Total_Global_Pass, double *Total_Weight, double *Total_Probability, int *check_station_DC,
     Event *event, Report *report, TTree *AraTree2,
     Counting *count1, Detector *detector, Settings *settings1, Trigger *trigger
 ){
@@ -682,9 +677,6 @@ void save_event_data(
         if (report->stations[i].Global_Pass) {
 
             event->inu_passed = Events_Passed;  
-                     
-            if (*max_dt < report->stations[i].max_arrival_time - report->stations[i].min_arrival_time)
-                *max_dt = report->stations[i].max_arrival_time - report->stations[i].min_arrival_time;
 
             cout<<"\nGlobal_Pass : "<<report->stations[i].Global_Pass<<" evt : "<<inu
                 <<" added weight : "<<event->Nu_Interaction[0].weight<<endl;
