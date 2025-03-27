@@ -164,7 +164,7 @@ void Signal::Initialize(Settings *settings1) {
 
      ReadCalPulserSpectrum();
 
-     std::string arbitraryWaveform = string(getenv("ARA_SIM_DIR"))+"/data/arbitrary_waveform.txt";  //Testing out IDL pulser - JCF 4/9/2023
+     std::string arbitraryWaveform = string(getenv("ARA_SIM_DIR"))+"/data/arbitrary_waveform.txt"; 
      ReadArbitraryWaveform(arbitraryWaveform);
      
      // std::string pulserWaveform = string(getenv("ARA_SIM_DIR"))+"/data/IDL1_waveform.txt";
