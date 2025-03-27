@@ -1195,20 +1195,6 @@ void Report::ModelRay(
 
                     }
                     
-                    // // @Justin:  Make this dynamic for user to set polarization and check if it does ray-tracing.
-                    
-                    // double psi = TMath::DegToRad()*settings->CLOCK_ANGLE;
-                    // double theta = acos(receive_vector[2]); //receive_vector is a unit vector
-                    // double phi = atan2(receive_vector[1],receive_vector[0]);
-                                                        
-                    // //Justin's method
-                    // double newPol_vectorX = -cos(psi)*cos(theta)*cos(phi) + sin(psi)*sin(phi);
-                    // double newPol_vectorY = -cos(psi)*cos(theta)*sin(phi) - sin(psi)*cos(phi);
-                    // double newPol_vectorZ = cos(psi)*sin(theta);
-                    
-                    // Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
-                    // //Justin's Method
-                    
                 } // neutrino events
                 else if (settings->EVENT_TYPE == 10) {
                     // Get the signal from Arbitrary Events
