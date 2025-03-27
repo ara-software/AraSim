@@ -1025,7 +1025,7 @@ void Report::ModelRay(
 
                 // multiply all factors for traveling through ice
                 if (settings->USE_ARA_ICEATTENU == 1 || settings->USE_ARA_ICEATTENU == 0) {
-                    // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
+                    // now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
                     vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_idx] *IceAttenFactor *mag * fresnel;
                 }
                 else if (settings->USE_ARA_ICEATTENU == 2) {
