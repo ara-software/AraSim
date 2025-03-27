@@ -288,7 +288,7 @@ void Signal::ReadPulserWaveform(string target){
 }
 
 
-//Adding function to read input voltage at transmitting antenna - JCF 1/10/2024   
+// Reads input voltage at transmitting antenna
 void Signal::ReadInputVoltage(string target){
    double voltage_tmp;
    double time_tmp;

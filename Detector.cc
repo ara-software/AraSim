@@ -2987,7 +2987,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     
     /*
     The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, Txgain)
-    to match the frequency binning dictated by NFOUR in the setup file.  - JCF 1/26/2024
+    to match the frequency binning dictated by NFOUR in the setup file. 
     */
     
     //Initialize pointer to dynamically point to the gain for chosen antenna.  The structure of this pointer matches that of the global gain arrays defined in Detector.h.
