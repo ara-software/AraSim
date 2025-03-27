@@ -60,7 +60,6 @@ int main(int argc, char **argv) {   // read setup.txt file
     cout<<"EXPONENT : "<<settings1->EXPONENT<<endl;
     cout<<"DETECTOR : "<<settings1->DETECTOR<<endl;
 
-    //string setupfile = "setup.txt";
     string setupfile;
     string run_no;
     if (argc<2) { // no setup file input, use default
@@ -80,10 +79,6 @@ int main(int argc, char **argv) {   // read setup.txt file
         if(outputdir[outputdir.size()-1]=='/') outputdir=outputdir.substr(0,outputdir.size()-1); // make sure outputdir doesn't have a / at the end
         cout<<"outputdir : "<<outputdir<<endl;
     }
-    // else { // no mode for argc > 2!
-    //  cout<<"too many info! just use default setup.txt file!"<<endl;
-    //  setupfile = "setup.txt";
-    // }
 
     settings1->ReadFile(setupfile);
     cout<<"Read "<<setupfile<<" file!"<<endl;
@@ -105,23 +100,19 @@ int main(int argc, char **argv) {   // read setup.txt file
     cout<<"DETECTOR : "<<settings1->DETECTOR<<endl;
     cout<<"POSNU_RADIUS : "<<settings1->POSNU_RADIUS<<endl;
     cout << "EVENT_GENERATION_MODE: " << settings1->EVENT_GENERATION_MODE << endl;
-    // cout << "EVENT_NUM: " << settings1->EVENT_NUM << endl;
 
     if (settings1->EVENT_GENERATION_MODE == 1){
-        // string evtfile = "eventReadIn.txt";
         string evtfile = string(argv[argc - 1]);
         settings1->ReadEvtFile(evtfile);
         cout<<"Read "<< evtfile <<" file!"<<endl;
         cout << "EVID    NUFLAVORINT    NUBAR    PNU    CURRENTINT    IND_POSNU_R    IND_POSNU_THETA    IND_POSNU_PHI    IND_NNU_THETA    IND_NNU_PHI    ELAST" << endl;
-        // for (int i = 0; i < settings1->NNU; i++){
-        //     cout << settings1->EVID[i] << "    " << settings1->NUFLAVORINT[i] << "    " << settings1->NUBAR[i] << "    " << settings1->PNU[i] << "    " << settings1->CURRENTINT[i] << "    " << settings1->IND_POSNU_R[i] << "    " << settings1->IND_POSNU_THETA[i] << "    " << settings1->IND_POSNU_PHI[i] << "    " << settings1->IND_NNU_THETA[i] << "    " << settings1->IND_NNU_PHI[i] << "    " << settings1->ELAST[i] << endl;
-        // }
         if (settings1->NNU == 0){
             // No events were read in from file, quit program
             cout<<"No events found in provided file. Exiting simulation."<<endl;
             return -1;
         }
     }
+
     // set gRandom as TRandom3 when settings1->RANDOM_MODE = 1
     if (settings1->RANDOM_MODE == 1) {
         // test TRandom3
@@ -131,21 +122,19 @@ int main(int argc, char **argv) {   // read setup.txt file
         gRandom->SetSeed(settings1->SEED + atoi(run_no.c_str() ) );
             
     }
-    //cout<<"first random from TRandom3 : "<<test_randm3->Rndm()<<"\n";
     cout<<"first random : "<<gRandom->Rndm()<<"\n";
 
-    // IceModel *icemodel=new IceModel(ICE_MODEL + NOFZ*10,CONSTANTICETHICKNESS * 1000 + CONSTANTCRUST * 100 + FIXEDELEVATION * 10 + 0,MOOREBAY);// creates Antarctica ice model
-    IceModel *icemodel=new IceModel(settings1->ICE_MODEL + settings1->NOFZ*10,settings1->CONSTANTICETHICKNESS * 1000 + settings1->CONSTANTCRUST * 100 + settings1->FIXEDELEVATION * 10 + 0,settings1->MOOREBAY);// creates Antarctica ice model
+    IceModel *icemodel=new IceModel(
+        settings1->ICE_MODEL + settings1->NOFZ*10,settings1->CONSTANTICETHICKNESS * 1000 + 
+        settings1->CONSTANTCRUST * 100 + settings1->FIXEDELEVATION * 10 + 0,settings1->MOOREBAY);// creates Antarctica ice model
     // IceModel inherits from EarthModel  
 
     cout<<endl;
     cout<<"Surface at (log:0, lat:0) : "<<icemodel->Surface(0., 0.)<<endl;
     cout<<"SurfaceAboveGeoid at (log:0, lat:0) : "<<icemodel->SurfaceAboveGeoid(0., 0.)<<endl;
     
-    // Detector *detector=new Detector(settings1, icemodel); // builds antenna array, 0 for testbed
     Detector *detector=new Detector(settings1, icemodel, setupfile ); // builds antenna array, 0 for testbed
     cout<<"end calling detector"<<endl;
-    // Detector *detector=new Detector(settings1->DETECTOR); // builds antenna array, 0 for testbed
 
     Birefringence *birefringence=new Birefringence(settings1);
 
@@ -169,15 +158,10 @@ int main(int argc, char **argv) {   // read setup.txt file
     cout<<"called Primaries"<<endl;
 
     int whichray = 0; // for test
-    //--------------------------------------------------
-    //   Interaction *interaction1=new Interaction("nu",primary1,settings1,whichray,count1);
-    //   cout<<"called Interaction1"<<endl;
-    //-------------------------------------------------- 
 
     Event *event = new Event();
     cout<<"called Event"<<endl;
 
-    //Report *report = new Report(detector, settings1);
     Report *report = new Report();
     cout<<"called Evt"<<endl;
 
@@ -240,32 +224,6 @@ int main(int argc, char **argv) {   // read setup.txt file
         eventTree->Branch("UsefulAtriStationEvent",&theAtriEvent);
         eventTree->Branch("weight", &weight);
 
-        /*
-        UsefulIcrrStationEvent *theIcrrEventArray[3];
-        for (int i = 0; i < 3; i++){
-            theIcrrEvent[i] = 0;
-        }
-        UsefulAtriStationEvent *theAtriEventArray[38];
-        for (int i = 0; i < 38; i++){
-            theAtriEvent[i] = 0;
-        }
-        */
-
-
-        /*
-        TTree *eventTree0;
-        eventTree0 = new TTree("eventTree0","Tree of Station 0 ARA Events");
-        eventTree0->Branch("UsefulIcrrStationEvent",&theIcrrEventArray[0]);
-        TTree *eventTree1;
-        eventTree1 = new TTree("eventTree1","Tree of Station 1 ARA Events");
-        eventTree1->Branch("UsefulAtriStationEvent",&theAtriEventArray[1]);
-        TTree *eventTree2;
-        eventTree2 = new TTree("eventTree2","Tree of Station 2 ARA Events");
-        eventTree2->Branch("UsefulAtriStationEvent",&theAtriEventArray[2]);
-        TTree *eventTree3;
-        eventTree3 = new TTree("eventTree3","Tree of Station 3 ARA Events");
-        eventTree3->Branch("UsefulAtriStationEvent",&theAtriEventArray[3]);
-        */
     }
     #endif
 
@@ -273,7 +231,6 @@ int main(int argc, char **argv) {   // read setup.txt file
     cout<<"will call secondaries"<<endl;
     Secondaries *sec1 = new Secondaries (settings1);
     cout<<"will call signal"<<endl;
-    // Signal *signal = new Signal;
     Signal *signal = new Signal (settings1);
     signal->SetMedium(0);   // set medium as ice
     cout<<"finish calling secondaries and signal"<<endl;
@@ -293,28 +250,8 @@ int main(int argc, char **argv) {   // read setup.txt file
     double Total_Weight = 0.;
     double Total_Probability = 0.;
 
-
-    /*
-
-    TCanvas *cFull_window = new TCanvas("cFull_window","A Simple Graph Example",200,10,10000,11200);
-    cFull_window->Divide(1,16);
-
-    TGraph *g_Full_window;
-
-    TGraph *G_V_threshold_diode;
-    G_V_threshold_diode = new TGraph(2, threshold_x, threshold_y);
-
-    TCanvas *cFull_window_V = new TCanvas("cFull_window_V","A Simple Graph Example",200,10,3200,2400);
-    cFull_window_V->Divide(4,4);
-
-    TGraph *g_Full_window_V;
-
-    */
-
     double x_V[settings1->NFOUR/2];
     double y_V[settings1->NFOUR/2];
-
-
 
     double xbin[settings1->DATA_BIN_SIZE];
     for (int i=0; i<settings1->DATA_BIN_SIZE; i++) {
@@ -327,16 +264,9 @@ int main(int argc, char **argv) {   // read setup.txt file
 
     ofstream TrigWind;
     TrigWind.open("outputs/TrigWindowStudy.txt");
-        
-        
-    // for (int iTrigWind = 10; iTrigWind < 201; iTrigWind = iTrigWind+10){
-        
-    //  double TRIG_WINDOW_Size = double (iTrigWind * 1.0E-9);
-    //  settings1->TRIG_WINDOW = TRIG_WINDOW_Size;
                 
     Total_Global_Pass = 0;
     cout<<"begin looping events!!"<<endl;
-
 
     double pre_posnu_x;
     double pre_posnu_y;
@@ -345,7 +275,6 @@ int main(int argc, char **argv) {   // read setup.txt file
     double cur_posnu_x;
     double cur_posnu_y;
     double cur_posnu_z;
-
 
     cout << "Calpulser_on: " << settings1->CALPULSER_ON << endl;
 
@@ -361,10 +290,7 @@ int main(int argc, char **argv) {   // read setup.txt file
             }
         }
     }
-
-
-
-                
+         
     // check if settings have to compatibility problems
     // if there's any, stop AraSim
     settings_compatibility_error = settings1->CheckCompatibilitiesDetector(detector);
@@ -380,10 +306,6 @@ int main(int argc, char **argv) {   // read setup.txt file
         }
     #endif
 
-
-    // test autoflush
-    // AraTree2->SetAutoFlush(0);
-
     // reset accumulative trig search bin info 
     settings1->ACCUM_TRIG_SEARCH_BINS_STATION0 = 0.;
 
@@ -397,7 +319,6 @@ int main(int argc, char **argv) {   // read setup.txt file
     else {
         nuLimit = settings1->NNU;
     }
-    // cout << "nuLimit: " << nuLimit << endl; 
     int inu = 0;
     int Events_Thrown = 0;
     int Events_Passed = 0;
@@ -480,7 +401,7 @@ int main(int argc, char **argv) {   // read setup.txt file
             // cout<<"pickposnu : "<<event->Nu_Interaction[0].pickposnu<<endl;
             //-------------------------------------------------- 
 
-            // decide whether debug mode or not
+            // Determine if the simulation is in debug mode or not
             int debugmode = 0;
             if (settings1->DEBUG_MODE_ON == 1 && Events_Thrown < settings1->DEBUG_SKIP_EVT) {
                 debugmode = 1;  // skip most of computation intensive processes if debugmode == 1
@@ -489,6 +410,10 @@ int main(int argc, char **argv) {   // read setup.txt file
                 cout << Events_Thrown << " " << endl;
             }
 
+            // While there is at least 1 station with enough waveform to perform a trigger check,
+            //   build waveforms for this event and check the trigger over it. 
+            //   If there is a part of any waveform that wasn't analyzed and exists beyond the
+            //   deadtime of the station, say there is still at least one station to trigger check. 
             int stations_to_trigger_check = report->stations.size();
             for (int station_i=0; station_i<report->stations.size(); station_i++){
                 report->stations[station_i].next_trig_search_init = trigger->maxt_diode_bin + settings1->NFOUR;  
@@ -508,9 +433,8 @@ int main(int argc, char **argv) {   // read setup.txt file
                 // Save the event object to a temporary object in case we have more data to analyze
                 Event *event_save = new Event(*event);
 
-                // If any stations have waveform left to analyze (indicated by whether 
-                //   `report->stations[station_i].next_trig_search_init` is equal to `-1` or not),
-                //   fill tree and rerun this trigger check. 
+                // Count how many stations have waveform left to analyze (indicated by whether 
+                //   `report->stations[station_i].next_trig_search_init` is equal to `-1` or not)
                 stations_to_trigger_check = 0;
                 int stations_next_trig_search_init[ detector->stations.size() ];
                 for (int station_i=0; station_i<report->stations.size(); station_i++){
@@ -520,7 +444,7 @@ int main(int argc, char **argv) {   // read setup.txt file
                     }
                 }
 
-                // Save the event data, report data, and ARA_like data if ARA_UTIL_EXISTS
+                // Save this event's event data, report data, and ARA_like data if ARA_UTIL_EXISTS
                 save_event_data(
                     Events_Passed, inu, 
                     &max_dt, &Total_Global_Pass, &Total_Weight, &Total_Probability, &check_station_DC,
@@ -535,7 +459,7 @@ int main(int argc, char **argv) {   // read setup.txt file
                     detector, report, settings1, trigger);
                 #endif
 
-                // test if posnu is exactly same in calpulser mode
+                // Ensure the calpulser didn't move randomly during the simulation
                 if (settings1->CALPULSER_ON == 1) {
                     cur_posnu_x = event->Nu_Interaction[0].posnu.GetX();
                     cur_posnu_y = event->Nu_Interaction[0].posnu.GetY();
@@ -558,8 +482,7 @@ int main(int argc, char **argv) {   // read setup.txt file
                     delete event;
                     
                     report = new Report(detector, settings1);
-                    event = new Event(*event_save); // Works
-                    //*event = Event(event_save); // doesnt work
+                    event = new Event(*event_save); 
                 }
 
                 for (int station_i=0; station_i<report->stations.size(); station_i++){
@@ -610,18 +533,10 @@ int main(int argc, char **argv) {   // read setup.txt file
         return 0;
     }
 
-    // TrigWind << TRIG_WINDOW_Size << "\t" << Total_Global_Pass << endl;
-    // cout << "TRIG_WINDOW_Size:Total_Global_Pass:: " << TRIG_WINDOW_Size << " : " << Total_Global_Pass << endl;
-
     // }// end trigger window loop
     TrigWind.close();
-                                         
-    //--------------------------------------------------
-    //    cFull_window_V->Print("test_V_mimic.pdf");
-    //-------------------------------------------------- 
 
     ofstream weight_file;
-    //weight_file.open(("./weight_output/weight_"+setupfile).c_str());
     if (argc == 3) {
         weight_file.open(("./weight_output/weight_"+setupfile+".run"+run_no).c_str());
     }
@@ -634,7 +549,6 @@ int main(int argc, char **argv) {   // read setup.txt file
 
 
     cout<<" end loop"<<endl;
-    // cout << "Total Events Thrown: " <<     settings1->NNU << endl;
     cout << "Total Events Thrown: " << Events_Thrown << endl;
     cout<<"Total_Global_Pass : "<<Total_Global_Pass<<endl;
     cout<<"Total_Weight : "<<Total_Weight<<endl;
@@ -673,14 +587,6 @@ int main(int argc, char **argv) {   // read setup.txt file
         double error_minus = 0;
         Counting::findErrorOnSumWeights( count1->eventsfound_binned, error_plus, error_minus );
 
-        /*       
-        Veff_test = IceVolume * 4. * PI * signal->RHOICE / signal->RHOH20 * Total_Weight / (double)(settings1->NNU);
-
-        // account all factors to error
-        error_plus = IceVolume * 4. * PI * signal->RHOICE / signal->RHOH20 * error_plus / (double)(settings1->NNU);
-        error_minus = IceVolume * 4. * PI * signal->RHOICE / signal->RHOH20 * error_minus / (double)(settings1->NNU);
-        */
-
         Veff_test_we = IceVolume * 4. * PI * signal->RHOICE / signal->RHOH20 * Total_Weight / (double)(settings1->NNU);
         Veff_test = IceVolume * 4. * PI * Total_Weight / (double)(settings1->NNU);
         error_plus = IceVolume * 4. * PI * signal->RHOICE / signal->RHOH20 * error_plus / (double)(settings1->NNU);
@@ -693,7 +599,6 @@ int main(int argc, char **argv) {   // read setup.txt file
 
 
      // if using picknear_sphere method
-     //
      else if (settings1->INTERACTION_MODE==0) {
 
         double IceArea;
@@ -704,7 +609,6 @@ int main(int argc, char **argv) {   // read setup.txt file
         double Aeff;
         Aeff = IceArea * Total_Probability / (double)(settings1->NNU);
         cout << "Aeff : " << Aeff << " [m^2]" << endl;
-
 
         // error bar for weight
         double error_plus = 0;
@@ -721,11 +625,6 @@ int main(int argc, char **argv) {   // read setup.txt file
         cout<<"and Aeff*sr values are"<<endl;
         cout << "Aeff*sr : " << Aeff * 4.* PI << " [m^2sr]" <<", "<< Aeff * 4.* PI *1.e-6<<" [km^2sr]"<< endl;
     }
-
-
-    //--------------------------------------------------
-    //   cout<<"Total NNU : "<<settings1->NNU<<", PickUnbiased passed NNU : "<<nnu_pass<<endl;
-    //-------------------------------------------------- 
 
     // remove noisewaveform info if DATA_SAVE_MODE == 2
     // remove noisewaveform info if DATA_SAVE_MODE is not 0
@@ -790,6 +689,7 @@ void save_event_data(
     Event *event, Report *report, TTree *AraTree2,
     Counting *count1, Detector *detector, Settings *settings1, Trigger *trigger
 ){
+    // Save the report and event branches of the requested simulated event to the output TTree
 
     report->clear_useless(settings1);   // to reduce the size of output AraOut.root, remove some information
     report->ClearUselessfromConnect(detector, settings1, trigger);
@@ -860,17 +760,21 @@ void save_event_data(
 void save_useful_event(
     int check_station_DC, 
     UsefulIcrrStationEvent *theIcrrEvent, UsefulAtriStationEvent *theAtriEvent, double *weight, TTree *eventTree,
-    Event *event, 
-    Detector *detector, Report *report, Settings *settings1, Trigger *trigger){
+    Event *event,  Detector *detector, Report *report, Settings *settings1, Trigger *trigger){
+    // Save simulated event data in a format similar to how ARA detectors save their events
 
+    // Extract the number of channels in each detector
     for (int i=0; i<detector->params.number_of_stations; i++) {
         if (settings1->DATA_LIKE_OUTPUT != 0){
             if (settings1->DETECTOR == 3 && i == 0)
+                // The testbed has 14 channels
                 { theIcrrEvent->numRFChans = 14; }
             else if (settings1->DETECTOR == 4 && settings1->DETECTOR_STATION == 0)
+                // The testbed has 14 channels
                 { theIcrrEvent->numRFChans = 14; }
             else { 
-                theAtriEvent->fNumChannels = 20; 
+                // All other stations have 16 channels
+                theAtriEvent->fNumChannels = 20; // Includes 4 surface channels
                 theIcrrEvent->numRFChans = 16; 
             }
         }
@@ -879,67 +783,66 @@ void save_useful_event(
         int stationID;
         int stationIndex;
         if (settings1->DETECTOR == 4){
+            // Traditional ARA1-5 Detectors
             stationID = settings1->DETECTOR_STATION;
             stationIndex = 0;
         }
         else if (settings1->DETECTOR == 5){
+            // Phased Array
             stationID = 6;
             stationIndex = 0;
         } else {
+            // Other detectors, e.g. the Testbed
             stationID = 0;
             stationIndex = 0;
         }
 
         if (report->stations[stationIndex].Global_Pass) {
-            // report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theIcrrEvent);
             cout << endl << "Making useful event" << endl;
             report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theAtriEvent);
         }
         *weight = event->Nu_Interaction[0].weight;
     }   
 
-    // test FILL_TREE_MODE
-    if (settings1->FILL_TREE_MODE==0) { // fill event event  
-        // for 1, save all events whether passed trigger or not
+    // Determine if the current event should be saved based on simulation settings
+    if (settings1->FILL_TREE_MODE==0) { 
+        // Save data for all events
         if (settings1->DATA_LIKE_OUTPUT==2) {
-            // theEvent = &report->theUsefulEvent;
+            // save all events whether they passed the trigger or not
             eventTree->Fill();
         }
-        // for 0, save events which passed trigger
         else if (settings1->DATA_LIKE_OUTPUT==1) {
+            // only save events that passed the trigger
             if ( check_station_DC > 0 ) {
-                // theEvent = &report->theUsefulEvent;
                 eventTree->Fill();
             }
         }
     }
-    else if (settings1->FILL_TREE_MODE==1) { // fill only usable posnu event 
+    else if (settings1->FILL_TREE_MODE==1) { 
+        // Only save events if their location was "usable"
         if (event->Nu_Interaction[0].pickposnu>0) {
-            // for 1, save all events whether passed trigger or not
             if (settings1->DATA_LIKE_OUTPUT==2) {
-                // theEvent = &report->theUsefulEvent;
+                // save all events whether they passed the trigger or not
                 eventTree->Fill();
             }
-            // for 0, save events which passed trigger
             else if (settings1->DATA_LIKE_OUTPUT==1) {
+                // only save events that passed the trigger
                 if ( check_station_DC > 0 ) {
-                    //theEvent = &report->theUsefulEvent;
                     eventTree->Fill();
                 }
             }
         }
     }
-    else if (settings1->FILL_TREE_MODE==2) { // fill only triggered event    
+    else if (settings1->FILL_TREE_MODE==2) { 
+        // Only save events that triggered
         if (check_station_DC>0) {
-            // for 1, save all events whether passed trigger or not
             if (settings1->DATA_LIKE_OUTPUT==2) {
-                //theEvent = &report->theUsefulEvent;
+                // save all events whether they passed the trigger or not
                 eventTree->Fill();
             }
-            // for 0, save events which passed trigger
             else if (settings1->DATA_LIKE_OUTPUT==1) {
+                // only save events that passed the trigger
                 if ( check_station_DC > 0 ) {
-                    //theEvent = &report->theUsefulEvent;
                     eventTree->Fill();
                 }
             }

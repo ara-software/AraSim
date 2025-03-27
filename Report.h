@@ -53,11 +53,8 @@ class Antenna_r {
     public:
 
         // one dimention for number of solutions, (if there,) another dimention for array of information
-        //
 
         int ray_sol_cnt;    // number of RaySolver solutions
-
-        //vector <int> trg;    // if antenna recieved any signal or not. 0 : no signal,  1 : yes signal
 
         vector < vector <double> > view_ang; //!   //viewing angle
         vector < vector <double> > launch_ang; //!  //launch angle
@@ -72,16 +69,14 @@ class Antenna_r {
         vector < vector <double> > arrival_time; //!       //time from posnu to antenna (t:0 at posnu)
         vector < vector <int> > reflection; //!    // non-reflected : 0,  reflected : 1
         vector < vector < Position > > Pol_vector; //!  // polarization vector at the antenna
-        //vector <Position> n_H;  // normalized vector for H pol
-        //vector <Position> n_V;  // normalized vector for V pol
 
-        //! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 02-12-2021 -MK-
+        //! Save every ray steps between the vertex (source) and an antenna (target), unless DATA_SAVE_MODE is 2. 
         //! These xz coordinates were calculated after we convert the earth coordinates to flat coordinates by the RaySolver::Earth_to_Flat_same_angle()
         vector < vector < vector < vector <double> > > > ray_step; //!
 
         // below freq domain simulation output
         vector < vector < vector <double> > > vmmhz; //!  // signal V/m/MHz for each freq bin
-        //
+
         vector < vector < vector <double> > > Heff; //!  // effective height for each freq bin
         vector < vector <double> > Mag; //!  // magnification factor
         vector < vector <double> > Fresnel; //!  // Fresnel factor
@@ -91,10 +86,7 @@ class Antenna_r {
         
         vector < vector < vector <double> > > Vm_zoom; //!  // E field before ant T-domain
         vector < vector < vector <double> > > Vm_zoom_T; //!  // E field before ant T-domain time
-        //vector < vector <double> > Vm_wo_antfactor;  // before applying ApplyAntFactors
-        //vector < vector <double> > VHz_antfactor;  // after applying ApplyAntFactors to vmmhz above ( 1/sqrt2 * 1/dt * 0.5 * heff * pol_factor )
-        //vector < vector <double> > VHz_filter;  // after applying ApplyAntFactors above and then apply filter gain from detector->GetFilterGain
-        //
+
         int skip_bins[2]; // for two ray sols
 
         int Nnew[2]; // new number of bins for V_fotfft array
@@ -110,7 +102,7 @@ class Antenna_r {
 
         int global_trig_bin; // from V_mimic [0, NFOUR/2] bins, where global trigger occured
 
-        vector < vector < vector <double> > > V; //!   // For each ray individually, volt signal with all factors applied (from fft, excludes gain offse)
+        vector < vector < vector <double> > > V; //!   // For each ray and interaction individually, volt signal with all factors applied (from fft, excludes gain offse)
         vector <double> V_convolved;    // After convolution of all rays, volt signal with all factors applied (from Convolve_Signal, excludes gain offset)
         vector <double> V_noise;        // noise voltage waveform with all factors applied (from Convolve_Signal, excludes gain offset)
 
@@ -118,18 +110,14 @@ class Antenna_r {
 
         vector < vector <int> > SignalBin; //! // the bin number where the center of signal located. we can compare this value to Trig_Pass value to have likely triggered ray trace solution
 
-        vector < vector <double> > SignalBinTime; //! ///< the time of center of bin where signal should locate after sim decided the readout window. MK added -2023-05-18-
+        vector < vector <double> > SignalBinTime; //! ///< the time of center of bin where signal should locate after sim decided the readout window.
 
         vector <int> noise_ID;      // information about which pure noise waveform is used for trigger analysis
 
         vector < vector <double> > PeakV; //!  // peak voltage in time domain
         vector <int> Rank;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
 
-        //	vector <double> PeakV_fromFullWaveform; // peak voltage in time domain taken from full waveform, including noise at the time of signal insertion
-        //	vector <int> Rank_fromFullWaveform;      // rank of peak voltage between antennas (Rank = 0 for 0 signal)
-
         int Trig_Pass; // 0 if not passed the trigger, 1 if passed the trigger
-        //vector <int> Trig_Pass; // 0 if not passed the trigger, 1 if passed the trigger
 
         int Likely_Sol[2]; // comparing Trig_Pass and SignalBin value, this value returns which ray trace solution has been triggered (not perfect but most likely)
 
@@ -152,9 +140,7 @@ class Antenna_r {
 
 class String_r {
     public:
-        //int trg;    // if any antenna trigg in the event. 0 : no antenna in the string trg
-                    //                                    1 : 1 or more antenna trg
-
+    
         vector <Antenna_r> antennas;
 
         ClassDef(String_r,1);
@@ -162,8 +148,7 @@ class String_r {
 
 class Station_r {
     public:
-        //int trg;    // if any antenna trigg in the event. 0 : no antenna trg
-                    //                                    1: 1 or more antenna trg 
+
         vector <String_r> strings;
         vector <Surface_antenna_r> surfaces;
 
@@ -171,20 +156,16 @@ class Station_r {
         double max_arrival_time;    // for each station, maximum arrival time (include all ray_solves). this will be used for time delay between antennas.
         double max_PeakV;           // for each station, maximum PeakV value (include all ray_solves). this will also be used for time delay plot (to set same vertical scale)
         int Total_ray_sol;          // total number of ray_sols in the stations. If there is 0 Total_ray_sol, we don't need to do trigger check while there is any Total_ray_sol, we do trigger check.
-        int Global_Pass;    // if global trigger passed or not: 0 = not passed, >0 passed, number indicates the first bin in the triggered window of the waveform at which the global trigger passed
+        int Global_Pass;            // if global trigger passed or not: 0 = not passed, >0 passed, number indicates the first bin in the triggered window of the waveform at which the global trigger passed
 
         int total_trig_search_bin;  // total number of bins for searching trigger. 
         int next_trig_search_init; // if not -1, designates the next global bin to begin a trigger search from
-
-//         int numChan;
-// 	int numChanVpol;
-// 	int numChanHpol;
         
         // TDR is for Tunnel Diode Response i.e. the value on which the trigger happened
         vector <double> TDR_all;
-	vector <double> TDR_all_sorted;
-	vector <double> TDR_Hpol_sorted;
-	vector <double> TDR_Vpol_sorted;
+        vector <double> TDR_all_sorted;
+        vector <double> TDR_Hpol_sorted;
+        vector <double> TDR_Vpol_sorted;
         
         ClassDef(Station_r,4);
 };
@@ -219,9 +200,9 @@ class CircularBuffer{
 
 class Report {
     private:
-        vector <double> noise_phase;    // random noise phase generated in GetNoisePhase()
+    
+           vector <double> noise_phase; // random noise phase generated in GetNoisePhase()
 
-           
            int N_noise;     // needed number of noise waveforms (most cases, we will need only 1)
            int noise_ID[5];    // selected noise waveform ID (we should not need 5 noise waveforms, but just in case)
 
@@ -230,21 +211,20 @@ class Report {
                 int n_scanned_channels, int station_index,
                 Detector *detector, Event *event, Settings *settings1, Trigger *trigger
             );
-            int triggerCheckLoop(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode=1);
+            int triggerCheckLoop(
+                Settings *settings1, Detector *detector, Event *event, Trigger *trigger, 
+                int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode=1);
 
-            int saveTriggeredEvent(Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int last_trig_bin);
+            int saveTriggeredEvent(
+                Settings *settings1, Detector *detector, Event *event, Trigger *trigger, int stationID, 
+                int trig_search_init, int max_total_bin, int trig_window_bin, int last_trig_bin);
 
             vector < vector < vector <double> > > RayStep;
 
 
     public:
-           /*
-           double Full_window[16][16384];  // test with array, not vector, diode response
-           double Full_window_V[16][16384];  // test with array, not vector, voltage waveform
-           */
-           vector <int> Passed_chs;
-        //int trg;    // if any antenna in entire detectors trg. 0 : no antenna trg
-                    //                                         1 : 1 or more antenna trg
+
+        vector <int> Passed_chs;
 
         Report ();
         Report (Report *report);
@@ -253,52 +233,48 @@ class Report {
     
         void Initialize (Detector *detector, Settings *settings1);
 
-    void CalculateSignals(
-        int debugmode, 
-        Birefringence *birefringence, Detector *detector, Event *event, 
-        IceModel *icemodel, RaySolver *raysolver, Settings *settings1, Signal *signal
-    );
-    void BuildAndTriggerOnWaveforms(
-        int debugmode, int station_index, int evt, int trig_search_init,
-        Detector *detector, Event *event, Settings *settings1, Trigger *trigger
-    );
-
-    void rerun_event(Event *event, Detector *detector, RaySolver *raysolver, Signal *signal, Birefringence *birefringence, IceModel *icemodel, Settings *settings, int which_solution,
-        vector<int> &numSolutions, vector<vector<vector<double> > > &traceTimes, vector<vector<vector<double> > > &traceVoltages
+        void CalculateSignals(
+            int debugmode, 
+            Birefringence *birefringence, Detector *detector, Event *event, 
+            IceModel *icemodel, RaySolver *raysolver, Settings *settings1, Signal *signal
         );
-    void ModelRay(
-        int ray_idx, vector< vector< double > > ray_output, int interaction_idx, double *T_forint, 
-        Antenna_r *antenna_r, Antenna *antenna_d,  int i, int j, int k, 
-        int debugmode,  Birefringence *birefringence, Detector *detector, 
-        Event *event, IceModel *icemodel, Settings *settings, Signal *signal);
-    void InitializeNNew(Antenna_r *antenna, int interaction_idx, int ray_idx, double dT, Settings *settings1);
-    void GetRayParameters(
-        Antenna_r *antenna_r, Antenna *antenna_d, Interaction interaction, int interaction_idx,
-        int i, int j, int k, int ray_idx, vector<vector< double > > ray_output,
-        Vector *n_trg_pokey, Vector *n_trg_slappy, Vector *Pol_vector_src,
-        Position *launch_vector, Position *receive_vector,
-        IceModel *icemodel, Settings *settings1 );
-    void PropagateSignal(
-        double dT_forfft, int efield_length, vector< double > efield_time, vector< double > efield, double *T_forint,
-        int interaction_idx, int ray_idx, vector<vector< double > > ray_output, Position launch_vector, double time_diff_birefringence, 
-        Vector Pol_vector_src, Vector Pol_vector, Vector n_trg_slappy, Vector n_trg_pokey, 
-        Antenna_r *antenna_r, Antenna *antenna_d, int gain_ch_no, int j, int k,
-        Birefringence *birefringence, Detector *detector, Event *event, IceModel *icemodel, Settings *settings);
-    
-    // Phased Array functions
-    bool isTrigger(double eff);
-    void checkPATrigger(
-        int i, Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
-        int trig_search_init, int max_total_bin);    
-    double interpolate(double *xdata,double *ydata, double xi, int numData);
-    
-#ifdef ARA_UTIL_EXISTS
+        void BuildAndTriggerOnWaveforms(
+            int debugmode, int station_index, int evt, int trig_search_init,
+            Detector *detector, Event *event, Settings *settings1, Trigger *trigger
+        );
 
-    void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulIcrrStationEvent *theUsefulEvent);
-    void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulAtriStationEvent *theUsefulEvent);
-#endif
-    
-    void ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger);
+        void ModelRay(
+            int ray_idx, vector< vector< double > > ray_output, int interaction_idx, double *T_forint, 
+            Antenna_r *antenna_r, Antenna *antenna_d,  int i, int j, int k, 
+            int debugmode,  Birefringence *birefringence, Detector *detector, 
+            Event *event, IceModel *icemodel, Settings *settings, Signal *signal);
+        void DetermineWFBins(Antenna_r *antenna, int interaction_idx, int ray_idx, double dT, Settings *settings1);
+        void GetRayParameters(
+            Antenna_r *antenna_r, Antenna *antenna_d, Interaction interaction, int interaction_idx,
+            int i, int j, int k, int ray_idx, vector<vector< double > > ray_output,
+            Vector *n_trg_pokey, Vector *n_trg_slappy, Vector *Pol_vector_src,
+            Position *launch_vector, Position *receive_vector,
+            IceModel *icemodel, Settings *settings1 );
+        void PropagateSignal(
+            double dT_forfft, int efield_length, vector< double > efield_time, vector< double > efield, double *T_forint,
+            int interaction_idx, int ray_idx, vector<vector< double > > ray_output, Position launch_vector, double time_diff_birefringence, 
+            Vector Pol_vector_src, Vector Pol_vector, Vector n_trg_slappy, Vector n_trg_pokey, 
+            Antenna_r *antenna_r, Antenna *antenna_d, int gain_ch_no, int j, int k,
+            Birefringence *birefringence, Detector *detector, Event *event, IceModel *icemodel, Settings *settings);
+        
+        // Phased Array functions
+        bool isTrigger(double eff);
+        void checkPATrigger(
+            int i, Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
+            int trig_search_init, int max_total_bin);    
+        double interpolate(double *xdata,double *ydata, double xi, int numData);
+        
+        #ifdef ARA_UTIL_EXISTS
+        void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulIcrrStationEvent *theUsefulEvent);
+        void MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulAtriStationEvent *theUsefulEvent);
+        #endif
+        
+        void ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger);
 
         // Signal+noise convolution functions
         void Convolve_Signals(    
@@ -329,31 +305,45 @@ class Report {
             int wf_length, int BINSIZE, int ID, int StationIndex, vector <double> *V_noise_only,
             Settings *settings1, Trigger *trigger, Detector *detector);
 
-
         void Apply_Gain_Offset(Settings *settings1, Trigger *trigger, Detector *detector, int ID, int StationIndex); // we need to apply a gain offset to the basic waveforms.
-
-
 
         int GetChNumFromArbChID( Detector *detector, int ID, int StationIndex, Settings *settings1);// get actual ch number from arb chID
 
         Vector GetPolarization (Vector &nnu, Vector &launch_vector);
 
-        void GetParameters (Position &src, Position &trg, Vector &nnu, double &viewangle, double receive_angle, Vector &launch_vector, Vector &receive_vector, Vector &n_trg_slappy, Vector &n_trg_pokey );    // get viewangle, launch, receive vectors  (it reads launch angle as a viewangle and returns actual viewangle)
+        void GetParameters (
+            Position &src, Position &trg, Vector &nnu, double &viewangle, double receive_angle, 
+            Vector &launch_vector, Vector &receive_vector, Vector &n_trg_slappy, Vector &n_trg_pokey 
+        );    // get viewangle, launch, receive vectors  (it reads launch angle as a viewangle and returns actual viewangle)
 
         double GaintoHeight(double gain, double freq, double n_medium, double Z_A=50);
         
         double calculatePolFactor(Vector &Pol_vector, int ant_type, double antenna_theta, double antenna_phi);
 
-        void ApplyAntFactors(double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, int ant_type, double &pol_factor, double &vmmhz, double antenna_theta, double antenna_phi);
-
-        void ApplyAntFactors_Tdomain(double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false, bool applyInverse=false);
-
-        void ApplyAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi,  double freq, bool useInTransmitterMode=false, bool applyInverse=false);
-    
-        void InvertAntFactors_Tdomain(double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false);
-
-        void InvertAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false);
-
+        void ApplyAntFactors(
+            double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, 
+            int ant_type, double &pol_factor, double &vmmhz, double antenna_theta, double antenna_phi
+        );
+        void ApplyAntFactors_Tdomain(
+            double AntPhase, double heff, Vector &Pol_vector, 
+            int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, 
+            double freq, bool useInTransmitterMode=false, bool applyInverse=false
+        );
+        void ApplyAntFactors_Tdomain_FirstTwo ( 
+            double heff, double heff_lastbin, Vector &Pol_vector, 
+            int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi,  
+            double freq, bool useInTransmitterMode=false, bool applyInverse=false
+        );
+        void InvertAntFactors_Tdomain(
+            double AntPhase, double heff, Vector &Pol_vector, 
+            int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, 
+            double freq, bool useInTransmitterMode=false
+        );
+        void InvertAntFactors_Tdomain_FirstTwo ( 
+            double heff, double heff_lastbin, Vector &Pol_vector, 
+            int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, double antenna_theta, double antenna_phi, 
+            double freq, bool useInTransmitterMode=false
+        );
 
         void ApplyElect_Tdomain(double freq, Detector *detector, double &vm_real, double &vm_img, int gain_ch_no, Settings *settings1, bool applyInverse=false);
 
@@ -365,13 +355,10 @@ class Report {
     
         void ApplySplitterFactor(double &vm_real, double &vm_img, Detector *detector, Settings *settings1, bool applyInverse=false);
 
-
-
         void ApplyFilter(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFilter_databin(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFilter_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFilter_OutZero (double freq, Detector *detector, double &vmmhz);
-
 
         // apply gain in Preamp
         void ApplyPreamp(int bin_n, Detector *detector, double &vmmhz);
@@ -379,7 +366,8 @@ class Report {
         void ApplyPreamp_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyPreamp_OutZero (double freq, Detector *detector, double &vmmhz);
 
-	void ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double &vmmhz, Settings *settings1);
+        void ApplyNoiseFig_databin(int ch, int bin_n, Detector *detector, double &vmmhz, Settings *settings1);
+        void ApplyNoiseFig_OutZero(int ch, double freq, Detector *detector, double &vmmhz, Settings *settings1);
 
         // apply gain in FOAM
         void ApplyFOAM(int bin_n, Detector *detector, double &vmmhz);
@@ -387,11 +375,10 @@ class Report {
         void ApplyFOAM_NFOUR(int bin_n, Detector *detector, double &vmmhz);
         void ApplyFOAM_OutZero (double freq, Detector *detector, double &vmmhz);
 
-
         // apply RFCM gain
         void ApplyRFCM(int ch, int bin_n, Detector *detector, double &vmmhz, double RFCM_OFFSET);
         void ApplyRFCM_databin(int ch, int bin_n, Detector *detector, double &vmmhz, double RFCM_OFFSET);
-
+        void ApplyRFCM_OutZero(int ch, double freq, Detector *detector, double &vmmhz, double RFCM_OFFSET);
 
         void GetAngleAnt(Vector &rec_vector, Position &antenna, double &ant_theta, double &ant_phi);
         void GetAngleLaunch(Vector &launch_vector, double &launch_theta, double &launch_phi);
@@ -411,34 +398,30 @@ class Report {
 
         void MakeArraysforFFT_noise(Settings *settings1, Detector *detector,  int StationIndex, vector <double> &vsignal_array, double *vsignal_forfft);
 
-
         double FindPeak (double *waveform, int n);  // same with icemc; trigger->AntTrigger::FindPeak
         double FindPeak(vector< double > waveform, int n);
 
         void SetRank(Detector *detector); // set rank (rank of strength of signal at each antenna)
 
+        int GetChannelNum8_LowAnt(int string_num, int antenna_num); 
+        // just return ch numbers 1-8 for antenna 0-1 (bottom antennas) and higher ch numbers for antenna 2-3 (top antennas)
+        // this is used for only TRIG_ONLY_LOW_CH_ON=1 mode with 
 
+        TGraph *getWaveform(Detector *detector, int ch, int station_i=0, int event_num=0, int run_num=0);
 
-        int GetChannelNum8_LowAnt(int string_num, int antenna_num); // just return ch numbers 1-8 for antenna 0-1 (bottom antennas) and higher ch numbers for antenna 2-3 (top antennas) this is used for only TRIG_ONLY_LOW_CH_ON=1 mode with 
+        vector<TGraph*> getWaveformVector(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
+        vector<TGraph*> getWaveformVectorVpol(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
+        vector<TGraph*> getWaveformVectorHpol(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
 
-
-	TGraph *getWaveform(Detector *detector, int ch, int station_i=0, int event_num=0, int run_num=0);
-
-	vector<TGraph*> getWaveformVector(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
-	vector<TGraph*> getWaveformVectorVpol(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
-	vector<TGraph*> getWaveformVectorHpol(Detector *detector, int station_i=0, int event_num=0, int run_num=0);
-
-       int getNumOfSignalledAnts(Station_r station);
+        int getNumOfSignalledAnts(Station_r station);
 
         double get_SNR(vector<double> signal_array, vector<double> noise_array);
 	
         vector <double> Vfft_noise_after;   // noise Vfft after get_random_rician
         vector <double> Vfft_noise_before;   // noise Vfft before get_random_rician
-        //vector <double> V_noise_timedomain;   // noise V timedomain after get_random_rician and inverse fft
         double Vfft_noise_org;              // V/Hz for thermal noise from Johnson-Nyquist
 
         vector <double> V_total_forconvlv; // vector array for pure signal diode convlv result
-
 
         void clear_useless(Settings *settings1);   // to reduce the size of output AraOut.root, remove some information
 

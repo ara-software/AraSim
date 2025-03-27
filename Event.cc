@@ -191,7 +191,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         delete Nu_temp;
 
     }
-    //Creating pulser event type that will be modelled after arbitrary event type (EVENT_TYPE=10). - JCF 4/6/2023
+    //Creating pulser event type that will be modelled after arbitrary event type (EVENT_TYPE=10).
     if (Event_type == 11 or Event_type == 12) { // if only arbitrary events exist
         
   
