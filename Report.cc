@@ -1288,8 +1288,9 @@ void Report::ModelRay(
 
                     //Defining polarization at the source (using launch_vector (a unit vector))
                     // double psi = TMath::DegToRad()*settings->CLOCK_ANGLE;
-                    double psi = 0;  // In the absence of cross-pol, the polarization angle is nominally zero for an antenna in the ice that is azimuthally symmetric. 
-                                     // Cross pol is the next step in implementation. - JCF 2/9/2024
+                    double psi = 0;  // In the absence of cross-pol, the polarization angle is nominally zero for
+                                     //   an antenna in the ice that is azimuthally symmetric. 
+                                     // Cross pol psi is updated after emission from a Tx
                     double theta = acos(launch_vector[2]);
                     double phi = atan2(launch_vector[1],launch_vector[0]);
                                                     
