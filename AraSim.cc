@@ -387,19 +387,6 @@ int main(int argc, char **argv) {   // read setup.txt file
         // go further only if we picked up usable posnu
         if (event->Nu_Interaction[0].pickposnu>0) {
 
-            //--------------------------------------------------
-            // cout<<"inu : "<<inu<<endl;
-            // cout<<"event->pnu : "<<event->pnu<<endl;
-            // cout<<"posnu : ";
-            // event->Nu_Interaction[0].posnu.Print();
-            // cout<<"nnu : ";
-            // event->Nu_Interaction[0].nnu.Print();
-            // cout<<"event->n_interactions : "<<event->n_interactions<<endl;
-            // cout<<"nu_flavor : "<<event->nuflavor<<endl;
-            // cout<<"event->Nu_Interaction[0].vmmhz1m[0] : "<<event->Nu_Interaction[0].vmmhz1m[0]<<endl;
-            // cout<<"pickposnu : "<<event->Nu_Interaction[0].pickposnu<<endl;
-            //-------------------------------------------------- 
-
             // Determine if the simulation is in debug mode or not
             int debugmode = 0;
             if (settings1->DEBUG_MODE_ON == 1 && Events_Thrown < settings1->DEBUG_SKIP_EVT) {
