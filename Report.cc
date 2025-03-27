@@ -823,7 +823,7 @@ void Report::BuildAndTriggerOnWaveforms(
 
         // Find the last bin in V_convolved that has nonzero signal 
         int signal_length = stations[station_index].strings[string].antennas[antenna].V_convolved.size();
-        int last_nonzero_bin = signal_length-1;
+        int last_nonzero_bin = 0;
         for (int bin=signal_length-1; bin>-1; bin--) {
           if ( stations[station_index].strings[string].antennas[antenna].V_convolved[bin] != 0. ) {
             last_nonzero_bin = bin;
