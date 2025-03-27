@@ -282,7 +282,7 @@ class Interaction  {
 
     void clear_useless(Settings *settings1);
   
-  ClassDef(Interaction,2);
+  ClassDef(Interaction,3);
 
 
 };//Interaction
