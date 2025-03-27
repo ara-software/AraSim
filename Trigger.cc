@@ -672,7 +672,7 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
     else if (settings1->NOISE_CHANNEL_MODE == 1)
     {
         int ngeneratedevents = settings1->NOISE_EVENTS;  // should this value read at Settings class
-        double v_noise[settings1->DATA_BIN_SIZE];  // noise voltage time domain (with filter applied)
+        std::vector<double> v_noise(settings1->DATA_BIN_SIZE);  // noise voltage time domain (with filter applied)
 
         int num_chs = detector->params.number_of_antennas;
 
@@ -696,14 +696,18 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
                 {
 
                     // get v_noise array (noise voltage in time domain)
-                    report->GetNoiseWaveforms_ch(settings1, detector, V_noise_freqbin_ch[ch], v_noise, ch);
+                    report->GetNoiseWaveforms_ch(settings1, detector, V_noise_freqbin_ch[ch], v_noise.data(), ch);
 
                     // do normal time ordering (not sure if this is necessary)
-                    Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise);
+                    Tools::NormalTimeOrdering(settings1->DATA_BIN_SIZE, v_noise.data());
 
-                    myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin, v_noise_timedomain_diode_ch[ch][i]);
+                    myconvlv(v_noise.data(), settings1->DATA_BIN_SIZE, detector->fdiode_real_databin, v_noise_timedomain_diode_ch[ch][i]);
 
-                    for (int m = 0; m < settings1->DATA_BIN_SIZE; m++) {
+                    // cout << "After convolve" << endl;
+
+                    for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
+                    {
+
                         v_noise_timedomain_ch[ch][i].push_back(v_noise[m]);  // save pure noise (not diode convlved) waveforms
                     }
 
@@ -786,7 +790,6 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
 
 // moved mindiodeconvl, onediodeconvl, power_noise as I can't find their use.
 void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <double> &fdiode, vector <double> &diodeconv) {
-    
     const int length=DATA_BIN_SIZE;
 
     // we are going to make double sized array for complete convolution
@@ -845,10 +848,12 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
 // input data is not vector but double array
 void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdiode, vector <double> &diodeconv) {
     
+
+    // cout << "Trigger::myconvlv" << endl;
     const int length=DATA_BIN_SIZE;
 
     // we are going to make double sized array for complete convolution
-    double power_noise_copy[length*2];
+    std::vector<double> power_noise_copy(length * 2);
 
     // fill half of the array as power (actually energy) and another half (actually extanded part) with zero padding (Numerical Recipes 643 page)
     for (int i=0;i<length;i++) {
@@ -859,9 +864,9 @@ void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdi
     }
     
     // do forward fft to get freq domain (energy of pure signal)
-    Tools::realft(power_noise_copy,1,length*2);
-    
-    double ans_copy[length*2];
+    Tools::realft(power_noise_copy.data(),1,length*2);
+
+    std::vector<double> ans_copy(length * 2);
     
     // change the sign (from numerical recipes 648, 649 page)
     for (int j=1;j<length;j++) {
@@ -872,8 +877,9 @@ void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdi
     ans_copy[1]=power_noise_copy[1]*fdiode[1]/((double)length);
 
     // 1/length is actually 2/(length * 2)
-
-    Tools::realft(ans_copy,-1,length*2);
+    //
+    
+    Tools::realft(ans_copy.data(),-1,length*2);
     
     diodeconv.clear();  // remove previous values in diodeconv
     
@@ -881,6 +887,7 @@ void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdi
     for (int i=0;i<length+maxt_diode_bin;i++) {
 	    diodeconv.push_back( ans_copy[i] );
     }
+    
     
     int iminsamp,imaxsamp; // find min and max samples such that
     // the diode response is fully overlapping with the noise waveform
