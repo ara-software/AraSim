@@ -462,7 +462,7 @@ void Report::CalculateSignals(
   double RandomTshift = gRandom->Rndm(); // for t-domain signal, a factor for random init time shift
 
   // Loop over stations
-  for (int i = 0; i < detector->params.number_of_stations; i++)
+  for (int i = 0; i < detector->stations.size(); i++)
   {
 
     double min_arrival_time_tmp = 10.; // min arrival time between all antennas, raysolves, first min_arrival_time is unreasonably big value
@@ -2754,7 +2754,7 @@ int Report::saveTriggeredEvent(
 
 #ifdef ARA_UTIL_EXISTS
 void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *trigger, int stationID, int stationIndex, UsefulIcrrStationEvent *theUsefulEvent) {
-    if (stationID < detector->params.number_of_stations){
+    if (stationID < detector->stations.size()){
         int i = stationID;
         cout << stationID << endl;
 	int ch_limit;
@@ -2850,7 +2850,7 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 
 void Report::ClearUselessfromConnect(Detector *detector, Settings *settings1, Trigger *trigger){
     
-    for (int i = 0; i< detector->params.number_of_stations; i++) {
+    for (int i = 0; i< stations.size(); i++) {
         // now remove all information which are useless
         for (int c_j=0; c_j< detector->stations[i].strings.size(); c_j++) {
             for (int c_k=0; c_k< detector->stations[i].strings[c_j].antennas.size(); c_k++) {
@@ -4721,7 +4721,7 @@ void Report::SetRank(Detector *detector) {
     double maxpeak; // maxpeak value
     double pre_maxpeak; // maxpeak at previous round
 
-    for (int i = 0; i< detector->params.number_of_stations; i++) {
+    for (int i = 0; i< detector->stations.size(); i++) {
 
         for (int j=0; j< detector->stations[i].strings.size(); j++) {
 
@@ -4756,7 +4756,7 @@ void Report::SetRank(Detector *detector) {
     while (check!=0) {
         check=0;
         maxpeak = 0.;
-        for (int i = 0; i< detector->params.number_of_stations; i++) {
+        for (int i = 0; i< detector->stations.size(); i++) {
 
             for (int j=0; j< detector->stations[i].strings.size(); j++) {
 

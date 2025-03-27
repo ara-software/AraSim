@@ -276,10 +276,10 @@ int main(int argc, char **argv) {   // read setup.txt file
     cout << "Calpulser_on: " << settings1->CALPULSER_ON << endl;
 
     // test Detector set correctly
-    cout<<"number of stations : "<<detector->params.number_of_stations << endl;
+    cout<<"number of stations : "<< detector->stations.size() << endl;
     cout<<"total number of antennas : "<<detector->params.number_of_antennas << endl;
     int ch_count = 0;
-    for (int i=0; i<detector->params.number_of_stations; i++) {
+    for (int i=0; i< detector->stations.size() ; i++) {
         for (int j=0; j<detector->stations[i].strings.size(); j++) {
             for (int k=0; k<detector->stations[i].strings[j].antennas.size(); k++) {
                 ch_count++;
@@ -408,7 +408,7 @@ int main(int argc, char **argv) {   // read setup.txt file
                 report->CalculateSignals(debugmode, birefringence, detector, event, icemodel, raysolver, settings1, signal);
 
                 // Combine all signal waveforms, add noise, perform trigger check on each station
-                for (int station=0; station < detector->params.number_of_stations; station++) {
+                for (int station=0; station < report->stations.size(); station++) {
                     report->BuildAndTriggerOnWaveforms(
                         debugmode, station, Events_Thrown, 
                         report->stations[station].next_trig_search_init, detector, event, settings1, trigger);
@@ -671,7 +671,7 @@ void save_event_data(
         event->Nu_Interaction[i].clear_useless(settings1);
     }
 
-    for (int i=0; i<detector->params.number_of_stations; i++) {
+    for (int i=0; i< report->stations.size(); i++) {
         
         // check the total global trigger passed
         if (report->stations[i].Global_Pass) {

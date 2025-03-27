@@ -158,7 +158,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         double phi_tmp;
 
         // set same theta, phi to all antennas in same string
-        for (int i = 0; i < params.number_of_strings; i++) {
+        for (int i = 0; i < strings.size(); i++) {
 
             Dist = sqrt(pow(strings[i].GetX(), 2) + pow(strings[i].GetY(), 2));
             theta_tmp = Dist / R1; // assume R1 is constant (which is not)
@@ -358,10 +358,10 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
         double next_dir = PI * 2. / 3;
 
-        for (int istation = 0; istation < (int) params.number_of_stations; istation++) {
+        for (int istation = 0; istation < stations.size(); istation++) {
             stations[istation].StationID = istation;
 
-            if (station_count < (int) params.number_of_stations - 1) {
+            if (station_count < stations.size() - 1) {
 
                 if (station_count < 6) { // first layer
                     stations[station_count].SetX(params.core_x + (double) params.station_spacing * cos((PI / 3.) * (double) station_count));
@@ -417,7 +417,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
                 station_count++;
             } 
-            else if (station_count < (int) params.number_of_stations) {
+            else if (station_count < (int) stations.size()) {
                 stations[station_count].SetX(params.core_x);
                 stations[station_count].SetY(params.core_y);
                 station_count++;
@@ -429,14 +429,14 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         // finished setting all stations' position
 
         if (station_count != (int) params.number_of_stations) {
-            cout << "\n\tError, station number not match !" << endl;
+            cout << "\n\tError, the number of stations initialized doesn't match the number requested!" << endl;
         }
   
         // set antenna values from parameters
         // set station positions
         if (settings1 -> READGEOM == 0) { // use idealized geometry
 
-            for (int i = 0; i < params.number_of_stations; i++) {
+            for (int i = 0; i < stations.size(); i++) {
 
                 // set string postions based on station position
                 stations[i].strings[0].SetX(stations[i].GetX() - (R_string * cos(PI / 4.)));
@@ -455,8 +455,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 // and set type (h or v pol antenna) and set orientation (facing x or y)
                 if (params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -504,8 +504,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 } // end if bore hole antenna layout = 0 or 1 (where VHVH way but different numbers)
                 else if (params.bore_hole_antenna_layout == 2) { // it's V-H-V-V
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -553,8 +553,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 } // end if bore hole antenna layout = 2 (where VHVV way but different numbers)
                 else if (params.bore_hole_antenna_layout == 3 || params.bore_hole_antenna_layout == 4) { // it's V-H-H-H or V-H-H
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -606,8 +606,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                          params.bore_hole_antenna_layout == 7) 
                 { // it's V-V-V-V or V-V or V
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -679,12 +679,12 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             AraGeomTool * araGeom = new AraGeomTool();
             cout << "read AraGeomTool" << endl;
 
-            for (int i = 0; i < params.number_of_stations; i++) {
-                for (int j = 0; j < params.number_of_strings_station; j++) {
+            for (int i = 0; i < stations.size(); i++) {
+                for (int j = 0; j < stations[i].strings.size(); j++) {
 
                     double avgX, avgY;
 
-                    for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                         int chan = GetChannelfromStringAntenna(i + 1, j, k, settings1);
 
@@ -716,8 +716,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 // and set type (h or v pol antenna) and set orientation (facing x or y)
                 if (params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (k % 2 == 0) { 
                                 stations[i].strings[j].antennas[k].type = 0; // v-pol
@@ -754,8 +754,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 } // end if bore hole antenna layout = 0 or 1 (where VHVH way but different numbers)
                 else if (params.bore_hole_antenna_layout == 2) { // it's V-H-V-V
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (k == 1) {  // only the second antenna is H pol
                                 stations[i].strings[j].antennas[k].type = 1; // h-pol
@@ -792,8 +792,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 } // end if bore hole antenna layout = 2 (where VHVV way but different numbers)
                 else if (params.bore_hole_antenna_layout == 3 || params.bore_hole_antenna_layout == 4) { // it's V-H-H-H or V-H-H
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (k == 0) { // only the first antenna is V pol
                                 stations[i].strings[j].antennas[k].type = 0; // v-pol
@@ -1078,7 +1078,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             int stations_this_row = (2 * (int) params.stations_per_side - 1) - abs((int) params.stations_per_side - 1 - irow);
 
             for (int istation = 0; istation < stations_this_row; istation++) {
-                if (station_count < (int) params.number_of_stations) {
+                if (station_count < stations.size()) {
                     stations[station_count].SetY(current_y);
                     stations[station_count].SetX((double) params.station_spacing * ((double) istation - ((double) stations_this_row - 1.) / 2.) + params.core_x);
                     station_count++;
@@ -1092,12 +1092,12 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
         cout << "total station_count : " << station_count << endl;
         if (station_count != (int) params.number_of_stations) { 
-            cout << "\n\tError, station number not match !" << endl;
+            cout << "\n\tError, the number of stations initialized doesn't match the number requested!" << endl;
         }
 
         // set antenna values from parameters
         // set station positions
-        for (int i = 0; i < params.number_of_stations; i++) {
+        for (int i = 0; i < stations.size(); i++) {
 
             // set string postions based on station position
             stations[i].strings[0].SetX(stations[i].GetX() - (R_string * cos(PI / 4.)));
@@ -1115,8 +1115,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             // set antenna postions in borehole
             // and set type (h or v pol antenna) and set orientation (facing x or y)
             if (params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
-                for (int j = 0; j < params.number_of_strings_station; j++) {
-                    for (int k = 0; k < params.number_of_antennas_string; k++) {
+                for (int j = 0; j < stations[i].strings.size(); j++) {
+                    for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                         if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                             stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -1163,8 +1163,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 }
             } // end if bore hole antenna layout = 0 or 1 (where VHVH way but different numbers)
             else if (params.bore_hole_antenna_layout == 2) { // it's V-H-V-V
-                for (int j = 0; j < params.number_of_strings_station; j++) {
-                    for (int k = 0; k < params.number_of_antennas_string; k++) {
+                for (int j = 0; j < stations[i].strings.size(); j++) {
+                    for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                         if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                             stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -1210,8 +1210,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 }
             } // end if bore hole antenna layout = 0 or 1 (where VHVH way but different numbers)
             else if (params.bore_hole_antenna_layout == 3 || params.bore_hole_antenna_layout == 4) { // it's V-H-H-H or V-H-H
-                for (int j = 0; j < params.number_of_strings_station; j++) {
-                    for (int k = 0; k < params.number_of_antennas_string; k++) {
+                for (int j = 0; j < stations[i].strings.size(); j++) {
+                    for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                         if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                             stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -1430,7 +1430,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         #ifdef ARA_UTIL_EXISTS
         UseAntennaInfo(0, settings1);
         #endif
-        for (int i = 0; i < (int) params.number_of_stations; i++) {
+        for (int i = 0; i < stations.size(); i++) {
             stations[i].StationID = i;
             
             if (settings1 -> USE_INSTALLED_TRIGGER_SETTINGS == 0) {
@@ -1683,7 +1683,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         int stationID = settings1 -> DETECTOR_STATION;
 
 
-        for (int i = 0; i < (int) params.number_of_stations; i++) {
+        for (int i = 0; i < (int) stations.size(); i++) {
             stations[i].StationID = settings1 -> DETECTOR_STATION;
             if (settings1 -> USE_INSTALLED_TRIGGER_SETTINGS == 0) {
                 stations[i].NFOUR = 1024;
@@ -2064,7 +2064,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
         // set antenna values from parameters and set station positions
         if (settings1->READGEOM == 0) {  // idealized geometry
-            for (int i=0; i<params.number_of_stations; i++) {
+            for (int i=0; i < stations.size(); i++) {
                 // Set Phased Array locations (load bottom to top)
                 stations[i].strings[0].SetX( stations[i].GetX()  );
                 stations[i].strings[0].SetY( stations[i].GetY()  );
@@ -3522,7 +3522,7 @@ inline void Detector::FlattoEarth_ARA(IceModel *icesurface) {
     
     // stations
     // stations, strings, and borehole antennas use geoid surface !!
-    for (int i=0; i<params.number_of_stations; i++) {
+    for (int i=0; i < stations.size(); i++) {
         
         Dist = sqrt( pow(stations[i].GetX(),2) + pow(stations[i].GetY(),2) );
         theta_tmp = Dist/R1;
@@ -3539,7 +3539,7 @@ inline void Detector::FlattoEarth_ARA(IceModel *icesurface) {
         
         
         // strings
-        for (int j=0; j<params.number_of_strings_station; j++) {
+        for (int j=0; j < stations[i].strings.size(); j++) {
             Dist = sqrt( pow(stations[i].strings[j].GetX(),2) + pow(stations[i].strings[j].GetY(),2) );
             theta_tmp = Dist/R1;
             phi_tmp = atan2(stations[i].strings[j].GetY(),stations[i].strings[j].GetX());
@@ -3553,7 +3553,7 @@ inline void Detector::FlattoEarth_ARA(IceModel *icesurface) {
             stations[i].strings[j].SetR( icesurface->Surface( stations[i].strings[j].Lon(), stations[i].strings[j].Lat()) );
             
             // borehole antennas
-            for (int k=0; k<params.number_of_antennas_string; k++) { 
+            for (int k=0; k<stations[i].strings[j].antennas.size(); k++) { 
                 stations[i].strings[j].antennas[k].SetRThetaPhi( stations[i].strings[j].R() + stations[i].strings[j].antennas[k].GetZ() , stations[i].strings[j].Theta(), stations[i].strings[j].Phi() );
             }
         }
