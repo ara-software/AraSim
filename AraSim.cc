@@ -398,6 +398,10 @@ int main(int argc, char **argv) {   // read setup.txt file
             //   build waveforms for this event and check the trigger over it. 
             //   If there is a part of any waveform that wasn't analyzed and exists beyond the
             //   deadtime of the station, say there is still at least one station to trigger check. 
+            // Max T_diode_bin is the maximum time the given diode model can store data for, in units
+            //    of bins (so divided by settings1->TIMESTEP typically but set by setting1->MAXT_DIODE)
+            // NFOUR is the number of bins to be used for the signal object at the source that will 
+            //   be fourier transformed and eventually turned into a waveform at an antenna
             int stations_to_trigger_check = report->stations.size();
             for (int station_i=0; station_i<report->stations.size(); station_i++){
                 report->stations[station_i].next_trig_search_init = trigger->maxt_diode_bin + settings1->NFOUR;  
