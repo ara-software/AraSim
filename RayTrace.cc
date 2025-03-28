@@ -1115,12 +1115,12 @@ namespace RayTrace{
 			//std::cout << "\ttesting theta=" << a << std::endl;
 			aTrace=doTrace<minimalRayPosition>(emit_depth,a,target,allowedReflections,0.0,0.0, sol_error );
 
-                        /*!
-			    02-12-2021 -MK-
-                	    'min_miss = std::(aTrace.miss);' is changed to 'min_miss = aTrace.miss;'
-                	    to check whether the closet 'min_miss' is smaller than the requiredAccuracy or not.
-                	    'min_miss' and 'min_angle' will return the values instead of exiecuting the 'throw' command in 'if(i==maxTests){'
-                	    The related talk: http://ara.physics.wisc.edu/docs/0022/002263/001/20201221_Raytracing_Bug.pdf
+			/*!
+				02-12-2021 -MK-
+				'min_miss = std::(aTrace.miss);' is changed to 'min_miss = aTrace.miss;'
+				to check whether the closet 'min_miss' is smaller than the requiredAccuracy or not.
+				'min_miss' and 'min_angle' will return the values instead of exiecuting the 'throw' command in 'if(i==maxTests){'
+				The related talk: http://ara.physics.wisc.edu/docs/0022/002263/001/20201221_Raytracing_Bug.pdf
 			*/
 			if ( std::abs(min_miss) > std::abs(aTrace.miss) ) {
                             min_miss = aTrace.miss;

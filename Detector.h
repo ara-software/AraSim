@@ -305,6 +305,7 @@ class Detector {
 
         void ReadRFCM_TestBed(string filename, Settings *settings1);
         double RFCM_TB_ch[16][freq_step_max];   // Filter gain (dB) for Detector freq bin array
+        vector<double> RFCM_TB_freq;
         vector < vector <double> > RFCM_TB_databin_ch;   // RFCM gain measured value for the TestBed (for each ch)
 
 
@@ -337,9 +338,11 @@ class Detector {
 
         void ReadNoiseFigure(string filename, Settings *settings1); 
         double NoiseFig_ch[16][freq_step_max];
+        vector<double> NoiseFig_freq;
         vector < vector < double > > NoiseFig_databin_ch;
 
 
+        vector <double> trans_freq;
         vector <double> transV_databin;
         vector <double> transVTop_databin;
         vector <double> transH_databin;
@@ -418,15 +421,19 @@ class Detector {
 
         double GetRFCMGain(int ch, int bin) { return RFCM_TB_ch[ch][bin]; }   // same bin with Vgain, Hgain
         double GetRFCMGain_databin(int ch, int bin) { return RFCM_TB_databin_ch[ch][bin]; }   // bin for FFT
+        double GetRFCMGain_OutZero(int ch, double freq);
 
 
         double GetRayleighFit_databin(int ch, int bin) { return Rayleigh_TB_databin_ch[ch][bin]; }   // bin for FFT
         std::vector< std::vector< double> > GetRayleighFitVector_databin(int station, Settings *settings);
 
         double GetNoiseFig_databin(int ch, int bin) { return NoiseFig_databin_ch[ch%16][bin]; }   // bin for FFT
+        double GetNoiseFig_OutZero(int ch, double freq);      
+        
         double GetTransm_databin(int ch, int bin) {	if(ch%16<4){return transVTop_databin[bin];}
 							else if(ch%16<8){return transV_databin[bin];} 
 							else{return transH_databin[bin];} }   // bin for FFT
+        double GetTransm_OutZero(int ch, double freq);
         void ReadNoiseFig_New(Settings *settings1); // get noise Figure array with new DATA_BIN_SIZE
 
         

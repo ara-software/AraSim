@@ -853,18 +853,18 @@ Interaction::Interaction(IceModel *antarctica, Detector *detector, Settings *set
       PickNear_Cylinder_AboveIce (antarctica, detector, settings1);
     }
     #ifdef ARA_UTIL_EXISTS
-    //Adding interaction mode where user can define source at lattitude, longitude, and altitude.  Useful for pulser simulations or coincidence analysis. - JCF 3/28/2023
+    //Adding interaction mode where user can define source at lattitude, longitude, and altitude.  Useful for pulser simulations or coincidence analysis.
     else if (settings1->INTERACTION_MODE == 5) {
         //Defaults to SpiceCore 2023 lat/long of (-89.97953, -100.78595) at depth of 1000 meters.
         PickExactGlobal(antarctica, detector, settings1, settings1->SOURCE_LATITUDE, settings1->SOURCE_LONGITUDE, settings1->SOURCE_DEPTH);
     }
     #endif
     
-    //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
+    //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view. 
     PosNuFromAntennaCenter(detector);      
   }
 
-  //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
+  //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view.
   PosNuFromAntennaCenter(detector);
   
   // now set N at posnu
@@ -903,6 +903,7 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
 
   Initialize ();
 
+  pnuenergy = pnu;
 
   if (settings1->NNU_THIS_THETA==1)    // set specific theta angle for nnu
       nnu = primary1->GetThatDirection(settings1->NNU_THETA, settings1->NNU_D_THETA, settings1->NNU_PHI, settings1->NNU_D_PHI, settings1->NNU_THIS_PHI);
@@ -955,18 +956,18 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
     else if (settings1->INTERACTION_MODE == 4)    // for picknear. posnu will be only near by ARA core with cylinderical volume above the ice
       PickNear_Cylinder_AboveIce (antarctica, detector, settings1);
     #ifdef ARA_UTIL_EXISTS
-    //Adding interaction mode where user can define source at lattitude, longitude, and altitude.  Useful for pulser simulations or coincidence analysis. - JCF 3/28/2023
+    //Adding interaction mode where user can define source at lattitude, longitude, and altitude.  Useful for pulser simulations or coincidence analysis. 
     else if (settings1->INTERACTION_MODE == 5) {
         //Defaults to SpiceCore 2023 lat/long of (-89.97953, -100.78595) at depth of 1000 meters.
         PickExactGlobal(antarctica, detector, settings1, settings1->SOURCE_LATITUDE, settings1->SOURCE_LONGITUDE, settings1->SOURCE_DEPTH);
     }
     #endif
 
-    //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
+    //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view.
     PosNuFromAntennaCenter(detector);        
   }
 
-  //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
+  //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view. 
   PosNuFromAntennaCenter(detector);
 
   // now set N at posnu
@@ -1207,7 +1208,7 @@ Interaction::Interaction (Settings *settings1, Detector *detector, IceModel *ant
     else if (settings1->INTERACTION_MODE == 4)    // for picknear. posnu will be only near by ARA core with cylinderical volume above the ice
       PickNear_Cylinder_AboveIce (antarctica, detector, settings1);
     #ifdef ARA_UTIL_EXISTS
-    //Adding interaction mode where user can define source at lattitude, longitude, and altitude.  Useful for pulser simulations or coincidence analysis. - JCF 3/28/2023
+    //Adding interaction mode where user can define source at lattitude, longitude, and altitude.  Useful for pulser simulations or coincidence analysis.
     else if (settings1->INTERACTION_MODE == 5) {
       //Defaults to SpiceCore 2023 lat/long of (-89.97953, -100.78595) at depth of 1000 meters.
       PickExactGlobal(antarctica, detector, settings1, settings1->SOURCE_LATITUDE, settings1->SOURCE_LONGITUDE, settings1->SOURCE_DEPTH);
@@ -1215,7 +1216,7 @@ Interaction::Interaction (Settings *settings1, Detector *detector, IceModel *ant
     #endif        
   }
 
-  //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
+  //! re-calculate Nu position (x, y, z, r, theta, phi) from antenna center point of view.
   PosNuFromAntennaCenter(detector);
 }
 
@@ -2335,8 +2336,7 @@ void Interaction::FlattoEarth_Spherical ( IceModel *antarctica, double X, double
 }
 
 /*!
-    MK added -2023-05-19-
-    re-calculate Neutrino position from antenna center point of view 
+    Calculate Neutrino position from antenna center point of view 
     Neutrino x,y,z,r,theta,phi will be saved on Position posnu_from_antcen array
 */
 void Interaction::PosNuFromAntennaCenter (Detector *detector) {

@@ -211,7 +211,7 @@ class Interaction  {
     void FlattoEarth_Near_Surface ( IceModel *antarctica, double X, double Y, double D, double max_depth);
     void FlattoEarth_Spherical ( IceModel *antarctica, double X, double Y, double Z);
 
-    void PosNuFromAntennaCenter (Detector *detector); ///< re-calculate Neutrino position (x, y, z, r, theta, phi) from antenna center point of view. MK added -2023-05-19-
+    void PosNuFromAntennaCenter (Detector *detector); ///< re-calculate Neutrino position (x, y, z, r, theta, phi) from antenna center point of view.
 
     void PickNear_Cylinder (IceModel *antarctica, Detector *detector, Settings *settings1, double energy = 0);
     double PickNear_Sphere (IceModel *antarctica, Detector *detector, Settings *settings1);
@@ -259,7 +259,7 @@ class Interaction  {
     void setCurrent(Primaries *primary1, Settings *settings1);
     Position posnu;
 
-    Position posnu_from_antcen; ///< Nu position (x,y,z,r,theta,phi) from antenna center. MK added -2023-05-19-    
+    Position posnu_from_antcen; ///< Nu position (x,y,z,r,theta,phi) from antenna center.
 
     Position posnu_down;
     string  current;                    //  CC or NC?
@@ -276,12 +276,13 @@ class Interaction  {
     vector <double> HAD_shower_depth_m;
     vector <double> HAD_shower_Q_profile;
     double HAD_LQ;
+    double pnuenergy;
 
     int primary_shower; // 0 or EM, 1 for HAD. set by emfrac, hadfrac
 
     void clear_useless(Settings *settings1);
   
-  ClassDef(Interaction,2);
+  ClassDef(Interaction,3);
 
 
 };//Interaction

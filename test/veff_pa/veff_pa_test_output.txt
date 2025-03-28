@@ -335,4 +335,4 @@ max_dt : 2.17989e-06
 rmsdiode= 3.90189e-14
 Info in <TCanvas::Print>: pdf file sigmaCrossSection.pdf has been created
 outputdir= outputs/.
-test is 0
+This AraSim run is complete and will exit with code 0

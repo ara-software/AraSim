@@ -37,6 +37,7 @@ read stations_per_side
 	Error, station number not match !
 InstalledStations[StationID].nChannels is 20
 Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
+Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /home/abishop/analysis/AraRoot_Install//share/araCalib/AntennaInfo.sqlite
 Opening default 2013-2017 SQLite tables for all stations 
 Borehole ch: 0 inserted station: 0 station: 3 string: 3 ant: 2 Type: 0
 Borehole ch: 1 inserted station: 0 station: 3 string: 0 ant: 2 Type: 0
@@ -93,15 +94,6 @@ Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 3 : 0 : 10004.8 : 9990.5
 Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 3 : 1 : 10004.8 : 9990.58 : -188.408 : 14140.1 : 1.58412 : 0.784686 : 6.37813e+06 : 
 Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 3 : 2 : 10004.8 : 9990.58 : -172.607 : 14139.9 : 1.583 : 0.784686 : 6.37813e+06 : 
 Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 3 : 3 : 10004.8 : 9990.58 : -169.486 : 14139.9 : 1.58278 : 0.784686 : 6.37813e+06 : 
-N = 56
-freq_step = 56
-N = 56
-freq_step = 56
-N = 56
-freq_step = 56
-N = 56
-freq_step = 56
-In ReadNoiseFigure
 The number of channels: 16
 DATA_BIN_SIZE: 16384 TIMESTEP: 6.25e-10 df_fft: 97656.2
 number of f bins: 8192
@@ -123,14 +115,14 @@ System temp ch14 : 325
 System temp ch15 : 325
 System temp ch16 : 0
 Reading in situ ARA noise for this station and configuration from file: 
-./data/noise/sigmavsfreq_A_3_config_2.csv
+/home/abishop/AraSim-AraSoft//data/noise/sigmavsfreq_A_3_config_2.csv
 start read elect chain
- Reading in situ ARA electronics response for this station and configuration from file:
-./data/gain/In_situ_Electronics_A3_C2.csv
+ Reading standard ARA electronics response from file:
+/home/abishop/AraSim-AraSoft//data/gain/ARA_Electronics_TotalGain_TwoFilters.csv
  Recalculating in situ electronic response amplitude to ensure consistency with antenna model used here.
 done read elect chain
  Reading trigger formation values for this station and configuration from file:
-./data/trigger/delays_masking_A3_C2.csv
+/home/abishop/AraSim-AraSoft//data/trigger/delays_masking_A3_C2.csv
 Sharesurface: 0 : 0 : 0 : 10010.2 : 10003 : 6.35944e+06 : 
 Sharesurface: 0 : 0 : 1 : 10010.2 : 10003 : 6.35944e+06 : 
 Sharesurface: 0 : 0 : 2 : 10010.2 : 10003 : 6.35946e+06 : 
@@ -218,45 +210,13 @@ station[0].strings[3].antennas[1] no_ch:14
 station[0].strings[3].antennas[2] no_ch:15
 station[0].strings[3].antennas[3] no_ch:16
 *Thrown 0
-****************************************************************************************************Thrown 100
-****************************************************************************************************Thrown 200
-********************************************depth negative! -5.92764
-depth negative! -5.92764
-depth negative! -5.92764
-depth negative! -5.92764
-depth negative! -5.92551
-depth negative! -5.92551
-depth negative! -5.92551
-depth negative! -5.92551
-depth negative! -5.92605
-depth negative! -5.92605
-depth negative! -5.92605
-depth negative! -5.92605
-depth negative! -5.92817
-depth negative! -5.92817
-depth negative! -5.92817
-depth negative! -5.92817
-****************************************depth negative! -1.05286
-depth negative! -1.05286
-depth negative! -1.05286
-depth negative! -1.05286
-depth negative! -1.04545
-depth negative! -1.04545
-depth negative! -1.04545
-depth negative! -1.04545
-depth negative! -1.03975
-depth negative! -1.03975
-depth negative! -1.03975
-depth negative! -1.03975
-depth negative! -1.04743
-depth negative! -1.04743
-depth negative! -1.04743
-depth negative! -1.04743
-****************Thrown 300
-**************
-trigger passed at bin 2106  passed ch : 4 (0type) Direct dist btw posnu : 420.335 noiseID : 0 ViewAngle : 56.2645 LikelyTrigSignal : 0
-trigger passed at bin 2113  passed ch : 8 (0type) Direct dist btw posnu : 418.687 noiseID : 0 ViewAngle : 57.0387 LikelyTrigSignal : 0
-trigger passed at bin 2250  passed ch : 10 (0type) Direct dist btw posnu : 433.533 noiseID : 0 ViewAngle : 55.7812 LikelyTrigSignal : 0
+*******************************************************************************************
+trigger passed at bin 4209  passed ch : 0 (0type) Direct dist btw posnu : 1544.96 noiseID : 0 ViewAngle : 58.5635 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4250  passed ch : 4 (0type) Direct dist btw posnu : 1551.6 noiseID : 0 ViewAngle : 58.8626 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4327  passed ch : 12 (0type) Direct dist btw posnu : 1557.44 noiseID : 0 ViewAngle : 58.9857 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4209 evt : 91 added weight : 0.99957
+0.99957 : 9
+
 Making useful event
 StationID: 3
 StationID_AraRoot: 3
@@ -267,25 +227,68 @@ OR
 c) Call UsefulAtriStationEvent *realAtriEvPtr = new UsefulAtriStationEvent(rawAtriEvPtr, AraCalType::kLatestCalib); ***BEFORE*** 
 AraGeomTool::getStationInfo(3,2017)
 Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
+Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /home/abishop/analysis/AraRoot_Install//share/araCalib/AntennaInfo.sqlite
 Opening default 2013-2017 SQLite tables for all stations 
+*********Thrown 100
+**************************************************************************depth negative! -19.1763
+depth negative! -19.1763
+depth negative! -19.1763
+depth negative! -19.1763
+depth negative! -19.1685
+depth negative! -19.1685
+depth negative! -19.1685
+depth negative! -19.1685
+depth negative! -19.1734
+depth negative! -19.1734
+depth negative! -19.1734
+depth negative! -19.1734
+depth negative! -19.1811
+depth negative! -19.1811
+depth negative! -19.1811
+depth negative! -19.1811
+**************************Thrown 200
+***********************************************************depth negative! -15.5757
+depth negative! -15.5757
+depth negative! -15.5757
+depth negative! -15.5757
+depth negative! -15.5723
+depth negative! -15.5723
+depth negative! -15.5723
+depth negative! -15.5723
+depth negative! -15.5821
+depth negative! -15.5821
+depth negative! -15.5821
+depth negative! -15.5821
+depth negative! -15.5851
+depth negative! -15.5851
+depth negative! -15.5851
+depth negative! -15.5851
+*****************************************Thrown 300
+*************************************************************
+trigger passed at bin 4321  passed ch : 8 (0type) Direct dist btw posnu : 1377.66 noiseID : 0 ViewAngle : 57.0444 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4327  passed ch : 10 (0type) Direct dist btw posnu : 1379.2 noiseID : 0 ViewAngle : 55.863 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4418  passed ch : 12 (0type) Direct dist btw posnu : 1387.96 noiseID : 0 ViewAngle : 57.1833 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4247 evt : 361 added weight : 1.30807e-24
+1.30807e-24 : 0
 
-Global_Pass : 1965 evt : 314 added weight : 5.20232e-15
-5.20232e-15 : 0
-**************************************************************************************Thrown 400
+Making useful event
+StationID: 3
+StationID_AraRoot: 3
+***************************************Thrown 400
 *************************************************************************************************** end loop
 Total Events Thrown: 500
-Total_Global_Pass : 1
-Total_Weight : 5.20232e-15
-Total_Probability : 1941.39
-weight bin values : 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
+Total_Global_Pass : 2
+Total_Weight : 0.99957
+Total_Probability : 3628.34
+weight bin values : 1, 0, 0, 0, 0, 0, 0, 0, 0, 1
 
 Radius: 5000 [m]
 IceVolume : 2.35619e+11
-test Veff(ice) : 3.08069e-05 m3sr, 3.08069e-14 km3sr
-test Veff(water eq.) : 2.82499e-05 m3sr, 2.82499e-14 km3sr
-And Veff(water eq.) error plus : 5.73092 km3sr and error minus : 0.00483238 km3sr
-max_dt : 2.14601e-06
+test Veff(ice) : 5.91922e+09 m3sr, 5.91922 km3sr
+test Veff(water eq.) : 5.42792e+09 m3sr, 5.42792 km3sr
+And Veff(water eq.) error plus : 7.31506 km3sr and error minus : 2.42193 km3sr
+max_dt : 1.96768e-07
 rmsdiode= 4.9017e-14
 Info in <TCanvas::Print>: pdf file sigmaCrossSection.pdf has been created
 outputdir= outputs/.
-test is 0
+This AraSim run is complete and will exit with code 0

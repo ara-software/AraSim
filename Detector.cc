@@ -158,7 +158,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         double phi_tmp;
 
         // set same theta, phi to all antennas in same string
-        for (int i = 0; i < params.number_of_strings; i++) {
+        for (int i = 0; i < strings.size(); i++) {
 
             Dist = sqrt(pow(strings[i].GetX(), 2) + pow(strings[i].GetY(), 2));
             theta_tmp = Dist / R1; // assume R1 is constant (which is not)
@@ -358,10 +358,10 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
         double next_dir = PI * 2. / 3;
 
-        for (int istation = 0; istation < (int) params.number_of_stations; istation++) {
+        for (int istation = 0; istation < stations.size(); istation++) {
             stations[istation].StationID = istation;
 
-            if (station_count < (int) params.number_of_stations - 1) {
+            if (station_count < stations.size() - 1) {
 
                 if (station_count < 6) { // first layer
                     stations[station_count].SetX(params.core_x + (double) params.station_spacing * cos((PI / 3.) * (double) station_count));
@@ -417,7 +417,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
                 station_count++;
             } 
-            else if (station_count < (int) params.number_of_stations) {
+            else if (station_count < (int) stations.size()) {
                 stations[station_count].SetX(params.core_x);
                 stations[station_count].SetY(params.core_y);
                 station_count++;
@@ -429,14 +429,14 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         // finished setting all stations' position
 
         if (station_count != (int) params.number_of_stations) {
-            cout << "\n\tError, station number not match !" << endl;
+            cout << "\n\tError, the number of stations initialized doesn't match the number requested!" << endl;
         }
   
         // set antenna values from parameters
         // set station positions
         if (settings1 -> READGEOM == 0) { // use idealized geometry
 
-            for (int i = 0; i < params.number_of_stations; i++) {
+            for (int i = 0; i < stations.size(); i++) {
 
                 // set string postions based on station position
                 stations[i].strings[0].SetX(stations[i].GetX() - (R_string * cos(PI / 4.)));
@@ -455,8 +455,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 // and set type (h or v pol antenna) and set orientation (facing x or y)
                 if (params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -504,8 +504,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 } // end if bore hole antenna layout = 0 or 1 (where VHVH way but different numbers)
                 else if (params.bore_hole_antenna_layout == 2) { // it's V-H-V-V
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -553,8 +553,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 } // end if bore hole antenna layout = 2 (where VHVV way but different numbers)
                 else if (params.bore_hole_antenna_layout == 3 || params.bore_hole_antenna_layout == 4) { // it's V-H-H-H or V-H-H
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -606,8 +606,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                          params.bore_hole_antenna_layout == 7) 
                 { // it's V-V-V-V or V-V or V
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                                 stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -679,12 +679,12 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             AraGeomTool * araGeom = new AraGeomTool();
             cout << "read AraGeomTool" << endl;
 
-            for (int i = 0; i < params.number_of_stations; i++) {
-                for (int j = 0; j < params.number_of_strings_station; j++) {
+            for (int i = 0; i < stations.size(); i++) {
+                for (int j = 0; j < stations[i].strings.size(); j++) {
 
                     double avgX, avgY;
 
-                    for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                         int chan = GetChannelfromStringAntenna(i + 1, j, k, settings1);
 
@@ -716,8 +716,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 // and set type (h or v pol antenna) and set orientation (facing x or y)
                 if (params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (k % 2 == 0) { 
                                 stations[i].strings[j].antennas[k].type = 0; // v-pol
@@ -754,8 +754,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 } // end if bore hole antenna layout = 0 or 1 (where VHVH way but different numbers)
                 else if (params.bore_hole_antenna_layout == 2) { // it's V-H-V-V
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (k == 1) {  // only the second antenna is H pol
                                 stations[i].strings[j].antennas[k].type = 1; // h-pol
@@ -792,8 +792,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 } // end if bore hole antenna layout = 2 (where VHVV way but different numbers)
                 else if (params.bore_hole_antenna_layout == 3 || params.bore_hole_antenna_layout == 4) { // it's V-H-H-H or V-H-H
 
-                    for (int j = 0; j < params.number_of_strings_station; j++) {
-                        for (int k = 0; k < params.number_of_antennas_string; k++) {
+                    for (int j = 0; j < stations[i].strings.size(); j++) {
+                        for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                             if (k == 0) { // only the first antenna is V pol
                                 stations[i].strings[j].antennas[k].type = 0; // v-pol
@@ -1078,7 +1078,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             int stations_this_row = (2 * (int) params.stations_per_side - 1) - abs((int) params.stations_per_side - 1 - irow);
 
             for (int istation = 0; istation < stations_this_row; istation++) {
-                if (station_count < (int) params.number_of_stations) {
+                if (station_count < stations.size()) {
                     stations[station_count].SetY(current_y);
                     stations[station_count].SetX((double) params.station_spacing * ((double) istation - ((double) stations_this_row - 1.) / 2.) + params.core_x);
                     station_count++;
@@ -1092,12 +1092,12 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
         cout << "total station_count : " << station_count << endl;
         if (station_count != (int) params.number_of_stations) { 
-            cout << "\n\tError, station number not match !" << endl;
+            cout << "\n\tError, the number of stations initialized doesn't match the number requested!" << endl;
         }
 
         // set antenna values from parameters
         // set station positions
-        for (int i = 0; i < params.number_of_stations; i++) {
+        for (int i = 0; i < stations.size(); i++) {
 
             // set string postions based on station position
             stations[i].strings[0].SetX(stations[i].GetX() - (R_string * cos(PI / 4.)));
@@ -1115,8 +1115,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
             // set antenna postions in borehole
             // and set type (h or v pol antenna) and set orientation (facing x or y)
             if (params.bore_hole_antenna_layout == 0 || params.bore_hole_antenna_layout == 1) {
-                for (int j = 0; j < params.number_of_strings_station; j++) {
-                    for (int k = 0; k < params.number_of_antennas_string; k++) {
+                for (int j = 0; j < stations[i].strings.size(); j++) {
+                    for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                         if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                             stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -1163,8 +1163,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 }
             } // end if bore hole antenna layout = 0 or 1 (where VHVH way but different numbers)
             else if (params.bore_hole_antenna_layout == 2) { // it's V-H-V-V
-                for (int j = 0; j < params.number_of_strings_station; j++) {
-                    for (int k = 0; k < params.number_of_antennas_string; k++) {
+                for (int j = 0; j < stations[i].strings.size(); j++) {
+                    for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                         if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                             stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -1210,8 +1210,8 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
                 }
             } // end if bore hole antenna layout = 0 or 1 (where VHVH way but different numbers)
             else if (params.bore_hole_antenna_layout == 3 || params.bore_hole_antenna_layout == 4) { // it's V-H-H-H or V-H-H
-                for (int j = 0; j < params.number_of_strings_station; j++) {
-                    for (int k = 0; k < params.number_of_antennas_string; k++) {
+                for (int j = 0; j < stations[i].strings.size(); j++) {
+                    for (int k = 0; k < stations[i].strings[j].antennas.size(); k++) {
 
                         if (settings1 -> BH_ANT_SEP_DIST_ON == 0) {
                             stations[i].strings[j].antennas[k].SetZ(-z_max + z_btw * k);
@@ -1430,7 +1430,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         #ifdef ARA_UTIL_EXISTS
         UseAntennaInfo(0, settings1);
         #endif
-        for (int i = 0; i < (int) params.number_of_stations; i++) {
+        for (int i = 0; i < stations.size(); i++) {
             stations[i].StationID = i;
             
             if (settings1 -> USE_INSTALLED_TRIGGER_SETTINGS == 0) {
@@ -1683,7 +1683,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
         int stationID = settings1 -> DETECTOR_STATION;
 
 
-        for (int i = 0; i < (int) params.number_of_stations; i++) {
+        for (int i = 0; i < (int) stations.size(); i++) {
             stations[i].StationID = settings1 -> DETECTOR_STATION;
             if (settings1 -> USE_INSTALLED_TRIGGER_SETTINGS == 0) {
                 stations[i].NFOUR = 1024;
@@ -2064,7 +2064,7 @@ Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile
 
         // set antenna values from parameters and set station positions
         if (settings1->READGEOM == 0) {  // idealized geometry
-            for (int i=0; i<params.number_of_stations; i++) {
+            for (int i=0; i < stations.size(); i++) {
                 // Set Phased Array locations (load bottom to top)
                 stations[i].strings[0].SetX( stations[i].GetX()  );
                 stations[i].strings[0].SetY( stations[i].GetY()  );
@@ -2573,7 +2573,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     if(freq_step > settings1->DATA_BIN_SIZE/2) {
         throw runtime_error("settings1->DATA_BIN_SIZE not large enough for the number of frequencies");
     }
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+    vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
     double trans_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
     double df_fft;
     
@@ -2587,7 +2587,10 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }    
 
-    Tools::SimpleLinearInterpolation( freq_step-1, xfreq, &Transm[0], settings1->DATA_BIN_SIZE/2, xfreq_databin, trans_databin );
+    // store the frequency bins used (should be okay to overwrite since all antenna types have same binning since it's defined here)
+    trans_freq = xfreq_databin;   
+ 
+    Tools::SimpleLinearInterpolation( freq_step-1, xfreq, &Transm[0], settings1->DATA_BIN_SIZE/2, &xfreq_databin[0], trans_databin );
     for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {    // this one is for DATA_BIN_SIZE
         if(!std::isfinite(trans_databin[i])) {
             throw runtime_error("Non-finite FFT gain value found! "+filename);
@@ -2597,6 +2600,39 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
 
     return;
 } 
+
+// linearly interpolate the transmittance for a channel at a particular frequency (OutZero == extrapolation is fixed to return 0)
+double Detector::GetTransm_OutZero(int ch, double freq) {
+
+  ch = ch%16; // to match the convention of Detector::GetTransm_databin
+
+  vector<double>* transm; 
+  if(ch < 4)
+      transm = &transVTop_databin;
+  else if(ch < 8)
+      transm = &transV_databin;
+  else
+      transm = &transH_databin;
+
+  const int nFreq = (int)trans_freq.size();
+  const double dfreq = trans_freq[1] - trans_freq[0]; 
+  const int bin = (int)( (freq - trans_freq[0]) / dfreq )+1;
+
+  if(freq == trans_freq[0])
+    return transm->front();
+  
+  if(freq == trans_freq.back())
+    return transm->back();
+ 
+  if(bin <= 0 || bin >= nFreq)
+    return 0;
+
+  const double m = (transm->at(bin) - transm->at(bin-1))/(trans_freq[bin] - trans_freq[bin-1]);
+  const double b = transm->at(bin-1); 
+  
+  return m*(freq - trans_freq[bin-1]) + b; 
+
+}
 
 double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
     
@@ -2952,7 +2988,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     
     /*
     The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, Txgain)
-    to match the frequency binning dictated by NFOUR in the setup file.  - JCF 1/26/2024
+    to match the frequency binning dictated by NFOUR in the setup file. 
     */
     
     //Initialize pointer to dynamically point to the gain for chosen antenna.  The structure of this pointer matches that of the global gain arrays defined in Detector.h.
@@ -3486,7 +3522,7 @@ inline void Detector::FlattoEarth_ARA(IceModel *icesurface) {
     
     // stations
     // stations, strings, and borehole antennas use geoid surface !!
-    for (int i=0; i<params.number_of_stations; i++) {
+    for (int i=0; i < stations.size(); i++) {
         
         Dist = sqrt( pow(stations[i].GetX(),2) + pow(stations[i].GetY(),2) );
         theta_tmp = Dist/R1;
@@ -3503,7 +3539,7 @@ inline void Detector::FlattoEarth_ARA(IceModel *icesurface) {
         
         
         // strings
-        for (int j=0; j<params.number_of_strings_station; j++) {
+        for (int j=0; j < stations[i].strings.size(); j++) {
             Dist = sqrt( pow(stations[i].strings[j].GetX(),2) + pow(stations[i].strings[j].GetY(),2) );
             theta_tmp = Dist/R1;
             phi_tmp = atan2(stations[i].strings[j].GetY(),stations[i].strings[j].GetX());
@@ -3517,7 +3553,7 @@ inline void Detector::FlattoEarth_ARA(IceModel *icesurface) {
             stations[i].strings[j].SetR( icesurface->Surface( stations[i].strings[j].Lon(), stations[i].strings[j].Lat()) );
             
             // borehole antennas
-            for (int k=0; k<params.number_of_antennas_string; k++) { 
+            for (int k=0; k<stations[i].strings[j].antennas.size(); k++) { 
                 stations[i].strings[j].antennas[k].SetRThetaPhi( stations[i].strings[j].R() + stations[i].strings[j].antennas[k].GetZ() , stations[i].strings[j].Theta(), stations[i].strings[j].Phi() );
             }
         }
@@ -3956,7 +3992,7 @@ void Detector::ReadNoiseFigure(string filename, Settings *settings1)
     int ch_no = 16;// all_chNF[1].size()-2;
     cerr << "The number of channels: " << ch_no << endl;
 
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+    vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
     double NoiseFig_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
     double df_fft;
     
@@ -3974,6 +4010,9 @@ void Detector::ReadNoiseFigure(string filename, Settings *settings1)
 
     // set vector array size to number of chs
     NoiseFig_databin_ch.resize(ch_no);
+    
+    // save frequency values we interpolate onto
+    NoiseFig_freq = xfreq_databin;
 
     // now loop over channels and do interpolation
     for (int ch=0; ch<ch_no; ch++) {
@@ -3985,7 +4024,7 @@ void Detector::ReadNoiseFigure(string filename, Settings *settings1)
 
         // Tools::SimpleLinearInterpolation will return NoiseFig array (in dB)
         Tools::SimpleLinearInterpolation( N-1, xfreq, NoiseFig, freq_step, &Freq[0], NoiseFig_ch[ch] );
-        Tools::SimpleLinearInterpolation( N-1, xfreq, NoiseFig, settings1->DATA_BIN_SIZE/2, xfreq_databin, NoiseFig_databin );
+        Tools::SimpleLinearInterpolation( N-1, xfreq, NoiseFig, settings1->DATA_BIN_SIZE/2, &xfreq_databin[0], NoiseFig_databin );
     
         for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) { 
             NoiseFig_databin_ch[ch].push_back( NoiseFig_databin[i] );
@@ -3993,6 +4032,33 @@ void Detector::ReadNoiseFigure(string filename, Settings *settings1)
     }
 
     return;
+}
+
+// linearly interpolate noise figure for channel, returning 0 out of range
+double Detector::GetNoiseFig_OutZero(int ch, double freq) {
+
+  ch = ch%16; // to match the convention of Detector::GetNoiseFig_databin
+
+  const int nFreq = (int)NoiseFig_freq.size();
+  const double dfreq = NoiseFig_freq[1] - NoiseFig_freq[0]; 
+  const int bin = (int)( (freq - NoiseFig_freq[0]) / dfreq )+1;
+
+  if(freq == NoiseFig_freq[0])
+    return NoiseFig_databin_ch[ch].front();
+  
+  if(freq == NoiseFig_freq.back())
+    return NoiseFig_databin_ch[ch].back();
+ 
+  if(bin <= 0 || bin >= nFreq)
+    return 0;
+
+  vector<double>* noiseFig = &NoiseFig_databin_ch[ch];
+
+  const double m = (noiseFig->at(bin) - noiseFig->at(bin-1))/(NoiseFig_freq[bin] - NoiseFig_freq[bin-1]);
+  const double b = noiseFig->at(bin-1); 
+  
+  return m*(freq - NoiseFig_freq[bin-1]) + b; 
+
 }
 
 // read-in amplifier noise figure for this station -- stored in linear units
@@ -5013,7 +5079,7 @@ inline void Detector::ReadRFCM_TestBed(string filename, Settings *settings1) {  
 
     double xfreq[N];
     double ygain[N];  // need array for Tools::SimpleLinearInterpolation
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
+    vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
     double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
     double df_fft;
     
@@ -5033,8 +5099,10 @@ inline void Detector::ReadRFCM_TestBed(string filename, Settings *settings1) {  
     // Tools::SimpleLinearInterpolation will return RFCM array (in dB)
     Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, &Freq[0], RFCM_TB_ch[ch_no] );
     
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, &xfreq_databin[0], ygain_databin );
 
+    // store frequency bins (should be okay if this is overwritten since it's defined in this function, so should be the same)
+    RFCM_TB_freq = xfreq_databin;
 
     // set vector array size to number of chs
     RFCM_TB_databin_ch.resize(ch_no+1);
@@ -5044,6 +5112,30 @@ inline void Detector::ReadRFCM_TestBed(string filename, Settings *settings1) {  
     }
    
     return; 
+}
+
+double Detector::GetRFCMGain_OutZero(int ch, double freq) {
+
+  const int nFreq = (int)RFCM_TB_freq.size();
+  const double dfreq = RFCM_TB_freq[1] - RFCM_TB_freq[0]; 
+  const int bin = (int)( (freq - RFCM_TB_freq[0]) / dfreq )+1;
+
+  vector<double>* RFCM_TB = &RFCM_TB_databin_ch[ch];
+
+  if(freq == RFCM_TB_freq[0])
+    return RFCM_TB->front();
+  
+  if(freq == NoiseFig_freq.back())
+    return RFCM_TB->back();
+ 
+  if(bin <= 0 || bin >= nFreq)
+    return 0;
+
+  const double m = (RFCM_TB->at(bin) - RFCM_TB->at(bin-1))/(RFCM_TB_freq[bin] - RFCM_TB_freq[bin-1]);
+  const double b = RFCM_TB->at(bin-1); 
+  
+  return m*(freq - RFCM_TB_freq[bin-1]) + b; 
+
 }
 
 void Detector::ReadRFCM_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
@@ -5826,7 +5918,7 @@ vector<double> Detector::getDiodeModel(const int len, Settings *settings1) {
 // for a best performance, we can just set a new reasonable DATA_BIN_SIZE and make new values for those
 void Detector::get_NewDiodeModel(Settings *settings1) {
 
-    double diode_real_fft[settings1->DATA_BIN_SIZE*2];  // double sized array for myconvlv
+    std::vector<double> diode_real_fft(settings1->DATA_BIN_SIZE * 2);  // double sized vector for myconvlv
 
     for (int i=0; i<settings1->DATA_BIN_SIZE*2; i++) {  // 512 bin added for zero padding
         if ( i<(int)(maxt_diode/TIMESTEP) ) { 
@@ -5838,7 +5930,7 @@ void Detector::get_NewDiodeModel(Settings *settings1) {
     }
 
     // forward FFT
-    Tools::realft(diode_real_fft,1,settings1->DATA_BIN_SIZE*2);
+    Tools::realft(diode_real_fft.data(),1,settings1->DATA_BIN_SIZE*2);
 
     // clear previous data as we need new diode response array for new DATA_BIN_SIZE
     fdiode_real_databin.clear();

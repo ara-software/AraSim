@@ -1,29 +1,21 @@
 #include "signal.hh"
-//#include "vector.hh"
 #include "TF1.h"
 #include "TRandom3.h"
-//#include "vector.hh"
 #include "Vector.h"
-//#include "position.hh"
 #include "Position.h"
 #include "Settings.h"
 #include "Event.h"
 #include <fstream>
-
 #include "TCanvas.h"
 #include "TGraph.h"
-
-
 #include "Constants.h"
 
 using std::cout;
-
 
 const double Signal::N_AIR(1.);                      // index of refraction of air
 const double Signal::NICE(1.79);                      // index of refraction of ice
 const double Signal::CHANGLE_ICE(acos(1/NICE));                      // index of refraction of ice
 const double Signal::NSALT(2.45);                   // index of refracton for salt
-//const double RHOSALT=2165;                 // density of salt (kg/m**3)
 const double Signal::RHOSALT(2050.);                 // density of salt (kg/m**3)
 const double Signal::RHOICE(917);                     // density of ice (kg/m**3)
 const double Signal::RHOH20(1000);          // density of water (kg/m**3)
@@ -32,14 +24,10 @@ const double Signal::RM_ICE(10.35); // moliere radius, in g/cm^2
 const double Signal::RM_SALT(12.09); // moliere radius, in g/cm^2
 const double Signal::KR_SALT(1.33); // constant in jaime's parameterization
 const double Signal::KR_ICE(1.42); // constant in jaime's parameterization
-//const double Signal::X0SALT=0.1024;                // radiation length of salt (meters)
 const double Signal::X0SALT(0.1081);                // radiation length of salt (meters)
-//const double Signal::ECSALT=40.;                   // critical energy in salt (MeV)
 const double Signal::ECSALT(38.5);                   // critical energy in salt (MeV)
 const double Signal::X0ICE(0.403); 
-// //const double Signal::X0ICE=0.392; // radiation length of ice (meters)
 const double Signal::ECICE(63.7);                     // critical energy in ice (MeV)
-// //const double Signal::ECICE=73.0; // critical energy in ice (MeV)
 const double Signal::AEX_ICE(1.);  //efficiency for producing charge asymmetry relative to ice.  1 by definition
  
 const double Signal::ALPHAICE(1.32); // exponent that goes into cutting off the spectrum at high frequencies
@@ -55,8 +43,6 @@ const double Signal::KDELTA_ICE(18.33); // constant in jaime's parameterization
 const double Signal::KELVINS_ICE(250.+150.);          // temperature in Kelvin (ice+system)
 const double Signal::KELVINS_SALT(500.);            // temperature in salt (350) + receiver temp (150)
 const double Signal::BETAICE(2.25); // exponent, in jaime's parameterization
-// double Signal::NU0_MODIFIED=0.; // nu_0 modified for a specific medium
-// double Signal::NU_R;// parameter for signal parameterization
 const double Signal::BETASALT(2.60); // exponent, in jaime's parameterization
 const double Signal::VIEWANGLE_CUT(sqrt(5.)); // require viewangle is no more than 5 delta away from the cerenkov angle where
 
@@ -68,22 +54,19 @@ Signal::Signal() : N_DEPTH(1.79) {
 }
 
 
-
 Signal::Signal(Settings *settings1) : N_DEPTH(1.79) {
 
   Initialize(settings1);
-
-    
-    
+  
 }
+
 
 Signal::~Signal() {
 
 }
 
 
-
- void Signal::InitializeMedium() {
+void Signal::InitializeMedium() {
   if (MEDIUM==1) {
     SetKelvins(KELVINS_SALT);
     
@@ -124,7 +107,8 @@ Signal::~Signal() {
  
 }
 
- void Signal::Initialize() {
+
+void Signal::Initialize() {
 
   ReadCalPulserSpectrum();
      
@@ -132,9 +116,7 @@ Signal::~Signal() {
   JAIME_FACTOR=1.0; // factor to multiply Jaime's parameterization for error analysis
 
   x0ice=0.403; 
-  //X0ICE=0.392; // radiation length of ice (meters)
   ecice=63.7;                     // critical energy in ice (MeV)
-  //const static ECICE=73.0; // critical energy in ice (MeV)
   nice=1.79;                      // index of refraction of ice
   nfirn=1.3250;                   // index of refraction at the very surface - Peter
   invnfirn=1/nfirn; 
@@ -156,11 +138,8 @@ Signal::~Signal() {
   freq_reference=1.E6; // reference frequency in MHz
   pnu_reference=1.E18; // reference energy in MHz
 
-
-
   if (WHICHPARAMETERIZATION==1) {
     nu_r=(RHOMEDIUM/1000.)
-      //NU_R=(RHOMEDIUM/1000.) // density in g/cm^3
       /KR_MEDIUM/RM_MEDIUM*
       CLIGHT*100./N_DEPTH/sin(acos(1/N_DEPTH));
  
@@ -171,9 +150,6 @@ Signal::~Signal() {
       *pnu_reference/1.E6 // energy in MeV
       *1./sin(changle); 
 
-    //cout << "multiplying by 1/changle which is " << 1./sin(changle) << "\n";
-
-    //    vmmhz1m*=1./(1.+pow(freq/NU_R,ALPHAMEDIUM));
     vmmhz1m_reference*=1./(1.+pow(freq_reference/nu_r,ALPHAMEDIUM));
 
   }
@@ -181,18 +157,14 @@ Signal::~Signal() {
       //cout<<"whichparameterization : "<<WHICHPARAMETERIZATION<<"\n";
   }
 
-  
-
-
 }
 
 
-
- void Signal::Initialize(Settings *settings1) {
+void Signal::Initialize(Settings *settings1) {
 
      ReadCalPulserSpectrum();
 
-     std::string arbitraryWaveform = string(getenv("ARA_SIM_DIR"))+"/data/arbitrary_waveform.txt";  //Testing out IDL pulser - JCF 4/9/2023
+     std::string arbitraryWaveform = string(getenv("ARA_SIM_DIR"))+"/data/arbitrary_waveform.txt"; 
      ReadArbitraryWaveform(arbitraryWaveform);
      
      // std::string pulserWaveform = string(getenv("ARA_SIM_DIR"))+"/data/IDL1_waveform.txt";
@@ -210,9 +182,7 @@ Signal::~Signal() {
   JAIME_FACTOR=1.0; // factor to multiply Jaime's parameterization for error analysis
 
   x0ice=0.403; 
-  //X0ICE=0.392; // radiation length of ice (meters)
   ecice=63.7;                     // critical energy in ice (MeV)
-  //const static ECICE=73.0; // critical energy in ice (MeV)
   nice=1.79;                      // index of refraction of ice
   nfirn=1.3250;                   // index of refraction at the very surface - Peter
   invnfirn=1/nfirn; 
@@ -236,10 +206,8 @@ Signal::~Signal() {
 
   SetLPM(settings1->LPM);   // set LPM effect on/off value
 
-
   if (WHICHPARAMETERIZATION==1) {
     nu_r=(RHOMEDIUM/1000.)
-      //NU_R=(RHOMEDIUM/1000.) // density in g/cm^3
       /KR_MEDIUM/RM_MEDIUM*
       CLIGHT*100./N_DEPTH/sin(acos(1/N_DEPTH));
  
@@ -250,9 +218,6 @@ Signal::~Signal() {
       *pnu_reference/1.E6 // energy in MeV
       *1./sin(changle); 
 
-    //cout << "multiplying by 1/changle which is " << 1./sin(changle) << "\n";
-
-    //    vmmhz1m*=1./(1.+pow(freq/NU_R,ALPHAMEDIUM));
     vmmhz1m_reference*=1./(1.+pow(freq_reference/nu_r,ALPHAMEDIUM));
 
   }
@@ -269,7 +234,7 @@ Signal::~Signal() {
 
 }
 
- void Signal::ReadCalPulserSpectrum(){
+void Signal::ReadCalPulserSpectrum(){
     int frequency;
     double vmmhz1m_temp;
     int count = 0;
@@ -287,7 +252,7 @@ Signal::~Signal() {
 }
 
 
- void Signal::ReadArbitraryWaveform(string target){
+void Signal::ReadArbitraryWaveform(string target){
    double e_field;
    double time_tmp;
 
@@ -296,7 +261,6 @@ Signal::~Signal() {
      while (1){
        infile >> time_tmp >> e_field;
        if (!infile.good()) break;
-//       cout << time_tmp << " : " << e_field <<endl;
        ArbitraryWaveform_T.push_back(time_tmp);
        ArbitraryWaveform_V.push_back(e_field);
      }
@@ -305,7 +269,8 @@ Signal::~Signal() {
     }
 }
 
- void Signal::ReadPulserWaveform(string target){
+
+void Signal::ReadPulserWaveform(string target){
    double e_field;
    double time_tmp;
 
@@ -322,8 +287,9 @@ Signal::~Signal() {
     }  
 }
 
-  //Adding function to read input voltage at transmitting antenna - JCF 1/10/2024   
- void Signal::ReadInputVoltage(string target){
+
+// Reads input voltage at transmitting antenna
+void Signal::ReadInputVoltage(string target){
    double voltage_tmp;
    double time_tmp;
 
@@ -341,8 +307,6 @@ Signal::~Signal() {
 }
 
 
-
-
 void Signal::GetVmMHz(double vmmhz_max,double vmmhz1m_max,double pnu,double *freq,double notch_min,double notch_max,double *vmmhz,int nfreq) {
 
   // parametrization from Jaime Alvarez Munhiz  
@@ -351,32 +315,13 @@ void Signal::GetVmMHz(double vmmhz_max,double vmmhz1m_max,double pnu,double *fre
   for (int i=0;i<nfreq;i++) {
   
     vmmhz[i]=vmmhz_max
-      //*1./FREQ_LOW*freq[i];
 
       
       *GetVmMHz1m(pnu,freq[i])/vmmhz1m_max;
-    //if (WHICHPARAMETERIZATION==0)
-    //vmmhz[i]*=(1./(1.+pow(freq[i]/NU0_MODIFIED,ALPHAMEDIUM)));
-    //if (WHICHPARAMETERIZATION==1)
-    //vmmhz[i]*=1./(1.+pow(freq[i]/NU_R,ALPHAMEDIUM));
 
-    
     if (notch_min!=0 && notch_max!=0 && freq[i]>notch_min && freq[i]<notch_max)
       vmmhz[i]=0.;
   } //for
-
-//   double sum[5]={0.};
-//   if (WHICHPATH==4) {
-//     for (int j=0;j<5;j++) {
-//       for (int i=0;i<NFREQ;i++) {
-// 	if (bwslice_min[j]<=freq[i] && bwslice_max[j]>freq[i]) { 
-// 	  sum[j]+=GetVmMHz1m(pnu,freq[i],x0ice,ecice,N_DEPTH,AEXMEDIUM,WHICHPARAMETERIZATION)*(freq[i+1]-freq[i])/1.E6;
-// 	}
-//       }
-//       cout << "j, sum is " << j << " " << sum[j] << "\n";
-//     }
-    
-//   }
   
 } //GetVmMHz
 
@@ -387,8 +332,6 @@ void Signal::GetVmMHz(double vmmhz_max,double vmmhz1m_max,double pnu,double *fre
   // so use elpm =  7.7TeV/cm*X0 
   // X0 is radiation lengths in cm
 
-  //double elpm=7.7E12*(X0ICE*100.);
-
   double elpm=2.E15*(X0MEDIUM/x0ice);  // this is what Jaime uses.  see caption under figure 4 of 0003315.
   return elpm;
 } //GetELPM
@@ -397,6 +340,8 @@ void Signal::GetVmMHz(double vmmhz_max,double vmmhz1m_max,double pnu,double *fre
 
   return LPM;
 } //GetLPM
+
+
 void Signal::GetSpread(double pnu,
 	       double emfrac,
 	       double hadfrac,
@@ -406,32 +351,9 @@ void Signal::GetSpread(double pnu,
 
 	       double& deltheta_em_max,
 	       double& deltheta_had_max) {
-  
-  //  cout << KR_MEDIUM << " " << RM_MEDIUM << " " << KL_MEDIUM << " " << KE_MEDIUM << " " << ECMEDIUM << " " << X0MEDIUM << " " << ALPHAMEDIUM << " " << AEXMEDIUM << " " << KDELTA_MEDIUM << " " << BETAMEDIUM << " " << KELVINS << " " << JAIME_FACTOR << "\n";
-  //cout << RHOSALT << " " << RHOICE << " " << RM_ICE << " " << RM_SALT << " " << KR_SALT << " " << KR_ICE << " " << X0SALT << " " << ECSALT << " " << X0ICE << " " << ECICE << " " << AEX_ICE << "\n";  
-  // cout << ALPHAICE << " " << AEX_SALT << " " << ALPHASALT << " " << KE_SALT << " " << KL_SALT << " " << KDELTA_SALT << " " << KE_ICE << " " << KL_ICE << " " << KDELTA_ICE << " " << KELVINS_SALT << " " << BETAICE << " " << BETASALT << "\n";
-  
-  //  scale by how far off Cherenkov angle this viewing antenna is
-  //  c.f. A-MZ  astro-ph/9706064 and astro-ph/0003315
-  //  and for non-LPM (non-EM) showers from 
-  // Phys.Lett.B434,396 (1998)  (astro-ph/9806098)
-  //  The lengths are different hence the angular thickness of 
-  //  the shower is different.  Get the angular thickness for
-  //  both the EM and hadroic parts.
 
-//   cout << KR_MEDIUM << " " << RM_MEDIUM << " " << KL_MEDIUM << " " << KE_MEDIUM << " " << ECMEDIUM << " " << X0MEDIUM << " " << ALPHAMEDIUM << " " << AEXMEDIUM << " " << KDELTA_MEDIUM << " " << BETAMEDIUM << " " << KELVINS << " " << JAIME_FACTOR << "\n";
-//   cout << RHOSALT << " " << RHOICE << " " << RM_ICE << " " << RM_SALT << " " << KR_SALT << " " << KR_ICE << " " << X0SALT << " " << ECSALT << " " << X0ICE << " " << ECICE << " " << AEX_ICE << "\n";  
-//   cout << ALPHAICE << " " << AEX_SALT << " " << ALPHASALT << " " << KE_SALT << " " << KL_SALT << " " << KDELTA_SALT << " " << KE_ICE << " " << KL_ICE << " " << KDELTA_ICE << " " << KELVINS_SALT << " " << BETAICE << " " << BETASALT << "\n";
-
-//--------------------------------------------------
-//   double elpm=GetLPM();
-//-------------------------------------------------- 
   double elpm=GetELPM();
-
-    //cout << "elpm is " << elpm << "\n";
-
-
-  //  cout << "elpm is " << elpm << "\n";
+  
   freq=freq/1.E6;  // frequency in MHz
   double showerlength=3.1;  //shower length in meters-gets a modification
                             //for em showers due to lpm effect.
@@ -459,16 +381,12 @@ void Signal::GetSpread(double pnu,
   else 
     showerlength/=pow(elpm/(0.14*(em_eshower)+elpm),0.3);
 
-  //  cout << "showerlength is " << showerlength << "\n";
-
-
     if (WHICHPARAMETERIZATION==0) {
 
       nu0=500.E6/1.E6*x0ice/X0MEDIUM; // for rego (astro-ph/9706064)
 
       // decoherence frequency scales with radiation length
       // when X0MEDIUM=X0ICE, nu0=500 MHz as in astro-ph/9706064
-
 
       // these equations are in astro-ph/9706064, but we have pulled
       // out the dependence on index of refraction and shower length. 
@@ -478,7 +396,6 @@ void Signal::GetSpread(double pnu,
       //cout<<"1) daltheta_em_max : "<<deltheta_em_max<<endl;
 
       if (hadfrac>0.00001) { // if there is a hadronic component
-	
 	
 	// these equations are in astro-ph/9806098, but we have pulled
 	// out the dependence on index of refraction and shower length.
@@ -494,10 +411,7 @@ void Signal::GetSpread(double pnu,
 	else {
 	  //  beyond param, just use value at 10 EeV since slow variation
 	  //  and parameterization might diverge
-	  //  so scale from 10 EeV at 7.5% per decade (30/4=7.5)
-	  //deltheta_had_max=1.473/sqrt(pow(N_DEPTH,2)-1)*nu0/freq*RADDEG*(4.23-0.785*7.+5.5e-2*49.);  // the last part in parenthesis if the previous equation evaluated at epsilon=7.
-	  //deltheta_had_max=deltheta_had_max*(1.+(epsilon-7.)*0.075);
-	  // It doesn't increase deltheta_had_max by 7.5% per decade anymore. Now it decreases the energy factor by 0.07 per decade.
+	  //  so scale from 10 EeV by 0.07 per decade.
 	  deltheta_had_max=1.473/sqrt(pow(N_DEPTH,2)-1)*nu0/freq*RADDEG*(4.23-0.785*7.+5.5e-2*49. - (epsilon-7.)*0.07);
 	} //else : beyond paramatrization
 	deltheta_had_max/=sqrt(log(2.)); // in astro-ph/9706064, Jaime uses exp(-0.5* (theta-theta_c)^2/delta_had^2)
@@ -509,17 +423,14 @@ void Signal::GetSpread(double pnu,
 	deltheta_had_max=1.E-10;
 
       deltheta_em_max/=sqrt(log(2.)); // in astro-ph/9706064, Jaime uses exp(-0.5 (theta-theta_c)^2/delta_had^2)
-      //cout<<"2) daltheta_em_max : "<<deltheta_em_max<<endl;
 
     }
     else if (WHICHPARAMETERIZATION==1) {
 
-      //  cout << "I'm here inside GetSpread.\n";
       // we use the old parameterization for em showers
       nu0=500.E6/1.E6; // for rego (astro-ph/9706064)
 
       deltheta_em_max=12.32/sqrt(nice*nice-1)*(nu0/freq)*RADDEG/showerlength;
-
 
       // and then scale it according to astro-ph/0512337
       // Eq. 9
@@ -544,20 +455,15 @@ void Signal::GetSpread(double pnu,
       
     } // if more recent parameterization
 
-
-    
-
-
 } //GetSpread
 
 
- double Signal::GetVmMHz1m(double pnu,double freq) { // constructor
+double Signal::GetVmMHz1m(double pnu,double freq) { // constructor
 
   if (WHICHPARAMETERIZATION==0) {
     // parametrization from Jaime Alvarez Munhiz  
     //  here using astro-ph/0003315 
     double nu0=1150.E6/1.E6;
-    //NU0_MODIFIED=nu0
     double nu0_modified=nu0
       *(x0ice/ecice)/(X0MEDIUM/ECMEDIUM)
       *(1/sqrt(N_DEPTH*N_DEPTH-1.))/(1/sqrt(nice*nice-1.));
@@ -565,7 +471,6 @@ void Signal::GetSpread(double pnu,
     freq=freq/1.E6;  // frequency in MHz
     
     double factor=
-      //1/sin(changle) // should be cerenkov angle for ice
       1/sqrt(1-1/(nice*nice)) // sin(changle) for ice
       *1/nu0 //
       *X0MEDIUM/x0ice  // track length *** use dE/dX rho instead
@@ -574,12 +479,10 @@ void Signal::GetSpread(double pnu,
     // to account for cerenkov threshold // maybe should be "a" instead
 
     vmmhz1m_max=factor*(2.53E-7)*(pnu/1.E12)*freq
-      //      *(1./(1.+pow(freq/NU0_MODIFIED,ALPHAMEDIUM)))
       *(1./(1.+pow(freq/nu0_modified,1.44)));
   }
   else if (WHICHPARAMETERIZATION==1) {
 
- 
     vmmhz1m_max=vmmhz1m_reference
       *freq/freq_reference
       *pnu/pnu_reference
@@ -588,27 +491,10 @@ void Signal::GetSpread(double pnu,
 
   }
 
-
   vmmhz1m_max=vmmhz1m_max/2.;  // This factor of 2 is to account for the 2 in the definition of the fourier transform in Equation 8 of the Halzen, Stanev and Zas paper.  The same factor of 2 seems to have propagated through subsequent Jaime papers.
   vmmhz1m_max=vmmhz1m_max*sqrt(2.);  // This is to account for the fact that the E fields quoted in the theory papers are double-sided in frequency (they extend from -F to F) whereas we are using it as a single-sided E-field (only from 0 to F).
 
-  //  cout << "jaime_factor is " << JAIME_FACTOR << "\n";
   return vmmhz1m_max*JAIME_FACTOR;
-
-
-  //  vmmhz1m=vmmhz1m/sqrt(1.E6/(BW/(double)NFREQ)); //THIS IS NEEDED TO CONSERVE ENERGY FOR DIFFERENT BIN WIDTHS.
-
-
-
-
-//      // this is the old version
-//      double factor=
-//        X0MEDIUM/X0ICE  // track length
-//        *(1-1/(N_DEPTH*N_DEPTH))/(1-1/(NICE*NICE)) // cerenkov index of refraction factor
-//        *N_DEPTH/NICE // to account for cerenkov threshold
-//        *ECICE/ECMEDIUM;  // to account for critical energy
-    
-//      double vmmhz1m=factor*(2.53E-7)*(pnu/1.E12)*(freq/nu0)*(1./(1.+pow(freq/nu0_modified,1.44)))*JAIME_FACTOR;
 
 } //Signal constructor
 
@@ -616,35 +502,16 @@ void Signal::GetSpread(double pnu,
 double Signal::GetVmMHz1mCalPulser(int bin) { // constructor
     
     vmmhz1m_max = CalpulserVmMHz1m[bin];
-//    std::cout << bin << " : " << vmmhz1m_max << std::endl;
-    
-//    vmmhz1m_max=vmmhz1m_max/2.;  // This factor of 2 is to account for the 2 in the definition of the fourier transform in Equation 8 of the Halzen, Stanev and Zas paper.  The same factor of 2 seems to have propagated through subsequent Jaime papers.
-//    vmmhz1m_max=vmmhz1m_max*sqrt(2.);  // This is to account for the fact that the E fields quoted in the theory papers are double-sided in frequency (they extend from -F to F) whereas we are using it as a single-sided E-field (only from 0 to F).
-    
-    //  cout << "jaime_factor is " << JAIME_FACTOR << "\n";
-//    return vmmhz1m_max*JAIME_FACTOR;
+
     return vmmhz1m_max;  
-    
-    //  vmmhz1m=vmmhz1m/sqrt(1.E6/(BW/(double)NFREQ)); //THIS IS NEEDED TO CONSERVE ENERGY FOR DIFFERENT BIN WIDTHS.
-    
-    
-    
-    
-    //      // this is the old version
-    //      double factor=
-    //        X0MEDIUM/X0ICE  // track length
-    //        *(1-1/(N_DEPTH*N_DEPTH))/(1-1/(NICE*NICE)) // cerenkov index of refraction factor
-    //        *N_DEPTH/NICE // to account for cerenkov threshold
-    //        *ECICE/ECMEDIUM;  // to account for critical energy
-    
-    //      double vmmhz1m=factor*(2.53E-7)*(pnu/1.E12)*(freq/nu0)*(1./(1.+pow(freq/nu0_modified,1.44)))*JAIME_FACTOR;
     
 } //Signal constructor
 
 
- void Signal::SetParameterization(int whichparameterization) {
+void Signal::SetParameterization(int whichparameterization) {
 
   WHICHPARAMETERIZATION=whichparameterization;
+
 }
 
 
@@ -659,18 +526,14 @@ void Signal::TaperVmMHz(double viewangle,
 
   //--EM
   
-    bool calpulser = false;
+  bool calpulser = false;
   double vmmhz1m_em=0; // V/m/MHz at 1m due to EM component of shower
-double vmmhz1m_had=0; // V/m/MHz at 1m due to HAD component of shower
+  double vmmhz1m_had=0; // V/m/MHz at 1m due to HAD component of shower
 
   // this is the number that get exponentiated
-  //  double rtemp=0.5*(viewangle-changle)*(viewangle-changle)/(deltheta_em*deltheta_em);
   double rtemp=(viewangle-changle)*(viewangle-changle)/(deltheta_em*deltheta_em);
   
-
-  //cout << "dangle, deltheta_em is " << viewangle-changle << " " << deltheta_em << "\n";
-  //cout << "rtemp (em) is " << rtemp << "\n";
-  // the power goes like exp(-(theta_v-theta_c)^2/Delta^2)
+    // the power goes like exp(-(theta_v-theta_c)^2/Delta^2)
     // so the e-field is the same with a 1/2 in the exponential
     
     if (emfrac>pow(10.,-10.)) { // if there is an em component
@@ -688,21 +551,18 @@ double vmmhz1m_had=0; // V/m/MHz at 1m due to HAD component of shower
             vmmhz1m_em = vmmhz1m;
         }
     } else // if the em component is essentially zero than set this to zero
-            vmmhz1m_em=0;
+      vmmhz1m_em=0;
 
   //--HAD
   // this is the quantity that gets exponentiated
 
   rtemp=(viewangle-changle)*(viewangle-changle)/(deltheta_had*deltheta_had);
 
-  //cout << "rtemp (had) is " << rtemp << "\n";
-
   if (hadfrac!=0) { // if there is a hadronic fraction
    if (calpulser == false){
 
     if (rtemp<20) { // if we are less than 20 sigma from cerenkov angle
       vmmhz1m_had=vmmhz1m*exp(-rtemp); // this is the effect of the hadronic width of the signal
-   
     }
     else // if we're more than 20 sigma from cerenkov angle
       vmmhz1m_had=0.; // just set it to zero
@@ -713,11 +573,8 @@ double vmmhz1m_had=0; // V/m/MHz at 1m due to HAD component of shower
   else 
     vmmhz1m_had=0.;
 
-
   logscalefactor_taper=log10((emfrac*vmmhz1m_em+hadfrac*vmmhz1m_had)/vmmhz1m);
 
-
-  //cout << "emfrac, vmmhz1m_em, hadfrac, vmmhz1m_had are " << emfrac << " " << vmmhz1m_em << " " << hadfrac << " " << vmmhz1m_had << "\n";
   vmmhz1m=sin(viewangle)*(emfrac*vmmhz1m_em+hadfrac*vmmhz1m_had);
 
   if (vmmhz1m==0)
@@ -725,33 +582,23 @@ double vmmhz1m_had=0; // V/m/MHz at 1m due to HAD component of shower
   else
     vmmhz1m_em_obs=sin(viewangle)*emfrac*vmmhz1m_em/vmmhz1m;
 
-
-
 } //TaperVmMHz
-
 
 
 // for t-domain signal generation,
 // first we need to generate shower profile
-//
 void Signal::GetShowerProfile(double E_shower, // energy of shower
                             int shower_mode, // 0 : EM shower, 1 : HAD shower 
                             double shower_step_m, // shower step in meters
                             int param_model, // 0 : Jaime's fit, 1 : Carl's fit
-                            //int q_excess_model, // 0 : const 25% (only option now)
-
                             std::vector <double> &depth, // shower depth array, output
                             std::vector <double> &Q_shower, // shower charge excess profile, output
                             double &LQ // integrated Q_shower
         ) {
 
-
-
     // reset all output vectors
     depth.clear();
     Q_shower.clear();
-
-
 
   // fit parameters
   double params[5];
@@ -769,7 +616,6 @@ void Signal::GetShowerProfile(double E_shower, // energy of shower
           params[1] = 37.5961; // X_0
           params[2] = 59.9807; // lambda
           params[3] = 0.158426; // E_c
-          //params[4] = pow(10, E_shower - 9. ); // shower energy E_0 in GeV
           params[4] = E_shower/1.e9; // shower energy E_0 in GeV
 
           X_max = params[1]*log(params[4]/params[3]); // in g/cm2
@@ -783,7 +629,6 @@ void Signal::GetShowerProfile(double E_shower, // energy of shower
           params[1] = 39.62; // X_0
           params[2] = 73.98; // lambda
           params[3] = 0.1691; // E_c
-          //params[4] = pow(10, E_shower - 9. ); // shower energy E_0 in GeV
           params[4] = E_shower/1.e9; // shower energy E_0 in GeV
 
           X_max = params[1]*log(params[4]/params[3]);
@@ -798,7 +643,6 @@ void Signal::GetShowerProfile(double E_shower, // energy of shower
       // EM shower case
       if ( shower_mode == 0 ) {
           params[0] = 0.073; // E_c
-          //params[1] = pow(10, E_shower - 9. ); // shower energy E_0 in GeV
           params[1] = E_shower/1.e9; // shower energy E_0 in GeV
 
           X_max = X_0_const*log(params[1]/params[0]); // not correct but just a approx.
@@ -812,7 +656,6 @@ void Signal::GetShowerProfile(double E_shower, // energy of shower
           params[1] = 39.562; // X_0
           params[2] = 113.03; // lambda
           params[3] = 0.17006; // E_c
-          //params[4] = pow(10, E_shower - 9. ); // shower energy E_0 in GeV
           params[4] = E_shower/1.e9; // shower energy E_0 in GeV
 
           X_max = params[1]*log(params[4]/params[3]);
@@ -820,7 +663,6 @@ void Signal::GetShowerProfile(double E_shower, // energy of shower
       }
 
   }
-
 
   int downflag = 0; // after X_max
   double currentN = 0;
@@ -831,15 +673,11 @@ void Signal::GetShowerProfile(double E_shower, // energy of shower
   double shower_step_gcm2 = shower_step_m * 1.e2 * 0.917; // g/cm2
   double shower_step_gcm2_X0factor = shower_step_gcm2 / X_0_const; // in unit of radiation length
 
-  //double gcm2_tmp = 0.;
   double gcm2_tmp = shower_step_gcm2_X0factor; // don't start with zero
 
   LQ = 0.;
 
-
   while (downflag==0 || currentN>100) {
-
-      //gcm2.push_back( gcm2_tmp * X_0_const ); // gcm2 is in unit of g/cm2
 
       if ( param_model == 0 && shower_mode == 0 ) {
           currentN = Greisen(gcm2_tmp, params); // input value gcm2_tmp is in unit of radiation length
@@ -847,8 +685,7 @@ void Signal::GetShowerProfile(double E_shower, // energy of shower
       else {
           currentN = GaisserHillas(gcm2_tmp, params);
       }
-          
-      //if (currentN < 1) currentN = 0;
+
       if (currentN < 4) currentN = 0; // 4 total = 1 excess
 
       // currently just apply 25% const factor for charge excess
@@ -857,25 +694,15 @@ void Signal::GetShowerProfile(double E_shower, // energy of shower
 
       depth.push_back( gcm2_tmp*X_0_const/0.917/100. ); // 0.917 for ice density, 100 for cm to m
 
-
-
       if (downflag==0 && depth[steps] > X_max_m ) downflag = 1; // now we are going down in shower profile
 
       if (steps > steps_limit) break; // if steps go too long, come out from while loop
       
-
       gcm2_tmp += shower_step_gcm2_X0factor;
       steps++;
   }
 
-  //cout<<"E_shower : "<<E_shower<<" steps : "<<steps<<endl;
-
-
-
 }// GetShowerProfile
-
-
-
 
 double Signal::GaisserHillas(double x_in, double *par) {
 
@@ -979,14 +806,13 @@ void Signal::Build_Param_RE_Tterm_tables(){
 
 
 // depending on the shower_mode, make Vm array for em shower/had shower or both
-void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins ) {
+void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins, int interaction_idx ) {
 
     double sin_view = sin(viewangle);
     double cos_view = cos(viewangle);
     double sin_changle = sin(changle_ice);
 
     double offcone_factor = 1.-nice*cos_view;
-
 
     //double c_ns = 2.998e-1; // speed of light in m/ns
     double c_ns = CLIGHT *1.e-9; // speed of light in m/ns 
@@ -1003,8 +829,6 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 
     double E_shower;
 
-
-
     // reset Earray and Tarray
     for (int tbin=0; tbin<outbin; tbin++) {
 
@@ -1013,15 +837,12 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
     }
     std::vector<double> the_table_to_use;
 
-
     // if we drive Askaryan signal from only one shower
     //if ( settings1->SHOWER_MODE == 0 || settings1->SHOWER_MODE == 1 ) { // only EM or only HAD
     if ( settings1->SHOWER_MODE == 0 || settings1->SHOWER_MODE == 1 || settings1->SHOWER_MODE == 3 ) { // only EM or only HAD
 
-
         // if EM shower only (always)
         if ( settings1->SHOWER_MODE == 0 ) {
-        //if ( event->Nu_Interaction[0].primary_shower == 0 ) {
 
             V_s = -4.5e-14;
             get_Param_RA(0, param_RA);
@@ -1029,46 +850,33 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 
             E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
 
-            //cout<<"E_shower, em : "<<E_shower<<endl;
-
             Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
 
             shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
 
             // do integration
-            //
 
         }
 
         // if HAD shower only (always)
         else if ( settings1->SHOWER_MODE == 1 ) {
-        //else if ( event->Nu_Interaction[0].primary_shower == 1 ) {
 
             V_s = -3.2e-14;
             get_Param_RA(1, param_RA);
             the_table_to_use = pick_table(1);
 
-
-
-            //E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
             E_shower = event->pnu*event->Nu_Interaction[0].hadfrac;
-
-            //cout<<"E_shower, had : "<<E_shower<<endl;
 
             Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
 
             shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
 
             // do integration
-            //
 
         }
 
-
         // EM or HAD shower only depending on the energy of the shower
         else if ( settings1->SHOWER_MODE == 3 ) {
-        //if ( event->Nu_Interaction[0].primary_shower == 0 ) {
-
 
             // if EM shower dominant
             if ( event->Nu_Interaction[0].primary_shower == 0 ) {
@@ -1077,10 +885,7 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
                 get_Param_RA(0, param_RA);
                 the_table_to_use = pick_table(0);
 
-
                 E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
-
-                //cout<<"E_shower, em : "<<E_shower<<endl;
 
                 Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
 
@@ -1095,11 +900,7 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
                 get_Param_RA(1, param_RA);
                 the_table_to_use = pick_table(1);
 
-
-                //E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
                 E_shower = event->pnu*event->Nu_Interaction[0].hadfrac;
-
-                //cout<<"E_shower, had : "<<E_shower<<endl;
 
                 Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
 
@@ -1109,13 +910,7 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 
         } // if shower_mode = 3
 
-
-
-        //cout<<"Const : "<<Const<<" viewangle : "<<viewangle*DEGRAD<<" E_shower : "<<E_shower<<endl;
-
-
         // ok, let's just calculate near signal time bins
-        //
         double shower_dt = (settings1->SHOWER_STEP * shower_bin) / c_ns; // shower time length in ns
 
         double test_signal_window = fabs(offcone_factor) * shower_dt * 1.2 + 2.; // additional 2 ns for changle_ice case, 20% additional time
@@ -1123,19 +918,8 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
         // we also have to calculate when the window should start
         double test_signal_Tinit = offcone_factor * shower_dt/2. - test_signal_window/2.;
 
-        // now let's try with constant number of time bins
-        //int test_T_bin = 50; -> now it's outbin
-
         // then we can decide the time step of the signal waveform
         double test_dT = test_signal_window / (double)outbin;
-
-
-
-
-        // we need to shift random amount of time in Tinit
-        //test_signal_Tinit += gRandom->Rndm() * test_dT;
-
-
 
         // calculate new integrate step in z (meters) depending on offcone angle set 10deg off is the maximum case and use default step in that case
         double test_shower_step;
@@ -1143,7 +927,6 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
         else test_shower_step = 5.e-4 / fabs( offcone_factor );
 
         if ( test_shower_step > 1.) test_shower_step = 1.; // maximum value is 1m step
-        //int skip_bins = (int)( test_shower_step / settings1->SHOWER_STEP );
         skip_bins = (int)( test_shower_step / settings1->SHOWER_STEP );
 
         // test
@@ -1151,44 +934,29 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 
         test_shower_step = skip_bins * settings1->SHOWER_STEP;
 
-        //int new_shower_bin = (int)( (settings1->SHOWER_STEP * shower_bin) / test_shower_step); // new number of bins for shower profile
         int new_shower_bin = (int)( shower_bin / skip_bins ); // new number of bins for shower profile
 
         int mid_old_bin;
 
-
-
-
-
         double Tterm;
 
         // do integration
-        //
         for (int tbin=0; tbin<outbin; tbin++) {
 
             Tarray[tbin] = test_signal_Tinit + (double)tbin*test_dT; // in ns
-            //cout<<" Tarray["<<tbin<<"] : "<<Tarray[tbin];
 
             Integrate = 0.;
 
-
-            //for (int bin=0; bin<shower_bin-1; bin++) {
             for (int bin=0; bin<new_shower_bin-2; bin++) {
 
                 mid_old_bin = bin*skip_bins;
 
-                //Tterm = Tarray[tbin] - (0.5+(double)bin)*settings1->SHOWER_STEP * ( (1.-nice*cos(angle))/c_ns );
-                //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[bin] * ( (1.-nice*cos(viewangle))/c_ns );
                 Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
 
-                //if ( event->Nu_Interaction[0].shower_Q_profile[bin]<=0) {
                 if ( event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]<=0) {
                     Integrate += 0.;
                 }
                 else {
-
-                    //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[bin]) * Param_RE_Tterm(Tterm, param_RA);
-                    //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
                     if(settings1->USE_PARAM_RE_TTERM_TABLE==1){
                     	Integrate += -1 *(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, the_table_to_use);
                     }
@@ -1199,23 +967,17 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 
             }
 
-            //Earray[tbin] = Const * Integrate * atten_factor;
-            //Earray[tbin] = Const * Integrate;
             Earray[tbin] = Const * Integrate * skip_bins * atten_factor;
-            //cout<<" Earray["<<tbin<<"] : "<<Earray[tbin];
 
         }
 
     } // if shower_mode == 0 or 1 or 3 (only EM or HAD)
-
-
     else if ( settings1->SHOWER_MODE == 2 ) { 
 
         int EM_shower_on = 0; // is there EM shower?
 
         // 1) for EM shower part
-        //
-        if ( event->Nu_Interaction[0].EM_LQ > 0 ) {
+        if ( event->Nu_Interaction[interaction_idx].EM_LQ > 0 ) {
 
             EM_shower_on = 1;
 
@@ -1224,19 +986,14 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             the_table_to_use = pick_table(0);
 
 
-            E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
+            E_shower = event->Nu_Interaction[interaction_idx].pnuenergy*event->Nu_Interaction[interaction_idx].emfrac;
 
-            //cout<<"E_shower, em : "<<E_shower<<endl;
-
-            //Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
-            Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].EM_LQ * (V_s) * E_shower / 1.e12;
+            Const = sin_view / sin_changle * 1./event->Nu_Interaction[interaction_idx].EM_LQ * (V_s) * E_shower / 1.e12;
 
             //shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
-            shower_bin = event->Nu_Interaction[0].EM_shower_Q_profile.size();
-
+            shower_bin = event->Nu_Interaction[interaction_idx].EM_shower_Q_profile.size();
 
             // ok, let's just calculate near signal time bins
-            //
             double shower_dt = (settings1->SHOWER_STEP * shower_bin) / c_ns; // shower time length in ns
 
             double test_signal_window = fabs(offcone_factor) * shower_dt * 1.2 + 2.; // additional 2 ns for changle_ice case, 20% additional time
@@ -1244,14 +1001,8 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             // we also have to calculate when the window should start
             double test_signal_Tinit = offcone_factor * shower_dt/2. - test_signal_window/2.;
 
-            // now let's try with constant number of time bins
-            //int test_T_bin = 50; -> now it's outbin
-
             // then we can decide the time step of the signal waveform
             double test_dT = test_signal_window / (double)outbin;
-
-            // we need to shift random amount of time in Tinit
-            //test_signal_Tinit += gRandom->Rndm() * test_dT;
 
             // calculate new integrate step in z (meters) depending on offcone angle set 10deg off is the maximum case and use default step in that case
             double test_shower_step;
@@ -1259,7 +1010,6 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             else test_shower_step = 5.e-4 / fabs( offcone_factor );
 
             if ( test_shower_step > 1.) test_shower_step = 1.; // maximum value is 1m step
-            //int skip_bins = (int)( test_shower_step / settings1->SHOWER_STEP );
             skip_bins = (int)( test_shower_step / settings1->SHOWER_STEP );
 
             // test
@@ -1267,92 +1017,60 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 
             test_shower_step = skip_bins * settings1->SHOWER_STEP;
 
-            //int new_shower_bin = (int)( (settings1->SHOWER_STEP * shower_bin) / test_shower_step); // new number of bins for shower profile
             int new_shower_bin = (int)( shower_bin / skip_bins ); // new number of bins for shower profile
 
             int mid_old_bin;
 
-
-
-
-
             double Tterm;
 
             // do integration
-            //
             for (int tbin=0; tbin<outbin; tbin++) {
 
                 Tarray[tbin] = test_signal_Tinit + (double)tbin*test_dT; // in ns
-                //cout<<" Tarray["<<tbin<<"] : "<<Tarray[tbin];
 
                 Integrate = 0.;
 
-
-                //for (int bin=0; bin<shower_bin-1; bin++) {
                 for (int bin=0; bin<new_shower_bin-2; bin++) {
 
                     mid_old_bin = bin*skip_bins;
 
-                    //Tterm = Tarray[tbin] - (0.5+(double)bin)*settings1->SHOWER_STEP * ( (1.-nice*cos(angle))/c_ns );
-                    //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[bin] * ( (1.-nice*cos(viewangle))/c_ns );
-                    //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
-                    Tterm = Tarray[tbin] - event->Nu_Interaction[0].EM_shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
+                    Tterm = Tarray[tbin] - event->Nu_Interaction[interaction_idx].EM_shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
 
-                    //if ( event->Nu_Interaction[0].shower_Q_profile[bin]<=0) {
-                    //if ( event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]<=0) {
-                    if ( event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]<=0) {
+                    if ( event->Nu_Interaction[interaction_idx].EM_shower_Q_profile[mid_old_bin]<=0) {
                         Integrate += 0.;
                     }
                     else {
-
-                        //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[bin]) * Param_RE_Tterm(Tterm, param_RA);
-                        //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
-                        //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
                         if(settings1->USE_PARAM_RE_TTERM_TABLE==1){
-                    		  Integrate += -1 *(event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_em);
+                    		  Integrate += -1 *(event->Nu_Interaction[interaction_idx].EM_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_em);
                         }
                         else{
-                        	Integrate += -1.*(event->Nu_Interaction[0].EM_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);                        		
+                        	Integrate += -1.*(event->Nu_Interaction[interaction_idx].EM_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);                        		
                         }
-
                     }
 
                 }
 
-                //Earray[tbin] = Const * Integrate * atten_factor;
-                //Earray[tbin] = Const * Integrate;
                 Earray[tbin] = Const * Integrate * skip_bins * atten_factor;
-                //cout<<" Earray["<<tbin<<"] : "<<Earray[tbin];
 
             }
 
 
         } // if EM_LQ > 0
 
-
         // 2) for HAD shower part
-        //
-        if ( event->Nu_Interaction[0].HAD_LQ > 0 ) {
+        if ( event->Nu_Interaction[interaction_idx].HAD_LQ > 0 ) {
 
             V_s = -3.2e-14;
             get_Param_RA(1, param_RA);
             the_table_to_use = pick_table(1);
 
-            //E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
-            E_shower = event->pnu*event->Nu_Interaction[0].hadfrac;
+            E_shower = event->Nu_Interaction[interaction_idx].pnuenergy*event->Nu_Interaction[interaction_idx].hadfrac;
 
-            //cout<<"E_shower, had : "<<E_shower<<endl;
+            Const = sin_view / sin_changle * 1./event->Nu_Interaction[interaction_idx].HAD_LQ * (V_s) * E_shower / 1.e12;
 
-            //Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
-            Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].HAD_LQ * (V_s) * E_shower / 1.e12;
-
-            //shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
-            shower_bin = event->Nu_Interaction[0].HAD_shower_Q_profile.size();
-
-
+            shower_bin = event->Nu_Interaction[interaction_idx].HAD_shower_Q_profile.size();
 
             // ok, let's just calculate near signal time bins
-            //
             double shower_dt = (settings1->SHOWER_STEP * shower_bin) / c_ns; // shower time length in ns
 
             double test_signal_window = fabs(offcone_factor) * shower_dt * 1.2 + 2.; // additional 2 ns for changle_ice case, 20% additional time
@@ -1360,14 +1078,8 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             // we also have to calculate when the window should start
             double test_signal_Tinit = offcone_factor * shower_dt/2. - test_signal_window/2.;
 
-            // now let's try with constant number of time bins
-            //int test_T_bin = 50; -> now it's outbin
-
             // then we can decide the time step of the signal waveform
             double test_dT = test_signal_window / (double)outbin;
-
-            // we need to shift random amount of time in Tinit
-            //test_signal_Tinit += gRandom->Rndm() * test_dT;
 
             // calculate new integrate step in z (meters) depending on offcone angle set 10deg off is the maximum case and use default step in that case
             double test_shower_step;
@@ -1375,7 +1087,6 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             else test_shower_step = 5.e-4 / fabs( offcone_factor );
 
             if ( test_shower_step > 1.) test_shower_step = 1.; // maximum value is 1m step
-            //int skip_bins = (int)( test_shower_step / settings1->SHOWER_STEP );
             skip_bins = (int)( test_shower_step / settings1->SHOWER_STEP );
 
             // test
@@ -1383,83 +1094,49 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 
             test_shower_step = skip_bins * settings1->SHOWER_STEP;
 
-            //int new_shower_bin = (int)( (settings1->SHOWER_STEP * shower_bin) / test_shower_step); // new number of bins for shower profile
             int new_shower_bin = (int)( shower_bin / skip_bins ); // new number of bins for shower profile
 
             int mid_old_bin;
 
-
-
-
-
             double Tterm;
 
             // do integration
-            //
             for (int tbin=0; tbin<outbin; tbin++) {
-
             
                 if ( EM_shower_on == 0 ) { // if there was no EM shower
                 
                     Tarray[tbin] = test_signal_Tinit + (double)tbin*test_dT; // in ns
                 }
-                /*
-                if ( Tarray[tbin] != test_signal_Tinit + (double)tbin*test_dT ) {
-                    cout<<"Tarray["<<tbin<<"] got different!"<<endl;
-                }
-                */
-
-
-                //cout<<" Tarray["<<tbin<<"] : "<<Tarray[tbin];
 
                 Integrate = 0.;
 
-
-                //for (int bin=0; bin<shower_bin-1; bin++) {
                 for (int bin=0; bin<new_shower_bin-2; bin++) {
 
                     mid_old_bin = bin*skip_bins;
 
-                    //Tterm = Tarray[tbin] - (0.5+(double)bin)*settings1->SHOWER_STEP * ( (1.-nice*cos(angle))/c_ns );
-                    //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[bin] * ( (1.-nice*cos(viewangle))/c_ns );
-                    //Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
-                    Tterm = Tarray[tbin] - event->Nu_Interaction[0].HAD_shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
+                    Tterm = Tarray[tbin] - event->Nu_Interaction[interaction_idx].HAD_shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
 
-                    //if ( event->Nu_Interaction[0].shower_Q_profile[bin]<=0) {
-                    //if ( event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]<=0) {
-                    if ( event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]<=0) {
+                    if ( event->Nu_Interaction[interaction_idx].HAD_shower_Q_profile[mid_old_bin]<=0) {
                         Integrate += 0.;
                     }
                     else {
-
-                        //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[bin]) * Param_RE_Tterm(Tterm, param_RA);
-                        //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm(Tterm, param_RA);
-                        //Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
                         if(settings1->USE_PARAM_RE_TTERM_TABLE==1){
-                        	Integrate += -1 *(event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_had);
+                        	Integrate += -1 *(event->Nu_Interaction[interaction_idx].HAD_shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, tterm_table_had);
                         }
                         else{
-                       		Integrate += -1.*(event->Nu_Interaction[0].HAD_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);                        	
+                       		Integrate += -1.*(event->Nu_Interaction[interaction_idx].HAD_shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);                        	
                         }
                     }
 
                 }
 
-                //Earray[tbin] = Const * Integrate * atten_factor;
-                //Earray[tbin] = Const * Integrate;
-                //Earray[tbin] = Const * Integrate * skip_bins * atten_factor;
                 Earray[tbin] += Const * Integrate * skip_bins * atten_factor; // add Had shower part on top of EM shower part
-                //cout<<" Earray["<<tbin<<"] : "<<Earray[tbin];
 
             }
 
-
         } // if HAD_LQ > 0
 
-
     } // if using both EM and HAD showers
-
-
 
 }
 
