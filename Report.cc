@@ -5097,6 +5097,7 @@ void Report::checkPATrigger(
     // for PA trigger check only 20 ns around the signal bin.
     // This is to avoid getting the second ray
     // KAH and ARB are not sure where the 1200 number comes from
+    // !!!HEY IF YOU ARE FIXING THIS!!! please update the corresponding check in Settings::CheckCompatibilitiesSettings 
     int BINSIZE = 1200/(settings1->TIMESTEP*1.e9);  // Number of bins (aka datapoints) of data to save
 
     int waveformLength = settings1->WAVEFORM_LENGTH;

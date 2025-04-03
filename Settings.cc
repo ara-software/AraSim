@@ -931,6 +931,15 @@ int Settings::CheckCompatibilitiesSettings() {
         cerr<<"NFOUR should be at least twice WAVEFORM_LENGTH to avoid FFT artifacts or problems with readout!"<<endl; 
         num_err++;
     }
+ 
+    // for PA simulations we need to be careful since BINSIZE isnt the usual NFOUR/2 
+    // but is hardcoded to 1200/(settings1->TIMESTEP*1.e9), so we need to make sure 
+    // NFOUR is at least twice this to avoid FFT issues
+    const int PA_INTERNAL_LENGTH = 1200/(TIMESTEP*1.e9);  
+    if ( DETECTOR==5 && 2*PA_INTERNAL_LENGTH > NFOUR) {
+        cerr<<"NFOUR should be at least twice PA_INTERNAL_LENGTH to avoid FFT artifacts or problems with readout!"<<endl; 
+        num_err++;
+    }
 
     // if BH_ANT_SEP_DIST_ON=1, we can't use READGEOM=1 (actual installed geom)
     if (BH_ANT_SEP_DIST_ON==1 && READGEOM==1) {
