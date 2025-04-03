@@ -941,6 +941,13 @@ int Settings::CheckCompatibilitiesSettings() {
         num_err++;
     }
 
+    // Also ensure that the requested waveform length isn't longer than the internal length
+    if ( DETECTOR==5 && PA_INTERNAL_LENGTH < WAVEFORM_LENGTH) {
+        cerr<<"WAVEFORM_LENGTH cannot be longer than PA_INTERNAL_LENGTH to avoid problems with readout!"<<endl; 
+        num_err++;
+    }
+
+
     // if BH_ANT_SEP_DIST_ON=1, we can't use READGEOM=1 (actual installed geom)
     if (BH_ANT_SEP_DIST_ON==1 && READGEOM==1) {
         cerr<<"BH_ANT_SEP_DIST_ON=1 is only available in ideal station geom (READGEOM=0)!"<<endl; 
