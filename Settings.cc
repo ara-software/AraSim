@@ -937,13 +937,15 @@ int Settings::CheckCompatibilitiesSettings() {
     // NFOUR is at least twice this to avoid FFT issues
     const int PA_INTERNAL_LENGTH = 1200/(TIMESTEP*1.e9);  
     if ( DETECTOR==5 && 2*PA_INTERNAL_LENGTH > NFOUR) {
-        cerr<<"NFOUR should be at least twice PA_INTERNAL_LENGTH to avoid FFT artifacts or problems with readout!"<<endl; 
+        cerr<<"NFOUR should be at least twice PA_INTERNAL_LENGTH to avoid FFT artifacts or problems with readout!" 
+            << " Your PA_INTERNAL_LENGTH = " << PA_INTERNAL_LENGTH <<endl; 
         num_err++;
     }
 
     // Also ensure that the requested waveform length isn't longer than the internal length
     if ( DETECTOR==5 && PA_INTERNAL_LENGTH < WAVEFORM_LENGTH) {
-        cerr<<"WAVEFORM_LENGTH cannot be longer than PA_INTERNAL_LENGTH to avoid problems with readout!"<<endl; 
+        cerr<<"WAVEFORM_LENGTH cannot be longer than PA_INTERNAL_LENGTH to avoid problems with readout!"
+            << " Your PA_INTERNAL_LENGTH = " << PA_INTERNAL_LENGTH <<endl; 
         num_err++;
     }
 
