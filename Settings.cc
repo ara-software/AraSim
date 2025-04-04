@@ -54,6 +54,10 @@ outputdir="outputs"; // directory where outputs go
  ARASIM_VERSION_SUBMINOR = ARASIM_SUBMINOR;
  ARASIM_VERSION = (double)ARASIM_VERSION_MAJOR + (double)ARASIM_VERSION_MINOR * 0.001 + (double)ARASIM_VERSION_SUBMINOR * 0.000001;
  
+ // assign the default git hash
+ std::strncpy(COMMIT_HASH, "UNDEFINED_COMMIT_HASH_OR_NOT_SET", sizeof(COMMIT_HASH));
+ COMMIT_HASH[sizeof(COMMIT_HASH) - 1] = '\0';  // Ensure null-termination
+
  ARAROOT_VERSION = 0.;
 
  ARAUTIL_EXISTS = false;
@@ -1123,5 +1127,12 @@ int Settings::CheckCompatibilitiesSettings() {
 
 }
 
-
+void Settings::SetGitCommitHash(){
+    #ifndef GIT_COMMIT_HASH
+    #define GIT_COMMIT_HASH "SETTING_GIT_COMMIT_HASH_FAILED"
+    #endif
+    std::strncpy(COMMIT_HASH, GIT_COMMIT_HASH, sizeof(COMMIT_HASH));
+    COMMIT_HASH[sizeof(COMMIT_HASH) - 1] = '\0';
+    std::cout<<"The Git Commit Hash: "<<COMMIT_HASH<<std::endl;
+}
 

@@ -48,6 +48,7 @@ string outputdir="outputs";
 int main(int argc, char **argv) {   // read setup.txt file
     
     Settings *settings1 = new Settings();
+    settings1->SetGitCommitHash();
 
     cout<<"\n\tDefault values!"<<endl;
     cout<<"NNU : "<<settings1->NNU<<endl;

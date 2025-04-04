@@ -10,6 +10,7 @@ ifeq ($(strip $(BOOST_ROOT)),)
 	BOOST_ROOT = /usr/local/include
 endif
 
+GIT_COMMIT_HASH := $(shell git rev-parse HEAD)
 SYSINCLUDES	= -I/usr/include -I$(BOOST_ROOT) -I$(PLATFORM_DIR)/include -I${ARA_DEPS_INSTALL_DIR}/include
 SYSLIBS         = -L/usr/lib -L$(PLATFORM_DIR)/lib -L${ARA_DEPS_INSTALL_DIR}/lib
 
@@ -22,7 +23,7 @@ SRCSUF = ${SrcSuf}
 CXX = g++
 
 #Generic and Site Specific Flags
-CXXFLAGS     += $(SYSINCLUDES) $(INC_ARA_UTIL)
+CXXFLAGS     += $(SYSINCLUDES) $(INC_ARA_UTIL) -DGIT_COMMIT_HASH=\"$(GIT_COMMIT_HASH)\"
 #LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl
 LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl,--no-as-needed
 #,--no-as-needed

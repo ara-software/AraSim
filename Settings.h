@@ -2,6 +2,7 @@
 #define SETTINGS_H_
 
 #include <string>
+#include <cstring>
 #include "TObject.h"
 #include "AraSimVersion.h"
 
@@ -21,6 +22,7 @@ class Settings
         void Initialize();
         void ReadFile(string setupfile);
         void ReadEvtFile(string evtfile);
+        void SetGitCommitHash();
 
         int CheckCompatibilitiesSettings();// check if settings are not compatible to each other
         int CheckCompatibilitiesDetector(Detector *detector);// check if settings are not compatible to each other. checking against initialized Detector *detector object
@@ -29,6 +31,7 @@ class Settings
         int ARASIM_VERSION_MINOR;
         int ARASIM_VERSION_SUBMINOR;
         double ARASIM_VERSION;
+        char COMMIT_HASH[128]; // the GitHub commit hash
 
         double ARAROOT_VERSION;
         bool ARAUTIL_EXISTS;
