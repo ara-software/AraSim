@@ -3763,9 +3763,11 @@ inline void Detector::ReadFilter(string filename, Settings *settings1) {    // w
 
 void Detector::ReadFilter_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
 
+    int n_bins = settings1->DATA_BIN_SIZE / 2;
+
     // We can use FilterGain array as a original array
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    std::vector<double> xfreq_databin(n_bins);   // vector for FFT freq bin
+    std::vector<double> ygain_databin(n_bins);   // vector for gain in FFT bin
     double df_fft;
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
@@ -3774,7 +3776,7 @@ void Detector::ReadFilter_New(Settings *settings1) {    // will return gain (dB)
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
 
-    Tools::SimpleLinearInterpolation( freq_step, &Freq[0], FilterGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+    Tools::SimpleLinearInterpolation( freq_step, &Freq[0], FilterGain, settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), ygain_databin.data() );
         
     FilterGain_databin.clear();
     
@@ -3858,10 +3860,12 @@ inline void Detector::ReadPreamp(string filename, Settings *settings1) {    // w
 
 void Detector::ReadPreamp_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
 
+    int n_bins = settings1->DATA_BIN_SIZE / 2;
+
     // We can use FilterGain array as a original array
 
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    std::vector<double> xfreq_databin(n_bins);   // vector for FFT freq bin
+    std::vector<double> ygain_databin(n_bins);    // vector for gain in FFT bin
     double df_fft;
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
@@ -3870,7 +3874,7 @@ void Detector::ReadPreamp_New(Settings *settings1) {    // will return gain (dB)
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
 
-    Tools::SimpleLinearInterpolation( freq_step, &Freq[0], PreampGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+    Tools::SimpleLinearInterpolation( freq_step, &Freq[0], PreampGain, settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), ygain_databin.data() );
         
     PreampGain_databin.clear();
     
@@ -4239,10 +4243,12 @@ void Detector::ReadAmplifierNoiseFigure(Settings *settings) {
 
 void Detector::ReadFOAM_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
 
+    int n_bins = settings1->DATA_BIN_SIZE / 2;
+
     // We can use FilterGain array as a original array
 
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    std::vector<double> xfreq_databin(n_bins);   // vector for FFT freq bin
+    std::vector<double> ygain_databin(n_bins);  // vector for gain in FFT bin
     double df_fft;
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
@@ -4251,7 +4257,7 @@ void Detector::ReadFOAM_New(Settings *settings1) {    // will return gain (dB) w
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
 
-    Tools::SimpleLinearInterpolation( freq_step, &Freq[0], FOAMGain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+    Tools::SimpleLinearInterpolation( freq_step, &Freq[0], FOAMGain, settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), ygain_databin.data() );
         
     FOAMGain_databin.clear();
     
@@ -5536,8 +5542,9 @@ std::vector< std::vector< double> > Detector::GetRayleighFitVector_databin(int s
     rayleighFits_DeepStation_values_databin.resize(this_station_original_fits.size()); // resize to match channel count
     
     // set up the output frequency spacing for this event's specific DATA_BIN_SIZE
+    int n_bins = settings->DATA_BIN_SIZE / 2;
     double df_fft = 1./ ( (double)(settings->DATA_BIN_SIZE) * settings->TIMESTEP ); // the frequency step
-    double interp_frequencies_databin[settings->DATA_BIN_SIZE/2];   // array for interpolated FFT frequencies
+    std::vector<double> interp_frequencies_databin(n_bins);   // array for interpolated FFT frequencies
     for(int i=0; i<settings->DATA_BIN_SIZE/2.; i++){
         // set the frequencies
         interp_frequencies_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
@@ -5547,23 +5554,23 @@ std::vector< std::vector< double> > Detector::GetRayleighFitVector_databin(int s
     // dumb, but oh well...
     // so, copy over the vector of frequencies into an array
     int numFreqBins = int(this_station_original_freqs.size());
-    double this_station_original_frequencies_asarray[numFreqBins];
-    std::copy(this_station_original_freqs.begin(), this_station_original_freqs.end(), this_station_original_frequencies_asarray);
+    //std::vector<double> this_station_original_frequencies_vector(this_station_original_freqs.begin(),
+    //                                                               this_station_original_freqs.end());
 
     // loop over channel, and do the interpolation
     for(int iCh=0; iCh<this_station_original_fits.size(); iCh++){
 
         // same issue as with the frequencies; we need to copy the results for this station and channel to an array
-        double this_channel_original_fits_asarray[numFreqBins];
-        std::copy(this_station_original_fits[iCh].begin(), this_station_original_fits[iCh].end(), this_channel_original_fits_asarray);
+        //std::vector<double> this_channel_original_fits_vector(this_station_original_fits[iCh].begin(),
+        //                                                       this_station_original_fits[iCh].end());
 
         // output value
-        double interp_fits_databin[settings->DATA_BIN_SIZE/2];   // array for interpolated rayleigh fit values
+        std::vector<double> interp_fits_databin(n_bins);   // array for interpolated rayleigh fit values
 
         // now, do interpolation
         Tools::SimpleLinearInterpolation(
-            numFreqBins, this_station_original_frequencies_asarray, this_channel_original_fits_asarray, // from the original binning
-            settings->DATA_BIN_SIZE/2, interp_frequencies_databin, interp_fits_databin // to the new binning
+            numFreqBins, this_station_original_freqs.data(), this_station_original_fits[iCh].data(), // from the original binning
+            settings->DATA_BIN_SIZE/2, interp_frequencies_databin.data(), interp_fits_databin.data() // to the new binning
         );
 
         // copy the interpolated values out

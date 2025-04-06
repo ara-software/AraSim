@@ -848,12 +848,13 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
 // input data is not vector but double array
 void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdiode, vector <double> &diodeconv) {
     
-
+cout << "ASG MC 1" << endl;
     // cout << "Trigger::myconvlv" << endl;
     const int length=DATA_BIN_SIZE;
 
     // we are going to make double sized array for complete convolution
     std::vector<double> power_noise_copy(length * 2);
+    cout << "ASG MC 2" << endl;
 
     // fill half of the array as power (actually energy) and another half (actually extanded part) with zero padding (Numerical Recipes 643 page)
     for (int i=0;i<length;i++) {
@@ -862,12 +863,15 @@ void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdi
     for (int i=length;i<length*2;i++) {
 	    power_noise_copy[i]=0.;
     }
-    
+    cout << "ASG MC 3" << endl;
+
     // do forward fft to get freq domain (energy of pure signal)
     Tools::realft(power_noise_copy.data(),1,length*2);
+    cout << "ASG MC 4" << endl;
 
     std::vector<double> ans_copy(length * 2);
-    
+    cout << "ASG MC 5" << endl;
+
     // change the sign (from numerical recipes 648, 649 page)
     for (int j=1;j<length;j++) {
         ans_copy[2*j]=(power_noise_copy[2*j]*fdiode[2*j]-power_noise_copy[2*j+1]*fdiode[2*j+1])/((double)length);
@@ -875,19 +879,22 @@ void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdi
     }
     ans_copy[0]=power_noise_copy[0]*fdiode[0]/((double)length);
     ans_copy[1]=power_noise_copy[1]*fdiode[1]/((double)length);
+    cout << "ASG MC 6" << endl;
 
     // 1/length is actually 2/(length * 2)
     //
     
     Tools::realft(ans_copy.data(),-1,length*2);
-    
+    cout << "ASG MC 7" << endl;
+
     diodeconv.clear();  // remove previous values in diodeconv
     
     // only save first half of convolution result as last half is result from zero padding (and some spoiled bins)
     for (int i=0;i<length+maxt_diode_bin;i++) {
 	    diodeconv.push_back( ans_copy[i] );
     }
-    
+    cout << "ASG MC 8" << endl;
+
     
     int iminsamp,imaxsamp; // find min and max samples such that
     // the diode response is fully overlapping with the noise waveform
@@ -897,7 +904,8 @@ void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdi
     // diode response function is only partially overlappying with the
     // waveform in the convolution
     imaxsamp=NFOUR/2;
-    
+    cout << "ASG MC 9" << endl;
+
     if (imaxsamp<iminsamp) {
         cout << "Noise waveform is not long enough for this diode response.\n";
         exit(1);

@@ -632,7 +632,12 @@ void Report::BuildAndTriggerOnWaveforms(
         
         DBS++; // Increment DBS for the next power of 2
       }
+
+      // Go one more power of two up
+      DBS++;
+      DATA_BIN_SIZE_tmp = (int) pow(2., (double) DBS);
       settings1->DATA_BIN_SIZE = DATA_BIN_SIZE_tmp;
+      cout << "settings1->DATA_BIN_SIZE :" << settings1->DATA_BIN_SIZE << endl;
 
       // Resize Full_window and Full_window_V to size 16 for 16 channels
       trigger->Full_window.resize(16);
@@ -648,8 +653,14 @@ void Report::BuildAndTriggerOnWaveforms(
 
       // reset all filter values in Detector class
       detector->get_NewDiodeModel(settings1);
+      cout << "ASG Inside BATOW 4.1 " << endl;
+
       detector->ReadFilter_New(settings1);
+      cout << "ASG Inside BATOW 4.2 " << endl;
+
       detector->ReadPreamp_New(settings1);
+      cout << "ASG Inside BATOW 4.3 " << endl;
+
       detector->ReadFOAM_New(settings1);
       cout << "ASG Inside BATOW 5 " << endl;
 
@@ -3338,6 +3349,7 @@ cout << "ASG GANWF 1" << endl;
     int bin_value;
     int noise_ID_index;
     int noise_wf_index;
+/*
     for (int bin = 0; bin < wf_length; bin++) {
         bin_value = signalbin - BINSIZE / 2 + bin;
     
@@ -3354,22 +3366,30 @@ cout << "ASG GANWF 1" << endl;
             noise_wf->at(noise_ID[noise_ID_index]).at(noise_wf_index)
         );
     }
-    /*
+*/ 
+    
     for (int bin=0; bin<wf_length; bin++) {
-        cout << "ASG GANWF 13" << endl;
+//        cout << "ASG GANWF 13" << endl;
 
         bin_value = signalbin - BINSIZE/2 + bin;
         noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
         noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
+/*        cout << "settings1->DATA_BIN_SIZE: " << settings1->DATA_BIN_SIZE << endl;
+        cout << "bin: " << bin << endl;
+        cout << "bin_value: " << bin_value << endl;
+        cout << "ASG noise_ID_index: " << noise_ID_index << endl;
+        cout << "ASG noise_wf_index: " << noise_wf_index << endl;
         cout << "ASG GANWF 14" << endl;
         cout << "wf_length: " << wf_length << endl;
+*/
         V_noise_only->push_back(
             noise_wf->at( noise_ID[noise_ID_index] ).at( noise_wf_index )
         );
-        cout << "ASG GANWF 15" << endl;
+//        cout << "ASG noise_wf: " << noise_wf->at(noise_ID[noise_ID_index]).size() << endl;
+//        cout << "ASG GANWF 15" << endl;
 
     } // end loop over bins
-    */
+    
 }
 
 
@@ -4184,7 +4204,7 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 Vfft_noise_before.push_back(fits_for_this_station[ch][k]);
                 current_phase = noise_phase[k];
                 V_tmp = fits_for_this_station[ch][k];
-                
+
                 // the right normalization factor is N * sqrt(deltaF)
                 V_tmp *= double(settings1->DATA_BIN_SIZE);
                 V_tmp *= sqrt(this_delta_f);
@@ -4195,7 +4215,7 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 // set the real and imaginary components of the FFT
                 vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
                 vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
-                
+
                 // stash those values
                 Vfft_noise_after.push_back(vnoise[2 * k]);
                 Vfft_noise_after.push_back(vnoise[2 * k + 1]);
