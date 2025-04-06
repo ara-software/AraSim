@@ -580,6 +580,7 @@ void Report::BuildAndTriggerOnWaveforms(
     int debugmode, int station_index, int evt, int trig_search_init, 
     Detector *detector, Event *event, Settings *settings1, Trigger *trigger
 ){
+    cout << "ASG Inside BATOW 1 " << endl;
   // Loop over all antennas to make DATA_BIN_SIZE array for signal + noise. (with time delay)
   // With that signal + noise array, we'll do the convolution with the diode response.
   // With the convolution result, we'll do a trigger check.
@@ -603,6 +604,7 @@ void Report::BuildAndTriggerOnWaveforms(
     if (stations[station_index].Total_ray_sol)  
         ants_with_nonzero_signal = getNumOfSignalledAnts(stations[station_index]);
   }
+  cout << "ASG Inside BATOW 2 " << endl;
 
   if (stations[station_index].Total_ray_sol && ants_with_nonzero_signal)
   {
@@ -618,6 +620,7 @@ void Report::BuildAndTriggerOnWaveforms(
     // Otherwise, the same noise waveforms will be used for the entire simulation run.
     if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0) {
       // Generate brand new noise waveforms for each event
+      cout << "ASG Inside BATOW 3 " << endl;
 
       // redefine DATA_BIN_SIZE
       int DATA_BIN_SIZE_tmp;
@@ -641,25 +644,30 @@ void Report::BuildAndTriggerOnWaveforms(
         trigger->Full_window_V[i].clear();
         trigger->Full_window_V[i].resize(DATA_BIN_SIZE_tmp, 0.0);
       }
+      cout << "ASG Inside BATOW 4 " << endl;
 
       // reset all filter values in Detector class
       detector->get_NewDiodeModel(settings1);
       detector->ReadFilter_New(settings1);
       detector->ReadPreamp_New(settings1);
       detector->ReadFOAM_New(settings1);
+      cout << "ASG Inside BATOW 5 " << endl;
 
       if (settings1->USE_TESTBED_RFCM_ON == 1)
         detector->ReadRFCM_New(settings1);
       if (settings1->NOISE == 1 && settings1->DETECTOR == 3)
         detector->ReadRayleigh_New(settings1);
+        cout << "ASG Inside BATOW 6 " << endl;
 
       // reset Trigger class noise temp values
       trigger->Reset_V_noise_freqbin(settings1, detector);
+      cout << "ASG Inside BATOW 7 " << endl;
 
       // now call new noise waveforms with new DATA_BIN_SIZE
       trigger->GetNewNoiseWaveforms(settings1, detector, this);
 
     }
+    cout << "ASG Inside BATOW 8 " << endl;
 
     // If the simulation is not in debug mode, check if DATA_BIN_SIZE is large 
     //   enough for the total time delay between antennas via this N_noise 
@@ -673,6 +681,7 @@ void Report::BuildAndTriggerOnWaveforms(
     if (N_noise > 1) {
         cout << "N_noise : " << N_noise << " max_total_bin : " << max_total_bin << " might cause error!!" << endl;
     }
+    cout << "ASG Inside BATOW 9 " << endl;
 
     // For all antennas on all strings, get the noise waveform and combine 
     //   it with the signal waveforms from all connected rays then convolve the 
@@ -686,9 +695,11 @@ void Report::BuildAndTriggerOnWaveforms(
       for (int k = 0; k < detector->stations[station_index].strings[j].antennas.size(); k++)
       {
         // Loop over antennas
+        cout << "ASG Inside BATOW 10 " << endl;
 
         // Fill trigger->Full_window and trigger->Full_window_V with noise waveforms
         Prepare_Antenna_Noise(debugmode, ch_ID, station_index, j, k, settings1, trigger, detector);
+        cout << "ASG Inside BATOW 11 " << endl;
 
         // currently there is a initial spoiled bins (maxt_diode_bin) 
         // at the initial Full_window "AND" at the initial of connected noisewaveform 
@@ -703,6 +714,7 @@ void Report::BuildAndTriggerOnWaveforms(
                 event, settings1, trigger, detector
             );
         }
+        cout << "ASG Inside BATOW 12 " << endl;
 
         // Calculate the SNR in this antenna from the event signal only
         double ant_SNR = 0.;
@@ -712,6 +724,7 @@ void Report::BuildAndTriggerOnWaveforms(
           //   the coming insufficient signal check
           ant_SNR = 100.;
         else {
+            cout << "ASG Inside BATOW 13 " << endl;
 
           // Use the noise RMS from the trigger class and pass 
           //   it as the noise WF to get_SNR() (since the RMS of an 
@@ -725,6 +738,7 @@ void Report::BuildAndTriggerOnWaveforms(
           ant_SNR = get_SNR( 
               stations[station_index].strings[j].antennas[k].V_convolved, 
               tmp_noise_RMS);
+              cout << "ASG Inside BATOW 14 " << endl;
 
         }
 
@@ -741,6 +755,7 @@ void Report::BuildAndTriggerOnWaveforms(
       } // for antennas
 
     } // for strings
+    cout << "ASG Inside BATOW 15 " << endl;
 
     // Check for a trigger on this event
     // Do only if it's not in debugmode and if at least 1 antenna has sufficient signal
@@ -757,6 +772,7 @@ void Report::BuildAndTriggerOnWaveforms(
 
       // save trig search bin info default (if no global trig, this value saved)
       stations[station_index].total_trig_search_bin = max_total_bin - trig_search_init;
+      cout << "ASG Inside BATOW 6 " << endl;
 
       if (settings1->TRIG_SCAN_MODE==5) {
         // Trigger mode for phased array
@@ -781,6 +797,7 @@ void Report::BuildAndTriggerOnWaveforms(
             settings1->TRIG_SCAN_MODE
         );
       }
+      cout << "ASG Inside BATOW 17 " << endl;
 
     }   // if it's not debugmode
 
@@ -791,10 +808,12 @@ void Report::BuildAndTriggerOnWaveforms(
       trigger->ClearNoiseWaveforms();
 
   }   // if there is any ray_sol in the station
+  cout << "ASG Inside BATOW 18 " << endl;
 
   // Check if there's additional waveform to trigger on. Save this event and rerun trigger if so.
   stations[station_index].next_trig_search_init = -1;
   if (stations[station_index].Global_Pass) {
+    cout << "ASG Inside BATOW 19 " << endl;
 
     bool analyze_more_waveform = false;
 
@@ -2873,12 +2892,13 @@ void Report::Convolve_Signals(
     // Combine signals from rays and load noise waveforms
     // Pass the noise+signal waveform through the tunnel diode
     // Enforce voltage saturation
-
+cout << "ASG Inside CS 1" << endl;
     // init : bin + maxt_diode_bin, fin : bin + NFOUR/2
 
     // Clear old signals
     vector < vector <int> > signal_bin; // the center of bin where signal should locate
     signal_bin.resize(event->Nu_Interaction.size());
+    cout << "ASG Inside CS 2" << endl;
 
     // Determine the bin (index) where the signal will arrive in output waveforms
     //   and flag which signals will fit into the same time window
@@ -2891,6 +2911,7 @@ void Report::Convolve_Signals(
             antenna->SignalBin[interaction_idx].push_back(signal_bin[interaction_idx][m]);
         }
     }
+    cout << "ASG Inside CS 3" << endl;
 
     // Set default signal wf length
     int BINSIZE = settings1->NFOUR/2;
@@ -2898,12 +2919,14 @@ void Report::Convolve_Signals(
     // If there are no ray solutions to this antenna, fill all the arrays with 0s
     //   then get noise and convolve
     if ( antenna->ray_sol_cnt == 0 ){
-        
+        cout << "ASG Inside CS 4" << endl;
+
         // Save signal wf as array of 0s
         vector <double> V_signal;
         for (int bin=0; bin<BINSIZE; bin++) V_signal.push_back(0.);
         for (int bin=0; bin<BINSIZE; bin++) antenna->V_convolved.push_back(0.);
         for (int bin=0; bin<BINSIZE; bin++) antenna->V_noise.push_back(0.);
+        cout << "ASG Inside CS 5" << endl;
 
         // Convolve the noise signal and add to the array used for triggering
         GetNoiseThenConvolve(
@@ -2916,6 +2939,7 @@ void Report::Convolve_Signals(
     // If there are ray solutions, prepare signal wf array with 0s 
     //   and save an array with the full noise-only waveform to the antenna
     else {
+        cout << "ASG Inside CS 6" << endl;
 
         // Initialize waveform length as 2 BINSIZES longer than the last ray's signal bin
         int array_length = antenna->Get_Max_SignalBin() + 2*BINSIZE;
@@ -2925,28 +2949,54 @@ void Report::Convolve_Signals(
         for (int i=0; i<array_length; i++) antenna->V_noise.push_back(0.);
 
     }
+    cout << "ASG Inside CS 7" << endl;
 
     // Loop over ray solutions and get signals from each
     // Loop does not run if there are no ray solutions
     if(antenna->ray_sol_cnt > 0) {
+        cout << "ASG Inside CS 7.1" << endl;
+
       int this_signalbin = 0;
       int n_connected_rays = antenna->ray_sol_cnt; 
       vector<double> V_signal;
+    
+      // Identify the indices of the last non-empty waveform (to apply final padding inside Combine_Waveforms)
+      // Loop through all interaction indices
+      int last_valid_interaction = -1;  // Will store the index of the last interaction with data
+      int last_valid_m = -1;            // Will store the index of the last ray within that interaction
+
+      for (int i = 0; i < antenna->V.size(); ++i) {
+          // Loop over rays for this interaction
+          for (int m = 0; m < signal_bin[i].size(); ++m) {
+              // Check if the waveform is non-empty
+              if (!antenna->V[i][m].empty()) {
+                  // Update the last known valid (non-empty) waveform indices
+                  last_valid_interaction = i;
+                  last_valid_m = m;
+              }
+          }
+      }
+
       for (int interaction_idx=0; interaction_idx<antenna->V.size(); interaction_idx++){
         for (int m = 0; m < signal_bin[interaction_idx].size(); ++m) {
+            
+            bool is_last = (interaction_idx == last_valid_interaction) && (m == last_valid_m); // reached the last waveform
+
             Combine_Waveforms(
                 signal_bin[interaction_idx][m], this_signalbin,
                 antenna->V[interaction_idx][m], V_signal,
-                &this_signalbin, &V_signal);
+                &this_signalbin, &V_signal, is_last);
         }
       }
-      
+      cout << "ASG Inside CS 8" << endl;
+
       GetNoiseThenConvolve(
           antenna, V_signal,
           BINSIZE, this_signalbin, n_connected_rays, 
           channel_index, station_number, 
           settings1, trigger, detector);
     }
+    cout << "ASG Inside CS 9" << endl;
 
 }
 
@@ -3056,7 +3106,7 @@ void Report::Select_Wave_Convlv_Exchange(
 
 void Report::Combine_Waveforms(int signalbin_0, int signalbin_1, 
     vector<double> V0, vector<double> V1, 
-    int* signalbin_combined, vector<double>* V_combined
+    int* signalbin_combined, vector<double>* V_combined, bool pad_to_power_of_two
 ) {
   // adds waveforms V0 & V1 into combined vector V_combined
   // uses global signalbin indices to ensure vectors are properly combined
@@ -3097,8 +3147,8 @@ void Report::Combine_Waveforms(int signalbin_0, int signalbin_1,
     V[combined_bin] += V1[bin];
   }
 
-  // if length is not a power of 2, zero pad
-  if((len & (len - 1)) != 0) {
+  // for the last added waveform if length is not a power of 2, zero pad
+  if(pad_to_power_of_two && (V.size() & (V.size() - 1)) != 0) {
     const int newLen = int(pow(2, ceil(log2(len)))); // get next power of 2 
     V.resize(newLen, 0.);
   }
