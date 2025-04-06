@@ -2989,14 +2989,16 @@ cout << "ASG Inside CS 1" << endl;
         }
       }
       cout << "ASG Inside CS 8" << endl;
-
+      cout << "ASG V_signal.size(): " << V_signal.size() << endl;
       GetNoiseThenConvolve(
           antenna, V_signal,
           BINSIZE, this_signalbin, n_connected_rays, 
           channel_index, station_number, 
           settings1, trigger, detector);
+      cout << "ASG Inside CS 9" << endl;
+
     }
-    cout << "ASG Inside CS 9" << endl;
+    cout << "ASG Inside CS 10" << endl;
 
 }
 
@@ -3129,10 +3131,15 @@ void Report::Combine_Waveforms(int signalbin_0, int signalbin_1,
   else if(V1.empty()) 
     signalbin_1 = signalbin_0;
 
+
+    cout << "[CW] signalbin_0 = " << signalbin_0 << ", V0.size() = " << V0.size() << endl;
+    cout << "[CW] signalbin_1 = " << signalbin_1 << ", V1.size() = " << V1.size() << endl;
+
   // resize to necessary length to combine vectors 
   signalbin = min(signalbin_0, signalbin_1); // starting index in terms of global index
   const int maxsignalbin = max(signalbin_0+V0.size()-1, signalbin_1+V1.size()-1); // last index in terms of global index
   const int len = maxsignalbin - signalbin + 1; // length needed to combine both signals
+  cout << "[CW] signalbin = " << signalbin << ", maxsignalbin = " << maxsignalbin << ", len = " << len << endl;
   V.resize(len, 0);
   
   // add in the zeroth vector
@@ -3149,7 +3156,7 @@ void Report::Combine_Waveforms(int signalbin_0, int signalbin_1,
 
   // for the last added waveform if length is not a power of 2, zero pad
   if(pad_to_power_of_two && (V.size() & (V.size() - 1)) != 0) {
-    const int newLen = int(pow(2, ceil(log2(len)))); // get next power of 2 
+    const int newLen = int(pow(2, ceil(log2(V.size())))); // get next power of 2 
     V.resize(newLen, 0.);
   }
 
@@ -3164,6 +3171,7 @@ void Report::GetNoiseThenConvolve(
     int channel_index, int station_number, 
     Settings *settings1, Trigger *trigger, Detector *detector
 ){
+    cout << "ASG Inside GNTC 1" << endl;
     // Get noise waveform, signal waveform, combine them, 
     //   convolve them through the tunnel diode, apply voltage saturation,
     //   then save the noise and signals to the 
@@ -3174,21 +3182,41 @@ void Report::GetNoiseThenConvolve(
     int min_wf_bin = 0;
     int max_wf_bin = 0;
     int offset = 0;
+    cout << "ASG Inside GNTC 1.1" << endl;
+
     vector <double> diode_response;
+    cout << "ASG Inside GNTC 1.2" << endl;
+
     if ( n_connected_rays > 1 ) { // multiple ray solutions in one window
+        cout << "ASG Inside GNTC -2" << endl;
+
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is 2*BINSIZE
+        cout << "ASG Inside GNTC -2.1" << endl;
+
         offset = trigger->maxt_diode_bin;
+        cout << "ASG Inside GNTC -2.2" << endl;
+
         min_wf_bin = this_signalbin - BINSIZE/2 + offset;
+        cout << "ASG Inside GNTC -2.3" << endl;
+
         max_wf_bin = this_signalbin - BINSIZE/2 + wf_length;
+        cout << "ASG Inside GNTC -2.4" << endl;
+
         diode_response = detector->getDiodeModel(2*wf_length, settings1);
+        cout << "ASG Inside GNTC 2" << endl;
+
     }
     else if ( antenna->ray_sol_cnt == 0 ){ // No rays connected to this antenna
+        cout << "ASG Inside GNTC -3" << endl;
+
         this_signalbin = BINSIZE/2;
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is BINSIZE
         offset = 0;
         min_wf_bin = 0;
         max_wf_bin = wf_length;
         diode_response = detector->getDiodeModel(2*wf_length, settings1);
+        cout << "ASG Inside GNTC 3" << endl;
+
     }
     else { // Only one ray signal in the window
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is BINSIZE
@@ -3196,22 +3224,28 @@ void Report::GetNoiseThenConvolve(
         min_wf_bin = this_signalbin - BINSIZE/2 + offset;
         max_wf_bin = this_signalbin - BINSIZE/2 + wf_length;
         diode_response = detector->getDiodeModel(2*wf_length, settings1);
+        cout << "ASG Inside GNTC 4" << endl;
+
     }
+    cout << "ASG Inside GNTC 5" << endl;
 
     // Get noise-only waveform
     vector <double> V_noise;
     GetAntennaNoiseWF(
         this_signalbin, wf_length, BINSIZE, channel_index, station_number, &V_noise, 
         settings1, trigger, detector);
+        cout << "ASG Inside GNTC 6" << endl;
 
     // Create noise+signal waveforms
     V_total_forconvlv.clear();
     for (int bin=0; bin<wf_length; bin++){
         V_total_forconvlv.push_back( V_signal.at(bin) + V_noise[bin]);
     }
+    cout << "ASG Inside GNTC 7" << endl;
 
     // Push noise+signal waveform through the tunnel diode
     trigger->myconvlv( V_total_forconvlv, wf_length, diode_response, V_total_forconvlv);
+    cout << "ASG Inside GNTC 8" << endl;
 
     // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
     for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
@@ -3222,6 +3256,7 @@ void Report::GetNoiseThenConvolve(
         trigger->Full_window_V[channel_index][bin] += V_signal[vBin];
         antenna->V_convolved[bin] += V_signal[vBin];
         antenna->V_noise[bin] += V_noise[vBin];
+        cout << "ASG Inside GNTC 9" << endl;
 
         // Add electronics saturation effect to WF we'll perform trigger check on
         if ( trigger->Full_window_V[channel_index][bin] > settings1->V_SATURATION ) {
@@ -3230,6 +3265,7 @@ void Report::GetNoiseThenConvolve(
         else if ( trigger->Full_window_V[channel_index][bin] < -1.*settings1->V_SATURATION ) {
             trigger->Full_window_V[channel_index][bin] = -1.*settings1->V_SATURATION;
         }
+        cout << "ASG Inside GNTC 10" << endl;
 
     } 
 
@@ -3243,30 +3279,51 @@ void Report::GetAntennaNoiseWF(
 ){
     // Save a `wf_length` long noise waveform to the provided `V_noise_only` array
     //   with the signal bin located at index `BINSIZE/2`
-
+cout << "ASG GANWF 1" << endl;
     // Clear old noise waveforms
     V_noise_only->clear();
+    cout << "ASG GANWF 2" << endl;
 
     // Pick noise waveform
     vector< vector <double> > *noise_wf;
     int channel_number = GetChNumFromArbChID(detector, channel_index, StationIndex, settings1) - 1;
+    cout << "ASG GANWF 3" << endl;
+
     if ( settings1->NOISE_CHANNEL_MODE==0) {
+        cout << "ASG GANWF 4" << endl;
         noise_wf = &trigger->v_noise_timedomain;
+        cout << "ASG GANWF 5" << endl;
+
+
     }
     // Use channel-by-channel temperatures to generate noise
     else if ( settings1->NOISE_CHANNEL_MODE==1) {
+        cout << "ASG GANWF 5" << endl;
+
         noise_wf = &trigger->v_noise_timedomain_ch[ channel_number ];
+        cout << "ASG GANWF 6" << endl;
+
     }
     // Only use channel-by-channel temperatures to generate noise for the first 8 channels. 
     // Use the same temperature for the remaining 8.
     else if ( settings1->NOISE_CHANNEL_MODE==2) {
+        cout << "ASG GANWF 7" << endl;
+
         // If this channel is one of the first 8, use channel specific noise
         if ( channel_number < 8) {
+            cout << "ASG GANWF 8" << endl;
+
             noise_wf = &trigger->v_noise_timedomain_ch[ channel_number ];
+            cout << "ASG GANWF 9" << endl;
+
         }
         // This channel is NOT one of the first 8, use same noise for these channels
         else {
+            cout << "ASG GANWF 10" << endl;
+
             noise_wf = &trigger->v_noise_timedomain_ch[ 8 ];
+            cout << "ASG GANWF 11" << endl;
+
         }
     }
     else{
@@ -3275,20 +3332,44 @@ void Report::GetAntennaNoiseWF(
         cout<<" for requested NOISE_CHANNEL_MODE "<<settings1->NOISE_CHANNEL_MODE<<endl;
         throw std::runtime_error("");
     }
+    cout << "ASG GANWF 12" << endl;
 
     // Loop over bins and get noise voltage value for each
     int bin_value;
     int noise_ID_index;
     int noise_wf_index;
+    for (int bin = 0; bin < wf_length; bin++) {
+        bin_value = signalbin - BINSIZE / 2 + bin;
+    
+        // Wrap bin_value to avoid out-of-bounds
+        int total_bins = noise_ID.size() * settings1->DATA_BIN_SIZE;
+        int wrapped_bin_value = bin_value % total_bins;
+        if (wrapped_bin_value < 0) wrapped_bin_value += total_bins;
+    
+        noise_ID_index = wrapped_bin_value / settings1->DATA_BIN_SIZE;
+        noise_wf_index = wrapped_bin_value % settings1->DATA_BIN_SIZE;
+    
+        // No bounds checks needed now since wrapped values are safe
+        V_noise_only->push_back(
+            noise_wf->at(noise_ID[noise_ID_index]).at(noise_wf_index)
+        );
+    }
+    /*
     for (int bin=0; bin<wf_length; bin++) {
+        cout << "ASG GANWF 13" << endl;
+
         bin_value = signalbin - BINSIZE/2 + bin;
         noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
         noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
+        cout << "ASG GANWF 14" << endl;
+        cout << "wf_length: " << wf_length << endl;
         V_noise_only->push_back(
             noise_wf->at( noise_ID[noise_ID_index] ).at( noise_wf_index )
         );
-    } // end loop over bins
+        cout << "ASG GANWF 15" << endl;
 
+    } // end loop over bins
+    */
 }
 
 

@@ -5841,35 +5841,40 @@ void Detector::getDiodeModel(Settings *settings1) {
 
 vector<double> Detector::getDiodeModel(const int len, Settings *settings1) {
     // creates diode model vector of length len
-
+cout << "ASG GDM 1" << endl;
     //  this is our homegrown diode response function which is a downgoing gaussian followed by an upward step function
     TF1 *fdown1=new TF1("fl_down1","[3]+[0]*exp(-1.*(x-[1])*(x-[1])/(2*[2]*[2]))",-300.E-9,300.E-9);
     fdown1->SetParameter(0,-0.8);
     fdown1->SetParameter(1,15.E-9);
     fdown1->SetParameter(2,2.3E-9);
     fdown1->SetParameter(3,0.);
-    
+    cout << "ASG GDM 2" << endl;
+
     TF1 *fdown2=new TF1("fl_down2","[3]+[0]*exp(-1.*(x-[1])*(x-[1])/(2*[2]*[2]))",-300.E-9,300.E-9);
     fdown2->SetParameter(0,-0.2);
     fdown2->SetParameter(1,15.E-9);
     fdown2->SetParameter(2,4.0E-9);
     fdown2->SetParameter(3,0.);
-    
+    cout << "ASG GDM 3" << endl;
+
     maxt_diode= settings1->MAXT_DIODE;
     
     TF1 *f_up=new TF1("f_up","[0]*([3]*(x-[1]))^2*exp(-(x-[1])/[2])",-200.E-9,100.E-9);
-    
+    cout << "ASG GDM 4" << endl;
+
     f_up->SetParameter(2,7.0E-9);
     f_up->SetParameter(0,1.);
     f_up->SetParameter(1,18.E-9);
     f_up->SetParameter(3,1.E9);
     
-    
+    cout << "ASG GDM 5" << endl;
+
     double sum=0.;
 	
     f_up->SetParameter(0,-1.*sqrt(2.*PI)*(fdown1->GetParameter(0)*fdown1->GetParameter(2)+fdown2->GetParameter(0)*fdown2->GetParameter(2))/(2.*pow(f_up->GetParameter(2),3.)*1.E18));
 
     diode_real.clear();
+    cout << "ASG GDM 6" << endl;
 
     for (int i=0;i<NFOUR/2;i++) {
         
@@ -5884,9 +5889,11 @@ vector<double> Detector::getDiodeModel(const int len, Settings *settings1) {
             sum+=diode_real[i];
         }
     }
-    
-    double diode_real_fft[len];  
-    
+    cout << "ASG GDM 7" << endl;
+
+    std::vector<double> diode_real_fft(len, 0.0);  
+    cout << "ASG GDM 8" << endl;
+
     for (int i=0; i < len; i++) {  
         if ( i<(int)(maxt_diode/TIMESTEP) ) { 
             diode_real_fft[i] = diode_real[i];
@@ -5895,16 +5902,20 @@ vector<double> Detector::getDiodeModel(const int len, Settings *settings1) {
             diode_real_fft[i] = 0.;
         }
     }
-    
+    cout << "ASG GDM 9" << endl;
+
     // forward FFT
-    Tools::realft(diode_real_fft,1,len);
-    
+    Tools::realft(diode_real_fft.data(),1,len);
+    cout << "ASG GDM 10" << endl;
+
     vector<double> fdiode; 
-    
+    cout << "ASG GDM 11" << endl;
+
     // save f domain diode response in fdiode
     for (int i=0; i < len; i++) { 
         fdiode.push_back( diode_real_fft[i] );
     }
+    cout << "ASG GDM 12" << endl;
 
     delete fdown1;
     delete fdown2;
