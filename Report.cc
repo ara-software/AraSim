@@ -580,7 +580,6 @@ void Report::BuildAndTriggerOnWaveforms(
     int debugmode, int station_index, int evt, int trig_search_init, 
     Detector *detector, Event *event, Settings *settings1, Trigger *trigger
 ){
-    cout << "ASG Inside BATOW 1 " << endl;
   // Loop over all antennas to make DATA_BIN_SIZE array for signal + noise. (with time delay)
   // With that signal + noise array, we'll do the convolution with the diode response.
   // With the convolution result, we'll do a trigger check.
@@ -604,7 +603,6 @@ void Report::BuildAndTriggerOnWaveforms(
     if (stations[station_index].Total_ray_sol)  
         ants_with_nonzero_signal = getNumOfSignalledAnts(stations[station_index]);
   }
-  cout << "ASG Inside BATOW 2 " << endl;
 
   if (stations[station_index].Total_ray_sol && ants_with_nonzero_signal)
   {
@@ -620,7 +618,6 @@ void Report::BuildAndTriggerOnWaveforms(
     // Otherwise, the same noise waveforms will be used for the entire simulation run.
     if (settings1->NOISE_WAVEFORM_GENERATE_MODE == 0) {
       // Generate brand new noise waveforms for each event
-      cout << "ASG Inside BATOW 3 " << endl;
 
       // redefine DATA_BIN_SIZE
       int DATA_BIN_SIZE_tmp;
@@ -649,36 +646,25 @@ void Report::BuildAndTriggerOnWaveforms(
         trigger->Full_window_V[i].clear();
         trigger->Full_window_V[i].resize(DATA_BIN_SIZE_tmp, 0.0);
       }
-      cout << "ASG Inside BATOW 4 " << endl;
 
       // reset all filter values in Detector class
       detector->get_NewDiodeModel(settings1);
-      cout << "ASG Inside BATOW 4.1 " << endl;
-
       detector->ReadFilter_New(settings1);
-      cout << "ASG Inside BATOW 4.2 " << endl;
-
       detector->ReadPreamp_New(settings1);
-      cout << "ASG Inside BATOW 4.3 " << endl;
-
       detector->ReadFOAM_New(settings1);
-      cout << "ASG Inside BATOW 5 " << endl;
 
       if (settings1->USE_TESTBED_RFCM_ON == 1)
         detector->ReadRFCM_New(settings1);
       if (settings1->NOISE == 1 && settings1->DETECTOR == 3)
         detector->ReadRayleigh_New(settings1);
-        cout << "ASG Inside BATOW 6 " << endl;
 
       // reset Trigger class noise temp values
       trigger->Reset_V_noise_freqbin(settings1, detector);
-      cout << "ASG Inside BATOW 7 " << endl;
 
       // now call new noise waveforms with new DATA_BIN_SIZE
       trigger->GetNewNoiseWaveforms(settings1, detector, this);
 
     }
-    cout << "ASG Inside BATOW 8 " << endl;
 
     // If the simulation is not in debug mode, check if DATA_BIN_SIZE is large 
     //   enough for the total time delay between antennas via this N_noise 
@@ -692,7 +678,6 @@ void Report::BuildAndTriggerOnWaveforms(
     if (N_noise > 1) {
         cout << "N_noise : " << N_noise << " max_total_bin : " << max_total_bin << " might cause error!!" << endl;
     }
-    cout << "ASG Inside BATOW 9 " << endl;
 
     // For all antennas on all strings, get the noise waveform and combine 
     //   it with the signal waveforms from all connected rays then convolve the 
@@ -706,11 +691,9 @@ void Report::BuildAndTriggerOnWaveforms(
       for (int k = 0; k < detector->stations[station_index].strings[j].antennas.size(); k++)
       {
         // Loop over antennas
-        cout << "ASG Inside BATOW 10 " << endl;
 
         // Fill trigger->Full_window and trigger->Full_window_V with noise waveforms
         Prepare_Antenna_Noise(debugmode, ch_ID, station_index, j, k, settings1, trigger, detector);
-        cout << "ASG Inside BATOW 11 " << endl;
 
         // currently there is a initial spoiled bins (maxt_diode_bin) 
         // at the initial Full_window "AND" at the initial of connected noisewaveform 
@@ -725,7 +708,6 @@ void Report::BuildAndTriggerOnWaveforms(
                 event, settings1, trigger, detector
             );
         }
-        cout << "ASG Inside BATOW 12 " << endl;
 
         // Calculate the SNR in this antenna from the event signal only
         double ant_SNR = 0.;
@@ -735,25 +717,19 @@ void Report::BuildAndTriggerOnWaveforms(
           //   the coming insufficient signal check
           ant_SNR = 100.;
         else {
-            cout << "ASG Inside BATOW 13 " << endl;
 
           // Use the noise RMS from the trigger class and pass 
           //   it as the noise WF to get_SNR() (since the RMS of an 
           //   array with one element is the absolute value of that element)
           vector <double> tmp_noise_RMS;
-          cout << "ASG Inside BATOW 13.1 " << endl;
           int trigger_ch_ID = GetChNumFromArbChID(detector, ch_ID, station_index, settings1) - 1;
-          cout << "ASG Inside BATOW 13.2 " << endl;
           double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
-          cout << "ASG Inside BATOW 13.3 " << endl;
           tmp_noise_RMS.push_back( ant_noise_voltage_RMS );
-          cout << "ASG Inside BATOW 13.4 " << endl;
 
           // Calculate the SNR in this antenna from the signal only
           ant_SNR = get_SNR( 
               stations[station_index].strings[j].antennas[k].V_convolved, 
               tmp_noise_RMS);
-              cout << "ASG Inside BATOW 14 " << endl;
 
         }
 
@@ -770,7 +746,6 @@ void Report::BuildAndTriggerOnWaveforms(
       } // for antennas
 
     } // for strings
-    cout << "ASG Inside BATOW 15 " << endl;
 
     // Check for a trigger on this event
     // Do only if it's not in debugmode and if at least 1 antenna has sufficient signal
@@ -787,7 +762,6 @@ void Report::BuildAndTriggerOnWaveforms(
 
       // save trig search bin info default (if no global trig, this value saved)
       stations[station_index].total_trig_search_bin = max_total_bin - trig_search_init;
-      cout << "ASG Inside BATOW 6 " << endl;
 
       if (settings1->TRIG_SCAN_MODE==5) {
         // Trigger mode for phased array
@@ -812,7 +786,6 @@ void Report::BuildAndTriggerOnWaveforms(
             settings1->TRIG_SCAN_MODE
         );
       }
-      cout << "ASG Inside BATOW 17 " << endl;
 
     }   // if it's not debugmode
 
@@ -823,12 +796,10 @@ void Report::BuildAndTriggerOnWaveforms(
       trigger->ClearNoiseWaveforms();
 
   }   // if there is any ray_sol in the station
-  cout << "ASG Inside BATOW 18 " << endl;
 
   // Check if there's additional waveform to trigger on. Save this event and rerun trigger if so.
   stations[station_index].next_trig_search_init = -1;
   if (stations[station_index].Global_Pass) {
-    cout << "ASG Inside BATOW 19 " << endl;
 
     bool analyze_more_waveform = false;
 
@@ -2907,6 +2878,7 @@ void Report::Convolve_Signals(
     // Combine signals from rays and load noise waveforms
     // Pass the noise+signal waveform through the tunnel diode
     // Enforce voltage saturation
+
     // init : bin + maxt_diode_bin, fin : bin + NFOUR/2
 
     // Clear old signals
@@ -3179,15 +3151,13 @@ void Report::GetNoiseThenConvolve(
     //   convolve them through the tunnel diode, apply voltage saturation,
     //   then save the noise and signals to the 
     //   `Antenna_r` object and the `trigger` class
-cout << "ASG GNTC 1 " << endl;
     // Extend the length of this waveform we're constructing if more than 1 ray connected
+
     int wf_length = 0;
     int min_wf_bin = 0;
     int max_wf_bin = 0;
     int offset = 0;
     vector <double> diode_response;
-    cout << "ASG GNTC 2 " << endl;
-
     if ( n_connected_rays > 1 ) { // multiple ray solutions in one window
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is 2*BINSIZE
         offset = trigger->maxt_diode_bin;
@@ -3210,58 +3180,26 @@ cout << "ASG GNTC 1 " << endl;
         max_wf_bin = this_signalbin - BINSIZE/2 + wf_length;
         diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
-    cout << "ASG GNTC 3" << endl;
 
     // Get noise-only waveform
     vector <double> V_noise;
     GetAntennaNoiseWF(
         this_signalbin, wf_length, BINSIZE, channel_index, station_number, &V_noise, 
         settings1, trigger, detector);
-        cout << "ASG GNTC 4 " << endl;
 
     // Create noise+signal waveforms
     V_total_forconvlv.clear();
     for (int bin=0; bin<wf_length; bin++){
         V_total_forconvlv.push_back( V_signal.at(bin) + V_noise[bin]);
     }
-    cout << "ASG GNTC 5 " << endl;
 
     // Push noise+signal waveform through the tunnel diode
     trigger->myconvlv( V_total_forconvlv, wf_length, diode_response, V_total_forconvlv);
-    cout << "ASG GNTC 6 " << endl;
-cout << "ASG max_wf_bin: " << max_wf_bin << endl;
     // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
     for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
 
-        
-        
         // Export WFs with newly-processed signals
         const int vBin = bin - (min_wf_bin - offset);
-            // Check vBin bounds
-    if (vBin < 0 || vBin >= wf_length) {
-        printf("[ERROR] vBin out of bounds: vBin = %d, wf_length = %d, bin = %d, min_wf_bin = %d, offset = %d\n",
-               vBin, wf_length, bin, min_wf_bin, offset);
-        continue;
-    }
-
-    // Check bin bounds in trigger and antenna vectors
-    if (bin < 0 || bin >= (int)trigger->Full_window[channel_index].size()) {
-        printf("[ERROR] bin out of bounds in trigger->Full_window: bin = %d, vector size = %zu\n",
-               bin, trigger->Full_window[channel_index].size());
-        continue;
-    }
-
-    if (bin >= (int)antenna->V_convolved.size()) {
-        printf("[ERROR] bin out of bounds in antenna->V_convolved: bin = %d, vector size = %zu\n",
-               bin, antenna->V_convolved.size());
-        continue;
-    }
-
-    if (bin >= (int)antenna->V_noise.size()) {
-        printf("[ERROR] bin out of bounds in antenna->V_noise: bin = %d, vector size = %zu\n",
-               bin, antenna->V_noise.size());
-        continue;
-    }
         trigger->Full_window[channel_index][bin] = V_total_forconvlv[vBin];
         trigger->Full_window_V[channel_index][bin] += V_signal[vBin];
         antenna->V_convolved[bin] += V_signal[vBin];
@@ -3323,45 +3261,16 @@ void Report::GetAntennaNoiseWF(
     int bin_value;
     int noise_ID_index;
     int noise_wf_index;
-/*
-    for (int bin = 0; bin < wf_length; bin++) {
-        bin_value = signalbin - BINSIZE / 2 + bin;
-    
-        // Wrap bin_value to avoid out-of-bounds
-        int total_bins = noise_ID.size() * settings1->DATA_BIN_SIZE;
-        int wrapped_bin_value = bin_value % total_bins;
-        if (wrapped_bin_value < 0) wrapped_bin_value += total_bins;
-    
-        noise_ID_index = wrapped_bin_value / settings1->DATA_BIN_SIZE;
-        noise_wf_index = wrapped_bin_value % settings1->DATA_BIN_SIZE;
-    
-        // No bounds checks needed now since wrapped values are safe
-        V_noise_only->push_back(
-            noise_wf->at(noise_ID[noise_ID_index]).at(noise_wf_index)
-        );
-    }
-*/ 
-    
+
     for (int bin=0; bin<wf_length; bin++) {
-//        cout << "ASG GANWF 13" << endl;
 
         bin_value = signalbin - BINSIZE/2 + bin;
         noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
         noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
-/*        cout << "settings1->DATA_BIN_SIZE: " << settings1->DATA_BIN_SIZE << endl;
-        cout << "bin: " << bin << endl;
-        cout << "bin_value: " << bin_value << endl;
-        cout << "ASG noise_ID_index: " << noise_ID_index << endl;
-        cout << "ASG noise_wf_index: " << noise_wf_index << endl;
-        cout << "ASG GANWF 14" << endl;
-        cout << "wf_length: " << wf_length << endl;
-*/
         V_noise_only->push_back(
             noise_wf->at( noise_ID[noise_ID_index] ).at( noise_wf_index )
         );
-//        cout << "ASG noise_wf: " << noise_wf->at(noise_ID[noise_ID_index]).size() << endl;
-//        cout << "ASG GANWF 15" << endl;
-
+        
     } // end loop over bins
     
 }
