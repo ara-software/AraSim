@@ -2951,7 +2951,7 @@ void Report::Convolve_Signals(
     else {
 
         // Initialize waveform length as 2 BINSIZES longer than the last ray's signal bin
-        int array_length = antenna->Get_Max_SignalBin() + 2*BINSIZE;
+        int array_length = (int)std::pow(2, std::ceil(std::log2(antenna->Get_Max_SignalBin()))) + 2 * antenna->Get_Max_SignalBin();
 
         // Make array of 0s for array we're saving all ray signals to
         for (int i=0; i<array_length; i++) antenna->V_convolved.push_back(0.);
@@ -3179,13 +3179,14 @@ void Report::GetNoiseThenConvolve(
     //   convolve them through the tunnel diode, apply voltage saturation,
     //   then save the noise and signals to the 
     //   `Antenna_r` object and the `trigger` class
-
+cout << "ASG GNTC 1 " << endl;
     // Extend the length of this waveform we're constructing if more than 1 ray connected
     int wf_length = 0;
     int min_wf_bin = 0;
     int max_wf_bin = 0;
     int offset = 0;
     vector <double> diode_response;
+    cout << "ASG GNTC 2 " << endl;
 
     if ( n_connected_rays > 1 ) { // multiple ray solutions in one window
         wf_length = V_signal.size(); // when using Select_Wave_Convlv_Exchange this is 2*BINSIZE
@@ -3193,7 +3194,6 @@ void Report::GetNoiseThenConvolve(
         min_wf_bin = this_signalbin - BINSIZE/2 + offset;
         max_wf_bin = this_signalbin - BINSIZE/2 + wf_length;
         diode_response = detector->getDiodeModel(2*wf_length, settings1);
-
     }
     else if ( antenna->ray_sol_cnt == 0 ){ // No rays connected to this antenna
         this_signalbin = BINSIZE/2;
@@ -3210,27 +3210,58 @@ void Report::GetNoiseThenConvolve(
         max_wf_bin = this_signalbin - BINSIZE/2 + wf_length;
         diode_response = detector->getDiodeModel(2*wf_length, settings1);
     }
+    cout << "ASG GNTC 3" << endl;
 
     // Get noise-only waveform
     vector <double> V_noise;
     GetAntennaNoiseWF(
         this_signalbin, wf_length, BINSIZE, channel_index, station_number, &V_noise, 
         settings1, trigger, detector);
+        cout << "ASG GNTC 4 " << endl;
 
     // Create noise+signal waveforms
     V_total_forconvlv.clear();
     for (int bin=0; bin<wf_length; bin++){
         V_total_forconvlv.push_back( V_signal.at(bin) + V_noise[bin]);
     }
+    cout << "ASG GNTC 5 " << endl;
 
     // Push noise+signal waveform through the tunnel diode
     trigger->myconvlv( V_total_forconvlv, wf_length, diode_response, V_total_forconvlv);
-
+    cout << "ASG GNTC 6 " << endl;
+cout << "ASG max_wf_bin: " << max_wf_bin << endl;
     // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
     for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
 
+        
+        
         // Export WFs with newly-processed signals
         const int vBin = bin - (min_wf_bin - offset);
+            // Check vBin bounds
+    if (vBin < 0 || vBin >= wf_length) {
+        printf("[ERROR] vBin out of bounds: vBin = %d, wf_length = %d, bin = %d, min_wf_bin = %d, offset = %d\n",
+               vBin, wf_length, bin, min_wf_bin, offset);
+        continue;
+    }
+
+    // Check bin bounds in trigger and antenna vectors
+    if (bin < 0 || bin >= (int)trigger->Full_window[channel_index].size()) {
+        printf("[ERROR] bin out of bounds in trigger->Full_window: bin = %d, vector size = %zu\n",
+               bin, trigger->Full_window[channel_index].size());
+        continue;
+    }
+
+    if (bin >= (int)antenna->V_convolved.size()) {
+        printf("[ERROR] bin out of bounds in antenna->V_convolved: bin = %d, vector size = %zu\n",
+               bin, antenna->V_convolved.size());
+        continue;
+    }
+
+    if (bin >= (int)antenna->V_noise.size()) {
+        printf("[ERROR] bin out of bounds in antenna->V_noise: bin = %d, vector size = %zu\n",
+               bin, antenna->V_noise.size());
+        continue;
+    }
         trigger->Full_window[channel_index][bin] = V_total_forconvlv[vBin];
         trigger->Full_window_V[channel_index][bin] += V_signal[vBin];
         antenna->V_convolved[bin] += V_signal[vBin];
