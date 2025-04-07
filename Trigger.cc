@@ -791,9 +791,10 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
 // moved mindiodeconvl, onediodeconvl, power_noise as I can't find their use.
 void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <double> &fdiode, vector <double> &diodeconv) {
     const int length=DATA_BIN_SIZE;
+    cout << "ASG OMC 1" << endl;
 
     // we are going to make double sized array for complete convolution
-    double power_noise_copy[length*2];
+    std::vector<double> power_noise_copy(length * 2);
 
     // fill half of the array as power (actually energy) and another half (actually extanded part) with zero padding (Numerical Recipes 643 page)
     for (int i=0;i<length;i++) {
@@ -804,9 +805,9 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
     }
     
     // do forward fft to get freq domain (energy of pure signal)
-    Tools::realft(power_noise_copy,1,length*2);
+    Tools::realft(power_noise_copy.data(),1,length*2);
     
-    double ans_copy[length*2];
+    std::vector<double> ans_copy(length * 2);
 
     // change the sign (from numerical recipes 648, 649 page)
     for (int j=1;j<length;j++) {
@@ -818,7 +819,7 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
 
     // 1/length is actually 2/(length * 2)
     
-    Tools::realft(ans_copy,-1,length*2);
+    Tools::realft(ans_copy.data(),-1,length*2);
     
     diodeconv.clear();  // remove previous values in diodeconv
     
