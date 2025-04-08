@@ -325,7 +325,7 @@ int main(int argc, char **argv) {   // read setup.txt file
         check_station_DC = 0;
         if ( settings1->DEBUG_MODE_ON==0 ) {
             std::cerr<<"*";
-            if ( Events_Thrown%100 == 0 )
+            //if ( Events_Thrown%100 == 0 )
                 cout<<"Thrown "<<Events_Thrown<<endl;
         }
 
@@ -414,9 +414,12 @@ int main(int argc, char **argv) {   // read setup.txt file
 
                 // Combine all signal waveforms, add noise, perform trigger check on each station
                 for (int station=0; station < report->stations.size(); station++) {
+                    cout << "ASG Enters BATOW?" << endl;
                     report->BuildAndTriggerOnWaveforms(
                         debugmode, station, Events_Thrown, 
                         report->stations[station].next_trig_search_init, detector, event, settings1, trigger);
+                    cout << "ASG Exists BATOW?" << endl;
+
                 }
 
                 // Save the event object to a temporary object in case we have more data to analyze
