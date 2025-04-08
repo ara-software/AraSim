@@ -612,7 +612,13 @@ void Report::BuildAndTriggerOnWaveforms(
     // to save time, use only necessary number of bins
     int max_total_bin = (
         (stations[station_index].max_arrival_time - stations[station_index].min_arrival_time) 
-        / settings1->TIMESTEP + settings1->NFOUR *3 + trigger->maxt_diode_bin );    // make more time
+        / settings1->TIMESTEP);
+    
+    // Compute next power of two larger than max_total_bin
+    max_total_bin = (int)std::pow(2, std::ceil(std::log2(max_total_bin)));
+    
+    //make more time
+    max_total_bin += settings1->NFOUR *3 + trigger->maxt_diode_bin;
 
     // Decide if new noise waveforms will be generated for every new event. 
     // Otherwise, the same noise waveforms will be used for the entire simulation run.
@@ -631,8 +637,8 @@ void Report::BuildAndTriggerOnWaveforms(
       }
 
       // Go one more power of two up
-      DBS++;
-      DATA_BIN_SIZE_tmp = (int) pow(2., (double) DBS);
+      //DBS++;
+      //DATA_BIN_SIZE_tmp = (int) pow(2., (double) DBS);
       settings1->DATA_BIN_SIZE = DATA_BIN_SIZE_tmp;
       cout << "settings1->DATA_BIN_SIZE :" << settings1->DATA_BIN_SIZE << endl;
 
@@ -2922,12 +2928,12 @@ void Report::Convolve_Signals(
     //   and save an array with the full noise-only waveform to the antenna
     else {
 
-        // Initialize waveform length as 2 BINSIZES longer than the last ray's signal bin
-        int array_length = (int)std::pow(2, std::ceil(std::log2(antenna->Get_Max_SignalBin()))) + 2 * antenna->Get_Max_SignalBin();
+        // Initialize array_length = waveform length + (2*NFOUR + maxt_diode_bin)
+        int array_length = std::pow(2, std::ceil(std::log2(antenna->Get_Max_SignalBin() - settings1->NFOUR *2 - trigger->maxt_diode_bin +2*BINSIZE))) + 2*settings1->NFOUR + trigger->maxt_diode_bin;
 
-        // Make array of 0s for array we're saving all ray signals to
-        for (int i=0; i<array_length; i++) antenna->V_convolved.push_back(0.);
-        for (int i=0; i<array_length; i++) antenna->V_noise.push_back(0.);
+        // Make vectors of 0s for array we're saving all ray signals to
+        antenna->V_convolved.resize(array_length, 0.0);
+        antenna->V_noise.resize(array_length, 0.0);
 
     }
 
@@ -3108,14 +3114,10 @@ void Report::Combine_Waveforms(int signalbin_0, int signalbin_1,
     signalbin_1 = signalbin_0;
 
 
-    cout << "[CW] signalbin_0 = " << signalbin_0 << ", V0.size() = " << V0.size() << endl;
-    cout << "[CW] signalbin_1 = " << signalbin_1 << ", V1.size() = " << V1.size() << endl;
-
   // resize to necessary length to combine vectors 
   signalbin = min(signalbin_0, signalbin_1); // starting index in terms of global index
   const int maxsignalbin = max(signalbin_0+V0.size()-1, signalbin_1+V1.size()-1); // last index in terms of global index
   const int len = maxsignalbin - signalbin + 1; // length needed to combine both signals
-  cout << "[CW] signalbin = " << signalbin << ", maxsignalbin = " << maxsignalbin << ", len = " << len << endl;
   V.resize(len, 0);
   
   // add in the zeroth vector
@@ -3270,7 +3272,7 @@ void Report::GetAntennaNoiseWF(
         V_noise_only->push_back(
             noise_wf->at( noise_ID[noise_ID_index] ).at( noise_wf_index )
         );
-        
+
     } // end loop over bins
     
 }
