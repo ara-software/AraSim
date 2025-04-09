@@ -5539,7 +5539,7 @@ std::vector< std::vector< double> > Detector::GetRayleighFitVector_databin(int s
 
     // this stores the response vector interpolated for THIS SPECIFIC DATA_BIN_SIZE
     std::vector< std::vector< double > > rayleighFits_DeepStation_values_databin;
-    rayleighFits_DeepStation_values_databin.resize(this_station_original_fits.size()); // resize to match channel count
+    rayleighFits_DeepStation_values_databin.resize(this_station_original_fits.size(), vector<double>(settings->DATA_BIN_SIZE/2)); // resize to match channel count
     
     // set up the output frequency spacing for this event's specific DATA_BIN_SIZE
     int n_bins = settings->DATA_BIN_SIZE / 2;
@@ -5575,7 +5575,7 @@ std::vector< std::vector< double> > Detector::GetRayleighFitVector_databin(int s
 
         // copy the interpolated values out
         for(int iFreqBin=0; iFreqBin<settings->DATA_BIN_SIZE/2; iFreqBin++) {
-            rayleighFits_DeepStation_values_databin[iCh].push_back( interp_fits_databin[iFreqBin] );
+            rayleighFits_DeepStation_values_databin[iCh][iFreqBin] = interp_fits_databin[iFreqBin];
         }
     }
 

@@ -2924,22 +2924,9 @@ void Report::Convolve_Signals(
             settings1, trigger, detector);
             
     }
-    // If there are ray solutions, prepare signal wf array with 0s 
-    //   and save an array with the full noise-only waveform to the antenna
-    else {
-
-        // Initialize array_length = waveform length + (2*NFOUR + maxt_diode_bin)
-        int array_length = std::pow(2, std::ceil(std::log2(antenna->Get_Max_SignalBin() - settings1->NFOUR *2 - trigger->maxt_diode_bin +2*BINSIZE))) + 2*settings1->NFOUR + trigger->maxt_diode_bin;
-
-        // Make vectors of 0s for array we're saving all ray signals to
-        antenna->V_convolved.resize(array_length, 0.0);
-        antenna->V_noise.resize(array_length, 0.0);
-
-    }
-
     // Loop over ray solutions and get signals from each
     // Loop does not run if there are no ray solutions
-    if(antenna->ray_sol_cnt > 0) {
+    else {
 
       int this_signalbin = 0;
       int n_connected_rays = antenna->ray_sol_cnt; 
@@ -2973,6 +2960,19 @@ void Report::Convolve_Signals(
                 &this_signalbin, &V_signal, is_last);
         }
       }
+      
+      // If there are ray solutions, prepare signal wf array with 0s 
+      //   and save an array with the full noise-only waveform to the antenna
+
+      // Initialize array_length = waveform length + (2*NFOUR + maxt_diode_bin)
+      int waveform_length = (int)V_signal.size();
+      int array_length = waveform_length + this_signalbin + 2*settings1->NFOUR + trigger->maxt_diode_bin;
+
+      // Make vectors of 0s for array we're saving all ray signals to
+      antenna->V_convolved.clear();
+      antenna->V_noise.clear();
+      antenna->V_convolved.resize(array_length, 0.0);
+      antenna->V_noise.resize(array_length, 0.0);
 
       GetNoiseThenConvolve(
           antenna, V_signal,
@@ -3137,7 +3137,6 @@ void Report::Combine_Waveforms(int signalbin_0, int signalbin_1,
     const int newLen = int(pow(2, ceil(log2(V.size())))); // get next power of 2 
     V.resize(newLen, 0.);
   }
-
 
   return;
 }
@@ -3944,6 +3943,9 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
         Vfft_noise_after.clear(); // remove previous Vfft_noise values
         Vfft_noise_before.clear(); // remove previous Vfft_noise values
 
+        Vfft_noise_after.resize(settings1->DATA_BIN_SIZE);
+        Vfft_noise_before.resize(settings1->DATA_BIN_SIZE/2);
+
         double V_tmp; // copy original flat H_n [V] value
         double current_amplitude, current_phase;
 
@@ -3970,7 +3972,7 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 ApplyRFCM_OutZero(ch, freq, detector, V_tmp, settings1 -> RFCM_OFFSET);
             }
 
-            Vfft_noise_before.push_back(V_tmp);
+            Vfft_noise_before[k] = V_tmp;
 
             current_phase = noise_phase[k];
 
@@ -3981,8 +3983,8 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
             vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
             vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
 
-            Vfft_noise_after.push_back(vnoise[2 * k]);
-            Vfft_noise_after.push_back(vnoise[2 * k + 1]);
+            Vfft_noise_after[2*k] = vnoise[2 * k];
+            Vfft_noise_after[2*k + 1] = vnoise[2 * k + 1];
 
             // inverse FFT normalization factor!
             vnoise[2 * k] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
@@ -3997,6 +3999,9 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
 
         Vfft_noise_after.clear(); // remove previous Vfft_noise values
         Vfft_noise_before.clear(); // remove previous Vfft_noise values
+        
+        Vfft_noise_after.resize(settings1->DATA_BIN_SIZE);
+        Vfft_noise_before.resize(settings1->DATA_BIN_SIZE/2);
 
         double V_tmp; // copy original flat H_n [V] value
         double current_amplitude, current_phase;
@@ -4014,7 +4019,7 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
 
                 if (ch < detector -> RayleighFit_ch) {
 
-                    Vfft_noise_before.push_back(detector -> GetRayleighFit_databin(ch, k));
+                    Vfft_noise_before[k] = detector -> GetRayleighFit_databin(ch, k);
 
                     current_phase = noise_phase[k];
 
@@ -4041,7 +4046,7 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                         ApplyRFCM_OutZero(ch, freq, detector, V_tmp, settings1 -> RFCM_OFFSET);
                     }
 
-                    Vfft_noise_before.push_back(V_tmp);
+                    Vfft_noise_before[k] = V_tmp;
 
                     current_phase = noise_phase[k];
 
@@ -4054,8 +4059,8 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 vnoise[2 * k] = (current_amplitude) * cos(noise_phase[k]);
                 vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
 
-                Vfft_noise_after.push_back(vnoise[2 * k]);
-                Vfft_noise_after.push_back(vnoise[2 * k + 1]);
+                Vfft_noise_after[2*k] = vnoise[2 * k];
+                Vfft_noise_after[2*k + 1] =  vnoise[2 * k + 1];
 
                 // inverse FFT normalization factor!
                 vnoise[2 * k] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
@@ -4086,7 +4091,7 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
             // loop over frequency bins
             for(int k=0; k<settings1->DATA_BIN_SIZE/2; k++){
 
-                Vfft_noise_before.push_back(fits_for_this_station[ch][k]);
+                Vfft_noise_before[k] = fits_for_this_station[ch][k];
                 current_phase = noise_phase[k];
                 V_tmp = fits_for_this_station[ch][k];
 
@@ -4102,8 +4107,8 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
 
                 // stash those values
-                Vfft_noise_after.push_back(vnoise[2 * k]);
-                Vfft_noise_after.push_back(vnoise[2 * k + 1]);
+                Vfft_noise_after[2*k] = vnoise[2 * k];
+                Vfft_noise_after[2*k+1] = vnoise[2 * k + 1];
 
                 // and apply the inverse FFT normalization factor
                 vnoise[2 * k] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
@@ -4138,7 +4143,7 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
             // loop over frequency bins
             for(int k=0; k<settings1->DATA_BIN_SIZE/2; k++){
 
-                Vfft_noise_before.push_back(fits_for_this_station[ch][k]);
+                Vfft_noise_before[k] = fits_for_this_station[ch][k];
                 current_phase = noise_phase[k];
                 V_tmp = fits_for_this_station[ch][k];
                 
@@ -4154,8 +4159,8 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
                 vnoise[2 * k + 1] = (current_amplitude) * sin(noise_phase[k]);
                 
                 // stash those values
-                Vfft_noise_after.push_back(vnoise[2 * k]);
-                Vfft_noise_after.push_back(vnoise[2 * k + 1]);
+                Vfft_noise_after[2*k] = vnoise[2 * k];
+                Vfft_noise_after[2*k + 1] = vnoise[2 * k + 1];
 
                 // and apply the inverse FFT normalization factor
                 vnoise[2 * k] *= 2. / ((double) settings1 -> DATA_BIN_SIZE);
@@ -4180,9 +4185,10 @@ void Report::GetNoiseWaveforms_ch(Settings * settings1, Detector * detector, dou
 void Report::GetNoisePhase(Settings *settings1) {
 
     noise_phase.clear();    // remove all previous noise_phase vector values
+    noise_phase.resize(settings1->DATA_BIN_SIZE/2);
 
     for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {  // noise with DATA_BIN_SIZE bin array
-        noise_phase.push_back(2*PI*gRandom->Rndm());  // get random phase for flat thermal noise
+        noise_phase[i] = 2*PI*gRandom->Rndm();  // get random phase for flat thermal noise
     }
     
 }

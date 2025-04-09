@@ -625,8 +625,8 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
         int ngeneratedevents = settings1->NOISE_EVENTS;  // should this value read at Settings class
         double v_noise[settings1->DATA_BIN_SIZE];  // noise voltage time domain (with filter applied)
 
-        v_noise_timedomain.resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
-        v_noise_timedomain_diode.resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+        v_noise_timedomain.resize(ngeneratedevents, vector<double>(DATA_BIN_SIZE));  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+        v_noise_timedomain_diode.resize(ngeneratedevents, vector<double>(DATA_BIN_SIZE));  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
 
         if (settings1->TRIG_ANALYSIS_MODE != 1)
         {
@@ -645,7 +645,7 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
                 for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
                 {
 
-                    v_noise_timedomain[i].push_back(v_noise[m]);  // save pure noise (not diode convlved) waveforms
+                    v_noise_timedomain[i][m] = v_noise[m];  // save pure noise (not diode convlved) waveforms
 
                 }
             }  // get meandiode with 1000 noisewaveforms
@@ -661,8 +661,8 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
                 for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
                 {
 
-                    v_noise_timedomain[i].push_back(0.);
-                    v_noise_timedomain_diode[i].push_back(0.);
+                    v_noise_timedomain[i][m] = 0.;
+                    v_noise_timedomain_diode[i][m] = 0.;
                 }
             }
         }
@@ -681,8 +681,8 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
 
         for (int i = 0; i < num_chs; i++)
         {
-            v_noise_timedomain_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
-            v_noise_timedomain_diode_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+            v_noise_timedomain_ch[i].resize(ngeneratedevents, vector<double>(settings1->DATA_BIN_SIZE));  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+            v_noise_timedomain_diode_ch[i].resize(ngeneratedevents, vector<double>(settings1->DATA_BIN_SIZE));  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
 
         }
 
@@ -708,7 +708,7 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
                     for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
                     {
 
-                        v_noise_timedomain_ch[ch][i].push_back(v_noise[m]);  // save pure noise (not diode convlved) waveforms
+                        v_noise_timedomain_ch[ch][i][m] = v_noise[m];  // save pure noise (not diode convlved) waveforms
                     }
 
                 }  // get meandiode with 1000 noisewaveforms
@@ -722,8 +722,8 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
             for (int ch = 0; ch < num_chs; ch++) {
                 for (int i = 0; i < ngeneratedevents; i++) {
                     for (int m = 0; m < settings1->DATA_BIN_SIZE; m++) {
-                        v_noise_timedomain_ch[ch][i].push_back(0.);
-                        v_noise_timedomain_diode_ch[ch][i].push_back(0.);
+                        v_noise_timedomain_ch[ch][i][m] = 0.;
+                        v_noise_timedomain_diode_ch[ch][i][m] = 0.;
                     }
                 }
             }
@@ -742,8 +742,8 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
         v_noise_timedomain_diode_ch.resize(num_chs);  // make the size of v_noise_timedomain_diode as number of chs
 
         for (int i = 0; i < num_chs; i++) {
-            v_noise_timedomain_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
-            v_noise_timedomain_diode_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+            v_noise_timedomain_ch[i].resize(ngeneratedevents, vector<double>(DATA_BIN_SIZE));  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+            v_noise_timedomain_diode_ch[i].resize(ngeneratedevents, vector<double>(DATA_BIN_SIZE));  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
 
         }
 
@@ -762,7 +762,7 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
                     myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin, v_noise_timedomain_diode_ch[ch][i]);
 
                     for (int m = 0; m < settings1->DATA_BIN_SIZE; m++) {
-                        v_noise_timedomain_ch[ch][i].push_back(v_noise[m]); // save pure noise (not diode convlved) waveforms
+                        v_noise_timedomain_ch[ch][i][m] = v_noise[m]; // save pure noise (not diode convlved) waveforms
                     }
 
                 }  // get meandiode with 1000 noisewaveforms
@@ -775,8 +775,8 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
             for (int ch = 0; ch < num_chs; ch++) {
                 for (int i = 0; i < ngeneratedevents; i++) {
                     for (int m = 0; m < settings1->DATA_BIN_SIZE; m++) {
-                        v_noise_timedomain_ch[ch][i].push_back(0.);
-                        v_noise_timedomain_diode_ch[ch][i].push_back(0.);
+                        v_noise_timedomain_ch[ch][i][m] = 0.;
+                        v_noise_timedomain_diode_ch[ch][i][m] = 0.;
                     }
                 }
             }
