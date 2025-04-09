@@ -615,7 +615,7 @@ void Report::BuildAndTriggerOnWaveforms(
         / settings1->TIMESTEP);
     
     // Compute next power of two larger than max_total_bin
-    max_total_bin = (int)std::pow(2, std::ceil(std::log2(max_total_bin)));
+    //max_total_bin = (int)std::pow(2, std::ceil(std::log2(max_total_bin)));
     
     //make more time
     max_total_bin += settings1->NFOUR *3 + trigger->maxt_diode_bin;
