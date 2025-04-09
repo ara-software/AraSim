@@ -635,10 +635,6 @@ void Report::BuildAndTriggerOnWaveforms(
         
         DBS++; // Increment DBS for the next power of 2
       }
-
-      // Go one more power of two up
-      //DBS++;
-      //DATA_BIN_SIZE_tmp = (int) pow(2., (double) DBS);
       settings1->DATA_BIN_SIZE = DATA_BIN_SIZE_tmp;
       cout << "settings1->DATA_BIN_SIZE :" << settings1->DATA_BIN_SIZE << endl;
 
@@ -3113,7 +3109,6 @@ void Report::Combine_Waveforms(int signalbin_0, int signalbin_1,
   else if(V1.empty()) 
     signalbin_1 = signalbin_0;
 
-
   // resize to necessary length to combine vectors 
   signalbin = min(signalbin_0, signalbin_1); // starting index in terms of global index
   const int maxsignalbin = max(signalbin_0+V0.size()-1, signalbin_1+V1.size()-1); // last index in terms of global index
@@ -3153,7 +3148,6 @@ void Report::GetNoiseThenConvolve(
     //   then save the noise and signals to the 
     //   `Antenna_r` object and the `trigger` class
     // Extend the length of this waveform we're constructing if more than 1 ray connected
-
     int wf_length = 0;
     int min_wf_bin = 0;
     int max_wf_bin = 0;
@@ -3196,6 +3190,7 @@ void Report::GetNoiseThenConvolve(
 
     // Push noise+signal waveform through the tunnel diode
     trigger->myconvlv( V_total_forconvlv, wf_length, diode_response, V_total_forconvlv);
+
     // Export our convolved waveforms to trigger->Full_window and trigger->Full_window_V
     for (int bin=min_wf_bin; bin<max_wf_bin; bin++) {
 
@@ -3226,6 +3221,7 @@ void Report::GetAntennaNoiseWF(
 ){
     // Save a `wf_length` long noise waveform to the provided `V_noise_only` array
     //   with the signal bin located at index `BINSIZE/2`
+
     // Clear old noise waveforms
     V_noise_only->clear();
 
@@ -3262,9 +3258,7 @@ void Report::GetAntennaNoiseWF(
     int bin_value;
     int noise_ID_index;
     int noise_wf_index;
-
     for (int bin=0; bin<wf_length; bin++) {
-
         bin_value = signalbin - BINSIZE/2 + bin;
         noise_ID_index = bin_value / settings1->DATA_BIN_SIZE;
         noise_wf_index = bin_value % settings1->DATA_BIN_SIZE;
@@ -3273,7 +3267,6 @@ void Report::GetAntennaNoiseWF(
         );
 
     } // end loop over bins
-    
 }
 
 
