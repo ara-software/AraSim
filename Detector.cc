@@ -3763,6 +3763,7 @@ inline void Detector::ReadFilter(string filename, Settings *settings1) {    // w
 
 void Detector::ReadFilter_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
 
+    // Number of bins for FFTs
     int n_bins = settings1->DATA_BIN_SIZE / 2;
 
     // We can use FilterGain array as a original array
@@ -3860,6 +3861,7 @@ inline void Detector::ReadPreamp(string filename, Settings *settings1) {    // w
 
 void Detector::ReadPreamp_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
 
+    // Number of bins for FFTs
     int n_bins = settings1->DATA_BIN_SIZE / 2;
 
     // We can use FilterGain array as a original array
@@ -4243,6 +4245,7 @@ void Detector::ReadAmplifierNoiseFigure(Settings *settings) {
 
 void Detector::ReadFOAM_New(Settings *settings1) {    // will return gain (dB) with same freq bin with antenna gain
 
+    // Number of bins for FFTs
     int n_bins = settings1->DATA_BIN_SIZE / 2;
 
     // We can use FilterGain array as a original array
@@ -5554,15 +5557,9 @@ std::vector< std::vector< double> > Detector::GetRayleighFitVector_databin(int s
     // dumb, but oh well...
     // so, copy over the vector of frequencies into an array
     int numFreqBins = int(this_station_original_freqs.size());
-    //std::vector<double> this_station_original_frequencies_vector(this_station_original_freqs.begin(),
-    //                                                               this_station_original_freqs.end());
 
     // loop over channel, and do the interpolation
     for(int iCh=0; iCh<this_station_original_fits.size(); iCh++){
-
-        // same issue as with the frequencies; we need to copy the results for this station and channel to an array
-        //std::vector<double> this_channel_original_fits_vector(this_station_original_fits[iCh].begin(),
-        //                                                       this_station_original_fits[iCh].end());
 
         // output value
         std::vector<double> interp_fits_databin(n_bins);   // array for interpolated rayleigh fit values
