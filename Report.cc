@@ -617,11 +617,9 @@ void Report::BuildAndTriggerOnWaveforms(
     // Compute next power of two larger than max_total_bin
     max_total_bin = (int)std::pow(2, std::ceil(std::log2(max_total_bin)));
     
-    // make extra time
-    // each signal has size BINSIZE = NFOUR/2
-    // NFOUR * 2 is the maximum bin that 2 signals can add to max_arrival_time (in bins). 
-    // It was probably changed to NFOUR * 3 for safety
-    // trigger->maxt_diode_bin is the offset for the diode to trigger
+    //Analyze more bins for historically unspecified reasons. 
+    //Could be to adjust for an offset in indexing and signals that come after the last event temporally
+    //However AraSim may break without this extra padding, so adjust carefully
     max_total_bin += settings1->NFOUR *3 + trigger->maxt_diode_bin;
 
     // Decide if new noise waveforms will be generated for every new event. 
