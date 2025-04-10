@@ -511,6 +511,12 @@ double Primaries::Gety(Settings *settings1,double pnu,int nu_nubar,int currentin
       return settings1->ELAST_Y;
   }
 
+  else {
+      throw runtime_error("YPARAM value not supported!");
+  }
+
+  return -1.; // should never reach this line
+
 } //Gety
 
 double Primaries::Getyweight(double pnu, double y, int nu_nubar, int currentint) {

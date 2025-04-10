@@ -476,15 +476,15 @@ void Tools::InterpolateComplex(double *array, const int n) {
     }
 }
 
-void Tools::NormalTimeOrdering(const int n,double *volts) {
-    double volts_temp[n];
-    for (int i=0;i<n/2;i++) {
-        volts_temp[i]=volts[i+n/2];
-        volts_temp[i+n/2]=volts[i];
+void Tools::NormalTimeOrdering(const int n, double *volts) {
+    std::vector<double> volts_temp(n);
+
+    for (int i = 0; i < n / 2; i++) {
+        volts_temp[i] = volts[i + n / 2];
+        volts_temp[i + n / 2] = volts[i];
     }
-    for (int i=0;i<n;i++) {
-        volts[i]=volts_temp[i];
-    }
+
+    std::copy(volts_temp.begin(), volts_temp.end(), volts);
 }
 
 void Tools::NormalTimeOrdering_InvT(const int n,double *volts) {

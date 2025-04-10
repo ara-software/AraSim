@@ -24,6 +24,7 @@ CXX = g++
 
 #Generic and Site Specific Flags
 CXXFLAGS     += $(SYSINCLUDES) $(INC_ARA_UTIL) -DGIT_COMMIT_HASH=\"$(GIT_COMMIT_HASH)\"
+CXXFLAGS		 += -Werror=return-type 
 #LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl
 LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl,--no-as-needed
 #,--no-as-needed
