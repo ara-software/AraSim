@@ -5201,6 +5201,13 @@ void Report::checkPATrigger(
         );
     }
 
+    //ASG: I had to delete this. Do we need it?
+
+    //if (trigger_antenna->ray_sol_cnt == 2){
+    //    dsignalBin = abs( signal_bin[0] - signal_bin[1] ); //original kah
+    //    dsignalBin = abs( trigger_antenna->SignalBin[0] - trigger_antenna->SignalBin[1] );
+    //}
+
     // If there was a PA trigger, calculate V_mimic and save other trigger info.
     if ( pa_trigger_bin > -1 ){ 
 
@@ -5492,6 +5499,12 @@ void Report::checkPATrigger(
                     + waveformLength/2 + waveformCenter );
                 }
                 
+                //ASG: I had to delete this. Do we need it?
+                //double arrivtime = stations[i].strings[string_i].antennas[antenna_i].arrival_time[0];
+                //double X = detector->stations[i].strings[string_i].antennas[antenna_i].GetX();
+                //double Y = detector->stations[i].strings[string_i].antennas[antenna_i].GetY();
+                //double Z = detector->stations[i].strings[string_i].antennas[antenna_i].GetZ();
+
                 stations[i].total_trig_search_bin = stations[i].Global_Pass + trig_window_bin - trig_search_init;
 
             } // end for trig_j in numchans
