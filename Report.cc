@@ -615,7 +615,7 @@ void Report::BuildAndTriggerOnWaveforms(
         / settings1->TIMESTEP);
     
     // Compute next power of two larger than max_total_bin
-    //max_total_bin = (int)std::pow(2, std::ceil(std::log2(max_total_bin)));
+    max_total_bin = (int)std::pow(2, std::ceil(std::log2(max_total_bin)));
     
     //make more time
     max_total_bin += settings1->NFOUR *3 + trigger->maxt_diode_bin;
@@ -636,7 +636,6 @@ void Report::BuildAndTriggerOnWaveforms(
         DBS++; // Increment DBS for the next power of 2
       }
       settings1->DATA_BIN_SIZE = DATA_BIN_SIZE_tmp;
-      cout << "settings1->DATA_BIN_SIZE :" << settings1->DATA_BIN_SIZE << endl;
 
       // Resize Full_window and Full_window_V to size 16 for 16 channels
       trigger->Full_window.resize(16);
