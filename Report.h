@@ -264,6 +264,11 @@ class Report {
         
         // Phased Array functions
         bool isTrigger(double eff);
+        double get_PA_efficiency(double SNR, Trigger *trigger);
+        int get_PA_trigger_bin(
+            Antenna_r *antenna, vector <double> waveform, double timestep, 
+            double event_trigger_rand_num, double noise_RMS, Trigger *trigger
+        );
         void checkPATrigger(
             int i, Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
             int trig_search_init, int max_total_bin);    
