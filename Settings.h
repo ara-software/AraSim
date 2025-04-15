@@ -483,7 +483,7 @@ class Settings
  // end of values from icemc
 
 
-  ClassDef(Settings,2);
+  ClassDef(Settings,3);
 
 
 };
