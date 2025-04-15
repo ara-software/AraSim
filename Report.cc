@@ -610,6 +610,9 @@ void Report::BuildAndTriggerOnWaveforms(
 
     // calculate total number of bins we need to do trigger check
     // to save time, use only necessary number of bins
+    // the max number of bins should be (max_arrival_bin - min_arrival_bin) + size of a signal
+    // we define the size of a signal as BINSIZE = NFOUR/2 later in the code
+    // there could be two ray solutions in an interaction. We add 2*BINSIZE = NFOUR for safety
     int max_total_bin = (
         (stations[station_index].max_arrival_time - stations[station_index].min_arrival_time) 
         / settings1->TIMESTEP) + settings1->NFOUR;
