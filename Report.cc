@@ -610,9 +610,12 @@ void Report::BuildAndTriggerOnWaveforms(
 
     // calculate total number of bins we need to do trigger check
     // to save time, use only necessary number of bins
+    // the max number of bins should be (max_arrival_bin - min_arrival_bin) + size of a signal
+    // we define the size of a signal as BINSIZE = NFOUR/2 later in the code
+    // there could be two ray solutions in an interaction. We add 2*BINSIZE = NFOUR for safety
     int max_total_bin = (
         (stations[station_index].max_arrival_time - stations[station_index].min_arrival_time) 
-        / settings1->TIMESTEP);
+        / settings1->TIMESTEP) + settings1->NFOUR;
     
     // Compute next power of two larger than max_total_bin
     max_total_bin = (int)std::pow(2, std::ceil(std::log2(max_total_bin)));
@@ -620,6 +623,7 @@ void Report::BuildAndTriggerOnWaveforms(
     //Analyze more bins for historically unspecified reasons. 
     //Could be to adjust for an offset in indexing and signals that come after the last event temporally
     //However AraSim may break without this extra padding, so adjust carefully
+    //This offset is probably to account for offset between indices of V_convolved and V_signal in GetNoiseThenConvolve()
     max_total_bin += settings1->NFOUR *3 + trigger->maxt_diode_bin;
 
     // Decide if new noise waveforms will be generated for every new event. 
@@ -2957,7 +2961,11 @@ void Report::Convolve_Signals(
                 &this_signalbin, &V_signal, is_last);
         }
       }
-      
+
+      if(V_signal.size() >= settings1->DATA_BIN_SIZE){
+        throw runtime_error("Full waveform trace is longer than DATA_BIN_SIZE.");
+      }
+
       // If there are ray solutions, prepare signal wf array with 0s 
       //   and save an array with the full noise-only waveform to the antenna
 
@@ -5525,5 +5533,6 @@ double Report::interpolate(double *xdata,double *ydata, double xi, int numData)
 }
 
 //Adding function for padding waveforms to take FFT
+
 
 
