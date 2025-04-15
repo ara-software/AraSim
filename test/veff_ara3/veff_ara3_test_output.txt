@@ -1,4 +1,4 @@
-The Git Commit Hash: 695932c44449f6e1c1cdf69105321f78aba2beb8
+The Git Commit Hash: bb0f892030b75ca1b071398c114dc7ec09d8e89e
 
 	Default values!
 NNU : 100
@@ -231,22 +231,69 @@ AraGeomTool::getStationInfo(3,2017)
 Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
 Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /cvmfs/ara.opensciencegrid.org/trunk/RHEL_7_x86_64/ara_build/share/araCalib/AntennaInfo.sqlite
 Opening default 2013-2017 SQLite tables for all stations 
-******************************************************************************************Thrown 100
-****************************************************************************************************Thrown 200
+******
+trigger passed at bin 4387  passed ch : 0 (0type) Direct dist btw posnu : 3201.86 noiseID : 0 ViewAngle : 56.3795 LikelyTrigSignal : interaction 0, ray 1
+trigger passed at bin 4468  passed ch : 6 (0type) Direct dist btw posnu : 3218.74 noiseID : 0 ViewAngle : 56.9636 LikelyTrigSignal : interaction 0, ray 1
+trigger passed at bin 4590  passed ch : 10 (0type) Direct dist btw posnu : 3219.54 noiseID : 0 ViewAngle : 56.9094 LikelyTrigSignal : interaction 0, ray 1
+trigger passed at bin 4695  passed ch : 15 (1type) Direct dist btw posnu : 3206.03 noiseID : 0 ViewAngle : 56.9101 LikelyTrigSignal : interaction 0, ray 1
+Global_Pass : 4387 evt : 16 added weight : 4.29438e-27
+4.29438e-27 : 0
+
+Making useful event
+StationID: 3
+StationID_AraRoot: 3
+************depth negative! -26.2745
+depth negative! -26.2745
+depth negative! -26.2745
+depth negative! -26.2745
+depth negative! -26.2636
+depth negative! -26.2636
+depth negative! -26.2636
+depth negative! -26.2636
+depth negative! -26.2643
+depth negative! -26.2643
+depth negative! -26.2643
+depth negative! -26.2643
+depth negative! -26.2752
+depth negative! -26.2752
+depth negative! -26.2752
+depth negative! -26.2752
+*
+trigger passed at bin 4655  passed ch : 7 (1type) Direct dist btw posnu : 3120.79 noiseID : 0 ViewAngle : 47.5286 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4418  passed ch : 9 (1type) Direct dist btw posnu : 3102.61 noiseID : 0 ViewAngle : 47.7038 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4412  passed ch : 13 (1type) Direct dist btw posnu : 3097.88 noiseID : 0 ViewAngle : 47.4649 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4347 evt : 29 added weight : 8.76793e-08
+8.76793e-08 : 0
+
+Making useful event
+StationID: 3
+StationID_AraRoot: 3
+***********************************************************************Thrown 100
+***********************************************************************************
+trigger passed at bin 4705  passed ch : 4 (0type) Direct dist btw posnu : 1911.64 noiseID : 0 ViewAngle : 51.8715 LikelyTrigSignal : interaction 0, ray 1
+trigger passed at bin 4651  passed ch : 6 (0type) Direct dist btw posnu : 1915.05 noiseID : 0 ViewAngle : 51.2907 LikelyTrigSignal : interaction 0, ray 1
+trigger passed at bin 4609  passed ch : 12 (0type) Direct dist btw posnu : 1899.4 noiseID : 0 ViewAngle : 51.7349 LikelyTrigSignal : interaction 0, ray 1
+Global_Pass : 4535 evt : 183 added weight : 0.998722
+0.998722 : 9
+
+Making useful event
+StationID: 3
+StationID_AraRoot: 3
+*****************Thrown 200
 ****************************************************************************************************Thrown 300
 ****************************************************************************************************Thrown 400
 *************************************************************************************************** end loop
 Total Events Thrown: 500
-Total_Global_Pass : 1
-Total_Weight : 0.81612
-Total_Probability : 3747.29
-weight bin values : 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+Total_Global_Pass : 4
+Total_Weight : 1.81484
+Total_Probability : 4869.4
+weight bin values : 2, 0, 0, 0, 0, 0, 0, 0, 0, 2
 
 Radius: 5000 [m]
 IceVolume : 2.35619e+11
-test Veff(ice) : 4.83287e+09 m3sr, 4.83287 km3sr
-test Veff(water eq.) : 4.43174e+09 m3sr, 4.43174 km3sr
-And Veff(water eq.) error plus : 7.31506 km3sr and error minus : 2.42193 km3sr
+test Veff(ice) : 1.07471e+10 m3sr, 10.7471 km3sr
+test Veff(water eq.) : 9.85506e+09 m3sr, 9.85506 km3sr
+And Veff(water eq.) error plus : 9.11416 km3sr and error minus : 4.84386 km3sr
 Info in <TCanvas::Print>: pdf file sigmaCrossSection.pdf has been created
 outputdir= outputs/.
 This AraSim run is complete and will exit with code 0

@@ -1,4 +1,4 @@
-The Git Commit Hash: 695932c44449f6e1c1cdf69105321f78aba2beb8
+The Git Commit Hash: bb0f892030b75ca1b071398c114dc7ec09d8e89e
 
 	Default values!
 NNU : 100
@@ -211,13 +211,15 @@ station[0].strings[3].antennas[1] no_ch:14
 station[0].strings[3].antennas[2] no_ch:15
 station[0].strings[3].antennas[3] no_ch:16
 *Thrown 0
-**********************************************************************************
-trigger passed at bin 4345  passed ch : 0 (0type) Direct dist btw posnu : 1548.39 noiseID : 0 ViewAngle : 58.3487 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4335  passed ch : 1 (1type) Direct dist btw posnu : 1550.56 noiseID : 0 ViewAngle : 58.3135 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4300  passed ch : 4 (0type) Direct dist btw posnu : 1543.09 noiseID : 0 ViewAngle : 59.0135 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4231  passed ch : 8 (0type) Direct dist btw posnu : 1536.14 noiseID : 0 ViewAngle : 58.5435 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4345 evt : 82 added weight : 7.23851e-11
-7.23851e-11 : 0
+*************************************************short chord 0.166532
+***************************************************Thrown 100
+****************************************************************************************************Thrown 200
+*************************************
+trigger passed at bin 4228  passed ch : 0 (0type) Direct dist btw posnu : 1591.57 noiseID : 0 ViewAngle : 55.4854 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4257  passed ch : 2 (0type) Direct dist btw posnu : 1595.82 noiseID : 0 ViewAngle : 56.1332 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4241  passed ch : 12 (0type) Direct dist btw posnu : 1592.92 noiseID : 0 ViewAngle : 55.3397 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4257 evt : 237 added weight : 0.999199
+0.999199 : 9
 
 Making useful event
 StationID: 2
@@ -231,42 +233,66 @@ AraGeomTool::getStationInfo(3,2017)
 Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
 Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /cvmfs/ara.opensciencegrid.org/trunk/RHEL_7_x86_64/ara_build/share/araCalib/AntennaInfo.sqlite
 Opening default 2013-2017 SQLite tables for all stations 
-******************Thrown 100
 ******************************************************
-trigger passed at bin 4226  passed ch : 4 (0type) Direct dist btw posnu : 1334.18 noiseID : 0 ViewAngle : 52.5976 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4212  passed ch : 8 (0type) Direct dist btw posnu : 1333.36 noiseID : 0 ViewAngle : 53.1481 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4339  passed ch : 12 (0type) Direct dist btw posnu : 1346.59 noiseID : 0 ViewAngle : 52.85 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4339 evt : 154 added weight : 2.01199e-14
-2.01199e-14 : 0
+trigger passed at bin 4213  passed ch : 0 (0type) Direct dist btw posnu : 1675.84 noiseID : 0 ViewAngle : 54.4786 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4222  passed ch : 2 (0type) Direct dist btw posnu : 1678.91 noiseID : 0 ViewAngle : 53.8541 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4290  passed ch : 12 (0type) Direct dist btw posnu : 1685.29 noiseID : 0 ViewAngle : 54.4365 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4290 evt : 291 added weight : 1.21462e-26
+1.21462e-26 : 0
 
 Making useful event
 StationID: 2
 StationID_AraRoot: 2
-**********************************************Thrown 200
-****************************************************************************************************Thrown 300
-**********************************************************************************************
-trigger passed at bin 4348  passed ch : 4 (0type) Direct dist btw posnu : 1308.75 noiseID : 0 ViewAngle : 57.6031 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4233  passed ch : 8 (0type) Direct dist btw posnu : 1295.6 noiseID : 0 ViewAngle : 57.7868 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4343  passed ch : 10 (0type) Direct dist btw posnu : 1307.27 noiseID : 0 ViewAngle : 58.0225 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4348 evt : 394 added weight : 0.0584521
-0.0584521 : 5
+*********Thrown 300
+*****
+trigger passed at bin 4300  passed ch : 4 (0type) Direct dist btw posnu : 1500.3 noiseID : 0 ViewAngle : 59.7475 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4233  passed ch : 8 (0type) Direct dist btw posnu : 1493.54 noiseID : 0 ViewAngle : 59.2655 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4308  passed ch : 10 (0type) Direct dist btw posnu : 1501.89 noiseID : 0 ViewAngle : 59.452 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4308 evt : 305 added weight : 0.900189
+0.900189 : 9
 
 Making useful event
 StationID: 2
 StationID_AraRoot: 2
-******Thrown 400
-*************************************************************************************************** end loop
+***********************************************************************************************Thrown 400
+*******************************
+trigger passed at bin 4397  passed ch : 4 (0type) Direct dist btw posnu : 1791.8 noiseID : 0 ViewAngle : 57.8268 LikelyTrigSignal : interaction 0, ray 1
+trigger passed at bin 4341  passed ch : 6 (0type) Direct dist btw posnu : 1792.52 noiseID : 0 ViewAngle : 56.9911 LikelyTrigSignal : interaction 0, ray 1
+trigger passed at bin 4415  passed ch : 10 (0type) Direct dist btw posnu : 1801.08 noiseID : 0 ViewAngle : 57.0021 LikelyTrigSignal : interaction 0, ray 1
+Global_Pass : 4415 evt : 431 added weight : 0.999593
+0.999593 : 9
+
+Making useful event
+StationID: 2
+StationID_AraRoot: 2
+**************************************depth negative! -22.2321
+depth negative! -22.2321
+depth negative! -22.2321
+depth negative! -22.2321
+depth negative! -22.218
+depth negative! -22.218
+depth negative! -22.218
+depth negative! -22.218
+depth negative! -22.2288
+depth negative! -22.2288
+depth negative! -22.2288
+depth negative! -22.2288
+depth negative! -22.2217
+depth negative! -22.2217
+depth negative! -22.2217
+depth negative! -22.2217
+****************************** end loop
 Total Events Thrown: 500
-Total_Global_Pass : 3
-Total_Weight : 0.0584521
-Total_Probability : 5572.51
-weight bin values : 2, 0, 0, 0, 0, 1, 0, 0, 0, 0
+Total_Global_Pass : 4
+Total_Weight : 2.89898
+Total_Probability : 10114.5
+weight bin values : 1, 0, 0, 0, 0, 0, 0, 0, 0, 3
 
 Radius: 5000 [m]
 IceVolume : 2.35619e+11
-test Veff(ice) : 3.46139e+08 m3sr, 0.346139 km3sr
-test Veff(water eq.) : 3.1741e+08 m3sr, 0.31741 km3sr
-And Veff(water eq.) error plus : 5.7381 km3sr and error minus : 0.153119 km3sr
+test Veff(ice) : 1.71671e+10 m3sr, 17.1671 km3sr
+test Veff(water eq.) : 1.57422e+10 m3sr, 15.7422 km3sr
+And Veff(water eq.) error plus : 9.29678 km3sr and error minus : 7.30422 km3sr
 Info in <TCanvas::Print>: pdf file sigmaCrossSection.pdf has been created
 outputdir= outputs/.
 This AraSim run is complete and will exit with code 0
