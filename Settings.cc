@@ -163,7 +163,7 @@ outputdir="outputs"; // directory where outputs go
 
   PICK_POSNU_DEPTH=0;     //default : 0 pick posnu depth from 0 to ice depth
 
-  MAX_POSNU_DEPTH=200.;     // default : 200m depth max
+  MAX_POSNU_DEPTH=0.;     // default : 0m depth max
 
   NNU_THIS_THETA=0;         // default 0: nnu angle pure random, 1: set a specific theta
 
@@ -531,10 +531,10 @@ void Settings::ReadFile(string setupfile) {
                   NNU_D_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
 
-	      else if (label == "Z_THIS_TOLERANCE") {
+              else if (label == "Z_THIS_TOLERANCE") {
                   Z_THIS_TOLERANCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-	      else if (label == "Z_TOLERANCE") {
+              else if (label == "Z_TOLERANCE") {
                   Z_TOLERANCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
 
@@ -910,11 +910,18 @@ int Settings::CheckCompatibilitiesDetector(Detector *detector) {
 
     // check if there's enough system temperature values prepared for NOISE_CHANNEL_MODE=1
     if (NOISE_CHANNEL_MODE==1) {// use different system temperature values for different chs
-      if (DETECTOR==3 && (detector->params.number_of_antennas > (int)(detector->Temp_TB_ch.size())) ) {
-	  cout << detector->params.number_of_antennas << " : " <<(int)(detector->Temp_TB_ch.size()) << endl;
+        if (DETECTOR==3 && (detector->params.number_of_antennas > (int)(detector->Temp_TB_ch.size())) ) {
+            cout << detector->params.number_of_antennas << " : " <<(int)(detector->Temp_TB_ch.size()) << endl;
             cerr<<"System temperature values are not enough for all channels! Check number of channels you are using and numbers in data/system_temperature.csv"<<endl;
             num_err++;
         }
+    }
+
+    // check if the user set a cylinder height but didn't tell AraSim to use it!
+    if (MAX_POSNU_DEPTH > 0 && PICK_POSNU_DEPTH != 1) {
+        cerr << "Non-zero MAX_POSNU_DEPTH set but PICK_POSNU_DEPTH != 1, so this will be ignored and cylinder height will be ice thickness!" << endl;
+        cerr << "Please change settings to either not set MAX_POSNU_DEPTH or set PICK_POSNU_DEPTH to 1." << endl;
+        num_err++;
     }
 
     return num_err;

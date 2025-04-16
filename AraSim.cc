@@ -352,7 +352,7 @@ int main(int argc, char **argv) {   // read setup.txt file
 
         if ( settings1->EVENT_GENERATION_MODE == 2 ){
             // Write event lists to file, no simulation
-            
+
             // get station center for conversion to local coordinates
             double sumX = 0.;
             double sumY = 0.; 
@@ -369,9 +369,9 @@ int main(int argc, char **argv) {   // read setup.txt file
             }
 
             // station center coordinates
-            double avgX = sumX/double(count);
-            double avgY = sumY/double(count);
-            double avgZ = sumZ/double(count);
+            const double avgX = sumX/double(count);
+            const double avgY = sumY/double(count);
+            const double avgZ = sumZ/double(count);
             const Vector detectorCenter(avgX, avgY, avgZ);
 
             for (int interaction_i=0; interaction_i<event->Nu_Interaction.size(); interaction_i++){
