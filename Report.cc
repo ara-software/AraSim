@@ -5222,9 +5222,9 @@ void Report::checkPATrigger(
                 for (size_t str = 0; str < detector->stations[i].strings.size(); str++) {
                     for (size_t ant = 0; ant < detector->stations[i].strings[str].antennas.size(); ant++) {
                         double peakvalue = 0;
-                        for (int bin=0; bin<BINSIZE; bin++) {
+                        for (int bin=0; bin<waveformLength; bin++) {
 
-                            int bin_value = last_trig_bin - BINSIZE/2 + bin;
+                            int bin_value = last_trig_bin + waveformCenter - waveformLength/2 + bin;
                             stations[i].strings[str].antennas[ant].V_mimic.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (KAH)
                             stations[i].strings[str].antennas[ant].time.push_back( bin_value );
                             stations[i].strings[str].antennas[ant].time_mimic.push_back( ( bin) * settings1->TIMESTEP*1.e9 );// save in ns

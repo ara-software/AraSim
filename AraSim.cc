@@ -352,16 +352,41 @@ int main(int argc, char **argv) {   // read setup.txt file
 
         if ( settings1->EVENT_GENERATION_MODE == 2 ){
             // Write event lists to file, no simulation
+
+            // get station center for conversion to local coordinates
+            double sumX = 0.;
+            double sumY = 0.; 
+            double sumZ = 0.;
+            int count = 0;
+
+            for (int i = 0; i < detector->stations[0].strings.size(); i++){
+              for (int j = 0; j < detector->stations[0].strings[i].antennas.size(); j++){
+                sumX = sumX + detector->stations[0].strings[i].antennas[j].GetX();
+                sumY = sumY + detector->stations[0].strings[i].antennas[j].GetY();
+                sumZ = sumZ + detector->stations[0].strings[i].antennas[j].GetZ();
+                count++;
+              }
+            }
+
+            // station center coordinates
+            const double avgX = sumX/double(count);
+            const double avgY = sumY/double(count);
+            const double avgZ = sumZ/double(count);
+            const Vector detectorCenter(avgX, avgY, avgZ);
+
             for (int interaction_i=0; interaction_i<event->Nu_Interaction.size(); interaction_i++){
-                
+
+                // convert to detector-centered coordinates
+                const Vector localPos = event->Nu_Interaction[interaction_i].posnu - detectorCenter;
+ 
                 event_file << inu << " "; // EVID    
                 event_file << event->nuflavorint << " "; // NUFLAVORINT       
                 event_file << event->nu_nubar << " "; // NUBAR       
                 event_file << event->pnu << " "; // PNU      
                 event_file << event->Nu_Interaction[interaction_i].currentint    << " "; // CURRENTINT       
-                event_file << event->Nu_Interaction[interaction_i].posnu.R()     << " "; // IND_POSNU_R      
-                event_file << event->Nu_Interaction[interaction_i].posnu.Theta() << " "; // IND_POSNU_THETA       
-                event_file << event->Nu_Interaction[interaction_i].posnu.Phi()   << " "; // IND_POSNU_PHI      
+                event_file << localPos.R()     << " "; // IND_POSNU_R      
+                event_file << localPos.Theta() << " "; // IND_POSNU_THETA       
+                event_file << localPos.Phi()   << " "; // IND_POSNU_PHI      
                 event_file << event->Nu_Interaction[interaction_i].nnu.Theta()   << " "; // IND_NNU_THETA      
                 event_file << event->Nu_Interaction[interaction_i].nnu.Phi()     << " "; // IND_NNU_PHI       
                 event_file << event->Nu_Interaction[interaction_i].elast_y       << endl; // ELAST
