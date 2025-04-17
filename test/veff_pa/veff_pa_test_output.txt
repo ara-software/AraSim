@@ -1,3 +1,4 @@
+The Git Commit Hash: 30328d5436ef38ee5ee2ee10ed82ae595675a984
 
 	Default values!
 NNU : 100
@@ -22,7 +23,7 @@ NOFZ : 1
 CONSTANTICETHICKNESS : 0
 FIXEDELEVATION : 0
 MOOREBAY : 0
-EXPONENT : 113
+EXPONENT : 19
 DETECTOR : 5
 POSNU_RADIUS : 5000
 EVENT_GENERATION_MODE: 0
@@ -32,15 +33,6 @@ Surface at (log:0, lat:0) : 6.35973e+06
 SurfaceAboveGeoid at (log:0, lat:0) : 2977
 Simulating realistic ARA05 and Phased Array.
 Using 7 ARA05 vanilla Vpols
-N = 56
-freq_step = 56
-N = 56
-freq_step = 56
-N = 56
-freq_step = 56
-N = 56
-freq_step = 56
-In ReadNoiseFigure
 The number of channels: 16
 DATA_BIN_SIZE: 16384 TIMESTEP: 6.67e-10 df_fft: 91507
 number of f bins: 8192
@@ -94,10 +86,10 @@ System temp ch14 : 325
 System temp ch15 : 325
 System temp ch16 : 0
 Reading in situ PA noise for this station and configuration from file: 
-./data/noise/sigmavsfreq_PA_config_4.csv
+/home/abishop/AraSim-AraSoft//data/noise/sigmavsfreq_PA_config_4.csv
 start read elect chain
- Reading in situ ARA electronics response for the PA and this configuration from file:
-./data/gain/In_situ_Electronics_PA_C4.csv
+ Reading standard PA electronics response from file:
+/home/abishop/AraSim-AraSoft//data/gain/PA_Electronics_TotalGainPhase.csv
  Recalculating in situ electronic response amplitude to ensure consistency with antenna model used here.
 done read elect chain
 Sharesurface: 0 : 0 : 0 : 9999.57 : 9999.57 : 6.35945e+06 : 
@@ -109,21 +101,19 @@ Sharesurface: 0 : 0 : 5 : 9999.59 : 9999.59 : 6.35946e+06 :
 Sharesurface: 0 : 0 : 6 : 9999.59 : 9999.59 : 6.35946e+06 : 
 Sharesurface: 0 : 0 : 7 : 9999.59 : 9999.59 : 6.35946e+06 : 
 Sharesurface: 0 : 0 : 8 : 9999.59 : 9999.59 : 6.35946e+06 : 
-Sharesurface: 0 : 1 : 0 : 10001.1 : 10015.2 : 6.35944e+06 : 
-Sharesurface: 0 : 1 : 1 : 10001.2 : 10015.3 : 6.35947e+06 : 
+Sharesurface: 0 : 1 : 0 : 10029.2 : 9996.26 : 6.35944e+06 : 
+Sharesurface: 0 : 1 : 1 : 10029.2 : 9996.31 : 6.35947e+06 : 
 Sharesurface: 0 : 2 : 0 : 9986.63 : 9990.94 : 6.35945e+06 : 
 Sharesurface: 0 : 3 : 0 : 10011.9 : 9967.68 : 6.35944e+06 : 
 Sharesurface: 0 : 3 : 1 : 10011.9 : 9967.72 : 6.35947e+06 : 
-Sharesurface: 0 : 4 : 0 : 10029.2 : 9996.26 : 6.35944e+06 : 
-Sharesurface: 0 : 4 : 1 : 10029.2 : 9996.31 : 6.35947e+06 : 
+Sharesurface: 0 : 4 : 0 : 10001.1 : 10015.2 : 6.35944e+06 : 
+Sharesurface: 0 : 4 : 1 : 10001.2 : 10015.3 : 6.35947e+06 : 
 end calling detector
 Detector.params.numberofantennas: 16
 Phased Array mode! Reading in data: 
    number of triggering efficiency data points: 61
    number of SNR vs angle data points: 189
 called Efficiencies
-We are using equalTriggersPerLnE.dat as the flux data.
-total lines in the file are 51
 called Spectra
 called Ray
 called Counting
@@ -153,22 +143,22 @@ finish calling secondaries and signal
 Preparing Noise
 num chs: 16
 From pure noise waveforms, diode responses
-For ch0 mean, rms diode are -1.46683e-15 3.90189e-14 rms voltage is 0.0216506
-For ch1 mean, rms diode are -1.36031e-15 3.81864e-14 rms voltage is 0.0215556
-For ch2 mean, rms diode are -1.52844e-15 4.08042e-14 rms voltage is 0.0218321
-For ch3 mean, rms diode are -1.54772e-15 3.98532e-14 rms voltage is 0.0220475
-For ch4 mean, rms diode are -1.46375e-15 3.79029e-14 rms voltage is 0.0216819
-For ch5 mean, rms diode are -2.62473e-15 8.11069e-14 rms voltage is 0.0303856
-For ch6 mean, rms diode are -1.53322e-15 4.03436e-14 rms voltage is 0.0217592
-For ch7 mean, rms diode are -1.45146e-15 3.87677e-14 rms voltage is 0.0212433
-For ch8 mean, rms diode are -2.59248e-15 6.15217e-14 rms voltage is 0.028615
-For ch9 mean, rms diode are -2.65468e-15 6.36176e-14 rms voltage is 0.028734
-For ch10 mean, rms diode are -5.71644e-15 1.70875e-13 rms voltage is 0.0443521
-For ch11 mean, rms diode are -1.63921e-14 4.14175e-13 rms voltage is 0.0713241
-For ch12 mean, rms diode are -7.69916e-15 1.98277e-13 rms voltage is 0.0488471
-For ch13 mean, rms diode are -1.20756e-14 3.1617e-13 rms voltage is 0.060929
-For ch14 mean, rms diode are -4.21969e-15 1.08536e-13 rms voltage is 0.0359816
-For ch15 mean, rms diode are -9.61566e-15 2.31825e-13 rms voltage is 0.0537504
+For ch0 mean, rms diode are -1.46189e-15 3.89501e-14 rms voltage is 0.0216221
+For ch1 mean, rms diode are -1.35607e-15 3.81008e-14 rms voltage is 0.0215262
+For ch2 mean, rms diode are -1.52514e-15 4.07306e-14 rms voltage is 0.021805
+For ch3 mean, rms diode are -1.54436e-15 3.97898e-14 rms voltage is 0.0220229
+For ch4 mean, rms diode are -1.46027e-15 3.78245e-14 rms voltage is 0.0216557
+For ch5 mean, rms diode are -2.61798e-15 8.09495e-14 rms voltage is 0.0303467
+For ch6 mean, rms diode are -1.52955e-15 4.0273e-14 rms voltage is 0.0217339
+For ch7 mean, rms diode are -1.44827e-15 3.86968e-14 rms voltage is 0.0212171
+For ch8 mean, rms diode are -2.58741e-15 6.13926e-14 rms voltage is 0.0285815
+For ch9 mean, rms diode are -2.64917e-15 6.35387e-14 rms voltage is 0.0287005
+For ch10 mean, rms diode are -5.70037e-15 1.70607e-13 rms voltage is 0.0442946
+For ch11 mean, rms diode are -1.63585e-14 4.13507e-13 rms voltage is 0.0712413
+For ch12 mean, rms diode are -7.68032e-15 1.97928e-13 rms voltage is 0.0487859
+For ch13 mean, rms diode are -1.20491e-14 3.15793e-13 rms voltage is 0.0608572
+For ch14 mean, rms diode are -4.20973e-15 1.08321e-13 rms voltage is 0.0359363
+For ch15 mean, rms diode are -9.5883e-15 2.31343e-13 rms voltage is 0.0536805
  DATA_BIN_SIZE : 16384
 powerthreshold : -6.06
 begin looping events!!
@@ -192,8 +182,11 @@ station[0].strings[3].antennas[1] no_ch:14
 station[0].strings[4].antennas[0] no_ch:15
 station[0].strings[4].antennas[1] no_ch:16
 *Thrown 0
-*************
-PA trigger ~~~ raySolNum: 0  SNR: 23.3657  Event Number : 13  PA efficiency : 1.00162
+************************************************************
+PA trigger ~~~ raySolNum: 0  avgSNR: 2.53092  Event Number : 60  PA efficiency : 0.930428
+
+Global_Pass : 8609 evt : 60 added weight : 7.84046e-81
+7.84046e-81 : 0
 
 Making useful event
 StationID: 6
@@ -205,134 +198,121 @@ OR
 c) Call UsefulAtriStationEvent *realAtriEvPtr = new UsefulAtriStationEvent(rawAtriEvPtr, AraCalType::kLatestCalib); ***BEFORE*** 
 AraGeomTool::getStationInfo(3,2017)
 Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
+Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /home/abishop/analysis/AraRoot_Install//share/araCalib/AntennaInfo.sqlite
 Opening default 2013-2017 SQLite tables for all stations 
+****************************************Thrown 100
+*********************************
+PA trigger ~~~ raySolNum: 0  avgSNR: 62.1325  Event Number : 133  PA efficiency : 1.00162
 
-Global_Pass : 2469 evt : 13 added weight : 7.32132e-73
-7.32132e-73 : 0
-***************************************************************************************Thrown 100
-****************
-PA trigger ~~~ raySolNum: 0  SNR: 23.3657  Event Number : 116  PA efficiency : 1.00162
-
-Making useful event
-StationID: 6
-StationID_AraRoot: 3
-
-Global_Pass : 2295 evt : 116 added weight : 1.42991e-161
-1.42991e-161 : 0
-***************
-PA trigger ~~~ raySolNum: 0  SNR: 2.69422  Event Number : 131  PA efficiency : 0.96919
+Global_Pass : 8555 evt : 133 added weight : 3.35065e-29
+3.35065e-29 : 0
 
 Making useful event
 StationID: 6
 StationID_AraRoot: 3
-
-Global_Pass : 2416 evt : 131 added weight : 2.49595e-42
-2.49595e-42 : 0
-*************
-PA trigger ~~~ raySolNum: 0  SNR: 2.39033  Event Number : 144  PA efficiency : 0.869452
-
-Making useful event
-StationID: 6
-StationID_AraRoot: 3
-
-Global_Pass : 2372 evt : 144 added weight : 0.997478
-0.997478 : 9
-********************************
-PA trigger ~~~ raySolNum: 0  SNR: 2.78134  Event Number : 176  PA efficiency : 0.980097
-
-Making useful event
-StationID: 6
-StationID_AraRoot: 3
-
-Global_Pass : 2328 evt : 176 added weight : 3.93979e-39
-3.93979e-39 : 0
-************************Thrown 200
-****************************************************************************************************Thrown 300
-****************************
-PA trigger ~~~ raySolNum: 1  SNR: 1.7015  Event Number : 328  PA efficiency : 0.177579
-
-Making useful event
-StationID: 6
-StationID_AraRoot: 3
-
-Global_Pass : 3416 evt : 328 added weight : 5.61832e-16
-5.61832e-16 : 0
-*******************
-PA trigger ~~~ raySolNum: 0  SNR: 23.3657  Event Number : 347  PA efficiency : 1.00162
-
-Making useful event
-StationID: 6
-StationID_AraRoot: 3
-
-Global_Pass : 2362 evt : 347 added weight : 0.981829
-0.981829 : 9
+*******************************************************************Thrown 200
 *****
-PA trigger ~~~ raySolNum: 0  SNR: 2.98722  Event Number : 352  PA efficiency : 0.993821
+PA trigger ~~~ raySolNum: 0  avgSNR: 8.62804  Event Number : 205  PA efficiency : 1.00162
+
+Global_Pass : 8474 evt : 205 added weight : 0.995622
+0.995622 : 9
 
 Making useful event
 StationID: 6
 StationID_AraRoot: 3
+*******************************
+PA trigger ~~~ raySolNum: 0  avgSNR: 4.65238  Event Number : 236  PA efficiency : 1.00162
 
-Global_Pass : 2392 evt : 352 added weight : 0.985067
-0.985067 : 9
-***************************
-PA trigger ~~~ raySolNum: 0  SNR: 2.92678  Event Number : 379  PA efficiency : 0.991043
-
-Making useful event
-StationID: 6
-StationID_AraRoot: 3
-
-Global_Pass : 2477 evt : 379 added weight : 0.889856
-0.889856 : 9
-*********depth negative! -14.8965
-depth negative! -14.8965
-depth negative! -14.8965
-depth negative! -14.8965
-depth negative! -14.8965
-depth negative! -14.8965
-depth negative! -14.8965
-depth negative! -14.8965
-depth negative! -14.8965
-depth negative! -14.8901
-depth negative! -14.8901
-depth negative! -14.899
-depth negative! -14.9106
-depth negative! -14.9106
-depth negative! -14.9001
-depth negative! -14.9001
-************Thrown 400
-**************************************************
-PA trigger ~~~ raySolNum: 0  SNR: 23.3657  Event Number : 450  PA efficiency : 1.00162
+Global_Pass : 8446 evt : 236 added weight : 0.998235
+0.998235 : 9
 
 Making useful event
 StationID: 6
 StationID_AraRoot: 3
+*****************************
+PA trigger ~~~ raySolNum: 0  avgSNR: 9.40231  Event Number : 265  PA efficiency : 1.00162
 
-Global_Pass : 2460 evt : 450 added weight : 0.996941
-0.996941 : 9
-*****************************************
-PA trigger ~~~ raySolNum: 0  SNR: 23.3657  Event Number : 491  PA efficiency : 1.00162
+Global_Pass : 8545 evt : 265 added weight : 2.20756e-43
+2.20756e-43 : 0
 
 Making useful event
 StationID: 6
 StationID_AraRoot: 3
+***********************************Thrown 300
+********************************************
+PA trigger ~~~ raySolNum: 0  avgSNR: 2.38054  Event Number : 344  PA efficiency : 0.863027
 
-Global_Pass : 2330 evt : 491 added weight : 5.08463e-40
-5.08463e-40 : 0
-******** end loop
+Global_Pass : 8474 evt : 344 added weight : 0.995615
+0.995615 : 9
+
+Making useful event
+StationID: 6
+StationID_AraRoot: 3
+*************************************depth negative! -7.06175
+depth negative! -7.06175
+depth negative! -7.06175
+depth negative! -7.06175
+depth negative! -7.06175
+depth negative! -7.06175
+depth negative! -7.06175
+depth negative! -7.06175
+depth negative! -7.06175
+depth negative! -7.05293
+depth negative! -7.05293
+depth negative! -7.07004
+depth negative! -7.07155
+depth negative! -7.07155
+depth negative! -7.05425
+depth negative! -7.05425
+*******************Thrown 400
+***************
+PA trigger ~~~ raySolNum: 0  avgSNR: 32.5518  Event Number : 415  PA efficiency : 1.00162
+
+Global_Pass : 8616 evt : 415 added weight : 0.0243914
+0.0243914 : 4
+
+Making useful event
+StationID: 6
+StationID_AraRoot: 3
+******
+PA trigger ~~~ raySolNum: 0  avgSNR: 3.53149  Event Number : 421  PA efficiency : 1.00109
+
+Global_Pass : 8400 evt : 421 added weight : 0.994757
+0.994757 : 9
+
+Making useful event
+StationID: 6
+StationID_AraRoot: 3
+***************************************************
+PA trigger ~~~ raySolNum: 0  avgSNR: 4.51783  Event Number : 472  PA efficiency : 1.00162
+
+Global_Pass : 8625 evt : 472 added weight : 0.992111
+0.992111 : 9
+
+Making useful event
+StationID: 6
+StationID_AraRoot: 3
+*****
+PA trigger ~~~ raySolNum: 0  avgSNR: 7.39083  Event Number : 477  PA efficiency : 1.00162
+
+Global_Pass : 8436 evt : 477 added weight : 7.54711e-75
+7.54711e-75 : 0
+
+Making useful event
+StationID: 6
+StationID_AraRoot: 3
+********************** end loop
 Total Events Thrown: 500
-Total_Global_Pass : 11
-Total_Weight : 4.85117
-Total_Probability : 16695.7
-weight bin values : 6, 0, 0, 0, 0, 0, 0, 0, 0, 5
+Total_Global_Pass : 10
+Total_Weight : 5.00073
+Total_Probability : 4.8271e-315
+weight bin values : 4, 0, 0, 0, 1, 0, 0, 0, 0, 5
 
 Radius: 5000 [m]
 IceVolume : 2.35619e+11
-test Veff(ice) : 2.87275e+10 m3sr, 28.7275 km3sr
-test Veff(water eq.) : 2.63431e+10 m3sr, 26.3431 km3sr
-And Veff(water eq.) error plus : 11.1779 km3sr and error minus : 8.64975 km3sr
-max_dt : 2.17989e-06
-rmsdiode= 3.90189e-14
+test Veff(ice) : 2.96131e+10 m3sr, 29.6131 km3sr
+test Veff(water eq.) : 2.71552e+10 m3sr, 27.1552 km3sr
+And Veff(water eq.) error plus : 11.1788 km3sr and error minus : 8.65008 km3sr
 Info in <TCanvas::Print>: pdf file sigmaCrossSection.pdf has been created
 outputdir= outputs/.
 This AraSim run is complete and will exit with code 0

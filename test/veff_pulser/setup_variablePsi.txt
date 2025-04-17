@@ -49,8 +49,6 @@ PICKNEARUNBIASED_R=5000 // (DEFAULT=5000) spherical radius around detector in pi
  
 PICK_POSNU_DEPTH=0 // (DEFAULT=0) 0: use all ice down to bedrock. 1: choose maximum depth yourself. 
  
-MAX_POSNU_DEPTH=0 // (DEFAULT=0) the maximum depth when PICK_POSNU_DEPTH =1. 
- 
 NNU_THIS_THETA=0 // (DEFAULT=0) 0: choose nutrino incident angle at random. 1: choose specfic angle range. 
  
 NNU_THETA=0 // (DEFAULT=0) the angle chosen when NNU_THIS_THETA =1 is chosen. Use radians! 

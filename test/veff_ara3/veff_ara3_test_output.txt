@@ -1,4 +1,4 @@
-The Git Commit Hash: bb0f892030b75ca1b071398c114dc7ec09d8e89e
+The Git Commit Hash: 30328d5436ef38ee5ee2ee10ed82ae595675a984
 
 	Default values!
 NNU : 100
@@ -38,7 +38,7 @@ read stations_per_side
 	Error, station number not match !
 InstalledStations[StationID].nChannels is 20
 Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
-Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /cvmfs/ara.opensciencegrid.org/trunk/RHEL_7_x86_64/ara_build/share/araCalib/AntennaInfo.sqlite
+Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /home/abishop/analysis/AraRoot_Install//share/araCalib/AntennaInfo.sqlite
 Opening default 2013-2017 SQLite tables for all stations 
 Borehole ch: 0 inserted station: 0 station: 3 string: 3 ant: 2 Type: 0
 Borehole ch: 1 inserted station: 0 station: 3 string: 0 ant: 2 Type: 0
@@ -116,14 +116,14 @@ System temp ch14 : 325
 System temp ch15 : 325
 System temp ch16 : 0
 Reading in situ ARA noise for this station and configuration from file: 
-/cvmfs/ara.opensciencegrid.org/trunk/RHEL_7_x86_64/source/AraSim/data/noise/sigmavsfreq_A_3_config_2.csv
+/home/abishop/AraSim-AraSoft//data/noise/sigmavsfreq_A_3_config_2.csv
 start read elect chain
  Reading standard ARA electronics response from file:
-/cvmfs/ara.opensciencegrid.org/trunk/RHEL_7_x86_64/source/AraSim/data/gain/ARA_Electronics_TotalGain_TwoFilters.csv
+/home/abishop/AraSim-AraSoft//data/gain/ARA_Electronics_TotalGain_TwoFilters.csv
  Recalculating in situ electronic response amplitude to ensure consistency with antenna model used here.
 done read elect chain
  Reading trigger formation values for this station and configuration from file:
-/cvmfs/ara.opensciencegrid.org/trunk/RHEL_7_x86_64/source/AraSim/data/trigger/delays_masking_A3_C2.csv
+/home/abishop/AraSim-AraSoft//data/trigger/delays_masking_A3_C2.csv
 Sharesurface: 0 : 0 : 0 : 10010.2 : 10003 : 6.35944e+06 : 
 Sharesurface: 0 : 0 : 1 : 10010.2 : 10003 : 6.35944e+06 : 
 Sharesurface: 0 : 0 : 2 : 10010.2 : 10003 : 6.35946e+06 : 
@@ -229,7 +229,7 @@ OR
 c) Call UsefulAtriStationEvent *realAtriEvPtr = new UsefulAtriStationEvent(rawAtriEvPtr, AraCalType::kLatestCalib); ***BEFORE*** 
 AraGeomTool::getStationInfo(3,2017)
 Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
-Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /cvmfs/ara.opensciencegrid.org/trunk/RHEL_7_x86_64/ara_build/share/araCalib/AntennaInfo.sqlite
+Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /home/abishop/analysis/AraRoot_Install//share/araCalib/AntennaInfo.sqlite
 Opening default 2013-2017 SQLite tables for all stations 
 ******
 trigger passed at bin 4387  passed ch : 0 (0type) Direct dist btw posnu : 3201.86 noiseID : 0 ViewAngle : 56.3795 LikelyTrigSignal : interaction 0, ray 1
@@ -286,7 +286,7 @@ StationID_AraRoot: 3
 Total Events Thrown: 500
 Total_Global_Pass : 4
 Total_Weight : 1.81484
-Total_Probability : 4869.4
+Total_Probability : 11325.1
 weight bin values : 2, 0, 0, 0, 0, 0, 0, 0, 0, 2
 
 Radius: 5000 [m]
