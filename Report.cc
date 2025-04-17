@@ -267,7 +267,16 @@ void Antenna_r::clear_useless(Settings *settings1) {
   // If the user requests that less information be stored in the output file, 
   //   clear some information here from the Antenna_r object
 
-  if (settings1->DATA_SAVE_MODE == 1) {
+  // DATA_SAVE_MODE meanings from Settings.h
+  // 0 : save all information which are generated during the processes. 
+  //     * Remove nothing *
+  // 1 : light mode, remove most of data before the final global trigger 
+  //     Remove most of data except geometric info, final data V_mimic
+  // 2 : light mode 2, except for physics information (energy, geometric info), 
+  //     Remove all waveform information (include noise waveforms in trigger class)
+
+  // Remove data from intermediate waveform objects
+  if (settings1->DATA_SAVE_MODE >= 1) {
     
     // Clear EM signal and waveform data for each interaction and ray
     vmmhz.clear();
@@ -285,30 +294,17 @@ void Antenna_r::clear_useless(Settings *settings1) {
     V_noise.clear();
 
   }
-  else if (settings1->DATA_SAVE_MODE == 2) {
+
+  // Remove final waveform data and ray path data
+  if (settings1->DATA_SAVE_MODE >= 2) {
     
     //! clear the ray step to reduce the size of output AraOut.root
     ray_step.clear();  
     
-    // Clear EM signal and waveform data for each interaction and ray
-    vmmhz.clear();
-    Heff.clear();
-    Vfft.clear();
-    Vfft_noise.clear();
-    V.clear();
-
-    TooMuch_Tdelay.clear();
-    
     // clear global trigger waveform info also
     time.clear();
     time_mimic.clear();
-    V_convolved.clear();
-    V_noise.clear();
     V_mimic.clear();
-    Vm_zoom.clear();
-    Vm_zoom_T.clear();
-    V_convolved.clear();
-    V_noise.clear();
     
   }
 
