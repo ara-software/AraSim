@@ -281,6 +281,9 @@ void Antenna_r::clear_useless(Settings *settings1) {
     // additional for before ant waveform
     Vm_zoom.clear();
     Vm_zoom_T.clear();
+    V_convolved.clear();
+    V_noise.clear();
+
   }
   else if (settings1->DATA_SAVE_MODE == 2) {
     
@@ -302,9 +305,10 @@ void Antenna_r::clear_useless(Settings *settings1) {
     V_convolved.clear();
     V_noise.clear();
     V_mimic.clear();
-
     Vm_zoom.clear();
     Vm_zoom_T.clear();
+    V_convolved.clear();
+    V_noise.clear();
     
   }
 
