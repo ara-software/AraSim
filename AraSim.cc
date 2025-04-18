@@ -644,14 +644,16 @@ int main(int argc, char **argv) {   // read setup.txt file
     // remove noisewaveform info if DATA_SAVE_MODE is not 0
     if (settings1->DATA_SAVE_MODE != 0) {
         trigger->v_noise_timedomain.clear();
+        trigger->v_noise_timedomain_ch.clear();
         trigger->v_noise_timedomain_diode.clear();
-    }
-    if (settings1->DATA_SAVE_MODE == 2) {// in DATA_SAVE_MODE==2, remove noise spectrum before Rayleigh dist.
+        trigger->v_noise_timedomain_diode_ch.clear();
+        trigger->Full_window.clear();
+        trigger->Full_window_V.clear();
         trigger->Vfft_noise_before.clear();
     }
     
     AraTree->Fill();  // fill tree for one entry
-    AraFile->Write();
+    AraFile->Write("", TObject::kOverwrite); // Without OverWrite, multiple AraTree2 objects may be written out
     AraFile->Close();
 
     efficiencies->summarize(); // summarize the results in an output file  
