@@ -786,7 +786,7 @@ void Settings::ReadEvtFile(string evtfile){
                 std::stringstream iss(line);
                 int a, b, c, e;
                 double d, f, g, h, i, j, k;
-                if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j >> k))
+                if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j >> k >> l))
                     break;
 /*                EVID[i] = atoi(a.c_str());
                 NUFLAVORINT[i] = atoi(b.c_str());
@@ -822,7 +822,7 @@ void Settings::ReadEvtFile(string evtfile){
                 IND_NNU_THETA.push_back(i);
                 IND_NNU_PHI.push_back(j);
                 ELAST.push_back(k);
-
+                NU_PRIM_ENERGY.push_back(l);
 
                 l++;
             }

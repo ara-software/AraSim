@@ -104,8 +104,10 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 settings1->YPARAM = 2;
                 settings1->ELAST_Y = settings1->ELAST[inu_thrown];
 
-                //Add event ID
+                //Add event ID and primary neutrino energy
                 event_ID.push_back(settings1->EVID[inu_thrown]);
+                nu_prim_energy.push_back(settings1->NU_PRIM_ENERGY[inu_thrown]);
+                cout << "ASG HERE: " << nu_prim_energy[inu_thrown] << endl;
             }
 
             //Calculate the interactions birth time for secondaries

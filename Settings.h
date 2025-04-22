@@ -362,6 +362,7 @@ class Settings
         vector<double> IND_NNU_THETA;
         vector<double> IND_NNU_PHI;
         vector<double> ELAST;
+        vector<double> NU_PRIM_ENERGY;
         vector<int> INT_PER_NNU; //storing the number of interactions per neutrino (NNU) e.g. stochastic losses, decays, ...,
                                  //associated to a primary neutrino interaction
 
