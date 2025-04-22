@@ -848,11 +848,11 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             get_Param_RA(0, param_RA);
             the_table_to_use = pick_table(0);
 
-            E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
+            E_shower = event->Nu_Interaction[interaction_idx].interaction_energy*event->Nu_Interaction[interaction_idx].emfrac;
 
-            Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
+            Const = sin_view / sin_changle * 1./event->Nu_Interaction[interaction_idx].LQ * (V_s) * E_shower / 1.e12;
 
-            shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
+            shower_bin = event->Nu_Interaction[interaction_idx].shower_Q_profile.size();
 
             // do integration
 
@@ -865,11 +865,11 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             get_Param_RA(1, param_RA);
             the_table_to_use = pick_table(1);
 
-            E_shower = event->pnu*event->Nu_Interaction[0].hadfrac;
+            E_shower = event->Nu_Interaction[interaction_idx].interaction_energy*event->Nu_Interaction[interaction_idx].hadfrac;
 
-            Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
+            Const = sin_view / sin_changle * 1./event->Nu_Interaction[interaction_idx].LQ * (V_s) * E_shower / 1.e12;
 
-            shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
+            shower_bin = event->Nu_Interaction[interaction_idx].shower_Q_profile.size();
 
             // do integration
 
@@ -879,32 +879,32 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
         else if ( settings1->SHOWER_MODE == 3 ) {
 
             // if EM shower dominant
-            if ( event->Nu_Interaction[0].primary_shower == 0 ) {
+            if ( event->Nu_Interaction[interaction_idx].primary_shower == 0 ) {
 
                 V_s = -4.5e-14;
                 get_Param_RA(0, param_RA);
                 the_table_to_use = pick_table(0);
 
-                E_shower = event->pnu*event->Nu_Interaction[0].emfrac;
+                E_shower = event->Nu_Interaction[interaction_idx].interaction_energy*event->Nu_Interaction[interaction_idx].emfrac;
 
-                Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
+                Const = sin_view / sin_changle * 1./event->Nu_Interaction[interaction_idx].LQ * (V_s) * E_shower / 1.e12;
 
-                shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
+                shower_bin = event->Nu_Interaction[interaction_idx].shower_Q_profile.size();
 
             }
 
             // if HAD shower dominant
-            else if ( event->Nu_Interaction[0].primary_shower == 1 ) {
+            else if ( event->Nu_Interaction[interaction_idx].primary_shower == 1 ) {
 
                 V_s = -3.2e-14;
                 get_Param_RA(1, param_RA);
                 the_table_to_use = pick_table(1);
 
-                E_shower = event->pnu*event->Nu_Interaction[0].hadfrac;
+                E_shower = event->Nu_Interaction[interaction_idx].interaction_energy*event->Nu_Interaction[interaction_idx].hadfrac;
 
-                Const = sin_view / sin_changle * 1./event->Nu_Interaction[0].LQ * (V_s) * E_shower / 1.e12;
+                Const = sin_view / sin_changle * 1./event->Nu_Interaction[interaction_idx].LQ * (V_s) * E_shower / 1.e12;
 
-                shower_bin = event->Nu_Interaction[0].shower_Q_profile.size();
+                shower_bin = event->Nu_Interaction[interaction_idx].shower_Q_profile.size();
 
             }
 
@@ -951,17 +951,17 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 
                 mid_old_bin = bin*skip_bins;
 
-                Tterm = Tarray[tbin] - event->Nu_Interaction[0].shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
+                Tterm = Tarray[tbin] - event->Nu_Interaction[interaction_idx].shower_depth_m[mid_old_bin] * ( offcone_factor/c_ns );
 
-                if ( event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]<=0) {
+                if ( event->Nu_Interaction[interaction_idx].shower_Q_profile[mid_old_bin]<=0) {
                     Integrate += 0.;
                 }
                 else {
                     if(settings1->USE_PARAM_RE_TTERM_TABLE==1){
-                    	Integrate += -1 *(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, the_table_to_use);
+                    	Integrate += -1 *(event->Nu_Interaction[interaction_idx].shower_Q_profile[mid_old_bin]) * evaluate_param_re_table(Tterm, the_table_to_use);
                     }
                     else{
-                    	Integrate += -1.*(event->Nu_Interaction[0].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
+                    	Integrate += -1.*(event->Nu_Interaction[interaction_idx].shower_Q_profile[mid_old_bin]) * Param_RE_Tterm_approx(Tterm, param_RA);
                     }
                 }
 
@@ -986,7 +986,7 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             the_table_to_use = pick_table(0);
 
 
-            E_shower = event->Nu_Interaction[interaction_idx].pnuenergy*event->Nu_Interaction[interaction_idx].emfrac;
+            E_shower = event->Nu_Interaction[interaction_idx].interaction_energy*event->Nu_Interaction[interaction_idx].emfrac;
 
             Const = sin_view / sin_changle * 1./event->Nu_Interaction[interaction_idx].EM_LQ * (V_s) * E_shower / 1.e12;
 
@@ -1064,7 +1064,7 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
             get_Param_RA(1, param_RA);
             the_table_to_use = pick_table(1);
 
-            E_shower = event->Nu_Interaction[interaction_idx].pnuenergy*event->Nu_Interaction[interaction_idx].hadfrac;
+            E_shower = event->Nu_Interaction[interaction_idx].interaction_energy*event->Nu_Interaction[interaction_idx].hadfrac;
 
             Const = sin_view / sin_changle * 1./event->Nu_Interaction[interaction_idx].HAD_LQ * (V_s) * E_shower / 1.e12;
 
