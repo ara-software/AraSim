@@ -788,29 +788,7 @@ void Settings::ReadEvtFile(string evtfile){
                 double d, f, g, h, i, j, k;
                 if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j >> k >> l))
                     break;
-/*                EVID[i] = atoi(a.c_str());
-                NUFLAVORINT[i] = atoi(b.c_str());
-                NUBAR[i] = atoi(c.c_str());
-                PNU[i] = atof(d.c_str());
-                CURRENTINT[i] = atoi(e.c_str());
-                X[i] = atof(f.c_str());
-                Y[i] = atof(g.c_str());
-                Z[i] = atof(h.c_str());
-                THETA[i] = atof(i.c_str());
-                PHI[i] = atof(j.c_str());
-*/
-/*
-                EVID[l] = a;
-                NUFLAVORINT[l] = b;
-                NUBAR[l] = c;
-                PNU[l] = d;
-                CURRENTINT[l] = e;
-                IND_POSNU_R[l] = f;
-                IND_POSNU_THETA[l] = g;
-                IND_POSNU_PHI[l] = h;
-                IND_NNU_THETA[l] = i;
-                IND_NNU_PHI[l] = j;
-*/
+
                 EVID.push_back(a);
                 NUFLAVORINT.push_back(b);
                 NUBAR.push_back(c);
