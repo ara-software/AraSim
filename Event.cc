@@ -32,6 +32,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
 
     Initialize ();
 
+    double pnu = 0.0; //energy of neutrino or interaction
     inu_thrown = event_num;
 
     // Set the default maximum number of interactions to n_interactions
@@ -62,7 +63,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         Choose_Evt_Type (settings1);
 
         if (Event_type == 0) { // if only neutrino events exist
-       
+
             pnu = spectra1->GetNuEnergy();
         
             if (settings1->EVENT_GENERATION_MODE == 1){

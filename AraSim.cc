@@ -382,7 +382,7 @@ int main(int argc, char **argv) {   // read setup.txt file
                 event_file << inu << " "; // EVID    
                 event_file << event->nuflavorint << " "; // NUFLAVORINT       
                 event_file << event->nu_nubar << " "; // NUBAR       
-                event_file << event->pnu << " "; // PNU      
+                event_file << event->Nu_Interaction[interaction_i].interaction_energy << " "; // PNU      
                 event_file << event->Nu_Interaction[interaction_i].currentint    << " "; // CURRENTINT       
                 event_file << localPos.R()     << " "; // IND_POSNU_R      
                 event_file << localPos.Theta() << " "; // IND_POSNU_THETA       
