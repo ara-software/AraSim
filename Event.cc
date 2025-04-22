@@ -107,7 +107,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 //Add event ID and primary neutrino energy
                 event_ID.push_back(settings1->EVID[inu_thrown]);
                 nu_prim_energy.push_back(settings1->NU_PRIM_ENERGY[inu_thrown]);
-                cout << "ASG HERE: " << nu_prim_energy[inu_thrown] << endl;
+
             }
 
             //Calculate the interactions birth time for secondaries
