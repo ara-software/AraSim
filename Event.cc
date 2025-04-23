@@ -23,6 +23,8 @@ void Event::Initialize () {
     Nu_Interaction.clear();
     //test_report.clear();
     n_interactions = 1;  // total number of interaction (including secondaries)
+    nu_prim_energy = -1; // placeholder for primary neutrino energies
+    prim_particle_type = -1; //placeholder particle data type (-1 doesn't exist in PDG)
 
 }
 
@@ -32,6 +34,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
 
     Initialize ();
 
+    double pnu = 0.0; //energy of neutrino or interaction
     inu_thrown = event_num;
 
     // Set the default maximum number of interactions to n_interactions
@@ -62,7 +65,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         Choose_Evt_Type (settings1);
 
         if (Event_type == 0) { // if only neutrino events exist
-       
+
             pnu = spectra1->GetNuEnergy();
         
             if (settings1->EVENT_GENERATION_MODE == 1){
@@ -104,8 +107,30 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 settings1->YPARAM = 2;
                 settings1->ELAST_Y = settings1->ELAST[inu_thrown];
 
-                //Add event ID
-                event_ID.push_back(settings1->EVID[inu_thrown]);
+                //store event ID, primary neutrino energy, particle type
+                event_ID = settings1->EVID[inu_thrown];
+                nu_prim_energy = settings1->NU_PRIM_ENERGY[inu_thrown];
+                prim_particle_type = settings1->PARTICLE_TYPE[inu_thrown];
+
+                nuflavor = primary1->GetNuFlavor(settings1);
+                nu_nubar = primary1->GetNuNuBar(nuflavor, settings1);
+            }
+            else{
+                nuflavor = primary1->GetNuFlavor(settings1);
+                nu_nubar = primary1->GetNuNuBar(nuflavor, settings1);
+
+                nu_prim_energy = pnu; // Set primary energy to be the particle energy when not reading event lists
+
+                // set primary's type to the same as particle's type when not reading event lists
+                if (nuflavor == "nue"){
+                    prim_particle_type = nu_nubar == 0 ? 12 : -12;
+                }
+                else if (nuflavor == "numu"){
+                    prim_particle_type = nu_nubar == 0 ? 14 : -14;
+                }
+                else if (nuflavor == "nutau"){
+                    prim_particle_type = nu_nubar == 0 ? 16 : -16;
+                }
             }
 
             //Calculate the interactions birth time for secondaries
@@ -129,11 +154,6 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 // Store the computed birth time for this secondary interaction
                 interactions_birth_time.push_back(tmp_birth_time);
             }
-            
-
-            nuflavor = primary1->GetNuFlavor(settings1);
-            nu_nubar = primary1->GetNuNuBar(nuflavor, settings1);
-
         
             if (nuflavor=="nue"){
                 nuflavorint=1;

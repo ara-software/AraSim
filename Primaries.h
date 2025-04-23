@@ -276,7 +276,7 @@ class Interaction  {
     vector <double> HAD_shower_depth_m;
     vector <double> HAD_shower_Q_profile;
     double HAD_LQ;
-    double pnuenergy;
+    double interaction_energy;
 
     int primary_shower; // 0 or EM, 1 for HAD. set by emfrac, hadfrac
 

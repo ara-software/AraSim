@@ -777,40 +777,18 @@ void Settings::ReadEvtFile(string evtfile){
     ifstream evtFile(evtfile.c_str());
 
     std::string line;
-    int l = 0;
+    int n = 0;
 
     if ( evtFile.is_open() ) {
         while (evtFile.good() ) {
             getline(evtFile, line);
             if (line[0] != "/"[0]) {
                 std::stringstream iss(line);
-                int a, b, c, e;
-                double d, f, g, h, i, j, k;
-                if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j >> k))
+                int a, b, c, e, m;
+                double d, f, g, h, i, j, k, l;
+                if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j >> k >> l >> m))
                     break;
-/*                EVID[i] = atoi(a.c_str());
-                NUFLAVORINT[i] = atoi(b.c_str());
-                NUBAR[i] = atoi(c.c_str());
-                PNU[i] = atof(d.c_str());
-                CURRENTINT[i] = atoi(e.c_str());
-                X[i] = atof(f.c_str());
-                Y[i] = atof(g.c_str());
-                Z[i] = atof(h.c_str());
-                THETA[i] = atof(i.c_str());
-                PHI[i] = atof(j.c_str());
-*/
-/*
-                EVID[l] = a;
-                NUFLAVORINT[l] = b;
-                NUBAR[l] = c;
-                PNU[l] = d;
-                CURRENTINT[l] = e;
-                IND_POSNU_R[l] = f;
-                IND_POSNU_THETA[l] = g;
-                IND_POSNU_PHI[l] = h;
-                IND_NNU_THETA[l] = i;
-                IND_NNU_PHI[l] = j;
-*/
+
                 EVID.push_back(a);
                 NUFLAVORINT.push_back(b);
                 NUBAR.push_back(c);
@@ -822,9 +800,11 @@ void Settings::ReadEvtFile(string evtfile){
                 IND_NNU_THETA.push_back(i);
                 IND_NNU_PHI.push_back(j);
                 ELAST.push_back(k);
+                NU_PRIM_ENERGY.push_back(l);
+                PARTICLE_TYPE.push_back(m);
 
 
-                l++;
+                n++;
             }
         }
         evtFile.close();

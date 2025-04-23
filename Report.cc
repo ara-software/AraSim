@@ -934,8 +934,8 @@ void Report::ModelRay(
     }
 
     double time_diff_birefringence = birefringence->Time_Diff_TwoRays(
-        RayStep[ray_idx][0], RayStep[ray_idx][1], ray_output[3][ray_idx], 
-        event->Nu_Interaction[0].posnu_from_antcen, settings
+        RayStep[ray_idx][interaction_idx], RayStep[ray_idx][1], ray_output[3][ray_idx], 
+        event->Nu_Interaction[interaction_idx].posnu_from_antcen, settings
     ); // calculate time differences for birefringence 
 
     antenna_r->arrival_time[interaction_idx].push_back(ray_output[4][ray_idx] + event->interactions_birth_time[interaction_idx]);
@@ -974,7 +974,7 @@ void Report::ModelRay(
         }
     }
     else if (settings->USE_ARA_ICEATTENU == 0) { // use old method
-        IceAttenFactor = exp(-ray_output[0][ray_idx] / icemodel->EffectiveAttenuationLength(settings, event->Nu_Interaction[0].posnu, 0));
+        IceAttenFactor = exp(-ray_output[0][ray_idx] / icemodel->EffectiveAttenuationLength(settings, event->Nu_Interaction[interaction_idx].posnu, 0));
     }
 
     // If the simulation is not in debug mode, calculate the field from the
@@ -1021,16 +1021,16 @@ void Report::ModelRay(
             for (int l = 0; l < detector->GetFreqBin(); l++) { // for detector freq bin numbers
 
                 if (event->IsCalpulser > 0) {
-                    vmmhz1m_tmp = event->Nu_Interaction[0].vmmhz1m[l] *settings->CALPUL_AMP;
+                    vmmhz1m_tmp = event->Nu_Interaction[interaction_idx].vmmhz1m[l] *settings->CALPUL_AMP;
                 }
                 else {
-                    vmmhz1m_tmp = event->Nu_Interaction[0].vmmhz1m[l];
+                    vmmhz1m_tmp = event->Nu_Interaction[interaction_idx].vmmhz1m[l];
                     signal->TaperVmMHz(
                         viewangle, 
-                        event->Nu_Interaction[0].d_theta_em[l], 
-                        event->Nu_Interaction[0].d_theta_had[l], 
-                        event->Nu_Interaction[0].emfrac, 
-                        event->Nu_Interaction[0].hadfrac, 
+                        event->Nu_Interaction[interaction_idx].d_theta_em[l], 
+                        event->Nu_Interaction[interaction_idx].d_theta_had[l], 
+                        event->Nu_Interaction[interaction_idx].emfrac, 
+                        event->Nu_Interaction[interaction_idx].hadfrac, 
                         vmmhz1m_tmp, vmmhz1m_em);
                 }
 
@@ -1145,7 +1145,7 @@ void Report::ModelRay(
 
                     // see if integrated shower profile LQ is non-zero and near the cone viewangle
                     static const int outbin = 64;
-                    if (event->Nu_Interaction[0].LQ > 0 && (fabs(viewangle - signal->CHANGLE_ICE) <= settings->OFFCONE_LIMIT *RADDEG)) {
+                    if (event->Nu_Interaction[interaction_idx].LQ > 0 && (fabs(viewangle - signal->CHANGLE_ICE) <= settings->OFFCONE_LIMIT *RADDEG)) {
 
                         double atten_factor = 0.;
                         if (settings->USE_ARA_ICEATTENU == 1 || settings->USE_ARA_ICEATTENU == 0) {
@@ -1258,7 +1258,7 @@ void Report::ModelRay(
                         ray_output[1][ray_idx], // launch_angle
                         ray_output[2][ray_idx], // rec_angle
                         ray_output[3][ray_idx], // reflect_angle
-                        event->Nu_Interaction[0].posnu,
+                        event->Nu_Interaction[interaction_idx].posnu,
                         launch_vector,
                         receive_vector,
                         settings,
@@ -1270,7 +1270,7 @@ void Report::ModelRay(
                         ray_output[1][ray_idx], // zenith angle of ray at launch
                         ray_output[2][ray_idx], // zenith angle of ray upon receipt
                         ray_idx,
-                        event->Nu_Interaction[0].posnu, // Neutrino
+                        event->Nu_Interaction[interaction_idx].posnu, // Neutrino
                         *antenna_d, // Antenna
                         -0.01, // 1cm antenna shift, inspired from NuRadioMC
                         icemodel, settings
@@ -1316,7 +1316,7 @@ void Report::ModelRay(
                         ray_output[1][ray_idx], // launch_angle
                         ray_output[2][ray_idx], // rec_angle
                         ray_output[3][ray_idx], // reflect_angle
-                        event->Nu_Interaction[0].posnu,
+                        event->Nu_Interaction[interaction_idx].posnu,
                         launch_vector,
                         receive_vector,
                         settings,
@@ -1594,7 +1594,7 @@ void Report::PropagateSignal(
             Tx_theta = ray_output[1][ray_idx] *DEGRAD;    // from 0 to 180
             heff_Tx_lastbin = GaintoHeight(
                 detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, antenna_phi, antenna_d->type, j, k),
-                freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu));   
+                freq_tmp, icemodel->GetN(event->Nu_Interaction[interaction_idx].posnu));   
                 
             if (event->IsCalpulser == 1) {
                 Pol_vector = n_trg_slappy;
@@ -1676,7 +1676,7 @@ void Report::PropagateSignal(
                     detector->GetGain_1D_OutZero(
                         freq_tmp *1.E-6,   // to MHz
                         Tx_theta, antenna_phi, antenna_d->type, j, k),
-                    freq_tmp, icemodel->GetN(event->Nu_Interaction[0].posnu));
+                    freq_tmp, icemodel->GetN(event->Nu_Interaction[interaction_idx].posnu));
                 
                 if (n > 0) {
                     ApplyAntFactors_Tdomain(

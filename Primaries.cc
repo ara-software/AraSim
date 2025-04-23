@@ -909,7 +909,7 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
 
   Initialize ();
 
-  pnuenergy = pnu;
+  interaction_energy = pnu;
 
   if (settings1->NNU_THIS_THETA==1)    // set specific theta angle for nnu
       nnu = primary1->GetThatDirection(settings1->NNU_THETA, settings1->NNU_D_THETA, settings1->NNU_PHI, settings1->NNU_D_PHI, settings1->NNU_THIS_PHI);
