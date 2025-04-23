@@ -379,17 +379,17 @@ int main(int argc, char **argv) {   // read setup.txt file
                 // convert to detector-centered coordinates
                 const Vector localPos = event->Nu_Interaction[interaction_i].posnu - detectorCenter;
  
-                event_file << inu << " "; // EVID    
-                event_file << event->nuflavorint << " "; // NUFLAVORINT       
-                event_file << event->nu_nubar << " "; // NUBAR       
-                event_file << event->Nu_Interaction[interaction_i].interaction_energy << " "; // PNU      
-                event_file << event->Nu_Interaction[interaction_i].currentint    << " "; // CURRENTINT       
-                event_file << localPos.R()     << " "; // IND_POSNU_R      
-                event_file << localPos.Theta() << " "; // IND_POSNU_THETA       
-                event_file << localPos.Phi()   << " "; // IND_POSNU_PHI      
-                event_file << event->Nu_Interaction[interaction_i].nnu.Theta()   << " "; // IND_NNU_THETA      
-                event_file << event->Nu_Interaction[interaction_i].nnu.Phi()     << " "; // IND_NNU_PHI       
-                event_file << event->Nu_Interaction[interaction_i].elast_y       << endl; // ELAST
+                event_file << inu << " "; // Event ID   
+                event_file << event->nuflavorint << " "; // particle flavor as an integer    
+                event_file << event->nu_nubar << " "; // integer indicating if the particle is normal or antiparticle    
+                event_file << event->Nu_Interaction[interaction_i].interaction_energy << " "; // particle energy   
+                event_file << event->Nu_Interaction[interaction_i].currentint    << " "; // interaction current (charged vs neutral)    
+                event_file << localPos.R()     << " "; // interaction vertex R 
+                event_file << localPos.Theta() << " "; // interaciton vertex theta     
+                event_file << localPos.Phi()   << " "; // interaction vertex phi  
+                event_file << event->Nu_Interaction[interaction_i].nnu.Theta()   << " "; // particle momentum direction theta    
+                event_file << event->Nu_Interaction[interaction_i].nnu.Phi()     << " "; // particle momentum direction phi  
+                event_file << event->Nu_Interaction[interaction_i].elast_y       << endl; // cascade inelasticity
 
                 inu++;
                 Events_Thrown++;
