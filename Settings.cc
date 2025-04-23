@@ -777,16 +777,16 @@ void Settings::ReadEvtFile(string evtfile){
     ifstream evtFile(evtfile.c_str());
 
     std::string line;
-    int l = 0;
+    int n = 0;
 
     if ( evtFile.is_open() ) {
         while (evtFile.good() ) {
             getline(evtFile, line);
             if (line[0] != "/"[0]) {
                 std::stringstream iss(line);
-                int a, b, c, e;
-                double d, f, g, h, i, j, k;
-                if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j >> k >> l))
+                int a, b, c, e, m;
+                double d, f, g, h, i, j, k, l;
+                if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j >> k >> l >> m))
                     break;
 
                 EVID.push_back(a);
@@ -801,8 +801,10 @@ void Settings::ReadEvtFile(string evtfile){
                 IND_NNU_PHI.push_back(j);
                 ELAST.push_back(k);
                 NU_PRIM_ENERGY.push_back(l);
+                PARTICLE_TYPE.push_back(m);
 
-                l++;
+
+                n++;
             }
         }
         evtFile.close();
