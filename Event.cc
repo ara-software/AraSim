@@ -106,10 +106,9 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 settings1->ELAST_Y = settings1->ELAST[inu_thrown];
 
                 //store event ID, primary neutrino energy, particle type
-                event_ID.push_back(settings1->EVID[inu_thrown]);
-                nu_prim_energy.push_back(settings1->NU_PRIM_ENERGY[inu_thrown]);
-                prim_particle_type.push_back(settings1->PARTICLE_TYPE[inu_thrown]);
-
+                event_ID = settings1->EVID[inu_thrown];
+                nu_prim_energy = settings1->NU_PRIM_ENERGY[inu_thrown];
+                prim_particle_type = settings1->PARTICLE_TYPE[inu_thrown];
             }
 
             //Calculate the interactions birth time for secondaries

@@ -390,8 +390,8 @@ int main(int argc, char **argv) {   // read setup.txt file
                 event_file << event->Nu_Interaction[interaction_i].nnu.Theta()   << " "; // particle momentum direction theta    
                 event_file << event->Nu_Interaction[interaction_i].nnu.Phi()     << " "; // particle momentum direction phi
                 event_file << event->Nu_Interaction[interaction_i].elast_y       << " "; // cascade inelasticity
-                event_file << event->Nu_Interaction[interaction_i].nu_prim_energy       << " ";  // energy of primary neutrino
-                event_file << event->Nu_Interaction[interaction_i].prim_particle_type       << endl; // particle type of primary neutrino
+                event_file << event->nu_prim_energy      << " ";  // energy of primary neutrino
+                event_file << event->prim_particle_type       << endl; // particle type of primary neutrino
 
                 inu++;
                 Events_Thrown++;
