@@ -105,7 +105,9 @@ int main(int argc, char **argv) {   // read setup.txt file
         string evtfile = string(argv[argc - 1]);
         settings1->ReadEvtFile(evtfile);
         cout<<"Read "<< evtfile <<" file!"<<endl;
-        cout << "EVID    NUFLAVORINT    NUBAR    PNU    CURRENTINT    IND_POSNU_R    IND_POSNU_THETA    IND_POSNU_PHI    IND_NNU_THETA    IND_NNU_PHI    ELAST" << endl;
+        cout << "EVID    NUFLAVORINT    NUBAR    PNU    CURRENTINT    "
+             << "IND_POSNU_R    IND_POSNU_THETA    IND_POSNU_PHI    IND_NNU_THETA    IND_NNU_PHI    "
+             << "ELAST    WEIGHT    PRIM_ENERGY    PRIM_PID" << endl;
         if (settings1->NNU == 0){
             // No events were read in from file, quit program
             cout<<"No events found in provided file. Exiting simulation."<<endl;
@@ -390,8 +392,9 @@ int main(int argc, char **argv) {   // read setup.txt file
                 event_file << event->Nu_Interaction[interaction_i].nnu.Theta()   << " "; // particle momentum direction theta    
                 event_file << event->Nu_Interaction[interaction_i].nnu.Phi()     << " "; // particle momentum direction phi
                 event_file << event->Nu_Interaction[interaction_i].elast_y       << " "; // cascade inelasticity
+                event_file << event->Nu_Interaction[interaction_i].weight        << " "; // cascade weight
                 event_file << event->nu_prim_energy      << " ";  // energy of primary neutrino
-                event_file << event->prim_particle_type       << endl; // particle type of primary neutrino
+                event_file << event->nu_prim_pid         << endl; // particle type of primary neutrino
 
                 inu++;
                 Events_Thrown++;

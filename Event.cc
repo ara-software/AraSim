@@ -24,7 +24,7 @@ void Event::Initialize () {
     //test_report.clear();
     n_interactions = 1;  // total number of interaction (including secondaries)
     nu_prim_energy = -1; // placeholder for primary neutrino energies
-    prim_particle_type = -1; //placeholder particle data type (-1 doesn't exist in PDG)
+    nu_prim_pid = -1; //placeholder particle data type (-1 doesn't exist in PDG)
 
 }
 
@@ -110,7 +110,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 //store event ID, primary neutrino energy, particle type
                 event_ID = settings1->EVID[inu_thrown];
                 nu_prim_energy = settings1->NU_PRIM_ENERGY[inu_thrown];
-                prim_particle_type = settings1->PARTICLE_TYPE[inu_thrown];
+                nu_prim_pid = settings1->NU_PRIM_PID[inu_thrown];
 
                 nuflavor = primary1->GetNuFlavor(settings1);
                 nu_nubar = primary1->GetNuNuBar(nuflavor, settings1);
@@ -123,13 +123,13 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
 
                 // set primary's type to the same as particle's type when not reading event lists
                 if (nuflavor == "nue"){
-                    prim_particle_type = nu_nubar == 0 ? 12 : -12;
+                    nu_prim_pid = nu_nubar == 0 ? 12 : -12;
                 }
                 else if (nuflavor == "numu"){
-                    prim_particle_type = nu_nubar == 0 ? 14 : -14;
+                    nu_prim_pid = nu_nubar == 0 ? 14 : -14;
                 }
                 else if (nuflavor == "nutau"){
-                    prim_particle_type = nu_nubar == 0 ? 16 : -16;
+                    nu_prim_pid = nu_nubar == 0 ? 16 : -16;
                 }
             }
 
@@ -167,7 +167,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
 
             Interaction *Nu_temp;
 
-            Nu_temp = new Interaction (pnu, nuflavor, nu_nubar, n_interactions, icemodel, detector, settings1, primary1, signal, sec1 );        
+            Nu_temp = new Interaction (pnu, nuflavor, nu_nubar, n_interactions, event_num, icemodel, detector, settings1, primary1, signal, sec1 );        
 
             if(Nu_temp->sigma_err==1){
                // only if getting sigma was successful
@@ -183,7 +183,6 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 cout<<"Nu_Interaction will be empty!"<<endl;
             }
 
-            inu_thrown++;
         } 
     }
     if (Event_type == 10) { // if only arbitrary events exist

@@ -905,7 +905,7 @@ Interaction::Interaction(IceModel *antarctica, Detector *detector, Settings *set
 }
 
 // Neutrino event Interaction class
-Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_interactions, IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 ) {
+Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_interactions, int event_num, IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 ) {
 
   Initialize ();
 
@@ -1164,6 +1164,11 @@ Interaction::Interaction (double pnu, string nuflavor, int nu_nubar, int &n_inte
   if(settings1->TRIG_ANALYSIS_MODE==2) {
       weight = 1.;
       probability = 1.;
+  }
+
+  // If we're reading from an event list, overwrite the weight with the weight from the event list
+  if (settings1->EVENT_GENERATION_MODE == 1){
+      weight = settings1->WEIGHTS[event_num];
   }
 
 }
