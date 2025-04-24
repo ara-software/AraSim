@@ -486,7 +486,6 @@ void Report::CalculateSignals(
         stations[i].strings[j].antennas[k].clear(); // clear data in antenna which stored in previous event
         stations[i].strings[j].antennas[k].Prepare_Outputs(event->Nu_Interaction.size()); // Resize output arrays to the number of interactions
 
-        cout << "NU INT SIZE: " << event->Nu_Interaction.size() << endl;
         // Loop over interactions in this event
         for (int interaction_idx=0; interaction_idx<event->Nu_Interaction.size(); interaction_idx++) {
 
