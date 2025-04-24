@@ -486,6 +486,7 @@ void Report::CalculateSignals(
         stations[i].strings[j].antennas[k].clear(); // clear data in antenna which stored in previous event
         stations[i].strings[j].antennas[k].Prepare_Outputs(event->Nu_Interaction.size()); // Resize output arrays to the number of interactions
 
+        cout << "NU INT SIZE: " << event->Nu_Interaction.size() << endl;
         // Loop over interactions in this event
         for (int interaction_idx=0; interaction_idx<event->Nu_Interaction.size(); interaction_idx++) {
 
@@ -934,7 +935,7 @@ void Report::ModelRay(
     }
 
     double time_diff_birefringence = birefringence->Time_Diff_TwoRays(
-        RayStep[ray_idx][interaction_idx], RayStep[ray_idx][1], ray_output[3][ray_idx], 
+        RayStep[ray_idx][0], RayStep[ray_idx][1], ray_output[3][ray_idx], 
         event->Nu_Interaction[interaction_idx].posnu_from_antcen, settings
     ); // calculate time differences for birefringence 
 
