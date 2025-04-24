@@ -934,7 +934,7 @@ void Report::ModelRay(
     }
 
     double time_diff_birefringence = birefringence->Time_Diff_TwoRays(
-        RayStep[ray_idx][interaction_idx], RayStep[ray_idx][1], ray_output[3][ray_idx], 
+        RayStep[ray_idx][0], RayStep[ray_idx][1], ray_output[3][ray_idx], 
         event->Nu_Interaction[interaction_idx].posnu_from_antcen, settings
     ); // calculate time differences for birefringence 
 
