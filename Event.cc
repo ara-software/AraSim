@@ -183,7 +183,6 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 cout<<"Nu_Interaction will be empty!"<<endl;
             }
 
-            inu_thrown++;
         } 
     }
     if (Event_type == 10) { // if only arbitrary events exist
