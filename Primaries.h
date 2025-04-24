@@ -161,7 +161,7 @@ class Interaction  {
     // default constructor
     Interaction();
     // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc
-    Interaction (double pnu, string nuflavor, int nu_nubar, int &n_interactions, IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 );
+    Interaction (double pnu, string nuflavor, int nu_nubar, int &n_interactions, int event_num, IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 );
     // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc
     Interaction (IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 );
     // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc 

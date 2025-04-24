@@ -783,26 +783,32 @@ void Settings::ReadEvtFile(string evtfile){
         while (evtFile.good() ) {
             getline(evtFile, line);
             if (line[0] != "/"[0]) {
+
                 std::stringstream iss(line);
-                int a, b, c, e, m;
-                double d, f, g, h, i, j, k, l;
-                if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j >> k >> l >> m))
+
+                int EL_evid, EL_nuflavorint, EL_nunubar, EL_current, EL_prim_pid;
+                double EL_energy, EL_pos_R, EL_pos_theta, EL_pos_phi, EL_dir_theta, EL_dir_phi;
+                double EL_elast_y, EL_weight, EL_prim_energy;
+                if(!(iss >> EL_evid >> EL_nuflavorint >> EL_nunubar >> EL_energy >> EL_current 
+                         >> EL_pos_R >> EL_pos_theta >> EL_pos_phi >> EL_dir_theta >> EL_dir_phi
+                         >> EL_elast_y >> EL_weight >> EL_prim_energy >> EL_prim_pid)){
                     break;
+                }
 
-                EVID.push_back(a);
-                NUFLAVORINT.push_back(b);
-                NUBAR.push_back(c);
-                PNU.push_back(d);
-                CURRENTINT.push_back(e);
-                IND_POSNU_R.push_back(f);
-                IND_POSNU_THETA.push_back(g);
-                IND_POSNU_PHI.push_back(h);
-                IND_NNU_THETA.push_back(i);
-                IND_NNU_PHI.push_back(j);
-                ELAST.push_back(k);
-                NU_PRIM_ENERGY.push_back(l);
-                PARTICLE_TYPE.push_back(m);
-
+                EVID.push_back(EL_evid);
+                NUFLAVORINT.push_back(EL_nuflavorint);
+                NUBAR.push_back(EL_nunubar);
+                PNU.push_back(EL_energy);
+                CURRENTINT.push_back(EL_current);
+                IND_POSNU_R.push_back(EL_pos_R);
+                IND_POSNU_THETA.push_back(EL_pos_theta);
+                IND_POSNU_PHI.push_back(EL_pos_phi);
+                IND_NNU_THETA.push_back(EL_dir_theta);
+                IND_NNU_PHI.push_back(EL_dir_phi);
+                ELAST.push_back(EL_elast_y);
+                WEIGHTS.push_back(EL_weight);
+                NU_PRIM_ENERGY.push_back(EL_prim_energy);
+                NU_PRIM_PID.push_back(EL_prim_pid);
 
                 n++;
             }
