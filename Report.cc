@@ -5103,47 +5103,61 @@ int Report::get_PA_trigger_bin(
     // Determine number of bins corresponding to a 10.7 ns integration window
     // 10.7 ns from page 12 of the PA design and instrumentation paper: https://arxiv.org/abs/1809.04573
     int trigger_window_bins = (10.7E-9) / timestep;
-
+    
     // The get_SNR function needs a vector to calculate the noise RMS
     // The RMS of a vector with a single element is the absolute value of that element.
     vector <double> tmp_noise_RMS;
     tmp_noise_RMS.push_back( noise_RMS );
-
+        
     // Create a 10.7 ns window of waveform to analyze for a trigger-worthy signal
     //   and move this window along the full waveform, returning the bin
     //   where a strong enough signal exists, if it does.
     for (int bin=0; bin < waveform.size()-trigger_window_bins; bin++) {
 
-        // Identify the ray solution that arrived closest to this waveform window's starting bin
-        int Likely_Sol = 0; // Initialize to direct ray 
-        int mindBin = 1.e9; // init big values
-        int dBin = 0;
-        for (int m=0; m<antenna->ray_sol_cnt; m++) {   // loop over raysol numbers
-            if ( !antenna->SignalExt[m].empty() ) { //ASG is this what's intended?
-                dBin = abs( antenna->SignalBin[m][0] - bin ); //ASG is this what's intended?
-                if ( dBin < mindBin ) {
-                    Likely_Sol = m; 
-                    mindBin = dBin;    
-                }
-            }     
+        // Get this 10.7ns snapshot of waveform and find the bin with greatest absolute value
+        vector <double> waveform_window;
+        int bin_max_value = 0; // Bin (in waveform_window) with the greatest absolute value
+        double max_value = 0; // Largest absolute value of a bin in waveform_window
+        for (int window_bin=bin; window_bin<bin+trigger_window_bins; window_bin++) {
+            waveform_window.push_back( waveform[window_bin] );
+            if (abs(waveform[window_bin]) > max_value){
+                max_value = abs(waveform[window_bin]);
+                bin_max_value = window_bin - bin;
+            }
+        }
+
+        // Identify the ray solution that arrived closest to bin with the 
+        //   greatest absolute value in this 10.7ns window.
+        int Likely_Sol[2] = {0, 0}; // Initialize to direct ray 
+        int mindBin = 1.e9; // Minimum difference between this bin and a ray solutions signal_bin.
+                            // Initialized unphysically large.
+        int dBin = 0; // Difference between this bin and some ray solution's signal bin.
+        for (int m=0; m<antenna->SignalBin.size(); m++) {   // loop over raysol numbers
+            for (int n=0; n<antenna->SignalBin[m].size(); n++){
+                if ( antenna->SignalExt[m][n] ) {
+                    dBin = abs( antenna->SignalBin[m][n] - bin_max_value );
+                    if ( dBin < mindBin ) {
+                        Likely_Sol[0] = m; 
+                        Likely_Sol[1] = n; 
+                        mindBin = dBin;    
+                    }
+                } 
+            } 
         } 
 
         // Scale SNR according to full phased array angular response
         double arrival_angle_scaling_factor = 2.0 / interpolate(
             trigger->angle_PA, trigger->aSNR_PA, // The arrival angle vs SNR curve
-            antenna->theta_rec[Likely_Sol][0]*180.0/PI-90.0, // arrival angle to get SNR for //ASG is this what's intended?
+            antenna->theta_rec[Likely_Sol[0]][Likely_Sol[1]]*180.0/PI-90.0, // arrival angle to get SNR for
             (*(&trigger->angle_PA+1) - trigger->angle_PA) - 1 // len(ang_data) - 1
         );
 
-        // Get this waveform window and calculate its SNR
-        vector <double> waveform_window;
-        for (int window_bin=bin; window_bin<bin+trigger_window_bins; window_bin++) {
-            waveform_window.push_back( waveform[window_bin] );
-        }
+        // Calculate the waveform's SNR
         double snr = get_SNR(waveform_window, tmp_noise_RMS) * arrival_angle_scaling_factor;
-
+        
         // If the PA triggers on this SNR, return the starting bin of this window
         if ( event_trigger_rand_num < get_PA_efficiency(snr, trigger) ) {
+            cout<<"max_value: "<<max_value<<"  bin: "<<bin_max_value<<endl;
             return bin;
         }
     }
@@ -5180,7 +5194,7 @@ void Report::checkPATrigger(
     // For phased array, waveform length is 680 ns, but 
     // for PA trigger check only 20 ns around the signal bin.
     // This is to avoid getting the second ray
-    // KAH and ARB are not sure where the 1200 number comes from
+    // KAH and ARB are not sure where the 1200ns window of data was inspired from
     // !!!HEY IF YOU ARE FIXING THIS!!! please update the corresponding check in Settings::CheckCompatibilitiesSettings 
     int BINSIZE = 1200/(settings1->TIMESTEP*1.e9);  // Number of bins (aka datapoints) of data to save
     int waveformLength = settings1->WAVEFORM_LENGTH;
@@ -5214,7 +5228,7 @@ void Report::checkPATrigger(
         // Save the bin the wavefom triggered on.
         // The first bin of `trigger_waveform` corresponds to the `trig_search_init`
         //   bin of the full `V_convolved` waveform so we need to adjust the 
-        //   `pa_trigger_bin` accordingly.
+        //   `pa_trigger_bin` by the calculated trigger bin.
         stations[i].Global_Pass = pa_trigger_bin + trig_search_init;
 
         // Save the V_mimic and corresponding time arrays
@@ -5233,8 +5247,9 @@ void Report::checkPATrigger(
                     }
 
                 }//end bin
+
                 my_ch_id ++;
-                //cout<<" Peak Value for ant "<<ant<<" is "<<peakvalue<<endl;
+                
             }//end ant
         }//end detector
 
@@ -5254,24 +5269,21 @@ void Report::checkPATrigger(
         double *TDR_Vpol_sorted_temp;
         double *TDR_Hpol_sorted_temp;
 
-        if(settings1->TRIG_SCAN_MODE>1){ // prepare TDR storage arrays and initialize all values to 0
-            TDR_all_sorted_temp=new double[numChan];
-            TDR_Vpol_sorted_temp=new double[numChanVpol];
-            TDR_Hpol_sorted_temp=new double[numChanHpol];
-            for(int trig_j=0; trig_j<numChan; trig_j++) {
-                TDR_all_sorted_temp[trig_j] =0;
-            }
-            for(int trig_j=0; trig_j<numChanVpol; trig_j++) {
-                TDR_Vpol_sorted_temp[trig_j]=0;
-            }
-            for(int trig_j=0; trig_j<numChanHpol; trig_j++) {
-                TDR_Hpol_sorted_temp[trig_j]=0;  
-            }
-        } // if scan_mode>1
+        TDR_all_sorted_temp=new double[numChan];
+        TDR_Vpol_sorted_temp=new double[numChanVpol];
+        TDR_Hpol_sorted_temp=new double[numChanHpol];
+        for(int trig_j=0; trig_j<numChan; trig_j++) {
+            TDR_all_sorted_temp[trig_j] =0;
+        }
+        for(int trig_j=0; trig_j<numChanVpol; trig_j++) {
+            TDR_Vpol_sorted_temp[trig_j]=0;
+        }
+        for(int trig_j=0; trig_j<numChanHpol; trig_j++) {
+            TDR_Hpol_sorted_temp[trig_j]=0;  
+        }
 
         int check_TDR_configuration=0; // check if we need to reorder our TDR arrays
         int first_trigger=0;
-
 
         // Calculate PThresh information (taken from triggerCheckLoop)
         for(int trig_j=0;trig_j<numChan; trig_j++){// initialize Trig_Pass and buffers for each channel
