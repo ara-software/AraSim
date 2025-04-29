@@ -105,7 +105,9 @@ int main(int argc, char **argv) {   // read setup.txt file
         string evtfile = string(argv[argc - 1]);
         settings1->ReadEvtFile(evtfile);
         cout<<"Read "<< evtfile <<" file!"<<endl;
-        cout << "EVID    NUFLAVORINT    NUBAR    PNU    CURRENTINT    IND_POSNU_R    IND_POSNU_THETA    IND_POSNU_PHI    IND_NNU_THETA    IND_NNU_PHI    ELAST" << endl;
+        cout << "EVID    NUFLAVORINT    NUBAR    PNU    CURRENTINT    "
+             << "IND_POSNU_R    IND_POSNU_THETA    IND_POSNU_PHI    IND_NNU_THETA    IND_NNU_PHI    "
+             << "ELAST    WEIGHT    PRIM_ENERGY    PRIM_PID" << endl;
         if (settings1->NNU == 0){
             // No events were read in from file, quit program
             cout<<"No events found in provided file. Exiting simulation."<<endl;
@@ -352,19 +354,47 @@ int main(int argc, char **argv) {   // read setup.txt file
 
         if ( settings1->EVENT_GENERATION_MODE == 2 ){
             // Write event lists to file, no simulation
+
+            // get station center for conversion to local coordinates
+            double sumX = 0.;
+            double sumY = 0.; 
+            double sumZ = 0.;
+            int count = 0;
+
+            for (int i = 0; i < detector->stations[0].strings.size(); i++){
+              for (int j = 0; j < detector->stations[0].strings[i].antennas.size(); j++){
+                sumX = sumX + detector->stations[0].strings[i].antennas[j].GetX();
+                sumY = sumY + detector->stations[0].strings[i].antennas[j].GetY();
+                sumZ = sumZ + detector->stations[0].strings[i].antennas[j].GetZ();
+                count++;
+              }
+            }
+
+            // station center coordinates
+            const double avgX = sumX/double(count);
+            const double avgY = sumY/double(count);
+            const double avgZ = sumZ/double(count);
+            const Vector detectorCenter(avgX, avgY, avgZ);
+
             for (int interaction_i=0; interaction_i<event->Nu_Interaction.size(); interaction_i++){
-                
-                event_file << inu << " "; // EVID    
-                event_file << event->nuflavorint << " "; // NUFLAVORINT       
-                event_file << event->nu_nubar << " "; // NUBAR       
-                event_file << event->pnu << " "; // PNU      
-                event_file << event->Nu_Interaction[interaction_i].currentint    << " "; // CURRENTINT       
-                event_file << event->Nu_Interaction[interaction_i].posnu.R()     << " "; // IND_POSNU_R      
-                event_file << event->Nu_Interaction[interaction_i].posnu.Theta() << " "; // IND_POSNU_THETA       
-                event_file << event->Nu_Interaction[interaction_i].posnu.Phi()   << " "; // IND_POSNU_PHI      
-                event_file << event->Nu_Interaction[interaction_i].nnu.Theta()   << " "; // IND_NNU_THETA      
-                event_file << event->Nu_Interaction[interaction_i].nnu.Phi()     << " "; // IND_NNU_PHI       
-                event_file << event->Nu_Interaction[interaction_i].elast_y       << endl; // ELAST
+
+                // convert to detector-centered coordinates
+                const Vector localPos = event->Nu_Interaction[interaction_i].posnu - detectorCenter;
+ 
+                event_file << inu << " "; // Event ID   
+                event_file << event->nuflavorint << " "; // particle flavor as an integer    
+                event_file << event->nu_nubar << " "; // integer indicating if the particle is normal or antiparticle    
+                event_file << event->Nu_Interaction[interaction_i].interaction_energy << " "; // particle energy   
+                event_file << event->Nu_Interaction[interaction_i].currentint    << " "; // interaction current (charged vs neutral)    
+                event_file << localPos.R()     << " "; // interaction vertex R 
+                event_file << localPos.Theta() << " "; // interaciton vertex theta     
+                event_file << localPos.Phi()   << " "; // interaction vertex phi  
+                event_file << event->Nu_Interaction[interaction_i].nnu.Theta()   << " "; // particle momentum direction theta    
+                event_file << event->Nu_Interaction[interaction_i].nnu.Phi()     << " "; // particle momentum direction phi
+                event_file << event->Nu_Interaction[interaction_i].elast_y       << " "; // cascade inelasticity
+                event_file << event->Nu_Interaction[interaction_i].weight        << " "; // cascade weight
+                event_file << event->nu_prim_energy      << " ";  // energy of primary neutrino
+                event_file << event->nu_prim_pid         << endl; // particle type of primary neutrino
 
                 inu++;
                 Events_Thrown++;
@@ -619,14 +649,16 @@ int main(int argc, char **argv) {   // read setup.txt file
     // remove noisewaveform info if DATA_SAVE_MODE is not 0
     if (settings1->DATA_SAVE_MODE != 0) {
         trigger->v_noise_timedomain.clear();
+        trigger->v_noise_timedomain_ch.clear();
         trigger->v_noise_timedomain_diode.clear();
-    }
-    if (settings1->DATA_SAVE_MODE == 2) {// in DATA_SAVE_MODE==2, remove noise spectrum before Rayleigh dist.
+        trigger->v_noise_timedomain_diode_ch.clear();
+        trigger->Full_window.clear();
+        trigger->Full_window_V.clear();
         trigger->Vfft_noise_before.clear();
     }
     
     AraTree->Fill();  // fill tree for one entry
-    AraFile->Write();
+    AraFile->Write("", TObject::kOverwrite); // Without OverWrite, multiple AraTree2 objects may be written out
     AraFile->Close();
 
     efficiencies->summarize(); // summarize the results in an output file  

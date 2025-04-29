@@ -1,3 +1,4 @@
+The Git Commit Hash: 30328d5436ef38ee5ee2ee10ed82ae595675a984
 
 	Default values!
 NNU : 100
@@ -9,7 +10,7 @@ MOOREBAY : 0
 EXPONENT : 19
 DETECTOR : 1
 setupfile : test/veff_birefringence/birefringence_setup
-run number : 2
+run number : 3
 outputdir : outputs/.
 Read in READGEOM
 Read test/veff_birefringence/birefringence_setup file!
@@ -28,7 +29,7 @@ EXPONENT : 18
 DETECTOR : 4
 POSNU_RADIUS : 5000
 EVENT_GENERATION_MODE: 0
-first random : 0.458232
+first random : 0.994531
 
 Surface at (log:0, lat:0) : 6.35973e+06
 SurfaceAboveGeoid at (log:0, lat:0) : 2977
@@ -171,22 +172,22 @@ finish calling secondaries and signal
 Preparing Noise
 num chs: 16
 From pure noise waveforms, diode responses
-For ch0 mean, rms diode are -6.04087e-16 1.43171e-14 rms voltage is 0.0146489
-For ch1 mean, rms diode are -6.38937e-16 1.7251e-14 rms voltage is 0.0146975
-For ch2 mean, rms diode are -2.37477e-15 5.21552e-14 rms voltage is 0.0282753
-For ch3 mean, rms diode are -7.93574e-16 1.76078e-14 rms voltage is 0.0159484
-For ch4 mean, rms diode are -2.07931e-15 4.56682e-14 rms voltage is 0.0260845
-For ch5 mean, rms diode are -6.08632e-16 1.363e-14 rms voltage is 0.0142274
-For ch6 mean, rms diode are -2.19729e-15 4.95485e-14 rms voltage is 0.027562
-For ch7 mean, rms diode are -1.54259e-15 3.34104e-14 rms voltage is 0.0224556
-For ch8 mean, rms diode are -1.87459e-15 4.92909e-14 rms voltage is 0.0250731
-For ch9 mean, rms diode are -6.50519e-16 1.6179e-14 rms voltage is 0.0148298
-For ch10 mean, rms diode are -8.24156e-16 2.06043e-14 rms voltage is 0.0164395
-For ch11 mean, rms diode are -7.74662e-16 2.265e-14 rms voltage is 0.0170404
-For ch12 mean, rms diode are -1.02349e-15 2.46667e-14 rms voltage is 0.0189183
-For ch13 mean, rms diode are -6.16079e-16 1.57967e-14 rms voltage is 0.0143372
-For ch14 mean, rms diode are -1.03576e-15 2.35384e-14 rms voltage is 0.0180482
-For ch15 mean, rms diode are -4.08123e-15 9.83434e-14 rms voltage is 0.0347238
+For ch0 mean, rms diode are -6.27955e-16 1.37047e-14 rms voltage is 0.0146185
+For ch1 mean, rms diode are -6.56328e-16 1.66139e-14 rms voltage is 0.0147315
+For ch2 mean, rms diode are -2.27714e-15 5.29088e-14 rms voltage is 0.0282751
+For ch3 mean, rms diode are -7.65577e-16 1.86105e-14 rms voltage is 0.0161629
+For ch4 mean, rms diode are -2.07609e-15 4.65665e-14 rms voltage is 0.0260487
+For ch5 mean, rms diode are -6.32337e-16 1.40649e-14 rms voltage is 0.0145787
+For ch6 mean, rms diode are -2.25692e-15 5.01206e-14 rms voltage is 0.0277761
+For ch7 mean, rms diode are -1.44037e-15 3.09927e-14 rms voltage is 0.0221141
+For ch8 mean, rms diode are -1.89703e-15 5.13312e-14 rms voltage is 0.0256865
+For ch9 mean, rms diode are -6.62946e-16 1.68771e-14 rms voltage is 0.014758
+For ch10 mean, rms diode are -8.2898e-16 2.05112e-14 rms voltage is 0.0168396
+For ch11 mean, rms diode are -8.81346e-16 2.33522e-14 rms voltage is 0.0171634
+For ch12 mean, rms diode are -1.04718e-15 2.43789e-14 rms voltage is 0.0188783
+For ch13 mean, rms diode are -5.75212e-16 1.54206e-14 rms voltage is 0.0144198
+For ch14 mean, rms diode are -1.04011e-15 2.40194e-14 rms voltage is 0.0183194
+For ch15 mean, rms diode are -3.48261e-15 9.90556e-14 rms voltage is 0.0347986
  DATA_BIN_SIZE : 16384
 powerthreshold : -6.06
 begin looping events!!
@@ -210,30 +211,15 @@ station[0].strings[3].antennas[1] no_ch:14
 station[0].strings[3].antennas[2] no_ch:15
 station[0].strings[3].antennas[3] no_ch:16
 *Thrown 0
-***********depth negative! -13.1584
-depth negative! -13.1584
-depth negative! -13.1584
-depth negative! -13.1584
-depth negative! -13.1456
-depth negative! -13.1456
-depth negative! -13.1456
-depth negative! -13.1456
-depth negative! -13.1563
-depth negative! -13.1563
-depth negative! -13.1563
-depth negative! -13.1563
-depth negative! -13.1481
-depth negative! -13.1481
-depth negative! -13.1481
-depth negative! -13.1481
-*****************************************************************************************Thrown 100
-********************************************************************************************
-trigger passed at bin 4704  passed ch : 1 (1type) Direct dist btw posnu : 3411.49 noiseID : 0 ViewAngle : 58.5844 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4855  passed ch : 3 (1type) Direct dist btw posnu : 3423.2 noiseID : 0 ViewAngle : 58.7952 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4920  passed ch : 4 (0type) Direct dist btw posnu : 3420.71 noiseID : 0 ViewAngle : 58.265 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4975  passed ch : 11 (1type) Direct dist btw posnu : 3431.12 noiseID : 0 ViewAngle : 58.6139 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4975 evt : 192 added weight : 0.992505
-0.992505 : 9
+*************************************************short chord 0.166532
+***************************************************Thrown 100
+****************************************************************************************************Thrown 200
+*************************************
+trigger passed at bin 4228  passed ch : 0 (0type) Direct dist btw posnu : 1591.57 noiseID : 0 ViewAngle : 55.4854 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4257  passed ch : 2 (0type) Direct dist btw posnu : 1595.82 noiseID : 0 ViewAngle : 56.1332 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4241  passed ch : 12 (0type) Direct dist btw posnu : 1592.92 noiseID : 0 ViewAngle : 55.3397 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4257 evt : 237 added weight : 0.999199
+0.999199 : 9
 
 Making useful event
 StationID: 2
@@ -247,109 +233,66 @@ AraGeomTool::getStationInfo(3,2017)
 Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
 Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /home/abishop/analysis/AraRoot_Install//share/araCalib/AntennaInfo.sqlite
 Opening default 2013-2017 SQLite tables for all stations 
-********Thrown 200
-***************************depth negative! -18.7981
-depth negative! -18.7981
-depth negative! -18.7981
-depth negative! -18.7981
-depth negative! -18.7875
-depth negative! -18.7875
-depth negative! -18.7875
-depth negative! -18.7875
-depth negative! -18.7939
-depth negative! -18.7939
-depth negative! -18.7939
-depth negative! -18.7939
-depth negative! -18.792
-depth negative! -18.792
-depth negative! -18.792
-depth negative! -18.792
-*******************depth negative! -22.6954
-depth negative! -22.6954
-depth negative! -22.6954
-depth negative! -22.6954
-depth negative! -22.6808
-depth negative! -22.6808
-depth negative! -22.6808
-depth negative! -22.6808
-depth negative! -22.6852
-depth negative! -22.6852
-depth negative! -22.6852
-depth negative! -22.6852
-depth negative! -22.6917
-depth negative! -22.6917
-depth negative! -22.6917
-depth negative! -22.6917
-**********************************************
-trigger passed at bin 4331  passed ch : 1 (1type) Direct dist btw posnu : 968.033 noiseID : 0 ViewAngle : 56.1143 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4088  passed ch : 3 (1type) Direct dist btw posnu : 974.312 noiseID : 0 ViewAngle : 56.0522 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4331  passed ch : 5 (1type) Direct dist btw posnu : 970.405 noiseID : 0 ViewAngle : 57.3571 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4249  passed ch : 8 (0type) Direct dist btw posnu : 957.689 noiseID : 0 ViewAngle : 56.8252 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4304  passed ch : 11 (1type) Direct dist btw posnu : 964.955 noiseID : 0 ViewAngle : 56.7442 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4331 evt : 292 added weight : 0.000194634
-0.000194634 : 0
+******************************************************
+trigger passed at bin 4213  passed ch : 0 (0type) Direct dist btw posnu : 1675.84 noiseID : 0 ViewAngle : 54.4786 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4222  passed ch : 2 (0type) Direct dist btw posnu : 1678.91 noiseID : 0 ViewAngle : 53.8541 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4290  passed ch : 12 (0type) Direct dist btw posnu : 1685.29 noiseID : 0 ViewAngle : 54.4365 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4290 evt : 291 added weight : 1.21462e-26
+1.21462e-26 : 0
 
 Making useful event
 StationID: 2
 StationID_AraRoot: 2
-********Thrown 300
-****************************************************************************
-trigger passed at bin 4186  passed ch : 4 (0type) Direct dist btw posnu : 1646.16 noiseID : 0 ViewAngle : 56.0449 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4295  passed ch : 6 (0type) Direct dist btw posnu : 1654.41 noiseID : 0 ViewAngle : 55.4934 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4290  passed ch : 8 (0type) Direct dist btw posnu : 1654.18 noiseID : 0 ViewAngle : 56.4219 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4295 evt : 376 added weight : 4.93334e-34
-4.93334e-34 : 0
+*********Thrown 300
+*****
+trigger passed at bin 4300  passed ch : 4 (0type) Direct dist btw posnu : 1500.3 noiseID : 0 ViewAngle : 59.7475 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4233  passed ch : 8 (0type) Direct dist btw posnu : 1493.54 noiseID : 0 ViewAngle : 59.2655 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4308  passed ch : 10 (0type) Direct dist btw posnu : 1501.89 noiseID : 0 ViewAngle : 59.452 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4308 evt : 305 added weight : 0.900189
+0.900189 : 9
 
 Making useful event
 StationID: 2
 StationID_AraRoot: 2
-************************Thrown 400
-*depth negative! -29.6918
-depth negative! -29.6918
-depth negative! -29.6918
-depth negative! -29.6918
-depth negative! -29.6781
-depth negative! -29.6781
-depth negative! -29.6781
-depth negative! -29.6781
-depth negative! -29.6837
-depth negative! -29.6837
-depth negative! -29.6837
-depth negative! -29.6837
-depth negative! -29.6868
-depth negative! -29.6868
-depth negative! -29.6868
-depth negative! -29.6868
-****************************************************depth negative! -13.2988
-depth negative! -13.2988
-depth negative! -13.2988
-depth negative! -13.2988
-depth negative! -13.2921
-depth negative! -13.2921
-depth negative! -13.2921
-depth negative! -13.2921
-depth negative! -13.2902
-depth negative! -13.2902
-depth negative! -13.2902
-depth negative! -13.2902
-depth negative! -13.3012
-depth negative! -13.3012
-depth negative! -13.3012
-depth negative! -13.3012
-********************************************** end loop
+***********************************************************************************************Thrown 400
+*******************************
+trigger passed at bin 4397  passed ch : 4 (0type) Direct dist btw posnu : 1791.8 noiseID : 0 ViewAngle : 57.8268 LikelyTrigSignal : interaction 0, ray 1
+trigger passed at bin 4341  passed ch : 6 (0type) Direct dist btw posnu : 1792.52 noiseID : 0 ViewAngle : 56.9911 LikelyTrigSignal : interaction 0, ray 1
+trigger passed at bin 4415  passed ch : 10 (0type) Direct dist btw posnu : 1801.08 noiseID : 0 ViewAngle : 57.0021 LikelyTrigSignal : interaction 0, ray 1
+Global_Pass : 4415 evt : 431 added weight : 0.999593
+0.999593 : 9
+
+Making useful event
+StationID: 2
+StationID_AraRoot: 2
+**************************************depth negative! -22.2321
+depth negative! -22.2321
+depth negative! -22.2321
+depth negative! -22.2321
+depth negative! -22.218
+depth negative! -22.218
+depth negative! -22.218
+depth negative! -22.218
+depth negative! -22.2288
+depth negative! -22.2288
+depth negative! -22.2288
+depth negative! -22.2288
+depth negative! -22.2217
+depth negative! -22.2217
+depth negative! -22.2217
+depth negative! -22.2217
+****************************** end loop
 Total Events Thrown: 500
-Total_Global_Pass : 3
-Total_Weight : 0.992699
-Total_Probability : 4128
-weight bin values : 2, 0, 0, 0, 0, 0, 0, 0, 0, 1
+Total_Global_Pass : 4
+Total_Weight : 2.89898
+Total_Probability : 4542.12
+weight bin values : 1, 0, 0, 0, 0, 0, 0, 0, 0, 3
 
 Radius: 5000 [m]
 IceVolume : 2.35619e+11
-test Veff(ice) : 5.87853e+09 m3sr, 5.87853 km3sr
-test Veff(water eq.) : 5.39061e+09 m3sr, 5.39061 km3sr
-And Veff(water eq.) error plus : 7.31507 km3sr and error minus : 2.42195 km3sr
-max_dt : 1.42865e-06
-rmsdiode= 1.43171e-14
+test Veff(ice) : 1.71671e+10 m3sr, 17.1671 km3sr
+test Veff(water eq.) : 1.57422e+10 m3sr, 15.7422 km3sr
+And Veff(water eq.) error plus : 9.29678 km3sr and error minus : 7.30422 km3sr
 Info in <TCanvas::Print>: pdf file sigmaCrossSection.pdf has been created
 outputdir= outputs/.
 This AraSim run is complete and will exit with code 0

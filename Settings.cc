@@ -163,7 +163,7 @@ outputdir="outputs"; // directory where outputs go
 
   PICK_POSNU_DEPTH=0;     //default : 0 pick posnu depth from 0 to ice depth
 
-  MAX_POSNU_DEPTH=200.;     // default : 200m depth max
+  MAX_POSNU_DEPTH=0.;     // default : 0m depth max
 
   NNU_THIS_THETA=0;         // default 0: nnu angle pure random, 1: set a specific theta
 
@@ -531,10 +531,10 @@ void Settings::ReadFile(string setupfile) {
                   NNU_D_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
 
-	      else if (label == "Z_THIS_TOLERANCE") {
+              else if (label == "Z_THIS_TOLERANCE") {
                   Z_THIS_TOLERANCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-	      else if (label == "Z_TOLERANCE") {
+              else if (label == "Z_TOLERANCE") {
                   Z_TOLERANCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
 
@@ -777,54 +777,40 @@ void Settings::ReadEvtFile(string evtfile){
     ifstream evtFile(evtfile.c_str());
 
     std::string line;
-    int l = 0;
+    int n = 0;
 
     if ( evtFile.is_open() ) {
         while (evtFile.good() ) {
             getline(evtFile, line);
             if (line[0] != "/"[0]) {
+
                 std::stringstream iss(line);
-                int a, b, c, e;
-                double d, f, g, h, i, j, k;
-                if (!(iss >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j >> k))
+
+                int EL_evid, EL_nuflavorint, EL_nunubar, EL_current, EL_prim_pid;
+                double EL_energy, EL_pos_R, EL_pos_theta, EL_pos_phi, EL_dir_theta, EL_dir_phi;
+                double EL_elast_y, EL_weight, EL_prim_energy;
+                if(!(iss >> EL_evid >> EL_nuflavorint >> EL_nunubar >> EL_energy >> EL_current 
+                         >> EL_pos_R >> EL_pos_theta >> EL_pos_phi >> EL_dir_theta >> EL_dir_phi
+                         >> EL_elast_y >> EL_weight >> EL_prim_energy >> EL_prim_pid)){
                     break;
-/*                EVID[i] = atoi(a.c_str());
-                NUFLAVORINT[i] = atoi(b.c_str());
-                NUBAR[i] = atoi(c.c_str());
-                PNU[i] = atof(d.c_str());
-                CURRENTINT[i] = atoi(e.c_str());
-                X[i] = atof(f.c_str());
-                Y[i] = atof(g.c_str());
-                Z[i] = atof(h.c_str());
-                THETA[i] = atof(i.c_str());
-                PHI[i] = atof(j.c_str());
-*/
-/*
-                EVID[l] = a;
-                NUFLAVORINT[l] = b;
-                NUBAR[l] = c;
-                PNU[l] = d;
-                CURRENTINT[l] = e;
-                IND_POSNU_R[l] = f;
-                IND_POSNU_THETA[l] = g;
-                IND_POSNU_PHI[l] = h;
-                IND_NNU_THETA[l] = i;
-                IND_NNU_PHI[l] = j;
-*/
-                EVID.push_back(a);
-                NUFLAVORINT.push_back(b);
-                NUBAR.push_back(c);
-                PNU.push_back(d);
-                CURRENTINT.push_back(e);
-                IND_POSNU_R.push_back(f);
-                IND_POSNU_THETA.push_back(g);
-                IND_POSNU_PHI.push_back(h);
-                IND_NNU_THETA.push_back(i);
-                IND_NNU_PHI.push_back(j);
-                ELAST.push_back(k);
+                }
 
+                EVID.push_back(EL_evid);
+                NUFLAVORINT.push_back(EL_nuflavorint);
+                NUBAR.push_back(EL_nunubar);
+                PNU.push_back(EL_energy);
+                CURRENTINT.push_back(EL_current);
+                IND_POSNU_R.push_back(EL_pos_R);
+                IND_POSNU_THETA.push_back(EL_pos_theta);
+                IND_POSNU_PHI.push_back(EL_pos_phi);
+                IND_NNU_THETA.push_back(EL_dir_theta);
+                IND_NNU_PHI.push_back(EL_dir_phi);
+                ELAST.push_back(EL_elast_y);
+                WEIGHTS.push_back(EL_weight);
+                NU_PRIM_ENERGY.push_back(EL_prim_energy);
+                NU_PRIM_PID.push_back(EL_prim_pid);
 
-                l++;
+                n++;
             }
         }
         evtFile.close();
@@ -910,11 +896,18 @@ int Settings::CheckCompatibilitiesDetector(Detector *detector) {
 
     // check if there's enough system temperature values prepared for NOISE_CHANNEL_MODE=1
     if (NOISE_CHANNEL_MODE==1) {// use different system temperature values for different chs
-      if (DETECTOR==3 && (detector->params.number_of_antennas > (int)(detector->Temp_TB_ch.size())) ) {
-	  cout << detector->params.number_of_antennas << " : " <<(int)(detector->Temp_TB_ch.size()) << endl;
+        if (DETECTOR==3 && (detector->params.number_of_antennas > (int)(detector->Temp_TB_ch.size())) ) {
+            cout << detector->params.number_of_antennas << " : " <<(int)(detector->Temp_TB_ch.size()) << endl;
             cerr<<"System temperature values are not enough for all channels! Check number of channels you are using and numbers in data/system_temperature.csv"<<endl;
             num_err++;
         }
+    }
+
+    // check if the user set a cylinder height but didn't tell AraSim to use it!
+    if (MAX_POSNU_DEPTH > 0 && PICK_POSNU_DEPTH != 1) {
+        cerr << "Non-zero MAX_POSNU_DEPTH set but PICK_POSNU_DEPTH != 1, so this will be ignored and cylinder height will be ice thickness!" << endl;
+        cerr << "Please change settings to either not set MAX_POSNU_DEPTH or set PICK_POSNU_DEPTH to 1." << endl;
+        num_err++;
     }
 
     return num_err;

@@ -161,7 +161,7 @@ class Interaction  {
     // default constructor
     Interaction();
     // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc
-    Interaction (double pnu, string nuflavor, int nu_nubar, int &n_interactions, IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 );
+    Interaction (double pnu, string nuflavor, int nu_nubar, int &n_interactions, int event_num, IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 );
     // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc
     Interaction (IceModel *antarctica, Detector *detector, Settings *settings1, Primaries *primary1, Signal *signal, Secondaries *sec1 );
     // constructor for setting posnu, y, emfrac, hadfrac, vmmhz1m at cherenkov angle, etc 
@@ -276,7 +276,7 @@ class Interaction  {
     vector <double> HAD_shower_depth_m;
     vector <double> HAD_shower_Q_profile;
     double HAD_LQ;
-    double pnuenergy;
+    double interaction_energy;
 
     int primary_shower; // 0 or EM, 1 for HAD. set by emfrac, hadfrac
 

@@ -362,6 +362,9 @@ class Settings
         vector<double> IND_NNU_THETA;
         vector<double> IND_NNU_PHI;
         vector<double> ELAST;
+        vector<double> WEIGHTS;
+        vector<double> NU_PRIM_ENERGY; // Energy (in eV) of the primary neutrino
+        vector<int> NU_PRIM_PID; // particle ID of the primary neutrino according to Particle Data Group 
         vector<int> INT_PER_NNU; //storing the number of interactions per neutrino (NNU) e.g. stochastic losses, decays, ...,
                                  //associated to a primary neutrino interaction
 
@@ -483,7 +486,7 @@ class Settings
  // end of values from icemc
 
 
-  ClassDef(Settings,2);
+  ClassDef(Settings,3);
 
 
 };

@@ -44,7 +44,6 @@ NNU=500              // number of neutrino events
 EXPONENT=18          // Simulating 10^18 eV neutrinos
 POSNU_RADIUS=5000   // Max neutrino generation distance from detector
 RAYSOL_RANGE=9000   // Max distance from detector to solve rays
-MAX_POSNU_DEPTH=2800 // Max depth of neutrinos
 
 
 //ADDED PRIMARY AND SHOWER FROM A23 SETTINGS: (inherited from Kaeli)

@@ -625,8 +625,8 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
         int ngeneratedevents = settings1->NOISE_EVENTS;  // should this value read at Settings class
         double v_noise[settings1->DATA_BIN_SIZE];  // noise voltage time domain (with filter applied)
 
-        v_noise_timedomain.resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
-        v_noise_timedomain_diode.resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+        v_noise_timedomain.resize(ngeneratedevents, vector<double>(DATA_BIN_SIZE));  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+        v_noise_timedomain_diode.resize(ngeneratedevents, vector<double>(DATA_BIN_SIZE));  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
 
         if (settings1->TRIG_ANALYSIS_MODE != 1)
         {
@@ -645,7 +645,7 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
                 for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
                 {
 
-                    v_noise_timedomain[i].push_back(v_noise[m]);  // save pure noise (not diode convlved) waveforms
+                    v_noise_timedomain[i][m] = v_noise[m];  // save pure noise (not diode convlved) waveforms
 
                 }
             }  // get meandiode with 1000 noisewaveforms
@@ -661,8 +661,8 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
                 for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
                 {
 
-                    v_noise_timedomain[i].push_back(0.);
-                    v_noise_timedomain_diode[i].push_back(0.);
+                    v_noise_timedomain[i][m] = 0.;
+                    v_noise_timedomain_diode[i][m] = 0.;
                 }
             }
         }
@@ -681,8 +681,8 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
 
         for (int i = 0; i < num_chs; i++)
         {
-            v_noise_timedomain_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
-            v_noise_timedomain_diode_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+            v_noise_timedomain_ch[i].resize(ngeneratedevents, vector<double>(settings1->DATA_BIN_SIZE));  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+            v_noise_timedomain_diode_ch[i].resize(ngeneratedevents, vector<double>(settings1->DATA_BIN_SIZE));  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
 
         }
 
@@ -708,7 +708,7 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
                     for (int m = 0; m < settings1->DATA_BIN_SIZE; m++)
                     {
 
-                        v_noise_timedomain_ch[ch][i].push_back(v_noise[m]);  // save pure noise (not diode convlved) waveforms
+                        v_noise_timedomain_ch[ch][i][m] = v_noise[m];  // save pure noise (not diode convlved) waveforms
                     }
 
                 }  // get meandiode with 1000 noisewaveforms
@@ -722,8 +722,8 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
             for (int ch = 0; ch < num_chs; ch++) {
                 for (int i = 0; i < ngeneratedevents; i++) {
                     for (int m = 0; m < settings1->DATA_BIN_SIZE; m++) {
-                        v_noise_timedomain_ch[ch][i].push_back(0.);
-                        v_noise_timedomain_diode_ch[ch][i].push_back(0.);
+                        v_noise_timedomain_ch[ch][i][m] = 0.;
+                        v_noise_timedomain_diode_ch[ch][i][m] = 0.;
                     }
                 }
             }
@@ -742,8 +742,8 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
         v_noise_timedomain_diode_ch.resize(num_chs);  // make the size of v_noise_timedomain_diode as number of chs
 
         for (int i = 0; i < num_chs; i++) {
-            v_noise_timedomain_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
-            v_noise_timedomain_diode_ch[i].resize(ngeneratedevents);  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+            v_noise_timedomain_ch[i].resize(ngeneratedevents, vector<double>(DATA_BIN_SIZE));  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
+            v_noise_timedomain_diode_ch[i].resize(ngeneratedevents, vector<double>(DATA_BIN_SIZE));  // make the size of v_noise_timedomain_diode as ngeneratedevents (this will be huge!)
 
         }
 
@@ -762,7 +762,7 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
                     myconvlv(v_noise, settings1->DATA_BIN_SIZE, detector->fdiode_real_databin, v_noise_timedomain_diode_ch[ch][i]);
 
                     for (int m = 0; m < settings1->DATA_BIN_SIZE; m++) {
-                        v_noise_timedomain_ch[ch][i].push_back(v_noise[m]); // save pure noise (not diode convlved) waveforms
+                        v_noise_timedomain_ch[ch][i][m] = v_noise[m]; // save pure noise (not diode convlved) waveforms
                     }
 
                 }  // get meandiode with 1000 noisewaveforms
@@ -775,8 +775,8 @@ void Trigger::GetNewNoiseWaveforms(Settings *settings1, Detector *detector, Repo
             for (int ch = 0; ch < num_chs; ch++) {
                 for (int i = 0; i < ngeneratedevents; i++) {
                     for (int m = 0; m < settings1->DATA_BIN_SIZE; m++) {
-                        v_noise_timedomain_ch[ch][i].push_back(0.);
-                        v_noise_timedomain_diode_ch[ch][i].push_back(0.);
+                        v_noise_timedomain_ch[ch][i][m] = 0.;
+                        v_noise_timedomain_diode_ch[ch][i][m] = 0.;
                     }
                 }
             }
@@ -793,7 +793,7 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
     const int length=DATA_BIN_SIZE;
 
     // we are going to make double sized array for complete convolution
-    double power_noise_copy[length*2];
+    std::vector<double> power_noise_copy(length * 2);
 
     // fill half of the array as power (actually energy) and another half (actually extanded part) with zero padding (Numerical Recipes 643 page)
     for (int i=0;i<length;i++) {
@@ -804,9 +804,9 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
     }
     
     // do forward fft to get freq domain (energy of pure signal)
-    Tools::realft(power_noise_copy,1,length*2);
+    Tools::realft(power_noise_copy.data(),1,length*2);
     
-    double ans_copy[length*2];
+    std::vector<double> ans_copy(length * 2);
 
     // change the sign (from numerical recipes 648, 649 page)
     for (int j=1;j<length;j++) {
@@ -818,7 +818,7 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
 
     // 1/length is actually 2/(length * 2)
     
-    Tools::realft(ans_copy,-1,length*2);
+    Tools::realft(ans_copy.data(),-1,length*2);
     
     diodeconv.clear();  // remove previous values in diodeconv
     
@@ -848,7 +848,6 @@ void Trigger::myconvlv(vector <double> &data,const int DATA_BIN_SIZE,vector <dou
 // input data is not vector but double array
 void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdiode, vector <double> &diodeconv) {
     
-
     // cout << "Trigger::myconvlv" << endl;
     const int length=DATA_BIN_SIZE;
 
@@ -862,12 +861,12 @@ void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdi
     for (int i=length;i<length*2;i++) {
 	    power_noise_copy[i]=0.;
     }
-    
+
     // do forward fft to get freq domain (energy of pure signal)
     Tools::realft(power_noise_copy.data(),1,length*2);
 
     std::vector<double> ans_copy(length * 2);
-    
+
     // change the sign (from numerical recipes 648, 649 page)
     for (int j=1;j<length;j++) {
         ans_copy[2*j]=(power_noise_copy[2*j]*fdiode[2*j]-power_noise_copy[2*j+1]*fdiode[2*j+1])/((double)length);
@@ -880,14 +879,14 @@ void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdi
     //
     
     Tools::realft(ans_copy.data(),-1,length*2);
-    
+
     diodeconv.clear();  // remove previous values in diodeconv
     
     // only save first half of convolution result as last half is result from zero padding (and some spoiled bins)
     for (int i=0;i<length+maxt_diode_bin;i++) {
 	    diodeconv.push_back( ans_copy[i] );
     }
-    
+
     
     int iminsamp,imaxsamp; // find min and max samples such that
     // the diode response is fully overlapping with the noise waveform
@@ -897,7 +896,7 @@ void Trigger::myconvlv(double *data,const int DATA_BIN_SIZE,vector <double> &fdi
     // diode response function is only partially overlappying with the
     // waveform in the convolution
     imaxsamp=NFOUR/2;
-    
+
     if (imaxsamp<iminsamp) {
         cout << "Noise waveform is not long enough for this diode response.\n";
         exit(1);
