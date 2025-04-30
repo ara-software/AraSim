@@ -5159,7 +5159,7 @@ int Report::get_PA_trigger_bin(
         throw runtime_error("Waveform length is shorter than 10.7 ns!");
     }
 
-    for (int bin=0; bin < waveform_length-trigger_window_bins; bin++) {
+    for (int bin=0; bin < waveform_length-trigger_window_bins + 1; bin++) {
 
         // Get this 10.7ns snapshot of waveform and find the bin with greatest absolute value
         vector <double> waveform_window(waveform.begin()+bin, waveform.begin()+bin+trigger_window_bins);
