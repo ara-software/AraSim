@@ -5149,8 +5149,7 @@ int Report::get_PA_trigger_bin(
     
     // The get_SNR function needs a vector to calculate the noise RMS
     // The RMS of a vector with a single element is the absolute value of that element.
-    vector <double> tmp_noise_RMS;
-    tmp_noise_RMS.push_back( noise_RMS );
+    vector <double> tmp_noise_RMS(1, noise_RMS);
         
     // Create a 10.7 ns window of waveform to analyze for a trigger-worthy signal
     //   and move this window along the full waveform, returning the bin
@@ -5163,16 +5162,11 @@ int Report::get_PA_trigger_bin(
     for (int bin=0; bin < waveform_length-trigger_window_bins; bin++) {
 
         // Get this 10.7ns snapshot of waveform and find the bin with greatest absolute value
-        vector <double> waveform_window;
-        int bin_max_value = 0; // Bin (in waveform_window) with the greatest absolute value
-        double max_value = 0; // Largest absolute value of a bin in waveform_window
-        for (int window_bin=bin; window_bin<bin+trigger_window_bins; window_bin++) {
-            waveform_window.push_back( waveform[window_bin] );
-            if (abs(waveform[window_bin]) > max_value){
-                max_value = abs(waveform[window_bin]);
-                bin_max_value = window_bin - bin;
-            }
-        }
+        vector <double> waveform_window(waveform.begin()+bin, waveform.begin()+bin+trigger_window_bins);
+        int bin_max_value = 
+            (TMath::MaxElement(trigger_window_bins, &waveform_window[0]) > -1* TMath::MinElement(trigger_window_bins, &waveform_window[0]))?
+            TMath::LocMax(trigger_window_bins, &waveform_window[0]) 
+            : TMath::LocMin(trigger_window_bins, &waveform_window[0]); // Bin (in waveform_window) with the greatest absolute value
 
         // Identify the ray solution that arrived closest to bin with the 
         //   greatest absolute value in this 10.7ns window.
@@ -5194,17 +5188,18 @@ int Report::get_PA_trigger_bin(
         } 
 
         // Scale SNR according to full phased array angular response
-        double arrival_angle_scaling_factor = 2.0 / interpolate(
+        const double SNR0 = 2.0;
+        const double SNR = interpolate(
             trigger->angle_PA, trigger->aSNR_PA, // The arrival angle vs SNR curve
             antenna->theta_rec[Likely_Sol[0]][Likely_Sol[1]]*180.0/PI-90.0, // arrival angle to get SNR for
             (*(&trigger->angle_PA+1) - trigger->angle_PA) - 1 // len(ang_data) - 1
         );
-
+        const double arrival_angle_scaling_factor = SNR0 / SNR;
         // Calculate the waveform's SNR
-        double snr = get_SNR(waveform_window, tmp_noise_RMS) * arrival_angle_scaling_factor;
+        const double eff_snr = get_SNR(waveform_window, tmp_noise_RMS) * arrival_angle_scaling_factor;
         
         // If the PA triggers on this SNR, return the starting bin of this window
-        if ( event_trigger_rand_num < get_PA_efficiency(snr, trigger) ) {
+        if ( event_trigger_rand_num < get_PA_efficiency(eff_snr, trigger) ) {
             return bin;
         }
     }
@@ -5238,10 +5233,9 @@ void Report::checkPATrigger(
     // Identify the interaction and ray solution with the greatest 
 
     // Create the signal-only waveform that will be used for triggering
-    vector <double> trigger_waveform;
-    for (int bin=trig_search_init; bin<trigger_antenna->V_convolved.size(); bin++){
-        trigger_waveform.push_back( trigger_antenna->V_convolved[bin] );
-    }
+    vector<double>* V_convolved = &trigger_antenna->V_convolved;
+    const int convolved_len = (int)V_convolved->size();
+    vector<double> trigger_waveform(V_convolved->begin()+trig_search_init, V_convolved->begin()+convolved_len);
     
     // For phased array, waveform length is 680 ns, but 
     // for PA trigger check only 20 ns around the signal bin.
@@ -5253,7 +5247,7 @@ void Report::checkPATrigger(
     int waveformCenter = settings1->WAVEFORM_CENTER;
     int dsignalBin = 0;
 
-    // Determine the bin the PA triggers on. If -1, PA does not trigger.
+    // Determine the bin the PA triggers on. If bin=-1, PA does not trigger.
     int pa_trigger_bin = -1;
     if(settings1->TRIG_ANALYSIS_MODE == 2) { // Noise only triggers
         pa_trigger_bin = trig_search_init;
@@ -5277,7 +5271,7 @@ void Report::checkPATrigger(
     // If there was a PA trigger, calculate V_mimic and save other trigger info.
     if ( pa_trigger_bin > -1 ){ 
 
-        // Save the bin the wavefom triggered on.
+        // Save the bin the waveform triggered on.
         // The first bin of `trigger_waveform` corresponds to the `trig_search_init`
         //   bin of the full `V_convolved` waveform so we need to adjust the 
         //   `pa_trigger_bin` by the calculated trigger bin.
@@ -5289,9 +5283,9 @@ void Report::checkPATrigger(
         for (size_t str = 0; str < detector->stations[i].strings.size(); str++) {
             for (size_t ant = 0; ant < detector->stations[i].strings[str].antennas.size(); ant++) {
                 double peakvalue = 0;
-                for (int bin=0; bin<BINSIZE; bin++) {
+                for (int bin=0; bin<waveformLength; bin++) {
 
-                    int bin_value = stations[i].Global_Pass - BINSIZE/2 + bin;
+                    int bin_value = stations[i].Global_Pass + waveformCenter - waveformLength/2 + bin;
                     stations[i].strings[str].antennas[ant].V_mimic.push_back(trigger->Full_window_V[my_ch_id][bin_value]);// save in V (kah)
                     stations[i].strings[str].antennas[ant].time.push_back( bin_value );
                     stations[i].strings[str].antennas[ant].time_mimic.push_back( ( bin) * settings1->TIMESTEP*1.e9 );// save in ns
