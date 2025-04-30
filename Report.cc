@@ -5155,7 +5155,12 @@ int Report::get_PA_trigger_bin(
     // Create a 10.7 ns window of waveform to analyze for a trigger-worthy signal
     //   and move this window along the full waveform, returning the bin
     //   where a strong enough signal exists, if it does.
-    for (int bin=0; bin < waveform.size()-trigger_window_bins; bin++) {
+    const int waveform_length = (int)waveform.size();
+    if(waveform_length < trigger_window_bins) {
+        throw runtime_error("Waveform length is shorter than 10.7 ns!");
+    }
+
+    for (int bin=0; bin < waveform_length-trigger_window_bins; bin++) {
 
         // Get this 10.7ns snapshot of waveform and find the bin with greatest absolute value
         vector <double> waveform_window;
