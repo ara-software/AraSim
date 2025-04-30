@@ -5188,13 +5188,14 @@ int Report::get_PA_trigger_bin(
         } 
 
         // Scale SNR according to full phased array angular response
-        const double SNR0 = 2.0;
-        const double SNR = interpolate(
+        const double viewangle = antenna->theta_rec[Likely_Sol[0]][Likely_Sol[1]]*180.0/PI-90.0;
+        const double SNR0_50 = 2.0;
+        const double SNR_50 = interpolate(
             trigger->angle_PA, trigger->aSNR_PA, // The arrival angle vs SNR curve
-            antenna->theta_rec[Likely_Sol[0]][Likely_Sol[1]]*180.0/PI-90.0, // arrival angle to get SNR for
+            viewangle, // arrival angle to get SNR for
             (*(&trigger->angle_PA+1) - trigger->angle_PA) - 1 // len(ang_data) - 1
         );
-        const double arrival_angle_scaling_factor = SNR0 / SNR;
+        const double arrival_angle_scaling_factor = SNR0_50 / SNR_50;
         // Calculate the waveform's SNR
         const double eff_snr = get_SNR(waveform_window, tmp_noise_RMS) * arrival_angle_scaling_factor;
         
