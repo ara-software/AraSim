@@ -891,16 +891,16 @@ void Antenna_r::Get_Brightest_Interaction(int (*brightest_event)[2]){
   // Determine which interaction and which ray from that interaction yielded
   //   the highest voltage response in this antenna. 
     
-  *brightest_event[0] = -1;
-  *brightest_event[1] = -1;
+  brightest_event[0][0] = -1;
+  brightest_event[0][1] = -1;
   double maxV = -1; 
   for (int interaction_idx=0; interaction_idx<V.size(); interaction_idx++){
     for (int ray=0; ray<V[interaction_idx].size(); ray++){
       double this_maxV = Tools::getMaxAbsoluteMagnitude(V[interaction_idx][ray]);
       if (this_maxV > maxV){
         maxV = this_maxV;
-        *brightest_event[0] = interaction_idx;
-        *brightest_event[1] = ray;
+        brightest_event[0][0] = interaction_idx;
+        brightest_event[0][1] = ray;
       }
     }
   }
