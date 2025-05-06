@@ -14,7 +14,8 @@ class Settings;
 //Constants relating to all ice models
 const double FIRNDEPTH=-150.;                // depth of the firn, in meters: currently a constant over all ice
 // input files for Crust 2.0
-const string crust20_in= string(getenv("ARA_SIM_DIR")) + "/data/outcr"; // Crust 2.0 data
+const char* const ara_sim_dir = getenv("ARA_SIM_DIR"); // capture the pointer before converting to string to avoid crash
+const string crust20_in= (ara_sim_dir? string(ara_sim_dir) : "") + "/data/outcr"; // Crust 2.0 data
 const string crust20_out="altitudes.txt"; // output file for plotting
 
 class IceModel : public EarthModel {
