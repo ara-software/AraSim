@@ -46,7 +46,21 @@ void save_useful_event(int, UsefulIcrrStationEvent*, UsefulAtriStationEvent*, do
 string outputdir="outputs";
 
 int main(int argc, char **argv) {   // read setup.txt file
-    
+
+    // check that the environmental variable needed to find data files
+    // is defined before we do anything
+    if(!getenv("ARA_SIM_DIR")) {
+        throw runtime_error("The environmental variable ARA_SIM_DIR must be set!");
+    }
+    // check if a data file can be loaded to ensure this variable
+    // points to a reasonable place
+    {
+        ifstream testfile(string(getenv("ARA_SIM_DIR"))+"/data/filter.csv"); 
+        if(!testfile.good()) {
+            throw runtime_error("ARA_SIM_DIR does not point to expected location!");
+        }
+    }
+  
     Settings *settings1 = new Settings();
     settings1->SetGitCommitHash();
 
