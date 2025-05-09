@@ -5326,27 +5326,18 @@ void Report::checkPATrigger(
     // Create the signal-only waveform that will be used for triggering
     vector<double>* V_convolved = &trigger_antenna->V_convolved;
     const int convolved_len = (int)V_convolved->size();
-    // cout<<"Trig Search init: "<<trig_search_init<<"  convolved_len: "<<convolved_len<<endl;
-    // vector<double> trigger_waveform(V_convolved->begin()+trig_search_init, V_convolved->begin()+convolved_len);
     vector<double> trigger_waveform(V_convolved->begin(), V_convolved->begin()+convolved_len-1);
 
     // Find and log the event and ray with the most signal
     int brightest_event[2]; 
     trigger_antenna->Get_Brightest_Interaction(&brightest_event);
-                      
-    // int last_trig_bin = get_PA_trigger_bin(
-    //     trigger_ch_ID, trigger_antenna, trigger_waveform, 
-    //     settings1, trigger
-    // );
 
     if( isTrigger(
         trigger_waveform, brightest_event,
         trigger_antenna, trigger_ch_ID, settings1, trigger
-    )){ // if a randomly selected value is greater than the PA efficiency we calculated, this event triggers
-    // if ( last_trig_bin > -1 ){
+    )){ 
         cout<<endl<<"PA trigger ~~~  Event Number : "<<evt<<endl;
         
-        // int last_trig_bin = trigger_antenna->SignalBin[brightest_event[0]][brightest_event[1]];
         int last_trig_bin = get_PA_trigger_bin(
             trigger_ch_ID, trigger_antenna, trigger_waveform, 
             settings1, trigger
