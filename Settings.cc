@@ -786,7 +786,8 @@ void Settings::ReadEvtFile(string evtfile){
 
                 std::stringstream iss(line);
 
-                int EL_evid, EL_nuflavorint, EL_nunubar, EL_current, EL_prim_pid;
+                uint64_t EL_evid;
+                int EL_nuflavorint, EL_nunubar, EL_current, EL_prim_pid;
                 double EL_energy, EL_pos_R, EL_pos_theta, EL_pos_phi, EL_dir_theta, EL_dir_phi;
                 double EL_elast_y, EL_weight, EL_prim_energy;
                 if(!(iss >> EL_evid >> EL_nuflavorint >> EL_nunubar >> EL_energy >> EL_current 
