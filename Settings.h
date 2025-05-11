@@ -351,7 +351,7 @@ class Settings
 
 
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
-        vector<int> EVID;
+        vector<uint64_t> EVID;
         vector<int> NUFLAVORINT;
         vector<int> NUBAR;
         vector<double> PNU;
