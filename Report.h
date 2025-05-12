@@ -264,10 +264,10 @@ class Report {
         
         // Phased Array functions
         bool isTrigger(
-            vector <double> waveform, int *brightest_event, double *randNum,
+            vector <double> waveform, int *brightest_event, double randNum,
             Antenna_r *antenna, int ch_ID, Settings *settings, Trigger *trigger);
         int get_PA_trigger_bin(
-            int ch_ID, Antenna_r *antenna, vector <double> waveform, double *randNum,
+            int ch_ID, Antenna_r *antenna, vector <double> waveform, double randNum,
             Settings *settings, Trigger *trigger
         );
         void checkPATrigger(

@@ -5119,7 +5119,7 @@ double Report::get_SNR(vector<double> signal_array, vector<double> noise_array){
 
 
 bool Report::isTrigger(
-    vector <double> waveform, int *brightest_event, double *randNum,
+    vector <double> waveform, int *brightest_event, double randNum,
     Antenna_r *antenna, int ch_ID, Settings *settings, Trigger *trigger) {
 
     double avgSnr = 0.;
@@ -5169,8 +5169,8 @@ bool Report::isTrigger(
             cout<<" efficiency : "<<eff<<"  avg SNR : "<<avgSnr<<endl;
             return true;
         }
-        *randNum = gRandom->Rndm();
-        if (*randNum < eff){
+        randNum = gRandom->Rndm();
+        if (randNum < eff){
             cout<<" efficiency : "<<eff<<"  avg SNR : "<<avgSnr<<"  random number : "<<randNum<<endl;
             return true;
         }
@@ -5181,7 +5181,7 @@ bool Report::isTrigger(
 }
 
 int Report::get_PA_trigger_bin(
-    int ch_ID, Antenna_r *antenna, vector <double> waveform, double *randNum,
+    int ch_ID, Antenna_r *antenna, vector <double> waveform, double randNum,
     Settings *settings, Trigger *trigger
 ){
     // From the given waveform, find and return the starting index of the 
@@ -5274,7 +5274,7 @@ int Report::get_PA_trigger_bin(
                 cout<<" efficiency : "<<eff<<"  avg SNR : "<<avgSnr<<endl;
                 return bin;
             }
-            if (*randNum < eff){
+            if (randNum < eff){
                 cout<<" efficiency : "<<eff<<"  avg SNR : "<<avgSnr<<endl;
                 return bin;
             }
@@ -5330,19 +5330,18 @@ void Report::checkPATrigger(
     int brightest_event[2]; 
     trigger_antenna->Get_Brightest_Interaction(&brightest_event);
 
-    // Create a pointer to save the random number generated in isTrigger()
+    // Create an object to save the random number generated in isTrigger()
     //   for use in get_PA_trigger_bin(). 
     double random_number = 1.01;
-    double *random_number_ptr = &random_number;
 
     if( isTrigger(
-        trigger_waveform, brightest_event, random_number_ptr,
+        trigger_waveform, brightest_event, random_number,
         trigger_antenna, trigger_ch_ID, settings1, trigger
     )){ 
         cout<<endl<<"PA trigger ~~~  Event Number : "<<evt<<endl;
         
         int last_trig_bin = get_PA_trigger_bin(
-            trigger_ch_ID, trigger_antenna, trigger_waveform, random_number_ptr,
+            trigger_ch_ID, trigger_antenna, trigger_waveform, random_number,
             settings1, trigger
         );
         if (last_trig_bin == -1) {
