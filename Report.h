@@ -263,7 +263,13 @@ class Report {
             Birefringence *birefringence, Detector *detector, Event *event, IceModel *icemodel, Settings *settings);
         
         // Phased Array functions
-        bool isTrigger(double eff);
+        bool isTrigger(
+            vector <double> waveform, int *brightest_event, double randNum,
+            Antenna_r *antenna, int ch_ID, Settings *settings, Trigger *trigger);
+        int get_PA_trigger_bin(
+            int ch_ID, Antenna_r *antenna, vector <double> waveform, double randNum,
+            Settings *settings, Trigger *trigger
+        );
         void checkPATrigger(
             int i, Detector *detector, Event *event, int evt, Trigger *trigger, Settings *settings1, 
             int trig_search_init, int max_total_bin);    
