@@ -281,7 +281,7 @@ double IceModel::GetARAIceAttenuLength(double depth) {
 double IceModel::temperature(double z){
   if( z < 0.){
     #ifdef VERBOSE_MODE
-    std::cerr << "depth negative! " << depth << std::endl;
+    std::cerr << "depth negative! " << z << std::endl;
     #endif
   }
   double temp = (-51.0696) + (0.00267687 * z) + (-1.59061E-08 * pow(z,2.)) + (1.83415E-09 * pow(z,3.));
