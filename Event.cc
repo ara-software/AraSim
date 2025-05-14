@@ -118,6 +118,8 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
             else{
                 nuflavor = primary1->GetNuFlavor(settings1);
                 nu_nubar = primary1->GetNuNuBar(nuflavor, settings1);
+                event_ID = event_num;
+
 
                 nu_prim_energy = pnu; // Set primary energy to be the particle energy when not reading event lists
 
