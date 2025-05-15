@@ -253,8 +253,9 @@ double IceModel::GetARAIceAttenuLength(double depth) {
 
     // check if depth is positive value
     if ( depth < 0. ) {// whether above the ice or wrong value!
-
-        cerr<<"depth negative! "<<depth<<endl;
+        #ifdef VERBOSE_MODE
+        std::cerr << "depth negative! " << depth << std::endl;
+        #endif
     }
     else {
 
@@ -279,7 +280,9 @@ double IceModel::GetARAIceAttenuLength(double depth) {
 */
 double IceModel::temperature(double z){
   if( z < 0.){
-    cerr<<"depth negative! "<<z<<endl;
+    #ifdef VERBOSE_MODE
+    std::cerr << "depth negative! " << z << std::endl;
+    #endif
   }
   double temp = (-51.0696) + (0.00267687 * z) + (-1.59061E-08 * pow(z,2.)) + (1.83415E-09 * pow(z,3.));
   return temp;
@@ -298,7 +301,9 @@ double IceModel::temperature(double z){
 double IceModel::GetFreqDepIceAttenuLength(double depth, double freq) {
   double AttenL = 0.0;
   if ( depth < 0. ) {
-    cerr<<"depth negative! "<<depth<<endl;
+    #ifdef VERBOSE_MODE
+    std::cerr << "depth negative! " << depth << std::endl;
+    #endif
   }
   else {
     double t = temperature(depth);
