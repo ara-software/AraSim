@@ -1927,7 +1927,7 @@ void Report::triggerCheck_ScanMode0(
                             N_pass_H++;
                         }
                         if (last_trig_bin < this_bin + trig_bin) 
-                            last_trig_bin = this_bin + trig_bin;   // added for fixed V_mimic
+                            last_trig_bin = this_bin + trig_bin + offset;   // added for fixed V_mimic
                         trig_bin = trig_window_bin; // if confirmed this channel passed the trigger, no need to do rest of bins
                         Passed_chs.push_back(antenna_counter);
 
