@@ -73,6 +73,9 @@ int main(int argc, char **argv) {   // read setup.txt file
     cout<<"MOOREBAY : "<<settings1->MOOREBAY<<endl;
     cout<<"EXPONENT : "<<settings1->EXPONENT<<endl;
     cout<<"DETECTOR : "<<settings1->DETECTOR<<endl;
+    cout<<"VPOL_BEAMPATTERN : "<<string( settings1->VPOL_BEAMPATTERN )<<endl;
+    cout<<"VTOP_BEAMPATTERN : "<<string( settings1->VTOP_BEAMPATTERN )<<endl;
+    cout<<"HPOL_BEAMPATTERN : "<<string( settings1->HPOL_BEAMPATTERN )<<endl;
 
     string setupfile;
     string run_no;
@@ -114,6 +117,9 @@ int main(int argc, char **argv) {   // read setup.txt file
     cout<<"DETECTOR : "<<settings1->DETECTOR<<endl;
     cout<<"POSNU_RADIUS : "<<settings1->POSNU_RADIUS<<endl;
     cout << "EVENT_GENERATION_MODE: " << settings1->EVENT_GENERATION_MODE << endl;
+    cout<<"VPOL_BEAMPATTERN : "<< string( settings1->VPOL_BEAMPATTERN )<<endl;
+    cout<<"VTOP_BEAMPATTERN : "<< string( settings1->VTOP_BEAMPATTERN )<<endl;
+    cout<<"HPOL_BEAMPATTERN : "<< string( settings1->HPOL_BEAMPATTERN )<<endl;
 
     if (settings1->EVENT_GENERATION_MODE == 1){
         string evtfile = string(argv[argc - 1]);

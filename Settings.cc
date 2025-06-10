@@ -34,7 +34,7 @@ void Settings::Initialize() {
   NDISCONES_PASS=3;
 
   DEBUG=false;                   // debugging option
-outputdir="outputs"; // directory where outputs go
+ outputdir="outputs"; // directory where outputs go
  FREQ_LOW_SEAVEYS=200.E6;
  FREQ_HIGH_SEAVEYS=1200.E6;
  BW_SEAVEYS=FREQ_HIGH_SEAVEYS-FREQ_LOW_SEAVEYS;
@@ -46,6 +46,9 @@ outputdir="outputs"; // directory where outputs go
 
  SIGMA_SELECT=0; // when in SIGMAPARAM=1 case, 0 : (default) use mean value, 1 : use upper bound, 2 : use lower bound
 
+HPOL_BEAMPATTERN="./data/antennas/realizedGain/ARA_dipoletest1_output.txt"; // Default to original Ara Data
+VTOP_BEAMPATTERN="./data/antennas/realizedGain/ARA_bicone6in_output.txt"; // Default to original Ara Data
+VPOL_BEAMPATTERN="./data/antennas/realizedGain/ARA_bicone6in_output.txt"; // Default to original Ara Data
 
 // end of values from icemc
 
@@ -726,6 +729,36 @@ void Settings::ReadFile(string setupfile) {
 	      //              }
               else if (label == "ANTENNA_MODE"){
                   ANTENNA_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "VPOL_BEAMPATTERN"){
+                size_t pos = line.find("="); // Variable position
+                size_t comment_pos = line.find("//", pos); // Comment Position
+                string fileloc = (comment_pos != string::npos) ? line.substr(pos + 1, comment_pos - pos - 1) : line.substr(pos + 1);
+                size_t start = fileloc.find_first_not_of(" \t\"");
+                size_t end = fileloc.find_last_not_of(" \t\"");
+                fileloc = fileloc.substr(start, end - start + 1);
+
+                VPOL_BEAMPATTERN = fileloc;
+              }
+              else if (label == "VTOP_BEAMPATTERN"){
+                size_t pos = line.find("="); // Variable position
+                size_t comment_pos = line.find("//", pos); // Comment Position
+                string fileloc = (comment_pos != string::npos) ? line.substr(pos + 1, comment_pos - pos - 1) : line.substr(pos + 1);
+                size_t start = fileloc.find_first_not_of(" \t\"");
+                size_t end = fileloc.find_last_not_of(" \t\"");
+                fileloc = fileloc.substr(start, end - start + 1);
+
+                VTOP_BEAMPATTERN = fileloc;
+              }
+              else if (label == "HPOL_BEAMPATTERN"){
+                size_t pos = line.find("="); // Variable position
+                size_t comment_pos = line.find("//", pos); // Comment Position
+                string fileloc = (comment_pos != string::npos) ? line.substr(pos + 1, comment_pos - pos - 1) : line.substr(pos + 1);
+                size_t start = fileloc.find_first_not_of(" \t\"");
+                size_t end = fileloc.find_last_not_of(" \t\"");
+                fileloc = fileloc.substr(start, end - start + 1);
+
+                HPOL_BEAMPATTERN = fileloc;
               }
               else if (label == "IMPEDANCE_RX_VPOL"){
                   IMPEDANCE_RX_VPOL = atoi(line.substr(line.find_first_of("=") + 1).c_str());

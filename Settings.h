@@ -320,7 +320,10 @@ class Settings
                              // 5: use the Kansas lab measurements that treat top and bottom vpol separately.
                              // 6: Uses custom antenna models that the user can specify with the custom files in data/antennas/realizedGain
                              // The related wiki page for antenna models description:http://ara.icecube.wisc.edu/wiki/index.php/Antenna_model
-                       
+        // Beampattern filepath strings
+        string VPOL_BEAMPATTERN;
+        string VTOP_BEAMPATTERN;
+        string HPOL_BEAMPATTERN;
         //Impedances of RX and TX antennas.  All use the numbering scheme below:
                              // 0: Simple 50 Ohm impedance model that matches the Zr=50 that's been historically used in AraSim
                              // 1: Bottom VPol impedance model measured by Mohammad at Kansas
