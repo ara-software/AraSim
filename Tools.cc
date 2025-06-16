@@ -552,12 +552,12 @@ void Tools::SincInterpolation(int n1, double *x1, double *y1, int n2, double *x2
         // just use the first/last sample, which replicates the behavior in SimpleLinearInterpolation_OutZero
         
         if(x2[samp]<first_input_sample){
-            // before first sample, use first sample y1
-            y2[samp] = y1[0];
+            // before first sample, set to 0 
+            y2[samp] = 0.;
         }
         else if(x2[samp]>last_input_sample){
-            // after last sample, use last sample of y1
-            y2[samp] = y1[n1-1];
+            // after last sample, set to 0 
+            y2[samp] = 0.;
         }
         else{
             // in the range of support, do interpolation
