@@ -104,7 +104,7 @@ VPOL_BEAMPATTERN="./data/antennas/realizedGain/ARA_bicone6in_output.txt"; // Def
 
   WHICHPARAMETERIZATION=0;  //
 
-  SIMULATION_MODE=1;    // default freq domain simulation
+  SIMULATION_MODE=1;    // default time domain simulation
 
   USE_PARAM_RE_TTERM_TABLE=1; // default: use the interpolation table to get Param_RE_TTerm
 
@@ -966,7 +966,7 @@ int Settings::CheckCompatibilitiesSettings() {
     // for PA simulations we need to be careful since BINSIZE isnt the usual NFOUR/2 
     // but is hardcoded to 1200/(settings1->TIMESTEP*1.e9), so we need to make sure 
     // NFOUR is at least twice this to avoid FFT issues
-    const int PA_INTERNAL_LENGTH = 1200/(TIMESTEP*1.e9);  
+    const int PA_INTERNAL_LENGTH = 1200/(TIMESTEP*1.e9);
     if ( DETECTOR==5 && 2*PA_INTERNAL_LENGTH > NFOUR) {
         cerr<<"NFOUR should be at least twice PA_INTERNAL_LENGTH to avoid FFT artifacts or problems with readout!" 
             << " Your PA_INTERNAL_LENGTH = " << PA_INTERNAL_LENGTH <<endl; 

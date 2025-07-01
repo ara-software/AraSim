@@ -1,4 +1,4 @@
-The Git Commit Hash: 30328d5436ef38ee5ee2ee10ed82ae595675a984
+The Git Commit Hash: db07246e2a18a11943b09f4afd46b505a92583dc
 
 	Default values!
 NNU : 100
@@ -38,7 +38,7 @@ read stations_per_side
 	Error, station number not match !
 InstalledStations[StationID].nChannels is 20
 Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
-Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /home/abishop/analysis/AraRoot_Install//share/araCalib/AntennaInfo.sqlite
+Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /home/mmuzio/AraRoot/build/share/araCalib/AntennaInfo.sqlite
 Opening default 2013-2017 SQLite tables for all stations 
 Borehole ch: 0 inserted station: 0 station: 3 string: 3 ant: 2 Type: 0
 Borehole ch: 1 inserted station: 0 station: 3 string: 0 ant: 2 Type: 0
@@ -116,14 +116,14 @@ System temp ch14 : 325
 System temp ch15 : 325
 System temp ch16 : 0
 Reading in situ ARA noise for this station and configuration from file: 
-/home/abishop/AraSim-AraSoft//data/noise/sigmavsfreq_A_3_config_2.csv
+/home/mmuzio/AraSimMain/AraSim/data/noise/sigmavsfreq_A_3_config_2.csv
 start read elect chain
  Reading standard ARA electronics response from file:
-/home/abishop/AraSim-AraSoft//data/gain/ARA_Electronics_TotalGain_TwoFilters.csv
+/home/mmuzio/AraSimMain/AraSim/data/gain/ARA_Electronics_TotalGain_TwoFilters.csv
  Recalculating in situ electronic response amplitude to ensure consistency with antenna model used here.
 done read elect chain
  Reading trigger formation values for this station and configuration from file:
-/home/abishop/AraSim-AraSoft//data/trigger/delays_masking_A3_C2.csv
+/home/mmuzio/AraSimMain/AraSim/data/trigger/delays_masking_A3_C2.csv
 Sharesurface: 0 : 0 : 0 : 10010.2 : 10003 : 6.35944e+06 : 
 Sharesurface: 0 : 0 : 1 : 10010.2 : 10003 : 6.35944e+06 : 
 Sharesurface: 0 : 0 : 2 : 10010.2 : 10003 : 6.35946e+06 : 
@@ -172,21 +172,21 @@ finish calling secondaries and signal
 Preparing Noise
 num chs: 16
 From pure noise waveforms, diode responses
-For ch0 mean, rms diode are -2.36607e-15 4.9017e-14 rms voltage is 0.027875
-For ch1 mean, rms diode are -2.2372e-15 4.44909e-14 rms voltage is 0.0269668
-For ch2 mean, rms diode are -9.45447e-16 2.04586e-14 rms voltage is 0.0182722
+For ch0 mean, rms diode are -1.92566e-15 3.91186e-14 rms voltage is 0.0252281
+For ch1 mean, rms diode are -2.02944e-15 4.0442e-14 rms voltage is 0.0256817
+For ch2 mean, rms diode are -9.58495e-16 2.07459e-14 rms voltage is 0.0183984
 For ch3 mean, rms diode are -8.21959e-16 1.75526e-14 rms voltage is 0.0166815
-For ch4 mean, rms diode are -9.92281e-16 2.33983e-14 rms voltage is 0.0186274
-For ch5 mean, rms diode are -5.49913e-16 1.28987e-14 rms voltage is 0.013676
-For ch6 mean, rms diode are -1.8071e-16 4.18687e-15 rms voltage is 0.00781729
+For ch4 mean, rms diode are -9.72768e-16 2.29477e-14 rms voltage is 0.0184416
+For ch5 mean, rms diode are -5.33435e-16 1.25312e-14 rms voltage is 0.0134704
+For ch6 mean, rms diode are -7.4225e-17 1.66481e-15 rms voltage is 0.00500636
 For ch7 mean, rms diode are -8.77795e-16 2.39495e-14 rms voltage is 0.0176839
-For ch8 mean, rms diode are -6.49316e-16 1.59372e-14 rms voltage is 0.0147166
-For ch9 mean, rms diode are -4.28054e-16 1.09895e-14 rms voltage is 0.0124801
-For ch10 mean, rms diode are -6.57897e-16 1.57158e-14 rms voltage is 0.0147533
+For ch8 mean, rms diode are -6.34433e-16 1.55181e-14 rms voltage is 0.0145411
+For ch9 mean, rms diode are -2.57994e-16 6.62388e-15 rms voltage is 0.00969027
+For ch10 mean, rms diode are -5.61829e-16 1.31715e-14 rms voltage is 0.0136514
 For ch11 mean, rms diode are -1.03275e-16 2.6613e-15 rms voltage is 0.00605047
-For ch12 mean, rms diode are -4.41037e-16 1.11148e-14 rms voltage is 0.012122
-For ch13 mean, rms diode are -6.06471e-16 1.48462e-14 rms voltage is 0.0139249
-For ch14 mean, rms diode are -4.44068e-16 1.17267e-14 rms voltage is 0.0119816
+For ch12 mean, rms diode are -4.3561e-16 1.09571e-14 rms voltage is 0.0120478
+For ch13 mean, rms diode are -5.4276e-16 1.31102e-14 rms voltage is 0.0131842
+For ch14 mean, rms diode are -4.82458e-16 1.27197e-14 rms voltage is 0.0124893
 For ch15 mean, rms diode are -3.84744e-16 1.04058e-14 rms voltage is 0.0115426
  DATA_BIN_SIZE : 16384
 powerthreshold : -6.06
@@ -212,11 +212,12 @@ station[0].strings[3].antennas[2] no_ch:15
 station[0].strings[3].antennas[3] no_ch:16
 *Thrown 0
 **********
+trigger passed at bin 5380  passed ch : 3 (1type) Direct dist btw posnu : 1823.63 noiseID : 0 ViewAngle : 55.1341 LikelyTrigSignal : interaction 0, ray 1
+trigger passed at bin 5413  passed ch : 5 (1type) Direct dist btw posnu : 1811.83 noiseID : 0 ViewAngle : 55.7054 LikelyTrigSignal : interaction 0, ray 1
 trigger passed at bin 5314  passed ch : 6 (0type) Direct dist btw posnu : 1817.96 noiseID : 0 ViewAngle : 55.5114 LikelyTrigSignal : interaction 0, ray 1
 trigger passed at bin 5434  passed ch : 10 (0type) Direct dist btw posnu : 1831.08 noiseID : 0 ViewAngle : 55.5173 LikelyTrigSignal : interaction 0, ray 1
 trigger passed at bin 5416  passed ch : 11 (1type) Direct dist btw posnu : 1832.25 noiseID : 0 ViewAngle : 55.4806 LikelyTrigSignal : interaction 0, ray 1
-trigger passed at bin 5454  passed ch : 14 (0type) Direct dist btw posnu : 1835.74 noiseID : 0 ViewAngle : 55.1539 LikelyTrigSignal : interaction 0, ray 1
-Global_Pass : 5165 evt : 10 added weight : 0.81612
+Global_Pass : 5380 evt : 10 added weight : 0.81612
 0.81612 : 9
 
 Making useful event
@@ -229,51 +230,24 @@ OR
 c) Call UsefulAtriStationEvent *realAtriEvPtr = new UsefulAtriStationEvent(rawAtriEvPtr, AraCalType::kLatestCalib); ***BEFORE*** 
 AraGeomTool::getStationInfo(3,2017)
 Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
-Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /home/abishop/analysis/AraRoot_Install//share/araCalib/AntennaInfo.sqlite
+Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /home/mmuzio/AraRoot/build/share/araCalib/AntennaInfo.sqlite
 Opening default 2013-2017 SQLite tables for all stations 
 ******
 trigger passed at bin 4387  passed ch : 0 (0type) Direct dist btw posnu : 3201.86 noiseID : 0 ViewAngle : 56.3795 LikelyTrigSignal : interaction 0, ray 1
 trigger passed at bin 4468  passed ch : 6 (0type) Direct dist btw posnu : 3218.74 noiseID : 0 ViewAngle : 56.9636 LikelyTrigSignal : interaction 0, ray 1
 trigger passed at bin 4590  passed ch : 10 (0type) Direct dist btw posnu : 3219.54 noiseID : 0 ViewAngle : 56.9094 LikelyTrigSignal : interaction 0, ray 1
-trigger passed at bin 4695  passed ch : 15 (1type) Direct dist btw posnu : 3206.03 noiseID : 0 ViewAngle : 56.9101 LikelyTrigSignal : interaction 0, ray 1
 Global_Pass : 4387 evt : 16 added weight : 4.29438e-27
 4.29438e-27 : 0
 
 Making useful event
 StationID: 3
 StationID_AraRoot: 3
-************depth negative! -26.2745
-depth negative! -26.2745
-depth negative! -26.2745
-depth negative! -26.2745
-depth negative! -26.2636
-depth negative! -26.2636
-depth negative! -26.2636
-depth negative! -26.2636
-depth negative! -26.2643
-depth negative! -26.2643
-depth negative! -26.2643
-depth negative! -26.2643
-depth negative! -26.2752
-depth negative! -26.2752
-depth negative! -26.2752
-depth negative! -26.2752
-*
-trigger passed at bin 4655  passed ch : 7 (1type) Direct dist btw posnu : 3120.79 noiseID : 0 ViewAngle : 47.5286 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4418  passed ch : 9 (1type) Direct dist btw posnu : 3102.61 noiseID : 0 ViewAngle : 47.7038 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4412  passed ch : 13 (1type) Direct dist btw posnu : 3097.88 noiseID : 0 ViewAngle : 47.4649 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4347 evt : 29 added weight : 8.76793e-08
-8.76793e-08 : 0
-
-Making useful event
-StationID: 3
-StationID_AraRoot: 3
-***********************************************************************Thrown 100
+************************************************************************************Thrown 100
 ***********************************************************************************
-trigger passed at bin 4705  passed ch : 4 (0type) Direct dist btw posnu : 1911.64 noiseID : 0 ViewAngle : 51.8715 LikelyTrigSignal : interaction 0, ray 1
+trigger passed at bin 4704  passed ch : 4 (0type) Direct dist btw posnu : 1911.64 noiseID : 0 ViewAngle : 51.8715 LikelyTrigSignal : interaction 0, ray 1
 trigger passed at bin 4651  passed ch : 6 (0type) Direct dist btw posnu : 1915.05 noiseID : 0 ViewAngle : 51.2907 LikelyTrigSignal : interaction 0, ray 1
 trigger passed at bin 4609  passed ch : 12 (0type) Direct dist btw posnu : 1899.4 noiseID : 0 ViewAngle : 51.7349 LikelyTrigSignal : interaction 0, ray 1
-Global_Pass : 4535 evt : 183 added weight : 0.998722
+Global_Pass : 4704 evt : 183 added weight : 0.998722
 0.998722 : 9
 
 Making useful event
@@ -284,16 +258,16 @@ StationID_AraRoot: 3
 ****************************************************************************************************Thrown 400
 *************************************************************************************************** end loop
 Total Events Thrown: 500
-Total_Global_Pass : 4
+Total_Global_Pass : 3
 Total_Weight : 1.81484
-Total_Probability : 11325.1
-weight bin values : 2, 0, 0, 0, 0, 0, 0, 0, 0, 2
+Total_Probability : -1619.74
+weight bin values : 1, 0, 0, 0, 0, 0, 0, 0, 0, 2
 
 Radius: 5000 [m]
 IceVolume : 2.35619e+11
 test Veff(ice) : 1.07471e+10 m3sr, 10.7471 km3sr
 test Veff(water eq.) : 9.85506e+09 m3sr, 9.85506 km3sr
-And Veff(water eq.) error plus : 9.11416 km3sr and error minus : 4.84386 km3sr
+And Veff(water eq.) error plus : 9.11416 km3sr and error minus : 4.84385 km3sr
 Info in <TCanvas::Print>: pdf file sigmaCrossSection.pdf has been created
 outputdir= outputs/.
 This AraSim run is complete and will exit with code 0
