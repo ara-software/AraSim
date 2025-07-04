@@ -2301,9 +2301,9 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Kansas2024.txt";         
     }
     else if (settings1->ANTENNA_MODE == 6) { //Adding antenna mode for custom gains (takes full path).
-        VgainFile = string( settings1->VPOL_BEAMPATTERN );
-        VgainTopFile = string( settings1->VTOP_BEAMPATTERN );
-        HgainFile = string( settings1->HPOL_BEAMPATTERN );        
+        VgainFile = string( settings1->VPOL_GAIN_FILE );
+        VgainTopFile = string( settings1->VTOP_GAIN_FILE );
+        HgainFile = string( settings1->HPOL_GAIN_FILE );        
     }
     
     // Check for ALL_ANT_V_ON, then set all antennas to VPol if true

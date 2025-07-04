@@ -46,9 +46,9 @@ void Settings::Initialize() {
 
  SIGMA_SELECT=0; // when in SIGMAPARAM=1 case, 0 : (default) use mean value, 1 : use upper bound, 2 : use lower bound
 
-HPOL_BEAMPATTERN="./data/antennas/realizedGain/ARA_dipoletest1_output.txt"; // Default to original Ara Data
-VTOP_BEAMPATTERN="./data/antennas/realizedGain/ARA_bicone6in_output.txt"; // Default to original Ara Data
-VPOL_BEAMPATTERN="./data/antennas/realizedGain/ARA_bicone6in_output.txt"; // Default to original Ara Data
+ HPOL_GAIN_FILE="./data/antennas/realizedGain/ARA_dipoletest1_output.txt"; // Default to original Ara Data
+ VTOP_GAIN_FILE="./data/antennas/realizedGain/ARA_bicone6in_output.txt"; // Default to original Ara Data
+ VPOL_GAIN_FILE="./data/antennas/realizedGain/ARA_bicone6in_output.txt"; // Default to original Ara Data
 
 // end of values from icemc
 
@@ -730,35 +730,14 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "ANTENNA_MODE"){
                   ANTENNA_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
-              else if (label == "VPOL_BEAMPATTERN"){
-                size_t pos = line.find("="); // Variable position
-                size_t comment_pos = line.find("//", pos); // Comment Position
-                string fileloc = (comment_pos != string::npos) ? line.substr(pos + 1, comment_pos - pos - 1) : line.substr(pos + 1);
-                size_t start = fileloc.find_first_not_of(" \t\"");
-                size_t end = fileloc.find_last_not_of(" \t\"");
-                fileloc = fileloc.substr(start, end - start + 1);
-
-                VPOL_BEAMPATTERN = fileloc;
+              else if (label == "VPOL_GAIN_FILE") {
+                  VPOL_GAIN_FILE = ParseFilePath(line);
               }
-              else if (label == "VTOP_BEAMPATTERN"){
-                size_t pos = line.find("="); // Variable position
-                size_t comment_pos = line.find("//", pos); // Comment Position
-                string fileloc = (comment_pos != string::npos) ? line.substr(pos + 1, comment_pos - pos - 1) : line.substr(pos + 1);
-                size_t start = fileloc.find_first_not_of(" \t\"");
-                size_t end = fileloc.find_last_not_of(" \t\"");
-                fileloc = fileloc.substr(start, end - start + 1);
-
-                VTOP_BEAMPATTERN = fileloc;
+              else if (label == "VTOP_GAIN_FILE") {
+                  VTOP_GAIN_FILE = ParseFilePath(line);
               }
-              else if (label == "HPOL_BEAMPATTERN"){
-                size_t pos = line.find("="); // Variable position
-                size_t comment_pos = line.find("//", pos); // Comment Position
-                string fileloc = (comment_pos != string::npos) ? line.substr(pos + 1, comment_pos - pos - 1) : line.substr(pos + 1);
-                size_t start = fileloc.find_first_not_of(" \t\"");
-                size_t end = fileloc.find_last_not_of(" \t\"");
-                fileloc = fileloc.substr(start, end - start + 1);
-
-                HPOL_BEAMPATTERN = fileloc;
+              else if (label == "HPOL_GAIN_FILE") {
+                  HPOL_GAIN_FILE = ParseFilePath(line);
               }
               else if (label == "IMPEDANCE_RX_VPOL"){
                   IMPEDANCE_RX_VPOL = atoi(line.substr(line.find_first_of("=") + 1).c_str());
@@ -795,8 +774,12 @@ void Settings::ReadFile(string setupfile) {
                SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
           }
 
-
-
+          if (ANTENNA_MODE != 6) {
+              if (!VPOL_GAIN_FILE.empty() || !VTOP_GAIN_FILE.empty() || !HPOL_GAIN_FILE.empty()) {
+                  std::cerr << "Warning: Custom GAIN_FILE paths provided, "
+                          << "but ANTENNA_MODE != 6. These files may be ignored." << std::endl;
+              }
+          }
 
           }
       }
@@ -1181,3 +1164,18 @@ void Settings::SetGitCommitHash(){
     std::cout<<"The Git Commit Hash: "<<COMMIT_HASH<<std::endl;
 }
 
+std::string Settings::ParseFilePath(const std::string& line) {
+    size_t pos = line.find("="); // Variable position
+    size_t comment_pos = line.find("//", pos); // Comment Position
+
+    std::string fileloc = (comment_pos != std::string::npos) 
+        ? line.substr(pos + 1, comment_pos - pos - 1) 
+        : line.substr(pos + 1);
+
+    size_t start = fileloc.find_first_not_of(" \t\"");
+    size_t end = fileloc.find_last_not_of(" \t\"");
+    if (start != std::string::npos && end != std::string::npos) {
+        fileloc = fileloc.substr(start, end - start + 1);
+    }
+    return fileloc;
+}
