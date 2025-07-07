@@ -732,12 +732,21 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "VPOL_GAIN_FILE") {
                   VPOL_GAIN_FILE = ParseFilePath(line);
+                  if (VPOL_GAIN_FILE.empty()) {
+                      std::cerr << "Warning: could not parse path from line: " << line << std::endl;
+                  }
               }
               else if (label == "VTOP_GAIN_FILE") {
                   VTOP_GAIN_FILE = ParseFilePath(line);
+                  if (VTOP_GAIN_FILE.empty()) {
+                      std::cerr << "Warning: could not parse path from line: " << line << std::endl;
+                  }
               }
               else if (label == "HPOL_GAIN_FILE") {
                   HPOL_GAIN_FILE = ParseFilePath(line);
+                  if (HPOL_GAIN_FILE.empty()) {
+                      std::cerr << "Warning: could not parse path from line: " << line << std::endl;
+                  }
               }
               else if (label == "IMPEDANCE_RX_VPOL"){
                   IMPEDANCE_RX_VPOL = atoi(line.substr(line.find_first_of("=") + 1).c_str());
@@ -1165,17 +1174,21 @@ void Settings::SetGitCommitHash(){
 }
 
 std::string Settings::ParseFilePath(const std::string& line) {
-    size_t pos = line.find("="); // Variable position
-    size_t comment_pos = line.find("//", pos); // Comment Position
-
-    std::string fileloc = (comment_pos != std::string::npos) 
-        ? line.substr(pos + 1, comment_pos - pos - 1) 
-        : line.substr(pos + 1);
-
-    size_t start = fileloc.find_first_not_of(" \t\"");
-    size_t end = fileloc.find_last_not_of(" \t\"");
-    if (start != std::string::npos && end != std::string::npos) {
-        fileloc = fileloc.substr(start, end - start + 1);
+    size_t eq_pos = line.find('=');
+    if (eq_pos == std::string::npos) {
+        return ""; 
     }
-    return fileloc;
+
+    // Search for the first quote after the '='
+    size_t quote_start = line.find('"', eq_pos);
+    if (quote_start == std::string::npos) {
+        return ""; 
+    }
+
+    size_t quote_end = line.find('"', quote_start + 1);
+    if (quote_end == std::string::npos) {
+        return ""; 
+    }
+
+    return line.substr(quote_start + 1, quote_end - quote_start - 1);
 }
