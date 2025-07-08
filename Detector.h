@@ -217,7 +217,11 @@ enum EAntennaType {
   eVPol, // (bottom) Vpol
   eVPolTop, // top Vpol
   eHPol, // Hpol
-  eTx // transmitter 
+  eTx, // transmitter 
+  eTxCross, // transmitter 
+  eVPolCross,     // Cross-pol VPol
+  eVPolTopCross,  // Cross-pol VPol Top
+  eHPolCross      // Cross-pol HPol
 };
   
 class Detector {
@@ -234,6 +238,14 @@ class Detector {
         vector<vector<double> > Hgain;
         vector<vector<double> > Hphase;
         vector<double> Freq;
+
+        // Cross-pol vectors
+        vector<vector<double> > VgainCross;
+        vector<vector<double> > VphaseCross;
+        vector<vector<double> > VgainTopCross;
+        vector<vector<double> > VphaseTopCross;
+        vector<vector<double> > HgainCross;
+        vector<vector<double> > HphaseCross;
     
         //Define impedance and gain for receiving antenna
         vector<double> impFreq;
@@ -252,6 +264,8 @@ class Detector {
         vector<double> TxFreq;
         vector<vector<double> > Txgain;
         vector<vector<double> > Txphase;
+        vector<vector<double> > TxgainCross;
+        vector<vector<double> > TxphaseCross;
         void ReadImpedance(string filename, double (*TempRealImpedance)[freq_step_max], double (*TempImagImpedance)[freq_step_max]);
         void ReadAllAntennaImpedance(Settings *settings1);
 
@@ -347,6 +361,10 @@ class Detector {
         vector <double> transVTop_databin;
         vector <double> transH_databin;
 
+        // Cross-pol data bins
+        std::vector<double> transVCross_databin;
+        std::vector<double> transVTopCross_databin;
+        std::vector<double> transHCross_databin;
       
         void ReadAmplifierNoiseFigure(Settings *settings1);
         vector< vector<double> > amplifierNoiseFig_ch;
@@ -383,7 +401,7 @@ class Detector {
         double GetGain(double freq, double theta, double phi, int ant_m, int ant_o);    //read antenna gain at certain angle, certain type, and certain orientation
         double GetGain(double freq, double theta, double phi, int ant_m);   //read antenna gain at certain angle, certain type. (orientation : default)
 
-        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, int string_number=0, int ant_number=0, bool useInTransmitterMode=false);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
+        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, int string_number=0, int ant_number=0, bool useInTransmitterMode=false, bool useCrossPol=false);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
 
         //Creating function to interpolate antenna impedance to frequency binning.
         double GetImpedance(double freq, int ant_m=0, int ant_number=0, bool useInTransmitterMode=false);
@@ -393,7 +411,7 @@ class Detector {
 
         double GetAntPhase(double freq, double theta, double phi, int ant_m); // return antenna phase with 2-D interpolation
 
-        double GetAntPhase_1D(double freq, double theta, double phi, int ant_m, bool useInTransmitterMode=false); // return antenna phase with 1-D interpolation
+        double GetAntPhase_1D(double freq, double theta, double phi, int ant_m, bool useInTransmitterMode=false, bool useCrossPol=false); // return antenna phase with 1-D interpolation
 
 
         double GetFilterGain(int bin) { return FilterGain[bin]; }   // same bin with Vgain, Hgain
