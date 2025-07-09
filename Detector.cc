@@ -2257,11 +2257,12 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     std::string VgainCrossFile;
     std::string VgainTopCrossFile;
     std::string HgainCrossFile;    
-    
+cout << "NEW ASG 1" << endl;
     //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
     TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt"; 
-    TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Crosspol_Kansas2024.txt";   
-    
+    TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";   
+cout << "NEW ASG 2" << endl;
+
     if (settings1->ANTENNA_MODE == 0){
         // use the orignal Vpol/Hpol gains
         VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt";
@@ -2310,11 +2311,18 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Custom.txt";
         HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Custom.txt";         
     }
+cout << "NEW ASG 3" << endl;
 
     // Add cross-pol gain files
     VgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
+cout << "NEW ASG 4" << endl;
+
     VgainTopCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt"; //Should be TV but it's not working due to a negative SWR (first SWR entry) -ASG 12/09/24
+cout << "NEW ASG 5" << endl;
+
     HgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
+cout << "NEW ASG 6" << endl;
+
     
     // Check for ALL_ANT_V_ON, then set all antennas to VPol if true
     if (settings1->ALL_ANT_V_ON == 1) {
@@ -2329,16 +2337,30 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     freq_init = -1;   
  
     //Read in antenna co-pol gain files.
+    cout << "ASG 1" << endl;
     ReadAntennaGain(VgainFile, settings1, eVPol);
+    cout << "ASG 2" << endl;
     ReadAntennaGain(VgainTopFile, settings1, eVPolTop);
+        cout << "ASG 3" << endl;
+
     ReadAntennaGain(HgainFile, settings1, eHPol);
+        cout << "ASG 4" << endl;
+
     ReadAntennaGain(TxgainFile, settings1, eTx);
+    cout << "ASG 5" << endl;
 
     // Read cross-pol Rx gain files
     ReadAntennaGain(VgainCrossFile, settings1, eVPolCross);
+        cout << "ASG 6" << endl;
+
     ReadAntennaGain(VgainTopCrossFile, settings1, eVPolTopCross);
+        cout << "ASG 7" << endl;
+
     ReadAntennaGain(HgainCrossFile, settings1, eHPolCross);
+        cout << "ASG 8" << endl;
+
     ReadAntennaGain(TxgainFileCross, settings1, eTxCross);
+    cout << "ASG 9" << endl;
 
     // update parameters to reflect what was read-in
     params.freq_step = freq_step;
@@ -2381,72 +2403,79 @@ inline double Detector::SWRtoTransCoeff(double swr){
 }
 
 inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAntennaType type) {
-
     // define some dummy variables that will point to the real variables
     // where values are stored
     vector<double> * freq;
     vector< vector<double> > * gain;
     vector< vector<double> > * phase;
     vector<double>* transAnt_databin;
-
     // make sure dummy variables point to the right variables 
     switch(type) {
         case(eVPol):
+            freq = &Freq;
             gain = &Vgain;
             phase = &Vphase;
             transAnt_databin = &transV_databin;
             break;
         case(eVPolTop):
+            freq = &Freq;
             gain = &VgainTop;
             phase = &VphaseTop;
             transAnt_databin = &transVTop_databin;
             break;
         case(eHPol):
+            freq = &Freq;
             gain = &Hgain;
             phase = &Hphase;
             transAnt_databin = &transH_databin;
             break;
         case(eVPolCross): // Cross-pol VPol
+            freq = &Freq;
             gain = &VgainCross;
             phase = &VphaseCross;
             transAnt_databin = &transVCross_databin;
             break;
         case(eVPolTopCross): // Cross-pol VPol Top
+            freq = &Freq;
             gain = &VgainTopCross;
             phase = &VphaseTopCross;
             transAnt_databin = &transVTopCross_databin;
             break;
         case(eHPolCross): // Cross-pol HPol
+            freq = &Freq;
             gain = &HgainCross;
             phase = &HphaseCross;
             transAnt_databin = &transHCross_databin;
             break;
         case(eTx):
+            freq = &Freq;
             gain = &Txgain;
             phase = &Txphase;
             break;
         case(eTxCross):
+            freq = &Freq;
             gain = &TxgainCross;
             phase = &TxphaseCross;
             break;
         default:
             throw runtime_error("Unknown antenna type!");
     }
-
     // open the requested file
     ifstream NecOut( filename.c_str() );
   
     // initialize some variables used for read-in
     vector<double> Transm;
     string line;
-  
+
     // clear vector in case there's any lingering data
     gain->clear();
-    phase->clear();   
+    phase->clear();
+   
     if(freq_step == -1 || type == eTx) { // only reset if it hasn't been read-in yet
+    cout << "freq ptr = " << freq << endl;
         freq->clear(); 
     }
-    
+
     // check the file opened successfully
     if (! NecOut.is_open() ) { 
         throw runtime_error("Antenna gain file could not be opened: "+filename);
@@ -2574,22 +2603,25 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         freq_init = freq->at(0);   
     }
 
-    // check things look sensible
-    if(Transm.size() != freq_step) {
-        throw runtime_error("Transm has an unexpected length! "+filename);
-    }
-    if(gain->size() != freq_step) {
-        throw runtime_error("gain has an unexpected length! "+filename);
-    }
-    if(phase->size() != freq_step) { 
-        throw runtime_error("phase has an unexpected length! "+filename);
-    }
-    for(int i = 0; i < freq_step; ++i) {
-        if(gain->at(i).size() != ang_step) {
-            throw runtime_error("gain vectors have inconsistent length! "+filename);
+    // Only enforce check for non-Tx and non-crosspol antennas
+    if(type != eTx && type != eTxCross && type != eVPolCross && type != eVPolTopCross && type != eHPolCross) {
+        // check things look sensible
+        if(freq_step != -1 && Transm.size() != freq_step) {
+            throw runtime_error("Transm has an unexpected length! "+filename);
         }
-        if(phase->at(i).size() != ang_step) {
-            throw runtime_error("gain vectors have inconsistent length! "+filename);
+        if(freq_step != -1 && gain->size() != freq_step) {
+            throw runtime_error("gain has an unexpected length! "+filename);
+        }
+        if(freq_step != -1 && phase->size() != freq_step) { 
+            throw runtime_error("phase has an unexpected length! "+filename);
+        }
+        for(int i = 0; i < freq_step; ++i) {
+            if(gain->at(i).size() != ang_step) {
+                throw runtime_error("gain vectors have inconsistent length! "+filename);
+            }
+            if(phase->at(i).size() != ang_step) {
+                throw runtime_error("gain vectors have inconsistent length! "+filename);
+            }
         }
     }
  
