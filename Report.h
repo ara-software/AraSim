@@ -332,19 +332,39 @@ class Report {
             double heff, Vector &n_trg_pokey, Vector &n_trg_slappy, Vector &Pol_vector, 
             int ant_type, double &pol_factor, double &vmmhz, double antenna_theta, double antenna_phi
         );
-        void ApplyAntFactors_Tdomain(double phase_copol, double phase_crosspol, double heff_copol, double heff_crosspol, Vector &Pol_vector, 
-                                     int ant_type, double &pol_factor, double &vm_real, double &vm_img, 
-                                     Settings *settings1, double antenna_theta, double antenna_phi, double freq, 
-                                     bool useInTransmitterMode=false, bool applyInverse=false
+
+        void ApplyAntFactors_Tdomain(
+            double AntPhase, double heff, Vector &Pol_vector, 
+            int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, 
+            double freq, bool useInTransmitterMode=false, bool applyInverse=false
+        );
+
+        void ApplyAntFactors_Tdomain(
+            double phase_copol, double phase_crosspol, double heff_copol, double heff_crosspol,
+            Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img,
+            Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false, bool applyInverse=false);
+
+        void ApplyAntFactors_Tdomain_FirstTwo ( 
+            double heff, double heff_lastbin, Vector &Pol_vector, 
+            int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, Settings *settings1, double antenna_theta, double antenna_phi,  
+            double freq, bool useInTransmitterMode=false, bool applyInverse=false
         );
         void ApplyAntFactors_Tdomain_FirstTwo(double heff_copol, double heff_copol_lastbin, double heff_crosspol, double heff_crosspol_lastbin, 
                                               Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, 
                                               Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false, 
                                               bool applyInverse=false
         );
+
+        void InvertAntFactors_Tdomain(double AntPhase, double heff, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false);
+
+
         void InvertAntFactors_Tdomain(double AntPhase_copol, double AntPhase_crosspol, double heff_copol, double heff_crosspol, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_real, double &vm_img, Settings *settings1, double antenna_theta, 
                                           double antenna_phi, double freq, bool useInTransmitterMode=false
         );
+
+
+        void InvertAntFactors_Tdomain_FirstTwo ( double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false);
+
         void InvertAntFactors_Tdomain_FirstTwo(double heff_copol, double heff_copol_lastbin, double heff_crosspol, double heff_crosspol_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, double &vm_bin1, Settings *settings1,
                                                     double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode=false
         );
