@@ -463,7 +463,6 @@ void Report::CalculateSignals(
 ){
   // For each each station, perform the ray tracing from each cascade to each antenna
   //   and determine the voltage readout in the antenna for each connected ray
-
   double RandomTshift = gRandom->Rndm(); // for t-domain signal, a factor for random init time shift
 
   // Loop over stations
@@ -1281,7 +1280,6 @@ void Report::ModelRay(
                         -0.01, // 1cm antenna shift, inspired from NuRadioMC
                         icemodel, settings
                     );
-
                     PropagateSignal(
                         dT_forfft, waveform_bin, signal->PulserWaveform_T, signal->PulserWaveform_V, T_forint,
                         interaction_idx, ray_idx, ray_output, launch_vector, time_diff_birefringence,
@@ -1584,14 +1582,15 @@ void Report::PropagateSignal(
         double Tx_theta = 0;
         double Tx_phi = 0;
         double heff_Tx_lastbin = 0;
-        if (settings->EVENT_TYPE == 11 || settings->EVENT_TYPE == 12){ // Pulser simulations
+        if (settings->EVENT_TYPE == 12){ // Pulser simulations
 
-            //Defining polarization at the source (using launch_vector (a unit vector))
+            //Defining transmission angle at the source (using launch_vector (a unit vector))
             double theta = acos(launch_vector[2]);
             double phi = atan2(launch_vector[1],launch_vector[0]);
 
             double Tx_theta = theta*180/PI;
             double Tx_phi = phi*180/PI;
+        
             double heff_Tx_lastbin = GaintoHeight(
                 detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true),
                 freq_tmp,
@@ -1670,12 +1669,12 @@ void Report::PropagateSignal(
                     ApplyAntFactors_Tdomain(
                         detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0),
                         heff_Tx, Pol_vector, 0, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1],
-                        settings, Tx_theta, Tx_phi, freq_tmp, detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true), true);
+                        settings, Tx_theta, Tx_phi, freq_tmp, true);
                 }
                 else {
                     ApplyAntFactors_Tdomain_FirstTwo(
                         heff_Tx, heff_Tx_lastbin, Pol_vector, 0, Pol_factor,
-                        V_forfft[2 *n], V_forfft[2 *n + 1], settings, Tx_theta, Tx_phi, freq_tmp);
+                        V_forfft[2 *n], V_forfft[2 *n + 1], settings, Tx_theta, Tx_phi, freq_tmp, true);
                 }
             }
             else if (event->IsCalpulser > 0){

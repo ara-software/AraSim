@@ -2257,11 +2257,9 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     std::string VgainCrossFile;
     std::string VgainTopCrossFile;
     std::string HgainCrossFile;    
-cout << "NEW ASG 1" << endl;
     //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
     TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt"; 
-    TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";   
-cout << "NEW ASG 2" << endl;
+    TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Crosspol_Kansas2024.txt";   
 
     if (settings1->ANTENNA_MODE == 0){
         // use the orignal Vpol/Hpol gains
@@ -2311,17 +2309,11 @@ cout << "NEW ASG 2" << endl;
         VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Custom.txt";
         HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Custom.txt";         
     }
-cout << "NEW ASG 3" << endl;
 
     // Add cross-pol gain files
     VgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
-cout << "NEW ASG 4" << endl;
-
-    VgainTopCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt"; //Should be TV but it's not working due to a negative SWR (first SWR entry) -ASG 12/09/24
-cout << "NEW ASG 5" << endl;
-
+    //VgainTopCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt"; //Should be TV but it's not working due to a negative SWR (first SWR entry) -ASG 12/09/24
     HgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
-cout << "NEW ASG 6" << endl;
 
     
     // Check for ALL_ANT_V_ON, then set all antennas to VPol if true
@@ -2337,30 +2329,16 @@ cout << "NEW ASG 6" << endl;
     freq_init = -1;   
  
     //Read in antenna co-pol gain files.
-    cout << "ASG 1" << endl;
     ReadAntennaGain(VgainFile, settings1, eVPol);
-    cout << "ASG 2" << endl;
     ReadAntennaGain(VgainTopFile, settings1, eVPolTop);
-        cout << "ASG 3" << endl;
-
     ReadAntennaGain(HgainFile, settings1, eHPol);
-        cout << "ASG 4" << endl;
-
     ReadAntennaGain(TxgainFile, settings1, eTx);
-    cout << "ASG 5" << endl;
 
     // Read cross-pol Rx gain files
     ReadAntennaGain(VgainCrossFile, settings1, eVPolCross);
-        cout << "ASG 6" << endl;
-
     ReadAntennaGain(VgainTopCrossFile, settings1, eVPolTopCross);
-        cout << "ASG 7" << endl;
-
     ReadAntennaGain(HgainCrossFile, settings1, eHPolCross);
-        cout << "ASG 8" << endl;
-
     ReadAntennaGain(TxgainFileCross, settings1, eTxCross);
-    cout << "ASG 9" << endl;
 
     // update parameters to reflect what was read-in
     params.freq_step = freq_step;
@@ -2472,7 +2450,6 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     phase->clear();
    
     if(freq_step == -1 || type == eTx) { // only reset if it hasn't been read-in yet
-    cout << "freq ptr = " << freq << endl;
         freq->clear(); 
     }
 
@@ -2595,24 +2572,24 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         return;
     }
 
-    // set parameter values if this is the first read-in
-    if(freq_step == -1) { 
-        freq_step = (int)freq->size();
+    int this_freq_step = (int)freq->size();
+    // set parameter values for the smallest freq_step
+    if(freq_step == -1 || this_freq_step < freq_step) { 
+        freq_step = this_freq_step;
         ang_step = (int)gain->back().size();
         freq_width = freq->at(1)-freq->at(0);
         freq_init = freq->at(0);   
     }
-
     // Only enforce check for non-Tx and non-crosspol antennas
     if(type != eTx && type != eTxCross && type != eVPolCross && type != eVPolTopCross && type != eHPolCross) {
         // check things look sensible
-        if(freq_step != -1 && Transm.size() != freq_step) {
+        if(Transm.size() != freq_step) {
             throw runtime_error("Transm has an unexpected length! "+filename);
         }
-        if(freq_step != -1 && gain->size() != freq_step) {
+        if(gain->size() != freq_step) {
             throw runtime_error("gain has an unexpected length! "+filename);
         }
-        if(freq_step != -1 && phase->size() != freq_step) { 
+        if(phase->size() != freq_step) { 
             throw runtime_error("phase has an unexpected length! "+filename);
         }
         for(int i = 0; i < freq_step; ++i) {
@@ -3048,7 +3025,6 @@ double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m )
 
 
 double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int ant_m, int string_number, int ant_number, bool useInTransmitterMode, bool useCrossPol) {
-    
     /*
     The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, Txgain)
     to match the frequency binning dictated by NFOUR in the setup file. 
@@ -3134,6 +3110,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
     int bin = (int)( (freq - thisFreq_init) / thisFreq_width )+1;
 
+
      //Interpolation of tempGain
     slope_1 = ((*tempGain)[1][angle_bin] - (*tempGain)[0][angle_bin]) / (F->at(1) - F->at(0));
 
@@ -3148,7 +3125,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     else { 
         Gout = (*tempGain)[bin-1][angle_bin] + (freq-F->at(bin-1))*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(F->at(bin)-F->at(bin-1));
     }   
- 
+
     if ( Gout < 0. ) { // gain can not go below 0
     	Gout = 0.;
     }

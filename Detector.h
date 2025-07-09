@@ -362,9 +362,9 @@ class Detector {
         vector <double> transH_databin;
 
         // Cross-pol data bins
-        std::vector<double> transVCross_databin;
-        std::vector<double> transVTopCross_databin;
-        std::vector<double> transHCross_databin;
+         vector <double> transVCross_databin;
+         vector <double> transVTopCross_databin;
+        vector <double> transHCross_databin;
       
         void ReadAmplifierNoiseFigure(Settings *settings1);
         vector< vector<double> > amplifierNoiseFig_ch;
