@@ -2259,7 +2259,7 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     std::string HgainCrossFile;
 
     //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
-    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt";
+    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";
     TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
 
     if (settings1->ANTENNA_MODE == 0){
@@ -3121,7 +3121,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     // if freq is higher than last freq
     else if ( freq > F->back() ) {
 
-        Gout = 0.;
+        Gout = 1e-30;
 
     }
     else {
@@ -3132,7 +3132,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
     if ( Gout < 0. ) { // gain can not go below 0
 
-        Gout = 0.;
+        Gout = 1e-30;
 
     }
     return Gout;
