@@ -1590,7 +1590,7 @@ void Report::PropagateSignal(
 
             double Tx_theta = theta*180/PI;
             double Tx_phi = phi*180/PI;
-        
+
             double heff_Tx_lastbin = GaintoHeight(
                 detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true),
                 freq_tmp,
@@ -3680,7 +3680,7 @@ void Report::InvertAntFactors_Tdomain(double AntPhase_copol, double AntPhase_cro
 }
 
 void Report::InvertAntFactors_Tdomain_FirstTwo(
-    double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0, 
+    double heff, double heff_lastbin, Vector &Pol_vector, int ant_type, double &pol_factor, double &vm_bin0,
     double &vm_bin1, Settings *settings1, double antenna_theta, double antenna_phi, double freq, bool useInTransmitterMode
 ) {
     ApplyAntFactors_Tdomain_FirstTwo(

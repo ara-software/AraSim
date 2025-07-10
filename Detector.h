@@ -43,14 +43,14 @@ class Parameters {
     int number_of_antennas_string;  //antennas per string
     int number_of_surfaces_station;    //surface antennas per station
     int number_of_channels; // number of channels for each regular (non-TestBed) station
-    
+
     int number_of_strings_station_TB; //number of strings in the TestBed
     int number_of_antennas_string_TB; //number of antennas in each string in the Testbed
     int number_of_surfaces_station_TB; //number of surface stations for the TestBed
     int number_of_channels_TB; // number of channels for the TestBed
-    
+
     int num_of_channels[2];
-    
+
     int bore_hole_antenna_layout;   // bore hole antenna layout, 0 : VHVH, 1 : VHV, 2 : VHVV
 
     int number_of_strings;
@@ -58,10 +58,10 @@ class Parameters {
 
     double core_x;
     double core_y;
-    
+
     int DeployedStations;
-    
-        
+
+
 //    static const int freq_step = 60;
 //    static const int ang_step = 2664;
 //    static const double freq_width = 16.667;  // this value could be changed when Nec2 condition changes!
@@ -116,7 +116,7 @@ class Surface_antenna : public Position {
 };
 
 
-    
+
 //struct Antenna : public Position, public TObject {
 //class Antenna : public Position, public TObject {
 class Antenna : public Position {
@@ -131,13 +131,13 @@ class Antenna : public Position {
     int manual_delay;   // to fit the waveform to actual TestBed waveform, added manual delay time
 
     int manual_delay_bin;   // to fit the waveform to actual TestBed waveform, added manual delay bin
-    
+
     double GetG(Detector *D, double freq, double theta, double phi);    // read gain value from Detector class, return 2-D interpolated value
 
 
     //ClassDef(Antenna,1);
     ClassDef(Antenna,3);
-    
+
 };
 
 
@@ -167,7 +167,7 @@ class ARA_station : public Position {
     double DATA_BIN_SIZE;
 
     int number_of_antennas; // total number of antennas for each stations
-    
+
     ClassDef(ARA_station,1);
 };
 
@@ -192,11 +192,11 @@ class InstalledStation {
 
 
 //class Detector : public TObject {
-      
+
 class IdealStation{
-      
+
     public:
-      
+
         int nSurfaces;
         int nStrings;
         vector < int > surfaceChannels;
@@ -208,22 +208,22 @@ class IdealStation{
         vector < int > IDSurface;
         vector < int > IDAntenna;
         vector < int > IDString;
-        
+
 	ClassDef(IdealStation, 1);
-	
+
 };
 
 enum EAntennaType {
   eVPol, // (bottom) Vpol
   eVPolTop, // top Vpol
   eHPol, // Hpol
-  eTx, // transmitter 
-  eTxCross, // transmitter 
+  eTx, // transmitter
+  eTxCross, // transmitter
   eVPolCross,     // Cross-pol VPol
   eVPolTopCross,  // Cross-pol VPol Top
   eHPolCross      // Cross-pol HPol
 };
-  
+
 class Detector {
     private:
         static const int freq_step_max = 60;
@@ -246,16 +246,16 @@ class Detector {
         vector<vector<double> > VphaseTopCross;
         vector<vector<double> > HgainCross;
         vector<vector<double> > HphaseCross;
-    
+
         //Define impedance and gain for receiving antenna
         vector<double> impFreq;
         double RealImpedanceV[freq_step_max];
-        double ImagImpedanceV[freq_step_max];   
+        double ImagImpedanceV[freq_step_max];
         double RealImpedanceVTop[freq_step_max];
-        double ImagImpedanceVTop[freq_step_max];       
+        double ImagImpedanceVTop[freq_step_max];
         double RealImpedanceH[freq_step_max];
-        double ImagImpedanceH[freq_step_max];       
-    
+        double ImagImpedanceH[freq_step_max];
+
         //Define impedance and gain for transmitting antenna
         double RealImpedanceTx[freq_step_max];
         double ImagImpedanceTx[freq_step_max];
@@ -270,7 +270,7 @@ class Detector {
         void ReadAllAntennaImpedance(Settings *settings1);
 
 
-	
+
 
         void ReadFilter(string filename, Settings *settings1);
         double FilterGain[freq_step_max];   // Filter gain (dB) for Detector freq bin array
@@ -298,7 +298,7 @@ class Detector {
         void CalculateElectChain(Settings *settings1); // calculate data-driven noise model
         int gain_ch; // Number of channels used for gain model array population in ReadElectChain()
         std::vector< std::vector <double> > ElectGain; //Elect chain gain (unitless) for Detector freq bin array
-        std::vector< std::vector <double> > ElectPhase; // Elect chain phase (rad) for Detector freq bin array 
+        std::vector< std::vector <double> > ElectPhase; // Elect chain phase (rad) for Detector freq bin array
 
         void ReadTrig_Delays_Masking(string filename, Settings *settings1);
         std::vector<double> triggerDelay; //trigger delay for a given channel (seconds?)
@@ -306,16 +306,16 @@ class Detector {
         std::vector<int> activeDelay;  //decision value to activate delay (either 0 or 1)
 
         void ReadGainOffset_TestBed(string filename, Settings *settings1);
-        vector <double> GainOffset_TB_ch;   // constant gain offset for the TestBed chs 
+        vector <double> GainOffset_TB_ch;   // constant gain offset for the TestBed chs
 
         void ReadThresOffset_TestBed(string filename, Settings *settings1);
-        vector <double> ThresOffset_TB_ch;   // constant gain offset for the TestBed chs 
+        vector <double> ThresOffset_TB_ch;   // constant gain offset for the TestBed chs
 
         void ReadThres_TestBed(string filename, Settings *settings1);
-        vector <double> Thres_TB_ch;   // Threshold values for the TestBed chs 
+        vector <double> Thres_TB_ch;   // Threshold values for the TestBed chs
 
         void ReadTemp_TestBed(string filename, Settings *settings1);
-        //vector <double> Temp_TB_ch;   // constant gain offset for the TestBed chs 
+        //vector <double> Temp_TB_ch;   // constant gain offset for the TestBed chs
 
         void ReadRFCM_TestBed(string filename, Settings *settings1);
         double RFCM_TB_ch[16][freq_step_max];   // Filter gain (dB) for Detector freq bin array
@@ -337,7 +337,7 @@ class Detector {
         rayleighFits_DeepStation_values holds the Rayleigh sigma.
         The first dimension is for the number of channels (so this is "number of channels" long).
         The second dimension is for the number of frequency bins (so this is "number of frequency bins" long).
-        (which goes first and which goes second is arbitrary; 
+        (which goes first and which goes second is arbitrary;
         the TestBed version does it in this order, so replicate here)
 
         rayleighFits_DeepStation_frequencies holds the Rayleigh frequencies.
@@ -350,7 +350,7 @@ class Detector {
         void ReadRayleighFit_DeepStation(string filename, Settings *settings1);
 
 
-        void ReadNoiseFigure(string filename, Settings *settings1); 
+        void ReadNoiseFigure(string filename, Settings *settings1);
         double NoiseFig_ch[16][freq_step_max];
         vector<double> NoiseFig_freq;
         vector < vector < double > > NoiseFig_databin_ch;
@@ -365,7 +365,7 @@ class Detector {
          vector <double> transVCross_databin;
          vector <double> transVTopCross_databin;
         vector <double> transHCross_databin;
-      
+
         void ReadAmplifierNoiseFigure(Settings *settings1);
         vector< vector<double> > amplifierNoiseFig_ch;
 
@@ -405,7 +405,7 @@ class Detector {
 
         //Creating function to interpolate antenna impedance to frequency binning.
         double GetImpedance(double freq, int ant_m=0, int ant_number=0, bool useInTransmitterMode=false);
-	
+
         int GetTrigOffset( int ch, Settings *settings1 );
         int GetTrigMasking( int ch );
 
@@ -430,7 +430,7 @@ class Detector {
         double GetFOAMGain_NFOUR(int bin) { return FOAMGain_NFOUR[bin]; }   // bin for FFT
         double GetFOAMGain_1D_OutZero(double freq);
 
-	
+
         double GetElectGain(int bin, int gain_ch_no) { return ElectGain[gain_ch_no][bin]; }   // same bin with Vgain, Hgain
         double GetElectGain_1D_OutZero(double freq, int gain_ch_no);
         double GetElectPhase_1D(double freq, int gain_ch_no);
@@ -446,23 +446,23 @@ class Detector {
         std::vector< std::vector< double> > GetRayleighFitVector_databin(int station, Settings *settings);
 
         double GetNoiseFig_databin(int ch, int bin) { return NoiseFig_databin_ch[ch%16][bin]; }   // bin for FFT
-        double GetNoiseFig_OutZero(int ch, double freq);      
-        
+        double GetNoiseFig_OutZero(int ch, double freq);
+
         double GetTransm_databin(int ch, int bin) {	if(ch%16<4){return transVTop_databin[bin];}
-							else if(ch%16<8){return transV_databin[bin];} 
+							else if(ch%16<8){return transV_databin[bin];}
 							else{return transH_databin[bin];} }   // bin for FFT
         double GetTransm_OutZero(int ch, double freq);
         void ReadNoiseFig_New(Settings *settings1); // get noise Figure array with new DATA_BIN_SIZE
 
-        
+
         double GetGainOffset( int StationID, int ch, Settings *settings1 );  // returns voltage factor for specific channel gain off set
 
         double GetThresOffset( int StationID, int ch, Settings *settings1 );  // returns voltage factor for specific channel gain off set
 
-        double GetThres( int StationID, int ch, Settings *settings1 );  // returns voltage factor threshold for specific channel 
+        double GetThres( int StationID, int ch, Settings *settings1 );  // returns voltage factor threshold for specific channel
 
         double GetTemp( int StationID, int ch, Settings *settings1 );  // returns voltage factor for specific channel gain off set
-        vector <double> Temp_TB_ch;   // constant gain offset for the TestBed chs 
+        vector <double> Temp_TB_ch;   // constant gain offset for the TestBed chs
 
 
         double Getfreq_init() {return freq_init;}
@@ -476,7 +476,7 @@ class Detector {
         vector <double> fdiode_real_databin;    // NFOUR array of f domain tunnel diode response (FFT of diode_real). also same with icemc -> anita -> fdiode_real  but only full bandwidth array 4
         vector <double> fdiode_real;    // NFOUR/2 array of f domain tunnel diode response (FFT of diode_real). also same with icemc -> anita -> fdiode_real  but only full bandwidth array 4
         vector <double> fdiode_real_double;    // NFOUR array of f domain tunnel diode response (FFT of diode_real). also same with icemc -> anita -> fdiode_real  but only full bandwidth array 4
-        
+
         double TIMESTEP;    // will copy TIMESTEP from Settings
         int NFOUR;          // also will copy NFOUR from Settings
 
@@ -498,23 +498,23 @@ class Detector {
         // for a best performance, we can just set a new reasonable DATA_BIN_SIZE and make new values for those
         void get_NewDiodeModel(Settings *settings1);
 
-        void ReadFilter_New(Settings *settings1);    // get filter vector array with new DATA_BIN_SIZE 
+        void ReadFilter_New(Settings *settings1);    // get filter vector array with new DATA_BIN_SIZE
 
-        void ReadPreamp_New(Settings *settings1);    // get filter vector array with new DATA_BIN_SIZE 
+        void ReadPreamp_New(Settings *settings1);    // get filter vector array with new DATA_BIN_SIZE
 
-        void ReadFOAM_New(Settings *settings1);    // get filter vector array with new DATA_BIN_SIZE 
+        void ReadFOAM_New(Settings *settings1);    // get filter vector array with new DATA_BIN_SIZE
 
-        void ReadRFCM_New(Settings *settings1);    // get filter vector array with new DATA_BIN_SIZE 
+        void ReadRFCM_New(Settings *settings1);    // get filter vector array with new DATA_BIN_SIZE
 
         void ReadRayleigh_New(Settings *settings1); // get Rayleigh fit array with new DATA_BIN_SIZE
 
 
-    
+
 //    vector < vector < vector < int > > > ChannelfromStringAntenna;
 //    void SetChannelStringAntennaMap();
     int GetChannelfromStringAntenna (int stationNum, int stringnum, int antennanum );
     void GetSSAfromChannel ( int stationNum, int channelNum, int * antennaNum, int * stringNum );
-    
+
 #ifdef ARA_UTIL_EXISTS
     void UseAntennaInfo (int stationNum, Settings *settings1);
     void ImportStationInfo (Settings *settings1, int StationIndex, int StationID);
@@ -523,8 +523,8 @@ class Detector {
 // more general used function
     void GetSSAfromChannel ( int stationID, int channelNum, int * antennaNum, int * stringNum, Settings *settings1);
     int GetChannelfromStringAntenna ( int stationID, int stringnum, int antennanum, Settings *settings1);
-   
-    
+
+
     /*
     struct InstalledStation {
         int nSurfaces;
@@ -538,13 +538,13 @@ class Detector {
 
     };
     */
-    
+
     vector < InstalledStation > InstalledStations;
-    
+
 //     class IdealStation{
-//       
+//
 //     public:
-//       
+//
 //         int nSurfaces;
 //         int nStrings;
 //         vector < int > surfaceChannels;
@@ -556,11 +556,11 @@ class Detector {
 //         vector < int > IDSurface;
 //         vector < int > IDAntenna;
 //         vector < int > IDString;
-//         
+//
 //     };
-    
+
     vector < IdealStation > IdealStations;
-    
+
 
     void SetupInstalledStations(Settings *settings1);
     void PrepareVectorsInstalled();
@@ -570,8 +570,8 @@ class Detector {
 
     int getAntennafromArbAntID( int stationID, int ant_ID);
     int getStringfromArbAntID( int stationID, int ant_ID);
-    
-    
+
+
     vector <double> CalPulserWF_ns;
     vector <double> CalPulserWF_V;
 
@@ -579,10 +579,10 @@ class Detector {
         ~Detector();    //destructor
 
         ClassDef(Detector,2);
-        
-    
-    
-    
+
+
+
+
 };
 
 
