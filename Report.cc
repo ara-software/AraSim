@@ -595,8 +595,9 @@ void Report::BuildAndTriggerOnWaveforms(
     // TRIG_ANALYSIS_MODE=2 is the noise-only mode, 
     //   say that all antennas have good signal and have a ray solution if not assigned
     ants_with_nonzero_signal = 16;
-    if(stations[station_index].Total_ray_sol == 0)
+    if(stations[station_index].Total_ray_sol == 0) {
         stations[station_index].Total_ray_sol = 16;
+    }
   }
   else {
     // If rays connected to the station, count how many antennas 
