@@ -238,6 +238,7 @@ class Detector {
         vector<vector<double> > Hgain;
         vector<vector<double> > Hphase;
         vector<double> Freq;
+        vector<double> FreqCross;
 
         // Cross-pol vectors
         vector<vector<double> > VgainCross;
@@ -262,6 +263,7 @@ class Detector {
         double Tx_freq_init;
         double Tx_freq_width;
         vector<double> TxFreq;
+        vector<double> TxFreqCross;
         vector<vector<double> > Txgain;
         vector<vector<double> > Txphase;
         vector<vector<double> > TxgainCross;

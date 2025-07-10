@@ -2409,19 +2409,19 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
             transAnt_databin = &transH_databin;
             break;
         case(eVPolCross): // Cross-pol VPol
-            freq = &Freq;
+            freq = &FreqCross;
             gain = &VgainCross;
             phase = &VphaseCross;
             transAnt_databin = &transVCross_databin;
             break;
         case(eVPolTopCross): // Cross-pol VPol Top
-            freq = &Freq;
+            freq = &FreqCross;
             gain = &VgainTopCross;
             phase = &VphaseTopCross;
             transAnt_databin = &transVTopCross_databin;
             break;
         case(eHPolCross): // Cross-pol HPol
-            freq = &Freq;
+            freq = &FreqCross;
             gain = &HgainCross;
             phase = &HphaseCross;
             transAnt_databin = &transHCross_databin;
@@ -2432,7 +2432,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
             phase = &Txphase;
             break;
         case(eTxCross):
-            freq = &TxFreq;
+            freq = &TxFreqCross;
             gain = &TxgainCross;
             phase = &TxphaseCross;
             break;
@@ -2450,7 +2450,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     gain->clear();
     phase->clear();
 
-    if(freq_step == -1 || type == eTx) { // only reset if it hasn't been read-in yet
+    if(freq_step == -1 || type == eTx || type == eVPolCross || type == eVPolTopCross || type == eHPolCross || eTxCross) { // only reset if it hasn't been read-in yet
         freq->clear();
     }
 
@@ -2489,10 +2489,12 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
                 throw runtime_error("Non-finite frequency value found! "+filename);
             }
 
-            if(freq_step == -1 || type == eTx) { // add frequency if this is the first read-in
+            if(freq_step == -1 || type == eTx || type == eVPolCross || type == eVPolTopCross || type == eHPolCross || eTxCross ) { // add frequency if this is the first read-in
                 freq->push_back(thisFreq);
+
             }
             else { // otherwise make sure it matches the values already stored
+
                 int i = (int)Transm.size();
 
                 if(abs(freq->at(i)-thisFreq) > 0.1 ) { // ensure they match to at least 0.1 MHz
@@ -2533,7 +2535,6 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
             phase->push_back(vector<double>());
 
         } // end frequency/header read in
-
         // otherwise we are reading in theta/phi values for a specific frequency
         else {
 
@@ -3030,7 +3031,6 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, Txgain)
     to match the frequency binning dictated by NFOUR in the setup file.
     */
-
     //Initialize pointer to dynamically point to the gain for chosen antenna.  The structure of this pointer matches that of the global gain arrays defined in Detector.h.
     vector<vector<double> > *tempGain = nullptr;
 
@@ -3083,13 +3083,12 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
     double thisFreq_init;
     double thisFreq_width;
-    if(useInTransmitterMode) {
-        F = &TxFreq;
+    if (useInTransmitterMode) {
+        F = useCrossPol ? &TxFreqCross : &TxFreq;
         thisFreq_init = Tx_freq_init;
         thisFreq_width = Tx_freq_width;
-    }
-    else {
-        F = &Freq;
+    } else {
+        F = useCrossPol ? &FreqCross : &Freq;
         thisFreq_init = freq_init;
         thisFreq_width = freq_width;
     }
@@ -3116,7 +3115,9 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
     // if freq is lower than freq_init
     if ( freq < thisFreq_init ) {
+
         Gout = slope_1 * (freq - F->at(0)) + (*tempGain)[0][angle_bin];
+
     }
     // if freq is higher than last freq
     else if ( freq > F->back() ) {
@@ -3219,13 +3220,12 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
     double thisFreq_init;
     double thisFreq_width;
     int thisFreq_step;
-    if(useInTransmitterMode) {
-        F = &TxFreq;
+    if (useInTransmitterMode) {
+        F = useCrossPol ? &TxFreqCross : &TxFreq;
         thisFreq_init = Tx_freq_init;
         thisFreq_width = Tx_freq_width;
-    }
-    else {
-        F = &Freq;
+    } else {
+        F = useCrossPol ? &FreqCross : &Freq;
         thisFreq_init = freq_init;
         thisFreq_width = freq_width;
     }
