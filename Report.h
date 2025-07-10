@@ -78,8 +78,8 @@ class Antenna_r {
         vector < vector < vector <double> > > vmmhz; //!  // signal V/m/MHz for each freq bin
 
         vector < vector < vector <double> > > Heff; //!  // effective height for each freq bin
-        vector < vector <double> > Heff_copol;  // effective height for each freq bin
-        vector < vector <double> > Heff_crosspol;  // effective height for each freq bin
+        vector < vector < vector <double> > > Heff_copol;  // effective height for each freq bin
+        vector < vector < vector <double> > > Heff_crosspol;  // effective height for each freq bin
         vector < vector <double> > Mag; //!  // magnification factor
         vector < vector <double> > Fresnel; //!  // Fresnel factor
         vector < vector <double> > Pol_factor; //! // Polarization factor

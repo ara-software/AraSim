@@ -1567,21 +1567,29 @@ void Report::PropagateSignal(
         //For birefringence, modify the polarization at the antennas
         birefringence->Principal_axes_polarization(Pol_vector, bire_ray_cnt, max_bire_ray_cnt, settings);
 
-        // Get ant gain with 2-D interpolation
-        double heff_lastbin = GaintoHeight(
-            detector->GetGain_1D_OutZero(
-                freq_tmp *1.E-6, antenna_theta, antenna_phi,
-                antenna_d->type, j, k),
+        // Co-pol effective height for the last bin
+        double heff_copol_lastbin = GaintoHeight(
+            detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, antenna_theta, antenna_phi,
+                antenna_d->type, j, k, false, false),
             freq_tmp,
             icemodel->GetN(*antenna_d),
-            detector->GetImpedance(freq_tmp*1.E-6, antenna_d->type, k));
+            detector->GetImpedance(freq_tmp * 1.E-6, antenna_d->type, k));
+
+        // Cross-pol effective height for the last bin
+        double heff_crosspol_lastbin = GaintoHeight(
+            detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, antenna_theta, antenna_phi,
+                antenna_d->type, j, k, false, true),
+            freq_tmp,
+            icemodel->GetN(*antenna_d),
+            detector->GetImpedance(freq_tmp * 1.E-6, antenna_d->type, k));      
 
         // Tx effective height for last bin.  Currently locked to standard ARA Vpol and HPol antennas.
         // Need to add selection mode.
         // Only used in EVENT_MODE == 12
         double Tx_theta = 0;
         double Tx_phi = 0;
-        double heff_Tx_lastbin = 0;
+        double heff_Tx_copol_lastbin=0;
+        double heff_Tx_crosspol_lastbin=0;
         if (settings->EVENT_TYPE == 12){ // Pulser simulations
 
             //Defining transmission angle at the source (using launch_vector (a unit vector))
@@ -1590,18 +1598,33 @@ void Report::PropagateSignal(
 
             Tx_theta = theta*180/PI;
             Tx_phi = phi*180/PI;
-
-            heff_Tx_lastbin = GaintoHeight(
-                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true),
-                freq_tmp,
+        
+            // Tx effective height for co-pol and cross-pol for the last bin
+            heff_Tx_copol_lastbin = GaintoHeight(
+                detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true, false),
+                    freq_tmp,
                 icemodel->GetN(*antenna_d),
-                detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));
+                detector->GetImpedance(freq_tmp * 1.E-6, 0, 0, true));
+
+            heff_Tx_crosspol_lastbin = GaintoHeight(
+                detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true, true),
+                    freq_tmp,
+                icemodel->GetN(*antenna_d),
+                detector->GetImpedance(freq_tmp * 1.E-6, 0, 0, true));
+            // End Tx effective height for last bin
         }
         else if (event->IsCalpulser > 0){ // Calibration Pulser simulations
             Tx_theta = ray_output[1][ray_idx] *DEGRAD;    // from 0 to 180
-            heff_Tx_lastbin = GaintoHeight(
-                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, antenna_phi, antenna_d->type, j, k),
-                freq_tmp, icemodel->GetN(event->Nu_Interaction[interaction_idx].posnu));
+
+            // Tx effective height for co-pol and cross-pol for the last bin
+            heff_Tx_copol_lastbin = GaintoHeight(
+                detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, Tx_theta, antenna_phi, antenna_d->type, j, k, true, false),
+                    freq_tmp, icemodel->GetN(event->Nu_Interaction[interaction_idx].posnu));
+
+            heff_Tx_crosspol_lastbin = GaintoHeight(
+                detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, Tx_theta, antenna_phi, antenna_d->type, j, k, true, true),
+                    freq_tmp, icemodel->GetN(event->Nu_Interaction[interaction_idx].posnu));
+            // End Tx effective height for last bin
 
             if (event->IsCalpulser == 1) {
                 Pol_vector = n_trg_slappy;
@@ -1624,12 +1647,22 @@ void Report::PropagateSignal(
 
             freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
 
-            double heff = GaintoHeight(
-                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta,  antenna_phi, antenna_d->type, j, k),
+            // Co-pol effective height
+            double heff_copol = GaintoHeight(
+                detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, antenna_theta, antenna_phi, antenna_d->type, j, k, false, false),
                 freq_tmp,
                 icemodel->GetN(*antenna_d),
-                detector->GetImpedance(freq_tmp*1.E-6, antenna_d->type, k));
-            antenna_r->Heff[interaction_idx][ray_idx].push_back(heff);
+                detector->GetImpedance(freq_tmp * 1.E-6, antenna_d->type, k));
+
+            // Cross-pol effective height
+            double heff_crosspol = GaintoHeight(
+                detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, antenna_theta, antenna_phi, antenna_d->type, j, k, false, true),
+                freq_tmp,
+                icemodel->GetN(*antenna_d),
+                detector->GetImpedance(freq_tmp * 1.E-6, antenna_d->type, k));
+
+            antenna_r->Heff_copol[interaction_idx][ray_idx].push_back(heff_copol);
+            antenna_r->Heff_crosspol[interaction_idx][ray_idx].push_back(heff_crosspol); 
 
             //apply freq dependent attenuation model if in neutrino mode
             if (settings->EVENT_TYPE == 0 && settings->USE_ARA_ICEATTENU == 2) {
@@ -1660,55 +1693,77 @@ void Report::PropagateSignal(
 
             // Apply transmitter effective height if in PVA Pulser mode
             if (settings->EVENT_TYPE == 12){
-                double heff_Tx = GaintoHeight(
-                    detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true),
+                // Co-pol effective height Tx
+                double heff_Tx_copol = GaintoHeight(
+                    detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true, false),
                     freq_tmp,
                     icemodel->GetN(*antenna_d),
                     detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));
+
+                // Cross-pol effective height Tx
+                double heff_Tx_crosspol = GaintoHeight(
+                    detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true, true),
+                    freq_tmp,
+                    icemodel->GetN(*antenna_d),
+                    detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));
+                
+                // Retrieve co-pol and cross-pol phases
+                double phase_copol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, true, false);
+                double phase_crosspol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, true, true);
+
                 if (n > 0) {
-                    ApplyAntFactors_Tdomain(
-                        detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0),
-                        heff_Tx, Pol_vector, 0, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1],
-                        settings, Tx_theta, Tx_phi, freq_tmp, true);
+                    ApplyAntFactors_Tdomain(phase_copol_tx, phase_crosspol_tx, heff_Tx_copol, heff_Tx_crosspol, Pol_vector, 0, Pol_factor, 
+                        V_forfft[2 * n], V_forfft[2 * n + 1], settings, Tx_theta, Tx_phi, freq_tmp, true, false);
                 }
                 else {
                     ApplyAntFactors_Tdomain_FirstTwo(
-                        heff_Tx, heff_Tx_lastbin, Pol_vector, 0, Pol_factor,
-                        V_forfft[2 *n], V_forfft[2 *n + 1], settings, Tx_theta, Tx_phi, freq_tmp, true);
+                        heff_Tx_copol, heff_Tx_copol_lastbin, heff_Tx_crosspol, heff_Tx_crosspol_lastbin, Pol_vector, 0, 
+                        Pol_factor, V_forfft[2 * n], V_forfft[2 * n + 1], settings, Tx_theta, Tx_phi, freq_tmp, true, false);         
                 }
             }
             else if (event->IsCalpulser > 0){
-                // apply ant factors (transmitter ant)
-                heff = GaintoHeight(
+
+                // Co-pol effective height
+                double heff_Tx_copol = GaintoHeight(
                     detector->GetGain_1D_OutZero(
-                        freq_tmp *1.E-6,   // to MHz
-                        Tx_theta, antenna_phi, antenna_d->type, j, k),
+                        freq_tmp * 1.E-6, Tx_theta, antenna_phi, antenna_d->type, j, k, false, false),
                     freq_tmp, icemodel->GetN(event->Nu_Interaction[interaction_idx].posnu));
+                    
+                // Cross-pol effective height
+                double heff_Tx_crosspol = GaintoHeight(
+                    detector->GetGain_1D_OutZero(
+                        freq_tmp * 1.E-6, 
+                        Tx_theta, antenna_phi, antenna_d->type, j, k, false, true),
+                    freq_tmp, icemodel->GetN(event->Nu_Interaction[interaction_idx].posnu));
+                
+                // Retrieve co-pol and cross-pol phases
+                double phase_copol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, antenna_phi, antenna_d->type, true, false);
+                double phase_crosspol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, antenna_phi, antenna_d->type, true, true);
 
                 if (n > 0) {
-                    ApplyAntFactors_Tdomain(
-                        detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, antenna_phi, antenna_d->type),
-                        heff, Pol_vector, antenna_d->type, Pol_factor,
-                        V_forfft[2 *n], V_forfft[2 *n + 1], settings, true, antenna_theta, antenna_phi, freq_tmp);
+                    ApplyAntFactors_Tdomain(phase_copol_tx, phase_crosspol_tx, heff_Tx_copol, heff_Tx_crosspol, Pol_vector, antenna_d->type, Pol_factor, 
+                        V_forfft[2 * n], V_forfft[2 * n + 1], settings, Tx_theta, Tx_phi, freq_tmp, true, false);
                 }
                 else {
                     ApplyAntFactors_Tdomain_FirstTwo(
-                        heff, heff_Tx_lastbin, Pol_vector, antenna_d->type, Pol_factor,
-                        V_forfft[2 *n], V_forfft[2 *n + 1], settings, antenna_theta, antenna_phi, freq_tmp);
+                        heff_Tx_copol, heff_Tx_copol_lastbin, heff_Tx_crosspol, heff_Tx_crosspol_lastbin, Pol_vector, antenna_d->type, Pol_factor, 
+                        V_forfft[2 * n], V_forfft[2 * n + 1], settings, Tx_theta, Tx_phi, freq_tmp, true, false);    
                 }
             }
 
+            double phase_copol = detector->GetAntPhase_1D(freq_tmp * 1.e-6, antenna_theta, antenna_phi, 
+                antenna_d->type, false, false);
+            double phase_crosspol = detector->GetAntPhase_1D(freq_tmp * 1.e-6, antenna_theta, antenna_phi, 
+                antenna_d->type, false, true);
+
             // apply ant factors
             if (n > 0) {
-                ApplyAntFactors_Tdomain(
-                    detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, antenna_d->type),
-                    heff, Pol_vector, antenna_d->type, Pol_factor,
-                    V_forfft[2 *n], V_forfft[2 *n + 1], settings, antenna_theta, antenna_phi, freq_tmp);
+                ApplyAntFactors_Tdomain(phase_copol, phase_crosspol, heff_copol, heff_crosspol, Pol_vector, antenna_d->type, Pol_factor, 
+                    V_forfft[2 * n], V_forfft[2 * n + 1], settings, antenna_theta, antenna_phi, freq_tmp);
             }
             else {
-                ApplyAntFactors_Tdomain_FirstTwo(
-                    heff, heff_lastbin, Pol_vector, antenna_d->type, Pol_factor,
-                    V_forfft[2 *n], V_forfft[2 *n + 1], settings, antenna_theta, antenna_phi, freq_tmp);
+                 ApplyAntFactors_Tdomain_FirstTwo(heff_copol, heff_copol_lastbin, heff_crosspol, heff_crosspol_lastbin, Pol_vector,  antenna_d->type, Pol_factor, 
+                    V_forfft[2 * n], V_forfft[2 * n + 1], settings, antenna_theta, antenna_phi, freq_tmp);  
             }
 
             // apply entire elect chain gain, phase
