@@ -156,7 +156,7 @@ class Station_r {
         double max_arrival_time;    // for each station, maximum arrival time (include all ray_solves). this will be used for time delay between antennas.
         double max_PeakV;           // for each station, maximum PeakV value (include all ray_solves). this will also be used for time delay plot (to set same vertical scale)
         int Total_ray_sol;          // total number of ray_sols in the stations. If there is 0 Total_ray_sol, we don't need to do trigger check while there is any Total_ray_sol, we do trigger check.
-        int Global_Pass;            // if global trigger passed or not: 0 = not passed, >0 passed, number indicates the first bin in the triggered window of the waveform at which the global trigger passed
+        int Global_Pass;            // if global trigger passed or not: -1 = not passed, >=0 passed, number indicates the first bin in the triggered window of the waveform at which the global trigger passed
 
         int total_trig_search_bin;  // total number of bins for searching trigger. 
         int next_trig_search_init; // if not -1, designates the next global bin to begin a trigger search from
@@ -439,12 +439,12 @@ class Report {
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
 
         // Phased Array variables
-        double pa_force_trigger_snr = 3.5; 
-            // SNR that should always trigger, 
-            // used (eg) when triggering on noise only events
         double pa_snr_cap = 25.;
             // KAH thinks this is the max SNR she had efficiencies calculated for
             // KAH says the PA has a SNR cap of 25 in practice and may have a link showing this.
+        double pa_force_trigger_snr = pa_snr_cap; 
+            // SNR that should always trigger, 
+            // used (eg) when triggering on noise only events
 
         ClassDef(Report,1);
 
