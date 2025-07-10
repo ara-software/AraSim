@@ -583,9 +583,9 @@ void Report::BuildAndTriggerOnWaveforms(
   // With that signal + noise array, we'll do the convolution with the diode response.
   // With the convolution result, we'll do a trigger check.
 
-  // When this variable is non-zero, it indicates that the station triggered
-  // Reinitialize it back to 0
-  stations[station_index].Global_Pass  = 0;
+  // When this variable is non-negative, it indicates that the station triggered
+  // Reinitialize it back to -1
+  stations[station_index].Global_Pass  = -1;
 
   // If we're looking to trigger on signal, check that there 
   //   is enough signal that reached the station. 
@@ -593,8 +593,10 @@ void Report::BuildAndTriggerOnWaveforms(
   int ants_with_nonzero_signal = 0;
   if (settings1->TRIG_ANALYSIS_MODE == 2) { 
     // TRIG_ANALYSIS_MODE=2 is the noise-only mode, 
-    //   say that all antennas have good signal
-    ants_with_nonzero_signal = 16; 
+    //   say that all antennas have good signal and have a ray solution if not assigned
+    ants_with_nonzero_signal = 16;
+    if(stations[station_index].Total_ray_sol == 0)
+        stations[station_index].Total_ray_sol = 16;
   }
   else {
     // If rays connected to the station, count how many antennas 
@@ -612,10 +614,16 @@ void Report::BuildAndTriggerOnWaveforms(
     // the max number of bins should be (max_arrival_bin - min_arrival_bin) + size of a signal
     // we define the size of a signal as BINSIZE = NFOUR/2 later in the code
     // there could be two ray solutions in an interaction. We add 2*BINSIZE = NFOUR for safety
-    int max_total_bin = (
-        (stations[station_index].max_arrival_time - stations[station_index].min_arrival_time) 
-        / settings1->TIMESTEP) + settings1->NFOUR;
-    
+    int max_total_bin;
+    if(settings1->TRIG_ANALYSIS_MODE == 2) {
+        max_total_bin = settings1->NFOUR; // if in noise-only mode, then just make this the length of a signal
+    }
+    else {
+        max_total_bin = (
+            (stations[station_index].max_arrival_time - stations[station_index].min_arrival_time) 
+            / settings1->TIMESTEP) + settings1->NFOUR;
+    }
+ 
     // Compute next power of two larger than max_total_bin
     max_total_bin = (int)std::pow(2, std::ceil(std::log2(max_total_bin)));
     
@@ -805,7 +813,7 @@ void Report::BuildAndTriggerOnWaveforms(
 
   // Check if there's additional waveform to trigger on. Save this event and rerun trigger if so.
   stations[station_index].next_trig_search_init = -1;
-  if (stations[station_index].Global_Pass) {
+  if (stations[station_index].Global_Pass >= 0) {
 
     bool analyze_more_waveform = false;
 
@@ -2786,7 +2794,7 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
             else UsefulEventBin = EFFECTIVE_LAB3_SAMPLES*2;
             
             for (int mimicbin=0; mimicbin<UsefulEventBin; mimicbin++) {
-                if (stations[stationIndex].Global_Pass > 0){
+                if (stations[stationIndex].Global_Pass >= 0){
                     theUsefulEvent->fVoltsRF[AraRootChannel-1][mimicbin] = stations[i].strings[string_i].antennas[antenna_i].V_mimic[mimicbin];
                     theUsefulEvent->fTimesRF[AraRootChannel-1][mimicbin] = stations[i].strings[string_i].antennas[antenna_i].time_mimic[mimicbin];
                 }
@@ -2839,7 +2847,7 @@ void Report::MakeUsefulEvent(Detector *detector, Settings *settings1, Trigger *t
 	  times.resize(UsefulEventBin);
       
 	  for (int mimicbin=0; mimicbin<UsefulEventBin; mimicbin++) {
-	    if (stations[stationIndex].Global_Pass > 0){
+	    if (stations[stationIndex].Global_Pass >= 0){
 	      volts[mimicbin] = stations[stationIndex].strings[string_i].antennas[antenna_i].V_mimic[mimicbin];
 	      times[mimicbin] = stations[stationIndex].strings[string_i].antennas[antenna_i].time_mimic[mimicbin];
 	    }
@@ -5145,24 +5153,26 @@ bool Report::isTrigger(
         else {
             avgSnr = 0.0;
         }
+    
+        // Scale SNR with respect to the antenna's viewing angle of the signal
+        double viewangle = antenna->view_ang[brightest_event[0]][brightest_event[1]];
+        viewangle = viewangle * 180.0/PI - 90.0;
+        double snr_50 = interpolate(
+            trigger->angle_PA, trigger->aSNR_PA, // x and y coordinates of curve to interpolate
+            viewangle, // x value to interpolate y value for
+            (*(&trigger->angle_PA+1) - trigger->angle_PA) - 1 // len(ang_data) - 1
+        );
+        avgSnr = avgSnr*2.0/snr_50;
+
     }
-
-    // Scale SNR with respect to the antenna's viewing angle of the signal
-    double viewangle = antenna->view_ang[brightest_event[0]][brightest_event[1]];
-    viewangle = viewangle * 180.0/PI - 90.0;
-    double snr_50 = interpolate(
-        trigger->angle_PA, trigger->aSNR_PA, // x and y coordinates of curve to interpolate
-        viewangle, // x value to interpolate y value for
-        (*(&trigger->angle_PA+1) - trigger->angle_PA) - 1 // len(ang_data) - 1
-    );
-    avgSnr = avgSnr*2.0/snr_50;
-
+        
     // Estimate the PA signal efficiency of for this SNR from curve of efficiency vs data
     double eff = interpolate(
         trigger->snr_PA, trigger->eff_PA, // x and y coordinates of curve to interpolate
         avgSnr, // x value to interpolate y value for
         (*(&trigger->snr_PA+1) - trigger->snr_PA) - 1 // len(snr_PA) - 1
     ); 
+
 
     if (avgSnr > 0.5){
         if (eff >= 1.0){
@@ -5250,16 +5260,17 @@ int Report::get_PA_trigger_bin(
             else {
                 avgSnr = 0.0;
             }
-        }
+            
+            // Scale SNR with respect to the antenna's viewing angle of the signal
+            const double viewangle = antenna->theta_rec[Likely_Sol[0]][Likely_Sol[1]] * 180.0/PI - 90.0 ;
+            double snr_50 = interpolate(
+                trigger->angle_PA, trigger->aSNR_PA, // x and y coordinates of curve to interpolate
+                viewangle, // x value to interpolate y value for
+                (*(&trigger->angle_PA+1) - trigger->angle_PA) - 1 // len(ang_data) - 1
+            );
+            avgSnr = avgSnr*2.0/snr_50;
     
-        // Scale SNR with respect to the antenna's viewing angle of the signal
-        const double viewangle = antenna->theta_rec[Likely_Sol[0]][Likely_Sol[1]] * 180.0/PI - 90.0 ;
-        double snr_50 = interpolate(
-            trigger->angle_PA, trigger->aSNR_PA, // x and y coordinates of curve to interpolate
-            viewangle, // x value to interpolate y value for
-            (*(&trigger->angle_PA+1) - trigger->angle_PA) - 1 // len(ang_data) - 1
-        );
-        avgSnr = avgSnr*2.0/snr_50;
+        }
     
         // Estimate the PA signal efficiency of for this SNR from curve of efficiency vs data
         double eff = interpolate(
@@ -5306,8 +5317,8 @@ void Report::checkPATrigger(
     int trigger_ch_ID = GetChNumFromArbChID(detector, trigger_antenna_number, i, settings1) - 1;
     
     // If the antenna we use to trigger the PA doesn't have any ray solutions, 
-    //   do not perform the trigger check.
-    if (trigger_antenna->ray_sol_cnt == 0){
+    //   do not perform the trigger check, unless in noise-only mode.
+    if (trigger_antenna->ray_sol_cnt == 0 && settings1->TRIG_ANALYSIS_MODE != 2){
         return;
     }
 

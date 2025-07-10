@@ -725,7 +725,7 @@ void save_event_data(
     for (int i=0; i< report->stations.size(); i++) {
         
         // check the total global trigger passed
-        if (report->stations[i].Global_Pass) {
+        if (report->stations[i].Global_Pass >= 0) {
 
             event->inu_passed = Events_Passed;  
 
@@ -817,7 +817,7 @@ void save_useful_event(
             stationIndex = 0;
         }
 
-        if (report->stations[stationIndex].Global_Pass) {
+        if (report->stations[stationIndex].Global_Pass >= 0) {
             cout << endl << "Making useful event" << endl;
             report->MakeUsefulEvent(detector, settings1, trigger, stationID, stationIndex, theAtriEvent);
         }
