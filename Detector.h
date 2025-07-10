@@ -259,8 +259,8 @@ class Detector {
         //Define impedance and gain for transmitting antenna
         double RealImpedanceTx[freq_step_max];
         double ImagImpedanceTx[freq_step_max];
-        int Tx_freq_init;
-        int Tx_freq_width;
+        double Tx_freq_init;
+        double Tx_freq_width;
         vector<double> TxFreq;
         vector<vector<double> > Txgain;
         vector<vector<double> > Txphase;

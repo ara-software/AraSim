@@ -2259,7 +2259,7 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     std::string HgainCrossFile;
 
     //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
-    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";
+    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt";
     TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
 
     if (settings1->ANTENNA_MODE == 0){
@@ -3110,72 +3110,31 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     double Gout;
 
     int bin = (int)( (freq - thisFreq_init) / thisFreq_width )+1;
-    cout << "thisFreq_init: " << thisFreq_init << endl;
-    cout << "thisFreq_width: " << thisFreq_width << endl;
-
-
-    // ========== Begin Debug Block ==========
-    cout << "[DEBUG] tempGain size: " << tempGain->size() << endl;
-    if(tempGain->size() < 2) {
-        cerr << "[ERROR] tempGain has size " << tempGain->size() << ", need at least 2 for interpolation.\n";
-        throw std::out_of_range("tempGain too small in GetGain1D()");
-    }
-
-    cout << "[DEBUG] tempGain[0] size: " << (*tempGain)[0].size() << ", tempGain[1] size: " << (*tempGain)[1].size() << endl;
-    cout << "[DEBUG] angle_bin: " << angle_bin << endl;
-
-    if(angle_bin >= (*tempGain)[0].size() || angle_bin >= (*tempGain)[1].size()) {
-        cerr << "[ERROR] angle_bin " << angle_bin << " is out of range for gain vectors.\n";
-        throw std::out_of_range("angle_bin out of range in GetGain1D()");
-    }
-
-    if(F->size() < 2) {
-        cerr << "[ERROR] F vector has only " << F->size() << " entries. Cannot interpolate.\n";
-        throw std::out_of_range("F vector too small in GetGain1D()");
-    }
-
-    cout << "[DEBUG] F[0]: " << F->at(0) << ", F[1]: " << F->at(1) << endl;
-    // ========== End Debug Block ==========
 
      //Interpolation of tempGain
     slope_1 = ((*tempGain)[1][angle_bin] - (*tempGain)[0][angle_bin]) / (F->at(1) - F->at(0));
 
-    cout << "ASG 2" << endl;
-    cout << "freq" << freq << endl;
-
     // if freq is lower than freq_init
     if ( freq < thisFreq_init ) {
-        cout << "Here 1" << endl;
         Gout = slope_1 * (freq - F->at(0)) + (*tempGain)[0][angle_bin];
-        cout << "Here 1" << endl;
     }
     // if freq is higher than last freq
     else if ( freq > F->back() ) {
-                cout << "Here 2" << endl;
 
         Gout = 0.;
-                cout << "Here 2" << endl;
 
     }
     else {
-                cout << "Here 3" << endl;
-cout << "[DEBUG] bin = " << bin
-     << ", F.size = " << F->size()
-     << ", F->back()" << F->back()
-     << ", freq = " << freq << endl;
+
         Gout = (*tempGain)[bin-1][angle_bin] + (freq-F->at(bin-1))*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(F->at(bin)-F->at(bin-1));
-                cout << "Here 3" << endl;
 
     }
 
     if ( Gout < 0. ) { // gain can not go below 0
-    	        cout << "Here 4" << endl;
 
         Gout = 0.;
-                cout << "Here 4" << endl;
 
     }
-cout << "ASG 3" << endl;
     return Gout;
 }
 

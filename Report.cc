@@ -1588,10 +1588,10 @@ void Report::PropagateSignal(
             double theta = acos(launch_vector[2]);
             double phi = atan2(launch_vector[1],launch_vector[0]);
 
-            double Tx_theta = theta*180/PI;
-            double Tx_phi = phi*180/PI;
+            Tx_theta = theta*180/PI;
+            Tx_phi = phi*180/PI;
 
-            double heff_Tx_lastbin = GaintoHeight(
+            heff_Tx_lastbin = GaintoHeight(
                 detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true),
                 freq_tmp,
                 icemodel->GetN(*antenna_d),
