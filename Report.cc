@@ -1327,8 +1327,13 @@ void Report::ModelRay(
                         fresnel,
                         Pol_vector);    // input src Pol and return Pol at trg
 
+                    std::vector<double> scaled_waveform;
+                    scaled_waveform.reserve(signal->InputVoltage_V.size());
+                    for (const auto& v : signal->InputVoltage_V)
+                        scaled_waveform.push_back(v * 1e-3);
+
                     PropagateSignal(
-                        dT_forfft, waveform_bin, signal->InputVoltage_T, signal->InputVoltage_V, T_forint,
+                        dT_forfft, waveform_bin, signal->InputVoltage_T, scaled_waveform, T_forint,
                         interaction_idx, ray_idx, ray_output, launch_vector, time_diff_birefringence,
                         Pol_vector_src, Pol_vector, n_trg_slappy, n_trg_pokey,
                         antenna_r, antenna_d,
