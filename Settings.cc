@@ -46,9 +46,9 @@ void Settings::Initialize() {
 
  SIGMA_SELECT=0; // when in SIGMAPARAM=1 case, 0 : (default) use mean value, 1 : use upper bound, 2 : use lower bound
 
- HPOL_GAIN_FILE="./data/antennas/realizedGain/ARA_dipoletest1_output.txt"; // Default to original Ara Data
- VTOP_GAIN_FILE="./data/antennas/realizedGain/ARA_bicone6in_output.txt"; // Default to original Ara Data
- VPOL_GAIN_FILE="./data/antennas/realizedGain/ARA_bicone6in_output.txt"; // Default to original Ara Data
+ HPOL_GAIN_FILE=string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_dipoletest1_output.txt"; // Default to original Ara Data
+ VTOP_GAIN_FILE=string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt"; // Default to original Ara Data
+ VPOL_GAIN_FILE=string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt"; // Default to original Ara Data
 
 // end of values from icemc
 
@@ -734,18 +734,24 @@ void Settings::ReadFile(string setupfile) {
                   VPOL_GAIN_FILE = ParseFilePath(line);
                   if (VPOL_GAIN_FILE.empty()) {
                       std::cerr << "Warning: could not parse path from line: " << line << std::endl;
+                      std::cerr << "Example Input: VPOL_GAIN_FILE=\"path/to/gain/file.txt\"" << std::endl;
+                      std::abort();
                   }
               }
               else if (label == "VTOP_GAIN_FILE") {
                   VTOP_GAIN_FILE = ParseFilePath(line);
                   if (VTOP_GAIN_FILE.empty()) {
                       std::cerr << "Warning: could not parse path from line: " << line << std::endl;
+                      std::cerr << "Example Input: VTOP_GAIN_FILE=\"path/to/gain/file.txt\"" << std::endl;
+                      std::abort();
                   }
               }
               else if (label == "HPOL_GAIN_FILE") {
                   HPOL_GAIN_FILE = ParseFilePath(line);
                   if (HPOL_GAIN_FILE.empty()) {
                       std::cerr << "Warning: could not parse path from line: " << line << std::endl;
+                      std::cerr << "Example Input: HPOL_GAIN_FILE=\"path/to/gain/file.txt\"" << std::endl;
+                      std::abort();
                   }
               }
               else if (label == "IMPEDANCE_RX_VPOL"){
