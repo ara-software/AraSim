@@ -789,13 +789,6 @@ void Settings::ReadFile(string setupfile) {
                SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
           }
 
-          if (ANTENNA_MODE != 6) {
-              if (!VPOL_GAIN_FILE.empty() || !VTOP_GAIN_FILE.empty() || !HPOL_GAIN_FILE.empty()) {
-                  std::cerr << "Warning: Custom GAIN_FILE paths provided, "
-                          << "but ANTENNA_MODE != 6. These files may be ignored." << std::endl;
-              }
-          }
-
           }
       }
       setFile.close();
@@ -1165,6 +1158,16 @@ int Settings::CheckCompatibilitiesSettings() {
       cerr << "BIREFRINGENCE only takes 0 or 1" << endl;
       num_err++;
     }
+
+    // checking antenna mode 
+    if (ANTENNA_MODE != 6) {
+        if (!VPOL_GAIN_FILE.empty() || !VTOP_GAIN_FILE.empty() || !HPOL_GAIN_FILE.empty()) {
+            std::cerr << "Warning: Custom GAIN_FILE paths provided, "
+                    << "but ANTENNA_MODE != 6. These files may be ignored." << std::endl;
+            num_err++; 
+        }
+    }
+
 
     return num_err;
 
