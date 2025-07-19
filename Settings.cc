@@ -324,7 +324,8 @@ outputdir="outputs"; // directory where outputs go
                                        // This setting is only used if DETECTOR > 3 && NOISE == 1 && CUSTOM_ELECTRONICS == 0
  
   CLOCK_ANGLE=0; //Default: 0 -- Angle of polarization "on the clock".  Angle of zero is pure thetaPol, whereas 90º is pure phiPol.
-
+  CROSSPOL_RX=0; //Default: 0 -- don't use cross-pol responses on receiving antennas
+  CROSSPOL_TX=0; //Default: 0 -- don't use cross-pol responses on transmitting antennas
 
 
 
@@ -365,12 +366,12 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "NOFZ") {
                   NOFZ = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-	      else if (label == "BIREFRINGENCE"){
-		  BIREFRINGENCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );	
-	      }
-	      else if (label == "BIAXIAL"){
-		  BIAXIAL = atof( line.substr(line.find_first_of("=") + 1).c_str() );	
-	      }
+	          else if (label == "BIREFRINGENCE"){
+		          BIREFRINGENCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );	
+	          }
+	          else if (label == "BIAXIAL"){
+		          BIAXIAL = atof( line.substr(line.find_first_of("=") + 1).c_str() );	
+	          }
               else if (label == "CONSTANTCRUST") {
                   CONSTANTCRUST = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -397,11 +398,11 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "DETECTOR_STATION") {
                   DETECTOR_STATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-		  DETECTOR_STATION_ARAROOT = DETECTOR_STATION;
-		  if (DETECTOR_STATION == 100) {
-			DETECTOR_STATION = 1;
-			DETECTOR_STATION_ARAROOT = 100;
-			}
+		          DETECTOR_STATION_ARAROOT = DETECTOR_STATION;
+		          if (DETECTOR_STATION == 100) {
+			          DETECTOR_STATION = 1;
+			          DETECTOR_STATION_ARAROOT = 100;
+			      }
               }
               else if (label == "DETECTOR_STATION_LIVETIME_CONFIG") {
                   DETECTOR_STATION_LIVETIME_CONFIG = atof( line.substr(line.find_first_of("=") + 1).c_str() );
@@ -456,7 +457,7 @@ void Settings::ReadFile(string setupfile) {
               }
               else if(label == "TRIG_SCAN_MODE"){
                   TRIG_SCAN_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
+	          }
               else if (label == "POWERTHRESHOLD") {
                   POWERTHRESHOLD = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -688,42 +689,39 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "AVZ_NORM_FACTOR_MODE") {
                   AVZ_NORM_FACTOR_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }              
-	      else if (label == "number_of_stations") {
-		number_of_stations = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "RAY_TRACE_ICE_MODEL_PARAMS") {
-		RAY_TRACE_ICE_MODEL_PARAMS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "WAVEFORM_LENGTH") {
-		WAVEFORM_LENGTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "WAVEFORM_CENTER") {
-		WAVEFORM_CENTER = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "DEADTIME") {
-		    DEADTIME = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "POSNU_R") {
-		POSNU_R = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "POSNU_THETA") {
-		POSNU_THETA = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "POSNU_PHI") {
-		POSNU_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "ARBITRARY_EVENT_ATTENUATION") {
-		ARBITRARY_EVENT_ATTENUATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "PICK_ABOVE_HEIGHT") {
-		PICK_ABOVE_HEIGHT = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
+	          else if (label == "number_of_stations") {
+		          number_of_stations = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "RAY_TRACE_ICE_MODEL_PARAMS") {
+		          RAY_TRACE_ICE_MODEL_PARAMS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "WAVEFORM_LENGTH") {
+		          WAVEFORM_LENGTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "WAVEFORM_CENTER") {
+		          WAVEFORM_CENTER = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "DEADTIME") {
+		          DEADTIME = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "POSNU_R") {
+		          POSNU_R = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "POSNU_THETA") {
+		          POSNU_THETA = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "POSNU_PHI") {
+		          POSNU_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "ARBITRARY_EVENT_ATTENUATION") {
+		          ARBITRARY_EVENT_ATTENUATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "PICK_ABOVE_HEIGHT") {
+		          PICK_ABOVE_HEIGHT = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
               else if (label == "EVENT_GENERATION_MODE"){
                   EVENT_GENERATION_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
-	      //              else if (label == "EVENT_NUM"){
-	      //                  EVENT_NUM = atoi(line.substr(line.find_first_of("=") + 1).c_str());
-	      //              }
               else if (label == "ANTENNA_MODE"){
                   ANTENNA_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
@@ -748,22 +746,25 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "ELECTRONICS_ANTENNA_CONSISTENCY"){
               	   ELECTRONICS_ANTENNA_CONSISTENCY = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
-          else if (label == "CLOCK_ANGLE"){
-               CLOCK_ANGLE = atof(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-          //Adding source easting, northing, and depth for INTERACTION_MODE=5.
-          else if (label == "SOURCE_LATITUDE"){
-              SOURCE_LATITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-          else if (label == "SOURCE_LONGITUDE"){
-              SOURCE_LONGITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-          else if (label == "SOURCE_DEPTH"){
-               SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-
-
-
+              else if (label == "CLOCK_ANGLE"){
+                CLOCK_ANGLE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              //Adding source easting, northing, and depth for INTERACTION_MODE=5.
+              else if (label == "SOURCE_LATITUDE"){
+                  SOURCE_LATITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SOURCE_LONGITUDE"){
+                  SOURCE_LONGITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SOURCE_DEPTH"){
+                  SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "CROSSPOL_RX"){
+                  CROSSPOL_RX = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "CROSSPOL_TX"){
+                  CROSSPOL_TX = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
 
           }
       }
