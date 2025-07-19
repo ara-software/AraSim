@@ -259,8 +259,8 @@ class Report {
             IceModel *icemodel, Settings *settings1 );
         void PropagateSignal(
             double dT_forfft, int efield_length, vector< double > efield_time, vector< double > efield, double *T_forint,
-            int interaction_idx, int ray_idx, vector<vector< double > > ray_output, Position launch_vector, double time_diff_birefringence, 
-            Vector Pol_vector_src, Vector Pol_vector, Vector n_trg_slappy, Vector n_trg_pokey, 
+            int interaction_idx, int ray_idx, vector<vector< double > > ray_output, Position launch_vector, Position receive_vector, double fresnel, 
+            double time_diff_birefringence, Vector Pol_vector_src, Vector Pol_vector, Vector n_trg_slappy, Vector n_trg_pokey, 
             Antenna_r *antenna_r, Antenna *antenna_d, int gain_ch_no, int j, int k,
             Birefringence *birefringence, Detector *detector, Event *event, IceModel *icemodel, Settings *settings);
         

@@ -1184,7 +1184,7 @@ void Report::ModelRay(
 
                         PropagateSignal(
                             dT_forfft, outbin, Tarray_vector, Earray_vector, T_forint,
-                            interaction_idx, ray_idx, ray_output, launch_vector, time_diff_birefringence,
+                            interaction_idx, ray_idx, ray_output, launch_vector, receive_vector, fresnel, time_diff_birefringence,
                             Pol_vector_src, Pol_vector, n_trg_slappy, n_trg_pokey,
                             antenna_r, antenna_d,
                             gain_ch_no, j, k, birefringence, detector, event, icemodel, settings);
@@ -1233,7 +1233,7 @@ void Report::ModelRay(
 
                     PropagateSignal(
                         dT_forfft, waveform_bin, ArbitraryWaveform_T_vector, ArbitraryWaveform_V_vector, T_forint,
-                        interaction_idx, ray_idx, ray_output, launch_vector, time_diff_birefringence,
+                        interaction_idx, ray_idx, ray_output, launch_vector, receive_vector, fresnel, time_diff_birefringence,
                         Pol_vector_src, Pol_vector, n_trg_slappy, n_trg_pokey,
                         antenna_r, antenna_d,
                         gain_ch_no, j, k, birefringence, detector, event, icemodel, settings);
@@ -1282,7 +1282,7 @@ void Report::ModelRay(
                     );
                     PropagateSignal(
                         dT_forfft, waveform_bin, signal->PulserWaveform_T, signal->PulserWaveform_V, T_forint,
-                        interaction_idx, ray_idx, ray_output, launch_vector, time_diff_birefringence,
+                        interaction_idx, ray_idx, ray_output, launch_vector, receive_vector, fresnel, time_diff_birefringence,
                         Pol_vector_src, Pol_vector, n_trg_slappy, n_trg_pokey,
                         antenna_r, antenna_d,
                         gain_ch_no, j, k, birefringence, detector, event, icemodel, settings);
@@ -1315,18 +1315,6 @@ void Report::ModelRay(
                     double newPol_vectorZ = cos(psi)*sin(theta);
                     Vector Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
 
-                    //Apply Fresnel factors for magnification and 1/r dependence
-                    icemodel->GetFresnel(
-                        ray_output[1][ray_idx], // launch_angle
-                        ray_output[2][ray_idx], // rec_angle
-                        ray_output[3][ray_idx], // reflect_angle
-                        event->Nu_Interaction[interaction_idx].posnu,
-                        launch_vector,
-                        receive_vector,
-                        settings,
-                        fresnel,
-                        Pol_vector);    // input src Pol and return Pol at trg
-
                     std::vector<double> scaled_waveform;
                     scaled_waveform.reserve(signal->InputVoltage_V.size());
                     for (const auto& v : signal->InputVoltage_V)
@@ -1334,7 +1322,7 @@ void Report::ModelRay(
 
                     PropagateSignal(
                         dT_forfft, waveform_bin, signal->InputVoltage_T, scaled_waveform, T_forint,
-                        interaction_idx, ray_idx, ray_output, launch_vector, time_diff_birefringence,
+                        interaction_idx, ray_idx, ray_output, launch_vector, receive_vector, fresnel, time_diff_birefringence,
                         Pol_vector_src, Pol_vector, n_trg_slappy, n_trg_pokey,
                         antenna_r, antenna_d,
                         gain_ch_no, j, k, birefringence, detector, event, icemodel, settings);
@@ -1357,7 +1345,7 @@ void Report::ModelRay(
 
                 PropagateSignal(
                     dT_forfft, CP_bin, detector->CalPulserWF_ns, detector->CalPulserWF_V, T_forint,
-                    interaction_idx, ray_idx, ray_output, launch_vector, time_diff_birefringence,
+                    interaction_idx, ray_idx, ray_output, launch_vector, receive_vector, fresnel, time_diff_birefringence,
                     Pol_vector_src, Pol_vector, n_trg_slappy, n_trg_pokey,
                     antenna_r, antenna_d,
                     gain_ch_no, j, k, birefringence, detector, event, icemodel, settings);
@@ -1495,8 +1483,8 @@ void Report::DetermineWFBins(
 
 void Report::PropagateSignal(
     double dT_forfft, int efield_length, vector< double > efield_time, vector< double > efield, double *T_forint,
-    int interaction_idx, int ray_idx, vector<vector< double > > ray_output, Position launch_vector, double time_diff_birefringence,
-    Vector Pol_vector_src, Vector Pol_vector, Vector n_trg_slappy, Vector n_trg_pokey,
+    int interaction_idx, int ray_idx, vector<vector< double > > ray_output, Position launch_vector, Position receive_vector, double fresnel,
+    double time_diff_birefringence, Vector Pol_vector_src, Vector Pol_vector, Vector n_trg_slappy, Vector n_trg_pokey,
     Antenna_r *antenna_r, Antenna *antenna_d, int gain_ch_no, int j, int k,
     Birefringence *birefringence, Detector *detector, Event *event, IceModel *icemodel, Settings *settings
 ){
@@ -1713,8 +1701,8 @@ void Report::PropagateSignal(
                     detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));
                 
                 // Retrieve co-pol and cross-pol phases
-                double phase_copol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, true, false);
-                double phase_crosspol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, true, true);
+                double phase_copol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, false, false); //ASG change when fixing phases
+                double phase_crosspol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, false, true); //ASG change when fixing phases
 
                 if (n > 0) {
                     ApplyAntFactors_Tdomain(phase_copol_tx, phase_crosspol_tx, heff_Tx_copol, heff_Tx_crosspol, Pol_vector, 0, Pol_factor, 
@@ -1725,6 +1713,18 @@ void Report::PropagateSignal(
                         heff_Tx_copol, heff_Tx_copol_lastbin, heff_Tx_crosspol, heff_Tx_crosspol_lastbin, Pol_vector, 0, 
                         Pol_factor, V_forfft[2 * n], V_forfft[2 * n + 1], settings, Tx_theta, Tx_phi, freq_tmp, true, false);         
                 }
+
+                //Apply Fresnel factors for magnification and 1/r dependence
+                icemodel->GetFresnel(
+                    ray_output[1][ray_idx], // launch_angle
+                    ray_output[2][ray_idx], // rec_angle
+                    ray_output[3][ray_idx], // reflect_angle
+                    event->Nu_Interaction[interaction_idx].posnu,
+                    launch_vector,
+                    receive_vector,
+                    settings,
+                    fresnel,
+                    Pol_vector);    // input src Pol and return Pol at trg
             }
             else if (event->IsCalpulser > 0){
 
@@ -1754,6 +1754,18 @@ void Report::PropagateSignal(
                         heff_Tx_copol, heff_Tx_copol_lastbin, heff_Tx_crosspol, heff_Tx_crosspol_lastbin, Pol_vector, antenna_d->type, Pol_factor, 
                         V_forfft[2 * n], V_forfft[2 * n + 1], settings, Tx_theta, Tx_phi, freq_tmp, true, false);    
                 }
+
+                //Apply Fresnel factors for magnification and 1/r dependence
+                icemodel->GetFresnel(
+                    ray_output[1][ray_idx], // launch_angle
+                    ray_output[2][ray_idx], // rec_angle
+                    ray_output[3][ray_idx], // reflect_angle
+                    event->Nu_Interaction[interaction_idx].posnu,
+                    launch_vector,
+                    receive_vector,
+                    settings,
+                    fresnel,
+                    Pol_vector);    // input src Pol and return Pol at trg
             }
 
             double phase_copol = detector->GetAntPhase_1D(freq_tmp * 1.e-6, antenna_theta, antenna_phi, 
@@ -3589,13 +3601,13 @@ void Report::ApplyAntFactors_Tdomain(double phase_copol, double phase_crosspol, 
         //If in transmitter mode, we must apply additional frequency and impedance terms to the amplitude.
         if (useInTransmitterMode==true){
             phase_current += PI/2;
-            double psi = settings1->CLOCK_ANGLE;
+            double psi = 0.0;
             double delta_psi = TMath::ATan(heff_crosspol / heff_copol); // Tx cross-pol tilt
-            double theta = antenna_theta*PI/180;
-            double phi = antenna_phi*PI/180;
+            double theta = antenna_theta*PI/180.0;
+            double phi = antenna_phi*PI/180.0;
 
             //turn on cross-pol Tx
-            if (settings1->CROSSPOL_TX != 1){
+            if (settings1->CROSSPOL_TX == 0){
                 heff_crosspol = 0.0; //need to be turned off for the calculation of amplitude v_amp
                 delta_psi = 0.0; // turn off cross-pol tx tilt
             }
