@@ -1791,6 +1791,7 @@ void Report::triggerCheck_ScanMode0(
 
         // --- Pre-check across all antennas: do we have any with sufficient SNR? ---
         int ants_with_sufficient_SNR = 0;
+
         for (int ch = 0; ch < n_scanned_channels; ch++) {
             int string_i  = detector->getStringfromArbAntID(station_index, ch);
             int antenna_i = detector->getAntennafromArbAntID(station_index, ch);
@@ -1801,10 +1802,23 @@ void Report::triggerCheck_ScanMode0(
 
             int start_bin = this_bin;
             int end_bin   = this_bin + trig_window_bin;
-            if (end_bin > (int)vconv.size()) end_bin = vconv.size();
 
-            std::vector<double> vconv_slice(vconv.begin() + start_bin,
-                                            vconv.begin() + end_bin);
+            std::vector<double> vconv_slice;
+
+            if (start_bin >= (int)vconv.size()) {
+                // Past the end: fill the whole slice with zeros
+                vconv_slice.assign(trig_window_bin, 0.0);
+            } else {
+                // Still partly inside the waveform
+                if (end_bin > (int)vconv.size()) end_bin = vconv.size();
+
+                vconv_slice.assign(vconv.begin() + start_bin, vconv.begin() + end_bin);
+
+                // If the slice is shorter than trig_window_bin, pad with zeros
+                if ((int)vconv_slice.size() < trig_window_bin) {
+                    vconv_slice.resize(trig_window_bin, 0.0);
+                }
+            }
 
             std::vector<double> tmp_noise_RMS;
             int trigger_ch_ID = GetChNumFromArbChID(detector, ch, station_index, settings1) - 1;
@@ -1814,7 +1828,6 @@ void Report::triggerCheck_ScanMode0(
             double snr = get_SNR(vconv_slice, tmp_noise_RMS);
             if (snr > 0.01) ants_with_sufficient_SNR++;
         }
-
         // If no antennas pass, skip trigger check entirely for this bin
         if (ants_with_sufficient_SNR == 0) {
             this_bin++;   // move to the next bin
