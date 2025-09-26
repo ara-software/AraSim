@@ -1789,6 +1789,56 @@ void Report::triggerCheck_ScanMode0(
     //    with sufficient signal to trigger in the appropriate amount of antennas 
     while (this_bin < max_total_bin - trig_window_bin) { // loop over waveform bins
 
+        // --- Pre-check across all antennas: do we have any with sufficient SNR? ---
+        int ants_with_sufficient_SNR = 0;
+
+        for (int ch = 0; ch < n_scanned_channels; ch++) {
+            int string_i  = detector->getStringfromArbAntID(station_index, ch);
+            int antenna_i = detector->getAntennafromArbAntID(station_index, ch);
+
+            std::vector<double>& vconv = stations[station_index]
+                                            .strings[string_i]
+                                            .antennas[antenna_i].V_convolved;
+
+            int start_bin = this_bin;
+            int end_bin   = this_bin + trig_window_bin;
+
+            std::vector<double> vconv_slice;
+
+            if (start_bin >= (int)vconv.size()) {
+                // Past the end: fill the whole slice with zeros
+                vconv_slice.assign(trig_window_bin, 0.0);
+            } 
+            else {
+                // Still partly inside the waveform
+                if (end_bin > (int)vconv.size()) {
+                    end_bin = vconv.size();
+                }
+
+                vconv_slice.assign(vconv.begin() + start_bin, vconv.begin() + end_bin);
+
+                // If the slice is shorter than trig_window_bin, pad with zeros
+                if ((int)vconv_slice.size() < trig_window_bin) {
+                    vconv_slice.resize(trig_window_bin, 0.0);
+                }
+            }
+
+            std::vector<double> tmp_noise_RMS;
+            int trigger_ch_ID = GetChNumFromArbChID(detector, ch, station_index, settings1) - 1;
+            double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
+            tmp_noise_RMS.push_back(ant_noise_voltage_RMS);
+
+            double snr = get_SNR(vconv_slice, tmp_noise_RMS);
+            if (snr > 0.01) {
+                ants_with_sufficient_SNR++;
+            }
+        }
+        // If no antennas pass, skip trigger check entirely for this bin
+        if (ants_with_sufficient_SNR == 0) {
+            this_bin++;   // move to the next bin
+            continue;     // skip the trigger check for this bin window
+        }
+
         int N_pass = 0;
         int N_pass_V = 0;
         int N_pass_H = 0;
@@ -2186,7 +2236,7 @@ int Report::triggerCheckLoop(
     Settings *settings1, Detector *detector, Event *event, Trigger *trigger, 
     int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode 
 ){
- 
+
   int i=stationID;
   
   int numChan=stations[i].TDR_all.size();
@@ -2254,7 +2304,51 @@ int Report::triggerCheckLoop(
     check_TDR_configuration=0;
       
     for (int trig_j=0; trig_j<numChan; trig_j++){
-      
+
+        // --- Pre-check across all antennas: do we have any with sufficient SNR? ---
+        int ants_with_sufficient_SNR = 0;
+
+        for (int ch = 0; ch < numChan; ch++) {
+            int string_i  = detector->getStringfromArbAntID(i, ch);
+            int antenna_i = detector->getAntennafromArbAntID(i, ch);
+
+            std::vector<double>& vconv = stations[i]
+                                            .strings[string_i]
+                                            .antennas[antenna_i].V_convolved;
+
+            int start_bin = trig_i;
+            int end_bin   = trig_i + trig_window_bin;
+
+            std::vector<double> vconv_slice;
+            if (start_bin >= (int)vconv.size()) {
+                vconv_slice.assign(trig_window_bin, 0.0);
+            } 
+            else {
+                if (end_bin > (int)vconv.size()) {
+                    end_bin = vconv.size();
+                }
+                vconv_slice.assign(vconv.begin() + start_bin,
+                                vconv.begin() + end_bin);
+                if ((int)vconv_slice.size() < trig_window_bin) {
+                    vconv_slice.resize(trig_window_bin, 0.0);
+                }
+            }
+
+            int trigger_ch_ID = GetChNumFromArbChID(detector, ch, i, settings1) - 1;
+            double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
+            std::vector<double> tmp_noise_RMS(1, ant_noise_voltage_RMS);
+
+            double snr = get_SNR(vconv_slice, tmp_noise_RMS);
+            if (snr > 0.01) { 
+                ants_with_sufficient_SNR++;
+            }
+        }
+
+        if (ants_with_sufficient_SNR == 0) {
+            trig_i++;       // next bin
+            continue;       // skip heavy trigger logic
+        }
+
       int string_i = detector->getStringfromArbAntID( i, trig_j);
       int antenna_i = detector->getAntennafromArbAntID( i, trig_j);
 
