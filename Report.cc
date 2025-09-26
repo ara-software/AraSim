@@ -1823,12 +1823,23 @@ void Report::triggerCheck_ScanMode0(
                 }
             }
 
-            std::vector<double> tmp_noise_RMS;
-            int trigger_ch_ID = GetChNumFromArbChID(detector, ch, station_index, settings1) - 1;
-            double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
-            tmp_noise_RMS.push_back(ant_noise_voltage_RMS);
+            double snr = 0.0;
 
-            double snr = get_SNR(vconv_slice, tmp_noise_RMS);
+
+            if (settings1->TRIG_ANALYSIS_MODE == 2) {
+                // Noise-only mode → force pass with high SNR
+                snr = 100.0;
+            }
+            else {
+                std::vector<double> tmp_noise_RMS;
+                int trigger_ch_ID = GetChNumFromArbChID(detector, ch, station_index, settings1) - 1;
+                double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
+                tmp_noise_RMS.push_back(ant_noise_voltage_RMS);
+
+                snr = get_SNR(vconv_slice, tmp_noise_RMS);
+
+            }
+
             if (snr > 0.01) {
                 ants_with_sufficient_SNR++;
             }
@@ -2334,11 +2345,19 @@ int Report::triggerCheckLoop(
                 }
             }
 
-            int trigger_ch_ID = GetChNumFromArbChID(detector, ch, i, settings1) - 1;
-            double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
-            std::vector<double> tmp_noise_RMS(1, ant_noise_voltage_RMS);
+            double snr = 0.0;
 
-            double snr = get_SNR(vconv_slice, tmp_noise_RMS);
+            if (settings1->TRIG_ANALYSIS_MODE == 2) {
+                // Noise-only mode → force pass with high SNR
+                snr = 100.0;
+            }
+            else{
+                int trigger_ch_ID = GetChNumFromArbChID(detector, ch, i, settings1) - 1;
+                double ant_noise_voltage_RMS = trigger->GetAntNoise_voltageRMS(trigger_ch_ID, settings1);
+                std::vector<double> tmp_noise_RMS(1, ant_noise_voltage_RMS);
+
+                snr = get_SNR(vconv_slice, tmp_noise_RMS);
+            }
             if (snr > 0.01) { 
                 ants_with_sufficient_SNR++;
             }
