@@ -1808,9 +1808,12 @@ void Report::triggerCheck_ScanMode0(
             if (start_bin >= (int)vconv.size()) {
                 // Past the end: fill the whole slice with zeros
                 vconv_slice.assign(trig_window_bin, 0.0);
-            } else {
+            } 
+            else {
                 // Still partly inside the waveform
-                if (end_bin > (int)vconv.size()) end_bin = vconv.size();
+                if (end_bin > (int)vconv.size()) {
+                    end_bin = vconv.size();
+                }
 
                 vconv_slice.assign(vconv.begin() + start_bin, vconv.begin() + end_bin);
 
@@ -1826,7 +1829,9 @@ void Report::triggerCheck_ScanMode0(
             tmp_noise_RMS.push_back(ant_noise_voltage_RMS);
 
             double snr = get_SNR(vconv_slice, tmp_noise_RMS);
-            if (snr > 0.01) ants_with_sufficient_SNR++;
+            if (snr > 0.01) {
+                ants_with_sufficient_SNR++;
+            }
         }
         // If no antennas pass, skip trigger check entirely for this bin
         if (ants_with_sufficient_SNR == 0) {
@@ -2317,8 +2322,11 @@ int Report::triggerCheckLoop(
             std::vector<double> vconv_slice;
             if (start_bin >= (int)vconv.size()) {
                 vconv_slice.assign(trig_window_bin, 0.0);
-            } else {
-                if (end_bin > (int)vconv.size()) end_bin = vconv.size();
+            } 
+            else {
+                if (end_bin > (int)vconv.size()) {
+                    end_bin = vconv.size();
+                }
                 vconv_slice.assign(vconv.begin() + start_bin,
                                 vconv.begin() + end_bin);
                 if ((int)vconv_slice.size() < trig_window_bin) {
@@ -2331,7 +2339,9 @@ int Report::triggerCheckLoop(
             std::vector<double> tmp_noise_RMS(1, ant_noise_voltage_RMS);
 
             double snr = get_SNR(vconv_slice, tmp_noise_RMS);
-            if (snr > 0.01) ants_with_sufficient_SNR++;
+            if (snr > 0.01) { 
+                ants_with_sufficient_SNR++;
+            }
         }
 
         if (ants_with_sufficient_SNR == 0) {
