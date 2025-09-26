@@ -2231,7 +2231,7 @@ int Report::triggerCheckLoop(
     Settings *settings1, Detector *detector, Event *event, Trigger *trigger, 
     int stationID, int trig_search_init, int max_total_bin, int trig_window_bin, int scan_mode 
 ){
-    
+
   int i=stationID;
   
   int numChan=stations[i].TDR_all.size();
@@ -2335,7 +2335,7 @@ int Report::triggerCheckLoop(
         }
 
         if (ants_with_sufficient_SNR == 0) {
-            trig_i++;       // ⬅️ manually move to the next bin
+            trig_i++;       // next bin
             continue;       // skip heavy trigger logic
         }
 
