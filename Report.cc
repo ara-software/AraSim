@@ -740,18 +740,25 @@ void Report::BuildAndTriggerOnWaveforms(
         }
 
         // Log if this antenna has a decent signal-only SNR or not.
-        if ( ant_SNR > 0.01 ) 
+        if ( ant_SNR > min_signal_snr ) { 
           ants_with_sufficient_SNR++;
+        }
 
         // Apply gain factors
-        if ((debugmode == 0) && (settings1->USE_MANUAL_GAINOFFSET == 1) )
+        if ((debugmode == 0) && (settings1->USE_MANUAL_GAINOFFSET == 1) ) {
           Apply_Gain_Offset(settings1, trigger, detector, ch_ID, station_index);
+        }
 
         ch_ID++; // now to next channel
 
       } // for antennas
 
     } // for strings
+
+    // for PA trigger case, always assume there's at least one antenna with sufficient SNR
+    if ( settings1->TRIG_SCAN_MODE==5 ) {
+        ants_with_sufficient_SNR++;
+    }
 
     // Check for a trigger on this event
     // Do only if it's not in debugmode and if at least 1 antenna has sufficient signal
@@ -1840,7 +1847,7 @@ void Report::triggerCheck_ScanMode0(
 
             }
 
-            if (snr > 0.01) {
+            if (snr > min_signal_snr) {
                 ants_with_sufficient_SNR++;
             }
         }
@@ -2358,7 +2365,7 @@ int Report::triggerCheckLoop(
 
                 snr = get_SNR(vconv_slice, tmp_noise_RMS);
             }
-            if (snr > 0.01) { 
+            if (snr > min_signal_snr) { 
                 ants_with_sufficient_SNR++;
             }
         }
