@@ -438,6 +438,7 @@ class Report {
 
         double init_T; // locate zero time at the middle and give random time shift (for interpolated waveforms)
 
+        // non-PA station variables
         double min_signal_snr = 1.0; // minimum signal snr to be considered as a valid signal event (to avoid pure noise triggers)
 
         // Phased Array variables
