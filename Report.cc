@@ -740,7 +740,7 @@ void Report::BuildAndTriggerOnWaveforms(
         }
 
         // Log if this antenna has a decent signal-only SNR or not.
-        if ( ant_SNR > 0.01 ) 
+        if ( ant_SNR > min_signal_snr ) 
           ants_with_sufficient_SNR++;
 
         // Apply gain factors
@@ -1840,7 +1840,7 @@ void Report::triggerCheck_ScanMode0(
 
             }
 
-            if (snr > 0.01) {
+            if (snr > min_signal_snr) {
                 ants_with_sufficient_SNR++;
             }
         }
@@ -2358,7 +2358,7 @@ int Report::triggerCheckLoop(
 
                 snr = get_SNR(vconv_slice, tmp_noise_RMS);
             }
-            if (snr > 0.01) { 
+            if (snr > min_signal_snr) { 
                 ants_with_sufficient_SNR++;
             }
         }
