@@ -294,6 +294,8 @@ outputdir="outputs"; // directory where outputs go
 
   RAY_TRACE_ICE_MODEL_PARAMS=0; // Default: South Pole values fitted from RICE data
 
+  ANALYTIC_RAYTRACE_MODE=0; //default: 0 -- use numerical RayTracing for AraSim, 1 -- use analytical raytracing 
+
   WAVEFORM_LENGTH = 64/2*20; // Default: 64 digitization samples per block / 2 samples per waveform value * 20 blocks (value used for 2013-2016)
   
   WAVEFORM_CENTER = 0; // Default: 0, no offset in waveform centering
@@ -318,6 +320,7 @@ outputdir="outputs"; // directory where outputs go
   APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
 
   CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.csv"
+  
 
   ELECTRONICS_ANTENNA_CONSISTENCY = 1; // default: 1 -- ensure antenna gain used to calculate electronics gain is consistent
                                        //               with that used in this simulation  
@@ -694,6 +697,9 @@ void Settings::ReadFile(string setupfile) {
 	      else if (label == "RAY_TRACE_ICE_MODEL_PARAMS") {
 		RAY_TRACE_ICE_MODEL_PARAMS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
 	      }
+          else if (label == "ANALYTIC_RAYTRACE_MODE"){
+              ANALYTIC_RAYTRACE_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+          }
 	      else if (label == "WAVEFORM_LENGTH") {
 		WAVEFORM_LENGTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
 	      }
