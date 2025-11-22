@@ -3018,7 +3018,7 @@ void Report::Convolve_Signals(
             // Store the bin where the signal is located
             signal_bin[interaction_idx].push_back(
                 (antenna->arrival_time[interaction_idx][m] - stations[station_number].min_arrival_time) / (settings1->TIMESTEP) 
-                + settings1->NFOUR *2 + trigger->maxt_diode_bin); 
+                + settings1->NFOUR *2 + trigger->maxt_diode_bin);
             antenna->SignalBin[interaction_idx].push_back(signal_bin[interaction_idx][m]);
         }
     }
@@ -3077,7 +3077,7 @@ void Report::Convolve_Signals(
             Combine_Waveforms(
                 signal_bin[interaction_idx][m], this_signalbin,
                 antenna->V[interaction_idx][m], V_signal,
-                &this_signalbin, &V_signal, is_last);
+                this_signalbin, V_signal, is_last);
         }
       }
 
@@ -3214,15 +3214,15 @@ void Report::Select_Wave_Convlv_Exchange(
 
 void Report::Combine_Waveforms(int signalbin_0, int signalbin_1, 
     vector<double> V0, vector<double> V1, 
-    int* signalbin_combined, vector<double>* V_combined, bool pad_to_power_of_two
+    int& signalbin_combined, vector<double>& V_combined, bool pad_to_power_of_two
 ) {
   // adds waveforms V0 & V1 into combined vector V_combined
   // uses global signalbin indices to ensure vectors are properly combined
   // V_combined is not guaranteed to have a length which is a multiple of BINSIZE
   // signalbin_combined tracks global signalbin index of combined vector for use later
 
-  vector<double>& V = *V_combined;
-  int& signalbin = *signalbin_combined;
+  vector<double>& V = V_combined;
+  int& signalbin = signalbin_combined;
 
   // ensure voltage array is empty
   V.clear();
@@ -3239,25 +3239,25 @@ void Report::Combine_Waveforms(int signalbin_0, int signalbin_1,
 
   // resize to necessary length to combine vectors 
   signalbin = min(signalbin_0, signalbin_1); // starting index in terms of global index
-  const int maxsignalbin = max(signalbin_0+V0.size()-1, signalbin_1+V1.size()-1); // last index in terms of global index
+  const int maxsignalbin = max(signalbin_0+int(V0.size())-1, signalbin_1+int(V1.size())-1); // last index in terms of global index
   const int len = maxsignalbin - signalbin + 1; // length needed to combine both signals
   V.resize(len, 0);
   
   // add in the zeroth vector
   for(unsigned int bin = 0; bin < V0.size(); ++bin) {
-    const int combined_bin = bin + (signalbin_0- signalbin);
+    const int combined_bin = bin + (signalbin_0 - signalbin);
     V[combined_bin] += V0[bin];
   }
 
   // add in the first vector
   for(unsigned int bin = 0; bin < V1.size(); ++bin) {
-    const int combined_bin = bin + (signalbin_1- signalbin);
+    const int combined_bin = bin + (signalbin_1 - signalbin);
     V[combined_bin] += V1[bin];
   }
 
   // for the last added waveform if length is not a power of 2, zero pad
-  if(pad_to_power_of_two && (V.size() & (V.size() - 1)) != 0) {
-    const int newLen = int(pow(2, ceil(log2(V.size())))); // get next power of 2 
+  if(pad_to_power_of_two && (int(V.size()) & (int(V.size()) - 1)) != 0) {
+    const int newLen = int(pow(2, ceil(log2(int(V.size()))))); // get next power of 2 
     V.resize(newLen, 0.);
   }
 
