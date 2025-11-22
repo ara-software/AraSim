@@ -136,7 +136,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
             }
 
             //Calculate the interactions birth time for secondaries
-            if (interaction_cnt == 1){
+            if (interaction_cnt == 0){
                 // If this is the first interaction, clear the birth time storage
                 interactions_birth_time.clear();
 
