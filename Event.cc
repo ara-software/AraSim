@@ -152,7 +152,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 // distance by the speed of light (CLIGHT), giving the travel time from the previous interaction.
                 // Assumes particles travel at ~CLIGHT.
                 first_vertex_idx = inu_thrown;
-                double tmp_birth_time = (sec1->get_interaction_distance(first_vertex_idx, inu_thrown, settings1)/CLIGHT);
+                double tmp_birth_time = (sec1->get_interaction_distance(first_vertex_idx, inu_thrown+interaction_cnt, settings1)/CLIGHT);
 
                 // Store the computed birth time for this secondary interaction
                 interactions_birth_time.push_back(tmp_birth_time);
