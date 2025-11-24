@@ -60,7 +60,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
         }  
     }
 
-    for (int interaction_cnt = 1; interaction_cnt <= interaction_cnt_max; ++interaction_cnt){ 
+    for (int interaction_cnt = 0; interaction_cnt < interaction_cnt_max; ++interaction_cnt){ 
 
         Choose_Evt_Type (settings1);
 
@@ -72,45 +72,45 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
 
                 // Determine if PNU is provided as settings->EXPONENT 
                 //   or actual energy and create spectra
-                if (settings1->PNU[inu_thrown] < 1000) { // pnu is settings->EXPONENT
-                    settings1->EXPONENT = settings1->PNU[inu_thrown];
+                if (settings1->PNU[inu_thrown+interaction_cnt] < 1000) { // pnu is settings->EXPONENT
+                    settings1->EXPONENT = settings1->PNU[inu_thrown+interaction_cnt];
                 } 
-                else if (settings1->PNU[inu_thrown] < 1e14) { // pnu is energy in GeV
-                    pnu = settings1->PNU[inu_thrown] * 1e9; // convert to eV
+                else if (settings1->PNU[inu_thrown+interaction_cnt] < 1e14) { // pnu is energy in GeV
+                    pnu = settings1->PNU[inu_thrown+interaction_cnt] * 1e9; // convert to eV
                     settings1->EXPONENT = 400 + log10(pnu)*10.;
                 }
                 else { // pnu is energy in eV
-                    pnu = settings1->PNU[inu_thrown];
+                    pnu = settings1->PNU[inu_thrown+interaction_cnt];
                     settings1->EXPONENT = 400 + log10(pnu)*10.;
                 }
                 spectra1 = new Spectra(settings1);
-                if (settings1->PNU[inu_thrown] < 1000) { 
+                if (settings1->PNU[inu_thrown+interaction_cnt] < 1000) { 
                     // set the pnu that wasn't set manually bc 
                     // provided pnu was in exponent form
                     pnu = spectra1->GetNuEnergy();
                 } 
 
                 // Prepare the rest of the parameters
-                settings1->SELECT_FLAVOR = settings1->NUFLAVORINT[inu_thrown];
-                settings1->NU_NUBAR_SELECT_MODE = settings1->NUBAR[inu_thrown];
-                settings1->SELECT_CURRENT = settings1->CURRENTINT[inu_thrown];
+                settings1->SELECT_FLAVOR = settings1->NUFLAVORINT[inu_thrown+interaction_cnt];
+                settings1->NU_NUBAR_SELECT_MODE = settings1->NUBAR[inu_thrown+interaction_cnt];
+                settings1->SELECT_CURRENT = settings1->CURRENTINT[inu_thrown+interaction_cnt];
                 settings1->INTERACTION_MODE = 2;
-                settings1->POSNU_R = settings1->IND_POSNU_R[inu_thrown];
-                settings1->POSNU_THETA = settings1->IND_POSNU_THETA[inu_thrown];
-                settings1->POSNU_PHI = settings1->IND_POSNU_PHI[inu_thrown];
+                settings1->POSNU_R = settings1->IND_POSNU_R[inu_thrown+interaction_cnt];
+                settings1->POSNU_THETA = settings1->IND_POSNU_THETA[inu_thrown+interaction_cnt];
+                settings1->POSNU_PHI = settings1->IND_POSNU_PHI[inu_thrown+interaction_cnt];
                 settings1->NNU_THIS_THETA = 1;
                 settings1->NNU_D_THETA = 0.0;
-                settings1->NNU_THETA = settings1->IND_NNU_THETA[inu_thrown];
+                settings1->NNU_THETA = settings1->IND_NNU_THETA[inu_thrown+interaction_cnt];
                 settings1->NNU_THIS_PHI = 1;
                 settings1->NNU_D_PHI = 0.0;
-                settings1->NNU_PHI = settings1->IND_NNU_PHI[inu_thrown];
+                settings1->NNU_PHI = settings1->IND_NNU_PHI[inu_thrown+interaction_cnt];
                 settings1->YPARAM = 2;
-                settings1->ELAST_Y = settings1->ELAST[inu_thrown];
+                settings1->ELAST_Y = settings1->ELAST[inu_thrown+interaction_cnt];
 
                 //store event ID, primary neutrino energy, particle type
-                event_ID = settings1->EVID[inu_thrown];
-                nu_prim_energy = settings1->NU_PRIM_ENERGY[inu_thrown];
-                nu_prim_pid = settings1->NU_PRIM_PID[inu_thrown];
+                event_ID = settings1->EVID[inu_thrown+interaction_cnt];
+                nu_prim_energy = settings1->NU_PRIM_ENERGY[inu_thrown+interaction_cnt];
+                nu_prim_pid = settings1->NU_PRIM_PID[inu_thrown+interaction_cnt];
 
                 nuflavor = primary1->GetNuFlavor(settings1);
                 nu_nubar = primary1->GetNuNuBar(nuflavor, settings1);
@@ -136,7 +136,7 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
             }
 
             //Calculate the interactions birth time for secondaries
-            if (interaction_cnt == 1){
+            if (interaction_cnt == 0){
                 // If this is the first interaction, clear the birth time storage
                 interactions_birth_time.clear();
 
@@ -151,7 +151,8 @@ Event::Event (Settings *settings1, Spectra *spectra1, Primaries *primary1, IceMo
                 // its first interaction (first_vertex_idx). This is determined by dividing the interaction 
                 // distance by the speed of light (CLIGHT), giving the travel time from the previous interaction.
                 // Assumes particles travel at ~CLIGHT.
-                double tmp_birth_time = (sec1->get_interaction_distance(first_vertex_idx, inu_thrown, settings1)/CLIGHT);
+                first_vertex_idx = inu_thrown;
+                double tmp_birth_time = (sec1->get_interaction_distance(first_vertex_idx, inu_thrown+interaction_cnt, settings1)/CLIGHT);
 
                 // Store the computed birth time for this secondary interaction
                 interactions_birth_time.push_back(tmp_birth_time);

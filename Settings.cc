@@ -769,7 +769,10 @@ void Settings::ReadFile(string setupfile) {
       }
       setFile.close();
   }
-  else cout<<"Unable to open "<<setupfile<<" file!"<<endl;
+  else {
+      throw runtime_error("Unable to open "+setupfile+" file!");
+  }
+
   return;
 }
 
@@ -848,8 +851,10 @@ void Settings::ReadEvtFile(string evtfile){
         }
 	
     }
-    else
-        cout << "Unable to open " << evtfile << " file!" << endl;
+    else {
+        throw runtime_error("Unable to open "+evtfile+" file!");
+    }
+
     return;
 }
 
