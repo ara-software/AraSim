@@ -1319,7 +1319,7 @@ namespace RayTrace{
                         }
 		bool fullyContained=(sourcePos.GetZ()<=0.0 && targetPos.GetZ()<=0.0); //whether the ray is entirely inside the ice
 		double xy_dist = sqrt((targetPos.GetX()-sourcePos.GetX())*(targetPos.GetX()-sourcePos.GetX())
-												+(targetPos.GetY()-sourcePos.GetY())*(targetPos.GetY()-sourcePos.GetY()));
+									+(targetPos.GetY()-sourcePos.GetY())*(targetPos.GetY()-sourcePos.GetY()));
 		double z_dist = std::abs(targetPos.GetZ()-sourcePos.GetZ());
 		double tanThetaThreshold = std::tan(2.0*M_PI / 180.0); // threshold for using doVerticalTrace is 2 degrees from vertical
 		rayTargetRecord target(targetPos.GetZ(),xy_dist);
