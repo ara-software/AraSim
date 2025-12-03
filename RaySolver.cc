@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include "Settings.h"
+#include "IceRayTracing.hh"
 
 
 RaySolver::RaySolver() {
@@ -1200,317 +1201,392 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
         // test print out location
     //std::cout<<"--src_x="<<src.GetX()<<" --src_y="<<src.GetY()<<" --src_z="<<src.GetZ()<<std::endl;
     //std::cout<<"--trg_x="<<trg.GetX()<<" --trg_y="<<trg.GetY()<<" --trg_z="<<trg.GetZ()<<std::endl;
-
-	std::vector<RayTrace::TraceRecord> paths;
-	std::vector<RayTrace::TraceRecord> paths_exc;
 	
-	RayTrace::TraceFinder tf(refractionModel,attenuationModel);
 
 	int sol_cnt;
-        int sol_error;
+    int sol_error;
 
 	int sol_cnt_exc;
-        int sol_error_exc;
+    int sol_error_exc;
 
-        int SrcTrgExc = 0;  // 0 not exchanged, 1 exchanged
+    int SrcTrgExc = 0;  // 0 not exchanged, 1 exchanged
 
-	
-	paths=tf.findPaths(src,trg,frequency/1.0e3,polarization, sol_cnt, sol_error, refl,requiredAccuracy);
+    if(settings1->ANALYTIC_RAYTRACE_MODE==1){
 
-                            
-        //std::vector < std::vector < std::vector <double> > > testvector;
+        double TimeRay[2];
+        double PathRay[2];
+        double LaunchAngle[2];
+        double RecieveAngle[2];
+        int IgnoreCh[2];
+        double IncidenceAngleInIce[2];
+        vector <double> xRay[2];
+        vector <double> zRay[2];
+        double AttRay[2];
 
-        //std::cout<<"sol cnt : "<<sol_cnt<<" sol error : "<<sol_error<<std::endl;
-        // have to fix src trg exchanged case angle outputs
-        //
-        if ( sol_cnt > 0 && sol_error > 0 ) {   // this case do findPahts again with src, trg exchanged
-            paths_exc=tf.findPaths(trg,src,frequency/1.0e3,polarization, sol_cnt_exc, sol_error_exc, refl,requiredAccuracy);
+        double Distance= sqrt( (source_tmp.GetX()-target_tmp.GetX())*(source_tmp.GetX()-target_tmp.GetX()) + (source_tmp.GetY()-target_tmp.GetY())*(source_tmp.GetY()-target_tmp.GetY()) ) ;
 
-            std::cout<<"sol cnt exc : "<<sol_cnt<<" sol error exc : "<<sol_error<<std::endl;
+        //IceRayTracing::GetRayTracingSolutions(source_tmp.GetZ(), Distance, target_tmp.GetZ(), TimeRay, PathRay, LaunchAngle, RecieveAngle, IgnoreCh, IncidenceAngleInIce,xRay,zRay);
 
-            if ( sol_error > sol_error_exc ) {  // exchanged one is better (less sol_error)
-                paths = paths_exc;
-                SrcTrgExc = 1;
+        IceRayTracing::GetRayTracingSolutions(source_tmp.GetZ(), Distance, target_tmp.GetZ(), TimeRay, PathRay, LaunchAngle, RecieveAngle, IgnoreCh, IncidenceAngleInIce, 1, 0.2,AttRay,xRay,zRay);
+
+        swap(LaunchAngle[0],RecieveAngle[0]);
+
+        TimeRay[0]=TimeRay[0];//*pow(10,-9);
+        TimeRay[1]=TimeRay[1];//*pow(10,-9);
+
+        LaunchAngle[0]=(180-LaunchAngle[0])*(PI/180);
+        RecieveAngle[0]=(180-RecieveAngle[0])*(PI/180);
+
+        LaunchAngle[1]=(LaunchAngle[1])*(PI/180);
+        RecieveAngle[1]=(RecieveAngle[1])*(PI/180);
+
+        if(IncidenceAngleInIce[0]!=100){
+          IncidenceAngleInIce[0]=IncidenceAngleInIce[0]*(PI/180);
+        }
+        if(IncidenceAngleInIce[1]!=100){
+            IncidenceAngleInIce[1]=IncidenceAngleInIce[1]*(PI/180);
+        }
+
+        solution_toggle = 0;
+        for(int iray=0;iray<2;iray++){
+            if(IgnoreCh[iray]==1){
+                outputs.resize(5);
+
+                outputs[0].push_back(PathRay[iray]);
+                outputs[1].push_back(LaunchAngle[iray]);
+                outputs[2].push_back(RecieveAngle[iray]);
+                outputs[3].push_back(IncidenceAngleInIce[iray]);
+                outputs[4].push_back(TimeRay[iray]);   // time in s (not ns)
+
+                std::string pathfilename;
+                if ( sol_no == 0 ) {
+                pathfilename = "./pathfile_0.txt";
+                }
+                else if ( sol_no == 1 ) {
+                pathfilename = "./pathfile_1.txt";
+                }
+
+                solution_toggle = 1;
+                RayStep.resize(sol_no+1);
+
+                RayStep[sol_no].resize(2); // x and z for the direct
+                for(int step=0; step<xRay[iray].size(); step++){
+                    RayStep[sol_no][0].push_back(xRay[iray][step]); // x component
+                    RayStep[sol_no][1].push_back(zRay[iray][step]); // z component
+                }   
+
+                sol_no++;
             }
-            else if (sol_error == sol_error_exc) {  // sol_error are same for both paths. Then use the better miss dist.
+        }	  
 
+    }
+	
+    if(settings1->ANALYTIC_RAYTRACE_MODE==0){////do AraSim Numerical Raytracing
+    
+        RayTrace::TraceFinder tf(refractionModel,attenuationModel);
 
-                std::vector<RayTrace::TraceRecord>::const_iterator it_tmp=paths.begin();
-                std::vector<RayTrace::TraceRecord>::const_iterator it_tmp_exc=paths_exc.begin();
-                if ( it_tmp->miss > it_tmp_exc->miss ) {    // if fist one miss dist is worse
+        std::vector<RayTrace::TraceRecord> paths;
+        std::vector<RayTrace::TraceRecord> paths_exc;
+
+        paths=tf.findPaths(src,trg,frequency/1.0e3,polarization, sol_cnt, sol_error, refl,requiredAccuracy);
+
+                                
+            //std::vector < std::vector < std::vector <double> > > testvector;
+
+            //std::cout<<"sol cnt : "<<sol_cnt<<" sol error : "<<sol_error<<std::endl;
+            // have to fix src trg exchanged case angle outputs
+            //
+            if ( sol_cnt > 0 && sol_error > 0 ) {   // this case do findPahts again with src, trg exchanged
+                paths_exc=tf.findPaths(trg,src,frequency/1.0e3,polarization, sol_cnt_exc, sol_error_exc, refl,requiredAccuracy);
+
+                std::cout<<"sol cnt exc : "<<sol_cnt<<" sol error exc : "<<sol_error<<std::endl;
+
+                if ( sol_error > sol_error_exc ) {  // exchanged one is better (less sol_error)
                     paths = paths_exc;
                     SrcTrgExc = 1;
                 }
+                else if (sol_error == sol_error_exc) {  // sol_error are same for both paths. Then use the better miss dist.
+
+
+                    std::vector<RayTrace::TraceRecord>::const_iterator it_tmp=paths.begin();
+                    std::vector<RayTrace::TraceRecord>::const_iterator it_tmp_exc=paths_exc.begin();
+                    if ( it_tmp->miss > it_tmp_exc->miss ) {    // if fist one miss dist is worse
+                        paths = paths_exc;
+                        SrcTrgExc = 1;
+                    }
+                }
+            }
+        
+        
+        if(showLabels){
+            if(!paths.empty()){
+                //--------------------------------------------------
+                // std::cout << std::fixed 
+                // << "path length (m) "
+                // << "path time (ns) "
+                // << "launch angle "
+                // << "recipt angle "
+                // << "reflect angle "
+                // << "miss dist. "
+                // << "attenuation "
+                // << "amplitude"
+                // << std::endl;
+                //-------------------------------------------------- 
+                            solution_toggle = 1;
+            }
+            else {
+                //std::cout << "No solutions" << std::endl;
+                            solution_toggle = 0;
+                    }
+        }
+        if(!dumpPaths){
+            for(std::vector<RayTrace::TraceRecord>::const_iterator it=paths.begin(); it!=paths.end(); ++it){
+                        if ( it->sol_error == 0 ) {
+                //double signal = tf.signalStrength(*it,src,trg,refl);
+                //--------------------------------------------------
+                // std::cout << std::left << std::fixed 
+                // << std::setprecision(2) << std::setw(15) << it->pathLen << ' '
+                // << std::setprecision(2) << std::setw(14) << 1e9*it->pathTime << ' '
+                // << std::setprecision(4) << std::setw(12) << it->launchAngle << ' '
+                // << std::setprecision(4) << std::setw(12) << it->receiptAngle << ' '
+                // << std::setprecision(3) << std::setw(13) << it->reflectionAngle << ' '
+                // << std::setprecision(2) << std::setw(10) << it->miss << ' ' 
+                // << std::scientific << std::setprecision(4) << std::setw(11) << it->attenuation << ' '
+                // //amplitude calculation, ignoring frequency response at both ends, angular response of receiver
+                // << std::setw(10) << (it->attenuation*signal)
+                // << std::endl;
+                //-------------------------------------------------- 
+
+                            if ( SrcTrgExc == 0 ) { // src, trg as original
+                                outputs.resize(5);
+
+                                outputs[0].push_back(it->pathLen);
+                                outputs[1].push_back(it->launchAngle);
+                                outputs[2].push_back(it->receiptAngle);
+                                outputs[3].push_back(it->reflectionAngle);
+                                outputs[4].push_back( it->pathTime );   // time in s (not ns)
+                                //std::cout<<"outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<"pathLen : "<<it->pathLen<<"\n";
+
+
+                                // test if raysol dist is shorter than physical distance
+                                if ( distance_flat - it->pathLen >= 10. ) // if more than 10m difference
+                                {
+                                    //cout<<"source, target physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
+                                    //cout<<"source(z:"<<src.GetZ()<<"), target(z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
+                                    cout<<"source(x:"<<src.GetX()<<" y:"<<src.GetY()<<" z:"<<src.GetZ()<<"), target(x:"<<trg.GetX()<<" y:"<<trg.GetY()<<" z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
+                                }
+
+
+                                std::string pathfilename;
+                                if ( sol_no == 0 ) {
+                                    pathfilename = "./pathfile_0.txt";
+                                }
+                                else if ( sol_no == 1 ) {
+                                    pathfilename = "./pathfile_1.txt";
+                                }
+                                else {
+                                    pathfilename = "./pathfile.txt";
+                                }
+
+                                //testvector.resize(sol_no+1);
+                                RayStep.resize(sol_no+1);
+
+                                // construct
+                                pathStore_vector<RayTrace::minimalRayPosition> pathsave_test;
+                                //pathStore_vector_2<RayTrace::minimalRayPosition> pathsave_test (testvector);
+                                //pathStore_test<RayTrace::minimalRayPosition> pathsave_test ("./pathfile.txt");
+                                //pathStore_test<RayTrace::minimalRayPosition> pathsave_test (pathfilename);
+                    
+                                //tf.doTrace<RayTrace::minimalRayPosition>(src_z, it->launchAngle, RayTrace::rayTargetRecord(trg_z,sqrt((trg_x-src_x)*(trg_x-src_x)+(trg_y-src_y)*(trg_y-src_y))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+                                tf.doTrace<RayTrace::minimalRayPosition>(src.GetZ(), it->launchAngle, RayTrace::rayTargetRecord(trg.GetZ(),sqrt((trg.GetX()-src.GetX())*(trg.GetX()-src.GetX())+(trg.GetY()-src.GetY())*(trg.GetY()-src.GetY()))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+
+                                //pathsave_test.CopyVector( testvector, sol_no );
+                                pathsave_test.CopyVector( RayStep, sol_no );
+                                pathsave_test.DelVector();
+
+                                /*
+                                double totalpath = 0.;
+                                double dx, dz;
+
+                                //cout<<"\nRayStep : "<<(int)testvector[0].size()<<endl;
+                                //for (int step=0; step<(int)testvector[sol_no][0].size(); step++ ) {
+                                for (int step=0; step<(int)RayStep[sol_no][0].size(); step++ ) {
+
+                                    if ( step > 0 ) {
+                                        //dx = fabs(testvector[sol_no][0][step-1] - testvector[sol_no][0][step]);
+                                        //dz = fabs(testvector[sol_no][1][step-1] - testvector[sol_no][1][step]);
+                                        dx = fabs(RayStep[sol_no][0][step-1] - RayStep[sol_no][0][step]);
+                                        dz = fabs(RayStep[sol_no][1][step-1] - RayStep[sol_no][1][step]);
+                                        totalpath += sqrt( (dx*dx) + (dz*dz) );
+                                    }
+                                }
+                                */
+
+                                //cout<<"pathLen : "<<it->pathLen<<", pathSum : "<<totalpath<<endl;
+
+
+
+                                //testvector.clear();
+
+
+                                sol_no++;
+                            }
+                            else if ( SrcTrgExc == 1 ) { // src, trg exchanged
+                                outputs.resize(5);
+
+                                outputs[0].push_back(it->pathLen);
+                                outputs[1].push_back(PI - it->receiptAngle);
+                                outputs[2].push_back(PI - it->launchAngle);
+                                outputs[3].push_back(it->reflectionAngle);
+                                outputs[4].push_back( it->pathTime );   // time in s (not ns)
+                                //std::cout<<"outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<"pathLen : "<<it->pathLen<<"\n";
+
+
+                                // test if raysol dist is shorter than physical distance
+                                if ( distance_flat - it->pathLen >= 10. ) // if more than 10m difference
+                                {
+                                    //cout<<"source, target physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", excsol"<<endl;
+                                    //cout<<"source(z:"<<src.GetZ()<<"), target(z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
+                                    cout<<"source(x:"<<src.GetX()<<" y:"<<src.GetY()<<" z:"<<src.GetZ()<<"), target(x:"<<trg.GetX()<<" y:"<<trg.GetY()<<" z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
+                                }
+
+
+
+                                std::string pathfilename;
+                                if ( sol_no == 0 ) {
+                                    pathfilename = "./pathfile_0.txt";
+                                }
+                                else if ( sol_no == 1 ) {
+                                    pathfilename = "./pathfile_1.txt";
+                                }
+                                else {
+                                    pathfilename = "./pathfile.txt";
+                                }
+
+
+                                //testvector.resize(sol_no+1);
+                                RayStep.resize(sol_no+1);
+
+                                // construct
+                                pathStore_vector<RayTrace::minimalRayPosition> pathsave_test;
+                                //pathStore_vector_2<RayTrace::minimalRayPosition> pathsave_test (testvector);
+                                //pathStore_test<RayTrace::minimalRayPosition> pathsave_test ("./pathfile.txt");
+                                //pathStore_test<RayTrace::minimalRayPosition> pathsave_test (pathfilename);
+                    
+                                //tf.doTrace<RayTrace::minimalRayPosition>(src_z, it->launchAngle, RayTrace::rayTargetRecord(trg_z,sqrt((trg_x-src_x)*(trg_x-src_x)+(trg_y-src_y)*(trg_y-src_y))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+                                tf.doTrace<RayTrace::minimalRayPosition>(src.GetZ(), PI - it->receiptAngle, RayTrace::rayTargetRecord(trg.GetZ(),sqrt((trg.GetX()-src.GetX())*(trg.GetX()-src.GetX())+(trg.GetY()-src.GetY())*(trg.GetY()-src.GetY()))), refl, 0.0, 0.0, sol_error, &pathsave_test);
+
+                                //pathsave_test.CopyVector( testvector, sol_no );
+                                pathsave_test.CopyVector( RayStep, sol_no );
+                                pathsave_test.DelVector();
+
+                                /*
+                                double totalpath = 0.;
+                                double dx, dz;
+
+                                //cout<<"\nRayStep : "<<(int)testvector[0].size()<<endl;
+                                //for (int step=0; step<(int)testvector[sol_no][0].size(); step++ ) {
+                                for (int step=0; step<(int)RayStep[sol_no][0].size(); step++ ) {
+
+                                    if ( step > 0 ) {
+                                        //dx = fabs(testvector[sol_no][0][step-1] - testvector[sol_no][0][step]);
+                                        //dz = fabs(testvector[sol_no][1][step-1] - testvector[sol_no][1][step]);
+                                        dx = fabs(RayStep[sol_no][0][step-1] - RayStep[sol_no][0][step]);
+                                        dz = fabs(RayStep[sol_no][1][step-1] - RayStep[sol_no][1][step]);
+                                        totalpath += sqrt( (dx*dx) + (dz*dz) );
+                                    }
+                                }
+                                */
+
+                                //cout<<"pathLen : "<<it->pathLen<<", pathSum : "<<totalpath<<endl;
+
+
+                                //testvector.clear();
+
+
+                                sol_no++;
+                            }
+
+
+
+
+
+                        }
+
+            }
+
+            // reorder the solutions (BAC Jan 2021)
+            // it is useful at this point to re-order the solutions so that the direct solution 
+            // (if it exists) is reported first
+            // this copying method is rather inefficient in terms of memory allocation
+            // but also, it's not obvious that it ever gets called 
+            // (Brian couldn't find a case in testing on a few hundred events)
+            // so probably it doesn't matter
+            if (outputs.size()>0){
+                int num_solutions = outputs[0].size();
+                if(num_solutions>1){
+                    // we only need to do something in the case of two solutions
+                    double path_len_first_sol = outputs[0][0];
+                    double path_len_second_sol = outputs[0][1];
+                    if(path_len_second_sol < path_len_first_sol){
+                        printf("The second path length (%.2f) is shorter than the first (%.2f)\n",path_len_second_sol, path_len_first_sol);
+                        printf("Flipping the order in the output vectors...");
+
+                        // if the shorter path length (which must be the direct solution)
+                        // has ended up second, then we need to make a swap
+                        // so that it's first in the output
+
+                        // for the outputs vector, we flip the first and second columns
+                        // that is, the direct and refracted/reflected solution
+                        // first, make a copy of the original
+                        vector< vector <double> > tmp_outputs(outputs);
+                        // then make the flip
+                        for(int item=0; item<outputs.size(); item++){
+                            outputs[item][0] = tmp_outputs[item][1];
+                            outputs[item][1] = tmp_outputs[item][0];
+                        }
+
+                        // for the RayStep, it's [solution][dimension (x or z)][step]
+                        // so we need to be a little smarter
+                        // first make a copy of the original
+                        vector< vector< vector <double> > > tmp_RayStep(RayStep);
+
+                        // now, totally empty the older vector (the one we need to return to the user at the end)
+                        RayStep.clear();
+                        RayStep.resize(2); // the RayStep needs a direct and refr/refl solution
+
+                        // first, the direct solution (which is currently in tmp_RayStep[1])
+                        RayStep[0].resize(2); // x and z for the direct
+                        for(int step=0; step<tmp_RayStep[1][0].size(); step++){
+                            RayStep[0][0].push_back(tmp_RayStep[1][0][step]); // x component
+                            RayStep[0][1].push_back(tmp_RayStep[1][1][step]); // z component
+                        }
+                        // next, the reflected/refracted solution (which is currently in tmp_RayStep[0])
+                        RayStep[1].resize(2); // x and z for the refracted/reflected
+                        for(int step=0; step<tmp_RayStep[0][0].size(); step++){
+                            RayStep[1][0].push_back(tmp_RayStep[0][0][step]); // x component
+                            RayStep[1][1].push_back(tmp_RayStep[0][1][step]); // y component
+                        }
+                    }
+                }		
             }
         }
-	
-	
-	if(showLabels){
-		if(!paths.empty()){
-			//--------------------------------------------------
-			// std::cout << std::fixed 
-			// << "path length (m) "
-			// << "path time (ns) "
-			// << "launch angle "
-			// << "recipt angle "
-			// << "reflect angle "
-			// << "miss dist. "
-			// << "attenuation "
-			// << "amplitude"
-			// << std::endl;
-			//-------------------------------------------------- 
-                        solution_toggle = 1;
-		}
-		else {
-			//std::cout << "No solutions" << std::endl;
-                        solution_toggle = 0;
-                }
-	}
-	if(!dumpPaths){
-		for(std::vector<RayTrace::TraceRecord>::const_iterator it=paths.begin(); it!=paths.end(); ++it){
-                    if ( it->sol_error == 0 ) {
-			//double signal = tf.signalStrength(*it,src,trg,refl);
-			//--------------------------------------------------
-			// std::cout << std::left << std::fixed 
-			// << std::setprecision(2) << std::setw(15) << it->pathLen << ' '
-			// << std::setprecision(2) << std::setw(14) << 1e9*it->pathTime << ' '
-			// << std::setprecision(4) << std::setw(12) << it->launchAngle << ' '
-			// << std::setprecision(4) << std::setw(12) << it->receiptAngle << ' '
-			// << std::setprecision(3) << std::setw(13) << it->reflectionAngle << ' '
-			// << std::setprecision(2) << std::setw(10) << it->miss << ' ' 
-			// << std::scientific << std::setprecision(4) << std::setw(11) << it->attenuation << ' '
-			// //amplitude calculation, ignoring frequency response at both ends, angular response of receiver
-			// << std::setw(10) << (it->attenuation*signal)
-			// << std::endl;
-			//-------------------------------------------------- 
+        else{ //do write out path data
+                // I didn't fix this part yet!
+                int sol_error;
 
-                        if ( SrcTrgExc == 0 ) { // src, trg as original
-                            outputs.resize(5);
+            pathPrinter<RayTrace::minimalRayPosition> print;
+            for(std::vector<RayTrace::TraceRecord>::const_iterator it=paths.begin(); it!=paths.end(); ++it){
+                tf.doTrace<RayTrace::minimalRayPosition>(src_z, it->launchAngle, RayTrace::rayTargetRecord(trg_z,sqrt((trg_x-src_x)*(trg_x-src_x)+(trg_y-src_y)*(trg_y-src_y))), refl, 0.0, 0.0, sol_error, &print);
+                //std::cout << "\n\n";
+            }
+        }
+        //--------------------------------------------------
+        // return(0);
+        //-------------------------------------------------- 
 
-                            outputs[0].push_back(it->pathLen);
-                            outputs[1].push_back(it->launchAngle);
-                            outputs[2].push_back(it->receiptAngle);
-                            outputs[3].push_back(it->reflectionAngle);
-                            outputs[4].push_back( it->pathTime );   // time in s (not ns)
-                            //std::cout<<"outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<"pathLen : "<<it->pathLen<<"\n";
+    }////AraSim numerical raytracing
 
-
-                            // test if raysol dist is shorter than physical distance
-                            if ( distance_flat - it->pathLen >= 10. ) // if more than 10m difference
-                            {
-                                //cout<<"source, target physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
-                                //cout<<"source(z:"<<src.GetZ()<<"), target(z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
-                                cout<<"source(x:"<<src.GetX()<<" y:"<<src.GetY()<<" z:"<<src.GetZ()<<"), target(x:"<<trg.GetX()<<" y:"<<trg.GetY()<<" z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
-                            }
-
-
-                            std::string pathfilename;
-                            if ( sol_no == 0 ) {
-                                pathfilename = "./pathfile_0.txt";
-                            }
-                            else if ( sol_no == 1 ) {
-                                pathfilename = "./pathfile_1.txt";
-                            }
-                            else {
-                                pathfilename = "./pathfile.txt";
-                            }
-
-                            //testvector.resize(sol_no+1);
-                            RayStep.resize(sol_no+1);
-
-                            // construct
-                            pathStore_vector<RayTrace::minimalRayPosition> pathsave_test;
-                            //pathStore_vector_2<RayTrace::minimalRayPosition> pathsave_test (testvector);
-                            //pathStore_test<RayTrace::minimalRayPosition> pathsave_test ("./pathfile.txt");
-                            //pathStore_test<RayTrace::minimalRayPosition> pathsave_test (pathfilename);
-                
-                            //tf.doTrace<RayTrace::minimalRayPosition>(src_z, it->launchAngle, RayTrace::rayTargetRecord(trg_z,sqrt((trg_x-src_x)*(trg_x-src_x)+(trg_y-src_y)*(trg_y-src_y))), refl, 0.0, 0.0, sol_error, &pathsave_test);
-                            tf.doTrace<RayTrace::minimalRayPosition>(src.GetZ(), it->launchAngle, RayTrace::rayTargetRecord(trg.GetZ(),sqrt((trg.GetX()-src.GetX())*(trg.GetX()-src.GetX())+(trg.GetY()-src.GetY())*(trg.GetY()-src.GetY()))), refl, 0.0, 0.0, sol_error, &pathsave_test);
-
-                            //pathsave_test.CopyVector( testvector, sol_no );
-                            pathsave_test.CopyVector( RayStep, sol_no );
-                            pathsave_test.DelVector();
-
-                            /*
-                            double totalpath = 0.;
-                            double dx, dz;
-
-                            //cout<<"\nRayStep : "<<(int)testvector[0].size()<<endl;
-                            //for (int step=0; step<(int)testvector[sol_no][0].size(); step++ ) {
-                            for (int step=0; step<(int)RayStep[sol_no][0].size(); step++ ) {
-
-                                if ( step > 0 ) {
-                                    //dx = fabs(testvector[sol_no][0][step-1] - testvector[sol_no][0][step]);
-                                    //dz = fabs(testvector[sol_no][1][step-1] - testvector[sol_no][1][step]);
-                                    dx = fabs(RayStep[sol_no][0][step-1] - RayStep[sol_no][0][step]);
-                                    dz = fabs(RayStep[sol_no][1][step-1] - RayStep[sol_no][1][step]);
-                                    totalpath += sqrt( (dx*dx) + (dz*dz) );
-                                }
-                            }
-                            */
-
-                            //cout<<"pathLen : "<<it->pathLen<<", pathSum : "<<totalpath<<endl;
-
-
-
-                            //testvector.clear();
-
-
-                            sol_no++;
-                        }
-                        else if ( SrcTrgExc == 1 ) { // src, trg exchanged
-                            outputs.resize(5);
-
-                            outputs[0].push_back(it->pathLen);
-                            outputs[1].push_back(PI - it->receiptAngle);
-                            outputs[2].push_back(PI - it->launchAngle);
-                            outputs[3].push_back(it->reflectionAngle);
-                            outputs[4].push_back( it->pathTime );   // time in s (not ns)
-                            //std::cout<<"outputs[0]["<<sol_no<<"] : "<<outputs[0][sol_no]<<"pathLen : "<<it->pathLen<<"\n";
-
-
-                            // test if raysol dist is shorter than physical distance
-                            if ( distance_flat - it->pathLen >= 10. ) // if more than 10m difference
-                            {
-                                //cout<<"source, target physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", excsol"<<endl;
-                                //cout<<"source(z:"<<src.GetZ()<<"), target(z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
-                                cout<<"source(x:"<<src.GetX()<<" y:"<<src.GetY()<<" z:"<<src.GetZ()<<"), target(x:"<<trg.GetX()<<" y:"<<trg.GetY()<<" z:"<<trg.GetZ()<<") physical distance: "<<distance_flat<<", RayTrace: "<<it->pathLen<<", orgsol"<<endl;
-                            }
-
-
-
-                            std::string pathfilename;
-                            if ( sol_no == 0 ) {
-                                pathfilename = "./pathfile_0.txt";
-                            }
-                            else if ( sol_no == 1 ) {
-                                pathfilename = "./pathfile_1.txt";
-                            }
-                            else {
-                                pathfilename = "./pathfile.txt";
-                            }
-
-
-                            //testvector.resize(sol_no+1);
-                            RayStep.resize(sol_no+1);
-
-                            // construct
-                            pathStore_vector<RayTrace::minimalRayPosition> pathsave_test;
-                            //pathStore_vector_2<RayTrace::minimalRayPosition> pathsave_test (testvector);
-                            //pathStore_test<RayTrace::minimalRayPosition> pathsave_test ("./pathfile.txt");
-                            //pathStore_test<RayTrace::minimalRayPosition> pathsave_test (pathfilename);
-                
-                            //tf.doTrace<RayTrace::minimalRayPosition>(src_z, it->launchAngle, RayTrace::rayTargetRecord(trg_z,sqrt((trg_x-src_x)*(trg_x-src_x)+(trg_y-src_y)*(trg_y-src_y))), refl, 0.0, 0.0, sol_error, &pathsave_test);
-                            tf.doTrace<RayTrace::minimalRayPosition>(src.GetZ(), PI - it->receiptAngle, RayTrace::rayTargetRecord(trg.GetZ(),sqrt((trg.GetX()-src.GetX())*(trg.GetX()-src.GetX())+(trg.GetY()-src.GetY())*(trg.GetY()-src.GetY()))), refl, 0.0, 0.0, sol_error, &pathsave_test);
-
-                            //pathsave_test.CopyVector( testvector, sol_no );
-                            pathsave_test.CopyVector( RayStep, sol_no );
-                            pathsave_test.DelVector();
-
-                            /*
-                            double totalpath = 0.;
-                            double dx, dz;
-
-                            //cout<<"\nRayStep : "<<(int)testvector[0].size()<<endl;
-                            //for (int step=0; step<(int)testvector[sol_no][0].size(); step++ ) {
-                            for (int step=0; step<(int)RayStep[sol_no][0].size(); step++ ) {
-
-                                if ( step > 0 ) {
-                                    //dx = fabs(testvector[sol_no][0][step-1] - testvector[sol_no][0][step]);
-                                    //dz = fabs(testvector[sol_no][1][step-1] - testvector[sol_no][1][step]);
-                                    dx = fabs(RayStep[sol_no][0][step-1] - RayStep[sol_no][0][step]);
-                                    dz = fabs(RayStep[sol_no][1][step-1] - RayStep[sol_no][1][step]);
-                                    totalpath += sqrt( (dx*dx) + (dz*dz) );
-                                }
-                            }
-                            */
-
-                            //cout<<"pathLen : "<<it->pathLen<<", pathSum : "<<totalpath<<endl;
-
-
-                            //testvector.clear();
-
-
-                            sol_no++;
-                        }
-
-
-
-
-
-                    }
-
-		}
-
-		// reorder the solutions (BAC Jan 2021)
-		// it is useful at this point to re-order the solutions so that the direct solution 
-		// (if it exists) is reported first
-		// this copying method is rather inefficient in terms of memory allocation
-		// but also, it's not obvious that it ever gets called 
-		// (Brian couldn't find a case in testing on a few hundred events)
-		// so probably it doesn't matter
-		if (outputs.size()>0){
-			int num_solutions = outputs[0].size();
-			if(num_solutions>1){
-				// we only need to do something in the case of two solutions
-				double path_len_first_sol = outputs[0][0];
-				double path_len_second_sol = outputs[0][1];
-				if(path_len_second_sol < path_len_first_sol){
-					printf("The second path length (%.2f) is shorter than the first (%.2f)\n",path_len_second_sol, path_len_first_sol);
-					printf("Flipping the order in the output vectors...");
-
-					// if the shorter path length (which must be the direct solution)
-					// has ended up second, then we need to make a swap
-					// so that it's first in the output
-
-					// for the outputs vector, we flip the first and second columns
-					// that is, the direct and refracted/reflected solution
-					// first, make a copy of the original
-					vector< vector <double> > tmp_outputs(outputs);
-					// then make the flip
-					for(int item=0; item<outputs.size(); item++){
-						outputs[item][0] = tmp_outputs[item][1];
-						outputs[item][1] = tmp_outputs[item][0];
-					}
-
-					// for the RayStep, it's [solution][dimension (x or z)][step]
-					// so we need to be a little smarter
-					// first make a copy of the original
-					vector< vector< vector <double> > > tmp_RayStep(RayStep);
-
-					// now, totally empty the older vector (the one we need to return to the user at the end)
-					RayStep.clear();
-					RayStep.resize(2); // the RayStep needs a direct and refr/refl solution
-
-					// first, the direct solution (which is currently in tmp_RayStep[1])
-					RayStep[0].resize(2); // x and z for the direct
-					for(int step=0; step<tmp_RayStep[1][0].size(); step++){
-						RayStep[0][0].push_back(tmp_RayStep[1][0][step]); // x component
-						RayStep[0][1].push_back(tmp_RayStep[1][1][step]); // z component
-					}
-					// next, the reflected/refracted solution (which is currently in tmp_RayStep[0])
-					RayStep[1].resize(2); // x and z for the refracted/reflected
-					for(int step=0; step<tmp_RayStep[0][0].size(); step++){
-						RayStep[1][0].push_back(tmp_RayStep[0][0][step]); // x component
-						RayStep[1][1].push_back(tmp_RayStep[0][1][step]); // y component
-					}
-				}
-			}		
-		}
-	}
-	else{ //do write out path data
-            // I didn't fix this part yet!
-            int sol_error;
-
-		pathPrinter<RayTrace::minimalRayPosition> print;
-		for(std::vector<RayTrace::TraceRecord>::const_iterator it=paths.begin(); it!=paths.end(); ++it){
-			tf.doTrace<RayTrace::minimalRayPosition>(src_z, it->launchAngle, RayTrace::rayTargetRecord(trg_z,sqrt((trg_x-src_x)*(trg_x-src_x)+(trg_y-src_y)*(trg_y-src_y))), refl, 0.0, 0.0, sol_error, &print);
-			//std::cout << "\n\n";
-		}
-	}
-	//--------------------------------------------------
-	// return(0);
-	//-------------------------------------------------- 
 }
 
 
