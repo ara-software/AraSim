@@ -310,6 +310,8 @@ outputdir="outputs"; // directory where outputs go
 
   EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: event mode
   //    EVENT_NUM = 10;//read in event number in EVENT_GENERATION_MODE=1, no more than 100 events
+
+  ANTENNA_TARGET_MEDIUM_N=1.78; // default to deep ice index of refraction
   ANTENNA_MODE=0; //default: 0 - old antenna model information
   IMPEDANCE_RX_VPOL=0;
   IMPEDANCE_RX_VPOL_TOP=0;
@@ -724,6 +726,9 @@ void Settings::ReadFile(string setupfile) {
 	      //              else if (label == "EVENT_NUM"){
 	      //                  EVENT_NUM = atoi(line.substr(line.find_first_of("=") + 1).c_str());
 	      //              }
+              else if (label == "ANTENNA_TARGET_MEDIUM_N"){
+                  ANTENNA_TARGET_MEDIUM_N = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
               else if (label == "ANTENNA_MODE"){
                   ANTENNA_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }

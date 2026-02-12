@@ -312,6 +312,7 @@ class Settings
         int EVENT_GENERATION_MODE;//default: 0: not event mode, 1: event mode
 	//        int EVENT_NUM;//number of events to read in, using EVENT_GENERATION_MODE=1, default initial 0: read in the number of events in the input file, resets to total number of events read in
 
+        double ANTENNA_TARGET_MEDIUM_N; // index of refraction of target medium for antenna gain
         int ANTENNA_MODE; // 0: old default antenna models bicone/rotated dipole
                            // 1: using different antenna response for the top Vpol antennas, otherwise same as old default
                              // 2: use the ARIANNA wipld LPDA responses instead
