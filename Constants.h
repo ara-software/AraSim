@@ -39,6 +39,10 @@ const double Z_AIR=377;            // resistance of air = sqrt(epsilon/mu)
 const double NFIRN=1.3250;                   // index of refraction at the very surface - Peter
 const double NICE=1.79;                      // index of refraction of ice
 
+// see DocDB XXXXX for details
+const double NICE_REF=1.78;           // reference index of refraction for borehole simulation 
+const double NEFF_REF=1.45;           // reference effective index of refraction for borehol simulation
+
 enum {kNC, kCC};    // neutrino interaction constant nc : 0, cc :1
 
 

@@ -3495,10 +3495,19 @@ void Report::GetParameters(
 
 }
 
+double Report::GetEffectiveIndex(const double n_local) {
 
-double Report::GaintoHeight(double gain, double freq, double n_medium, double Z_A) {
-    
-    return sqrt((gain*CLIGHT*CLIGHT*Zr) / (4*PI*n_medium*freq*freq*Z0));
+    const double scaling = (NEFF_REF-1.) / (NICE_REF-1.);
+    const double n_eff = 1. + scaling*(n_local - 1.);
+
+    return n_eff;
+}
+
+double Report::GaintoHeight(double gain, double freq, double n_local, double Z_A) {
+
+    double n_eff = GetEffectiveIndex(n_local);   
+ 
+    return sqrt((gain*CLIGHT*CLIGHT*Zr) / (4*PI*n_eff*freq*freq*Z0));
 
 }
 
