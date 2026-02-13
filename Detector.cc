@@ -2663,7 +2663,7 @@ double Detector::GetTransm_OutZero(int ch, double freq) {
 double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimensions!
    
     // scale frequency according to ratio of media indices of refraction
-    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n 
+    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n; 
  
     // change antenna facing orientation
     if (ant_o == 0) {
@@ -2806,7 +2806,7 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
 double Detector::GetGain(double freq, double theta, double phi, int ant_m) {
     
     // scale frequency according to ratio of media indices of refraction
-    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n 
+    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n; 
     
     //Parameters params;
     
@@ -2916,7 +2916,7 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m) {
 double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m ) {
 
     // scale frequency according to ratio of media indices of refraction
-    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n 
+    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n; 
     
     int i = (int)(theta/5.);
     int j = (int)(phi/5.);
@@ -3027,7 +3027,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     */
     
     // scale frequency according to ratio of media indices of refraction
-    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n 
+    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n; 
     
     //Initialize pointer to dynamically point to the gain for chosen antenna.  The structure of this pointer matches that of the global gain arrays defined in Detector.h.
     vector<vector<double> > *tempGain = nullptr;
@@ -3190,7 +3190,7 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
 double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m, bool useInTransmitterMode ) {
     
     // scale frequency according to ratio of media indices of refraction
-    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n 
+    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n; 
     
     //Creating tempPhase array to make this function more dynamic for Rx and Tx mode.
     vector<vector<double> > *tempPhase = nullptr;
