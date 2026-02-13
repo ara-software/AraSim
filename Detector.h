@@ -234,7 +234,9 @@ class Detector {
         vector<vector<double> > Hgain;
         vector<vector<double> > Hphase;
         vector<double> Freq;
-    
+        double antenna_target_medium_n;
+        double antenna_source_medium_n;    
+ 
         //Define impedance and gain for receiving antenna
         vector<double> impFreq;
         double RealImpedanceV[freq_step_max];

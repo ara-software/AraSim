@@ -2366,6 +2366,9 @@ inline double Detector::SWRtoTransCoeff(double swr){
 
 inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAntennaType type) {
 
+    // assign target medium to class variable 
+    antenna_target_medium_n = settings1->ANTENNA_TARGET_MEDIUM_N;
+    
     // define some dummy variables that will point to the real variables
     // where values are stored
     vector<double> * freq;
@@ -2423,6 +2426,29 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
   
     // read the first line
     getline (NecOut, line);
+
+    // extract source index of refraction
+    {
+        //put line into a string stream
+        stringstream ss(line);
+
+        // break line up into each of its words (i.e. strings separated by whitespace)
+        string buff;
+        vector<string> words;
+        while(ss >> buff) { // >> skips whitespace and just goes to the next word
+            words.push_back(buff);
+        }
+
+        if(words.size() > 0 && words[0] == "n") { // index included in file
+            antenna_source_medium_n = stof(words[0]);
+            getline (NecOut, line); // get next line
+        }
+        else { // if line doesn't exist in file, do not load another and match target n so no transformation occurs
+            cerr << "Index of refraction for antenna gain file " << filename << " could not be "
+                 << "determined. Using target medium index: " << antenna_target_medium_n << "." << endl;
+            antenna_source_medium_n = antenna_target_medium_n;
+        }
+    }
             
     // start reading the file 
     while (NecOut.good() ) {
@@ -2634,8 +2660,11 @@ double Detector::GetTransm_OutZero(int ch, double freq) {
 
 }
 
-double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimentions!
-    
+double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o) { // using Interpolation on multidimensions!
+   
+    // scale frequency according to ratio of media indices of refraction
+    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n 
+ 
     // change antenna facing orientation
     if (ant_o == 0) {
         // no change...
@@ -2683,18 +2712,18 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
     double u = (phi - phij)/(phij1 - phij);
     
     // in case when freq is out of nec2 freq range. use nearest min/max freq bin value. 
-    if ( freq < freq_init ) { 
+    if ( freq_scaled < freq_init ) { 
         //cout<<"Frequency value is smaller than frequency range with Gain."<<endl;
         //cout<<"Frequency value "<<freq<<" will be replaced to minimum frequency value "<<freq_init<<endl;
-        freq = freq_init;
+        freq_scaled = freq_init;
     }
-    else if ( freq > (freq_init + freq_width*((double)freq_step-1.) ) ) { 
+    else if ( freq_scaled > (freq_init + freq_width*((double)freq_step-1.) ) ) { 
         //cout<<"Frequency value is bigger than frequency range with Gain."<<endl;
         //cout<<"Frequency value "<<freq<<" will be replaced to maximum frequency value "<< freq_init + freq_width*((double)freq_step-1.) - 0.01 <<endl;
-        freq = freq_init + freq_width*((double)freq_step-1.) - 0.01;
+        freq_scaled = freq_init + freq_width*((double)freq_step-1.) - 0.01;
     }
     
-    int fx1 = (int)( (freq - freq_init)/freq_width );
+    int fx1 = (int)( (freq_scaled - freq_init)/freq_width );
     int fx2 = fx1 + 1;
     
     double Gij, Gi1j, Gij1, Gi1j1, Gout1, Gout2, Gout;
@@ -2763,7 +2792,7 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
         Gout2 = 0.;
     }
     
-    Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
+    Gout = ((Gout2 - Gout1)/freq_width) * ( freq_scaled - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
     
     if ( Gout < 0. ) { // gain can not go below 0
     	Gout = 0.;
@@ -2775,6 +2804,9 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
 
 
 double Detector::GetGain(double freq, double theta, double phi, int ant_m) {
+    
+    // scale frequency according to ratio of media indices of refraction
+    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n 
     
     //Parameters params;
     
@@ -2791,18 +2823,18 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m) {
     
     
     // in case when freq is out of nec2 freq range. use nearest min/max freq bin value. 
-    if ( freq < freq_init ) { 
+    if ( freq_scaled < freq_init ) { 
         //cout<<"Frequency value is smaller than frequency range with Gain."<<endl;
         //cout<<"Frequency value "<<freq<<" will be replaced to minimum frequency value "<<freq_init<<endl;
-        freq = freq_init; 
+        freq_scaled = freq_init; 
     }
-    else if ( freq > (freq_init + freq_width*((double)freq_step - 1.) ) ) { 
+    else if ( freq_scaled > (freq_init + freq_width*((double)freq_step - 1.) ) ) { 
         //cout<<"Frequency value is bigger than frequency range with Gain."<<endl;
         //cout<<"Frequency value "<<freq<<" will be replaced to maximum frequency value "<< freq_init + freq_width*((double)freq_step-1.) - 0.01 <<endl;
-        freq = freq_init + freq_width*((double)freq_step-1.) - 0.01;
+        freq_scaled = freq_init + freq_width*((double)freq_step-1.) - 0.01;
     }
     
-    int fx1 = (int)( (freq - freq_init)/freq_width );
+    int fx1 = (int)( (freq_scaled - freq_init)/freq_width );
     int fx2 = fx1 + 1;
     
     double Gij, Gi1j, Gij1, Gi1j1, Gout1, Gout2, Gout;
@@ -2871,7 +2903,7 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m) {
         Gout2 = 0.;
     }
     
-    Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
+    Gout = ((Gout2 - Gout1)/freq_width) * ( freq_scaled - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
     if ( Gout < 0. ) { // gain can not go below 0
     	Gout = 0.;
     }
@@ -2883,6 +2915,9 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m) {
 
 double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m ) {
 
+    // scale frequency according to ratio of media indices of refraction
+    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n 
+    
     int i = (int)(theta/5.);
     int j = (int)(phi/5.);
     
@@ -2896,19 +2931,19 @@ double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m )
     
     
     // in case when freq is out of nec2 freq range. use nearest min/max freq bin value. 
-    if ( freq < freq_init ) { 
+    if ( freq_scaled < freq_init ) { 
         //cout<<"Frequency value is smaller than frequency range with phase."<<endl;
         //cout<<"Frequency value "<<freq<<" will be replaced to minimum frequency value "<<freq_init<<endl;
-        freq = freq_init;
+        freq_scaled = freq_init;
     }
-    else if ( freq > (freq_init + freq_width*((double)freq_step - 1.) ) ) { 
+    else if ( freq_scaled > (freq_init + freq_width*((double)freq_step - 1.) ) ) { 
         //cout<<"Frequency value is bigger than frequency range with phase."<<endl;
         //cout<<"Frequency value "<<freq<<" will be replaced to maximum frequency value "<< freq_init + freq_width*((double)freq_step-1.) - 0.01 <<endl;
-        freq = freq_init + freq_width*((double)freq_step-1.) - 0.01;
+        freq_scaled = freq_init + freq_width*((double)freq_step-1.) - 0.01;
     }
     
     
-    int fx1 = (int)( (freq - freq_init)/freq_width );
+    int fx1 = (int)( (freq_scaled - freq_init)/freq_width );
     int fx2 = fx1 + 1;
     
     double Gij, Gi1j, Gij1, Gi1j1, Gout1, Gout2, Gout;
@@ -2977,7 +3012,7 @@ double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m )
         Gout2 = 0.;
     }
     
-    Gout = ((Gout2 - Gout1)/freq_width) * ( freq - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
+    Gout = ((Gout2 - Gout1)/freq_width) * ( freq_scaled - (freq_init + fx1*freq_width) ) + Gout1; // get linear interpolation between two nearest freq bin.
     
     
     return Gout;
@@ -2990,6 +3025,9 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, Txgain)
     to match the frequency binning dictated by NFOUR in the setup file. 
     */
+    
+    // scale frequency according to ratio of media indices of refraction
+    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n 
     
     //Initialize pointer to dynamically point to the gain for chosen antenna.  The structure of this pointer matches that of the global gain arrays defined in Detector.h.
     vector<vector<double> > *tempGain = nullptr;
@@ -3069,21 +3107,21 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
     double Gout;
 
-    int bin = (int)( (freq - thisFreq_init) / thisFreq_width )+1;
+    int bin = (int)( (freq_scaled - thisFreq_init) / thisFreq_width )+1;
 
      //Interpolation of tempGain
     slope_1 = ((*tempGain)[1][angle_bin] - (*tempGain)[0][angle_bin]) / (F->at(1) - F->at(0));
 
     // if freq is lower than freq_init
-    if ( freq < thisFreq_init ) { 
-        Gout = slope_1 * (freq - F->at(0)) + (*tempGain)[0][angle_bin];
+    if ( freq_scaled < thisFreq_init ) { 
+        Gout = slope_1 * (freq_scaled - F->at(0)) + (*tempGain)[0][angle_bin];
     }
     // if freq is higher than last freq
-    else if ( freq > F->back() ) { 
+    else if ( freq_scaled > F->back() ) { 
         Gout = 0.;
     }
     else { 
-        Gout = (*tempGain)[bin-1][angle_bin] + (freq-F->at(bin-1))*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(F->at(bin)-F->at(bin-1));
+        Gout = (*tempGain)[bin-1][angle_bin] + (freq_scaled-F->at(bin-1))*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(F->at(bin)-F->at(bin-1));
     }   
  
     if ( Gout < 0. ) { // gain can not go below 0
@@ -3151,6 +3189,9 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
 
 double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m, bool useInTransmitterMode ) {
     
+    // scale frequency according to ratio of media indices of refraction
+    double freq_scaled = freq * antenna_target_medium_n / antenna_source_medium_n 
+    
     //Creating tempPhase array to make this function more dynamic for Rx and Tx mode.
     vector<vector<double> > *tempPhase = nullptr;
     vector<double> * F;   
@@ -3204,16 +3245,16 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
 
     double phase;
 
-    int bin = (int)( (freq - thisFreq_init) / thisFreq_width )+1;
+    int bin = (int)( (freq_scaled - thisFreq_init) / thisFreq_width )+1;
 
     slope_1 = ((*tempPhase)[1][angle_bin] - (*tempPhase)[0][angle_bin]) / (F->at(1) - F->at(0));
     slope_2 = ((*tempPhase)[thisFreq_step-1][angle_bin] - (*tempPhase)[thisFreq_step-2][angle_bin]) / (F->at(thisFreq_step-1) - F->at(thisFreq_step-2));
 
 
     // if freq is lower than freq_init
-    if ( freq < thisFreq_init ) {
+    if ( freq_scaled < thisFreq_init ) {
 
-        phase = slope_1 * (freq - F->at(0)) + (*tempPhase)[0][angle_bin];
+        phase = slope_1 * (freq_scaled - F->at(0)) + (*tempPhase)[0][angle_bin];
 
         if ( phase > 180. ) {
             while ( phase > 180. ) { 
@@ -3227,9 +3268,9 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
         }
     }
     // if freq is higher than last freq
-    else if ( freq > F->back() ) {
+    else if ( freq_scaled > F->back() ) {
 
-        phase = slope_2 * (freq - F->back()) + (*tempPhase)[thisFreq_step-1][angle_bin];
+        phase = slope_2 * (freq_scaled - F->back()) + (*tempPhase)[thisFreq_step-1][angle_bin];
 
         if ( phase > 180. ) {
             while ( phase > 180. ) { 
@@ -3253,15 +3294,15 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
 
             // down going case
             if ( slope_t1 * slope_t2 > 0. && (*tempPhase)[bin][angle_bin] - (*tempPhase)[bin-1][angle_bin] > 180. ) { 
-                phase = (*tempPhase)[bin-1][angle_bin] + (freq - F->at(bin-1))*((*tempPhase)[bin][angle_bin]-360.-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
+                phase = (*tempPhase)[bin-1][angle_bin] + (freq_scaled - F->at(bin-1))*((*tempPhase)[bin][angle_bin]-360.-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
             }
             // up going case
             else if ( slope_t1 * slope_t2 > 0. && (*tempPhase)[bin][angle_bin] - (*tempPhase)[bin-1][angle_bin] < -180. ) { 
-                phase = (*tempPhase)[bin-1][angle_bin] + (freq - F->at(bin-1))*((*tempPhase)[bin][angle_bin]+360.-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
+                phase = (*tempPhase)[bin-1][angle_bin] + (freq_scaled - F->at(bin-1))*((*tempPhase)[bin][angle_bin]+360.-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
             }
             // neither case
             else { 
-                phase = (*tempPhase)[bin-1][angle_bin] + (freq - F->at(bin-1))*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
+                phase = (*tempPhase)[bin-1][angle_bin] + (freq_scaled - F->at(bin-1))*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
             }          
 
             // if outside the range, put inside
@@ -3278,7 +3319,7 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
 
         }// not first two bins
         else { 
-            phase = (*tempPhase)[bin-1][angle_bin] + (freq - F->at(bin-1))*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
+            phase = (*tempPhase)[bin-1][angle_bin] + (freq_scaled - F->at(bin-1))*((*tempPhase)[bin][angle_bin]-(*tempPhase)[bin-1][angle_bin])/(F->at(bin) - F->at(bin-1));
         }
     
         // if outside the range, put inside
