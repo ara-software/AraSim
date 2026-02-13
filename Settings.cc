@@ -726,9 +726,6 @@ void Settings::ReadFile(string setupfile) {
 	      //              else if (label == "EVENT_NUM"){
 	      //                  EVENT_NUM = atoi(line.substr(line.find_first_of("=") + 1).c_str());
 	      //              }
-              else if (label == "ANTENNA_TARGET_MEDIUM_N"){
-                  ANTENNA_TARGET_MEDIUM_N = atof(line.substr(line.find_first_of("=") + 1).c_str());
-              }
               else if (label == "ANTENNA_MODE"){
                   ANTENNA_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
