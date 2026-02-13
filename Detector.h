@@ -109,7 +109,7 @@ class Surface_antenna : public Position {
     int type;   // need to be defined
     int orient; //0 : facing x, 1 : y, 2 : -x, 3 : -y.
 
-    double GetG(Detector *D, double freq, double theta, double phi);    // read gain value from Detector class
+    double GetG(Detector *D, double freq, double theta, double phi, double target_n);    // read gain value from Detector class
 
     ClassDef(Surface_antenna,1);
 
@@ -132,7 +132,7 @@ class Antenna : public Position {
 
     int manual_delay_bin;   // to fit the waveform to actual TestBed waveform, added manual delay bin
     
-    double GetG(Detector *D, double freq, double theta, double phi);    // read gain value from Detector class, return 2-D interpolated value
+    double GetG(Detector *D, double freq, double theta, double phi, double target_n);    // read gain value from Detector class, return 2-D interpolated value
 
 
     //ClassDef(Antenna,1);
@@ -234,7 +234,6 @@ class Detector {
         vector<vector<double> > Hgain;
         vector<vector<double> > Hphase;
         vector<double> Freq;
-        double antenna_target_medium_n;
         double antenna_source_medium_n;    
  
         //Define impedance and gain for receiving antenna
@@ -382,10 +381,10 @@ class Detector {
 
         vector <double> freq_forfft;
 
-        double GetGain(double freq, double theta, double phi, int ant_m, int ant_o);    //read antenna gain at certain angle, certain type, and certain orientation
-        double GetGain(double freq, double theta, double phi, int ant_m);   //read antenna gain at certain angle, certain type. (orientation : default)
+        double GetGain(double freq, double theta, double phi, int ant_m, int ant_o, double antenna_target_medium_n);    //read antenna gain at certain angle, certain type, and certain orientation
+        double GetGain(double freq, double theta, double phi, int ant_m, double antenna_target_medium_n);   //read antenna gain at certain angle, certain type. (orientation : default)
 
-        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, int string_number=0, int ant_number=0, bool useInTransmitterMode=false);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
+        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, double antenna_target_medium_n, int string_number=0, int ant_number=0, bool useInTransmitterMode=false);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
 
         //Creating function to interpolate antenna impedance to frequency binning.
         double GetImpedance(double freq, int ant_m=0, int ant_number=0, bool useInTransmitterMode=false);
@@ -393,9 +392,9 @@ class Detector {
         int GetTrigOffset( int ch, Settings *settings1 );
         int GetTrigMasking( int ch );
 
-        double GetAntPhase(double freq, double theta, double phi, int ant_m); // return antenna phase with 2-D interpolation
+        double GetAntPhase(double freq, double theta, double phi, int ant_m, double antenna_target_medium_n); // return antenna phase with 2-D interpolation
 
-        double GetAntPhase_1D(double freq, double theta, double phi, int ant_m, bool useInTransmitterMode=false); // return antenna phase with 1-D interpolation
+        double GetAntPhase_1D(double freq, double theta, double phi, int ant_m, double antenna_target_medium_n, bool useInTransmitterMode=false); // return antenna phase with 1-D interpolation
 
 
         double GetFilterGain(int bin) { return FilterGain[bin]; }   // same bin with Vgain, Hgain

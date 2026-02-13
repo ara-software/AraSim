@@ -1078,10 +1078,11 @@ void Report::ModelRay(
                 double freq_tmp = detector->GetFreq(l);    // freq in Hz
 
                 // Get ant gain with 2-D interpolation
+                double n_eff = GetEffectiveIndex(icemodel->GetN(*antenna_d));
                 double heff = GaintoHeight(
                     detector->GetGain_1D_OutZero(
                         freq_tmp *1.E-6, antenna_theta,  antenna_phi,  
-                        antenna_d->type, j, k),
+                        antenna_d->type, n_eff, j, k),
                     freq_tmp, 
                     icemodel->GetN(*antenna_d),
                     detector->GetImpedance(freq_tmp*1.E-6, antenna_d->type, j, k));                                        
@@ -1569,10 +1570,11 @@ void Report::PropagateSignal(
         birefringence->Principal_axes_polarization(Pol_vector, bire_ray_cnt, max_bire_ray_cnt, settings); 
 
         // Get ant gain with 2-D interpolation 
+        double n_eff = GetEffectiveIndex(icemodel->GetN(*antenna_d));
         double heff_lastbin = GaintoHeight(
             detector->GetGain_1D_OutZero(
                 freq_tmp *1.E-6, antenna_theta, antenna_phi, 
-                antenna_d->type, j, k),
+                antenna_d->type, n_eff, j, k),
             freq_tmp, 
             icemodel->GetN(*antenna_d),
             detector->GetImpedance(freq_tmp*1.E-6, antenna_d->type, k));
@@ -1591,16 +1593,18 @@ void Report::PropagateSignal(
 
             double Tx_theta = theta*180/PI;
             double Tx_phi = phi*180/PI;
+            double n_eff = GetEffectiveIndex(icemodel->GetN(*antenna_d));
             double heff_Tx_lastbin = GaintoHeight(
-                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true),
+                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, n_eff, 0, 0, true),
                 freq_tmp, 
                 icemodel->GetN(*antenna_d),
                 detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));  
         }
         else if (event->IsCalpulser > 0){ // Calibration Pulser simulations
             Tx_theta = ray_output[1][ray_idx] *DEGRAD;    // from 0 to 180
+            double n_eff = GetEffectiveIndex(icemodel->GetN(event->Nu_Interaction[interaction_idx].posnu));
             heff_Tx_lastbin = GaintoHeight(
-                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, antenna_phi, antenna_d->type, j, k),
+                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, antenna_phi, antenna_d->type, n_eff, j, k),
                 freq_tmp, icemodel->GetN(event->Nu_Interaction[interaction_idx].posnu));   
                 
             if (event->IsCalpulser == 1) {
@@ -1624,8 +1628,9 @@ void Report::PropagateSignal(
 
             freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
         
+            double n_eff = GetEffectiveIndex(icemodel->GetN(*antenna_d));
             double heff = GaintoHeight(
-                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta,  antenna_phi, antenna_d->type, j, k),
+                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta,  antenna_phi, antenna_d->type, n_eff, j, k),
                 freq_tmp, 
                 icemodel->GetN(*antenna_d),
                 detector->GetImpedance(freq_tmp*1.E-6, antenna_d->type, k));                                                        
@@ -1660,14 +1665,15 @@ void Report::PropagateSignal(
 
             // Apply transmitter effective height if in PVA Pulser mode
             if (settings->EVENT_TYPE == 12){
+                double n_eff = GetEffectiveIndex(icemodel->GetN(*antenna_d));
                 double heff_Tx = GaintoHeight(
-                    detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true),
+                    detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, n_eff, 0, 0, true),
                     freq_tmp, 
                     icemodel->GetN(*antenna_d),
                     detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));   
                 if (n > 0) {
                     ApplyAntFactors_Tdomain(
-                        detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0),
+                        detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, n_eff),
                         heff_Tx, Pol_vector, 0, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], 
                         settings, Tx_theta, Tx_phi, freq_tmp, detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true), true);
                 }
@@ -1679,15 +1685,16 @@ void Report::PropagateSignal(
             }
             else if (event->IsCalpulser > 0){
                 // apply ant factors (transmitter ant)
+                double n_eff = GetEffectiveIndex(icemodel->GetN(*antenna_d));
                 heff = GaintoHeight(
                     detector->GetGain_1D_OutZero(
                         freq_tmp *1.E-6,   // to MHz
-                        Tx_theta, antenna_phi, antenna_d->type, j, k),
+                        Tx_theta, antenna_phi, antenna_d->type, n_eff, j, k),
                     freq_tmp, icemodel->GetN(event->Nu_Interaction[interaction_idx].posnu));
                 
                 if (n > 0) {
                     ApplyAntFactors_Tdomain(
-                        detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, antenna_phi, antenna_d->type),
+                        detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, antenna_phi, antenna_d->type, n_eff),
                         heff, Pol_vector, antenna_d->type, Pol_factor, 
                         V_forfft[2 *n], V_forfft[2 *n + 1], settings, true, antenna_theta, antenna_phi, freq_tmp);
                 }
@@ -1701,7 +1708,7 @@ void Report::PropagateSignal(
             // apply ant factors
             if (n > 0) {
                 ApplyAntFactors_Tdomain( 
-                    detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, antenna_d->type),
+                    detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, antenna_d->type, n_eff),
                     heff, Pol_vector, antenna_d->type, Pol_factor, 
                     V_forfft[2 *n], V_forfft[2 *n + 1], settings, antenna_theta, antenna_phi, freq_tmp);                                                                
             }
