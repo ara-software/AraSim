@@ -3560,7 +3560,7 @@ void Report::ApplyAntFactors_Tdomain (
     
     Inputs:
         AntPhase:  Phase of the antenna, usually calculated with Detector::GetAntPhase_1D()
-        heff:  Effective height of the antenna, usually calculated with Report::GainToHeight
+        heff:  Effective height of the antenna, usually calculated with Report::GaintoHeight
         Pol_vector:  polarization vector of electric field as it reaches the antenna.  Used to calculate pol_factor
         ant_type:  integer indicates Vpol (0) or HPol (1) antenna.  Use to calculate pol_factor
         pol_factor:  The projection of the E-field onto the antenna.  Essentially the cos(theta) term in a dot product between the E-field and effective height vector.
