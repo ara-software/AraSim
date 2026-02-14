@@ -6,6 +6,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
+#include <zlib.h>
 #include <sstream>
 #include <math.h>
 #include <string>
@@ -2403,8 +2405,45 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     }
 
     // open the requested file
-    ifstream NecOut( filename.c_str() );
-  
+    unique_ptr<istream> streamPtr;
+    ifstream fileTest(filename, ios::binary);
+
+    // Detect gzip by magic bytes
+    unsigned char magic[2] = {0};
+    fileTest.read(reinterpret_cast<char*>(magic), 2);
+    fileTest.close();
+
+    bool isGz = (magic[0] == 0x1f && magic[1] == 0x8b);
+
+    // now actually load the file
+    if (!isGz) {
+        // Plain text load
+        auto f = make_unique<ifstream>(filename);
+        if (!f->is_open())
+            throw runtime_error("Antenna gain file could not be opened: " + filename);
+        streamPtr = move(f);
+    } else {
+        // Gzip load
+        gzFile gz = gzopen(filename.c_str(), "rb");
+        if (!gz)
+            throw runtime_error("Could not open gz file: " + filename);
+
+        // Decompress entire file into memory
+        string buffer;
+        char tmp[8192];
+        int bytes;
+        while ((bytes = gzread(gz, tmp, sizeof(tmp))) > 0) {
+            buffer.append(tmp, bytes);
+        }
+        gzclose(gz);
+
+        streamPtr = make_unique<istringstream>(buffer);
+    }
+
+    // assign expected object type 
+    istream& NecOut = *streamPtr;
+ 
+ 
     // initialize some variables used for read-in
     vector<double> Transm;
     string line;
@@ -2417,7 +2456,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     }
     
     // check the file opened successfully
-    if (! NecOut.is_open() ) { 
+    if (!NecOut ) { 
         throw runtime_error("Antenna gain file could not be opened: "+filename);
     }
   
@@ -2547,7 +2586,6 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         getline (NecOut, line);
             
     }// end while NecOut.good
-    NecOut.close();
 
     // skip this for the transmitter case for now since it may not match other models 
     if(type == eTx)
