@@ -2413,7 +2413,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     fileTest.read(reinterpret_cast<char*>(magic), 2);
     fileTest.close();
 
-    bool isGz = (magic[0] == 0x1f && magic[1] == 0x8b);
+    bool isGz = (magic[0] == 0x1f && magic[1] == 0x8b); // check for magic bytes in header indicating the file is of type gzip
 
     // now actually load the file
     if (!isGz) {
@@ -2432,7 +2432,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         string buffer;
         char tmp[8192];
         int bytes;
-        while ((bytes = gzread(gz, tmp, sizeof(tmp))) > 0) {
+        while ((bytes = gzread(gz, tmp, sizeof(tmp))) > 0) { // load file in chunks of size set by tmp
             buffer.append(tmp, bytes);
         }
         gzclose(gz);
