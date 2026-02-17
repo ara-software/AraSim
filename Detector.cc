@@ -2298,9 +2298,9 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/In_situ_HPol_Model.txt";         
     }
     else if (settings1->ANTENNA_MODE == 5) { //Adding antenna mode for Kansas lab measurements.
-        VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Kansas2024.txt";
-        VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Kansas2024.txt";
-        HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Kansas2024.txt";         
+        VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Kansas2024.txt.gz";
+        VgainTopFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Copol_Kansas2024.txt.gz";
+        HgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Copol_Kansas2024.txt.gz";         
     }
     else if (settings1->ANTENNA_MODE == 6) { //Adding antenna mode for custom gains.
         VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Copol_Custom.txt";
@@ -2367,7 +2367,7 @@ inline double Detector::SWRtoTransCoeff(double swr){
 }
 
 inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAntennaType type) {
-    
+
     // define some dummy variables that will point to the real variables
     // where values are stored
     vector<double> * freq;
@@ -2443,7 +2443,6 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     // assign expected object type 
     istream& NecOut = *streamPtr;
  
- 
     // initialize some variables used for read-in
     vector<double> Transm;
     string line;
@@ -2476,7 +2475,11 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         }
 
         if(words.size() > 0 && words[0] == "n") { // index included in file
-            antenna_source_medium_n = stof(words[0]);
+            // make sure it's properly formatted
+            if(words.size() != 3) {
+                throw runtime_error("Antenna gain file index of refraction not properly formatted! "+filename);
+            }
+            antenna_source_medium_n = stof(words[2]);
             getline (NecOut, line); // get next line
         }
         else { // if line doesn't exist in file, do not load another and match target n so no transformation occurs
@@ -3170,7 +3173,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useInTransmitterMode ) {
 
     //Initialize pointer to dynamically point to the impedance for the chosen antenna.
-    double (*tempImpedance)[freq_step_max] = nullptr;
+    vector<double> *tempImpedance = nullptr;
     //Tx
     if (useInTransmitterMode) { 
         tempImpedance = &RealImpedanceTx;
@@ -3200,18 +3203,18 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
     int bin = (int)( (freq - thisFreq_init) / thisFreq_width )+1;
 
      //Interpolation of tempGain
-    slope_1 = ((*tempImpedance)[1] - (*tempImpedance)[0]) / (F->at(1) - F->at(0));
+    slope_1 = (tempImpedance->at(1) - tempImpedance->at(0)) / (F->at(1) - F->at(0));
 
     // if freq is lower than freq_init
     if ( freq < thisFreq_init ) { 
-        ZOut = slope_1 * (freq - F->at(0)) + (*tempImpedance)[0];
+        ZOut = slope_1 * (freq - F->at(0)) + tempImpedance->at(0);
     }
     // if freq is higher than last freq
     else if ( freq > F->back() ) { 
         ZOut = 0.;
     }
     else { 
-        ZOut = (*tempImpedance)[bin-1] + (freq - F->at(bin-1))*((*tempImpedance)[bin]-(*tempImpedance)[bin-1])/(F->at(bin) - F->at(bin-1));
+        ZOut = tempImpedance->at(bin-1) + (freq - F->at(bin-1))*(tempImpedance->at(bin)-tempImpedance->at(bin-1))/(F->at(bin) - F->at(bin-1));
     }    
 
     if ( ZOut < 0. ) { // impedance can not go below 0
@@ -3792,10 +3795,10 @@ inline void Detector::ReadFilter(string filename, Settings *settings1) {    // w
         cout<<"Filter file can not opened!!"<<endl;
     }   
  
-    double xfreq[N];
-    double ygain[N];  // need array for Tools::SimpleLinearInterpolation
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    vector<double> xfreq(N);
+    vector<double> ygain(N);  // need array for Tools::SimpleLinearInterpolation
+    vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
+    vector<double> ygain_databin(settings1->DATA_BIN_SIZE/2);   // array for gain in FFT bin
     double df_fft;
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
@@ -3809,17 +3812,18 @@ inline void Detector::ReadFilter(string filename, Settings *settings1) {    // w
     }    
 
     // Tools::SimpleLinearInterpolation will return Filter array (in dB)
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, &Freq[0], FilterGain );
+    FilterGain.resize(freq_step);
+    Tools::SimpleLinearInterpolation( N, xfreq.data(), ygain.data(), freq_step, Freq.data(), FilterGain.data() );
     
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+    Tools::SimpleLinearInterpolation( N, xfreq.data(), ygain.data(), settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), ygain_databin.data() );
     
     for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) { 
         FilterGain_databin.push_back( ygain_databin[i] );
     }
     
     // for NFOUR/2 t domain array
-    double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
-    double ygain_NFOUR[settings1->NFOUR/4+1];   // array for gain in FFT bin
+    vector<double> xfreq_NFOUR(settings1->NFOUR/4+1);   // array for FFT freq bin
+    vector<double> ygain_NFOUR(settings1->NFOUR/4+1);   // array for gain in FFT bin
     
     df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
 
@@ -3827,7 +3831,7 @@ inline void Detector::ReadFilter(string filename, Settings *settings1) {    // w
         xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
 
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
+    Tools::SimpleLinearInterpolation( N, xfreq.data(), ygain.data(), settings1->NFOUR/4+1, xfreq_NFOUR.data(), ygain_NFOUR.data() );
     
     for (int i=0;i<settings1->NFOUR/4+1;i++) { 
         FilterGain_NFOUR.push_back( ygain_NFOUR[i] );
@@ -3853,7 +3857,7 @@ void Detector::ReadFilter_New(Settings *settings1) {    // will return gain (dB)
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
 
-    Tools::SimpleLinearInterpolation( freq_step, &Freq[0], FilterGain, settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), ygain_databin.data() );
+    Tools::SimpleLinearInterpolation( freq_step, &Freq[0], FilterGain.data(), settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), ygain_databin.data() );
         
     FilterGain_databin.clear();
     
@@ -3891,34 +3895,31 @@ inline void Detector::ReadPreamp(string filename, Settings *settings1) {    // w
         cout<<"Preamgain file can not opened!!"<<endl;
     }    
 
-    double xfreq[N];
-    double ygain[N];  // need array for Tools::SimpleLinearInterpolation
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    vector<double> xfreq = xfreq_tmp;
+    vector<double> ygain = ygain_tmp;  // need array for Tools::SimpleLinearInterpolation
+    vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
+    vector<double> ygain_databin(settings1->DATA_BIN_SIZE/2);   // array for gain in FFT bin
     double df_fft;
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
     
-    for (int i=0; i<N; i++) { // copy values
-        xfreq[i] = xfreq_tmp[i];
-        ygain[i] = ygain_tmp[i];
-    }
     for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }    
 
     // Tools::SimpleLinearInterpolation will return Preampgain array (in dB)
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, &Freq[0], PreampGain );
+    PreampGain.resize(freq_step);
+    Tools::SimpleLinearInterpolation( N, xfreq.data(), ygain.data(), freq_step, Freq.data(), PreampGain.data() );
     
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+    Tools::SimpleLinearInterpolation( N, xfreq.data(), ygain.data(), settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), ygain_databin.data() );
     
     for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) { 
         PreampGain_databin.push_back( ygain_databin[i] );
     }
     
     // for NFOUR/2 t domain array
-    double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
-    double ygain_NFOUR[settings1->NFOUR/4+1];   // array for gain in FFT bin
+    vector<double> xfreq_NFOUR(settings1->NFOUR/4+1);   // array for FFT freq bin
+    vector<double> ygain_NFOUR(settings1->NFOUR/4+1);   // array for gain in FFT bin
     
     df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
 
@@ -3926,7 +3927,7 @@ inline void Detector::ReadPreamp(string filename, Settings *settings1) {    // w
         xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
 
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
+    Tools::SimpleLinearInterpolation( N, xfreq.data(), ygain.data(), settings1->NFOUR/4+1, xfreq_NFOUR.data(), ygain_NFOUR.data() );
     
     for (int i=0; i<settings1->NFOUR/4+1; i++) { 
         PreampGain_NFOUR.push_back( ygain_NFOUR[i] );
@@ -3952,7 +3953,7 @@ void Detector::ReadPreamp_New(Settings *settings1) {    // will return gain (dB)
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
 
-    Tools::SimpleLinearInterpolation( freq_step, &Freq[0], PreampGain, settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), ygain_databin.data() );
+    Tools::SimpleLinearInterpolation( freq_step, Freq.data(), PreampGain.data(), settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), ygain_databin.data() );
         
     PreampGain_databin.clear();
     
@@ -3969,19 +3970,18 @@ inline void Detector::ReadFOAM(string filename, Settings *settings1) {    // wil
     
     string line;
     
-    int N=-1;
-    
     vector <double> xfreq_tmp;
     vector <double> ygain_tmp;
     
     if ( FOAMgain.is_open() ) {
-        while (FOAMgain.good() ) {
+        while (getline (FOAMgain, line)) {
             
-            getline (FOAMgain, line);
+            if(line.empty()) {
+                continue;
+            }
             xfreq_tmp.push_back( atof( line.substr(0, line.find_first_of(",")).c_str() ) );
             ygain_tmp.push_back( atof( line.substr(line.find_first_of(",") + 1).c_str() ) );
             
-            N++;
         }
         FOAMgain.close();
     }
@@ -3989,34 +3989,36 @@ inline void Detector::ReadFOAM(string filename, Settings *settings1) {    // wil
         cout<<"Preamgain file can not opened!!"<<endl;
     }    
 
-    double xfreq[N];
-    double ygain[N];  // need array for Tools::SimpleLinearInterpolation
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    const int N = (int)xfreq_tmp.size();
+    if (N < 2 || (int)ygain_tmp.size() != N) {
+        throw runtime_error("FOAM gain file has insufficient/mismatched rows: " + filename);
+    }
+
+    vector<double> xfreq = xfreq_tmp;
+    vector<double> ygain = ygain_tmp;  // need array for Tools::SimpleLinearInterpolation
+    vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
+    vector<double> ygain_databin(settings1->DATA_BIN_SIZE/2);   // array for gain in FFT bin
     double df_fft;
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
     
-    for (int i=0;i<N;i++) { // copy values
-        xfreq[i] = xfreq_tmp[i];
-        ygain[i] = ygain_tmp[i];
-    }
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }   
  
     // Tools::SimpleLinearInterpolation will return FOAMgain array (in dB)
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, &Freq[0], FOAMGain );
+    FOAMGain.resize(freq_step);
+    Tools::SimpleLinearInterpolation( N, xfreq.data(), ygain.data(), freq_step, Freq.data(), FOAMGain.data() );
     
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+    Tools::SimpleLinearInterpolation( N, xfreq.data(), ygain.data(), settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), ygain_databin.data() );
     
     for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) { 
         FOAMGain_databin.push_back( ygain_databin[i] );
     }
 
     // for NFOUR/2 t domain array
-    double xfreq_NFOUR[settings1->NFOUR/4+1];   // array for FFT freq bin
-    double ygain_NFOUR[settings1->NFOUR/4+1];   // array for gain in FFT bin
+    vector<double> xfreq_NFOUR(settings1->NFOUR/4+1);   // array for FFT freq bin
+    vector<double> ygain_NFOUR(settings1->NFOUR/4+1);   // array for gain in FFT bin
     
     df_fft = 1./ ( (double)(settings1->NFOUR/2) * settings1->TIMESTEP );
 
@@ -4024,7 +4026,7 @@ inline void Detector::ReadFOAM(string filename, Settings *settings1) {    // wil
         xfreq_NFOUR[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
 
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->NFOUR/4+1, xfreq_NFOUR, ygain_NFOUR );
+    Tools::SimpleLinearInterpolation( N, xfreq.data(), ygain.data(), settings1->NFOUR/4+1, xfreq_NFOUR.data(), ygain_NFOUR.data() );
     
     for (int i=0; i<settings1->NFOUR/4+1; i++) { 
         FOAMGain_NFOUR.push_back( ygain_NFOUR[i] );
@@ -4068,16 +4070,18 @@ void Detector::ReadNoiseFigure(string filename, Settings *settings1)
         cout<<"Noise Figure file can not be opened!!"<<endl;
     }     
 
-    double xfreq[N];  // need array for Tools::SimpleLinearInterpolation
-    double NoiseFig[N];
+    vector<double> xfreq(N);  // need array for Tools::SimpleLinearInterpolation
+    vector<double> NoiseFig(N);
 
     int ch_no = 16;// all_chNF[1].size()-2;
-    cerr << "The number of channels: " << ch_no << endl;
+    
+    NoiseFig_ch.assign(16, std::vector<double>(freq_step));   
 
     vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
-    double NoiseFig_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    vector<double> NoiseFig_databin(settings1->DATA_BIN_SIZE/2);   // array for gain in FFT bin
     double df_fft;
-    
+
+ 
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
     cout<<"DATA_BIN_SIZE: "<<settings1->DATA_BIN_SIZE<<" TIMESTEP: "<<settings1->TIMESTEP<<" df_fft: "<<df_fft<<endl; 
     // now below are values that shared in all channels
@@ -4092,7 +4096,7 @@ void Detector::ReadNoiseFigure(string filename, Settings *settings1)
 
     // set vector array size to number of chs
     NoiseFig_databin_ch.resize(ch_no);
-    
+ 
     // save frequency values we interpolate onto
     NoiseFig_freq = xfreq_databin;
 
@@ -4105,10 +4109,10 @@ void Detector::ReadNoiseFigure(string filename, Settings *settings1)
         }        
 
         // Tools::SimpleLinearInterpolation will return NoiseFig array (in dB)
-        Tools::SimpleLinearInterpolation( N-1, xfreq, NoiseFig, freq_step, &Freq[0], NoiseFig_ch[ch] );
-        Tools::SimpleLinearInterpolation( N-1, xfreq, NoiseFig, settings1->DATA_BIN_SIZE/2, &xfreq_databin[0], NoiseFig_databin );
+        Tools::SimpleLinearInterpolation( N-1, xfreq.data(), NoiseFig.data(), freq_step, Freq.data(), NoiseFig_ch[ch].data() );
+        Tools::SimpleLinearInterpolation( N-1, xfreq.data(), NoiseFig.data(), settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), NoiseFig_databin.data() );
     
-        for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) { 
+        for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {
             NoiseFig_databin_ch[ch].push_back( NoiseFig_databin[i] );
         }
     }
@@ -4336,7 +4340,7 @@ void Detector::ReadFOAM_New(Settings *settings1) {    // will return gain (dB) w
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
 
-    Tools::SimpleLinearInterpolation( freq_step, &Freq[0], FOAMGain, settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), ygain_databin.data() );
+    Tools::SimpleLinearInterpolation( freq_step, Freq.data(), FOAMGain.data(), settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), ygain_databin.data() );
         
     FOAMGain_databin.clear();
     
@@ -4658,12 +4662,12 @@ inline void Detector::ReadElectChain(string filename, Settings *settings1) {    
         // now, do interpolation
         Tools::SimpleLinearInterpolation(
             numFreqBins, frequencies_asarray, gains_asarray, //From original binning
-            freq_step, &Freq[0], interp_gains	//To the new binning
+            freq_step, Freq.data(), interp_gains	//To the new binning
         );
            
         Tools::SimpleLinearInterpolation(
             numFreqBins, frequencies_asarray, phases_asarray, //From original binning
-            freq_step, &Freq[0], interp_phases //To the new binning
+            freq_step, Freq.data(), interp_phases //To the new binning
         );
              
     
@@ -4816,7 +4820,7 @@ inline void Detector::CalculateElectChain(Settings *settings) {
      
         // interpolate back onto the original frequency binning for the gain
         Tools::SimpleLinearInterpolation(nFreqs, interp_frequencies_databin, (double*)&buffGain[0],
-                                         freq_step, &Freq[0], (double*)&ElectGain[rfChan][0]);
+                                         freq_step, Freq.data(), (double*)&ElectGain[rfChan][0]);
     }
 
     return;
@@ -5676,7 +5680,7 @@ void Detector::ReadNoiseFig_New(Settings *settings1) {    // will return gain (d
 
     for (int ch=0; ch<NoiseFig_numCh; ch++) {
 
-        Tools::SimpleLinearInterpolation( freq_step, &Freq[0], NoiseFig_ch[ch], settings1->DATA_BIN_SIZE/2, xfreq_databin, NoiseFig_databin );
+        Tools::SimpleLinearInterpolation( freq_step, &Freq[0], NoiseFig_ch[ch].data(), settings1->DATA_BIN_SIZE/2, xfreq_databin, NoiseFig_databin );
             
         NoiseFig_databin_ch[ch].clear();
         
@@ -7116,7 +7120,7 @@ int Detector::getAntennafromArbAntID( int stationID, int ant_ID){
 }
 
 //TODO:  Need to retool the arguments of this to use the Settings parameters for Vpol, Vpol_top, HPol, and Tx.
-inline void Detector::ReadImpedance(string filename, double (*TempRealImpedance)[freq_step_max], double (*TempImagImpedance)[freq_step_max]) {
+inline void Detector::ReadImpedance(string filename, vector<double> *TempRealImpedance, vector<double> *TempImagImpedance) {
 
     // this is really dumb but were gonna assume all the impedances have the same frequency
     // binning and just rewrite this every time a file is read-in. seems okay for now 
@@ -7147,8 +7151,8 @@ inline void Detector::ReadImpedance(string filename, double (*TempRealImpedance)
             }
 
             impFreq.push_back(stod(words[0]));
-            (*TempRealImpedance)[idx] = stod(words[1]);
-            (*TempImagImpedance)[idx] = stod(words[2]);
+            TempRealImpedance->push_back(stod(words[1]));
+            TempImagImpedance->push_back(stod(words[2]));
 
             getline (NecOut, line); //Gets next line of data 
             idx++;

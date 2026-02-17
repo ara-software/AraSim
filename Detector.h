@@ -238,40 +238,40 @@ class Detector {
  
         //Define impedance and gain for receiving antenna
         vector<double> impFreq;
-        double RealImpedanceV[freq_step_max];
-        double ImagImpedanceV[freq_step_max];   
-        double RealImpedanceVTop[freq_step_max];
-        double ImagImpedanceVTop[freq_step_max];       
-        double RealImpedanceH[freq_step_max];
-        double ImagImpedanceH[freq_step_max];       
+        vector<double> RealImpedanceV;
+        vector<double> ImagImpedanceV;   
+        vector<double> RealImpedanceVTop;
+        vector<double> ImagImpedanceVTop;       
+        vector<double> RealImpedanceH;
+        vector<double> ImagImpedanceH;       
     
         //Define impedance and gain for transmitting antenna
-        double RealImpedanceTx[freq_step_max];
-        double ImagImpedanceTx[freq_step_max];
+        vector<double> RealImpedanceTx;
+        vector<double> ImagImpedanceTx;
         int Tx_freq_init;
         int Tx_freq_width;
         vector<double> TxFreq;
         vector<vector<double> > Txgain;
         vector<vector<double> > Txphase;
-        void ReadImpedance(string filename, double (*TempRealImpedance)[freq_step_max], double (*TempImagImpedance)[freq_step_max]);
+        void ReadImpedance(string filename, vector<double> *TempRealImpedance, vector<double> *TempImagImpedance);
         void ReadAllAntennaImpedance(Settings *settings1);
 
 
 	
 
         void ReadFilter(string filename, Settings *settings1);
-        double FilterGain[freq_step_max];   // Filter gain (dB) for Detector freq bin array
+        vector <double> FilterGain;   // Filter gain (dB) for Detector freq bin array
         vector <double> FilterGain_databin;   // Filter gain (dB) for DATA_BIN_SIZE bin array
         vector <double> FilterGain_NFOUR;   // Filter gain (dB) for NFOUR bin array
 
         void ReadPreamp(string filename, Settings *settings1);
-        double PreampGain[freq_step_max];   // Filter gain (dB) for Detector freq bin array
+        vector<double> PreampGain;   // Filter gain (dB) for Detector freq bin array
         vector <double> PreampGain_databin;   // Filter gain (dB) for DATA_BIN_SIZE bin array
         vector <double> PreampGain_NFOUR;   // Filter gain (dB) for NFOUR bin array
 
 
         void ReadFOAM(string filename, Settings *settings1);
-        double FOAMGain[freq_step_max];   // Filter gain (dB) for Detector freq bin array
+        vector <double> FOAMGain;   // Filter gain (dB) for Detector freq bin array
         vector <double> FOAMGain_databin;   // Filter gain (dB) for DATA_BIN_SIZE bin array
         vector <double> FOAMGain_NFOUR;   // Filter gain (dB) for NFOUR bin array
 
@@ -338,7 +338,7 @@ class Detector {
 
 
         void ReadNoiseFigure(string filename, Settings *settings1); 
-        double NoiseFig_ch[16][freq_step_max];
+        vector< vector<double> > NoiseFig_ch;
         vector<double> NoiseFig_freq;
         vector < vector < double > > NoiseFig_databin_ch;
 

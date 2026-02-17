@@ -576,10 +576,10 @@ void Tools::SimpleLinearInterpolation(int n1, double *x1, double *y1, int n2, do
     int cnt = 0;
     
     for (int i=0; i<n2; i++) {
-            if (x2[i] < x1[0] ) {
+            if (x2[i] <= x1[0] ) {
                     first++;
             }
-            else if (x2[i] > x1[n1-1]) {
+            else if (x2[i] >= x1[n1-1]) {
                     last++;
             }
     }
@@ -596,11 +596,16 @@ void Tools::SimpleLinearInterpolation(int n1, double *x1, double *y1, int n2, do
 
         else {
             cnt=-1;
-            for (int j=0; j<n1; j++) {
-                //if (x2[i] < x1[j] && cnt==-1) {
+            for (int j=1; j<n1; j++) {
                 if (x2[i] <= x1[j] && cnt==-1) {
                     cnt = j;
+                    break;
                 }
+            }
+
+            if (cnt == -1) {
+                y2[i] = y1[n1-1];
+                continue;
             }
 
             y2[i] = y1[cnt-1] + (x2[i]-x1[cnt-1])*(y1[cnt]-y1[cnt-1])/(x1[cnt]-x1[cnt-1]);
