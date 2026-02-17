@@ -27,12 +27,12 @@ VERBOSE ?= 0  # Default is off unless user sets VERBOSE=1
 
 #Generic and Site Specific Flags
 CXXFLAGS     += $(SYSINCLUDES) $(INC_ARA_UTIL) -DGIT_COMMIT_HASH=\"$(GIT_COMMIT_HASH)\"
-CXXFLAGS		 += -Werror=return-type 
+CXXFLAGS		 += -Werror=return-type -g 
 ifeq ($(VERBOSE), 1)
   CXXFLAGS += -DVERBOSE_MODE
 endif
 #LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl
-LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl,--no-as-needed
+LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL) -Wl,--no-as-needed -lz
 #,--no-as-needed
 #LDFLAGS      += -L. -g -I$(BOOST_ROOT) $(ROOTLDFLAGS) $(LD_ARA_UTIL)
 ARA_ROOT_FLAGS = 
