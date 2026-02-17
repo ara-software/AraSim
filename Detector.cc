@@ -5426,7 +5426,7 @@ inline void Detector::ReadRayleighFit_TestBed(string filename, Settings *setting
     Rayleigh_TB_databin_ch.resize(ch_no);
     
     // now loop over channels and do interpolation
-    Rayleigh_TB_ch.assign(ch_no, std::vector<double>(freq_step));   
+    Rayleigh_TB_ch.assign(ch_no, std::vector<double>(freq_step)); // preallocate expected layout to fill below   
     for (int ch=0; ch<ch_no; ch++) {
 
         // copy fit values
