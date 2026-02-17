@@ -2474,7 +2474,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
             words.push_back(buff);
         }
 
-        if(words.size() > 0 && words[0] == "n") { // index included in file
+        if(words.size() > 0 && words[0] == "n") { // index included in file; when included expect format like "n : 1.0"
             // make sure it's properly formatted
             if(words.size() != 3) {
                 throw runtime_error("Antenna gain file index of refraction not properly formatted! "+filename);
