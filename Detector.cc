@@ -2700,6 +2700,11 @@ double Detector::GetTransm_OutZero(int ch, double freq) {
 
 double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o, double antenna_target_medium_n) { // using Interpolation on multidimensions!
    
+    // check that target index of refraction is sensible
+    if(antenna_target_medium_n < 1.0) {
+        throw runtime_error("Target medium index of refraction is invalid: " + to_string(antenna_target_medium_n));
+    }
+    
     // scale frequency according to ratio of media indices of refraction
     // if source medium n is a valid value scale the frequency, otherwise do not
     double freq_scaled = (antenna_source_medium_n >= 1)? freq * antenna_target_medium_n / antenna_source_medium_n : freq; 
@@ -2843,7 +2848,12 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
 
 
 double Detector::GetGain(double freq, double theta, double phi, int ant_m, double antenna_target_medium_n) {
-    
+   
+    // check that target index of refraction is sensible
+    if(antenna_target_medium_n < 1.0) {
+        throw runtime_error("Target medium index of refraction is invalid: " + to_string(antenna_target_medium_n));
+    }
+ 
     // scale frequency according to ratio of media indices of refraction
     // if source medium n is a valid value scale the frequency, otherwise do not
     double freq_scaled = (antenna_source_medium_n >= 1)? freq * antenna_target_medium_n / antenna_source_medium_n : freq; 
@@ -2955,6 +2965,11 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, doubl
 
 double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m, double antenna_target_medium_n ) {
 
+    // check that target index of refraction is sensible
+    if(antenna_target_medium_n < 1.0) {
+        throw runtime_error("Target medium index of refraction is invalid: " + to_string(antenna_target_medium_n));
+    }
+    
     // scale frequency according to ratio of media indices of refraction
     // if source medium n is a valid value scale the frequency, otherwise do not
     double freq_scaled = (antenna_source_medium_n >= 1)? freq * antenna_target_medium_n / antenna_source_medium_n : freq; 
@@ -3066,6 +3081,11 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     The purpose of this function is to interpolate the globally defined gain arrays (Vgain, VgainTop, Hgain, Txgain)
     to match the frequency binning dictated by NFOUR in the setup file. 
     */
+    
+    // check that target index of refraction is sensible
+    if(antenna_target_medium_n < 1.0) {
+        throw runtime_error("Target medium index of refraction is invalid: " + to_string(antenna_target_medium_n));
+    }
     
     // scale frequency according to ratio of media indices of refraction
     // if source medium n is a valid value scale the frequency, otherwise do not
@@ -3234,6 +3254,11 @@ double Detector::GetImpedance( double freq, int ant_m, int ant_number, bool useI
 
 
 double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_m, double antenna_target_medium_n, bool useInTransmitterMode ) {
+    
+    // check that target index of refraction is sensible
+    if(antenna_target_medium_n < 1.0) {
+        throw runtime_error("Target medium index of refraction is invalid: " + to_string(antenna_target_medium_n));
+    }
     
     // scale frequency according to ratio of media indices of refraction
     // if source medium n is a valid value scale the frequency, otherwise do not
