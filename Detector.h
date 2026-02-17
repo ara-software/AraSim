@@ -222,7 +222,6 @@ enum EAntennaType {
   
 class Detector {
     private:
-        static const int freq_step_max = 60;
         static const int ang_step_max = 2664;
         void ReadAllAntennaGains(Settings *settings1);
         double SWRtoTransCoeff(double swr);
@@ -305,13 +304,13 @@ class Detector {
         //vector <double> Temp_TB_ch;   // constant gain offset for the TestBed chs 
 
         void ReadRFCM_TestBed(string filename, Settings *settings1);
-        double RFCM_TB_ch[16][freq_step_max];   // Filter gain (dB) for Detector freq bin array
+        vector< vector<double> >  RFCM_TB_ch;   // Filter gain (dB) for Detector freq bin array
         vector<double> RFCM_TB_freq;
         vector < vector <double> > RFCM_TB_databin_ch;   // RFCM gain measured value for the TestBed (for each ch)
 
 
         void ReadRayleighFit_TestBed(string filename, Settings *settings1); // will read Rayleigh fit result from the file
-        double Rayleigh_TB_ch[16][freq_step_max];   // Filter gain (dB) for Detector freq bin array
+        vector< vector<double> > Rayleigh_TB_ch;   // Filter gain (dB) for Detector freq bin array
         vector < vector <double> > Rayleigh_TB_databin_ch;   // RFCM gain measured value for the TestBed (for each ch)
 
         /*

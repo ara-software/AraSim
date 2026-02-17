@@ -3775,38 +3775,39 @@ inline void Detector::ReadFilter(string filename, Settings *settings1) {    // w
     
     string line;
     
-    int N=-1;
-    
     vector <double> xfreq_tmp;
     vector <double> ygain_tmp;
     
     if ( Filter.is_open() ) {
-        while (Filter.good() ) {
-            
-            getline (Filter, line);
+        while (getline (Filter, line)) {
+      
+            if(line.empty()) {
+                continue;
+            }           
+ 
             xfreq_tmp.push_back( atof( line.substr(0, line.find_first_of(",")).c_str() ) );
             ygain_tmp.push_back( atof( line.substr(line.find_first_of(",") + 1).c_str() ) );
             
-            N++;
         }
         Filter.close();
     }
     else {
         cout<<"Filter file can not opened!!"<<endl;
     }   
+
+    const int N = (int)xfreq_tmp.size();
+    if (N < 2 || (int)ygain_tmp.size() != N) {
+        throw runtime_error("Filter gain file has insufficient/mismatched rows: " + filename);
+    }
  
-    vector<double> xfreq(N);
-    vector<double> ygain(N);  // need array for Tools::SimpleLinearInterpolation
+    vector<double> xfreq = xfreq_tmp;
+    vector<double> ygain = ygain_tmp;  // need array for Tools::SimpleLinearInterpolation
     vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
     vector<double> ygain_databin(settings1->DATA_BIN_SIZE/2);   // array for gain in FFT bin
     double df_fft;
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
     
-    for (int i=0;i<N;i++) { // copy values
-        xfreq[i] = xfreq_tmp[i];
-        ygain[i] = ygain_tmp[i];
-    }
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }    
@@ -3875,19 +3876,19 @@ inline void Detector::ReadPreamp(string filename, Settings *settings1) {    // w
     
     string line;
     
-    int N=-1;
-    
     vector <double> xfreq_tmp;
     vector <double> ygain_tmp;
     
     if ( Preampgain.is_open() ) {
-        while (Preampgain.good() ) {
-            
-            getline (Preampgain, line);
+        while ( getline (Preampgain, line)) {
+
+            if(line.empty()) {
+                continue;
+            }        
+    
             xfreq_tmp.push_back( atof( line.substr(0, line.find_first_of(",")).c_str() ) );
             ygain_tmp.push_back( atof( line.substr(line.find_first_of(",") + 1).c_str() ) );
             
-            N++;
         }
         Preampgain.close();
     }
@@ -3895,6 +3896,11 @@ inline void Detector::ReadPreamp(string filename, Settings *settings1) {    // w
         cout<<"Preamgain file can not opened!!"<<endl;
     }    
 
+    const int N = (int)xfreq_tmp.size();
+    if (N < 2 || (int)ygain_tmp.size() != N) {
+        throw runtime_error("Preamp gain file has insufficient/mismatched rows: " + filename);
+    }
+  
     vector<double> xfreq = xfreq_tmp;
     vector<double> ygain = ygain_tmp;  // need array for Tools::SimpleLinearInterpolation
     vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
@@ -4075,7 +4081,7 @@ void Detector::ReadNoiseFigure(string filename, Settings *settings1)
 
     int ch_no = 16;// all_chNF[1].size()-2;
     
-    NoiseFig_ch.assign(16, std::vector<double>(freq_step));   
+    NoiseFig_ch.assign(ch_no, std::vector<double>(freq_step));   
 
     vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
     vector<double> NoiseFig_databin(settings1->DATA_BIN_SIZE/2);   // array for gain in FFT bin
@@ -5145,19 +5151,19 @@ inline void Detector::ReadRFCM_TestBed(string filename, Settings *settings1) {  
     
     string line;
     
-    int N=-1;
-    
     vector <double> xfreq_tmp;
     vector <double> ygain_tmp;
     
     if ( RFCM.is_open() ) {
-        while (RFCM.good() ) {
-            getline (RFCM, line);
+        while ( getline (RFCM, line)) {
+           
+            if(line.empty()) {
+                continue;
+            } 
+
             xfreq_tmp.push_back( atof( line.substr(0, line.find_first_of(",")).c_str() )*1.e-6 ); // from Hz to MHz
-            
             ygain_tmp.push_back( atof( line.substr(line.find_first_of(",") + 1).c_str() ) );
             
-            N++;
         }
         RFCM.close();
     }
@@ -5166,29 +5172,31 @@ inline void Detector::ReadRFCM_TestBed(string filename, Settings *settings1) {  
         cout<<"RFCM file can not opened!!"<<endl;
     }    
 
-    double xfreq[N];
-    double ygain[N];  // need array for Tools::SimpleLinearInterpolation
+    const int N = (int)xfreq_tmp.size();
+    if (N < 2 || (int)ygain_tmp.size() != N) {
+        throw runtime_error("RFCM gain file has insufficient/mismatched rows: " + filename);
+    }
+
+    vector<double> xfreq = xfreq_tmp;
+    vector<double> ygain = ygain_tmp;  // need array for Tools::SimpleLinearInterpolation
     vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
-    double ygain_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    vector<double> ygain_databin(settings1->DATA_BIN_SIZE/2);   // array for gain in FFT bin
     double df_fft;
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
     
-    for (int i=0; i<N; i++) { // copy values
-        xfreq[i] = xfreq_tmp[i];
-        ygain[i] = ygain_tmp[i];
-    }
     for (int i=0; i<settings1->DATA_BIN_SIZE/2; i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }
 
     // check if there's pre assigned chs
     int ch_no = RFCM_TB_databin_ch.size();
+    RFCM_TB_ch.assign(ch_no, std::vector<double>(freq_step));   
     
     // Tools::SimpleLinearInterpolation will return RFCM array (in dB)
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, freq_step, &Freq[0], RFCM_TB_ch[ch_no] );
+    Tools::SimpleLinearInterpolation( N, xfreq.data(), ygain.data(), freq_step, Freq.data(), RFCM_TB_ch[ch_no].data() );
     
-    Tools::SimpleLinearInterpolation( N, xfreq, ygain, settings1->DATA_BIN_SIZE/2, &xfreq_databin[0], ygain_databin );
+    Tools::SimpleLinearInterpolation( N, xfreq.data(), ygain.data(), settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), ygain_databin.data() );
 
     // store frequency bins (should be okay if this is overwritten since it's defined in this function, so should be the same)
     RFCM_TB_freq = xfreq_databin;
@@ -5244,7 +5252,7 @@ void Detector::ReadRFCM_New(Settings *settings1) {    // will return gain (dB) w
     int RFCM_ch = RFCM_TB_databin_ch.size();
 
     for (int ch=0; ch<RFCM_ch; ch++) {
-        Tools::SimpleLinearInterpolation( freq_step, &Freq[0], RFCM_TB_ch[ch], settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
+        Tools::SimpleLinearInterpolation( freq_step, Freq.data(), RFCM_TB_ch[ch].data(), settings1->DATA_BIN_SIZE/2, xfreq_databin, ygain_databin );
             
         RFCM_TB_databin_ch[ch].clear();
         
@@ -5321,20 +5329,16 @@ inline void Detector::ReadRayleighFit_TestBed(string filename, Settings *setting
     RayleighFit_ch = ch_no;
 
     
-    double xfreq[N];  // need array for Tools::SimpleLinearInterpolation
-    double Rayleigh[N];
+    vector<double> xfreq = xfreq_tmp;  // need array for Tools::SimpleLinearInterpolation
+    vector<double> Rayleigh;
 
-    double xfreq_databin[settings1->DATA_BIN_SIZE/2];   // array for FFT freq bin
-    double Rayleigh_databin[settings1->DATA_BIN_SIZE/2];   // array for gain in FFT bin
+    vector<double> xfreq_databin(settings1->DATA_BIN_SIZE/2);   // array for FFT freq bin
+    vector<double> Rayleigh_databin(settings1->DATA_BIN_SIZE/2);   // array for gain in FFT bin
     double df_fft;
     
     df_fft = 1./ ( (double)(settings1->DATA_BIN_SIZE) * settings1->TIMESTEP );
     
     // now below are values that shared in all channels
-    for (int i=0;i<N;i++) {  // copy values
-        xfreq[i] = xfreq_tmp[i];
-    }
-    
     for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) {     // this one is for DATA_BIN_SIZE
         xfreq_databin[i] = (double)i * df_fft / (1.E6); // from Hz to MHz
     }   
@@ -5343,17 +5347,16 @@ inline void Detector::ReadRayleighFit_TestBed(string filename, Settings *setting
     Rayleigh_TB_databin_ch.resize(ch_no);
     
     // now loop over channels and do interpolation
+    Rayleigh_TB_ch.assign(ch_no, std::vector<double>(freq_step));   
     for (int ch=0; ch<ch_no; ch++) {
 
         // copy fit values
-        for (int i=0;i<N;i++) { 
-            Rayleigh[i] = fit_tmp[ch][i];
-        }
+        Rayleigh = fit_tmp[ch];
 
         // Tools::SimpleLinearInterpolation will return Rayleigh array (in dB)
-        Tools::SimpleLinearInterpolation( N, xfreq, Rayleigh, freq_step, &Freq[0], Rayleigh_TB_ch[ch] );
+        Tools::SimpleLinearInterpolation( N, xfreq.data(), Rayleigh.data(), freq_step, Freq.data(), Rayleigh_TB_ch[ch].data() );
         
-        Tools::SimpleLinearInterpolation( N, xfreq, Rayleigh, settings1->DATA_BIN_SIZE/2, xfreq_databin, Rayleigh_databin );
+        Tools::SimpleLinearInterpolation( N, xfreq.data(), Rayleigh.data(), settings1->DATA_BIN_SIZE/2, xfreq_databin.data(), Rayleigh_databin.data() );
 
         for (int i=0;i<settings1->DATA_BIN_SIZE/2;i++) { 
             Rayleigh_TB_databin_ch[ch].push_back( Rayleigh_databin[i] );
@@ -5723,7 +5726,7 @@ void Detector::ReadRayleigh_New(Settings *settings1) {    // will return gain (d
     int Rayleigh_ch = Rayleigh_TB_databin_ch.size();
 
     for (int ch=0; ch<Rayleigh_ch; ch++) {
-        Tools::SimpleLinearInterpolation( freq_step, &Freq[0], Rayleigh_TB_ch[ch], settings1->DATA_BIN_SIZE/2, xfreq_databin, Rayleigh_databin );
+        Tools::SimpleLinearInterpolation( freq_step, Freq.data(), Rayleigh_TB_ch[ch].data(), settings1->DATA_BIN_SIZE/2, xfreq_databin, Rayleigh_databin );
             
         Rayleigh_TB_databin_ch[ch].clear();
         
