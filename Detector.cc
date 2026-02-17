@@ -3148,18 +3148,22 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     int bin = (int)( (freq_scaled - thisFreq_init) / thisFreq_width )+1;
 
      //Interpolation of tempGain
-    slope_1 = ((*tempGain)[1][angle_bin] - (*tempGain)[0][angle_bin]) / (F->at(1) - F->at(0));
+    slope_1 = (tempGain->at(1)[angle_bin] - tempGain->at(0)[angle_bin]) / (F->at(1) - F->at(0));
 
     // if freq is lower than freq_init
     if ( freq_scaled < thisFreq_init ) { 
-        Gout = slope_1 * (freq_scaled - F->at(0)) + (*tempGain)[0][angle_bin];
+        Gout = slope_1 * (freq_scaled - F->at(0)) + tempGain->at(0)[angle_bin];
     }
     // if freq is higher than last freq
     else if ( freq_scaled > F->back() ) { 
         Gout = 0.;
     }
+    // if freq is exactly the last freq
+    else if (freq_scaled == F->back()) {
+        Gout = tempGain->at(F->size()-1)[angle_bin];
+    }
     else { 
-        Gout = (*tempGain)[bin-1][angle_bin] + (freq_scaled-F->at(bin-1))*((*tempGain)[bin][angle_bin]-(*tempGain)[bin-1][angle_bin])/(F->at(bin)-F->at(bin-1));
+        Gout = tempGain->at(bin-1)[angle_bin] + (freq_scaled-F->at(bin-1))*(tempGain->at(bin)[angle_bin]-tempGain->at(bin-1)[angle_bin])/(F->at(bin)-F->at(bin-1));
     }   
  
     if ( Gout < 0. ) { // gain can not go below 0
@@ -3321,7 +3325,21 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
             }
         }
     }
-
+    // if freq is exactly last freq
+    else if ( freq_scaled == F->back() ) {
+        phase = (*tempPhase)[F->size()-1][angle_bin];
+        
+        if ( phase > 180. ) {
+            while ( phase > 180. ) { 
+                phase = phase - 360.;
+            }
+        }
+        else if ( phase < -180. ) {
+            while ( phase < -180. ) { 
+                phase = phase + 360.;
+            }
+        }
+    }
     else {
 
         // not at the first two bins
@@ -3395,6 +3413,10 @@ double Detector::GetFilterGain_1D_OutZero( double freq ) {
     else if ( freq > Freq[freq_step-1] ) { 
         Gout = 0.;
     }
+    // if freq is exactly the last freq
+    else if ( freq == Freq.back() ) {
+        Gout = FilterGain[Freq.size()-1];
+    }
     else { 
         Gout = FilterGain[bin-1] + (freq-Freq[bin-1])*(FilterGain[bin]-FilterGain[bin-1])/(Freq[bin]-Freq[bin-1]);
     }   
@@ -3422,6 +3444,10 @@ double Detector::GetPreampGain_1D_OutZero( double freq ) {
     else if ( freq > Freq[freq_step-1] ) { 
         Gout = 0.;
     }
+    // if freq is exactly the last freq
+    else if ( freq == Freq.back() ) {
+        Gout = PreampGain[Freq.size()-1];
+    }
     else { 
         Gout = PreampGain[bin-1] + (freq-Freq[bin-1])*(PreampGain[bin]-PreampGain[bin-1])/(Freq[bin]-Freq[bin-1]);
     }
@@ -3446,6 +3472,10 @@ double Detector::GetFOAMGain_1D_OutZero( double freq ) {
     // if freq is higher than last freq
     else if ( freq > Freq[freq_step-1] ) { 
         Gout = 0.;
+    }
+    // if freq is exactly the last freq
+    else if ( freq == Freq.back() ) {
+        Gout = FOAMGain[Freq.size()-1];
     }
     else { 
         Gout = FOAMGain[bin-1] + (freq-Freq[bin-1])*(FOAMGain[bin]-FOAMGain[bin-1])/(Freq[bin]-Freq[bin-1]);
@@ -3472,6 +3502,10 @@ double Detector::GetElectGain_1D_OutZero( double freq, int gain_ch_no) {
     // if freq is higher than last freq
     else if ( bin > freq_step -1 ) {
         Gout = 0.;
+    }
+    // if freq is exactly the last freq
+    else if ( freq == Freq.back() ) {
+        Gout = ElectGain[gain_ch_no][Freq.size()-1];
     }
     else { 
         Gout = ElectGain[gain_ch_no][bin-1] + (freq-Freq[bin-1])*(ElectGain[gain_ch_no][bin]-ElectGain[gain_ch_no][bin-1])/(Freq[bin]-Freq[bin-1]);
@@ -3516,6 +3550,21 @@ double Detector::GetElectPhase_1D( double freq, int gain_ch_no ) {
 
         phase = slope_2 * (freq - Freq[freq_step-1]) + ElectPhase[gain_ch_no][freq_step-1];
 
+        if ( phase > PI ) {
+            while ( phase > PI ) { 
+                phase = phase - 2*PI;
+            }
+        }
+        else if ( phase < -PI ) {
+            while ( phase < -PI ) { 
+                phase = phase + 2*PI;
+            }
+        }
+    }
+    // if freq is exactly the last freq
+    else if ( freq == Freq.back() ) {
+        phase = ElectPhase[gain_ch_no][Freq.size()-1];
+        
         if ( phase > PI ) {
             while ( phase > PI ) { 
                 phase = phase - 2*PI;
