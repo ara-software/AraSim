@@ -5470,20 +5470,22 @@ void Report::checkPATrigger(
     //   for use in get_PA_trigger_bin(). 
     double random_number = 1.01;
 
+    // do initial trigger check on full trace
     if( isTrigger(
         trigger_waveform, brightest_event, random_number,
         trigger_antenna, trigger_ch_ID, settings1, trigger
     )){ 
-        cout<<endl<<"PA trigger ~~~  Event Number : "<<evt<<endl;
-        
+       
+        // now check for a trigger window that actually satisfies the trigger check 
         int last_trig_bin = get_PA_trigger_bin(
             trigger_ch_ID, trigger_antenna, trigger_waveform, random_number,
             settings1, trigger
         );
-        if (last_trig_bin == -1) {
-            cerr<<"Waveform triggered but we cannot find a trigger bin."<<endl;
-            last_trig_bin = trigger_antenna->SignalBin[brightest_event[0]][brightest_event[1]];
+        if (last_trig_bin == -1) { // trigger-window level check failed
+            return; // no trigger so return
         }
+        cout<<endl<<"PA trigger ~~~  Event Number : "<<evt<<endl;
+        
         int my_ch_id = 0;
         stations[i].Global_Pass = last_trig_bin;
         trigger_antenna->Trig_Pass = last_trig_bin;
