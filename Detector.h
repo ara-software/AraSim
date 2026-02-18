@@ -252,6 +252,7 @@ class Detector {
         vector<double> TxFreq;
         vector<vector<double> > Txgain;
         vector<vector<double> > Txphase;
+        double Txantenna_source_medium_n;    
         void ReadImpedance(string filename, vector<double> *TempRealImpedance, vector<double> *TempImagImpedance);
         void ReadAllAntennaImpedance(Settings *settings1);
 
