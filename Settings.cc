@@ -34,7 +34,7 @@ void Settings::Initialize() {
   NDISCONES_PASS=3;
 
   DEBUG=false;                   // debugging option
-outputdir="outputs"; // directory where outputs go
+ outputdir="outputs"; // directory where outputs go
  FREQ_LOW_SEAVEYS=200.E6;
  FREQ_HIGH_SEAVEYS=1200.E6;
  BW_SEAVEYS=FREQ_HIGH_SEAVEYS-FREQ_LOW_SEAVEYS;
@@ -46,6 +46,9 @@ outputdir="outputs"; // directory where outputs go
 
  SIGMA_SELECT=0; // when in SIGMAPARAM=1 case, 0 : (default) use mean value, 1 : use upper bound, 2 : use lower bound
 
+ HPOL_GAIN_FILE=string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_dipoletest1_output.txt"; // Default to original Ara Data
+ VTOP_GAIN_FILE=string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt"; // Default to original Ara Data
+ VPOL_GAIN_FILE=string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt"; // Default to original Ara Data
 
 // end of values from icemc
 
@@ -728,6 +731,30 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "ANTENNA_MODE"){
                   ANTENNA_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
+              else if (label == "VPOL_GAIN_FILE") {
+                  VPOL_GAIN_FILE = ParseFilePath(line);
+                  if (VPOL_GAIN_FILE.empty()) {
+                      std::cerr << "Warning: could not parse path from line: " << line << std::endl;
+                      std::cerr << "Example Input: VPOL_GAIN_FILE=\"path/to/gain/file.txt\"" << std::endl;
+                      std::abort();
+                  }
+              }
+              else if (label == "VTOP_GAIN_FILE") {
+                  VTOP_GAIN_FILE = ParseFilePath(line);
+                  if (VTOP_GAIN_FILE.empty()) {
+                      std::cerr << "Warning: could not parse path from line: " << line << std::endl;
+                      std::cerr << "Example Input: VTOP_GAIN_FILE=\"path/to/gain/file.txt\"" << std::endl;
+                      std::abort();
+                  }
+              }
+              else if (label == "HPOL_GAIN_FILE") {
+                  HPOL_GAIN_FILE = ParseFilePath(line);
+                  if (HPOL_GAIN_FILE.empty()) {
+                      std::cerr << "Warning: could not parse path from line: " << line << std::endl;
+                      std::cerr << "Example Input: HPOL_GAIN_FILE=\"path/to/gain/file.txt\"" << std::endl;
+                      std::abort();
+                  }
+              }
               else if (label == "IMPEDANCE_RX_VPOL"){
                   IMPEDANCE_RX_VPOL = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }              
@@ -762,9 +789,6 @@ void Settings::ReadFile(string setupfile) {
           else if (label == "SOURCE_DEPTH"){
                SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
           }
-
-
-
 
           }
       }
@@ -1141,6 +1165,16 @@ int Settings::CheckCompatibilitiesSettings() {
       num_err++;
     }
 
+    // checking antenna mode 
+    if (ANTENNA_MODE != 6) {
+        if (!VPOL_GAIN_FILE.empty() || !VTOP_GAIN_FILE.empty() || !HPOL_GAIN_FILE.empty()) {
+            std::cerr << "Warning: Custom GAIN_FILE paths provided, "
+                    << "but ANTENNA_MODE != 6. These files may be ignored." << std::endl;
+            num_err++; 
+        }
+    }
+
+
     return num_err;
 
 }
@@ -1154,3 +1188,22 @@ void Settings::SetGitCommitHash(){
     std::cout<<"The Git Commit Hash: "<<COMMIT_HASH<<std::endl;
 }
 
+std::string Settings::ParseFilePath(const std::string& line) {
+    size_t eq_pos = line.find('=');
+    if (eq_pos == std::string::npos) {
+        return ""; 
+    }
+
+    // Search for the first quote after the '='
+    size_t quote_start = line.find('"', eq_pos);
+    if (quote_start == std::string::npos) {
+        return ""; 
+    }
+
+    size_t quote_end = line.find('"', quote_start + 1);
+    if (quote_end == std::string::npos) {
+        return ""; 
+    }
+
+    return line.substr(quote_start + 1, quote_end - quote_start - 1);
+}
