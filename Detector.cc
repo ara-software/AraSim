@@ -2408,6 +2408,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         default :
             throw runtime_error("Unknown antenna type!");
     }
+    source_n = -1;
 
     // open the requested file
     unique_ptr<istream> streamPtr;
@@ -2721,11 +2722,11 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, int a
     if(antenna_target_medium_n < 1.0) {
         throw runtime_error("Target medium index of refraction is invalid: " + to_string(antenna_target_medium_n));
     }
-   
+  
     // scale frequency according to ratio of media indices of refraction
     // if source medium n is a valid value scale the frequency, otherwise do not
     // NOTE: this function only support receiver antennas
-    double freq_scaled = (antenna_source_medium_n >= 1)? freq * antenna_target_medium_n / antenna_source_medium_n : freq; 
+    double freq_scaled = freq; 
  
     // change antenna facing orientation
     if (ant_o == 0) {
@@ -2875,7 +2876,7 @@ double Detector::GetGain(double freq, double theta, double phi, int ant_m, doubl
     // scale frequency according to ratio of media indices of refraction
     // if source medium n is a valid value scale the frequency, otherwise do not
     // NOTE: this function only support receiver antennas
-    double freq_scaled = (antenna_source_medium_n >= 1)? freq * antenna_target_medium_n / antenna_source_medium_n : freq; 
+    double freq_scaled = freq; 
     
     //Parameters params;
     
@@ -2992,7 +2993,7 @@ double Detector::GetAntPhase( double freq, double theta, double phi, int ant_m, 
     // scale frequency according to ratio of media indices of refraction
     // if source medium n is a valid value scale the frequency, otherwise do not
     // NOTE: this function only support receiver antennas
-    double freq_scaled = (antenna_source_medium_n >= 1)? freq * antenna_target_medium_n / antenna_source_medium_n : freq; 
+    double freq_scaled = freq; 
     
     int i = (int)(theta/5.);
     int j = (int)(phi/5.);
@@ -3117,7 +3118,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
     }
     // scale frequency according to ratio of media indices of refraction
     // if source medium n is a valid value scale the frequency, otherwise do not
-    double freq_scaled = (source_n >= 1)? freq * antenna_target_medium_n / source_n : freq; 
+    double freq_scaled = freq; 
     
     //Initialize pointer to dynamically point to the gain for chosen antenna.  The structure of this pointer matches that of the global gain arrays defined in Detector.h.
     vector<vector<double> > *tempGain = nullptr;
@@ -3298,7 +3299,7 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
     }
     // scale frequency according to ratio of media indices of refraction
     // if source medium n is a valid value scale the frequency, otherwise do not
-    double freq_scaled = (source_n >= 1)? freq * antenna_target_medium_n / source_n : freq; 
+    double freq_scaled = freq; 
     
     //Creating tempPhase array to make this function more dynamic for Rx and Tx mode.
     vector<vector<double> > *tempPhase = nullptr;
