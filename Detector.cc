@@ -2408,7 +2408,6 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         default :
             throw runtime_error("Unknown antenna type!");
     }
-    source_n = -1;
 
     // open the requested file
     unique_ptr<istream> streamPtr;
