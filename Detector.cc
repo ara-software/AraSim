@@ -2362,6 +2362,10 @@ inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
 
 // convert the swr into a transmission coefficient
 inline double Detector::SWRtoTransCoeff(double swr){
+    if(swr < 1.) {
+        throw invalid_argument("SWR must be >= 1!");
+    }   
+ 
     double reflection_coefficient = (swr-1.)/(swr+1.);
     double transmission_coefficient = sqrt(1. - pow(reflection_coefficient, 2.));
     return transmission_coefficient;
