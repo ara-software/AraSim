@@ -2,6 +2,7 @@
 #include <fstream> 
 #include <iostream>
 #include <vector>
+#include <complex>
 
 #include "Tools.h"
 #include "TSpline.h"
@@ -742,5 +743,133 @@ void Tools::Exchange( double &a, double &b ) {
     double tmp = a;
     a = b;
     b = tmp;
+}
+
+// calculates the complex response of a low-pass Butterworth filter of given order
+// Note: this is a pretty basic implementation, not really efficient if it's being called a lot (if needed, promote to a class)
+complex<double> Tools::butterworth_lp_filter_response(double f, double fc, int order){
+
+    if(f < 0) {
+        throw invalid_argument("Frequency must be non-negative!");
+    }
+
+    if(fc <= 0) {
+        throw invalid_argument("Cut-off frequency must be positive!");
+    }
+
+    if(order < 1) {
+        throw invalid_argument("Butterworth filter order must be >= 1");
+    }
+
+    const double omega = 2. * M_PI * f;
+    const double omega_c = 2. * M_PI * fc;
+
+    // construct complex transfer function
+    complex<double> s(0., omega);
+    complex<double> H(1., 0.);
+    for(int i = 0; i < order; ++i) {
+
+        const double theta = (2.*(i+1) + order - 1) * M_PI / 2. / order; // pole angle
+        const complex<double> p = polar(omega_c, theta); // pole
+
+        const complex<double> num(omega_c, 0.);
+        const complex<double> den = s - p;
+       
+        H *= num / den; 
+    }
+
+    return H;
+}
+
+// calculates the complex response of a high-pass Butterworth filter of given order
+// Note: this is a pretty basic implementation, not really efficient if it's being called a lot (if needed, promote to a class)
+complex<double> Tools::butterworth_hp_filter_response(double f, double fc, int order){
+
+    if(f < 0) {
+        throw invalid_argument("Frequency must be non-negative!");
+    }
+
+    if(fc <= 0) {
+        throw invalid_argument("Cut-off frequency must be positive!");
+    }
+
+    if(order < 1) {
+        throw invalid_argument("Butterworth filter order must be >= 1");
+    }
+
+    if(f == 0) { 
+       return complex<double>(0., 0.); 
+    }
+
+    const double omega = 2. * M_PI * f;
+    const double omega_c = 2. * M_PI * fc;
+
+    // construct complex transfer function
+    complex<double> s(0., omega);
+    complex<double> H(1., 0.);
+    for(int i = 0; i < order; ++i) {
+
+        const double theta = (2.*(i+1) + order - 1) * M_PI / 2. / order; // pole angle
+        const complex<double> p = polar(omega_c, -theta); // pole
+
+        const complex<double> num = s;
+        const complex<double> den = s - p;
+       
+        H *= num / den; 
+    }
+
+    return H;
+}
+
+// calculates complex response of a bandpass Butterworth filer of given order 
+// Note: this is a pretty basic implementation, not really efficient if it's being called a lot (if needed, promote to a class)
+complex<double> Tools::butterworth_bp_filter_response(double f, double flo, double fhi, int order){
+
+    if(f < 0) {
+        throw invalid_argument("Frequency must be non-negative!");
+    }
+
+    if(flo <= 0 || fhi <= 0) {
+        throw invalid_argument("Cut-off frequencies must be positive!");
+    }
+    
+    if( flo >= fhi ) {
+        throw invalid_argument("flo must be less than fhi!");
+    }
+
+    if(order < 1) {
+        throw invalid_argument("Butterworth filter order must be >= 1");
+    }
+
+    if(f == 0.) {
+        return complex<double>(0., 0.);
+    }
+
+    const double omega = 2. * M_PI * f;
+    const double omega_lo = 2. * M_PI * flo;
+    const double omega_hi = 2. * M_PI * fhi;
+    const double band = omega_hi - omega_lo;
+    const double omega0 = sqrt(omega_lo * omega_hi);
+
+    // construct complex transfer function
+    complex<double> s(0., omega);
+    complex<double> H(1., 0.);
+    
+    for(int i = 0; i < order; ++i) {
+
+        const double theta = (2.*(i+1) + order - 1) * M_PI / 2. / order; // pole angle
+        const complex<double> p = polar(1., theta); // pole
+
+        const complex<double> disc = sqrt(band*band * p*p - 4. * omega0*omega0);
+        const complex<double> p_plus = 0.5 * (band*p + disc);
+        const complex<double> p_minus = 0.5 * (band*p - disc);
+
+        const complex<double> num = -band * p * s;
+        const complex<double> den = (s - p_plus) * (s - p_minus);
+
+        H *= num / den;
+    }    
+
+    return H;
 }
 
