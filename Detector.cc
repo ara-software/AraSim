@@ -3205,7 +3205,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
     // if freq is lower than freq_init
     if ( freq_scaled < thisFreq_init ) { 
-        Gout = slope_1 * (freq_scaled - F->at(0)) + tempGain->at(0)[angle_bin];
+        Gout = 0.;
     }
     // if freq is higher than last freq
     else if ( freq_scaled > F->back() ) { 
