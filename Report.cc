@@ -3669,10 +3669,6 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo (
         vm_bin0 *= pow(freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.), amplitudeSign);
         vm_bin1 *= pow(freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.), amplitudeSign);
     }
-    else {
-        vm_bin0 *= pow(heff * pol_factor, amplitudeSign);
-        vm_bin1 *= pow(heff_lastbin * pol_factor, amplitudeSign);
-    }
 
 }
 
