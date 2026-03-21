@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <stdexcept>
+#include <complex>
 #include "Constants.h"
 #include "TF1.h"
 
@@ -4921,27 +4922,47 @@ inline void Detector::CalculateElectChain(Settings *settings) {
     ElectGain.clear(); // clear previous values 
     ElectGain.resize(16, vector<double>(freq_step, 0));
 
-    // parameters for bandpass [MHz]
-    const int loFreq = (detector < 5)? 150 : 130;
-    const int hiFreq = (detector < 5)? 850 : 720;
-    const int width = 10;
-   
+    // save the pre-bandpass amplitude  
     for(int rfChan = 0; rfChan < 16; ++rfChan) {
 
         vector<double> buffGain(nFreqs, 0);
         for(int i = 0; i < nFreqs; ++i) { 
             buffGain[i] = Hmeas[rfChan][i]/Htot[rfChan][i];
-
-            // apply basic bandpass to make sure we don't get any surprises out of band 
-            // (this is equivalent to the quality control done for the tabulated models)
-            const double thisFreq = interp_frequencies_databin[i];
-            buffGain[i] *= (tanh((thisFreq - loFreq)/width) + 1)/2.;
-            buffGain[i] *= (tanh((hiFreq - thisFreq)/width) + 1)/2.;
         }
      
         // interpolate back onto the original frequency binning for the gain
         Tools::SimpleLinearInterpolation(nFreqs, interp_frequencies_databin, (double*)&buffGain[0],
                                          freq_step, Freq.data(), (double*)&ElectGain[rfChan][0]);
+    }
+            
+    // parameters for bandpass [MHz]
+    const int loFreq = (detector < 5)? 150 : 130;
+    const int hiFreq = (detector < 5)? 850 : 720;
+    const int order = 4;
+  
+    // apply Butterworth bandpass to make sure we don't get any surprises out of band 
+    for(int i = 0; i < freq_step; ++i) {
+        const double thisFreq = Freq[i];
+
+        // get filter response
+        complex<double> bp = Tools::butterworth_bp_filter_response(thisFreq, loFreq, hiFreq, order);   
+
+        for(int rfChan = 0; rfChan < 16; ++rfChan) {
+        
+            // get system gain components
+            double syst_mag = ElectGain[rfChan][i];
+            double syst_phase = ElectPhase[rfChan][i];
+    
+            // form complex system gain
+            complex<double> H_system = polar(syst_mag, syst_phase);
+            
+            // apply filter to system gain
+            complex<double> H_system_bp = bp * H_system;
+
+            // replace previous gain values with resulting magnitude and phase
+            ElectGain[rfChan][i] = abs(H_system_bp);
+            ElectPhase[rfChan][i] = arg(H_system_bp);
+        } 
     }
 
     return;
