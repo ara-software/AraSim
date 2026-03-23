@@ -39,6 +39,7 @@ Detector::Detector() {
 
 Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile) {
 
+    icemodel = icesurface;
 
     double freqstep = 1. / (double)(settings1 -> NFOUR / 2) / (settings1 -> TIMESTEP);
 
@@ -2688,7 +2689,17 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
 } 
 
 // linearly interpolate the transmittance for a channel at a particular frequency (OutZero == extrapolation is fixed to return 0)
-double Detector::GetTransm_OutZero(int ch, double freq) {
+double Detector::GetTransm_OutZero(int ch, double freq, double antenna_target_medium_n) {
+    
+  // check that target index of refraction is sensible
+  if(antenna_target_medium_n < 1.0) {
+      throw runtime_error("Target medium index of refraction is invalid: " + to_string(antenna_target_medium_n));
+  }
+ 
+  // scale frequency according to ratio of media indices of refraction
+  // if source medium n is a valid value scale the frequency, otherwise do not
+  // NOTE: this function only support receiver antennas
+  double freq_scaled = (antenna_source_medium_n >= 1)? freq * antenna_target_medium_n / antenna_source_medium_n : freq; 
 
   ch = ch%16; // to match the convention of Detector::GetTransm_databin
 
@@ -2702,12 +2713,12 @@ double Detector::GetTransm_OutZero(int ch, double freq) {
 
   const int nFreq = (int)trans_freq.size();
   const double dfreq = trans_freq[1] - trans_freq[0]; 
-  const int bin = (int)( (freq - trans_freq[0]) / dfreq )+1;
+  const int bin = (int)( (freq_scaled - trans_freq[0]) / dfreq )+1;
 
-  if(freq == trans_freq[0])
+  if(freq_scaled == trans_freq[0])
     return transm->front();
   
-  if(freq == trans_freq.back())
+  if(freq_scaled == trans_freq.back())
     return transm->back();
  
   if(bin <= 0 || bin >= nFreq)
@@ -2716,7 +2727,7 @@ double Detector::GetTransm_OutZero(int ch, double freq) {
   const double m = (transm->at(bin) - transm->at(bin-1))/(trans_freq[bin] - trans_freq[bin-1]);
   const double b = transm->at(bin-1); 
   
-  return m*(freq - trans_freq[bin-1]) + b; 
+  return m*(freq_scaled - trans_freq[bin-1]) + b; 
 
 }
 
@@ -4843,8 +4854,12 @@ inline void Detector::CalculateElectChain(Settings *settings) {
 
     for(int rfChan = 0; rfChan < 16; ++rfChan) {
     
-        std::vector<double> Ttot(nFreqs, 0);
+        const int sj = getStringfromArbAntID(0, rfChan); // hard code to station 0
+        const int ak = getAntennafromArbAntID(0, rfChan);
+        const double n_eff = icemodel->GetEffectiveN(stations[0].strings[sj].antennas[ak]);
       
+        std::vector<double> Ttot(nFreqs, 0);
+        
         // get appropriate trasmittances (antenna-type specific)
         {
             // choose correct antenna type for this channel
@@ -4884,20 +4899,9 @@ inline void Detector::CalculateElectChain(Settings *settings) {
             // calculate ice contribution to Ttot at each frequency for this channel 
             // uses loaded antenna model for transmittance
             for(int i = 0; i < nFreqs; ++i) {
-
-                // trans*_databin vectors store the sqrt of the trasmittance, so we need to square them
-                if(type == eVPol) {
-                    Ttot[i] = pow(transV_databin[i], 2)*Tice;
-                }
-                else if(type == eVPolTop) {
-                    Ttot[i] = pow(transVTop_databin[i], 2)*Tice;
-                }
-                else if(type == eHPol) {
-                    Ttot[i] = pow(transH_databin[i], 2)*Tice;
-                }
-                else {
-                    throw runtime_error("Unsupported antenna type, transmittance unknown!");
-                } 
+                const double freq = interp_frequencies_databin[i];
+                const double transm = GetTransm_OutZero(rfChan, freq, n_eff);
+                Ttot[i] = pow(transm, 2)*Tice;
             } 
         }
       

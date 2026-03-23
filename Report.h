@@ -322,8 +322,7 @@ class Report {
             Vector &launch_vector, Vector &receive_vector, Vector &n_trg_slappy, Vector &n_trg_pokey 
         );    // get viewangle, launch, receive vectors  (it reads launch angle as a viewangle and returns actual viewangle)
 
-        double GetEffectiveIndex(const double n_local);
-        double GaintoHeight(double gain, double freq, double n_local, double Z_A=50);
+        double GaintoHeight(double gain, double freq, double n_eff, double Z_A=50);
         
         double calculatePolFactor(Vector &Pol_vector, int ant_type, double antenna_theta, double antenna_phi);
 
