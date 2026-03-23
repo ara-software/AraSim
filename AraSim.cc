@@ -669,6 +669,7 @@ int main(int argc, char **argv) {   // read setup.txt file
         trigger->Full_window.clear();
         trigger->Full_window_V.clear();
         trigger->Vfft_noise_before.clear();
+        detector->clear_useless();
     }
     
     AraTree->Fill();  // fill tree for one entry

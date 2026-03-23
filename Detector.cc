@@ -7339,6 +7339,25 @@ double Detector::GetSplitterFactor(Settings *settings) {
   return factor;
 }
 
+void Detector::clear_useless(){
+
+    Freq.clear();
+    Vgain.clear();
+    Vphase.clear();
+    transV_databin.clear();
+    Freq.clear();
+    VgainTop.clear();
+    VphaseTop.clear();
+    transVTop_databin.clear();
+    Freq.clear();
+    Hgain.clear();
+    Hphase.clear();
+    transH_databin.clear();
+    TxFreq.clear();
+    Txgain.clear();
+    Txphase.clear();
+    
+}
 
 Detector::~Detector() {
 }

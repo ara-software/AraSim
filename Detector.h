@@ -496,7 +496,7 @@ class Detector {
 
         void ReadRayleigh_New(Settings *settings1); // get Rayleigh fit array with new DATA_BIN_SIZE
 
-
+        void clear_useless();
     
 //    vector < vector < vector < int > > > ChannelfromStringAntenna;
 //    void SetChannelStringAntennaMap();
