@@ -223,7 +223,7 @@ enum EAntennaType {
 class Detector {
     private:
 
-        IceModel* icemodel;
+        IceModel* icemodel; //!
 
         static const int ang_step_max = 2664;
         void ReadAllAntennaGains(Settings *settings1);
