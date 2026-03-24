@@ -6,6 +6,7 @@
 #include "Constants.h"
 #include "Vector.h"
 #include "Position.h"
+#include <string>
 //#include "Primaries.h"
 
 class Interaction;
@@ -95,7 +96,11 @@ private:
   const static int N_westlanddown=420;
   double d_westlanddown[N_westlanddown],l_westlanddown[N_westlanddown];
 
-
+  //Attenuation Systematics
+  std::vector<double> iceAttenPctDepth;
+  std::vector<double> iceAttenPctUp;
+  std::vector<double> iceAttenPctLow;
+  bool iceAttenPctTableLoaded = false;
 
 public:
 
@@ -189,8 +194,10 @@ void GetFresnel (
   double ARA_IceAtten_Length[100];
   int ARA_IceAtten_bin;
 
-  double GetARAIceAttenuLength(double depth);
-  double GetFreqDepIceAttenuLength(double depth, double freq);
+  double GetARAIceAttenuLength(double depth, Settings *settings1);
+  double GetFreqDepIceAttenuLength(double depth, double freq, Settings *settings1);
+  bool LoadIceAttenPercentTable(const std::string& filename);
+  double GetIceAttenSystematicsFactor(double depth, Settings *settings1) const;
   double temperature(double z);
 
   //  void FillArraysforTree(double lon_ground[1068][869],double lat_ground[1068][869],double lon_ice[1200][1000],double lat_ice[1200][1000],double lon_water[1200][1000],double lat_water[1200][1000]);

@@ -762,6 +762,9 @@ void Settings::ReadFile(string setupfile) {
           else if (label == "SOURCE_DEPTH"){
                SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
           }
+          else if (label == "SYSTEMATICS_IceAttenuation") {
+               SYSTEMATICS_IceAttenuation = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+          }
 
 
 
