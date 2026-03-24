@@ -158,6 +158,8 @@ public:
   Vector GetSurfaceNormal(const Position &r_out) const; //overloaded from EarthModel to include procedures for new ice models.
   double GetN(double depth) const;
   double GetN(const Position &pos) const;
+  double GetEffectiveN(double n_local) const;
+  double GetEffectiveN(const Position &pos) const;
   double EffectiveAttenuationLength(const Position &pos, const int &whichray) const;
   double EffectiveAttenuationLength(Settings *settings1, const Position &pos, const int &whichray) const;
   
@@ -211,6 +213,7 @@ void GetFresnel (
 //-------------------------------------------------- 
   // end three copied members from icemc icemodel.
 
+  void clear_useless();
 
   ClassDef(IceModel,1);
 

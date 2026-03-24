@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <stdexcept>
+#include <complex>
 #include "Constants.h"
 #include "TF1.h"
 
@@ -38,6 +39,7 @@ Detector::Detector() {
 
 Detector::Detector(Settings * settings1, IceModel * icesurface, string setupfile) {
 
+    icemodel = icesurface;
 
     double freqstep = 1. / (double)(settings1 -> NFOUR / 2) / (settings1 -> TIMESTEP);
 
@@ -2361,6 +2363,10 @@ inline void Detector::ReadAllAntennaImpedance(Settings *settings1) {
 
 // convert the swr into a transmission coefficient
 inline double Detector::SWRtoTransCoeff(double swr){
+    if(swr < 1.) {
+        throw invalid_argument("SWR must be >= 1!");
+    }   
+ 
     double reflection_coefficient = (swr-1.)/(swr+1.);
     double transmission_coefficient = sqrt(1. - pow(reflection_coefficient, 2.));
     return transmission_coefficient;
@@ -2683,7 +2689,17 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
 } 
 
 // linearly interpolate the transmittance for a channel at a particular frequency (OutZero == extrapolation is fixed to return 0)
-double Detector::GetTransm_OutZero(int ch, double freq) {
+double Detector::GetTransm_OutZero(int ch, double freq, double antenna_target_medium_n) {
+    
+  // check that target index of refraction is sensible
+  if(antenna_target_medium_n < 1.0) {
+      throw runtime_error("Target medium index of refraction is invalid: " + to_string(antenna_target_medium_n));
+  }
+ 
+  // scale frequency according to ratio of media indices of refraction
+  // if source medium n is a valid value scale the frequency, otherwise do not
+  // NOTE: this function only support receiver antennas
+  double freq_scaled = (antenna_source_medium_n >= 1)? freq * antenna_target_medium_n / antenna_source_medium_n : freq; 
 
   ch = ch%16; // to match the convention of Detector::GetTransm_databin
 
@@ -2697,12 +2713,12 @@ double Detector::GetTransm_OutZero(int ch, double freq) {
 
   const int nFreq = (int)trans_freq.size();
   const double dfreq = trans_freq[1] - trans_freq[0]; 
-  const int bin = (int)( (freq - trans_freq[0]) / dfreq )+1;
+  const int bin = (int)( (freq_scaled - trans_freq[0]) / dfreq )+1;
 
-  if(freq == trans_freq[0])
+  if(freq_scaled == trans_freq[0])
     return transm->front();
   
-  if(freq == trans_freq.back())
+  if(freq_scaled == trans_freq.back())
     return transm->back();
  
   if(bin <= 0 || bin >= nFreq)
@@ -2711,8 +2727,82 @@ double Detector::GetTransm_OutZero(int ch, double freq) {
   const double m = (transm->at(bin) - transm->at(bin-1))/(trans_freq[bin] - trans_freq[bin-1]);
   const double b = transm->at(bin-1); 
   
-  return m*(freq - trans_freq[bin-1]) + b; 
+  return m*(freq_scaled - trans_freq[bin-1]) + b; 
 
+}
+
+double Detector::GetGainBin(int ifreq, int itheta, int iphi, int ant_m, int string_number, int ant_number, bool useInTransmitterMode) {
+    
+    //Initialize pointer to dynamically point to the gain for chosen antenna.  The structure of this pointer matches that of the global gain arrays defined in Detector.h.
+    vector<vector<double> > *tempGain = nullptr;
+
+    vector<double> * F;   
+ 
+    //Assign local pointer to gain array specified in the function argument
+    //VPol Rx
+    if ( Detector_mode == 5 ){ // Phased Array mode
+        if ( useInTransmitterMode ) {
+            tempGain = &Txgain; // Transmitter mode
+        }
+        else if ( ant_m == 1 ) {
+            tempGain = &Hgain; // PA Hpols
+        }
+        else {
+            if ( string_number == 0 ) { 
+                tempGain = &Vgain; // PA Vpols
+            }
+            else {
+                if ( ant_number == 1 ) { 
+                    tempGain = &VgainTop; // A5 Top VPols
+                }
+                else { 
+                    tempGain = &Vgain; // A5 Bottom Vpols
+                }
+            }
+        }
+    }
+    else { // Traditional Station mode
+        //Tx
+        if (useInTransmitterMode) { 
+            tempGain = &Txgain;
+        }
+        else if (ant_m == 0) {
+            if (ant_number == 0) { 
+                tempGain = &Vgain;
+            }
+            else if (ant_number == 2) { 
+                tempGain = &VgainTop;
+            }
+        }
+        //HPol Rx
+        else if (ant_m == 1) { 
+            tempGain = &Hgain;
+        }
+        else { 
+            throw runtime_error("In GetGain_1D_OutZero: No appropriate gain model for this simulation setup.");
+        }
+    }
+
+    if(useInTransmitterMode) {
+        F = &TxFreq;
+    }
+    else {
+        F = &Freq;
+    }  
+ 
+
+    // check if angles range actually theta 0-180, phi 0-360
+    int i = itheta;
+    int j = iphi;
+
+    if ( j == 72 ) { 
+        j = 0;
+    }
+
+    int angle_bin = 37*j+i;
+
+    return tempGain->at(ifreq).at(angle_bin); 
+    
 }
 
 double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o, double antenna_target_medium_n) { // using Interpolation on multidimensions!
@@ -3204,7 +3294,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
 
     // if freq is lower than freq_init
     if ( freq_scaled < thisFreq_init ) { 
-        Gout = slope_1 * (freq_scaled - F->at(0)) + tempGain->at(0)[angle_bin];
+        Gout = 0.;
     }
     // if freq is higher than last freq
     else if ( freq_scaled > F->back() ) { 
@@ -4838,8 +4928,12 @@ inline void Detector::CalculateElectChain(Settings *settings) {
 
     for(int rfChan = 0; rfChan < 16; ++rfChan) {
     
-        std::vector<double> Ttot(nFreqs, 0);
+        const int sj = getStringfromArbAntID(0, rfChan); // hard code to station 0
+        const int ak = getAntennafromArbAntID(0, rfChan);
+        const double n_eff = icemodel->GetEffectiveN(stations[0].strings[sj].antennas[ak]);
       
+        std::vector<double> Ttot(nFreqs, 0);
+        
         // get appropriate trasmittances (antenna-type specific)
         {
             // choose correct antenna type for this channel
@@ -4879,20 +4973,9 @@ inline void Detector::CalculateElectChain(Settings *settings) {
             // calculate ice contribution to Ttot at each frequency for this channel 
             // uses loaded antenna model for transmittance
             for(int i = 0; i < nFreqs; ++i) {
-
-                // trans*_databin vectors store the sqrt of the trasmittance, so we need to square them
-                if(type == eVPol) {
-                    Ttot[i] = pow(transV_databin[i], 2)*Tice;
-                }
-                else if(type == eVPolTop) {
-                    Ttot[i] = pow(transVTop_databin[i], 2)*Tice;
-                }
-                else if(type == eHPol) {
-                    Ttot[i] = pow(transH_databin[i], 2)*Tice;
-                }
-                else {
-                    throw runtime_error("Unsupported antenna type, transmittance unknown!");
-                } 
+                const double freq = interp_frequencies_databin[i];
+                const double transm = GetTransm_OutZero(rfChan, freq, n_eff);
+                Ttot[i] = pow(transm, 2)*Tice;
             } 
         }
       
@@ -4921,27 +5004,47 @@ inline void Detector::CalculateElectChain(Settings *settings) {
     ElectGain.clear(); // clear previous values 
     ElectGain.resize(16, vector<double>(freq_step, 0));
 
-    // parameters for bandpass [MHz]
-    const int loFreq = (detector < 5)? 150 : 130;
-    const int hiFreq = (detector < 5)? 850 : 720;
-    const int width = 10;
-   
+    // save the pre-bandpass amplitude  
     for(int rfChan = 0; rfChan < 16; ++rfChan) {
 
         vector<double> buffGain(nFreqs, 0);
         for(int i = 0; i < nFreqs; ++i) { 
             buffGain[i] = Hmeas[rfChan][i]/Htot[rfChan][i];
-
-            // apply basic bandpass to make sure we don't get any surprises out of band 
-            // (this is equivalent to the quality control done for the tabulated models)
-            const double thisFreq = interp_frequencies_databin[i];
-            buffGain[i] *= (tanh((thisFreq - loFreq)/width) + 1)/2.;
-            buffGain[i] *= (tanh((hiFreq - thisFreq)/width) + 1)/2.;
         }
      
         // interpolate back onto the original frequency binning for the gain
         Tools::SimpleLinearInterpolation(nFreqs, interp_frequencies_databin, (double*)&buffGain[0],
                                          freq_step, Freq.data(), (double*)&ElectGain[rfChan][0]);
+    }
+            
+    // parameters for bandpass [MHz]
+    const int loFreq = (detector < 5)? 150 : 130;
+    const int hiFreq = (detector < 5)? 850 : 720;
+    const int order = 4;
+  
+    // apply Butterworth bandpass to make sure we don't get any surprises out of band 
+    for(int i = 0; i < freq_step; ++i) {
+        const double thisFreq = Freq[i];
+
+        // get filter response
+        complex<double> bp = Tools::butterworth_bp_filter_response(thisFreq, loFreq, hiFreq, order);   
+
+        for(int rfChan = 0; rfChan < 16; ++rfChan) {
+        
+            // get system gain components
+            double syst_mag = ElectGain[rfChan][i];
+            double syst_phase = ElectPhase[rfChan][i];
+    
+            // form complex system gain
+            complex<double> H_system = polar(syst_mag, syst_phase);
+            
+            // apply filter to system gain
+            complex<double> H_system_bp = bp * H_system;
+
+            // replace previous gain values with resulting magnitude and phase
+            ElectGain[rfChan][i] = abs(H_system_bp);
+            ElectPhase[rfChan][i] = arg(H_system_bp);
+        } 
     }
 
     return;
@@ -7310,6 +7413,95 @@ double Detector::GetSplitterFactor(Settings *settings) {
   return factor;
 }
 
+void Detector::clear_useless(){
+
+    Freq.clear();
+    Vgain.clear();
+    Vphase.clear();
+    transV_databin.clear();
+    Freq.clear();
+    VgainTop.clear();
+    VphaseTop.clear();
+    transVTop_databin.clear();
+    Freq.clear();
+    Hgain.clear();
+    Hphase.clear();
+    transH_databin.clear();
+    TxFreq.clear();
+    Txgain.clear();
+    Txphase.clear();
+
+    amplifierNoiseFig_ch.clear();
+    amplifierNoiseFig_ch.shrink_to_fit();
+
+    fdiode_real_databin.clear();
+    fdiode_real_databin.shrink_to_fit();
+
+    NoiseFig_databin_ch.clear();
+    NoiseFig_databin_ch.shrink_to_fit();
+
+    rayleighFits_DeepStation_values.clear();
+    rayleighFits_DeepStation_frequencies.clear();
+
+    PreampGain_databin.clear();
+    PreampGain_databin.shrink_to_fit();
+
+    FilterGain_databin.clear();
+    FilterGain_databin.shrink_to_fit();
+
+    fdiode_real_double.clear();
+    fdiode_real_double.shrink_to_fit();
+
+    FOAMGain_databin.clear();
+    FOAMGain_databin.shrink_to_fit();
+
+    ElectGain.clear();
+    ElectGain.shrink_to_fit();
+
+    fdiode_real.clear();
+    fdiode_real.shrink_to_fit();
+
+    NoiseFig_freq.clear();
+    NoiseFig_freq.shrink_to_fit();
+
+    trans_freq.clear();
+    trans_freq.shrink_to_fit();
+
+    freq_forfft.clear();
+    freq_forfft.shrink_to_fit();
+
+    NoiseFig_ch.clear();
+    NoiseFig_ch.shrink_to_fit();
+
+    ElectPhase.clear();
+    ElectPhase.shrink_to_fit();
+
+    PreampGain_NFOUR.clear();
+    PreampGain_NFOUR.shrink_to_fit();
+
+    FilterGain_NFOUR.clear();
+    FilterGain_NFOUR.shrink_to_fit();
+
+    FOAMGain_NFOUR.clear();
+    FOAMGain_NFOUR.shrink_to_fit();
+
+    diode_real.clear();
+    diode_real.shrink_to_fit();
+
+    PreampGain.clear();
+    PreampGain.shrink_to_fit();
+
+    FilterGain.clear();
+    FilterGain.shrink_to_fit();
+
+    FOAMGain.clear();
+    FOAMGain.shrink_to_fit();
+
+    if (icemodel) {
+        icemodel->clear_useless();
+    }
+
+}
 
 Detector::~Detector() {
 }

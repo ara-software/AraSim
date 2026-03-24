@@ -18,6 +18,8 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <algorithm>
+
 
 ClassImp(IceModel);
 
@@ -1345,6 +1347,20 @@ double IceModel::GetN(const Position &pos) const{
   return GetN(pos.Mag() - Surface(pos.Lon(),pos.Lat()));
 } //GetN(Position)
 
+double IceModel::GetEffectiveN(double n_local) const{
+
+  const double scaling = (NEFF_REF-1.) / (NICE_REF-1.);
+  const double n_eff = 1. + scaling*(n_local - 1.);
+
+  return n_eff;
+} //GetEffectiveN(depth)
+
+double IceModel::GetEffectiveN(const Position &pos) const{
+  const double n_local = GetN(pos); 
+ 
+  return GetEffectiveN(n_local);
+} //GetEffectiveN(Position)
+
 double IceModel::EffectiveAttenuationLength(const Position &pos,const int &whichray) const {
   double localmaxdepth = IceThickness(pos);
   double depth = Surface(pos) - pos.Mag();
@@ -1996,3 +2012,12 @@ void IceModel::GetMag (
 
 
 //}
+
+
+void IceModel::clear_useless() {
+
+    EarthModel::clear_useless();
+
+}
+
+

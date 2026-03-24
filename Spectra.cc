@@ -473,3 +473,8 @@ int Spectra::IsMonoenergetic() {
     }
     return out;
 }
+
+void Spectra::clear_useless() {
+    Rand3 = TRandom3();
+}
+
