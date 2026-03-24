@@ -1521,3 +1521,4 @@ void RaySolver::ApplyNofzSystematics(double& ns, double& nd, double& nc, Setting
     nd += settings1->SYSTEMATICS_nofz_delta_nd;
     nc += settings1->SYSTEMATICS_nofz_delta_nc;
 }
+
