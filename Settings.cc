@@ -327,8 +327,14 @@ outputdir="outputs"; // directory where outputs go
   CLOCK_ANGLE=0; //Default: 0 -- Angle of polarization "on the clock".  Angle of zero is pure thetaPol, whereas 90º is pure phiPol.
 
   SYSTEMATICS_IceAttenuation=0; // 0=central (default), 1=up, 2=low
+  
   SYSTEMATICS_Askaryan=0; // 0=central (default), 1=increase pecentage, 2=decrease pecentage
   SYSTEMATICS_AskaryanPercent=12.0; //Define the percentage (12% by default)
+  
+  //Systematics of n(z) = nd - (nd-ns)e^nc*z
+  SYSTEMATICS_nofz_delta_ns = 0.0;
+  SYSTEMATICS_nofz_delta_nd = 0.0;
+  SYSTEMATICS_nofz_delta_nc = 0.0;
 
     /*
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
@@ -772,7 +778,15 @@ void Settings::ReadFile(string setupfile) {
           else if (label == "SYSTEMATICS_AskaryanPercent") {
                SYSTEMATICS_AskaryanPercent = atoi(line.substr(line.find_first_of("=") + 1).c_str());
           }
-
+          else if (label == "SYSTEMATICS_nofz_delta_ns") {
+              SYSTEMATICS_nofz_delta_ns = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          else if (label == "SYSTEMATICS_nofz_delta_nd") {
+              SYSTEMATICS_nofz_delta_nd = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
+          else if (label == "SYSTEMATICS_nofz_delta_nc") {
+              SYSTEMATICS_nofz_delta_nc = atof(line.substr(line.find_first_of("=") + 1).c_str());
+          }
 
 
           }

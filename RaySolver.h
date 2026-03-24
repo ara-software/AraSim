@@ -167,7 +167,7 @@ class RaySolver {
 
         //void Solve_Ray(Position &source, Position &target, IceModel *antarctica, std::vector < std::vector <double> > &outputs, Settings *settings1);
         void Solve_Ray(Position &source, Position &target, IceModel *antarctica, std::vector < std::vector <double> > &outputs, Settings *settings1, std::vector < std::vector < std::vector <double> > > &RayStep );
-
+        void ApplyNofzSystematics(double& ns, double& nd, double& nc, Settings* settings1);
         int source_over_surface;
         int solution_toggle;    // no solution : 0  solution exist : 1
 };
