@@ -659,6 +659,15 @@ int main(int argc, char **argv) {   // read setup.txt file
         cout << "Aeff*sr : " << Aeff * 4.* PI << " [m^2sr]" <<", "<< Aeff * 4.* PI *1.e-6<<" [km^2sr]"<< endl;
     }
 
+    double freq[detector->GetFreqBin()], Filter[detector->GetFreqBin()];
+    double Filter_E[detector->GetFreqBin()];
+
+    for (int i=0; i<detector->GetFreqBin(); i++) {
+        freq[i] = detector->GetFreq(i);    // in Hz
+        Filter[i] = detector->GetFilterGain(i);    // in dB
+        Filter_E[i] = pow(10., (detector->GetFilterGain(i))/20.);
+    }
+    
     // remove noisewaveform info if DATA_SAVE_MODE == 2
     // remove noisewaveform info if DATA_SAVE_MODE is not 0
     if (settings1->DATA_SAVE_MODE != 0) {
@@ -669,6 +678,8 @@ int main(int argc, char **argv) {   // read setup.txt file
         trigger->Full_window.clear();
         trigger->Full_window_V.clear();
         trigger->Vfft_noise_before.clear();
+        detector->clear_useless();
+        spectra->clear_useless();
     }
     
     AraTree->Fill();  // fill tree for one entry
@@ -677,14 +688,6 @@ int main(int argc, char **argv) {   // read setup.txt file
 
     efficiencies->summarize(); // summarize the results in an output file  
 
-    double freq[detector->GetFreqBin()], Filter[detector->GetFreqBin()];
-    double Filter_E[detector->GetFreqBin()];
-
-    for (int i=0; i<detector->GetFreqBin(); i++) {
-        freq[i] = detector->GetFreq(i);    // in Hz
-        Filter[i] = detector->GetFilterGain(i);    // in dB
-        Filter_E[i] = pow(10., (detector->GetFilterGain(i))/20.);
-    }
 
     delete raysolver;
     delete icemodel;

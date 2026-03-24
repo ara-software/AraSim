@@ -222,6 +222,9 @@ enum EAntennaType {
   
 class Detector {
     private:
+
+        IceModel* icemodel; //!
+
         static const int ang_step_max = 2664;
         void ReadAllAntennaGains(Settings *settings1);
         double SWRtoTransCoeff(double swr);
@@ -375,12 +378,15 @@ class Detector {
         vector <ARA_station> stations;
         vector <Antenna_string> strings;
 
+        IceModel* GetIceModel() { return icemodel; };
+
         double GetSplitterFactor(Settings *settings1); // get splitter factor for digitizer path of station
 
         int NoiseFig_numCh;
 
         vector <double> freq_forfft;
 
+        double GetGainBin(int ifreq, int itheta, int iphi, int ant_m, int string_number=0, int ant_number=0, bool useInTransmitterMode=false); 
         double GetGain(double freq, double theta, double phi, int ant_m, int ant_o, double antenna_target_medium_n);    //read antenna gain at certain angle, certain type, and certain orientation
         double GetGain(double freq, double theta, double phi, int ant_m, double antenna_target_medium_n);   //read antenna gain at certain angle, certain type. (orientation : default)
 
@@ -434,7 +440,7 @@ class Detector {
         double GetTransm_databin(int ch, int bin) {	if(ch%16<4){return transVTop_databin[bin];}
 							else if(ch%16<8){return transV_databin[bin];} 
 							else{return transH_databin[bin];} }   // bin for FFT
-        double GetTransm_OutZero(int ch, double freq);
+        double GetTransm_OutZero(int ch, double freq, double antenna_target_medium_n);
         void ReadNoiseFig_New(Settings *settings1); // get noise Figure array with new DATA_BIN_SIZE
 
         
@@ -491,7 +497,7 @@ class Detector {
 
         void ReadRayleigh_New(Settings *settings1); // get Rayleigh fit array with new DATA_BIN_SIZE
 
-
+        void clear_useless();
     
 //    vector < vector < vector < int > > > ChannelfromStringAntenna;
 //    void SetChannelStringAntennaMap();
@@ -557,7 +563,6 @@ class Detector {
     
     vector <double> CalPulserWF_ns;
     vector <double> CalPulserWF_V;
-
 
         ~Detector();    //destructor
 

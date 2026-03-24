@@ -940,6 +940,54 @@ int Settings::CheckCompatibilitiesDetector(Detector *detector) {
         num_err++;
     }
 
+    // check if the antenna gain is falling fast enough at low frequencies
+    {
+        double freq0 = detector->GetFreq(0); 
+        double freq1 = detector->GetFreq(1); 
+
+        // Vpols
+        {
+            double gain0 = detector->GetGainBin(0, 0, 0, 0, 0, 0);
+            double gain1 = detector->GetGainBin(1, 0, 0, 0, 0, 0);
+
+            // calculate quantity proportional to heff
+            double heff0 = gain0 / freq0 / freq0; 
+            double heff1 = gain1 / freq1 / freq1;
+            if(heff0 > heff1) {
+                cerr << "Vpol antenna gain may not be falling fast enough! Effective height may grow and introduce power at low frequencies." << endl;
+                num_err++;
+            }
+        }
+        
+        // TVpols
+        {
+            double gain0 = detector->GetGainBin(0, 0, 0, 0, 0, 2);
+            double gain1 = detector->GetGainBin(1, 0, 0, 0, 0, 2);
+
+            // calculate quantity proportional to heff
+            double heff0 = gain0 / freq0 / freq0; 
+            double heff1 = gain1 / freq1 / freq1;
+            if(heff0 > heff1) {
+                cerr << "TVpol antenna gain may not be falling fast enough! Effective height may grow and introduce power at low frequencies." << endl;
+                num_err++;
+            }
+        }
+        
+        // Hpols
+        {
+            double gain0 = detector->GetGainBin(0, 0, 0, 1);
+            double gain1 = detector->GetGainBin(1, 0, 0, 1);
+
+            // calculate quantity proportional to heff
+            double heff0 = gain0 / freq0 / freq0; 
+            double heff1 = gain1 / freq1 / freq1;
+            if(heff0 > heff1) {
+                cerr << "Hpol antenna gain may not be falling fast enough! Effective height may grow and introduce power at low frequencies." << endl;
+                num_err++;
+            }
+        }
+    }
+
     return num_err;
 }
 

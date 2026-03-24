@@ -240,6 +240,8 @@ public:
   static double GetGeoid(double latitude);
   static double GetCOASTLINE();
 
+  void clear_useless();
+
   ClassDef(EarthModel,1);
 
 
