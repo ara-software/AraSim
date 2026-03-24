@@ -347,7 +347,10 @@ class Settings
                                              // This setting is only used if DETECTOR > 3 && NOISE == 1 && CUSTOM_ELECTRONICS == 0
                                   
         double CLOCK_ANGLE;  // default: 0; Angle of polarization "on the clock" for use in pulser events (EVENT_TYPE=11)
+        
         int SYSTEMATICS_IceAttenuation; // 0=central, 1=up, 2=low
+        int SYSTEMATICS_Askaryan; // 0=central (default), 1=increase pecentage, 2=decrease pecentage
+        int SYSTEMATICS_AskaryanPercent; //Define the percentage (12% by default)
 
 
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1

@@ -804,6 +804,20 @@ void Signal::Build_Param_RE_Tterm_tables(){
   cout<<"Finished building the Param RE Tterm tables."<<endl;
 }
 
+double Signal::GetAskaryanSystematicsFactor(Settings *settings1) {
+    if (!settings1) return 1.0;
+
+    double frac = settings1->SYSTEMATICS_AskaryanPercent / 100.0;
+
+    if (settings1->SYSTEMATICS_Askaryan == 1) {
+        return 1.0 + frac;
+    }
+    else if (settings1->SYSTEMATICS_Askaryan == 2) {
+        return 1.0 - frac;
+    }
+
+    return 1.0;
+}
 
 // depending on the shower_mode, make Vm array for em shower/had shower or both
 void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double viewangle, double atten_factor, int outbin, double *Tarray, double *Earray, int &skip_bins, int interaction_idx ) {
@@ -1138,6 +1152,11 @@ void Signal::GetVm_FarField_Tarray( Event *event, Settings *settings1, double vi
 
     } // if using both EM and HAD showers
 
+  double askaryan_scale = GetAskaryanSystematicsFactor(settings1);
+  for (int tbin=0; tbin<outbin; tbin++) {
+      Earray[tbin] *= askaryan_scale;
+  }
+
 }
 
 
@@ -1394,5 +1413,3 @@ double Signal::Param_RE_Tterm_approx(double Tterm, double *par) {
     return value * 1.e9;
 
 }
-
-
