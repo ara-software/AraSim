@@ -326,7 +326,7 @@ outputdir="outputs"; // directory where outputs go
  
   CLOCK_ANGLE=0; //Default: 0 -- Angle of polarization "on the clock".  Angle of zero is pure thetaPol, whereas 90º is pure phiPol.
 
-
+  SYSTEMATICS_IceAttenuation=0; // 0=central (default), 1=up, 2=low
 
 
     /*
