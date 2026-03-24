@@ -2731,6 +2731,80 @@ double Detector::GetTransm_OutZero(int ch, double freq, double antenna_target_me
 
 }
 
+double Detector::GetGainBin(int ifreq, int itheta, int iphi, int ant_m, int string_number, int ant_number, bool useInTransmitterMode) {
+    
+    //Initialize pointer to dynamically point to the gain for chosen antenna.  The structure of this pointer matches that of the global gain arrays defined in Detector.h.
+    vector<vector<double> > *tempGain = nullptr;
+
+    vector<double> * F;   
+ 
+    //Assign local pointer to gain array specified in the function argument
+    //VPol Rx
+    if ( Detector_mode == 5 ){ // Phased Array mode
+        if ( useInTransmitterMode ) {
+            tempGain = &Txgain; // Transmitter mode
+        }
+        else if ( ant_m == 1 ) {
+            tempGain = &Hgain; // PA Hpols
+        }
+        else {
+            if ( string_number == 0 ) { 
+                tempGain = &Vgain; // PA Vpols
+            }
+            else {
+                if ( ant_number == 1 ) { 
+                    tempGain = &VgainTop; // A5 Top VPols
+                }
+                else { 
+                    tempGain = &Vgain; // A5 Bottom Vpols
+                }
+            }
+        }
+    }
+    else { // Traditional Station mode
+        //Tx
+        if (useInTransmitterMode) { 
+            tempGain = &Txgain;
+        }
+        else if (ant_m == 0) {
+            if (ant_number == 0) { 
+                tempGain = &Vgain;
+            }
+            else if (ant_number == 2) { 
+                tempGain = &VgainTop;
+            }
+        }
+        //HPol Rx
+        else if (ant_m == 1) { 
+            tempGain = &Hgain;
+        }
+        else { 
+            throw runtime_error("In GetGain_1D_OutZero: No appropriate gain model for this simulation setup.");
+        }
+    }
+
+    if(useInTransmitterMode) {
+        F = &TxFreq;
+    }
+    else {
+        F = &Freq;
+    }  
+ 
+
+    // check if angles range actually theta 0-180, phi 0-360
+    int i = itheta;
+    int j = iphi;
+
+    if ( j == 72 ) { 
+        j = 0;
+    }
+
+    int angle_bin = 37*j+i;
+
+    return tempGain->at(ifreq).at(angle_bin); 
+    
+}
+
 double Detector::GetGain(double freq, double theta, double phi, int ant_m, int ant_o, double antenna_target_medium_n) { // using Interpolation on multidimensions!
    
     // check that target index of refraction is sensible

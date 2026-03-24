@@ -386,6 +386,7 @@ class Detector {
 
         vector <double> freq_forfft;
 
+        double GetGainBin(int ifreq, int itheta, int iphi, int ant_m, int string_number=0, int ant_number=0, bool useInTransmitterMode=false); 
         double GetGain(double freq, double theta, double phi, int ant_m, int ant_o, double antenna_target_medium_n);    //read antenna gain at certain angle, certain type, and certain orientation
         double GetGain(double freq, double theta, double phi, int ant_m, double antenna_target_medium_n);   //read antenna gain at certain angle, certain type. (orientation : default)
 
