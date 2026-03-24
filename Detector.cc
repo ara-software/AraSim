@@ -7430,7 +7430,77 @@ void Detector::clear_useless(){
     TxFreq.clear();
     Txgain.clear();
     Txphase.clear();
-    
+
+    amplifierNoiseFig_ch.clear();
+    amplifierNoiseFig_ch.shrink_to_fit();
+
+    fdiode_real_databin.clear();
+    fdiode_real_databin.shrink_to_fit();
+
+    NoiseFig_databin_ch.clear();
+    NoiseFig_databin_ch.shrink_to_fit();
+
+    rayleighFits_DeepStation_values.clear();
+    rayleighFits_DeepStation_frequencies.clear();
+
+    PreampGain_databin.clear();
+    PreampGain_databin.shrink_to_fit();
+
+    FilterGain_databin.clear();
+    FilterGain_databin.shrink_to_fit();
+
+    fdiode_real_double.clear();
+    fdiode_real_double.shrink_to_fit();
+
+    FOAMGain_databin.clear();
+    FOAMGain_databin.shrink_to_fit();
+
+    ElectGain.clear();
+    ElectGain.shrink_to_fit();
+
+    fdiode_real.clear();
+    fdiode_real.shrink_to_fit();
+
+    NoiseFig_freq.clear();
+    NoiseFig_freq.shrink_to_fit();
+
+    trans_freq.clear();
+    trans_freq.shrink_to_fit();
+
+    freq_forfft.clear();
+    freq_forfft.shrink_to_fit();
+
+    NoiseFig_ch.clear();
+    NoiseFig_ch.shrink_to_fit();
+
+    ElectPhase.clear();
+    ElectPhase.shrink_to_fit();
+
+    PreampGain_NFOUR.clear();
+    PreampGain_NFOUR.shrink_to_fit();
+
+    FilterGain_NFOUR.clear();
+    FilterGain_NFOUR.shrink_to_fit();
+
+    FOAMGain_NFOUR.clear();
+    FOAMGain_NFOUR.shrink_to_fit();
+
+    diode_real.clear();
+    diode_real.shrink_to_fit();
+
+    PreampGain.clear();
+    PreampGain.shrink_to_fit();
+
+    FilterGain.clear();
+    FilterGain.shrink_to_fit();
+
+    FOAMGain.clear();
+    FOAMGain.shrink_to_fit();
+
+    if (icemodel) {
+        icemodel->clear_useless();
+    }
+
 }
 
 Detector::~Detector() {

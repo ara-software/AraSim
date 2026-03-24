@@ -213,6 +213,7 @@ void GetFresnel (
 //-------------------------------------------------- 
   // end three copied members from icemc icemodel.
 
+  void clear_useless();
 
   ClassDef(IceModel,1);
 

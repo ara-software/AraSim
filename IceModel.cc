@@ -18,6 +18,8 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <algorithm>
+
 
 ClassImp(IceModel);
 
@@ -2010,3 +2012,12 @@ void IceModel::GetMag (
 
 
 //}
+
+
+void IceModel::clear_useless() {
+
+    EarthModel::clear_useless();
+
+}
+
+

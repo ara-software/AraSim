@@ -14,6 +14,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <algorithm>
 
 #include "signal.hh"
 
@@ -2185,3 +2186,11 @@ void EarthModel::EarthCurvature(double *array,double depth_temp) {
   array[2]=length*cos(rxdtheta);
 
 }
+
+void EarthModel::clear_useless() {
+
+    Rand3 = TRandom3();
+
+}
+
+
