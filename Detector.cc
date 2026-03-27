@@ -7389,17 +7389,18 @@ inline void Detector::ReadImpedance(string filename, vector<double> *TempRealImp
 double Detector::GetSplitterFactor(Settings *settings) {
   // Get splitter/attenutation factor for the digitizer path for this station
   // AraSim default had factor of 1/sqrt(2), whereas A1-3 have a 3.4 dB factor and A4-5 have a 1.4 dB factor.
+  // See relevant spec sheet for A1-3 (3.4 is rough value in band) https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=3509
   // See talk by Brian discussing splitter factors: https://aradocs.wipac.wisc.edu/cgi-bin/DocDB/ShowDocument?docid=2751
 
   double factor; 
  
   //Case for simulating real ARA Stations 0 (testbed), A1, A2, and A3.
   if (settings->DETECTOR == 4 and settings->DETECTOR_STATION < 4) { 
-      factor = 1/sqrt(pow(10,-0.34));
+      factor = sqrt(pow(10,-0.34));
   }
   //Case for simulating real ARA Stations A4 and A5 (non phased array).
   else if (settings->DETECTOR == 4 and settings->DETECTOR_STATION >= 4) { 
-      factor = 1/sqrt(pow(10,-0.14));
+      factor = sqrt(pow(10,-0.14));
   }
   //Case for Phased Array implementation by Abby Bishop. 
   else if (settings->DETECTOR == 5) { 
