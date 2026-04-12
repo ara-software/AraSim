@@ -5356,7 +5356,8 @@ int Report::get_PA_trigger_bin(
         // Scale SNR according to full phased array angular response
         double avgSnr = 0.;
         if(settings->TRIG_ANALYSIS_MODE == 2) { // Noise only triggers
-            avgSnr = pa_force_trigger_snr; 
+            avgSnr = pa_force_trigger_snr;
+            return (waveform_length-trigger_window_bins + 1)/2; // 0 is interpreted as false downstream, so can't trigger on bin 0 
         }
         else { 
             // Estimate average SNR in topmost vpol
