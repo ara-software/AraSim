@@ -1515,7 +1515,6 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 
 
 void RaySolver::ApplyNofzSystematics(double& ns, double& nd, double& nc, Settings* settings1) {
-    if (!settings1) return;
 
     ns += settings1->SYSTEMATICS_nofz_delta_ns;
     nd += settings1->SYSTEMATICS_nofz_delta_nd;

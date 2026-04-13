@@ -805,18 +805,17 @@ void Signal::Build_Param_RE_Tterm_tables(){
 }
 
 double Signal::GetAskaryanSystematicsFactor(Settings *settings1) {
-    if (!settings1) return 1.0;
 
     double frac = settings1->SYSTEMATICS_AskaryanPercent / 100.0;
+    double factor = 1.0 + frac;
 
-    if (settings1->SYSTEMATICS_Askaryan == 1) {
-        return 1.0 + frac;
-    }
-    else if (settings1->SYSTEMATICS_Askaryan == 2) {
-        return 1.0 - frac;
+    if (factor <= 0.0) {
+        std::cerr << "Error: SYSTEMATICS_AskaryanPercent gives a non-positive scaling factor: "
+                  << settings1->SYSTEMATICS_AskaryanPercent << std::endl;
+        exit(1);
     }
 
-    return 1.0;
+    return factor;
 }
 
 // depending on the shower_mode, make Vm array for em shower/had shower or both

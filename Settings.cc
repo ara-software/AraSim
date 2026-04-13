@@ -328,8 +328,7 @@ outputdir="outputs"; // directory where outputs go
 
   SYSTEMATICS_IceAttenuation=0; // 0=central (default), 1=up, 2=low
   
-  SYSTEMATICS_Askaryan=0; // 0=central (default), 1=increase pecentage, 2=decrease pecentage
-  SYSTEMATICS_AskaryanPercent=12.0; //Define the percentage (12% by default)
+  SYSTEMATICS_AskaryanPercent=0.0; //Define the percentage (0% by default)
   
   //Systematics of n(z) = nd - (nd-ns)e^nc*z
   SYSTEMATICS_nofz_delta_ns = 0.0;
@@ -771,9 +770,6 @@ void Settings::ReadFile(string setupfile) {
           }
           else if (label == "SYSTEMATICS_IceAttenuation") {
                SYSTEMATICS_IceAttenuation = atoi(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-          else if (label == "SYSTEMATICS_Askaryan") {
-               SYSTEMATICS_Askaryan = atoi(line.substr(line.find_first_of("=") + 1).c_str());
           }
           else if (label == "SYSTEMATICS_AskaryanPercent") {
                SYSTEMATICS_AskaryanPercent = atoi(line.substr(line.find_first_of("=") + 1).c_str());

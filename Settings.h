@@ -350,7 +350,7 @@ class Settings
         
         int SYSTEMATICS_IceAttenuation; // 0=central, 1=up, 2=low
         
-        int SYSTEMATICS_Askaryan; // 0=central (default), 1=increase pecentage, 2=decrease pecentage
+        int SYSTEMATICS_Askaryan; // 0=central (default), 1=increase percentage, 2=decrease percentage
         int SYSTEMATICS_AskaryanPercent; //Define the percentage (12% by default)
         
         //Systematics of n(z) = nd - (nd-ns)e^nc*z

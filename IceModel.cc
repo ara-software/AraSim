@@ -71,19 +71,20 @@ IceModel::IceModel(int model,int earth_model,int moorebay) : EarthModel(earth_mo
 
   setUpIceModel(model);
 
-  const char* araSimDir = getenv("ARA_SIM_DIR");
-  if (!araSimDir) {
+  if (!ara_sim_dir) {
       std::cerr << "Warning: ARA_SIM_DIR is not set. "
                 << "Ice attenuation systematics table will not be loaded."
                 << std::endl;
   }
   else {
       std::string attenFile =
-          std::string(araSimDir) + "/data/iceattenuation_systematics.txt";
+          std::string(ara_sim_dir) + "/data/iceattenuation_systematics.txt";
 
       if (!LoadIceAttenPercentTable(attenFile)) {
           std::cerr << "Warning: failed to load ice attenuation systematics file: "
-                    << attenFile << std::endl;
+                    << attenFile
+                    << ". Defaulting to no ice attenuation systematics correction."
+                    << std::endl;
       }
   }
 
@@ -1507,6 +1508,8 @@ double IceModel::EffectiveAttenuationLength(Settings *settings1, const Position 
 	 cerr << " wrong attenuation length " <<endl;
      } //else
 
+    attenuation_length *= GetIceAttenSystematicsFactor(depth, settings1);
+
   return attenuation_length;
 } //EffectiveAttenuationLengthUp
 
@@ -2044,7 +2047,7 @@ bool IceModel::LoadIceAttenPercentTable(const std::string& filename) {
 
     iceAttenPctDepth.clear();
     iceAttenPctUp.clear();
-    iceAttenPctLow.clear();
+    iceAttenPctDown.clear();
 
     std::string line;
     while (std::getline(infile, line)) {
@@ -2063,7 +2066,7 @@ bool IceModel::LoadIceAttenPercentTable(const std::string& filename) {
 
         iceAttenPctDepth.push_back(depth);
         iceAttenPctUp.push_back(pct_up);
-        iceAttenPctLow.push_back(pct_low);
+        iceAttenPctDown.push_back(pct_low);
     }
 
     infile.close();
@@ -2083,38 +2086,37 @@ bool IceModel::LoadIceAttenPercentTable(const std::string& filename) {
 }
 
 double IceModel::GetIceAttenSystematicsFactor(double depth, Settings *settings1) const {
-    if (!settings1) {
-        return 1.0;
-    }
 
     if (settings1->SYSTEMATICS_IceAttenuation == 0) {
         return 1.0;
     }
-
+    
     if (!iceAttenPctTableLoaded || iceAttenPctDepth.empty()) {
-        return 1.0;
+        std::cerr << "Error: ice attenuation systematics table was not loaded, "
+                  << "but GetIceAttenSystematicsFactor() was called." << std::endl;
+        exit(1);
     }
 
-    const double* pct_array = nullptr;
+    const std::vector<double>* pct_vector = nullptr;
 
     if (settings1->SYSTEMATICS_IceAttenuation == 1) {
-        pct_array = iceAttenPctUp.data();
+        pct_vector = &iceAttenPctUp;
     }
-    else if (settings1->SYSTEMATICS_IceAttenuation == 2) {
-        pct_array = iceAttenPctLow.data();
+    else if (settings1->SYSTEMATICS_IceAttenuation == -1) {
+        pct_vector = &iceAttenPctDown;
     }
     else {
         return 1.0;
     }
 
-    double pct = Tools::SimpleLinearInterpolation_extend_Single(
+    double pct_value = Tools::SimpleLinearInterpolation_extend_Single(
         (int)iceAttenPctDepth.size(),
         const_cast<double*>(iceAttenPctDepth.data()),
-        const_cast<double*>(pct_array),
+        const_cast<double*>(pct_vector->data()),
         depth
     );
 
-    return 1.0 + pct / 100.0;
+    return 1.0 + pct_value / 100.0;
 }
 
 void IceModel::clear_useless() {
