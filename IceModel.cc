@@ -271,7 +271,7 @@ if ( file.is_open() ) {
 // read depth in positive value and return attenuation length (m) at the depth
 double IceModel::GetARAIceAttenuLength(double depth, Settings *settings1) {
 
-    double AttenL;
+    double AttenL=0.0;
 
     // check if depth is positive value
     if ( depth < 0. ) {// whether above the ice or wrong value!
@@ -282,9 +282,10 @@ double IceModel::GetARAIceAttenuLength(double depth, Settings *settings1) {
     else {
 
         AttenL = Tools::SimpleLinearInterpolation_extend_Single(ARA_IceAtten_bin, ARA_IceAtten_Depth, ARA_IceAtten_Length, depth );
+        AttenL *= GetIceAttenSystematicsFactor(depth, settings1); //Systematics
+
     }
 
-    AttenL *= GetIceAttenSystematicsFactor(depth, settings1); //Systematics
     return AttenL;
 
 }
