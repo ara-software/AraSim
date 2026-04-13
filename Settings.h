@@ -353,9 +353,9 @@ class Settings
         int SYSTEMATICS_AskaryanPercent; //Define the percentage (12% by default)
         
         //Systematics of n(z) = nd - (nd-ns)e^nc*z
-        double SYSTEMATICS_nofz_delta_ns = 0.0;
-        double SYSTEMATICS_nofz_delta_nd = 0.0;
-        double SYSTEMATICS_nofz_delta_nc = 0.0;
+        double SYSTEMATICS_nofz_delta_ns;
+        double SYSTEMATICS_nofz_delta_nd;
+        double SYSTEMATICS_nofz_delta_nc;
 
 
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
