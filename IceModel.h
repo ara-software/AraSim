@@ -99,7 +99,7 @@ private:
   //Attenuation Systematics
   std::vector<double> iceAttenPctDepth;
   std::vector<double> iceAttenPctUp;
-  std::vector<double> iceAttenPctLow;
+  std::vector<double> iceAttenPctDown;
   bool iceAttenPctTableLoaded = false;
 
 public:

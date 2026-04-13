@@ -2058,15 +2058,15 @@ bool IceModel::LoadIceAttenPercentTable(const std::string& filename) {
 
         double depth = 0.0;
         double pct_up = 0.0;
-        double pct_low = 0.0;
+        double pct_down = 0.0;
 
-        if (!(iss >> depth >> pct_up >> pct_low)) {
+        if (!(iss >> depth >> pct_up >> pct_down)) {
             continue;
         }
 
         iceAttenPctDepth.push_back(depth);
         iceAttenPctUp.push_back(pct_up);
-        iceAttenPctDown.push_back(pct_low);
+        iceAttenPctDown.push_back(pct_down);
     }
 
     infile.close();
