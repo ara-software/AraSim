@@ -282,9 +282,9 @@ double IceModel::GetARAIceAttenuLength(double depth, Settings *settings1) {
     else {
 
         AttenL = Tools::SimpleLinearInterpolation_extend_Single(ARA_IceAtten_bin, ARA_IceAtten_Depth, ARA_IceAtten_Length, depth );
-        AttenL *= GetIceAttenSystematicsFactor(depth, settings1); //Systematics
     }
 
+    AttenL *= GetIceAttenSystematicsFactor(depth, settings1); //Systematics
     return AttenL;
 
 }
