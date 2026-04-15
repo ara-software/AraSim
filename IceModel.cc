@@ -2093,9 +2093,10 @@ double IceModel::GetIceAttenSystematicsFactor(double depth, Settings *settings1)
     }
     
     if (!iceAttenPctTableLoaded || iceAttenPctDepth.empty()) {
-        std::cerr << "Error: ice attenuation systematics table was not loaded, "
-                  << "but GetIceAttenSystematicsFactor() was called." << std::endl;
-        exit(1);
+        throw std::runtime_error(
+            "IceModel::GetIceAttenSystematicsFactor: ice attenuation systematics "
+            "table was not loaded, but the function was called."
+        );
     }
 
     const std::vector<double>* pct_vector = nullptr;

@@ -810,9 +810,11 @@ double Signal::GetAskaryanSystematicsFactor(Settings *settings1) {
     double factor = 1.0 + frac;
 
     if (factor <= 0.0) {
-        std::cerr << "Error: SYSTEMATICS_AskaryanPercent gives a non-positive scaling factor: "
-                  << settings1->SYSTEMATICS_AskaryanPercent << std::endl;
-        exit(1);
+        throw std::runtime_error(
+            "IceModel::SomeFunction: SYSTEMATICS_AskaryanPercent gives a non-positive "
+            "scaling factor (" + std::to_string(factor) + ") for input value " +
+            std::to_string(settings1->SYSTEMATICS_AskaryanPercent)
+        );
     }
 
     return factor;
