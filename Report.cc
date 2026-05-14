@@ -977,13 +977,23 @@ void Report::ModelRay(
                 // ray as fully attenuated and stop accumulating.
                 if (L1 < IceModel::MIN_PHYSICAL_ATTEN_M ||
                     L2 < IceModel::MIN_PHYSICAL_ATTEN_M) {
-                    IceAttenFactor = 0.;
-                    break;
+                    // if (-RayStep[ray_idx][1][steps - 1] < 2500. && -RayStep[ray_idx][1][steps] < 2500){
+                    //     printf("Start (%.2f, %.2f), End (%.2f, %.2f)\n", 
+                    //         RayStep[ray_idx][0][steps - 1], RayStep[ray_idx][1][steps - 1],
+                    //         RayStep[ray_idx][0][steps], RayStep[ray_idx][1][steps]
+                    //     );
+                    //     printf("This is firing! Tighter check! L2 and L1 are %f, %f, and dl is %f \n", L2, L1, dl);
+                    //     printf("----\n");
+                    // }
+                    // IceAttenFactor = 0.;
+                    IceAttenFactor *= 0.;
+                    // break;
                 }
-
-                // use new ice model
-                // use the midpoint of the array to calculate the attenuation length, instead of the end of the ray
-                IceAttenFactor *= (exp(-dl / L1) + exp(-dl / L2)) / 2;
+                else{
+                    // use new ice model
+                    // use the midpoint of the array to calculate the attenuation length, instead of the end of the ray
+                    IceAttenFactor *= (exp(-dl / L1) + exp(-dl / L2)) / 2;
+                }
             }
         }
     }
