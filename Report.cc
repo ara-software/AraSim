@@ -965,23 +965,35 @@ void Report::ModelRay(
 
             dx = RayStep[ray_idx][0][steps - 1] - RayStep[ray_idx][0][steps];
             dz = RayStep[ray_idx][1][steps - 1] - RayStep[ray_idx][1][steps];
-            dl = sqrt((dx *dx) + (dz *dz));
+            dl = sqrt((dx * dx) + (dz * dz));
 
-            // Skipping attenuation calculation when the distance between two RaySteps is 0. 
-            // PrevenTing adds -nan into the IceAttenFactor.
+            // Skipping attenuation calculation when the distance between two RaySteps is 0.
+            // Preventing adds -nan into the IceAttenFactor.
             if (dl > 0) {
-                // use new ice model
-                // use the midpoint of the array to calculate the attenuation length, instead of the end of the ray 
-                IceAttenFactor *= (
-                    exp(-dl / icemodel->GetARAIceAttenuLength(-RayStep[ray_idx][1][steps], settings)) + 
-                    exp(-dl / icemodel->GetARAIceAttenuLength(-RayStep[ray_idx][1][steps - 1], settings))
-                ) / 2;
-            }
+                double L1 = icemodel->GetARAIceAttenuLength(-RayStep[ray_idx][1][steps],     settings);
+                double L2 = icemodel->GetARAIceAttenuLength(-RayStep[ray_idx][1][steps - 1], settings);
 
+                // If either endpoint is in unmodelable ice, treat the whole
+                // ray as fully attenuated and stop accumulating.
+                if (L1 < IceModel::MIN_PHYSICAL_ATTEN_M ||
+                    L2 < IceModel::MIN_PHYSICAL_ATTEN_M) {
+                    IceAttenFactor = 0.;
+                    break;
+                }
+
+                // use new ice model
+                // use the midpoint of the array to calculate the attenuation length, instead of the end of the ray
+                IceAttenFactor *= (exp(-dl / L1) + exp(-dl / L2)) / 2;
+            }
         }
     }
     else if (settings->USE_ARA_ICEATTENU == 0) { // use old method
-        IceAttenFactor = exp(-ray_output[0][ray_idx] / icemodel->EffectiveAttenuationLength(settings, event->Nu_Interaction[interaction_idx].posnu, 0));
+        double L = icemodel->EffectiveAttenuationLength(settings, event->Nu_Interaction[interaction_idx].posnu, 0);
+        if (L < IceModel::MIN_PHYSICAL_ATTEN_M) {
+            IceAttenFactor = 0.;
+        } else {
+            IceAttenFactor = exp(-ray_output[0][ray_idx] / L);
+        }
     }
 
     // If the simulation is not in debug mode, calculate the field from the
@@ -1048,27 +1060,39 @@ void Report::ModelRay(
                 }
                 else if (settings->USE_ARA_ICEATTENU == 2) {
 
+
                     double IceAttenFactor = 1.;
                     double dx, dz, dl;
                     for (int steps = 1; steps < (int) RayStep[ray_idx][0].size(); steps++) {
                         dx = RayStep[ray_idx][0][steps - 1] - RayStep[ray_idx][0][steps];
                         dz = RayStep[ray_idx][1][steps - 1] - RayStep[ray_idx][1][steps];
-                        dl = sqrt((dx *dx) + (dz *dz));
+                        dl = sqrt((dx * dx) + (dz * dz));
 
-                        // Skipping attenuation calculation when the distance between two RaySteps is 0. 
-                        // Prevening adds -nan into the IceAttenFactor.
+                        // Skipping attenuation calculation when the distance between two RaySteps is 0.
+                        // Preventing adds -nan into the IceAttenFactor.
                         if (dl > 0)
                         {
                             // use ray midpoint for attenuation calculation
-                            IceAttenFactor *= (exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps], detector->GetFreq(l) / 1e9, settings)) +
-                                exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps - 1], detector->GetFreq(l) / 1e9,  settings))
-                            ) / 2.;  // 1e9 to convert to GHz
+                            // But, if either endpoint is in unmodelable ice (L < 1 m), the ray
+                            // segment can't be evaluated with any confidence. Treat the
+                            // whole ray as fully attenuated and stop accumulating.
+
+                            double freq_GHz = detector->GetFreq(l) / 1e9;
+                            double L1 = icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps],     freq_GHz, settings);
+                            double L2 = icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps - 1], freq_GHz, settings);
+                
+                            if (L1 < IceModel::MIN_PHYSICAL_ATTEN_M || L2 < IceModel::MIN_PHYSICAL_ATTEN_M) {
+                                IceAttenFactor = 0.;
+                                break;
+                            }
+                
+                            IceAttenFactor *= (exp(-dl / L1) + exp(-dl / L2)) / 2.;
                         }
                     }
-                    
+                
                     // assume whichray = 0, now vmmhz1m_tmp has all factors except for the detector properties (antenna gain, etc)
-                    vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_idx] *IceAttenFactor *mag * fresnel;
-
+                    vmmhz1m_tmp = vmmhz1m_tmp / ray_output[0][ray_idx] * IceAttenFactor * mag * fresnel;
+                
                 }
 
                 vmmhz1m_sum += vmmhz1m_tmp;
@@ -1644,22 +1668,31 @@ void Report::PropagateSignal(
                 for (int steps = 1; steps < (int) RayStep[ray_idx][0].size(); steps++) {
                         dx = RayStep[ray_idx][0][steps - 1] - RayStep[ray_idx][0][steps];
                         dz = RayStep[ray_idx][1][steps - 1] - RayStep[ray_idx][1][steps];
-                        dl = sqrt((dx *dx) + (dz *dz));
+                        dl = sqrt((dx * dx) + (dz * dz));
 
-                        // Skipping attenuation calculation when the distance between two RaySteps is 0. 
-                        // Prevening adds -nan into the IceAttenFactor. 
+                        // Skipping attenuation calculation when the distance between two RaySteps is 0.
+                        // Preventing adds -nan into the IceAttenFactor.
                         if (dl > 0) {
+                            double freq_GHz = freq_tmp * 1.E-9;
+                            double L1 = icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps],     freq_GHz, settings);
+                            double L2 = icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps - 1], freq_GHz, settings);
+
+                            // If either endpoint is in unmodelable ice, treat the whole
+                            // ray as fully attenuated and stop accumulating.
+                            if (L1 < IceModel::MIN_PHYSICAL_ATTEN_M ||
+                                L2 < IceModel::MIN_PHYSICAL_ATTEN_M) {
+                                IceAttenFactor = 0.;
+                                break;
+                            }
+
                             // use ray midpoint for attenuation calculation
-                            IceAttenFactor *= (
-                                exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps],     freq_tmp *1.E-9, settings)) +
-                                exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps - 1], freq_tmp *1.E-9, settings))
-                            ) / 2.;  // 1e9 for conversion to GHz
+                            IceAttenFactor *= (exp(-dl / L1) + exp(-dl / L2)) / 2.;
                         }
 
                 }
-                
-                V_forfft[2 *n] *= IceAttenFactor;   // apply IceAttenFactor to the real part of fft
-                V_forfft[2 *n + 1] *= IceAttenFactor;   // apply IceAttenFactor to the imag part of fft
+
+                V_forfft[2 * n] *= IceAttenFactor;       // apply IceAttenFactor to the real part of fft
+                V_forfft[2 * n + 1] *= IceAttenFactor;   // apply IceAttenFactor to the imag part of fft
 
             }
 
