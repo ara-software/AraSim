@@ -5,6 +5,7 @@ import numpy as np
 import ROOT
 from ROOT import gSystem
 
+# change this to your use case!
 gSystem.Load('/home/baclark/scratch/ARA/AraSim/libAra.so')
 
 icemodel = ROOT.IceModel(10, 0, 0)
