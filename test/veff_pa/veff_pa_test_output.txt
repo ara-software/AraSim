@@ -1,4 +1,4 @@
-The Git Commit Hash: 30328d5436ef38ee5ee2ee10ed82ae595675a984
+The Git Commit Hash: b7a845875883896465a00bfbc7c7c0ee83371f9e
 
 	Default values!
 NNU : 100
@@ -28,12 +28,13 @@ DETECTOR : 5
 POSNU_RADIUS : 5000
 EVENT_GENERATION_MODE: 0
 first random : 0.455064
+Loaded ice attenuation percent table from /home/baclark/scratch/ARA/AraSim_old//data/iceattenuation_systematics.txt with 3001 rows.
 
 Surface at (log:0, lat:0) : 6.35973e+06
 SurfaceAboveGeoid at (log:0, lat:0) : 2977
 Simulating realistic ARA05 and Phased Array.
 Using 7 ARA05 vanilla Vpols
-The number of channels: 16
+Index of refraction for antenna gain file /home/baclark/scratch/ARA/AraSim_old//data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt could not be determined. Index will adjust to always match local value.
 DATA_BIN_SIZE: 16384 TIMESTEP: 6.67e-10 df_fft: 91507
 number of f bins: 8192
 ThresOffset ch0 : 1
@@ -86,10 +87,10 @@ System temp ch14 : 325
 System temp ch15 : 325
 System temp ch16 : 0
 Reading in situ PA noise for this station and configuration from file: 
-/home/abishop/AraSim-AraSoft//data/noise/sigmavsfreq_PA_config_4.csv
+/home/baclark/scratch/ARA/AraSim_old//data/noise/sigmavsfreq_PA_config_4.csv
 start read elect chain
  Reading standard PA electronics response from file:
-/home/abishop/AraSim-AraSoft//data/gain/PA_Electronics_TotalGainPhase.csv
+/home/baclark/scratch/ARA/AraSim_old//data/gain/PA_Electronics_TotalGainPhase.csv
  Recalculating in situ electronic response amplitude to ensure consistency with antenna model used here.
 done read elect chain
 Sharesurface: 0 : 0 : 0 : 9999.57 : 9999.57 : 6.35945e+06 : 
@@ -182,11 +183,13 @@ station[0].strings[3].antennas[1] no_ch:14
 station[0].strings[4].antennas[0] no_ch:15
 station[0].strings[4].antennas[1] no_ch:16
 *Thrown 0
-************************************************************
-PA trigger ~~~ raySolNum: 0  avgSNR: 2.53092  Event Number : 60  PA efficiency : 0.930428
+********************************************************** efficiency : 1.00161  avg SNR : 4.4043
+ efficiency : 1.00161  avg SNR : 4.33342
 
-Global_Pass : 8609 evt : 60 added weight : 7.84046e-81
-7.84046e-81 : 0
+PA trigger ~~~  Event Number : 58
+
+Global_Pass : 9094 evt : 58 added weight : 1.46284e-06
+1.46284e-06 : 0
 
 Making useful event
 StationID: 6
@@ -198,121 +201,93 @@ OR
 c) Call UsefulAtriStationEvent *realAtriEvPtr = new UsefulAtriStationEvent(rawAtriEvPtr, AraCalType::kLatestCalib); ***BEFORE*** 
 AraGeomTool::getStationInfo(3,2017)
 Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
-Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /home/abishop/analysis/AraRoot_Install//share/araCalib/AntennaInfo.sqlite
+Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /cvmfs/ara.opensciencegrid.org/trunk/RHEL_8_x86_64/ara_build/share/araCalib/AntennaInfo.sqlite
 Opening default 2013-2017 SQLite tables for all stations 
-****************************************Thrown 100
-*********************************
-PA trigger ~~~ raySolNum: 0  avgSNR: 62.1325  Event Number : 133  PA efficiency : 1.00162
+******************************************Thrown 100
+****************************************** efficiency : 1.00162  avg SNR : 22.4232
+ efficiency : 1.00149  avg SNR : 3.80011
 
-Global_Pass : 8555 evt : 133 added weight : 3.35065e-29
-3.35065e-29 : 0
+PA trigger ~~~  Event Number : 142
 
-Making useful event
-StationID: 6
-StationID_AraRoot: 3
-*******************************************************************Thrown 200
-*****
-PA trigger ~~~ raySolNum: 0  avgSNR: 8.62804  Event Number : 205  PA efficiency : 1.00162
-
-Global_Pass : 8474 evt : 205 added weight : 0.995622
-0.995622 : 9
+Global_Pass : 9881 evt : 142 added weight : 3.4195e-80
+3.4195e-80 : 0
 
 Making useful event
 StationID: 6
 StationID_AraRoot: 3
-*******************************
-PA trigger ~~~ raySolNum: 0  avgSNR: 4.65238  Event Number : 236  PA efficiency : 1.00162
+******************************************************** efficiency : 1.00162  avg SNR : 16.7165
+ efficiency : 1.00162  avg SNR : 4.9953
 
-Global_Pass : 8446 evt : 236 added weight : 0.998235
-0.998235 : 9
+PA trigger ~~~  Event Number : 198
 
-Making useful event
-StationID: 6
-StationID_AraRoot: 3
-*****************************
-PA trigger ~~~ raySolNum: 0  avgSNR: 9.40231  Event Number : 265  PA efficiency : 1.00162
-
-Global_Pass : 8545 evt : 265 added weight : 2.20756e-43
-2.20756e-43 : 0
+Global_Pass : 8508 evt : 198 added weight : 0.997365
+0.997365 : 9
 
 Making useful event
 StationID: 6
 StationID_AraRoot: 3
-***********************************Thrown 300
-********************************************
-PA trigger ~~~ raySolNum: 0  avgSNR: 2.38054  Event Number : 344  PA efficiency : 0.863027
+**Thrown 200
+****************************************************************************************************Thrown 300
+* efficiency : 1.00162  avg SNR : 5.5357
+ efficiency : 1.00161  avg SNR : 4.32862
 
-Global_Pass : 8474 evt : 344 added weight : 0.995615
-0.995615 : 9
+PA trigger ~~~  Event Number : 301
 
-Making useful event
-StationID: 6
-StationID_AraRoot: 3
-*************************************depth negative! -7.06175
-depth negative! -7.06175
-depth negative! -7.06175
-depth negative! -7.06175
-depth negative! -7.06175
-depth negative! -7.06175
-depth negative! -7.06175
-depth negative! -7.06175
-depth negative! -7.06175
-depth negative! -7.05293
-depth negative! -7.05293
-depth negative! -7.07004
-depth negative! -7.07155
-depth negative! -7.07155
-depth negative! -7.05425
-depth negative! -7.05425
-*******************Thrown 400
-***************
-PA trigger ~~~ raySolNum: 0  avgSNR: 32.5518  Event Number : 415  PA efficiency : 1.00162
-
-Global_Pass : 8616 evt : 415 added weight : 0.0243914
-0.0243914 : 4
+Global_Pass : 8377 evt : 301 added weight : 1.17701e-50
+1.17701e-50 : 0
 
 Making useful event
 StationID: 6
 StationID_AraRoot: 3
-******
-PA trigger ~~~ raySolNum: 0  avgSNR: 3.53149  Event Number : 421  PA efficiency : 1.00109
+*************************** efficiency : 0.958449  avg SNR : 2.63821  random number : 0.377613
+******************************** efficiency : 1.00162  avg SNR : 20.8026
+ efficiency : 1.00118  avg SNR : 3.56964
 
-Global_Pass : 8400 evt : 421 added weight : 0.994757
-0.994757 : 9
+PA trigger ~~~  Event Number : 360
 
-Making useful event
-StationID: 6
-StationID_AraRoot: 3
-***************************************************
-PA trigger ~~~ raySolNum: 0  avgSNR: 4.51783  Event Number : 472  PA efficiency : 1.00162
-
-Global_Pass : 8625 evt : 472 added weight : 0.992111
-0.992111 : 9
+Global_Pass : 8528 evt : 360 added weight : 4.09918e-20
+4.09918e-20 : 0
 
 Making useful event
 StationID: 6
 StationID_AraRoot: 3
-*****
-PA trigger ~~~ raySolNum: 0  avgSNR: 7.39083  Event Number : 477  PA efficiency : 1.00162
+************* efficiency : 1.00162  avg SNR : 21.6302
+ efficiency : 1.0016  avg SNR : 4.22
 
-Global_Pass : 8436 evt : 477 added weight : 7.54711e-75
-7.54711e-75 : 0
+PA trigger ~~~  Event Number : 373
+
+Global_Pass : 8361 evt : 373 added weight : 0.996485
+0.996485 : 9
 
 Making useful event
 StationID: 6
 StationID_AraRoot: 3
-********************** end loop
+***************************Thrown 400
+********** efficiency : 1.00162  avg SNR : 24.0975
+ efficiency : 1.00157  avg SNR : 3.98589
+
+PA trigger ~~~  Event Number : 410
+
+Global_Pass : 8486 evt : 410 added weight : 0.993382
+0.993382 : 9
+
+Making useful event
+StationID: 6
+StationID_AraRoot: 3
+************************************ efficiency : 0.783637  avg SNR : 2.27016  random number : 0.464669
+***************************************************** end loop
 Total Events Thrown: 500
-Total_Global_Pass : 10
-Total_Weight : 5.00073
-Total_Probability : 4.8271e-315
-weight bin values : 4, 0, 0, 0, 1, 0, 0, 0, 0, 5
+Total_Global_Pass : 7
+Total_Weight : 2.98723
+Total_Probability : 3689.84
+weight bin values : 4, 0, 0, 0, 0, 0, 0, 0, 0, 3
 
 Radius: 5000 [m]
 IceVolume : 2.35619e+11
-test Veff(ice) : 2.96131e+10 m3sr, 29.6131 km3sr
-test Veff(water eq.) : 2.71552e+10 m3sr, 27.1552 km3sr
-And Veff(water eq.) error plus : 11.1788 km3sr and error minus : 8.65008 km3sr
+test Veff(ice) : 1.76897e+10 m3sr, 17.6897 km3sr
+test Veff(water eq.) : 1.62214e+10 m3sr, 16.2214 km3sr
+And Veff(water eq.) error plus : 9.29679 km3sr and error minus : 7.30423 km3sr
+Warning in <THistPainter::MakeChopt>: option SCAT is deprecated.
 Info in <TCanvas::Print>: pdf file sigmaCrossSection.pdf has been created
 outputdir= outputs/.
 This AraSim run is complete and will exit with code 0

@@ -1913,3 +1913,31 @@ Removed ReadVgain, ReadVgainTop, ReadHgain, and ReadTxgain functions and replace
 Added new option ELECTRONICS_ANTENNA_CONSISTENCY and corresponding functionality to ensure antenna gain model and electronics gain model are self-consistent within a simulation. This is done by calculating the electronics gain model amplitude on-the-fly from the in situ noise model, antenna gain model, and amplifier noise figure. The default (ELECTRONICS_ANTENNA_CONSISTENCY=1) is to ensure these are self-consistent whenever an in-situ electronics gain model is requested and a corresponding in-situ noise model is used. The electronics gain phase read-in from the in situ model file is left unchanged. 
 
 ==============================================================================
+
+2026/5/13 Brian Clark
+
+Hardened ice attenuation models against unphysical behavior at large depths.
+Per D. Besson, the attenuation model is unreliable beyond ~2.5 km depth.
+
+IceModel: Added public static constexpr BEDROCK_DEPTH_M (2850 m) 
+and MIN_PHYSICAL_ATTEN_M (1 m).
+These set the depth of bedrock at SP and the minimum attenuation length
+we think is physical. This is important to help protect against nans
+(see below in the report class).
+GetFreqDepIceAttenuLength, GetARAIceAttenuLength, and 
+EffectiveAttenuationLength now return 0 past 2.5 km and past bedrock. 
+temperature() gained an opt-in strict mode (throws on out-of-ice depths) 
+and clamps positive values to 0.
+I also removed an unused version of EffectiveAttenuationLength,
+which must have been cruft.
+
+Report: All uses of the attenuation length in e.g. exp(-dl/L)
+now guard against L < MIN_PHYSICAL_ATTEN_M, 
+treating such steps as fully attenuating to 
+avoid NaNs from division by zero.
+
+NB: I've hardcoded in the depth of bedrock, which means
+if someone later wanted to run this at a site with deeper ice,
+they'll need to adjust it.
+
+==============================================================================
