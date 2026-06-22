@@ -111,6 +111,11 @@ public:
   double ground_elevation[1068][869]; //elevation above geoid at which ice starts
   double water_depth[1200][1000]; //depth of water under ice
 
+  static constexpr double BEDROCK_DEPTH_M = 2850.;  // South Pole nominal
+  static constexpr double UNRELIABLE_DEPTH_M = 2500.; // the depth below which we don't trust our ARA ice models according to D. Besson
+  static constexpr double MIN_PHYSICAL_ATTEN_M = 1.; // the smallest physical attenuation length we think we'd have (to guard against divison by zero issues)
+
+
   void IceENtoLonLat(int e,
 		     int n,
 		     
@@ -165,7 +170,6 @@ public:
   double GetN(const Position &pos) const;
   double GetEffectiveN(double n_local) const;
   double GetEffectiveN(const Position &pos) const;
-  double EffectiveAttenuationLength(const Position &pos, const int &whichray) const;
   double EffectiveAttenuationLength(Settings *settings1, const Position &pos, const int &whichray) const;
   
   void IceLonLattoEN(double lon, 
@@ -200,7 +204,7 @@ void GetFresnel (
   double GetFreqDepIceAttenuLength(double depth, double freq, Settings *settings1);
   bool LoadIceAttenPercentTable(const std::string& filename);
   double GetIceAttenSystematicsFactor(double depth, Settings *settings1) const;
-  double temperature(double z);
+  double temperature(double z, bool strict = true);
 
   //  void FillArraysforTree(double lon_ground[1068][869],double lat_ground[1068][869],double lon_ice[1200][1000],double lat_ice[1200][1000],double lon_water[1200][1000],double lat_water[1200][1000]);
 
