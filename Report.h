@@ -300,7 +300,7 @@ class Report {
         void Combine_Waveforms( // combine the signal from two vectors into single vector
             int signalbin_0, int signalbin_1,
             vector<double> V0, vector<double> V1,
-            int* signalbin_combined, vector<double>* V_combined, bool pad_to_power_of_two);
+            int& signalbin_combined, vector<double>& V_combined, bool pad_to_power_of_two);
         void GetNoiseThenConvolve(
             Antenna_r *antenna, vector <double> V_signal,
             int BINSIZE, int this_signalbin, int n_connected_rays, 
@@ -322,7 +322,7 @@ class Report {
             Vector &launch_vector, Vector &receive_vector, Vector &n_trg_slappy, Vector &n_trg_pokey 
         );    // get viewangle, launch, receive vectors  (it reads launch angle as a viewangle and returns actual viewangle)
 
-        double GaintoHeight(double gain, double freq, double n_medium, double Z_A=50);
+        double GaintoHeight(double gain, double freq, double n_eff, double Z_A=50);
         
         double calculatePolFactor(Vector &Pol_vector, int ant_type, double antenna_theta, double antenna_phi);
 

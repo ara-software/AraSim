@@ -293,7 +293,9 @@ class Settings
         //11 : Moore's Bay Model 2
         //20 : Byrd (Ebimuna (1983))
         //30 : Mizuho (Ebimuna (1983))
-              //40: UNL Modified (PA model). Related slide: https://aradocs.wipac.wisc.edu/docs/0022/002222/001/inIceMC_Hughes_A5locations_10222020.pdf
+        //40: UNL Modified (PA model). Related slide: https://aradocs.wipac.wisc.edu/docs/0022/002222/001/inIceMC_Hughes_A5locations_10222020.pdf
+        //41: UNL Modified (PA model) with upward systematics. Related slide: https://aradocs.wipac.wisc.edu/0035/003525/002/5SA_Ice_Model_Uncertainties.pdf
+        //42: UNL Modified (PA model) with downward systematics. Related slide: https://aradocs.wipac.wisc.edu/0035/003525/002/5SA_Ice_Model_Uncertainties.pdf
         
         int ANALYTIC_RAYTRACE_MODE; //default: 0 -- use numerical RayTracing for AraSim, 1 -- use analytical raytracing 
 
@@ -349,7 +351,15 @@ class Settings
                                              // This setting is only used if DETECTOR > 3 && NOISE == 1 && CUSTOM_ELECTRONICS == 0
                                   
         double CLOCK_ANGLE;  // default: 0; Angle of polarization "on the clock" for use in pulser events (EVENT_TYPE=11)
-
+        
+        int SYSTEMATICS_IceAttenuation; // 0=central, 1=up, 2=low
+        
+        int SYSTEMATICS_AskaryanPercent; //Define the percentage (12% by default)
+        
+        //Systematics of n(z) = nd - (nd-ns)e^nc*z
+        double SYSTEMATICS_nofz_delta_ns;
+        double SYSTEMATICS_nofz_delta_nd;
+        double SYSTEMATICS_nofz_delta_nc;
 
 
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1

@@ -973,8 +973,8 @@ void Report::ModelRay(
                 // use new ice model
                 // use the midpoint of the array to calculate the attenuation length, instead of the end of the ray 
                 IceAttenFactor *= (
-                    exp(-dl / icemodel->GetARAIceAttenuLength(-RayStep[ray_idx][1][steps])) + 
-                    exp(-dl / icemodel->GetARAIceAttenuLength(-RayStep[ray_idx][1][steps - 1]))
+                    exp(-dl / icemodel->GetARAIceAttenuLength(-RayStep[ray_idx][1][steps], settings)) + 
+                    exp(-dl / icemodel->GetARAIceAttenuLength(-RayStep[ray_idx][1][steps - 1], settings))
                 ) / 2;
             }
 
@@ -1060,8 +1060,8 @@ void Report::ModelRay(
                         if (dl > 0)
                         {
                             // use ray midpoint for attenuation calculation
-                            IceAttenFactor *= (exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps], detector->GetFreq(l) / 1e9)) +
-                                exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps - 1], detector->GetFreq(l) / 1e9))
+                            IceAttenFactor *= (exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps], detector->GetFreq(l) / 1e9, settings)) +
+                                exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps - 1], detector->GetFreq(l) / 1e9,  settings))
                             ) / 2.;  // 1e9 to convert to GHz
                         }
                     }
@@ -1078,12 +1078,13 @@ void Report::ModelRay(
                 double freq_tmp = detector->GetFreq(l);    // freq in Hz
 
                 // Get ant gain with 2-D interpolation
+                double n_eff = icemodel->GetEffectiveN(*antenna_d);
                 double heff = GaintoHeight(
                     detector->GetGain_1D_OutZero(
                         freq_tmp *1.E-6, antenna_theta,  antenna_phi,  
-                        antenna_d->type, j, k),
+                        antenna_d->type, n_eff, j, k),
                     freq_tmp, 
-                    icemodel->GetN(*antenna_d),
+                    n_eff,
                     detector->GetImpedance(freq_tmp*1.E-6, antenna_d->type, j, k));                                        
 
                 antenna_r->Heff[interaction_idx][ray_idx].push_back(heff);
@@ -1569,12 +1570,13 @@ void Report::PropagateSignal(
         birefringence->Principal_axes_polarization(Pol_vector, bire_ray_cnt, max_bire_ray_cnt, settings); 
 
         // Get ant gain with 2-D interpolation 
+        double n_eff = icemodel->GetEffectiveN(*antenna_d);
         double heff_lastbin = GaintoHeight(
             detector->GetGain_1D_OutZero(
                 freq_tmp *1.E-6, antenna_theta, antenna_phi, 
-                antenna_d->type, j, k),
+                antenna_d->type, n_eff, j, k),
             freq_tmp, 
-            icemodel->GetN(*antenna_d),
+            n_eff,
             detector->GetImpedance(freq_tmp*1.E-6, antenna_d->type, k));
 
         // Tx effective height for last bin.  Currently locked to standard ARA Vpol and HPol antennas.  
@@ -1591,17 +1593,19 @@ void Report::PropagateSignal(
 
             double Tx_theta = theta*180/PI;
             double Tx_phi = phi*180/PI;
+            double n_eff = icemodel->GetEffectiveN(*antenna_d);
             double heff_Tx_lastbin = GaintoHeight(
-                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true),
-                freq_tmp, 
-                icemodel->GetN(*antenna_d),
+                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, n_eff, 0, 0, true),
+                freq_tmp,
+                n_eff, 
                 detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));  
         }
         else if (event->IsCalpulser > 0){ // Calibration Pulser simulations
             Tx_theta = ray_output[1][ray_idx] *DEGRAD;    // from 0 to 180
+            double n_eff = icemodel->GetEffectiveN(event->Nu_Interaction[interaction_idx].posnu);
             heff_Tx_lastbin = GaintoHeight(
-                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, antenna_phi, antenna_d->type, j, k),
-                freq_tmp, icemodel->GetN(event->Nu_Interaction[interaction_idx].posnu));   
+                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, antenna_phi, antenna_d->type, n_eff, j, k),
+                freq_tmp, n_eff);   
                 
             if (event->IsCalpulser == 1) {
                 Pol_vector = n_trg_slappy;
@@ -1624,10 +1628,11 @@ void Report::PropagateSignal(
 
             freq_tmp = dF_Nnew *((double) n + 0.5); // in Hz 0.5 to place the middle of the bin and avoid zero freq
         
+            double n_eff = icemodel->GetEffectiveN(*antenna_d);
             double heff = GaintoHeight(
-                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta,  antenna_phi, antenna_d->type, j, k),
+                detector->GetGain_1D_OutZero(freq_tmp *1.E-6, antenna_theta,  antenna_phi, antenna_d->type, n_eff, j, k),
                 freq_tmp, 
-                icemodel->GetN(*antenna_d),
+                n_eff,
                 detector->GetImpedance(freq_tmp*1.E-6, antenna_d->type, k));                                                        
             antenna_r->Heff[interaction_idx][ray_idx].push_back(heff);
 
@@ -1646,8 +1651,8 @@ void Report::PropagateSignal(
                         if (dl > 0) {
                             // use ray midpoint for attenuation calculation
                             IceAttenFactor *= (
-                                exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps],     freq_tmp *1.E-9)) +
-                                exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps - 1], freq_tmp *1.E-9))
+                                exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps],     freq_tmp *1.E-9, settings)) +
+                                exp(-dl / icemodel->GetFreqDepIceAttenuLength(-RayStep[ray_idx][1][steps - 1], freq_tmp *1.E-9, settings))
                             ) / 2.;  // 1e9 for conversion to GHz
                         }
 
@@ -1660,14 +1665,15 @@ void Report::PropagateSignal(
 
             // Apply transmitter effective height if in PVA Pulser mode
             if (settings->EVENT_TYPE == 12){
+                double n_eff = icemodel->GetEffectiveN(*antenna_d);
                 double heff_Tx = GaintoHeight(
-                    detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, 0, 0, true),
+                    detector->GetGain_1D_OutZero(freq_tmp *1.E-6, Tx_theta, Tx_phi, 0, n_eff, 0, 0, true),
                     freq_tmp, 
-                    icemodel->GetN(*antenna_d),
+                    n_eff,
                     detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));   
                 if (n > 0) {
                     ApplyAntFactors_Tdomain(
-                        detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0),
+                        detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, n_eff),
                         heff_Tx, Pol_vector, 0, Pol_factor, V_forfft[2 *n], V_forfft[2 *n + 1], 
                         settings, Tx_theta, Tx_phi, freq_tmp, detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true), true);
                 }
@@ -1679,15 +1685,16 @@ void Report::PropagateSignal(
             }
             else if (event->IsCalpulser > 0){
                 // apply ant factors (transmitter ant)
+                double n_eff = icemodel->GetEffectiveN(*antenna_d);
                 heff = GaintoHeight(
                     detector->GetGain_1D_OutZero(
                         freq_tmp *1.E-6,   // to MHz
-                        Tx_theta, antenna_phi, antenna_d->type, j, k),
-                    freq_tmp, icemodel->GetN(event->Nu_Interaction[interaction_idx].posnu));
+                        Tx_theta, antenna_phi, antenna_d->type, n_eff, j, k),
+                    freq_tmp, n_eff);
                 
                 if (n > 0) {
                     ApplyAntFactors_Tdomain(
-                        detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, antenna_phi, antenna_d->type),
+                        detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, antenna_phi, antenna_d->type, n_eff),
                         heff, Pol_vector, antenna_d->type, Pol_factor, 
                         V_forfft[2 *n], V_forfft[2 *n + 1], settings, true, antenna_theta, antenna_phi, freq_tmp);
                 }
@@ -1701,7 +1708,7 @@ void Report::PropagateSignal(
             // apply ant factors
             if (n > 0) {
                 ApplyAntFactors_Tdomain( 
-                    detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, antenna_d->type),
+                    detector->GetAntPhase_1D(freq_tmp *1.e-6, antenna_theta, antenna_phi, antenna_d->type, n_eff),
                     heff, Pol_vector, antenna_d->type, Pol_factor, 
                     V_forfft[2 *n], V_forfft[2 *n + 1], settings, antenna_theta, antenna_phi, freq_tmp);                                                                
             }
@@ -3018,7 +3025,7 @@ void Report::Convolve_Signals(
             // Store the bin where the signal is located
             signal_bin[interaction_idx].push_back(
                 (antenna->arrival_time[interaction_idx][m] - stations[station_number].min_arrival_time) / (settings1->TIMESTEP) 
-                + settings1->NFOUR *2 + trigger->maxt_diode_bin); 
+                + settings1->NFOUR *2 + trigger->maxt_diode_bin);
             antenna->SignalBin[interaction_idx].push_back(signal_bin[interaction_idx][m]);
         }
     }
@@ -3077,7 +3084,7 @@ void Report::Convolve_Signals(
             Combine_Waveforms(
                 signal_bin[interaction_idx][m], this_signalbin,
                 antenna->V[interaction_idx][m], V_signal,
-                &this_signalbin, &V_signal, is_last);
+                this_signalbin, V_signal, is_last);
         }
       }
 
@@ -3214,15 +3221,15 @@ void Report::Select_Wave_Convlv_Exchange(
 
 void Report::Combine_Waveforms(int signalbin_0, int signalbin_1, 
     vector<double> V0, vector<double> V1, 
-    int* signalbin_combined, vector<double>* V_combined, bool pad_to_power_of_two
+    int& signalbin_combined, vector<double>& V_combined, bool pad_to_power_of_two
 ) {
   // adds waveforms V0 & V1 into combined vector V_combined
   // uses global signalbin indices to ensure vectors are properly combined
   // V_combined is not guaranteed to have a length which is a multiple of BINSIZE
   // signalbin_combined tracks global signalbin index of combined vector for use later
 
-  vector<double>& V = *V_combined;
-  int& signalbin = *signalbin_combined;
+  vector<double>& V = V_combined;
+  int& signalbin = signalbin_combined;
 
   // ensure voltage array is empty
   V.clear();
@@ -3239,25 +3246,25 @@ void Report::Combine_Waveforms(int signalbin_0, int signalbin_1,
 
   // resize to necessary length to combine vectors 
   signalbin = min(signalbin_0, signalbin_1); // starting index in terms of global index
-  const int maxsignalbin = max(signalbin_0+V0.size()-1, signalbin_1+V1.size()-1); // last index in terms of global index
+  const int maxsignalbin = max(signalbin_0+int(V0.size())-1, signalbin_1+int(V1.size())-1); // last index in terms of global index
   const int len = maxsignalbin - signalbin + 1; // length needed to combine both signals
   V.resize(len, 0);
   
   // add in the zeroth vector
   for(unsigned int bin = 0; bin < V0.size(); ++bin) {
-    const int combined_bin = bin + (signalbin_0- signalbin);
+    const int combined_bin = bin + (signalbin_0 - signalbin);
     V[combined_bin] += V0[bin];
   }
 
   // add in the first vector
   for(unsigned int bin = 0; bin < V1.size(); ++bin) {
-    const int combined_bin = bin + (signalbin_1- signalbin);
+    const int combined_bin = bin + (signalbin_1 - signalbin);
     V[combined_bin] += V1[bin];
   }
 
   // for the last added waveform if length is not a power of 2, zero pad
-  if(pad_to_power_of_two && (V.size() & (V.size() - 1)) != 0) {
-    const int newLen = int(pow(2, ceil(log2(V.size())))); // get next power of 2 
+  if(pad_to_power_of_two && (int(V.size()) & (int(V.size()) - 1)) != 0) {
+    const int newLen = int(pow(2, ceil(log2(int(V.size()))))); // get next power of 2 
     V.resize(newLen, 0.);
   }
 
@@ -3495,10 +3502,9 @@ void Report::GetParameters(
 
 }
 
+double Report::GaintoHeight(double gain, double freq, double n_eff, double Z_A) {
 
-double Report::GaintoHeight(double gain, double freq, double n_medium, double Z_A) {
-    
-    return sqrt((gain*CLIGHT*CLIGHT*Zr) / (4*PI*n_medium*freq*freq*Z0));
+    return sqrt((gain*CLIGHT*CLIGHT*Zr) / (4*PI*n_eff*freq*freq*Z0));
 
 }
 
@@ -3560,7 +3566,7 @@ void Report::ApplyAntFactors_Tdomain (
     
     Inputs:
         AntPhase:  Phase of the antenna, usually calculated with Detector::GetAntPhase_1D()
-        heff:  Effective height of the antenna, usually calculated with Report::GainToHeight
+        heff:  Effective height of the antenna, usually calculated with Report::GaintoHeight
         Pol_vector:  polarization vector of electric field as it reaches the antenna.  Used to calculate pol_factor
         ant_type:  integer indicates Vpol (0) or HPol (1) antenna.  Use to calculate pol_factor
         pol_factor:  The projection of the E-field onto the antenna.  Essentially the cos(theta) term in a dot product between the E-field and effective height vector.
@@ -3652,10 +3658,6 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo (
         // The factors of two in these two lines are currently up for debate, see GitHub Issue #175
         vm_bin0 *= pow(freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.), amplitudeSign);
         vm_bin1 *= pow(freq/CLIGHT*(Z0/(Zr))/4/sqrt(2.), amplitudeSign);
-    }
-    else {
-        vm_bin0 *= pow(heff * pol_factor, amplitudeSign);
-        vm_bin1 *= pow(heff_lastbin * pol_factor, amplitudeSign);
     }
 
 }
@@ -3942,7 +3944,10 @@ void Report::ApplyNoiseFig_OutZero(int ch, double freq, Detector *detector, doub
     double tempNoise = vmmhz*vmmhz;
     
     if(detector->GetNoiseFig_OutZero(ch, freq)>1.0){
-        vmmhz = TMath::Sqrt( tempNoise*(detector->GetTransm_OutZero(ch, freq)) + tempNoise/(settings1->NOISE_TEMP)*220.0*(detector->GetNoiseFig_OutZero(ch, freq) - 1.0) ) ;  
+        const int sj = detector->getStringfromArbAntID(0, ch); // hard code to station 0
+        const int ak = detector->getAntennafromArbAntID(0, ch);
+        const double n_eff = detector->GetIceModel()->GetEffectiveN(detector->stations[0].strings[sj].antennas[ak]);
+        vmmhz = TMath::Sqrt( tempNoise*(detector->GetTransm_OutZero(ch, freq, n_eff)) + tempNoise/(settings1->NOISE_TEMP)*220.0*(detector->GetNoiseFig_OutZero(ch, freq) - 1.0) ) ;  
     }
     else{
       vmmhz = vmmhz;
@@ -5351,7 +5356,8 @@ int Report::get_PA_trigger_bin(
         // Scale SNR according to full phased array angular response
         double avgSnr = 0.;
         if(settings->TRIG_ANALYSIS_MODE == 2) { // Noise only triggers
-            avgSnr = pa_force_trigger_snr; 
+            avgSnr = pa_force_trigger_snr;
+            return (waveform_length-trigger_window_bins + 1)/2; // 0 is interpreted as false downstream, so can't trigger on bin 0 
         }
         else { 
             // Estimate average SNR in topmost vpol
@@ -5454,20 +5460,22 @@ void Report::checkPATrigger(
     //   for use in get_PA_trigger_bin(). 
     double random_number = 1.01;
 
+    // do initial trigger check on full trace
     if( isTrigger(
         trigger_waveform, brightest_event, random_number,
         trigger_antenna, trigger_ch_ID, settings1, trigger
     )){ 
-        cout<<endl<<"PA trigger ~~~  Event Number : "<<evt<<endl;
-        
+       
+        // now check for a trigger window that actually satisfies the trigger check 
         int last_trig_bin = get_PA_trigger_bin(
             trigger_ch_ID, trigger_antenna, trigger_waveform, random_number,
             settings1, trigger
         );
-        if (last_trig_bin == -1) {
-            cerr<<"Waveform triggered but we cannot find a trigger bin."<<endl;
-            last_trig_bin = trigger_antenna->SignalBin[brightest_event[0]][brightest_event[1]];
+        if (last_trig_bin == -1) { // trigger-window level check failed
+            return; // no trigger so return
         }
+        cout<<endl<<"PA trigger ~~~  Event Number : "<<evt<<endl;
+        
         int my_ch_id = 0;
         stations[i].Global_Pass = last_trig_bin;
         trigger_antenna->Trig_Pass = last_trig_bin;

@@ -312,6 +312,7 @@ outputdir="outputs"; // directory where outputs go
 
   EVENT_GENERATION_MODE = 0;//default: 0: not event mode, 1: event mode
   //    EVENT_NUM = 10;//read in event number in EVENT_GENERATION_MODE=1, no more than 100 events
+
   ANTENNA_MODE=0; //default: 0 - old antenna model information
   IMPEDANCE_RX_VPOL=0;
   IMPEDANCE_RX_VPOL_TOP=0;
@@ -327,8 +328,14 @@ outputdir="outputs"; // directory where outputs go
  
   CLOCK_ANGLE=0; //Default: 0 -- Angle of polarization "on the clock".  Angle of zero is pure thetaPol, whereas 90º is pure phiPol.
 
-
-
+  SYSTEMATICS_IceAttenuation=0; // 0=central (default), 1=up, 2=low
+  
+  SYSTEMATICS_AskaryanPercent=0.0; //Define the percentage (0% by default)
+  
+  //Systematics of n(z) = nd - (nd-ns)e^nc*z
+  SYSTEMATICS_nofz_delta_ns = 0.0;
+  SYSTEMATICS_nofz_delta_nd = 0.0;
+  SYSTEMATICS_nofz_delta_nc = 0.0;
 
     /*
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
@@ -747,8 +754,9 @@ void Settings::ReadFile(string setupfile) {
               	   ELECTRONICS_ANTENNA_CONSISTENCY = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
               else if (label == "CLOCK_ANGLE"){
-                  CLOCK_ANGLE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                   CLOCK_ANGLE = atof(line.substr(line.find_first_of("=") + 1).c_str());
               }
+              //Adding source easting, northing, and depth for INTERACTION_MODE=5.
               else if (label == "SOURCE_LATITUDE"){
                   SOURCE_LATITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
               }
@@ -756,13 +764,32 @@ void Settings::ReadFile(string setupfile) {
                   SOURCE_LONGITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
               }
               else if (label == "SOURCE_DEPTH"){
-                  SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                   SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
               }
+              else if (label == "SYSTEMATICS_IceAttenuation") {
+                   SYSTEMATICS_IceAttenuation = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SYSTEMATICS_AskaryanPercent") {
+                   SYSTEMATICS_AskaryanPercent = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SYSTEMATICS_nofz_delta_ns") {
+                  SYSTEMATICS_nofz_delta_ns = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SYSTEMATICS_nofz_delta_nd") {
+                  SYSTEMATICS_nofz_delta_nd = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SYSTEMATICS_nofz_delta_nc") {
+                  SYSTEMATICS_nofz_delta_nc = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+
           }
       }
       setFile.close();
   }
-  else cout<<"Unable to open "<<setupfile<<" file!"<<endl;
+  else {
+      throw runtime_error("Unable to open "+setupfile+" file!");
+  }
+
   return;
 }
 
@@ -841,8 +868,10 @@ void Settings::ReadEvtFile(string evtfile){
         }
 	
     }
-    else
-        cout << "Unable to open " << evtfile << " file!" << endl;
+    else {
+        throw runtime_error("Unable to open "+evtfile+" file!");
+    }
+
     return;
 }
 
@@ -902,6 +931,54 @@ int Settings::CheckCompatibilitiesDetector(Detector *detector) {
         cerr << "Non-zero MAX_POSNU_DEPTH set but PICK_POSNU_DEPTH != 1, so this will be ignored and cylinder height will be ice thickness!" << endl;
         cerr << "Please change settings to either not set MAX_POSNU_DEPTH or set PICK_POSNU_DEPTH to 1." << endl;
         num_err++;
+    }
+
+    // check if the antenna gain is falling fast enough at low frequencies
+    {
+        double freq0 = detector->GetFreq(0); 
+        double freq1 = detector->GetFreq(1); 
+
+        // Vpols
+        {
+            double gain0 = detector->GetGainBin(0, 0, 0, 0, 0, 0);
+            double gain1 = detector->GetGainBin(1, 0, 0, 0, 0, 0);
+
+            // calculate quantity proportional to heff
+            double heff0 = gain0 / freq0 / freq0; 
+            double heff1 = gain1 / freq1 / freq1;
+            if(heff0 > heff1) {
+                cerr << "Vpol antenna gain may not be falling fast enough! Effective height may grow and introduce power at low frequencies." << endl;
+                num_err++;
+            }
+        }
+        
+        // TVpols
+        {
+            double gain0 = detector->GetGainBin(0, 0, 0, 0, 0, 2);
+            double gain1 = detector->GetGainBin(1, 0, 0, 0, 0, 2);
+
+            // calculate quantity proportional to heff
+            double heff0 = gain0 / freq0 / freq0; 
+            double heff1 = gain1 / freq1 / freq1;
+            if(heff0 > heff1) {
+                cerr << "TVpol antenna gain may not be falling fast enough! Effective height may grow and introduce power at low frequencies." << endl;
+                num_err++;
+            }
+        }
+        
+        // Hpols
+        {
+            double gain0 = detector->GetGainBin(0, 0, 0, 1);
+            double gain1 = detector->GetGainBin(1, 0, 0, 1);
+
+            // calculate quantity proportional to heff
+            double heff0 = gain0 / freq0 / freq0; 
+            double heff1 = gain1 / freq1 / freq1;
+            if(heff0 > heff1) {
+                cerr << "Hpol antenna gain may not be falling fast enough! Effective height may grow and introduce power at low frequencies." << endl;
+                num_err++;
+            }
+        }
     }
 
     return num_err;

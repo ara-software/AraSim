@@ -158,7 +158,7 @@ double GetELPM();  // elpm
   double Param_RE_Tterm(double Tterm, double *par);
   double Param_RE_Tterm_approx(double Tterm, double *par); // use approx expansion if possible
 
-
+  double GetAskaryanSystematicsFactor(Settings *settings1); 
 
 
 double X0MEDIUM; // radiation length of medium

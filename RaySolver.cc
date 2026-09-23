@@ -1123,6 +1123,16 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
       ns = 1.326;
       nd = 1.78;
       nc = 0.0202;
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 41){ 
+      // UNL Modified (PA model) with upward systematics (see ice model 40). Related slide: https://aradocs.wipac.wisc.edu/0035/003525/002/5SA_Ice_Model_Uncertainties.pdf 
+      ns = 1.40968; // 1.326 + 0.08368
+      nd = 1.788;   // 1.78 + 0.00800
+      nc = 0.0206;  // 0.0202 + 0.00040  
+    } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 42){ 
+      // UNL Modified (PA model) with upward systematics (see ice model 40). Related slide: https://aradocs.wipac.wisc.edu/0035/003525/002/5SA_Ice_Model_Uncertainties.pdf 
+      ns = 1.166;   // 1.326 - 0.16000
+      nd = 1.774;    // 1.78 - 0.00600
+      nc = 0.0155;  // 0.0202 - 0.00470  
     } else if (settings1->RAY_TRACE_ICE_MODEL_PARAMS == 50){ // AC model for birefringence: https://arxiv.org/abs/2110.09015
       ns = 1.35;
       nd = 1.78;
@@ -1135,7 +1145,7 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
       nc = 0.0132;
     } 
 
-
+    ApplyNofzSystematics(ns, nd, nc, settings1);
 
 
 
@@ -1590,6 +1600,10 @@ void RaySolver::Solve_Ray (Position &source, Position &target, IceModel *antarct
 }
 
 
+void RaySolver::ApplyNofzSystematics(double& ns, double& nd, double& nc, Settings* settings1) {
 
-
+    ns += settings1->SYSTEMATICS_nofz_delta_ns;
+    nd += settings1->SYSTEMATICS_nofz_delta_nd;
+    nc += settings1->SYSTEMATICS_nofz_delta_nc;
+}
 
