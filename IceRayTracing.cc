@@ -1,59 +1,45 @@
-/*
-  This is the IceRayTracing namespace. Author: Uzair Latif 
-  released under GPL3.
-*/
-
 #include "IceRayTracing.hh"
+#include "IceModel.h"
 
-void IceRayTracing::SetA(double &A){
-  IceRayTracing::A_ice=A;
+void IceRayTracing::SetA(double A){
+   IceRayTracing::A_ice = A;
 }
 
-void IceRayTracing::SetB(double &B){
+void IceRayTracing::SetB(double B){
   IceRayTracing::B_ice=B;
 }
 
-void IceRayTracing::SetC(double &C){
+void IceRayTracing::SetC(double C){
   IceRayTracing::C_ice=C;
 }
 
+/* Get the value of the A parameter for the refractive index model */
+double IceRayTracing::GetA(){
+    return IceRayTracing::A_ice;
+}
+
 /* Get the value of the B parameter for the refractive index model */
-double IceRayTracing::GetB(double z){
-  z=fabs(z);
-  double B=0;
-
-  B=IceRayTracing::B_ice;
-
-  // if(z<=IceRayTracing::TransitionBoundary){
-  //   B=-0.5019;
-  // }else{
-  //   B=-0.448023;
-  // }
-
-  return B;
+double IceRayTracing::GetB(){
+    return IceRayTracing::B_ice;
 }
 
 /* Get the value of the C parameter for the refractive index model */
-double IceRayTracing::GetC(double z){
-  z=fabs(z);
-  double C=0;
-
-  C=IceRayTracing::C_ice;
-
-  // if(z<=IceRayTracing::TransitionBoundary){
-  //   C=0.03247;
-  // }else{
-  //   C=0.02469;
-  // }
-
-  return C;
+double IceRayTracing::GetC(){
+    return IceRayTracing::C_ice;
 }
-
 
 /* Get the value of refractive index model for a given depth  */
 double IceRayTracing::Getnz(double z){
-  z=fabs(z);
-  return IceRayTracing::A_ice+IceRayTracing::GetB(z)*exp(-IceRayTracing::GetC(z)*z);
+
+    if (z > 0) {
+        throw std::invalid_argument(
+            "Getnz: z must be <= 0 for in-ice positions."
+        );
+    }
+
+    return IceRayTracing::A_ice
+         + IceRayTracing::GetB()
+         * exp(IceRayTracing::GetC()*z);
 }
 
 /* E-feild Power Fresnel coefficient for S-polarised wave which is perpendicular to the plane of propogation/incidence. This function gives you back the reflectance. The transmittance is T=1-R */
@@ -93,25 +79,20 @@ double IceRayTracing::Refl_P(double thetai){
   return (RP);
 }
 
-/* The temperature and attenuation model has been taken from AraSim which also took it from here http://icecube.wisc.edu/~araproject/radio/ . This is basically Matt Newcomb's icecube directory which has alot of information, plots and codes about South Pole Ice activities. Please read it if you find it interesting. */
-
-/* Temperature model:The model takes in value of depth z in m and returns the value of temperature in Celsius.*/
-double IceRayTracing::GetIceTemperature(double z){
-  double depth=fabs(z);
-  double t = 1.83415e-09*pow(depth,3) + (-1.59061e-08*pow(depth,2)) + 0.00267687*depth + (-51.0696 );
-  return t;
-}
 
 /* Ice Attenuation Length model: Takes in value of frequency in Ghz and depth z and returns you the value of attenuation length in m */
 double IceRayTracing::GetIceAttenuationLength(double z, double frequency){
 
-  double t =IceRayTracing::GetIceTemperature(z);
+  double t = IceModel::temperature(z);
+
   const double f0=0.0001, f2=3.16;
   const double w0=log(f0), w1=0.0, w2=log(f2), w=log(frequency);
   const double b0=-6.74890+t*(0.026709-t*0.000884);
   const double b1=-6.22121-t*(0.070927+t*0.001773);
   const double b2=-4.09468-t*(0.002213+t*0.000332);
+
   double a,bb;
+
   if(frequency<1.){
     a=(b1*w0-b0*w1)/(w0-w1);
     bb=(b1-b0)/(w1-w0);
@@ -120,7 +101,9 @@ double IceRayTracing::GetIceAttenuationLength(double z, double frequency){
     a=(b2*w1-b1*w2)/(w1-w2);
     bb=(b2-b1)/(w2-w1);
   }
+
   double Lval=1./exp(a+bb*w);
+
   return Lval;
 }
 
@@ -301,7 +284,7 @@ double IceRayTracing::GetMinnz(double x,void *params){
   struct IceRayTracing::Minnz_params *p= (struct IceRayTracing::Minnz_params *) params;
   double A = p->a;
   double L = p->l;
-  return A+IceRayTracing::GetB(x)*exp(-IceRayTracing::GetC(x)*x)-L;
+  return A+IceRayTracing::GetB()*exp(-IceRayTracing::GetC()*x)-L;
 }
 
 /* Get the value of the depth of the turning point for the refracted ray */
@@ -350,7 +333,10 @@ double IceRayTracing::ftimeD(double x,void *params){
   double Speedc = p->speedc;
   double L = p->l;
 
-  return (1.0/(Speedc*C*sqrt(pow(IceRayTracing::Getnz(x),2)-L*L)))*(pow(IceRayTracing::Getnz(x),2)-L*L+(C*x-log(A*IceRayTracing::Getnz(x)-L*L+sqrt(A*A-L*L)*sqrt(pow(IceRayTracing::Getnz(x),2)-L*L)))*(A*A*sqrt(pow(IceRayTracing::Getnz(x),2)-L*L))/sqrt(A*A-L*L) +A*sqrt(pow(IceRayTracing::Getnz(x),2)-L*L)*log(IceRayTracing::Getnz(x)+sqrt(pow(IceRayTracing::Getnz(x),2)-L*L)) );
+  return (1.0/(Speedc*C*sqrt(pow(IceRayTracing::Getnz(x),2)-L*L)))*(pow(IceRayTracing::Getnz(x),2)-L*L
+              +(C*x-log(A*IceRayTracing::Getnz(x)-L*L+sqrt(A*A-L*L)*sqrt(pow(IceRayTracing::Getnz(x),2)-L*L)))
+              *(A*A*sqrt(pow(IceRayTracing::Getnz(x),2)-L*L))/sqrt(A*A-L*L) +A*sqrt(pow(IceRayTracing::Getnz(x),2)-L*L)
+              *log(IceRayTracing::Getnz(x)+sqrt(pow(IceRayTracing::Getnz(x),2)-L*L)) );
 }
 
 /* The function is used to calculate ray geometric path in ice */
@@ -365,7 +351,10 @@ double IceRayTracing::fpathD(double x,void *params){
 
   //integral sec(sin^(-1)(L/(A + B e^(C x)))) dx = (log((A + B e^(C x)) (sqrt((A^2 + 2 A B e^(C x) + B^2 e^(2 C x) - L^2)/(A + B e^(C x))^2) + 1)) - (A log(A sqrt(A^2 - L^2) sqrt((A^2 + 2 A B e^(C x) + B^2 e^(2 C x) - L^2)/(A + B e^(C x))^2) + B sqrt(A^2 - L^2) e^(C x) sqrt((A^2 + 2 A B e^(C x) + B^2 e^(2 C x) - L^2)/(A + B e^(C x))^2) + A^2 + A B e^(C x) - L^2))/sqrt(A^2 - L^2) + (A C x)/sqrt(A^2 - L^2))/C;
 
-  return (log((A + B*exp(C*x))*(sqrt((A*A + 2*A*B*exp(C*x) + B*B*exp(2*C*x) - L*L)/((A + B*exp(C*x))*(A + B*exp(C*x))) ) + 1)) - (A*log(A*sqrt(A*A - L*L)*sqrt((A*A + 2*A*B*exp(C*x) + B*B* exp(2*C*x) - L*L)/(( A + B*exp(C*x))*(A + B*exp(C*x)))) + B*sqrt(A*A - L*L)*exp(C*x)*sqrt((A*A + 2*A*B*exp(C*x) + B*B* exp(2*C*x) - L*L)/((A + B*exp(C*x))*(A + B*exp(C*x)))) + A*A + A*B*exp(C*x) - L*L))/sqrt(A*A - L*L) + (A*C*x)/sqrt(A*A - L*L))/C ;
+  return (log((A + B*exp(C*x))*(sqrt((A*A + 2*A*B*exp(C*x) + B*B*exp(2*C*x) - L*L)/((A + B*exp(C*x))*(A + B*exp(C*x))) ) + 1)) 
+              - (A*log(A*sqrt(A*A - L*L)*sqrt((A*A + 2*A*B*exp(C*x) + B*B* exp(2*C*x) - L*L)/(( A + B*exp(C*x))*(A + B*exp(C*x)))) 
+              + B*sqrt(A*A - L*L)*exp(C*x)*sqrt((A*A + 2*A*B*exp(C*x) + B*B* exp(2*C*x) - L*L)/((A + B*exp(C*x))*(A + B*exp(C*x)))) + A*A + A*B*exp(C*x) - L*L))/sqrt(A*A - L*L) 
+              + (A*C*x)/sqrt(A*A - L*L))/C ;
 
 }
 
@@ -377,10 +366,10 @@ double IceRayTracing::fDa(double x,void *params){
   double x1 = p->x1;
   double z1 = p->z1;
 
-  struct IceRayTracing::fDnfR_L_params params1a = {A, IceRayTracing::GetB(z1), IceRayTracing::GetC(z1), z1};
-  struct IceRayTracing::fDnfR_L_params params1b = {A, IceRayTracing::GetB(z0), IceRayTracing::GetC(z0), z0};
-  struct IceRayTracing::fDnfR_L_params params1c = {A, IceRayTracing::GetB(IceRayTracing::TransitionBoundary), IceRayTracing::GetC(IceRayTracing::TransitionBoundary), -IceRayTracing::TransitionBoundary};
-  struct IceRayTracing::fDnfR_L_params params1d = {A, IceRayTracing::GetB(-(IceRayTracing::TransitionBoundary+0.000001)), IceRayTracing::GetC(-(IceRayTracing::TransitionBoundary+0.000001)), -(IceRayTracing::TransitionBoundary+0.000001)};
+  struct IceRayTracing::fDnfR_L_params params1a = {A, IceRayTracing::GetB(), IceRayTracing::GetC(), z1};
+  struct IceRayTracing::fDnfR_L_params params1b = {A, IceRayTracing::GetB(), IceRayTracing::GetC(), z0};
+  struct IceRayTracing::fDnfR_L_params params1c = {A, IceRayTracing::GetB(), IceRayTracing::GetC(), -IceRayTracing::TransitionBoundary};
+  struct IceRayTracing::fDnfR_L_params params1d = {A, IceRayTracing::GetB(), IceRayTracing::GetC(), -(IceRayTracing::TransitionBoundary+0.000001)};
 
   double distancez0z1=0;
   if(IceRayTracing::TransitionBoundary!=0){
@@ -437,11 +426,11 @@ double IceRayTracing::fRa(double x,void *params){
   double x1 = p->x1;
   double z1 = p->z1;
 
-  struct IceRayTracing::fDnfR_L_params params1a = {A, IceRayTracing::GetB(z1), -IceRayTracing::GetC(z1), -z1};
-  struct IceRayTracing::fDnfR_L_params params1b = {A, IceRayTracing::GetB(z0), -IceRayTracing::GetC(z0), -z0};
-  struct IceRayTracing::fDnfR_L_params params1c = {A, IceRayTracing::GetB(1e-7), -IceRayTracing::GetC(1e-7), 1e-7};
-  struct IceRayTracing::fDnfR_L_params params1d = {A, IceRayTracing::GetB(IceRayTracing::TransitionBoundary), -IceRayTracing::GetC(IceRayTracing::TransitionBoundary), IceRayTracing::TransitionBoundary};
-  struct IceRayTracing::fDnfR_L_params params1f = {A, IceRayTracing::GetB(IceRayTracing::TransitionBoundary+0.000001), -IceRayTracing::GetC(IceRayTracing::TransitionBoundary+0.000001), IceRayTracing::TransitionBoundary+0.000001};
+  struct IceRayTracing::fDnfR_L_params params1a = {A, IceRayTracing::GetB(), -IceRayTracing::GetC(), -z1};
+  struct IceRayTracing::fDnfR_L_params params1b = {A, IceRayTracing::GetB(), -IceRayTracing::GetC(), -z0};
+  struct IceRayTracing::fDnfR_L_params params1c = {A, IceRayTracing::GetB(), -IceRayTracing::GetC(), 1e-7};
+  struct IceRayTracing::fDnfR_L_params params1d = {A, IceRayTracing::GetB(), -IceRayTracing::GetC(), IceRayTracing::TransitionBoundary};
+  struct IceRayTracing::fDnfR_L_params params1f = {A, IceRayTracing::GetB(), -IceRayTracing::GetC(), IceRayTracing::TransitionBoundary+0.000001};
 
   double distancez0z1=0;
   double distancez0surface=0;
@@ -512,11 +501,11 @@ double IceRayTracing::fRaa(double x,void *params){
   double zmax= IceRayTracing::GetZmax(A,x)+1e-7;
   double output=0;
   if(zmax>0){
-    struct IceRayTracing::fDnfR_L_params params1a = {A, IceRayTracing::GetB(z1), -IceRayTracing::GetC(z1), -z1};
-    struct IceRayTracing::fDnfR_L_params params1b = {A, IceRayTracing::GetB(z0), -IceRayTracing::GetC(z0), -z0};
-    struct IceRayTracing::fDnfR_L_params params1c = {A, IceRayTracing::GetB(zmax), -IceRayTracing::GetC(zmax), zmax};
-    struct IceRayTracing::fDnfR_L_params params1d = {A, IceRayTracing::GetB(IceRayTracing::TransitionBoundary), -IceRayTracing::GetC(IceRayTracing::TransitionBoundary), IceRayTracing::TransitionBoundary};
-    struct IceRayTracing::fDnfR_L_params params1f = {A, IceRayTracing::GetB(IceRayTracing::TransitionBoundary+1e-7), -IceRayTracing::GetC(IceRayTracing::TransitionBoundary+1e-7), IceRayTracing::TransitionBoundary+1e-7};
+    struct IceRayTracing::fDnfR_L_params params1a = {A, IceRayTracing::GetB(), -IceRayTracing::GetC(), -z1};
+    struct IceRayTracing::fDnfR_L_params params1b = {A, IceRayTracing::GetB(), -IceRayTracing::GetC(), -z0};
+    struct IceRayTracing::fDnfR_L_params params1c = {A, IceRayTracing::GetB(), -IceRayTracing::GetC(), zmax};
+    struct IceRayTracing::fDnfR_L_params params1d = {A, IceRayTracing::GetB(), -IceRayTracing::GetC(), IceRayTracing::TransitionBoundary};
+    struct IceRayTracing::fDnfR_L_params params1f = {A, IceRayTracing::GetB(), -IceRayTracing::GetC(), IceRayTracing::TransitionBoundary+1e-7};
 
     double distancez0z1=0;
     double distancez0surface=0;
@@ -621,10 +610,10 @@ double* IceRayTracing::GetDirectRayPar(double z0, double x1, double z1){
   double checkzeroD=IceRayTracing::fDa(lvalueD,&params1);
 
   /* Get the propagation time for the direct ray using the ftimeD function after we have gotten the value of the L parameter. */
-  struct IceRayTracing::ftimeD_params params2a = {IceRayTracing::A_ice, IceRayTracing::GetB(z0), -IceRayTracing::GetC(z0), IceRayTracing::c_light_ms,lvalueD};
-  struct IceRayTracing::ftimeD_params params2b = {IceRayTracing::A_ice, IceRayTracing::GetB(z1), -IceRayTracing::GetC(z1), IceRayTracing::c_light_ms,lvalueD};
-  struct IceRayTracing::ftimeD_params params2c = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary), -IceRayTracing::GetC(IceRayTracing::TransitionBoundary), IceRayTracing::c_light_ms, lvalueD};
-  struct IceRayTracing::ftimeD_params params2d = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary+1e-7), -IceRayTracing::GetC(IceRayTracing::TransitionBoundary+1e-7), IceRayTracing::c_light_ms, lvalueD};
+  struct IceRayTracing::ftimeD_params params2a = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), IceRayTracing::c_light_ms,lvalueD};
+  struct IceRayTracing::ftimeD_params params2b = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), IceRayTracing::c_light_ms,lvalueD};
+  struct IceRayTracing::ftimeD_params params2c = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), IceRayTracing::c_light_ms, lvalueD};
+  struct IceRayTracing::ftimeD_params params2d = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), IceRayTracing::c_light_ms, lvalueD};
 
   /* we do the subtraction because we are measuring the time taken between the Tx and Rx positions */
   double timeD=0;
@@ -661,7 +650,7 @@ double* IceRayTracing::GetDirectRayPar(double z0, double x1, double z1){
 
   /* Setup the function that will be used to calculate the angle of reception for all the rays */
   gsl_function F5;
-  struct IceRayTracing::fDnfR_params params5a = {IceRayTracing::A_ice, IceRayTracing::GetB(z1), -IceRayTracing::GetC(z1), lvalueD};
+  struct IceRayTracing::fDnfR_params params5a = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), lvalueD};
   double result, abserr;
   F5.function = &IceRayTracing::fDnfR;
 
@@ -741,11 +730,11 @@ double *IceRayTracing::GetReflectedRayPar(double z0, double x1 ,double z1){
   double checkzeroR=IceRayTracing::fRa(lvalueR,&params3); 
 
   /* Get the propagation time for the reflected ray using the ftimeD function after we have gotten the value of the L parameter. */
-  struct IceRayTracing::ftimeD_params params3a = {IceRayTracing::A_ice, IceRayTracing::GetB(z0), IceRayTracing::GetC(z0), IceRayTracing::c_light_ms,lvalueR};
-  struct IceRayTracing::ftimeD_params params3b = {IceRayTracing::A_ice, IceRayTracing::GetB(z1), IceRayTracing::GetC(z1), IceRayTracing::c_light_ms,lvalueR};
-  struct IceRayTracing::ftimeD_params params3c = {IceRayTracing::A_ice, IceRayTracing::GetB(1e-7), IceRayTracing::GetC(1e-7), IceRayTracing::c_light_ms,lvalueR};
-  struct IceRayTracing::ftimeD_params params3d = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary), IceRayTracing::GetC(IceRayTracing::TransitionBoundary), IceRayTracing::c_light_ms, lvalueR};
-  struct IceRayTracing::ftimeD_params params3f = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary+1e-7), IceRayTracing::GetC(IceRayTracing::TransitionBoundary+1e-7), IceRayTracing::c_light_ms, lvalueR};
+  struct IceRayTracing::ftimeD_params params3a = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), IceRayTracing::c_light_ms,lvalueR};
+  struct IceRayTracing::ftimeD_params params3b = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), IceRayTracing::c_light_ms,lvalueR};
+  struct IceRayTracing::ftimeD_params params3c = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), IceRayTracing::c_light_ms,lvalueR};
+  struct IceRayTracing::ftimeD_params params3d = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), IceRayTracing::c_light_ms, lvalueR};
+  struct IceRayTracing::ftimeD_params params3f = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), IceRayTracing::c_light_ms, lvalueR};
   /* We do the subtraction because we are measuring the time taken between the Tx and Rx positions. In the reflected case we basically have two direct rays 1) from Tx to surface 2) from surface to Rx. Also get the time for the two individual direct rays separately */
   double timeR1=0;
   double timeR2=0;
@@ -823,7 +812,7 @@ double *IceRayTracing::GetReflectedRayPar(double z0, double x1 ,double z1){
 
   /* Setup the function that will be used to calculate the angle of reception for all the rays */
   gsl_function F5;
-  struct IceRayTracing::fDnfR_params params5b = {IceRayTracing::A_ice, IceRayTracing::GetB(z1), IceRayTracing::GetC(z1), lvalueR};
+  struct IceRayTracing::fDnfR_params params5b = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueR};
   double result, abserr;
   F5.function = &IceRayTracing::fDnfR;
 
@@ -847,7 +836,7 @@ double *IceRayTracing::GetReflectedRayPar(double z0, double x1 ,double z1){
   }
 
   /* Calculate the angle of incidence of the reflected ray at the surface ice. This will be used to calculate the Fresnel Coefficients. The angle is calculated by calculating the derivative of the ray path fucnction at the surface*/
-  struct IceRayTracing::fDnfR_params paramsIAngB = {IceRayTracing::A_ice, IceRayTracing::GetB(1e-7), IceRayTracing::GetC(1e-7), lvalueR};
+  struct IceRayTracing::fDnfR_params paramsIAngB = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueR};
   F5.function = &IceRayTracing::fDnfR; 
   F5.params = &paramsIAngB;
   gsl_deriv_central (&F5, -1e-7, 1e-8, &result, &abserr);
@@ -1048,11 +1037,11 @@ double *IceRayTracing::GetRefractedRayPar(double z0, double x1 ,double z1, doubl
     }
 
     /* Set parameters for ftimeD function to get the propagation time for the refracted ray */
-    struct IceRayTracing::ftimeD_params params4a = {IceRayTracing::A_ice, IceRayTracing::GetB(z0), IceRayTracing::GetC(z0), IceRayTracing::c_light_ms,lvalueRa[i]};
-    struct IceRayTracing::ftimeD_params params4b = {IceRayTracing::A_ice, IceRayTracing::GetB(z1), IceRayTracing::GetC(z1), IceRayTracing::c_light_ms,lvalueRa[i]};
-    struct IceRayTracing::ftimeD_params params4c = {IceRayTracing::A_ice, IceRayTracing::GetB(zmax[i]), IceRayTracing::GetC(zmax[i]), IceRayTracing::c_light_ms,lvalueRa[i]};
-    struct IceRayTracing::ftimeD_params params4d = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary), IceRayTracing::GetC(IceRayTracing::TransitionBoundary), IceRayTracing::c_light_ms, lvalueRa[i]};
-    struct IceRayTracing::ftimeD_params params4f = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary+1e-7), IceRayTracing::GetC(IceRayTracing::TransitionBoundary+1e-7), IceRayTracing::c_light_ms, lvalueRa[i]};
+    struct IceRayTracing::ftimeD_params params4a = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), IceRayTracing::c_light_ms,lvalueRa[i]};
+    struct IceRayTracing::ftimeD_params params4b = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), IceRayTracing::c_light_ms,lvalueRa[i]};
+    struct IceRayTracing::ftimeD_params params4c = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), IceRayTracing::c_light_ms,lvalueRa[i]};
+    struct IceRayTracing::ftimeD_params params4d = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), IceRayTracing::c_light_ms, lvalueRa[i]};
+    struct IceRayTracing::ftimeD_params params4f = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), IceRayTracing::c_light_ms, lvalueRa[i]};
 
     /* This if condition checks if the function has not gone crazy and given us a turning point of the ray which is lower than both Tx and Rx and is shallower in depth than both */
     if((z0<-zmax[i] || zmax[i]<-z1)){
@@ -1136,7 +1125,7 @@ double *IceRayTracing::GetRefractedRayPar(double z0, double x1 ,double z1, doubl
 
     /* Setup the function that will be used to calculate the angle of reception for all the rays */
     gsl_function F5;
-    struct IceRayTracing::fDnfR_params params5c = {IceRayTracing::A_ice, IceRayTracing::GetB(z1), IceRayTracing::GetC(z1), lvalueRa[i]};
+    struct IceRayTracing::fDnfR_params params5c = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueRa[i]};
     double result, abserr;
     F5.function = &IceRayTracing::fDnfR;
 
@@ -1240,10 +1229,10 @@ void IceRayTracing::GetFullDirectRayPath(double z0, double x1, double z1,double 
 
 
   for(int i=0;i<dmax;i++){
-    params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(zn), IceRayTracing::GetC(zn), lvalueD};
-    params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(z0), IceRayTracing::GetC(z0), lvalueD};
-    params6c = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary), IceRayTracing::GetC(IceRayTracing::TransitionBoundary), lvalueD};
-    params6d = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary+1e-7), IceRayTracing::GetC(IceRayTracing::TransitionBoundary+1e-7), lvalueD};
+    params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueD};
+    params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueD};
+    params6c = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueD};
+    params6d = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueD};
 
     if(IceRayTracing::TransitionBoundary!=0){
       if (fabs(z0)<IceRayTracing::TransitionBoundary && fabs(zn)<IceRayTracing::TransitionBoundary){
@@ -1290,8 +1279,8 @@ void IceRayTracing::GetFullDirectRayPath(double z0, double x1, double z1,double 
     }  
   }
 
-  params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(zn), IceRayTracing::GetC(zn), lvalueD};
-  params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(z0), IceRayTracing::GetC(z0), lvalueD};
+  params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueD};
+  params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueD};
   xn=IceRayTracing::fDnfR(zn,&params6a)-IceRayTracing::fDnfR(z0,&params6b);  
   if(Flip==true){
     x.push_back(x1-xn);
@@ -1346,11 +1335,11 @@ void IceRayTracing::GetFullReflectedRayPath(double z0, double x1, double z1,doub
 
   /* Map out the 1st part of the reflected ray */
   for(int i=0;i<dmax;i++){
-    params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(zn), -IceRayTracing::GetC(zn), lvalueR};
-    params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(z0), -IceRayTracing::GetC(z0), lvalueR};
-    params6c = {IceRayTracing::A_ice, IceRayTracing::GetB(1e-7), -IceRayTracing::GetC(1e-7), lvalueR};
-    params6d = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary), -IceRayTracing::GetC(IceRayTracing::TransitionBoundary), lvalueR};
-    params6f = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary+1e-7), -IceRayTracing::GetC(IceRayTracing::TransitionBoundary+1e-7), lvalueR};
+    params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), lvalueR};
+    params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), lvalueR};
+    params6c = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), lvalueR};
+    params6d = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), lvalueR};
+    params6f = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), lvalueR};
 
     double distancez0z1=0;
     double distancez0surface=0;  
@@ -1410,10 +1399,10 @@ void IceRayTracing::GetFullReflectedRayPath(double z0, double x1, double z1,doub
   /* Map out the 2nd part of the reflected ray */
   zn=-1e-7;
   for(int i=0;i<dmax;i++){  
-    params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(zn), IceRayTracing::GetC(zn), lvalueR};
-    params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(z0), IceRayTracing::GetC(z0), lvalueR};
-    params6c = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary), IceRayTracing::GetC(IceRayTracing::TransitionBoundary), lvalueR};
-    params6d = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary+1e-7), IceRayTracing::GetC(IceRayTracing::TransitionBoundary+1e-7), lvalueR};
+    params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueR};
+    params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueR};
+    params6c = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueR};
+    params6d = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueR};
 
     if(IceRayTracing::TransitionBoundary!=0){
       if (fabs(z0)<IceRayTracing::TransitionBoundary && fabs(zn)<IceRayTracing::TransitionBoundary){
@@ -1460,8 +1449,8 @@ void IceRayTracing::GetFullReflectedRayPath(double z0, double x1, double z1,doub
     }
   }
 
-  params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(zn), IceRayTracing::GetC(zn), lvalueR};
-  params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(z0), IceRayTracing::GetC(z0), lvalueR};
+  params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueR};
+  params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueR};
   xn=IceRayTracing::fDnfR(zn,&params6a) -IceRayTracing::fDnfR(z0,&params6b);
   if(Flip==true){
     x.push_back(x1-xn);
@@ -1523,11 +1512,11 @@ void IceRayTracing::GetFullRefractedRayPath(double z0, double x1, double z1, dou
 
   /* Map out the 1st part of the refracted ray */
   for(int i=0;i<dmax;i++){
-    params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(zn), -IceRayTracing::GetC(zn), lvalueRa};
-    params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(z0), -IceRayTracing::GetC(z0), lvalueRa};
-    params6c = {IceRayTracing::A_ice, IceRayTracing::GetB(zmax), -IceRayTracing::GetC(zmax), lvalueRa};
-    params6d = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary), -IceRayTracing::GetC(IceRayTracing::TransitionBoundary), lvalueRa};
-    params6f = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary+1e-6), -IceRayTracing::GetC(IceRayTracing::TransitionBoundary+1e-6), lvalueRa};
+    params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), lvalueRa};
+    params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), lvalueRa};
+    params6c = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), lvalueRa};
+    params6d = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), lvalueRa};
+    params6f = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), lvalueRa};
 
     double distancez0z1=0;
     double distancez0surface=0;  
@@ -1592,10 +1581,10 @@ void IceRayTracing::GetFullRefractedRayPath(double z0, double x1, double z1, dou
   /* Map out the 2nd part of the refracted ray */
   zn=-zmax;
   for(int i=0;i<dmax;i++){  
-    params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(zn), IceRayTracing::GetC(zn), lvalueRa};
-    params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(z0), IceRayTracing::GetC(z0), lvalueRa};
-    params6c = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary), IceRayTracing::GetC(IceRayTracing::TransitionBoundary), lvalueRa};
-    params6d = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary+1e-6), IceRayTracing::GetC(IceRayTracing::TransitionBoundary+1e-6), lvalueRa}; 
+    params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueRa};
+    params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueRa};
+    params6c = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueRa};
+    params6d = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueRa}; 
 
     if(IceRayTracing::TransitionBoundary!=0){
       if (fabs(z0)<IceRayTracing::TransitionBoundary && fabs(zn)<IceRayTracing::TransitionBoundary){
@@ -1642,8 +1631,8 @@ void IceRayTracing::GetFullRefractedRayPath(double z0, double x1, double z1, dou
     }
   }
 
-  params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(zn), IceRayTracing::GetC(zn), lvalueRa};
-  params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(z0), IceRayTracing::GetC(z0), lvalueRa};  
+  params6a = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueRa};
+  params6b = {IceRayTracing::A_ice, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueRa};  
   xn=IceRayTracing::fDnfR(zn,&params6a)-IceRayTracing::fDnfR(z0,&params6b);
   if(Flip==true){
     x.push_back(x1-xn);
@@ -2076,8 +2065,8 @@ void IceRayTracing::GetFullDirectRayPath_Cnz(double z0, double x1, double z1, do
   struct IceRayTracing::fDnfR_params params6b;
 
   for(int i=0;i<dmax;i++){
-    params6a = {A_ice_Cnz, IceRayTracing::GetB(zn), IceRayTracing::GetC(zn), lvalueD};
-    params6b = {A_ice_Cnz, IceRayTracing::GetB(z0), IceRayTracing::GetC(z0), lvalueD};
+    params6a = {A_ice_Cnz, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueD};
+    params6b = {A_ice_Cnz, IceRayTracing::GetB(), IceRayTracing::GetC(), lvalueD};
     xn=IceRayTracing::fDnfR_Cnz(zn,&params6a)-IceRayTracing::fDnfR_Cnz(z0,&params6b);
     checknan=IceRayTracing::fDnfR(zn,&params6a);
     if(std::isnan(checknan)==false && Flip==false){
@@ -2233,7 +2222,7 @@ void IceRayTracing::GetFullReflectedRayPath_Cnz(double z0, double x1, double z1,
 }
 
 /* function for plotting and storing all the rays. This is for constant refractive index. */
-void IceRayTracing::PlotAndStoreRays_Cnz(double x0,double z0, double z1, double x1, double lvalues[2], double A_ice_Cnz){
+void IceRayTracing::PlotAndStoreRays_Cnz(double z0, double z1, double x1, double lvalues[2], double A_ice_Cnz){
 
   double lvalueD=lvalues[0];
   double lvalueR=lvalues[1];
@@ -2245,8 +2234,8 @@ void IceRayTracing::PlotAndStoreRays_Cnz(double x0,double z0, double z1, double 
 
 }
 
-/* This is the main raytracing function. x0 always has to be zero. z0 is the Tx depth in m and z1 is the depth of the Rx in m. Both depths are negative. x1 is the distance between them. This functions works for a constant refractive index */
-double *IceRayTracing::IceRayTracing_Cnz(double x0, double z0, double x1, double z1, double A_ice_Cnz){
+/* This is the main raytracing function. z0 is the Tx depth in m and z1 is the depth of the Rx in m. Both depths are negative. x1 is the distance between them. This functions works for a constant refractive index */
+double *IceRayTracing::IceRayTracing_Cnz(double z0, double x1, double z1, double A_ice_Cnz){
 
   /* define a pointer to give back the output of raytracing */ 
   double *output=new double[9];
@@ -2281,7 +2270,7 @@ double *IceRayTracing::IceRayTracing_Cnz(double x0, double z0, double x1, double
     lvalues[0]=lvalueD;
     lvalues[1]=lvalueR;
 
-    PlotAndStoreRays_Cnz(x0,z0,z1,x1,lvalues,A_ice_Cnz);
+    PlotAndStoreRays_Cnz(z0,z1,x1,lvalues,A_ice_Cnz);
   }  
 
   /* Fill in the output pointer after calculating all the results */
@@ -2313,10 +2302,10 @@ double IceRayTracing::fDa_Air(double x,void *params){
   double AngleInAir=asin(x/nz_Air);
   double x1_Air=z1*tan(AngleInAir);
 
-  struct IceRayTracing::fDnfR_L_params params1a = {A, IceRayTracing::GetB(1e-7), IceRayTracing::GetC(1e-7), -1e-7};
-  struct IceRayTracing::fDnfR_L_params params1b = {A, IceRayTracing::GetB(z0), IceRayTracing::GetC(z0), z0};
-  struct IceRayTracing::fDnfR_L_params params1c = {A, IceRayTracing::GetB(IceRayTracing::TransitionBoundary), IceRayTracing::GetC(IceRayTracing::TransitionBoundary), -IceRayTracing::TransitionBoundary};
-  struct IceRayTracing::fDnfR_L_params params1d = {A, IceRayTracing::GetB(-(IceRayTracing::TransitionBoundary+0.000001)), IceRayTracing::GetC(-(IceRayTracing::TransitionBoundary+0.000001)), -(IceRayTracing::TransitionBoundary+0.000001)};
+  struct IceRayTracing::fDnfR_L_params params1a = {A, IceRayTracing::GetB(), IceRayTracing::GetC(), -1e-7};
+  struct IceRayTracing::fDnfR_L_params params1b = {A, IceRayTracing::GetB(), IceRayTracing::GetC(), z0};
+  struct IceRayTracing::fDnfR_L_params params1c = {A, IceRayTracing::GetB(), IceRayTracing::GetC(), -IceRayTracing::TransitionBoundary};
+  struct IceRayTracing::fDnfR_L_params params1d = {A, IceRayTracing::GetB(), IceRayTracing::GetC(), -(IceRayTracing::TransitionBoundary+0.000001)};
 
   double distancez0z1=0;
 
@@ -2375,10 +2364,10 @@ double* IceRayTracing::GetDirectRayPar_Air(double z0, double x1, double z1){
   double checkzeroD=IceRayTracing::fDa_Air(lvalueD,&params1);
 
   /* Get the propagation time for the direct ray using the ftimeD function after we have gotten the value of the L parameter. */
-  struct IceRayTracing::ftimeD_params params2a = {IceRayTracing::A_ice, IceRayTracing::GetB(z0), -IceRayTracing::GetC(z0), IceRayTracing::c_light_ms,lvalueD};
-  struct IceRayTracing::ftimeD_params params2b = {IceRayTracing::A_ice, IceRayTracing::GetB(1e-7), -IceRayTracing::GetC(1e-7), IceRayTracing::c_light_ms,lvalueD};
-  struct IceRayTracing::ftimeD_params params2c = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary), -IceRayTracing::GetC(IceRayTracing::TransitionBoundary), IceRayTracing::c_light_ms, lvalueD};
-  struct IceRayTracing::ftimeD_params params2d = {IceRayTracing::A_ice, IceRayTracing::GetB(IceRayTracing::TransitionBoundary+1e-7), -IceRayTracing::GetC(IceRayTracing::TransitionBoundary+1e-7), IceRayTracing::c_light_ms, lvalueD};
+  struct IceRayTracing::ftimeD_params params2a = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), IceRayTracing::c_light_ms,lvalueD};
+  struct IceRayTracing::ftimeD_params params2b = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), IceRayTracing::c_light_ms,lvalueD};
+  struct IceRayTracing::ftimeD_params params2c = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), IceRayTracing::c_light_ms, lvalueD};
+  struct IceRayTracing::ftimeD_params params2d = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), IceRayTracing::c_light_ms, lvalueD};
 
   /* we do the subtraction because we are measuring the time taken between the Tx and Rx positions */
   double timeD=0;
@@ -2407,7 +2396,7 @@ double* IceRayTracing::GetDirectRayPar_Air(double z0, double x1, double z1){
 
   /* Setup the function that will be used to calculate the angle of reception for all the rays */
   gsl_function F5;
-  struct IceRayTracing::fDnfR_params params5a = {IceRayTracing::A_ice, IceRayTracing::GetB(1e-7), -IceRayTracing::GetC(1e-7), lvalueD};
+  struct IceRayTracing::fDnfR_params params5a = {IceRayTracing::A_ice, IceRayTracing::GetB(), -IceRayTracing::GetC(), lvalueD};
   double result, abserr;
   F5.function = &IceRayTracing::fDnfR;
 

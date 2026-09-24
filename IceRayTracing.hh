@@ -1,7 +1,3 @@
-/*
-This is the IceRayTracing namespace. Author: Uzair Latif 
-released under GPL3.
-*/
 #ifndef IRT_HEAD
 #define IRT_HEAD
 
@@ -61,19 +57,22 @@ namespace IceRayTracing{
 
 
  /* Get the value of the B parameter for the refractive index model */
-  void SetA(double &A);
+  void SetA(double A);
 
   /* Get the value of the B parameter for the refractive index model */
-  void SetB(double &B);
+  void SetB(double B);
 
   /* Get the value of the C parameter for the refractive index model */
-  void SetC(double &C);
+  void SetC(double C);
 
   /* Get the value of the B parameter for the refractive index model */
-  double GetB(double z);
+  double GetA();
+
+  /* Get the value of the B parameter for the refractive index model */
+  double GetB();
 
   /* Get the value of the C parameter for the refractive index model */
-  double GetC(double z);
+  double GetC();
 
   /* Get the value of refractive index model for a given depth  */
   double Getnz(double z);
@@ -84,10 +83,7 @@ namespace IceRayTracing{
 /* E-feild Power Fresnel coefficient for P-polarised wave which is parallel to the plane of propogation/incidence. This function gives you back the reflectance. The transmittance is T=1-R */
   double Refl_P(double thetai);
 
-  /* The temperature and attenuation model has been taken from AraSim which also took it from here http://icecube.wisc.edu/~araproject/radio/ . This is basically Matt Newcomb's icecube directory which has alot of information, plots and codes about South Pole Ice activities. Please read it if you find it interesting. */
-
-  /* Temperature model:The model takes in value of depth z in m and returns the value of temperature in Celsius.*/
-  double GetIceTemperature(double z);
+  /* The attenuation model has been taken from AraSim which also took it from here http://icecube.wisc.edu/~araproject/radio/ . This is basically Matt Newcomb's icecube directory which has alot of information, plots and codes about South Pole Ice activities. Please read it if you find it interesting. */
 
   /* Ice Attenuation Length model: Takes in value of frequency in Ghz and depth z and returns you the value of attenuation length in m */
   double GetIceAttenuationLength(double z, double frequency);
@@ -208,10 +204,10 @@ namespace IceRayTracing{
   void GetFullReflectedRayPath_Cnz(double z0, double x1, double z1, double lvalueR, double A_ice_Cnz,vector <double> &x, vector <double> &z);
 
   /* function for plotting and storing all the rays. This is for constant refractive index. */
-  void PlotAndStoreRays_Cnz(double x0,double z0, double z1, double x1, double lvalues[2], double A_ice_Cnz);
+  void PlotAndStoreRays_Cnz(double z0, double z1, double x1, double lvalues[2], double A_ice_Cnz);
 
-  /* This is the main raytracing function. x0 always has to be zero. z0 is the Tx depth in m and z1 is the depth of the Rx in m. Both depths are negative. x1 is the distance between them. This functions works for a constant refractive index */
-  double *IceRayTracing_Cnz(double x0, double z0, double x1, double z1, double A_ice_Cnz); 
+  /* This is the main raytracing function. z0 is the Tx depth in m and z1 is the depth of the Rx in m. Both depths are negative. x1 is the distance between them. This functions works for a constant refractive index */
+  double *IceRayTracing_Cnz(double z0, double x1, double z1, double A_ice_Cnz); 
 
  /* The set of functions starting with the name "fDa" are used in the minimisation procedure to find the launch angle (or the L parameter) for the direct ray */
   double fDa_Air(double x,void *params);
