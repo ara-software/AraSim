@@ -85,6 +85,9 @@ namespace IceRayTracing{
 
   /* The attenuation model has been taken from AraSim which also took it from here http://icecube.wisc.edu/~araproject/radio/ . This is basically Matt Newcomb's icecube directory which has alot of information, plots and codes about South Pole Ice activities. Please read it if you find it interesting. */
 
+  /* Temperature model:The model takes in value of depth z in m and returns the value of temperature in Celsius.*/
+  double GetIceTemperature(double z);
+
   /* Ice Attenuation Length model: Takes in value of frequency in Ghz and depth z and returns you the value of attenuation length in m */
   double GetIceAttenuationLength(double z, double frequency);
 

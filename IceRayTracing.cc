@@ -79,11 +79,19 @@ double IceRayTracing::Refl_P(double thetai){
   return (RP);
 }
 
+/* Temperature model:The model takes in value of depth z in m and returns the value of temperature in Celsius.*/
+double IceRayTracing::GetIceTemperature(double z){
+
+  double depth=fabs(z);
+  double t = 1.83415e-09*pow(depth,3) + (-1.59061e-08*pow(depth,2)) + 0.00267687*depth + (-51.0696 );
+  return t;
+
+}
 
 /* Ice Attenuation Length model: Takes in value of frequency in Ghz and depth z and returns you the value of attenuation length in m */
 double IceRayTracing::GetIceAttenuationLength(double z, double frequency){
 
-  double t = IceModel::temperature(z);
+  double t = IceRayTracing::GetIceTemperature(z);
 
   const double f0=0.0001, f2=3.16;
   const double w0=log(f0), w1=0.0, w2=log(f2), w=log(frequency);
