@@ -18,7 +18,16 @@
 
 using namespace std;
 
+class IceModel;
+class Settings;
+
 namespace IceRayTracing{
+
+  extern IceModel* iceModel;
+  extern Settings* settings;
+
+  void SetIceModel(IceModel* model);
+  void SetSettings(Settings* settings1);
 
   /********Stuff for Interpolation**********/
   static vector<vector <double>> GridPositionXb;
@@ -51,10 +60,10 @@ namespace IceRayTracing{
   static double A_ice=A_ice_def;
   static double B_ice=B_ice_def;
   static double C_ice=C_ice_def;
+
   static constexpr double TransitionBoundary=0;
   // const double A_ice=1.775;
   // const double TransitionBoundary=14.9;
-
 
  /* Get the value of the B parameter for the refractive index model */
   void SetA(double A);

@@ -1,5 +1,17 @@
 #include "IceRayTracing.hh"
 #include "IceModel.h"
+#include "Settings.h"
+
+IceModel* IceRayTracing::iceModel = nullptr;
+Settings* IceRayTracing::settings = nullptr;
+
+void IceRayTracing::SetIceModel(IceModel* model){
+    IceRayTracing::iceModel = model;
+}
+
+void IceRayTracing::SetSettings(Settings* settings1){
+    IceRayTracing::settings = settings1;
+}
 
 void IceRayTracing::SetA(double A){
    IceRayTracing::A_ice = A;
@@ -78,37 +90,41 @@ double IceRayTracing::Refl_P(double thetai){
 /* Temperature model:The model takes in value of depth z in m and returns the value of temperature in Celsius.*/
 double IceRayTracing::GetIceTemperature(double z){
 
-  double depth=fabs(z);
-  double t = 1.83415e-09*pow(depth,3) + (-1.59061e-08*pow(depth,2)) + 0.00267687*depth + (-51.0696 );
-  return t;
+    double depth = -z; //make depth positive
 
+    if (IceRayTracing::iceModel == nullptr) {
+        throw std::runtime_error(
+            "IceRayTracing: IceModel has not been set"
+        );
+    }
+
+    return IceRayTracing::iceModel->temperature(depth);
 }
 
-/* Ice Attenuation Length model: Takes in value of frequency in Ghz and depth z and returns you the value of attenuation length in m */
-double IceRayTracing::GetIceAttenuationLength(double z, double frequency){
+double IceRayTracing::GetIceAttenuationLength(
+    double z,
+    double frequency)
+{
 
-  double t = IceRayTracing::GetIceTemperature(z);
+    double depth = -z; //make depth positive
 
-  const double f0=0.0001, f2=3.16;
-  const double w0=log(f0), w1=0.0, w2=log(f2), w=log(frequency);
-  const double b0=-6.74890+t*(0.026709-t*0.000884);
-  const double b1=-6.22121-t*(0.070927+t*0.001773);
-  const double b2=-4.09468-t*(0.002213+t*0.000332);
+    if (IceRayTracing::iceModel == nullptr) {
+        throw std::runtime_error(
+            "IceRayTracing: IceModel has not been set"
+        );
+    }
 
-  double a,bb;
+    if (IceRayTracing::settings == nullptr) {
+        throw std::runtime_error(
+            "IceRayTracing: Settings has not been set"
+        );
+    }
 
-  if(frequency<1.){
-    a=(b1*w0-b0*w1)/(w0-w1);
-    bb=(b1-b0)/(w1-w0);
-  }
-  else{
-    a=(b2*w1-b1*w2)/(w1-w2);
-    bb=(b2-b1)/(w2-w1);
-  }
-
-  double Lval=1./exp(a+bb*w);
-
-  return Lval;
+    return IceRayTracing::iceModel->GetFreqDepIceAttenuLength(
+        depth,
+        frequency,
+        IceRayTracing::settings
+    );
 }
 
 /* Setup the integrand to calculate the attenuation */
@@ -149,21 +165,36 @@ double IceRayTracing::IntegrateOverLAttn (double A0, double Frequency, double z0
 }
 
 /* Calculate the total attenuation for each type of ray */
-double IceRayTracing::GetTotalAttenuationDirect (double A0, double frequency, double z0, double z1, double Lvalue) {
-  z0=fabs(z0);
-  z1=fabs(z1);
-  return IceRayTracing::IntegrateOverLAttn(A0,frequency,z0,z1,Lvalue);
+double IceRayTracing::GetTotalAttenuationDirect(double A0, double frequency, double z0, double z1, double Lvalue) {
+  if (z0 > 0 || z1 > 0) {
+      throw std::invalid_argument(
+          "GetTotalAttenuationDirect: z0 and z1 must be <= 0"
+      );
+  }
+  z0 = -z0; // make it positive
+  z1 = -z1; // make it positive
+  return IceRayTracing::IntegrateOverLAttn(A0, frequency, z0, z1, Lvalue);
 }
 
 double IceRayTracing::GetTotalAttenuationReflected (double A0, double frequency, double z0, double z1, double Lvalue) {
-  z0=fabs(z0);
-  z1=fabs(z1);
+  if (z0 > 0 || z1 > 0) {
+      throw std::invalid_argument(
+          "GetTotalAttenuationDirect: z0 and z1 must be <= 0"
+      );
+  }
+  z0=-z0;
+  z1=-z1;
   return IceRayTracing::IntegrateOverLAttn(A0,frequency,z0,0.000001,Lvalue) + IceRayTracing::IntegrateOverLAttn(A0,frequency,z1,0.000001,Lvalue);
 }
 
 double IceRayTracing::GetTotalAttenuationRefracted (double A0, double frequency, double z0, double z1, double zmax, double Lvalue) {
-  z0=fabs(z0);
-  z1=fabs(z1);
+  if (z0 > 0 || z1 > 0) {
+      throw std::invalid_argument(
+          "GetTotalAttenuationDirect: z0 and z1 must be <= 0"
+      );
+  }
+  z0=-z0;
+  z1=-z1;
   return IceRayTracing::IntegrateOverLAttn(A0,frequency,z0,zmax,Lvalue) + IceRayTracing::IntegrateOverLAttn(A0,frequency,z1,zmax,Lvalue);
 }
 
