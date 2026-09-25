@@ -297,6 +297,8 @@ class Settings
         //41: UNL Modified (PA model) with upward systematics. Related slide: https://aradocs.wipac.wisc.edu/0035/003525/002/5SA_Ice_Model_Uncertainties.pdf
         //42: UNL Modified (PA model) with downward systematics. Related slide: https://aradocs.wipac.wisc.edu/0035/003525/002/5SA_Ice_Model_Uncertainties.pdf
         
+        int ANALYTIC_RAYTRACE_MODE; //default: 0 -- use numerical RayTracing for AraSim, 1 -- use analytical raytracing 
+
         int WAVEFORM_LENGTH; // the number of samples in the waveform length for V_mimic and UsefulAtriStationEvent, default: 64/2*20 = 640
 
         int WAVEFORM_CENTER; // the relative location of the center of the write-out window with respect to the last triggered bin (which is laced at the center of the window by default), this effectively provides a global delay in the write-out window across all channels: positive values shift the write-out window to later times in the waveform, negative values shift the window to earlier times, default: 0

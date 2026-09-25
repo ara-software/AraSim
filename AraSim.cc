@@ -15,6 +15,7 @@
 #include "Efficiencies.h"
 #include "Event.h"
 #include "IceModel.h"
+#include "IceRayTracing.hh"
 #include "Primaries.h"
 #include "Ray.h"
 #include "Report.h"
@@ -144,6 +145,9 @@ int main(int argc, char **argv) {   // read setup.txt file
         settings1->ICE_MODEL + settings1->NOFZ*10,settings1->CONSTANTICETHICKNESS * 1000 + 
         settings1->CONSTANTCRUST * 100 + settings1->FIXEDELEVATION * 10 + 0,settings1->MOOREBAY);// creates Antarctica ice model
     // IceModel inherits from EarthModel  
+
+    IceRayTracing::SetIceModel(icemodel);
+    IceRayTracing::SetSettings(settings1);
 
     cout<<endl;
     cout<<"Surface at (log:0, lat:0) : "<<icemodel->Surface(0., 0.)<<endl;

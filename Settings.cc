@@ -294,6 +294,8 @@ outputdir="outputs"; // directory where outputs go
 
   RAY_TRACE_ICE_MODEL_PARAMS=0; // Default: South Pole values fitted from RICE data
 
+  ANALYTIC_RAYTRACE_MODE=0; //default: 0 -- use numerical RayTracing for AraSim, 1 -- use analytical raytracing 
+
   WAVEFORM_LENGTH = 64/2*20; // Default: 64 digitization samples per block / 2 samples per waveform value * 20 blocks (value used for 2013-2016)
   
   WAVEFORM_CENTER = 0; // Default: 0, no offset in waveform centering
@@ -318,7 +320,7 @@ outputdir="outputs"; // directory where outputs go
   IMPEDANCE_TX=0;
   APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
 
-  CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.csv"
+  CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.csv"  
 
   ELECTRONICS_ANTENNA_CONSISTENCY = 1; // default: 1 -- ensure antenna gain used to calculate electronics gain is consistent
                                        //               with that used in this simulation  
@@ -372,12 +374,12 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "NOFZ") {
                   NOFZ = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-	      else if (label == "BIREFRINGENCE"){
-		  BIREFRINGENCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );	
-	      }
-	      else if (label == "BIAXIAL"){
-		  BIAXIAL = atof( line.substr(line.find_first_of("=") + 1).c_str() );	
-	      }
+              else if (label == "BIREFRINGENCE"){
+                  BIREFRINGENCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );	
+              }
+              else if (label == "BIAXIAL"){
+                  BIAXIAL = atof( line.substr(line.find_first_of("=") + 1).c_str() );	
+              }
               else if (label == "CONSTANTCRUST") {
                   CONSTANTCRUST = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -404,11 +406,11 @@ void Settings::ReadFile(string setupfile) {
               }
               else if (label == "DETECTOR_STATION") {
                   DETECTOR_STATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-		  DETECTOR_STATION_ARAROOT = DETECTOR_STATION;
-		  if (DETECTOR_STATION == 100) {
-			DETECTOR_STATION = 1;
-			DETECTOR_STATION_ARAROOT = 100;
-			}
+		          DETECTOR_STATION_ARAROOT = DETECTOR_STATION;
+		            if (DETECTOR_STATION == 100) {
+			              DETECTOR_STATION = 1;
+			              DETECTOR_STATION_ARAROOT = 100;
+			        }
               }
               else if (label == "DETECTOR_STATION_LIVETIME_CONFIG") {
                   DETECTOR_STATION_LIVETIME_CONFIG = atof( line.substr(line.find_first_of("=") + 1).c_str() );
@@ -463,7 +465,7 @@ void Settings::ReadFile(string setupfile) {
               }
               else if(label == "TRIG_SCAN_MODE"){
                   TRIG_SCAN_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
+	          }
               else if (label == "POWERTHRESHOLD") {
                   POWERTHRESHOLD = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -544,7 +546,6 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "Z_TOLERANCE") {
                   Z_TOLERANCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-
               else if (label == "DATA_LIKE_OUTPUT") {
                   DATA_LIKE_OUTPUT = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -596,9 +597,6 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "USE_CH_GAINOFFSET") {
                   USE_CH_GAINOFFSET = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-              //else if (label == "GETCHORD_MODE") {
-                  //GETCHORD_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-              //}
               else if (label == "taumodes") {
                   taumodes = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -695,42 +693,42 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "AVZ_NORM_FACTOR_MODE") {
                   AVZ_NORM_FACTOR_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }              
-	      else if (label == "number_of_stations") {
-		number_of_stations = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "RAY_TRACE_ICE_MODEL_PARAMS") {
-		RAY_TRACE_ICE_MODEL_PARAMS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "WAVEFORM_LENGTH") {
-		WAVEFORM_LENGTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "WAVEFORM_CENTER") {
-		WAVEFORM_CENTER = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "DEADTIME") {
-		    DEADTIME = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "POSNU_R") {
-		POSNU_R = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "POSNU_THETA") {
-		POSNU_THETA = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "POSNU_PHI") {
-		POSNU_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "ARBITRARY_EVENT_ATTENUATION") {
-		ARBITRARY_EVENT_ATTENUATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
-	      else if (label == "PICK_ABOVE_HEIGHT") {
-		PICK_ABOVE_HEIGHT = atof( line.substr(line.find_first_of("=") + 1).c_str() );
-	      }
+	          else if (label == "number_of_stations") {
+		          number_of_stations = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "RAY_TRACE_ICE_MODEL_PARAMS") {
+		          RAY_TRACE_ICE_MODEL_PARAMS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+              else if (label == "ANALYTIC_RAYTRACE_MODE"){
+                  ANALYTIC_RAYTRACE_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+	          else if (label == "WAVEFORM_LENGTH") {
+		          WAVEFORM_LENGTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "WAVEFORM_CENTER") {
+		          WAVEFORM_CENTER = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "DEADTIME") {
+		          DEADTIME = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "POSNU_R") {
+		          POSNU_R = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "POSNU_THETA") {
+		          POSNU_THETA = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "POSNU_PHI") {
+		          POSNU_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "ARBITRARY_EVENT_ATTENUATION") {
+		          ARBITRARY_EVENT_ATTENUATION = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
+	          else if (label == "PICK_ABOVE_HEIGHT") {
+		          PICK_ABOVE_HEIGHT = atof( line.substr(line.find_first_of("=") + 1).c_str() );
+	          }
               else if (label == "EVENT_GENERATION_MODE"){
                   EVENT_GENERATION_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
-	      //              else if (label == "EVENT_NUM"){
-	      //                  EVENT_NUM = atoi(line.substr(line.find_first_of("=") + 1).c_str());
-	      //              }
               else if (label == "ANTENNA_MODE"){
                   ANTENNA_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
@@ -755,35 +753,34 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "ELECTRONICS_ANTENNA_CONSISTENCY"){
               	   ELECTRONICS_ANTENNA_CONSISTENCY = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
-          else if (label == "CLOCK_ANGLE"){
-               CLOCK_ANGLE = atof(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-          //Adding source easting, northing, and depth for INTERACTION_MODE=5.
-          else if (label == "SOURCE_LATITUDE"){
-              SOURCE_LATITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-          else if (label == "SOURCE_LONGITUDE"){
-              SOURCE_LONGITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-          else if (label == "SOURCE_DEPTH"){
-               SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-          else if (label == "SYSTEMATICS_IceAttenuation") {
-               SYSTEMATICS_IceAttenuation = atoi(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-          else if (label == "SYSTEMATICS_AskaryanPercent") {
-               SYSTEMATICS_AskaryanPercent = atoi(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-          else if (label == "SYSTEMATICS_nofz_delta_ns") {
-              SYSTEMATICS_nofz_delta_ns = atof(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-          else if (label == "SYSTEMATICS_nofz_delta_nd") {
-              SYSTEMATICS_nofz_delta_nd = atof(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-          else if (label == "SYSTEMATICS_nofz_delta_nc") {
-              SYSTEMATICS_nofz_delta_nc = atof(line.substr(line.find_first_of("=") + 1).c_str());
-          }
-
+              else if (label == "CLOCK_ANGLE"){
+                   CLOCK_ANGLE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              //Adding source easting, northing, and depth for INTERACTION_MODE=5.
+              else if (label == "SOURCE_LATITUDE"){
+                  SOURCE_LATITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SOURCE_LONGITUDE"){
+                  SOURCE_LONGITUDE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SOURCE_DEPTH"){
+                   SOURCE_DEPTH = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SYSTEMATICS_IceAttenuation") {
+                   SYSTEMATICS_IceAttenuation = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SYSTEMATICS_AskaryanPercent") {
+                   SYSTEMATICS_AskaryanPercent = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SYSTEMATICS_nofz_delta_ns") {
+                  SYSTEMATICS_nofz_delta_ns = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SYSTEMATICS_nofz_delta_nd") {
+                  SYSTEMATICS_nofz_delta_nd = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SYSTEMATICS_nofz_delta_nc") {
+                  SYSTEMATICS_nofz_delta_nc = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
 
           }
       }

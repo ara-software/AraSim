@@ -421,11 +421,11 @@ namespace RayTrace{
 	struct positionRecordingWrapper : public positionType{
 		rkStepRecord rec;
 		
-		positionRecordingWrapper<positionType>(){
+		positionRecordingWrapper(){
 			rec.length=0.0;
 			std::fill(&rec.z[0],&rec.z[6],0.0);
 		}
-		positionRecordingWrapper<positionType>(const positionType& pos):positionType(pos){
+		positionRecordingWrapper(const positionType& pos):positionType(pos){
 			rec.length=0.0;
 			std::fill(&rec.z[0],&rec.z[6],0.0);
 		}
