@@ -31,15 +31,11 @@ double IceRayTracing::GetC(){
 /* Get the value of refractive index model for a given depth  */
 double IceRayTracing::Getnz(double z){
 
-    if (z > 0) {
-        throw std::invalid_argument(
-            "Getnz: z must be <= 0 for in-ice positions."
-        );
-    }
+    z=fabs(z);
 
     return IceRayTracing::A_ice
          + IceRayTracing::GetB()
-         * exp(IceRayTracing::GetC()*z);
+         * exp(-IceRayTracing::GetC()*z);
 }
 
 /* E-feild Power Fresnel coefficient for S-polarised wave which is perpendicular to the plane of propogation/incidence. This function gives you back the reflectance. The transmittance is T=1-R */
