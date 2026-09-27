@@ -78,6 +78,10 @@ class Tools {
 
     static void Exchange(double &a, double &b);
 
+    static complex<double> butterworth_lp_filter_response(double f, double fc, int order);
+    static complex<double> butterworth_hp_filter_response(double f, double fc, int order);
+    static complex<double> butterworth_bp_filter_response(double f, double flo, double fhi, int order);
+
   protected:
 
 };

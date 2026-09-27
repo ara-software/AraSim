@@ -293,8 +293,12 @@ class Settings
         //11 : Moore's Bay Model 2
         //20 : Byrd (Ebimuna (1983))
         //30 : Mizuho (Ebimuna (1983))
-              //40: UNL Modified (PA model). Related slide: https://aradocs.wipac.wisc.edu/docs/0022/002222/001/inIceMC_Hughes_A5locations_10222020.pdf
+        //40: UNL Modified (PA model). Related slide: https://aradocs.wipac.wisc.edu/docs/0022/002222/001/inIceMC_Hughes_A5locations_10222020.pdf
+        //41: UNL Modified (PA model) with upward systematics. Related slide: https://aradocs.wipac.wisc.edu/0035/003525/002/5SA_Ice_Model_Uncertainties.pdf
+        //42: UNL Modified (PA model) with downward systematics. Related slide: https://aradocs.wipac.wisc.edu/0035/003525/002/5SA_Ice_Model_Uncertainties.pdf
         
+        int ANALYTIC_RAYTRACE_MODE; //default: 0 -- use numerical RayTracing for AraSim, 1 -- use analytical raytracing 
+
         int WAVEFORM_LENGTH; // the number of samples in the waveform length for V_mimic and UsefulAtriStationEvent, default: 64/2*20 = 640
 
         int WAVEFORM_CENTER; // the relative location of the center of the write-out window with respect to the last triggered bin (which is laced at the center of the window by default), this effectively provides a global delay in the write-out window across all channels: positive values shift the write-out window to later times in the waveform, negative values shift the window to earlier times, default: 0
@@ -347,8 +351,18 @@ class Settings
                                              // This setting is only used if DETECTOR > 3 && NOISE == 1 && CUSTOM_ELECTRONICS == 0
                                   
         double CLOCK_ANGLE;  // default: 0; Angle of polarization "on the clock" for use in pulser events (EVENT_TYPE=11)
+  
         int CROSSPOL_RX=0; //Default: 0 -- don't use cross-pol responses on receiving antennas
         int CROSSPOL_TX=0; //Default: 0 -- don't use cross-pol responses on transmitting antennas
+        
+        int SYSTEMATICS_IceAttenuation; // 0=central, 1=up, 2=low
+        
+        int SYSTEMATICS_AskaryanPercent; //Define the percentage (12% by default)
+        
+        //Systematics of n(z) = nd - (nd-ns)e^nc*z
+        double SYSTEMATICS_nofz_delta_ns;
+        double SYSTEMATICS_nofz_delta_nd;
+        double SYSTEMATICS_nofz_delta_nc;
 
 
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1

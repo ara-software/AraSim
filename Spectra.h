@@ -59,6 +59,8 @@ class Spectra
     int IsSpectrum(); // return 1 or 0 depend on EXPONENT value
     int IsMonoenergetic();    // return 1 or 0 depend of EXPONENT value
 
+    void clear_useless();
+
     // destructor
 
 

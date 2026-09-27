@@ -294,6 +294,8 @@ outputdir="outputs"; // directory where outputs go
 
   RAY_TRACE_ICE_MODEL_PARAMS=0; // Default: South Pole values fitted from RICE data
 
+  ANALYTIC_RAYTRACE_MODE=0; //default: 0 -- use numerical RayTracing for AraSim, 1 -- use analytical raytracing 
+
   WAVEFORM_LENGTH = 64/2*20; // Default: 64 digitization samples per block / 2 samples per waveform value * 20 blocks (value used for 2013-2016)
   
   WAVEFORM_CENTER = 0; // Default: 0, no offset in waveform centering
@@ -318,17 +320,25 @@ outputdir="outputs"; // directory where outputs go
   IMPEDANCE_TX=0;
   APPLY_NOISE_FIGURE=0; // default: 0 - don't use new noise figure information
 
-  CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.csv"
+  CUSTOM_ELECTRONICS=0; //default: 0 -- don't use custom electronics, load regular "ARA_Electronics_TotalGain_TwoFilter.csv"  
 
   ELECTRONICS_ANTENNA_CONSISTENCY = 1; // default: 1 -- ensure antenna gain used to calculate electronics gain is consistent
                                        //               with that used in this simulation  
                                        // This setting is only used if DETECTOR > 3 && NOISE == 1 && CUSTOM_ELECTRONICS == 0
  
   CLOCK_ANGLE=0; //Default: 0 -- Angle of polarization "on the clock".  Angle of zero is pure thetaPol, whereas 90º is pure phiPol.
+
   CROSSPOL_RX=0; //Default: 0 -- don't use cross-pol responses on receiving antennas
   CROSSPOL_TX=0; //Default: 0 -- don't use cross-pol responses on transmitting antennas
 
-
+  SYSTEMATICS_IceAttenuation=0; // 0=central (default), 1=up, 2=low
+  
+  SYSTEMATICS_AskaryanPercent=0.0; //Define the percentage (0% by default)
+  
+  //Systematics of n(z) = nd - (nd-ns)e^nc*z
+  SYSTEMATICS_nofz_delta_ns = 0.0;
+  SYSTEMATICS_nofz_delta_nd = 0.0;
+  SYSTEMATICS_nofz_delta_nc = 0.0;
 
     /*
 //arrays for saving read in event features in EVENT_GENERATION_MODE=1
@@ -458,7 +468,7 @@ void Settings::ReadFile(string setupfile) {
               }
               else if(label == "TRIG_SCAN_MODE"){
                   TRIG_SCAN_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	          }
+	            }
               else if (label == "POWERTHRESHOLD") {
                   POWERTHRESHOLD = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -532,14 +542,12 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "NNU_D_PHI") {
                   NNU_D_PHI = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-
               else if (label == "Z_THIS_TOLERANCE") {
                   Z_THIS_TOLERANCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
               else if (label == "Z_TOLERANCE") {
                   Z_TOLERANCE = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
-
               else if (label == "DATA_LIKE_OUTPUT") {
                   DATA_LIKE_OUTPUT = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -693,6 +701,9 @@ void Settings::ReadFile(string setupfile) {
 	          else if (label == "RAY_TRACE_ICE_MODEL_PARAMS") {
 		          RAY_TRACE_ICE_MODEL_PARAMS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
 	          }
+            else if (label == "ANALYTIC_RAYTRACE_MODE"){
+              ANALYTIC_RAYTRACE_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+            }
 	          else if (label == "WAVEFORM_LENGTH") {
 		          WAVEFORM_LENGTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
 	          }
@@ -745,7 +756,7 @@ void Settings::ReadFile(string setupfile) {
               	   ELECTRONICS_ANTENNA_CONSISTENCY = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
               else if (label == "CLOCK_ANGLE"){
-                  CLOCK_ANGLE = atof(line.substr(line.find_first_of("=") + 1).c_str());
+                   CLOCK_ANGLE = atof(line.substr(line.find_first_of("=") + 1).c_str());
               }
               //Adding source easting, northing, and depth for INTERACTION_MODE=5.
               else if (label == "SOURCE_LATITUDE"){
@@ -763,7 +774,21 @@ void Settings::ReadFile(string setupfile) {
               else if (label == "CROSSPOL_TX"){
                   CROSSPOL_TX = atof(line.substr(line.find_first_of("=") + 1).c_str());
               }
-              
+              else if (label == "SYSTEMATICS_IceAttenuation") {
+                   SYSTEMATICS_IceAttenuation = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SYSTEMATICS_AskaryanPercent") {
+                   SYSTEMATICS_AskaryanPercent = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SYSTEMATICS_nofz_delta_ns") {
+                  SYSTEMATICS_nofz_delta_ns = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SYSTEMATICS_nofz_delta_nd") {
+                  SYSTEMATICS_nofz_delta_nd = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
+              else if (label == "SYSTEMATICS_nofz_delta_nc") {
+                  SYSTEMATICS_nofz_delta_nc = atof(line.substr(line.find_first_of("=") + 1).c_str());
+              }
 
           }
       }
@@ -914,6 +939,54 @@ int Settings::CheckCompatibilitiesDetector(Detector *detector) {
         cerr << "Non-zero MAX_POSNU_DEPTH set but PICK_POSNU_DEPTH != 1, so this will be ignored and cylinder height will be ice thickness!" << endl;
         cerr << "Please change settings to either not set MAX_POSNU_DEPTH or set PICK_POSNU_DEPTH to 1." << endl;
         num_err++;
+    }
+
+    // check if the antenna gain is falling fast enough at low frequencies
+    {
+        double freq0 = detector->GetFreq(0); 
+        double freq1 = detector->GetFreq(1); 
+
+        // Vpols
+        {
+            double gain0 = detector->GetGainBin(0, 0, 0, 0, 0, 0);
+            double gain1 = detector->GetGainBin(1, 0, 0, 0, 0, 0);
+
+            // calculate quantity proportional to heff
+            double heff0 = gain0 / freq0 / freq0; 
+            double heff1 = gain1 / freq1 / freq1;
+            if(heff0 > heff1) {
+                cerr << "Vpol antenna gain may not be falling fast enough! Effective height may grow and introduce power at low frequencies." << endl;
+                num_err++;
+            }
+        }
+        
+        // TVpols
+        {
+            double gain0 = detector->GetGainBin(0, 0, 0, 0, 0, 2);
+            double gain1 = detector->GetGainBin(1, 0, 0, 0, 0, 2);
+
+            // calculate quantity proportional to heff
+            double heff0 = gain0 / freq0 / freq0; 
+            double heff1 = gain1 / freq1 / freq1;
+            if(heff0 > heff1) {
+                cerr << "TVpol antenna gain may not be falling fast enough! Effective height may grow and introduce power at low frequencies." << endl;
+                num_err++;
+            }
+        }
+        
+        // Hpols
+        {
+            double gain0 = detector->GetGainBin(0, 0, 0, 1);
+            double gain1 = detector->GetGainBin(1, 0, 0, 1);
+
+            // calculate quantity proportional to heff
+            double heff0 = gain0 / freq0 / freq0; 
+            double heff1 = gain1 / freq1 / freq1;
+            if(heff0 > heff1) {
+                cerr << "Hpol antenna gain may not be falling fast enough! Effective height may grow and introduce power at low frequencies." << endl;
+                num_err++;
+            }
+        }
     }
 
     return num_err;
