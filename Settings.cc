@@ -468,7 +468,7 @@ void Settings::ReadFile(string setupfile) {
               }
               else if(label == "TRIG_SCAN_MODE"){
                   TRIG_SCAN_MODE = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
-	            }
+	          }
               else if (label == "POWERTHRESHOLD") {
                   POWERTHRESHOLD = atof( line.substr(line.find_first_of("=") + 1).c_str() );
               }
@@ -701,9 +701,9 @@ void Settings::ReadFile(string setupfile) {
 	          else if (label == "RAY_TRACE_ICE_MODEL_PARAMS") {
 		          RAY_TRACE_ICE_MODEL_PARAMS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
 	          }
-            else if (label == "ANALYTIC_RAYTRACE_MODE"){
-              ANALYTIC_RAYTRACE_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
-            }
+              else if (label == "ANALYTIC_RAYTRACE_MODE"){
+                ANALYTIC_RAYTRACE_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+              }
 	          else if (label == "WAVEFORM_LENGTH") {
 		          WAVEFORM_LENGTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
 	          }
