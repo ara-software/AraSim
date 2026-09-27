@@ -702,7 +702,7 @@ void Settings::ReadFile(string setupfile) {
 		          RAY_TRACE_ICE_MODEL_PARAMS = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
 	          }
               else if (label == "ANALYTIC_RAYTRACE_MODE"){
-                ANALYTIC_RAYTRACE_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
+                  ANALYTIC_RAYTRACE_MODE = atoi(line.substr(line.find_first_of("=") + 1).c_str());
               }
 	          else if (label == "WAVEFORM_LENGTH") {
 		          WAVEFORM_LENGTH = atoi( line.substr(line.find_first_of("=") + 1).c_str() );
