@@ -2261,11 +2261,11 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     std::string VgainCrossFile;
     std::string VgainTopCrossFile;
     std::string HgainCrossFile;  
-    
+
     //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
     TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";
     TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Crosspol_Kansas2024.txt";    
-    
+
     if (settings1->ANTENNA_MODE == 0){
         // use the orignal Vpol/Hpol gains
         VgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_bicone6in_output.txt";
@@ -2325,13 +2325,13 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
         HgainFile = VgainFile;
         VgainTopFile = VgainFile;
     }
-  
+
     // set parameters to "unset" values
     freq_step = -1;
     ang_step = -1;
     freq_width = -1;
     freq_init = -1;   
- 
+    
     //Read co-pol Rx gain files.
     ReadAntennaGain(VgainFile, settings1, eVPol);
     ReadAntennaGain(VgainTopFile, settings1, eVPolTop);
@@ -2349,7 +2349,7 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     params.ang_step = ang_step;
     params.freq_width = freq_width;
     params.freq_init = freq_init;
-    
+
     return;
 }
 //Defining function that reads in TX antenna impedances
@@ -2426,18 +2426,21 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
             gain = &VgainCross;
             phase = &VphaseCross;
             transAnt_databin = &transVCross_databin;
+            source_n = &antenna_source_medium_n;
             break;
         case(eVPolTopCross): // Cross-pol VPol Top
             freq = &FreqCross;
             gain = &VgainTopCross;
             phase = &VphaseTopCross;
             transAnt_databin = &transVTopCross_databin;
+            source_n = &antenna_source_medium_n;
             break;
         case(eHPolCross): // Cross-pol HPol
             freq = &FreqCross;
             gain = &HgainCross;
             phase = &HphaseCross;
             transAnt_databin = &transHCross_databin;
+            source_n = &antenna_source_medium_n;
             break;
         case(eTx):
             freq = &TxFreq;
@@ -2449,6 +2452,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
             freq = &TxFreqCross;
             gain = &TxgainCross;
             phase = &TxphaseCross;
+            source_n = &Txantenna_source_medium_n;
             break;
         default:
             throw runtime_error("Unknown antenna type!");
@@ -2501,9 +2505,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     gain->clear();
     phase->clear();
 
-    if(freq_step == -1 || type == eTx || type == eVPolCross || type == eVPolTopCross || type == eHPolCross || eTxCross) { // only reset if it hasn't been read-in yet
-        freq->clear();
-    }
+    if(freq_step == -1 || type == eTx || type == eVPolCross || type == eTxCross) { freq->clear(); } 
     
     // check the file opened successfully
     if (!NecOut ) { 
@@ -2534,7 +2536,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
             double buff_n = stof(words[2]);
             
             // always assign if this is the first read-in or its the transmitter
-            if(freq_step == -1 || type == eTx || type == eVPolCross || type == eVPolTopCross || type == eHPolCross || eTxCross ) {
+            if(freq_step == -1 || type == eTx || type == eVPolCross || type == eVPolTopCross || type == eHPolCross || type == eTxCross ) {
                 *source_n = buff_n;
             }
             else { // if not the first read-in, check for consistency
@@ -2579,7 +2581,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
                 throw runtime_error("Non-finite frequency value found! "+filename);
             }
 
-            if(freq_step == -1 || type == eTx) { // add frequency if this is the first read-in
+            if(freq_step == -1 || type == eTx || type == eVPolCross || type == eTxCross) { // add frequency if this is the first read-in
                 freq->push_back(thisFreq);
             }
             else { // otherwise make sure it matches the values already stored
