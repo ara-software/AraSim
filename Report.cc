@@ -1631,11 +1631,11 @@ void Report::PropagateSignal(
             // Tx effective height for co-pol and cross-pol for the last bin
             heff_Tx_copol_lastbin = GaintoHeight(
                 detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, Tx_theta, antenna_phi, antenna_d->type, n_eff, j, k, true, false),
-                    freq_tmp, n_eff));
+                    freq_tmp, n_eff);
 
             heff_Tx_crosspol_lastbin = GaintoHeight(
                 detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, Tx_theta, antenna_phi, antenna_d->type, n_eff, j, k, true, true),
-                    freq_tmp, n_eff));
+                    freq_tmp, n_eff);
             // End Tx effective height for last bin
                 
             if (event->IsCalpulser == 1) {
@@ -3749,7 +3749,7 @@ void Report::ApplyAntFactors_Tdomain(double phase_copol, double phase_crosspol, 
 
             phase_current += PI/2;
             double psi = 0.0;
-            double delta_psi = atan2(heff_crosspol / heff_copol); // Tx cross-pol tilt
+            double delta_psi = atan2(heff_crosspol, heff_copol); // Tx cross-pol tilt
             double theta = antenna_theta*PI/180.0;
             double phi = antenna_phi*PI/180.0;
 
