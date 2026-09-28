@@ -3696,9 +3696,12 @@ void Report::ApplyAntFactors_Tdomain(double phase_copol, double phase_crosspol, 
     */
     double phaseSign = 1.;
     double amplitudeSign = 1.;
+
     //If using in transmitter mode, the phase gets a minus sign since the signal is out-going from the antenna rather than incoming.
     if(useInTransmitterMode==true){ phaseSign*=-1.;};
-    //If using this function to invert the antenna response, we apply a minus sign the phase in order to undo the phase applied by the antenna.  We also divide the amplitude by the factor rather than multiply.  To do this, we simply apply a -1 to the power of the factor applied to the amplitude so that it is divided out.
+
+    //If using this function to invert the antenna response, we apply a minus sign the phase in order to undo the phase applied by the antenna.
+    //We also divide the amplitude by the factor rather than multiply.
     if(applyInverse==true){ phaseSign*=-1.; amplitudeSign*=-1;};
 
     //Calculate the polarization factor, which is essentially the vector component of the Electric field that is projected onto the antenna.
@@ -3715,13 +3718,16 @@ void Report::ApplyAntFactors_Tdomain(double phase_copol, double phase_crosspol, 
         v_amplification_crosspol = heff_crosspol * pol_factor_crosspol;
     }
 
-     // Add the contributions linearly for Rx
-     double v_amplification = v_amplification_copol + v_amplification_crosspol;
+    // Add the contributions linearly for Rx
+    double v_amplification = v_amplification_copol + v_amplification_crosspol;
 
     if ( settings1->PHASE_SKIP_MODE != 1 ) {
+
         double phase_current;
+
         if ( vm_real != 0. ) {
             phase_current = atan( vm_img / vm_real );
+
             // phase in +-PI range
             if (vm_real<0.) {
                 if (vm_img>0.) phase_current += PI;
@@ -3733,22 +3739,23 @@ void Report::ApplyAntFactors_Tdomain(double phase_copol, double phase_crosspol, 
             else if (vm_img<0.) phase_current = -PI;
             else phase_current = 0.;
         }
+
         //Calculate amplitude via the real and imaginary components.
         double v_amp_in  = sqrt(vm_real*vm_real + vm_img*vm_img);
-        double v_amp = v_amp_in; //save the incomming voltage
-        // Apply amplitude sign for inversion if necessary
-        v_amp *= pow(v_amplification, amplitudeSign);
+        double v_amp = v_amp_in; //save the incoming voltage
+
         //If in transmitter mode, we must apply additional frequency and impedance terms to the amplitude.
-        if (useInTransmitterMode==true){ 
+        if (useInTransmitterMode==true){
+
             phase_current += PI/2;
             double psi = 0.0;
-            double delta_psi = TMath::ATan(heff_crosspol / heff_copol); // Tx cross-pol tilt
+            double delta_psi = atan2(heff_crosspol / heff_copol); // Tx cross-pol tilt
             double theta = antenna_theta*PI/180.0;
             double phi = antenna_phi*PI/180.0;
 
             //turn on cross-pol Tx
             if (settings1->CROSSPOL_TX == 0){
-                heff_crosspol = 0.0; //need to be turned off for the calculation of amplitude v_amp
+                heff_crosspol = 0.0; // turn off for the calculation of amplitude v_amp
                 delta_psi = 0.0; // turn off cross-pol tx tilt
             }
 
@@ -3759,24 +3766,64 @@ void Report::ApplyAntFactors_Tdomain(double phase_copol, double phase_crosspol, 
 
             Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
 
-            //copol and cross-pol add quadratically in E-field
-            v_amp *= pow(freq/CLIGHT*(Z0/Zr)/4/sqrt(2.)*(1/v_amplification)*(sqrt(heff_crosspol* heff_crosspol + heff_copol*heff_copol )), amplitudeSign);       
+            // copol and cross-pol add quadratically in E-field
+            v_amp *= pow(2.0 * freq/CLIGHT * (Z0/Zr) * sqrt(heff_crosspol*heff_crosspol + heff_copol*heff_copol),
+                amplitudeSign);
         }
-        // Calculate the combined real and imaginary terms from co-pol and cross-pol
-        double vm_real_copol = v_amp_in * (v_amplification_copol * cos(phase_current + (phaseSign * phase_copol * RADDEG)));
-        double vm_img_copol = v_amp_in * (v_amplification_copol * sin(phase_current + (phaseSign * phase_copol * RADDEG)));
 
-        double vm_real_crosspol = v_amp_in * (v_amplification_crosspol * cos(phase_current + (phaseSign * phase_crosspol * RADDEG)));
-        double vm_img_crosspol = v_amp_in * (v_amplification_crosspol * sin(phase_current + (phaseSign * phase_crosspol * RADDEG)));
+        // =========================================================
+        // Transmitter
+        // =========================================================
 
-        // Combine co-pol and cross-pol real and imaginary parts
-        vm_real = vm_real_copol + vm_real_crosspol;
-        vm_img = vm_img_copol + vm_img_crosspol;
+        if (useInTransmitterMode == true) {
+
+            // Assume Tx co-pol and cross-pol have the same phase.
+            // Use co-pol phase as the common Tx antenna phase.
+            vm_real = v_amp * cos( phase_current + (phaseSign * phase_copol * RADDEG) );
+            vm_img = v_amp * sin( phase_current + (phaseSign * phase_copol * RADDEG) );
+
+        }
+
+        // =========================================================
+        // Receiver
+        // =========================================================
+
+        else {
+
+            // Calculate the combined real and imaginary terms from co-pol and cross-pol
+            double vm_real_copol = v_amp_in * (v_amplification_copol * cos(phase_current + (phaseSign * phase_copol * RADDEG)));
+            double vm_img_copol = v_amp_in * (v_amplification_copol * sin(phase_current + (phaseSign * phase_copol * RADDEG)));
+
+            double vm_real_crosspol = v_amp_in * (v_amplification_crosspol * cos(phase_current + (phaseSign * phase_crosspol * RADDEG)));
+            double vm_img_crosspol = v_amp_in * (v_amplification_crosspol * sin(phase_current + (phaseSign * phase_crosspol * RADDEG)));
+
+            // Combine co-pol and cross-pol real and imaginary parts
+            vm_real = vm_real_copol + vm_real_crosspol;
+            vm_img = vm_img_copol + vm_img_crosspol;
+        }
     }
 
     else { // only amplitude
-        vm_real *= pow(v_amplification, amplitudeSign);
-        vm_img *= pow(v_amplification, amplitudeSign);
+
+        // CHANGED: Tx needs the Tx amplitude conversion, not Rx projection
+        if (useInTransmitterMode == true) {
+
+            if (settings1->CROSSPOL_TX == 0){
+                heff_crosspol = 0.0;
+            }
+
+            double heff_tx = sqrt( heff_crosspol*heff_crosspol + heff_copol*heff_copol );
+            double tx_amplification = 2.0 * freq/CLIGHT * (Z0/Zr) * heff_tx;
+
+            vm_real *= pow(tx_amplification, amplitudeSign);
+            vm_img  *= pow(tx_amplification, amplitudeSign);
+        }
+
+        else {
+
+            vm_real *= pow(v_amplification, amplitudeSign);
+            vm_img  *= pow(v_amplification, amplitudeSign);
+        }
     }
 }
 
