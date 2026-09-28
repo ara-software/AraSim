@@ -1724,8 +1724,8 @@ void Report::PropagateSignal(
                     detector->GetImpedance(freq_tmp*1.E-6, 0, 0, true));
                 
                 // Retrieve co-pol and cross-pol phases
-                double phase_copol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, n_eff, false, false); //ASG change when fixing phases
-                double phase_crosspol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, n_eff, false, true); //ASG change when fixing phases
+                double phase_copol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, n_eff, true, false); //ASG change when fixing phases
+                double phase_crosspol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, Tx_phi, 0, n_eff, true, true); //ASG change when fixing phases
 
                 if (n > 0) {                    
                     ApplyAntFactors_Tdomain(phase_copol_tx, phase_crosspol_tx, heff_Tx_copol, heff_Tx_crosspol, Pol_vector, 0, Pol_factor, 
@@ -3881,25 +3881,40 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo(double heff_copol, double heff_cop
     double v_amplification_bin1 = v_amplification_copol_bin1 + v_amplification_crosspol_bin1;
 
     // Apply amplification for receiver mode
-    vm_bin0 *= pow(v_amplification_bin0, amplitudeSign);
-    vm_bin1 *= pow(v_amplification_bin1, amplitudeSign);
+    if (!useInTransmitterMode) {
+        vm_bin0 *= pow(v_amplification_bin0, amplitudeSign);
+        vm_bin1 *= pow(v_amplification_bin1, amplitudeSign);
+    }
 
     if (useInTransmitterMode) {
+
         // Handle cross-pol factors for transmitter mode
         if (settings1->CROSSPOL_TX) {
             pol_factor_crosspol = calculatePolFactor(Pol_vector, 1 - ant_type, antenna_theta, antenna_phi);
             v_amplification_crosspol_bin0 = heff_crosspol * pol_factor_crosspol;
             v_amplification_crosspol_bin1 = heff_crosspol_lastbin * pol_factor_crosspol;
+
+            // Co-pol and cross-pol add quadratically in E-field
+            double tx_amplification_bin0 = 2.0 * freq / CLIGHT * (Z0 / Zr) *
+                                           sqrt(heff_crosspol * heff_crosspol + heff_copol * heff_copol);
+
+            double tx_amplification_bin1 = 2.0 * freq / CLIGHT * (Z0 / Zr) *
+                                           sqrt(heff_crosspol_lastbin * heff_crosspol_lastbin +
+                                                heff_copol_lastbin * heff_copol_lastbin);
+
+            vm_bin0 *= pow(tx_amplification_bin0, amplitudeSign);
+            vm_bin1 *= pow(tx_amplification_bin1, amplitudeSign);
         }
 
-        // Co-pol and cross-pol add quadratically in E-field
-        double tx_amplification_bin0 = freq / CLIGHT * (Z0 / Zr) / 4 / sqrt(2.0) * (1/v_amplification_bin0) *
-                                       (sqrt(heff_crosspol * heff_crosspol + heff_copol * heff_copol));
-        double tx_amplification_bin1 = freq / CLIGHT * (Z0 / Zr) / 4 / sqrt(2.0) * (1/v_amplification_bin1) *
-                                       (sqrt(heff_crosspol_lastbin * heff_crosspol_lastbin + heff_copol_lastbin * heff_copol_lastbin));
+        else {
 
-        vm_bin0 *= pow(tx_amplification_bin0, amplitudeSign);
-        vm_bin1 *= pow(tx_amplification_bin1, amplitudeSign);
+            // Original co-pol-only transmitter behavior
+            vm_bin0 *= pow(v_amplification_copol_bin0, amplitudeSign);
+            vm_bin1 *= pow(v_amplification_copol_bin1, amplitudeSign);
+
+            vm_bin0 *= pow(freq / CLIGHT * (Z0 / Zr) / 4 / sqrt(2.0), amplitudeSign);
+            vm_bin1 *= pow(freq / CLIGHT * (Z0 / Zr) / 4 / sqrt(2.0), amplitudeSign);
+        }
     }
 
 }
