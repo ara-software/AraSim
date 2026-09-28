@@ -2663,6 +2663,12 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
         
         return;
     }
+    // Cross-pol Tx has its own frequency vector and does not need
+    // the Rx transmittance interpolation below
+    if(type == eTxCross)
+    {
+        return;
+    }
 
     int this_freq_step = (int)freq->size();
 
@@ -2700,7 +2706,7 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     }
  
     // skip this for the transmitter case 
-    if(type == eTx) {
+    if(type == eTx || type == eTxCross) {
         return;
     }
    
