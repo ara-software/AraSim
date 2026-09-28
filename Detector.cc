@@ -2665,12 +2665,16 @@ inline void Detector::ReadAntennaGain(string filename, Settings *settings1, EAnt
     }
 
     int this_freq_step = (int)freq->size();
-    // set parameter values for the smallest freq_step
-    if(freq_step == -1 || this_freq_step < freq_step) {
-        freq_step = this_freq_step;
-        ang_step = (int)gain->back().size();
-        freq_width = freq->at(1)-freq->at(0);
-        freq_init = freq->at(0);
+
+    // Only let the co-pol Rx models define the nominal frequency parameters
+    if(type == eVPol || type == eVPolTop || type == eHPol) {
+
+        if(freq_step == -1 || this_freq_step < freq_step) {
+            freq_step = this_freq_step;
+            ang_step = (int)gain->back().size();
+            freq_width = freq->at(1)-freq->at(0);
+            freq_init = freq->at(0);
+        }
     }
 
     // Only enforce check for non-Tx and non-crosspol antennas
@@ -3278,7 +3282,7 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
                      tempGain = useCrossPol ? &VgainTopCross : &VgainTop; // A5 Top VPols
                 }
                 else { 
-                    useCrossPol ? &VgainCross : &Vgain; // A5 Bottom Vpols
+                     tempGain = useCrossPol ? &VgainCross : &Vgain; // A5 Bottom Vpols
                 }
             }
         }
@@ -3306,18 +3310,15 @@ double Detector::GetGain_1D_OutZero( double freq, double theta, double phi, int 
         throw runtime_error("In GetGain_1D_OutZero: No appropriate gain model for this simulation setup.");
     }
 
-    double thisFreq_init;
-    double thisFreq_width;
     if(useInTransmitterMode) {
         F = useCrossPol ? &TxFreqCross : &TxFreq;
-        thisFreq_init = Tx_freq_init;
-        thisFreq_width = Tx_freq_width;
     } 
     else {
         F = useCrossPol ? &FreqCross : &Freq;
-        thisFreq_init = freq_init;
-        thisFreq_width = freq_width;
-    }  
+    }
+
+    double thisFreq_init = F->at(0);
+    double thisFreq_width = F->at(1) - F->at(0);  
   
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
@@ -3457,20 +3458,16 @@ double Detector::GetAntPhase_1D( double freq, double theta, double phi, int ant_
         throw runtime_error("In GetAntPhase_1D: No appropriate phase model for this simulation setup.");
     }
 
-    double thisFreq_init;
-    double thisFreq_width;
-    int thisFreq_step;
     if(useInTransmitterMode) {
         F = useCrossPol ? &TxFreqCross : &TxFreq;
-        thisFreq_init = Tx_freq_init;
-        thisFreq_width = Tx_freq_width;
     }
     else {
         F = useCrossPol ? &FreqCross : &Freq;
-        thisFreq_init = freq_init;
-        thisFreq_width = freq_width;
     }
-    thisFreq_step = (int)F->size();  
+
+    double thisFreq_init = F->at(0);
+    double thisFreq_width = F->at(1) - F->at(0);
+    int thisFreq_step = (int)F->size();
 
     // check if angles range actually theta 0-180, phi 0-360
     int i = (int)( (theta+2.5)/5. );
