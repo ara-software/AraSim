@@ -351,6 +351,9 @@ class Settings
                                              // This setting is only used if DETECTOR > 3 && NOISE == 1 && CUSTOM_ELECTRONICS == 0
                                   
         double CLOCK_ANGLE;  // default: 0; Angle of polarization "on the clock" for use in pulser events (EVENT_TYPE=11)
+  
+        int CROSSPOL_RX=0; //Default: 0 -- don't use cross-pol responses on receiving antennas
+        int CROSSPOL_TX=0; //Default: 0 -- don't use cross-pol responses on transmitting antennas
         
         int SYSTEMATICS_IceAttenuation; // 0=central, 1=up, 2=low
         

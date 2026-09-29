@@ -1,3 +1,4 @@
+n : 1.0
 freq : 83.33 MHz
 SWR : 8.64
  Theta   Phi 	 Gain(dB)   	   Gain   	   Phase(deg)
