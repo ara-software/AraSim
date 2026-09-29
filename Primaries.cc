@@ -2428,22 +2428,23 @@ void Interaction::PickExactGlobal(IceModel *antarctica, Detector *detector, Sett
   TVector3 sourceStationVector = AraGeomTool::Instance()->convertArrayToStationCoords(stationId, sourceArrayVector);
 
   // Calculate average antenna depth
-  double avgZ = 0.;
+  double avgDepth = 0.;
   int count = 0;
-  for (int i = 0; i < detector->stations[0].strings.size(); i++) {
-      for (int j = 0; j < detector->stations[0].strings[i].antennas.size(); j++) {
-        avgZ += detector->stations[0].strings[i].antennas[j].GetZ();
-        count++;
-      }
+  for (int chan = 0; chan < 16; chan++) {
+      double antDepth = AraGeomTool::Instance()->getStationInfo(settings1->DETECTOR_STATION_ARAROOT,settings1->DETECTOR_YEAR)->fAntInfo[chan].antLocation[2];
+      avgDepth += antDepth;
+      count++;
   }
-  avgZ /= double(count);
+
+  avgDepth /= double(count);
+
 
   // SOURCE_DEPTH is referenced to the surface,
   // while PickExact() later adds avgZ.
   // Therefore shift only the Z coordinate.
   double sourceX = sourceStationVector[0];
   double sourceY = sourceStationVector[1];
-  double sourceZ = sourceStationVector[2] - avgZ;
+  double sourceZ = sourceStationVector[2] - avgDepth;
 
   //Calculate posnu
   double R = sqrt(pow(sourceX,2) + pow(sourceY,2) + pow(sourceZ,2));
