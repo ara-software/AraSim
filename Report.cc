@@ -1630,11 +1630,11 @@ void Report::PropagateSignal(
 
             // Tx effective height for co-pol and cross-pol for the last bin
             heff_Tx_copol_lastbin = GaintoHeight(
-                detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, Tx_theta, antenna_phi, antenna_d->type, n_eff, j, k, true, false),
+                detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, Tx_theta, antenna_phi, antenna_d->type, n_eff, j, k, false, false),
                     freq_tmp, n_eff);
 
             heff_Tx_crosspol_lastbin = GaintoHeight(
-                detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, Tx_theta, antenna_phi, antenna_d->type, n_eff, j, k, true, true),
+                detector->GetGain_1D_OutZero(freq_tmp * 1.E-6, Tx_theta, antenna_phi, antenna_d->type, n_eff, j, k, false, true),
                     freq_tmp, n_eff);
             // End Tx effective height for last bin
                 
@@ -1768,8 +1768,8 @@ void Report::PropagateSignal(
                     freq_tmp, n_eff);
 
                 // Retrieve co-pol and cross-pol phases
-                double phase_copol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, antenna_phi, antenna_d->type, n_eff, true, false);
-                double phase_crosspol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, antenna_phi, antenna_d->type, n_eff, true, true);
+                double phase_copol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, antenna_phi, antenna_d->type, n_eff, false, false);
+                double phase_crosspol_tx = detector->GetAntPhase_1D(freq_tmp *1.e-6, Tx_theta, antenna_phi, antenna_d->type, n_eff, false, true);
                 
                 if (n > 0) {
                     ApplyAntFactors_Tdomain(phase_copol_tx, phase_crosspol_tx, heff_Tx_copol, heff_Tx_crosspol, Pol_vector, antenna_d->type, Pol_factor, 
@@ -3767,7 +3767,7 @@ void Report::ApplyAntFactors_Tdomain(double phase_copol, double phase_crosspol, 
             Pol_vector = Vector(newPol_vectorX, newPol_vectorY, newPol_vectorZ);
 
             // copol and cross-pol add quadratically in E-field
-            v_amp *= pow(2.0 * freq/CLIGHT * (Z0/Zr) * sqrt(heff_crosspol*heff_crosspol + heff_copol*heff_copol),
+            v_amp *= pow( (0.25) * freq/CLIGHT * (Z0/Zr) * sqrt(heff_crosspol*heff_crosspol + heff_copol*heff_copol), // The 0.25 factor needs revision
                 amplitudeSign);
         }
 
@@ -3813,7 +3813,7 @@ void Report::ApplyAntFactors_Tdomain(double phase_copol, double phase_crosspol, 
             }
 
             double heff_tx = sqrt( heff_crosspol*heff_crosspol + heff_copol*heff_copol );
-            double tx_amplification = 2.0 * freq/CLIGHT * (Z0/Zr) * heff_tx;
+            double tx_amplification = (0.25) * freq/CLIGHT * (Z0/Zr) * heff_tx;  // The 0.25 factor needs revision
 
             vm_real *= pow(tx_amplification, amplitudeSign);
             vm_img  *= pow(tx_amplification, amplitudeSign);
@@ -3895,12 +3895,12 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo(double heff_copol, double heff_cop
             v_amplification_crosspol_bin1 = heff_crosspol_lastbin * pol_factor_crosspol;
 
             // Co-pol and cross-pol add quadratically in E-field
-            double tx_amplification_bin0 = 2.0 * freq / CLIGHT * (Z0 / Zr) *
-                                           sqrt(heff_crosspol * heff_crosspol + heff_copol * heff_copol);
+            double tx_amplification_bin0 = (0.25) * freq / CLIGHT * (Z0 / Zr) *
+                                           sqrt(heff_crosspol * heff_crosspol + heff_copol * heff_copol);  // The 0.25 factor needs revision
 
-            double tx_amplification_bin1 = 2.0 * freq / CLIGHT * (Z0 / Zr) *
+            double tx_amplification_bin1 = (0.25) * freq / CLIGHT * (Z0 / Zr) *
                                            sqrt(heff_crosspol_lastbin * heff_crosspol_lastbin +
-                                                heff_copol_lastbin * heff_copol_lastbin);
+                                                heff_copol_lastbin * heff_copol_lastbin);  // The 0.25 factor needs revision
 
             vm_bin0 *= pow(tx_amplification_bin0, amplitudeSign);
             vm_bin1 *= pow(tx_amplification_bin1, amplitudeSign);
@@ -3912,8 +3912,8 @@ void Report::ApplyAntFactors_Tdomain_FirstTwo(double heff_copol, double heff_cop
             vm_bin0 *= pow(v_amplification_copol_bin0, amplitudeSign);
             vm_bin1 *= pow(v_amplification_copol_bin1, amplitudeSign);
 
-            vm_bin0 *= pow(freq / CLIGHT * (Z0 / Zr) / 4 / sqrt(2.0), amplitudeSign);
-            vm_bin1 *= pow(freq / CLIGHT * (Z0 / Zr) / 4 / sqrt(2.0), amplitudeSign);
+            vm_bin0 *= pow((0.25) * freq / CLIGHT * (Z0 / Zr), amplitudeSign);  // The 0.25 factor needs revision
+            vm_bin1 *= pow((0.25) * freq / CLIGHT * (Z0 / Zr), amplitudeSign);  // The 0.25 factor needs revision
         }
     }
 

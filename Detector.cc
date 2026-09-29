@@ -2263,8 +2263,8 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     std::string HgainCrossFile;  
 
     //Adding step to read Tx gain.  Will hardcode to PVA gain for now.
-    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt";
-    TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Crosspol_Kansas2024.txt";    
+    TxgainFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt.gz";
+    TxgainFileCross = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/PVA_RealizedGainAndPhase_Crosspol_Kansas2024.txt.gz";    
 
     if (settings1->ANTENNA_MODE == 0){
         // use the orignal Vpol/Hpol gains
@@ -2316,9 +2316,9 @@ inline void Detector::ReadAllAntennaGains(Settings *settings1){
     }
 
     // Add cross-pol gain files
-    VgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";
-    VgainTopCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt"; //Should be TV but it's not working due to a negative SWR (first SWR entry) -ASG 12/09/24
-    HgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt";    
+    VgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_BVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt.gz";
+    VgainTopCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_TVpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt.gz";
+    HgainCrossFile = string(getenv("ARA_SIM_DIR"))+"/data/antennas/realizedGain/ARA_Hpol_RealizedGainAndPhase_Crosspol_Kansas2024.txt.gz";    
 
     // Check for ALL_ANT_V_ON, then set all antennas to VPol if true
     if (settings1->ALL_ANT_V_ON == 1) {
