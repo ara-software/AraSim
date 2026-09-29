@@ -956,7 +956,6 @@ int Settings::CheckCompatibilitiesDetector(Detector *detector) {
             double heff1 = gain1 / freq1 / freq1;
             if(heff0 > heff1) {
                 cerr << "Vpol antenna gain may not be falling fast enough! Effective height may grow and introduce power at low frequencies." << endl;
-                num_err++;
             }
         }
         
@@ -970,7 +969,6 @@ int Settings::CheckCompatibilitiesDetector(Detector *detector) {
             double heff1 = gain1 / freq1 / freq1;
             if(heff0 > heff1) {
                 cerr << "TVpol antenna gain may not be falling fast enough! Effective height may grow and introduce power at low frequencies." << endl;
-                num_err++;
             }
         }
         
@@ -984,7 +982,6 @@ int Settings::CheckCompatibilitiesDetector(Detector *detector) {
             double heff1 = gain1 / freq1 / freq1;
             if(heff0 > heff1) {
                 cerr << "Hpol antenna gain may not be falling fast enough! Effective height may grow and introduce power at low frequencies." << endl;
-                num_err++;
             }
         }
     }
