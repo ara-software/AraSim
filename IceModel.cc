@@ -271,23 +271,22 @@ if ( file.is_open() ) {
 // read depth in positive value and return attenuation length (m) at the depth
 double IceModel::GetARAIceAttenuLength(double depth, Settings *settings1) {
 
-    double AttenL=0.0;
+  double AttenL = 0.0;
 
-    // check if depth is positive value
-    if ( depth < 0. ) {// whether above the ice or wrong value!
-        #ifdef VERBOSE_MODE
-        std::cerr << "depth negative! " << depth << std::endl;
-        #endif
-    }
-    else {
-
-        AttenL = Tools::SimpleLinearInterpolation_extend_Single(ARA_IceAtten_bin, ARA_IceAtten_Depth, ARA_IceAtten_Length, depth );
-        AttenL *= GetIceAttenSystematicsFactor(depth, settings1); //Systematics
-
-    }
-
+  // check if depth is positive value
+  if ( depth < 0. ) {// whether above the ice or wrong value!
+    #ifdef VERBOSE_MODE
+    std::cerr << "depth negative! " << depth << std::endl;
+    #endif
     return AttenL;
+  }
+  if ( depth > UNRELIABLE_DEPTH_M ) return 0.;
+  if ( depth > BEDROCK_DEPTH_M )    return 0.;
 
+  AttenL = Tools::SimpleLinearInterpolation_extend_Single(ARA_IceAtten_bin, ARA_IceAtten_Depth, ARA_IceAtten_Length, depth );
+  AttenL *= GetIceAttenSystematicsFactor(depth, settings1); //Systematics
+
+  return AttenL;
 }
 
 
@@ -299,17 +298,34 @@ double IceModel::GetARAIceAttenuLength(double depth, Settings *settings1) {
     And is described here: https://icecube.wisc.edu/~araproject/radio/#figure1a
     and https://icecube.wisc.edu/~araproject/radio/temp/
 
+    The "strict" parameter controls whether or not this function will let you call
+    it above the ice or below the bedrock.
+    It can be useful for *plotting* to have access to unphysical depths,
+    but generally the code should fail loudly if you try and access this function
+    somewhere unphysical.
+    Default is therefore "true" on strict behavior.
+
     \param z depth as a positive number in meters
+    \param strict whether or not to encorce strict rules
     \return ice temperature in Celsius
 */
-double IceModel::temperature(double z){
-  if( z < 0.){
-    #ifdef VERBOSE_MODE
-    std::cerr << "depth negative! " << z << std::endl;
-    #endif
+double IceModel::temperature(double z, bool strict){
+  if( strict ){
+    if( z < 0. ){
+      throw std::runtime_error(
+        "IceModel::temperature: depth " + std::to_string(z) +
+        " m is above the ice surface (z < 0).");
+    }
+    if( z > BEDROCK_DEPTH_M ){
+      throw std::runtime_error(
+        "IceModel::temperature: depth " + std::to_string(z) +
+        " m is below bedrock (> " + std::to_string(BEDROCK_DEPTH_M) + " m).");
+    }
   }
   double temp = (-51.0696) + (0.00267687 * z) + (-1.59061E-08 * pow(z,2.)) + (1.83415E-09 * pow(z,3.));
-  return temp;
+
+  // we also clamp the output to freezing to make sure this can't return a *positive* temperature
+  return std::min(temp, 0.);
 }
 
 //! Get the ice attenuation length at a depth and frequency
@@ -320,34 +336,51 @@ double IceModel::temperature(double z){
 
     \param depth depth as a positive number in meters
     \param freq frequency as a number in GHz
+    \param settings a settings pointer so we know whether or not to apply systematics factors
     \return ice temperature in Celsius
 */
 double IceModel::GetFreqDepIceAttenuLength(double depth, double freq, Settings *settings1) {
+  // Constants for the unreliable / out-of-ice regimes.
+  // Per D. Besson, the attenuation model becomes unphysical below ~2.5 km depth.
+  // The bedrock check is a fail-safe in case the 2.5 km cutoff is ever relaxed.
+
   double AttenL = 0.0;
-  if ( depth < 0. ) {
+  if (depth < 0.) {
     #ifdef VERBOSE_MODE
     std::cerr << "depth negative! " << depth << std::endl;
     #endif
+    return AttenL;
   }
-  else {
-    double t = temperature(depth);
-    const double f0=0.0001, f2=3.16;
-    const double w0=log(f0), w1=0.0, w2=log(f2), w=log(freq);
-    const double b0=-6.74890+t*(0.026709-t*0.000884);
-    const double b1=-6.22121-t*(0.070927+t*0.001773);
-    const double b2=-4.09468-t*(0.002213+t*0.000332);
-    double a,bb;
-    if(freq<1.){
-      a=(b1*w0-b0*w1)/(w0-w1);
-      bb=(b1-b0)/(w1-w0);
-    }
-    else{
-      a=(b2*w1-b1*w2)/(w1-w2);
-      bb=(b2-b1)/(w2-w1);
-    }
-    AttenL = 1./exp(a+bb*w);
-    AttenL *= GetIceAttenSystematicsFactor(depth, settings1); //Systematics
+  if (depth > UNRELIABLE_DEPTH_M){
+    #ifdef VERBOSE_MODE
+    std::cerr << "depth is below where we trust the ice model. Depth = " << depth << std::endl;
+    #endif
+    return 0.;
   }
+  if (depth > BEDROCK_DEPTH_M){
+    #ifdef VERBOSE_MODE
+    std::cerr << "depth is below bedrock at SP. Depth = " << depth << std::endl;
+    #endif
+    return 0.;
+  }
+
+  double t = temperature(depth);
+  const double f0=0.0001, f2=3.16;
+  const double w0=log(f0), w1=0.0, w2=log(f2), w=log(freq);
+  const double b0=-6.74890+t*(0.026709-t*0.000884);
+  const double b1=-6.22121-t*(0.070927+t*0.001773);
+  const double b2=-4.09468-t*(0.002213+t*0.000332);
+  double a,bb;
+  if(freq<1.){
+    a=(b1*w0-b0*w1)/(w0-w1);
+    bb=(b1-b0)/(w1-w0);
+  }
+  else{
+    a=(b2*w1-b1*w2)/(w1-w2);
+    bb=(b2-b1)/(w2-w1);
+  }
+  AttenL = 1./exp(a+bb*w);
+  AttenL *= GetIceAttenSystematicsFactor(depth, settings1); //Systematics
   return AttenL;
 }
 
@@ -1384,135 +1417,66 @@ double IceModel::GetEffectiveN(const Position &pos) const{
   return GetEffectiveN(n_local);
 } //GetEffectiveN(Position)
 
-double IceModel::EffectiveAttenuationLength(const Position &pos,const int &whichray) const {
+double IceModel::EffectiveAttenuationLength(Settings *settings1, const Position &pos, const int &whichray) const {
+
   double localmaxdepth = IceThickness(pos);
   double depth = Surface(pos) - pos.Mag();
 
-  int depth_index=0;
-  double attenuation_length=0.0;
-//   if (inu<10) {
-//     cout << "pos is ";pos.Print();
-//     cout << "surface is " << Surface(pos) << "\n";
-//   }
-  if(WestLand(pos) && !CONSTANTICETHICKNESS)
-    {
-      depth_index=int(depth*419.9/localmaxdepth);//use 420 m ice shelf attenuation length data as the standard, squeeze or stretch if localmaxdepth is longer or shorter than 420m.
-      if(RossIceShelf(pos) || RonneIceShelf(pos))
-	{
-	  if(whichray==0)
-	    attenuation_length=l_shelfup[depth_index];
-	  else if(whichray==1)
-	    attenuation_length=l_shelfdown[depth_index];
-	  else
-	    cerr << " wrong attenuation length " <<endl;
+  if (depth < 0.) {
+    #ifdef VERBOSE_MODE
+    std::cerr << "depth negative! " << depth << std::endl;
+    #endif
+    return 0.;
+  }
+  if (depth > UNRELIABLE_DEPTH_M) return 0.;
+  if (depth > BEDROCK_DEPTH_M)    return 0.;
 
-	  //for sanity check
-	  if((depth_index+0.5)!=d_shelfup[depth_index])
-	    {
-	      cerr << "the index of the array l_iceshelfup is wrong!" << endl;
-	      exit(1);
-	    }
-	}
-      else //in ice sheet of westland
-	{
-	  if(whichray==0)
-	    attenuation_length=l_westlandup[depth_index];
-	  else if(whichray==1)
-	    attenuation_length=l_westlanddown[depth_index];
-	  else
-	    cerr << " wrong attenuation length " <<endl;
-      	}
+  int depth_index = 0;
+  double attenuation_length = 0.0;
 
-      if(mooreBayFlag)//if use Moore's Bay measured data for the west land
-	attenuation_length*=1.717557; //about 450 m (field attenuation length) for one whole way when assuming -3dB for the power loss at the bottom
+  if (WestLand(pos) && !CONSTANTICETHICKNESS) {
+    depth_index = int(depth * 419.9 / localmaxdepth);  // use 420 m ice shelf attenuation length data as the standard, squeeze or stretch if localmaxdepth is longer or shorter than 420m.
+    if (RossIceShelf(pos) || RonneIceShelf(pos)) {
+      if (whichray == 0)
+        attenuation_length = l_shelfup[depth_index];
+      else if (whichray == 1)
+        attenuation_length = l_shelfdown[depth_index];
+      else
+        cerr << " wrong attenuation length " << endl;
+
+      // for sanity check
+      if ((depth_index + 0.5) != d_shelfup[depth_index]) {
+        cerr << "the index of the array l_iceshelfup is wrong!" << endl;
+        exit(1);
+      }
     }
-  else //in east antarctica or constant ice thickness
-     {
-//        if (inu<10) {
-//        cout << "localmaxdepth is " << localmaxdepth << "\n";
-//        cout << "depth is " << depth << "\n";
-//        }
-       depth_index =int(depth*(2809.9/localmaxdepth));
-       //if (inu<10)
-	 //       cout << "depth_index is " << depth_index << "\n";
+    else {  // in ice sheet of westland
+      if (whichray == 0)
+        attenuation_length = l_westlandup[depth_index];
+      else if (whichray == 1)
+        attenuation_length = l_westlanddown[depth_index];
+      else
+        cerr << " wrong attenuation length " << endl;
+    }
 
-       if(whichray==0)
-	 attenuation_length =l_sheetup[depth_index];
-       else if(whichray==1)
-	 attenuation_length =l_sheetdown[depth_index];
-       else
-	 cerr << " wrong attenuation length " <<endl;
-     } //else
+    if (settings1->MOOREBAY)  // if use Moore's Bay measured data for the west land
+      attenuation_length *= 1.717557;  // about 450 m (field attenuation length) for one whole way when assuming -3dB for the power loss at the bottom
+  }
+  else {  // in east antarctica or constant ice thickness
+    depth_index = int(depth * (2809.9 / localmaxdepth));
+
+    if (whichray == 0)
+      attenuation_length = l_sheetup[depth_index];
+    else if (whichray == 1)
+      attenuation_length = l_sheetdown[depth_index];
+    else
+      cerr << " wrong attenuation length " << endl;
+  }
+
+  attenuation_length *= GetIceAttenSystematicsFactor(depth, settings1);
 
   return attenuation_length;
-} //EffectiveAttenuationLengthUp
-
-
-double IceModel::EffectiveAttenuationLength(Settings *settings1, const Position &pos,const int &whichray) const {
-  double localmaxdepth = IceThickness(pos);
-  double depth = Surface(pos) - pos.Mag();
-
-  int depth_index=0;
-  double attenuation_length=0.0;
-//   if (inu<10) {
-//     cout << "pos is ";pos.Print();
-//     cout << "surface is " << Surface(pos) << "\n";
-//   }
-  if(WestLand(pos) && !CONSTANTICETHICKNESS)
-    {
-      depth_index=int(depth*419.9/localmaxdepth);//use 420 m ice shelf attenuation length data as the standard, squeeze or stretch if localmaxdepth is longer or shorter than 420m.
-      if(RossIceShelf(pos) || RonneIceShelf(pos))
-	{
-	  if(whichray==0)
-	    attenuation_length=l_shelfup[depth_index];
-	  else if(whichray==1)
-	    attenuation_length=l_shelfdown[depth_index];
-	  else
-	    cerr << " wrong attenuation length " <<endl;
-
-	  //for sanity check
-	  if((depth_index+0.5)!=d_shelfup[depth_index])
-	    {
-	      cerr << "the index of the array l_iceshelfup is wrong!" << endl;
-	      exit(1);
-	    }
-	}
-      else //in ice sheet of westland
-	{
-	  if(whichray==0)
-	    attenuation_length=l_westlandup[depth_index];
-	  else if(whichray==1)
-	    attenuation_length=l_westlanddown[depth_index];
-	  else
-	    cerr << " wrong attenuation length " <<endl;
-      	}
-
-      //if(mooreBayFlag)//if use Moore's Bay measured data for the west land
-      if(settings1->MOOREBAY)//if use Moore's Bay measured data for the west land
-	attenuation_length*=1.717557; //about 450 m (field attenuation length) for one whole way when assuming -3dB for the power loss at the bottom
-    }
-  else //in east antarctica or constant ice thickness
-     {
-//        if (inu<10) {
-//        cout << "localmaxdepth is " << localmaxdepth << "\n";
-//        cout << "depth is " << depth << "\n";
-//        }
-       depth_index =int(depth*(2809.9/localmaxdepth));
-       //if (inu<10)
-	 //       cout << "depth_index is " << depth_index << "\n";
-
-       if(whichray==0)
-	 attenuation_length =l_sheetup[depth_index];
-       else if(whichray==1)
-	 attenuation_length =l_sheetdown[depth_index];
-       else
-	 cerr << " wrong attenuation length " <<endl;
-     } //else
-
-    attenuation_length *= GetIceAttenSystematicsFactor(depth, settings1);
-
-  return attenuation_length;
-} //EffectiveAttenuationLengthUp
+}  // EffectiveAttenuationLength
 
 
 

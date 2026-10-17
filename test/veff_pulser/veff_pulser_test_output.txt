@@ -1,3 +1,4 @@
+The Git Commit Hash: b7a845875883896465a00bfbc7c7c0ee83371f9e
 
 	Default values!
 NNU : 100
@@ -29,6 +30,7 @@ DETECTOR : 4
 POSNU_RADIUS : 3000
 EVENT_GENERATION_MODE: 0
 first random : 0.809467
+Loaded ice attenuation percent table from /home/baclark/scratch/ARA/AraSim_old//data/iceattenuation_systematics.txt with 3001 rows.
 
 Surface at (log:0, lat:0) : 6.35973e+06
 SurfaceAboveGeoid at (log:0, lat:0) : 2977
@@ -43,7 +45,7 @@ read z_btw
 	Error, station number not match !
 InstalledStations[StationID].nChannels is 20
 Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
-Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /home/abishop/analysis/AraRoot_Install//share/araCalib/AntennaInfo.sqlite
+Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /cvmfs/ara.opensciencegrid.org/trunk/RHEL_8_x86_64/ara_build/share/araCalib/AntennaInfo.sqlite
 Opening default 2013-2017 SQLite tables for all stations 
 Borehole ch: 0 inserted station: 0 station: 2 string: 3 ant: 2 Type: 0
 Borehole ch: 1 inserted station: 0 station: 2 string: 0 ant: 2 Type: 0
@@ -100,17 +102,17 @@ Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 3 : 0 : 10010.6 : 10002.
 Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 3 : 1 : 10010.6 : 10002.3 : -186.546 : 14152.5 : 1.58398 : 0.784986 : 6.37813e+06 : 
 Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 3 : 2 : 10010.6 : 10002.3 : -170.247 : 14152.3 : 1.58283 : 0.784986 : 6.37813e+06 : 
 Detector:station:string:antenna:X:Y:Z:R:Theta:Phi:: 0 : 3 : 3 : 10010.6 : 10002.3 : -167.492 : 14152.2 : 1.58263 : 0.784985 : 6.37813e+06 : 
-The number of channels: 16
+Index of refraction for antenna gain file /home/baclark/scratch/ARA/AraSim_old//data/antennas/realizedGain/PVA_RealizedGainAndPhase_Copol_Kansas2024.txt could not be determined. Index will adjust to always match local value.
 DATA_BIN_SIZE: 16384 TIMESTEP: 5e-10 df_fft: 122070
 number of f bins: 8192
 start read elect chain
  Reading standard ARA electronics response from file:
-/home/abishop/AraSim-AraSoft//data/gain/ARA_Electronics_TotalGain_TwoFilters.csv
+/home/baclark/scratch/ARA/AraSim_old//data/gain/ARA_Electronics_TotalGain_TwoFilters.csv
 WARNING - Antenna model used to calculate in situ gain model may not match that used in this simulation!
 	 To ensure consistency load an in-situ noise model with NOISE = 1.
 done read elect chain
  Reading trigger formation values for this station and configuration from file:
-/home/abishop/AraSim-AraSoft//data/trigger/delays_masking_A2_C6.csv
+/home/baclark/scratch/ARA/AraSim_old//data/trigger/delays_masking_A2_C6.csv
 Sharesurface: 0 : 0 : 0 : 10004.4 : 9989.17 : 6.35944e+06 : 
 Sharesurface: 0 : 0 : 1 : 10004.4 : 9989.17 : 6.35945e+06 : 
 Sharesurface: 0 : 0 : 2 : 10004.4 : 9989.2 : 6.35946e+06 : 
@@ -195,8 +197,8 @@ Calculating noise waveforms for RMS
 0% done
 100% done
 From pure noise waveforms, diode responses
-mean, rms diode are -4.65116e-15 9.28804e-14
-rms voltage is 0.0400492
+mean, rms diode are -4.76064e-15 9.45211e-14
+rms voltage is 0.0405195
  DATA_BIN_SIZE : 16384
 powerthreshold : -6.15
 begin looping events!!
@@ -221,10 +223,10 @@ station[0].strings[3].antennas[2] no_ch:15
 station[0].strings[3].antennas[3] no_ch:16
 *Thrown 0
 
-trigger passed at bin 4181  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 13 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4251  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 15 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4284  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 10 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4284 evt : 0 added weight : 1
+trigger passed at bin 4097  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 3 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4167  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 9 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4198  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 7 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4198 evt : 0 added weight : 1
 
 Making useful event
 StationID: 2
@@ -236,86 +238,85 @@ OR
 c) Call UsefulAtriStationEvent *realAtriEvPtr = new UsefulAtriStationEvent(rawAtriEvPtr, AraCalType::kLatestCalib); ***BEFORE*** 
 AraGeomTool::getStationInfo(3,2017)
 Opening 2013-2017 SQliteDB using AraGeomTool::getStationInfo()
-Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /home/abishop/analysis/AraRoot_Install//share/araCalib/AntennaInfo.sqlite
+Pre 2018: AraStationInfo::readChannelMapDbAtri_2(): INFO - /cvmfs/ara.opensciencegrid.org/trunk/RHEL_8_x86_64/ara_build/share/araCalib/AntennaInfo.sqlite
 Opening default 2013-2017 SQLite tables for all stations 
 *
-trigger passed at bin 4181  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 4 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4256  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 9 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4284  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 8 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4284 evt : 1 added weight : 1
+trigger passed at bin 4093  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 3 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4167  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 15 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4198  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 10 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4198 evt : 1 added weight : 1
 
 Making useful event
 StationID: 2
 StationID_AraRoot: 2
 *
-trigger passed at bin 4181  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 5 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4255  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 6 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4284  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 3 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4284 evt : 2 added weight : 1
+trigger passed at bin 4097  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 1 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4170  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 3 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4201  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 15 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4201 evt : 2 added weight : 1
 
 Making useful event
 StationID: 2
 StationID_AraRoot: 2
 *
-trigger passed at bin 4181  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 7 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4255  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 15 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4285  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 0 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4285 evt : 3 added weight : 1
+trigger passed at bin 4096  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 3 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4168  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 5 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4059  passed ch : 13 (1type) Direct dist btw posnu : 2576.36 noiseID : 10 ViewAngle : 67.183 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4168 evt : 3 added weight : 1
 
 Making useful event
 StationID: 2
 StationID_AraRoot: 2
 *
-trigger passed at bin 4182  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 9 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4255  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 15 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4285  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 3 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4285 evt : 4 added weight : 1
+trigger passed at bin 4095  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 3 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4170  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 12 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4157  passed ch : 13 (1type) Direct dist btw posnu : 2576.36 noiseID : 15 ViewAngle : 67.183 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4170 evt : 4 added weight : 1
 
 Making useful event
 StationID: 2
 StationID_AraRoot: 2
 *
-trigger passed at bin 4182  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 7 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4255  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 5 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4284  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 15 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4284 evt : 5 added weight : 1
+trigger passed at bin 4097  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 6 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4172  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 0 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4062  passed ch : 13 (1type) Direct dist btw posnu : 2576.36 noiseID : 15 ViewAngle : 67.183 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4172 evt : 5 added weight : 1
 
 Making useful event
 StationID: 2
 StationID_AraRoot: 2
 *
-trigger passed at bin 4181  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 4 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4254  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 13 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4283  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 3 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4283 evt : 6 added weight : 1
+trigger passed at bin 4096  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 10 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4168  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 14 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4198  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 7 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4198 evt : 6 added weight : 1
 
 Making useful event
 StationID: 2
 StationID_AraRoot: 2
 *
-trigger passed at bin 4181  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 10 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4254  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 12 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4154  passed ch : 6 (0type) Direct dist btw posnu : 2586.84 noiseID : 9 ViewAngle : 66.8717 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4284  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 0 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4284 evt : 7 added weight : 1
+trigger passed at bin 4096  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 15 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4170  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 5 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4200  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 13 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4200 evt : 7 added weight : 1
 
 Making useful event
 StationID: 2
 StationID_AraRoot: 2
 *
-trigger passed at bin 4179  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 14 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4254  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 12 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4282  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 6 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4282 evt : 8 added weight : 1
+trigger passed at bin 4097  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 0 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4167  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 12 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4050  passed ch : 7 (1type) Direct dist btw posnu : 2588.06 noiseID : 15 ViewAngle : 66.7967 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4167 evt : 8 added weight : 1
 
 Making useful event
 StationID: 2
 StationID_AraRoot: 2
 *
-trigger passed at bin 4182  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 9 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4255  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 13 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
-trigger passed at bin 4283  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 6 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
-Global_Pass : 4283 evt : 9 added weight : 1
+trigger passed at bin 4096  passed ch : 1 (1type) Direct dist btw posnu : 2564.13 noiseID : 9 ViewAngle : 67.0586 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4169  passed ch : 3 (1type) Direct dist btw posnu : 2571.43 noiseID : 8 ViewAngle : 66.6135 LikelyTrigSignal : interaction 0, ray 0
+trigger passed at bin 4198  passed ch : 11 (1type) Direct dist btw posnu : 2573.59 noiseID : 12 ViewAngle : 66.7716 LikelyTrigSignal : interaction 0, ray 0
+Global_Pass : 4198 evt : 9 added weight : 1
 
 Making useful event
 StationID: 2
@@ -324,11 +325,10 @@ StationID_AraRoot: 2
 Total Events Thrown: 10
 Total_Global_Pass : 10
 Total_Weight : 10
-Total_Probability : -88.04
+Total_Probability : -2.85546e+191
 weight bin values : 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
-max_dt : 6.0702e-07
-rmsdiode= 9.28804e-14
+Warning in <THistPainter::MakeChopt>: option SCAT is deprecated.
 Info in <TCanvas::Print>: pdf file sigmaCrossSection.pdf has been created
 outputdir= outputs/.
 This AraSim run is complete and will exit with code 0
