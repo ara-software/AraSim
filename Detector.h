@@ -109,7 +109,7 @@ class Surface_antenna : public Position {
     int type;   // need to be defined
     int orient; //0 : facing x, 1 : y, 2 : -x, 3 : -y.
 
-    double GetG(Detector *D, double freq, double theta, double phi);    // read gain value from Detector class
+    double GetG(Detector *D, double freq, double theta, double phi, double target_n);    // read gain value from Detector class
 
     ClassDef(Surface_antenna,1);
 
@@ -132,7 +132,7 @@ class Antenna : public Position {
 
     int manual_delay_bin;   // to fit the waveform to actual TestBed waveform, added manual delay bin
     
-    double GetG(Detector *D, double freq, double theta, double phi);    // read gain value from Detector class, return 2-D interpolated value
+    double GetG(Detector *D, double freq, double theta, double phi, double target_n);    // read gain value from Detector class, return 2-D interpolated value
 
 
     //ClassDef(Antenna,1);
@@ -222,51 +222,56 @@ enum EAntennaType {
   
 class Detector {
     private:
-        static const int freq_step_max = 60;
         static const int ang_step_max = 2664;
         void ReadAllAntennaGains(Settings *settings1);
         double SWRtoTransCoeff(double swr);
         void ReadAntennaGain(string filename, Settings *settings1, EAntennaType type);
-        double Vgain[freq_step_max][ang_step_max];
-        double Vphase[freq_step_max][ang_step_max];
-        double VgainTop[freq_step_max][ang_step_max];
-        double VphaseTop[freq_step_max][ang_step_max];
-        double Hgain[freq_step_max][ang_step_max];
-        double Hphase[freq_step_max][ang_step_max];
-        double Freq[freq_step_max];
-    
+        vector<vector<double> > Vgain;
+        vector<vector<double> > Vphase;
+        vector<vector<double> > VgainTop;
+        vector<vector<double> > VphaseTop;
+        vector<vector<double> > Hgain;
+        vector<vector<double> > Hphase;
+        vector<double> Freq;
+        double antenna_source_medium_n;    
+ 
         //Define impedance and gain for receiving antenna
-        double RealImpedanceV[freq_step_max];
-        double ImagImpedanceV[freq_step_max];   
-        double RealImpedanceVTop[freq_step_max];
-        double ImagImpedanceVTop[freq_step_max];       
-        double RealImpedanceH[freq_step_max];
-        double ImagImpedanceH[freq_step_max];       
+        vector<double> impFreq;
+        vector<double> RealImpedanceV;
+        vector<double> ImagImpedanceV;   
+        vector<double> RealImpedanceVTop;
+        vector<double> ImagImpedanceVTop;       
+        vector<double> RealImpedanceH;
+        vector<double> ImagImpedanceH;       
     
         //Define impedance and gain for transmitting antenna
-        double RealImpedanceTx[freq_step_max];
-        double ImagImpedanceTx[freq_step_max];
-        double Txgain[freq_step_max][ang_step_max];
-        double Txphase[freq_step_max][ang_step_max];
-        void ReadImpedance(string filename, double (*TempRealImpedance)[freq_step_max], double (*TempImagImpedance)[freq_step_max]);
+        vector<double> RealImpedanceTx;
+        vector<double> ImagImpedanceTx;
+        int Tx_freq_init;
+        int Tx_freq_width;
+        vector<double> TxFreq;
+        vector<vector<double> > Txgain;
+        vector<vector<double> > Txphase;
+        double Txantenna_source_medium_n;    
+        void ReadImpedance(string filename, vector<double> *TempRealImpedance, vector<double> *TempImagImpedance);
         void ReadAllAntennaImpedance(Settings *settings1);
 
 
 	
 
         void ReadFilter(string filename, Settings *settings1);
-        double FilterGain[freq_step_max];   // Filter gain (dB) for Detector freq bin array
+        vector <double> FilterGain;   // Filter gain (dB) for Detector freq bin array
         vector <double> FilterGain_databin;   // Filter gain (dB) for DATA_BIN_SIZE bin array
         vector <double> FilterGain_NFOUR;   // Filter gain (dB) for NFOUR bin array
 
         void ReadPreamp(string filename, Settings *settings1);
-        double PreampGain[freq_step_max];   // Filter gain (dB) for Detector freq bin array
+        vector<double> PreampGain;   // Filter gain (dB) for Detector freq bin array
         vector <double> PreampGain_databin;   // Filter gain (dB) for DATA_BIN_SIZE bin array
         vector <double> PreampGain_NFOUR;   // Filter gain (dB) for NFOUR bin array
 
 
         void ReadFOAM(string filename, Settings *settings1);
-        double FOAMGain[freq_step_max];   // Filter gain (dB) for Detector freq bin array
+        vector <double> FOAMGain;   // Filter gain (dB) for Detector freq bin array
         vector <double> FOAMGain_databin;   // Filter gain (dB) for DATA_BIN_SIZE bin array
         vector <double> FOAMGain_NFOUR;   // Filter gain (dB) for NFOUR bin array
 
@@ -277,6 +282,7 @@ class Detector {
 
 
         void ReadElectChain(string filename, Settings *settings1);
+        void CalculateElectChain(Settings *settings1); // calculate data-driven noise model
         int gain_ch; // Number of channels used for gain model array population in ReadElectChain()
         std::vector< std::vector <double> > ElectGain; //Elect chain gain (unitless) for Detector freq bin array
         std::vector< std::vector <double> > ElectPhase; // Elect chain phase (rad) for Detector freq bin array 
@@ -299,12 +305,13 @@ class Detector {
         //vector <double> Temp_TB_ch;   // constant gain offset for the TestBed chs 
 
         void ReadRFCM_TestBed(string filename, Settings *settings1);
-        double RFCM_TB_ch[16][freq_step_max];   // Filter gain (dB) for Detector freq bin array
+        vector< vector<double> >  RFCM_TB_ch;   // Filter gain (dB) for Detector freq bin array
+        vector<double> RFCM_TB_freq;
         vector < vector <double> > RFCM_TB_databin_ch;   // RFCM gain measured value for the TestBed (for each ch)
 
 
         void ReadRayleighFit_TestBed(string filename, Settings *settings1); // will read Rayleigh fit result from the file
-        double Rayleigh_TB_ch[16][freq_step_max];   // Filter gain (dB) for Detector freq bin array
+        vector< vector<double> > Rayleigh_TB_ch;   // Filter gain (dB) for Detector freq bin array
         vector < vector <double> > Rayleigh_TB_databin_ch;   // RFCM gain measured value for the TestBed (for each ch)
 
         /*
@@ -331,13 +338,19 @@ class Detector {
 
 
         void ReadNoiseFigure(string filename, Settings *settings1); 
-        double NoiseFig_ch[16][freq_step_max];
+        vector< vector<double> > NoiseFig_ch;
+        vector<double> NoiseFig_freq;
         vector < vector < double > > NoiseFig_databin_ch;
 
 
+        vector <double> trans_freq;
         vector <double> transV_databin;
         vector <double> transVTop_databin;
         vector <double> transH_databin;
+
+      
+        void ReadAmplifierNoiseFigure(Settings *settings1);
+        vector< vector<double> > amplifierNoiseFig_ch;
 
 
         void FlattoEarth_ARA(IceModel *icesurface);
@@ -362,26 +375,26 @@ class Detector {
         vector <ARA_station> stations;
         vector <Antenna_string> strings;
 
+        double GetSplitterFactor(Settings *settings1); // get splitter factor for digitizer path of station
+
         int NoiseFig_numCh;
 
         vector <double> freq_forfft;
 
-        double GetGain(double freq, double theta, double phi, int ant_m, int ant_o);    //read antenna gain at certain angle, certain type, and certain orientation
-        double GetGain(double freq, double theta, double phi, int ant_m);   //read antenna gain at certain angle, certain type. (orientation : default)
+        double GetGain(double freq, double theta, double phi, int ant_m, int ant_o, double antenna_target_medium_n);    //read antenna gain at certain angle, certain type, and certain orientation
+        double GetGain(double freq, double theta, double phi, int ant_m, double antenna_target_medium_n);   //read antenna gain at certain angle, certain type. (orientation : default)
 
-        double GetGain_1D(double freq, double theta, double phi, int ant_m);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain
-
-        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, int ant_number=0, bool useInTransmitterMode=false);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
+        double GetGain_1D_OutZero(double freq, double theta, double phi, int ant_m, double antenna_target_medium_n, int string_number=0, int ant_number=0, bool useInTransmitterMode=false);   //read antenna gain at certain angle, certain type. (orientation : default) and use 1-D interpolation to get gain, if freq bigger than freq range, return 0 gain
 
         //Creating function to interpolate antenna impedance to frequency binning.
         double GetImpedance(double freq, int ant_m=0, int ant_number=0, bool useInTransmitterMode=false);
 	
-	int GetTrigOffset( int ch, Settings *settings1 );
+        int GetTrigOffset( int ch, Settings *settings1 );
         int GetTrigMasking( int ch );
 
-        double GetAntPhase(double freq, double theta, double phi, int ant_m); // return antenna phase with 2-D interpolation
+        double GetAntPhase(double freq, double theta, double phi, int ant_m, double antenna_target_medium_n); // return antenna phase with 2-D interpolation
 
-        double GetAntPhase_1D(double freq, double theta, double phi, int ant_m, bool useInTransmitterMode=false); // return antenna phase with 1-D interpolation
+        double GetAntPhase_1D(double freq, double theta, double phi, int ant_m, double antenna_target_medium_n, bool useInTransmitterMode=false); // return antenna phase with 1-D interpolation
 
 
         double GetFilterGain(int bin) { return FilterGain[bin]; }   // same bin with Vgain, Hgain
@@ -409,15 +422,19 @@ class Detector {
 
         double GetRFCMGain(int ch, int bin) { return RFCM_TB_ch[ch][bin]; }   // same bin with Vgain, Hgain
         double GetRFCMGain_databin(int ch, int bin) { return RFCM_TB_databin_ch[ch][bin]; }   // bin for FFT
+        double GetRFCMGain_OutZero(int ch, double freq);
 
 
         double GetRayleighFit_databin(int ch, int bin) { return Rayleigh_TB_databin_ch[ch][bin]; }   // bin for FFT
         std::vector< std::vector< double> > GetRayleighFitVector_databin(int station, Settings *settings);
 
         double GetNoiseFig_databin(int ch, int bin) { return NoiseFig_databin_ch[ch%16][bin]; }   // bin for FFT
+        double GetNoiseFig_OutZero(int ch, double freq);      
+        
         double GetTransm_databin(int ch, int bin) {	if(ch%16<4){return transVTop_databin[bin];}
 							else if(ch%16<8){return transV_databin[bin];} 
 							else{return transH_databin[bin];} }   // bin for FFT
+        double GetTransm_OutZero(int ch, double freq);
         void ReadNoiseFig_New(Settings *settings1); // get noise Figure array with new DATA_BIN_SIZE
 
         
@@ -458,7 +475,7 @@ class Detector {
         int max_number_of_antennas_station; // maximum number of antennas in a station
 
         void getDiodeModel(Settings *settings1);   // similar with icemc -> anita -> getDiodeModel().  set diode_real and fdiode_real values.
-
+        vector<double> getDiodeModel(const int len, Settings *settings1); // returns diode model vector of length len
 
         // this is a test version for getting new noise waveforms for each event
         // for a best performance, we can just set a new reasonable DATA_BIN_SIZE and make new values for those
@@ -544,7 +561,7 @@ class Detector {
 
         ~Detector();    //destructor
 
-        ClassDef(Detector,1);
+        ClassDef(Detector,2);
         
     
     
