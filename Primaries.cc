@@ -2426,11 +2426,30 @@ void Interaction::PickExactGlobal(IceModel *antarctica, Detector *detector, Sett
   
   //Convert source vector into array coordinates
   TVector3 sourceStationVector = AraGeomTool::Instance()->convertArrayToStationCoords(stationId, sourceArrayVector);
-  
+
+  // Calculate average antenna depth
+  double avgDepth = 0.;
+  int count = 0;
+  for (int chan = 0; chan < 16; chan++) {
+      double antDepth = AraGeomTool::Instance()->getStationInfo(settings1->DETECTOR_STATION_ARAROOT,settings1->DETECTOR_YEAR)->fAntInfo[chan].antLocation[2];
+      avgDepth += antDepth;
+      count++;
+  }
+
+  avgDepth /= double(count);
+
+
+  // SOURCE_DEPTH is referenced to the surface,
+  // while PickExact() later adds avgZ.
+  // Therefore shift only the Z coordinate.
+  double sourceX = sourceStationVector[0];
+  double sourceY = sourceStationVector[1];
+  double sourceZ = sourceStationVector[2] - avgDepth;
+
   //Calculate posnu
-  double R = sqrt(pow(sourceStationVector[0],2) + pow(sourceStationVector[1],2) + pow(sourceStationVector[2],2));
-  double phi = (360+(atan2(sourceStationVector[1], sourceStationVector[0]))*180/PI)*PI/180;
-  double theta = acos((sourceStationVector[2])/R);
+  double R = sqrt(pow(sourceX,2) + pow(sourceY,2) + pow(sourceZ,2));
+  double phi = (360+(atan2(sourceY, sourceX))*180/PI)*PI/180;
+  double theta = acos((sourceZ)/R);
   settings1->POSNU_THETA = theta;
   settings1->POSNU_PHI = phi;
   settings1->POSNU_R = R;
